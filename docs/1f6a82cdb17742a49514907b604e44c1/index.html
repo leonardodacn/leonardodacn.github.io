@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>libevent源码深度剖析05 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="libevent源码深度剖析05 libevent的核心：事件event
+对事件处理流程有了高层的认识后，本节将详细介绍libevent的核心结构event，以及libevent对event的管理**。**
+1. libevent的核心-event libevent是基于**事件驱动（event-driven）**的，从名字也可以看到event是整个库的核心。event就是Reactor框架中的事件处理程序组件；它提供了函数接口，供Reactor在事件发生时调用，以执行相应的事件处理，通常它会绑定一个有效的句柄。
+首先给出event结构体的声明，它位于event.h文件中：
+struct event { TAILQ_ENTRY (event) ev_next; TAILQ_ENTRY (event) ev_active_next; TAILQ_ENTRY (event) ev_signal_next; unsigned int min_heap_idx; /* for managing timeouts */ struct event_base *ev_base; int ev_fd; short ev_events; short ev_ncalls; short *ev_pncalls; /* Allows deletes in callback */ struct timeval ev_timeout; int ev_pri; /* smaller numbers are higher priority */ void (*ev_callback)(int, short, void *arg); void *ev_arg; int ev_res; /* result passed to event callback */ int ev_flags; }; ev_events：event关注的事件类型，它可以是以下3种类型：
+I/O事件： EV_WRITE和EV_READ 定时事件：EV_TIMEOUT 信号： EV_SIGNAL 辅助选项：EV_PERSIST，表明是一个永久事件 Libevent中的定义为：
+#define EV_TIMEOUT 0x01 #define EV_READ 0x02 #define EV_WRITE 0x04 #define EV_SIGNAL 0x08 #define EV_PERSIST 0x10 /* Persistant event */ 可以看出事件类型可以使用“|”运算符进行组合，需要说明的是，信号和I/O事件不能同时设置；">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/1f6a82cdb17742a49514907b604e44c1/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="libevent源码深度剖析05" />
+<meta property="og:description" content="libevent源码深度剖析05 libevent的核心：事件event
+对事件处理流程有了高层的认识后，本节将详细介绍libevent的核心结构event，以及libevent对event的管理**。**
+1. libevent的核心-event libevent是基于**事件驱动（event-driven）**的，从名字也可以看到event是整个库的核心。event就是Reactor框架中的事件处理程序组件；它提供了函数接口，供Reactor在事件发生时调用，以执行相应的事件处理，通常它会绑定一个有效的句柄。
+首先给出event结构体的声明，它位于event.h文件中：
+struct event { TAILQ_ENTRY (event) ev_next; TAILQ_ENTRY (event) ev_active_next; TAILQ_ENTRY (event) ev_signal_next; unsigned int min_heap_idx; /* for managing timeouts */ struct event_base *ev_base; int ev_fd; short ev_events; short ev_ncalls; short *ev_pncalls; /* Allows deletes in callback */ struct timeval ev_timeout; int ev_pri; /* smaller numbers are higher priority */ void (*ev_callback)(int, short, void *arg); void *ev_arg; int ev_res; /* result passed to event callback */ int ev_flags; }; ev_events：event关注的事件类型，它可以是以下3种类型：
+I/O事件： EV_WRITE和EV_READ 定时事件：EV_TIMEOUT 信号： EV_SIGNAL 辅助选项：EV_PERSIST，表明是一个永久事件 Libevent中的定义为：
+#define EV_TIMEOUT 0x01 #define EV_READ 0x02 #define EV_WRITE 0x04 #define EV_SIGNAL 0x08 #define EV_PERSIST 0x10 /* Persistant event */ 可以看出事件类型可以使用“|”运算符进行组合，需要说明的是，信号和I/O事件不能同时设置；" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/1f6a82cdb17742a49514907b604e44c1/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="libevent源码深度剖析05"/>
+<meta name="twitter:description" content="libevent源码深度剖析05 libevent的核心：事件event
+对事件处理流程有了高层的认识后，本节将详细介绍libevent的核心结构event，以及libevent对event的管理**。**
+1. libevent的核心-event libevent是基于**事件驱动（event-driven）**的，从名字也可以看到event是整个库的核心。event就是Reactor框架中的事件处理程序组件；它提供了函数接口，供Reactor在事件发生时调用，以执行相应的事件处理，通常它会绑定一个有效的句柄。
+首先给出event结构体的声明，它位于event.h文件中：
+struct event { TAILQ_ENTRY (event) ev_next; TAILQ_ENTRY (event) ev_active_next; TAILQ_ENTRY (event) ev_signal_next; unsigned int min_heap_idx; /* for managing timeouts */ struct event_base *ev_base; int ev_fd; short ev_events; short ev_ncalls; short *ev_pncalls; /* Allows deletes in callback */ struct timeval ev_timeout; int ev_pri; /* smaller numbers are higher priority */ void (*ev_callback)(int, short, void *arg); void *ev_arg; int ev_res; /* result passed to event callback */ int ev_flags; }; ev_events：event关注的事件类型，它可以是以下3种类型：
+I/O事件： EV_WRITE和EV_READ 定时事件：EV_TIMEOUT 信号： EV_SIGNAL 辅助选项：EV_PERSIST，表明是一个永久事件 Libevent中的定义为：
+#define EV_TIMEOUT 0x01 #define EV_READ 0x02 #define EV_WRITE 0x04 #define EV_SIGNAL 0x08 #define EV_PERSIST 0x10 /* Persistant event */ 可以看出事件类型可以使用“|”运算符进行组合，需要说明的是，信号和I/O事件不能同时设置；"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "libevent源码深度剖析05",
+      "item": "https://haokiu.com/1f6a82cdb17742a49514907b604e44c1/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "libevent源码深度剖析05",
+  "name": "libevent源码深度剖析05",
+  "description": "libevent源码深度剖析05 libevent的核心：事件event\n对事件处理流程有了高层的认识后，本节将详细介绍libevent的核心结构event，以及libevent对event的管理**。**\n1. libevent的核心-event libevent是基于**事件驱动（event-driven）**的，从名字也可以看到event是整个库的核心。event就是Reactor框架中的事件处理程序组件；它提供了函数接口，供Reactor在事件发生时调用，以执行相应的事件处理，通常它会绑定一个有效的句柄。\n首先给出event结构体的声明，它位于event.h文件中：\nstruct event { TAILQ_ENTRY (event) ev_next; TAILQ_ENTRY (event) ev_active_next; TAILQ_ENTRY (event) ev_signal_next; unsigned int min_heap_idx; /* for managing timeouts */ struct event_base *ev_base; int ev_fd; short ev_events; short ev_ncalls; short *ev_pncalls; /* Allows deletes in callback */ struct timeval ev_timeout; int ev_pri; /* smaller numbers are higher priority */ void (*ev_callback)(int, short, void *arg); void *ev_arg; int ev_res; /* result passed to event callback */ int ev_flags; }; ev_events：event关注的事件类型，它可以是以下3种类型：\nI/O事件： EV_WRITE和EV_READ 定时事件：EV_TIMEOUT 信号： EV_SIGNAL 辅助选项：EV_PERSIST，表明是一个永久事件 Libevent中的定义为：\n#define EV_TIMEOUT 0x01 #define EV_READ 0x02 #define EV_WRITE 0x04 #define EV_SIGNAL 0x08 #define EV_PERSIST 0x10 /* Persistant event */ 可以看出事件类型可以使用“|”运算符进行组合，需要说明的是，信号和I/O事件不能同时设置；",
+  "keywords": [
+    
+  ],
+  "articleBody": "libevent源码深度剖析05 libevent的核心：事件event\n对事件处理流程有了高层的认识后，本节将详细介绍libevent的核心结构event，以及libevent对event的管理**。**\n1. libevent的核心-event libevent是基于**事件驱动（event-driven）**的，从名字也可以看到event是整个库的核心。event就是Reactor框架中的事件处理程序组件；它提供了函数接口，供Reactor在事件发生时调用，以执行相应的事件处理，通常它会绑定一个有效的句柄。\n首先给出event结构体的声明，它位于event.h文件中：\nstruct event { TAILQ_ENTRY (event) ev_next; TAILQ_ENTRY (event) ev_active_next; TAILQ_ENTRY (event) ev_signal_next; unsigned int min_heap_idx; /* for managing timeouts */ struct event_base *ev_base; int ev_fd; short ev_events; short ev_ncalls; short *ev_pncalls; /* Allows deletes in callback */ struct timeval ev_timeout; int ev_pri; /* smaller numbers are higher priority */ void (*ev_callback)(int, short, void *arg); void *ev_arg; int ev_res; /* result passed to event callback */ int ev_flags; }; ev_events：event关注的事件类型，它可以是以下3种类型：\nI/O事件： EV_WRITE和EV_READ 定时事件：EV_TIMEOUT 信号： EV_SIGNAL 辅助选项：EV_PERSIST，表明是一个永久事件 Libevent中的定义为：\n#define EV_TIMEOUT 0x01 #define EV_READ 0x02 #define EV_WRITE 0x04 #define EV_SIGNAL 0x08 #define EV_PERSIST 0x10 /* Persistant event */ 可以看出事件类型可以使用“|”运算符进行组合，需要说明的是，信号和I/O事件不能同时设置；\n还可以看出libevent使用event结构体将这3种事件的处理统一起来；\nev_next，ev_active_next和ev_signal_next都是双向链表节点指针；它们是libevent对不同事件类型和在不同的时期，对事件的管理时使用到的字段。 libevent使用双向链表保存所有注册的I/O和Signal事件\nev_next就是该I/O事件在链表中的位置；称此链表为“已注册事件链表”；\n同样ev_signal_next就是signal事件在signal事件链表中的位置；\nev_active_next：libevent将所有的激活事件放入到链表active list中，然后遍历active list执行调度，ev_active_next就指明了event在active list中的位置；\nmin_heap_idx和ev_timeout，如果是timeout事件，它们是event在小根堆中的索引和超时值，libevent使用小根堆来管理定时事件，这将在后面定时事件处理时专门讲解；\nev_base该事件所属的反应堆实例，这是一个event_base结构体，下一节将会详细讲解；\nev_fd，对于I/O事件，是绑定的文件描述符；对于signal事件，是绑定的信号；\nev_callback，event的回调函数，被ev_base调用，执行事件处理程序，这是一个函数指针，原型为：\n1void (*ev_callback)(int fd, short events, void *arg) 其中参数fd对应于ev_fd；events对应于ev_events；arg对应于ev_arg；\nev_arg：void*，表明可以是任意类型的数据，在设置event时指定；\neb_flags：libevent用于标记event信息的字段，表明其当前的状态，可能的值有：\n1#define EVLIST_TIMEOUT 0x01 // event在time堆中 2 3#define EVLIST_INSERTED 0x02 // event在已注册事件链表中 4 5#define EVLIST_SIGNAL 0x04 // 未见使用 6 7#define EVLIST_ACTIVE 0x08 // event在激活链表中 8 9#define EVLIST_INTERNAL 0x10 // 内部使用标记 10 11#define EVLIST_INIT 0x80 // event已被初始化 ev_ncalls：事件就绪执行时，调用ev_callback的次数，通常为1；\nev_pncalls：指针，通常指向ev_ncalls或者为NULL；\nev_res：记录了当前激活事件的类型；\n2. libevent对event的管理 从event结构体中的3个链表节点指针和一个堆索引出发，大体上也能窥出libevent对event的管理方法了，可以参见下面的示意图：\n每次当有事件event转变为就绪状态时，libevent就会把它移入到active event list[priority]中，其中priority是event的优先级； 接着libevent会根据自己的调度策略选择就绪事件，调用其cb_callback()函数执行事件处理；并根据就绪的句柄和事件类型填充cb_callback函数的参数。 3. 事件设置的接口函数 要向libevent添加一个事件，需要首先设置event对象，这通过调用libevent提供的函数有：event_set(), event_base_set(), event_priority_set()来完成；下面分别进行讲解。\nvoid event_set(struct event *ev, int fd, short events, void (*callback)(int, short, void *), void *arg) 设置事件ev绑定的文件描述符或者信号，对于定时事件，设为-1即可； 设置事件类型，比如EV_READ|EV_PERSIST, EV_WRITE, EV_SIGNAL等； 设置事件的回调函数以及参数arg； 初始化其它字段，比如缺省的event_base和优先级； int event_base_set(struct event_base *base, struct event *ev) 设置event ev将要注册到的event_base； libevent有一个全局event_base指针current_base，默认情况下事件ev将被注册到current_base上，使用该函数可以指定不同的event_base； 如果一个进程中存**在多个libevent实例，**则必须要调用该函数为event设置不同的event_base； int event_priority_set(struct event *ev, int pri) 设置event ev的优先级，没什么可说的，注意的一点就是：当ev正处于就绪状态时，不能设置，返回-1。\n4. 小结 本节讲述了libevent的核心event结构，以及libevent支持的事件类型和libevent对event的管理模型；接下来将会描述libevent的事件处理框架，以及其中使用的重要的结构体event_base。\n",
+  "wordCount" : "219",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/1f6a82cdb17742a49514907b604e44c1/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      libevent源码深度剖析05
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#libevent%e6%ba%90%e7%a0%81%e6%b7%b1%e5%ba%a6%e5%89%96%e6%9e%9005" aria-label="libevent源码深度剖析05">libevent源码深度剖析05</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#1-libevent%e7%9a%84%e6%a0%b8%e5%bf%83-event" aria-label="1. libevent的核心-event">1. libevent的核心-event</a></li>
+                <li>
+                    <a href="#2-libevent%e5%af%b9event%e7%9a%84%e7%ae%a1%e7%90%86" aria-label="2. libevent对event的管理">2. libevent对event的管理</a></li>
+                <li>
+                    <a href="#3-%e4%ba%8b%e4%bb%b6%e8%ae%be%e7%bd%ae%e7%9a%84%e6%8e%a5%e5%8f%a3%e5%87%bd%e6%95%b0" aria-label="3. 事件设置的接口函数">3. 事件设置的接口函数</a></li>
+                <li>
+                    <a href="#4-%e5%b0%8f%e7%bb%93" aria-label="4. 小结">4. 小结</a>
+                </li>
+            </ul>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="libevent源码深度剖析05">libevent源码深度剖析05</h1>
+<p><strong>libevent的核心：事件event</strong></p>
+<p>对事件处理流程有了高层的认识后，本节将详细介绍libevent的核心结构event，以及libevent对event的管理**。**</p>
+<h3 id="1-libevent的核心-event">1. libevent的核心-event</h3>
+<p>libevent是基于**事件驱动（event-driven）**的，从名字也可以看到event是整个库的核心。event就是Reactor框架中的事件处理程序组件；它提供了函数接口，供Reactor在事件发生时调用，以执行相应的事件处理，通常它会绑定一个有效的句柄。</p>
+<p>首先给出event结构体的声明，它<strong>位于event.h文件</strong>中：</p>
+<pre tabindex="0"><code>struct event {
+
+     TAILQ_ENTRY (event) ev_next;
+
+     TAILQ_ENTRY (event) ev_active_next;
+
+     TAILQ_ENTRY (event) ev_signal_next;
+
+     unsigned int min_heap_idx; /* for managing timeouts */
+
+     struct event_base *ev_base;
+
+     int ev_fd;
+
+     short ev_events;
+
+     short ev_ncalls;
+
+     short *ev_pncalls; /* Allows deletes in callback */
+
+     struct timeval ev_timeout;
+
+     int ev_pri;  /* smaller numbers are higher priority */
+
+     void (*ev_callback)(int, short, void *arg);
+
+     void *ev_arg;
+
+     int ev_res;  /* result passed to event callback */
+
+     int ev_flags;
+
+};
+</code></pre><p><strong>ev_events：event关注的事件类型</strong>，它可以是以下3种类型：</p>
+<ol>
+<li>
+<p>I/O事件： EV_WRITE和EV_READ
+定时事件：EV_TIMEOUT
+信号： EV_SIGNAL
+辅助选项：EV_PERSIST，表明是一个永久事件
+<strong>Libevent中的定义为：</strong></p>
+<pre tabindex="0"><code>#define EV_TIMEOUT 0x01
+
+#define EV_READ  0x02
+
+#define EV_WRITE 0x04
+
+#define EV_SIGNAL 0x08
+
+#define EV_PERSIST 0x10 /* Persistant event */
+</code></pre><p>可以看出事件类型可以使用“|”运算符进行组合，需要说明的是，信号和I/O事件不能同时设置；</p>
+<p>还可以看出libevent使用event结构体将这3种事件的处理统一起来；</p>
+</li>
+<li>
+<p><strong>ev_next，ev_active_next和ev_signal_next</strong>都是双向链表节点指针；它们是libevent对不同事件类型和在不同的时期，对事件的管理时使用到的字段。
+libevent使用双向链表保存所有注册的I/O和Signal事件</p>
+</li>
+<li>
+<p><strong>ev_next</strong>就是该I/O事件在链表中的位置；称此链表为“已注册事件链表”；</p>
+</li>
+<li>
+<p>同样<strong>ev_signal_next</strong>就是signal事件在signal事件链表中的位置；</p>
+</li>
+<li>
+<p><strong>ev_active_next</strong>：libevent将所有的激活事件放入到链表active list中，然后遍历active list执行调度，ev_active_next就指明了event在active list中的位置；</p>
+</li>
+<li>
+<p><strong>min_heap_idx和ev_timeout</strong>，如果是timeout事件，它们是event在小根堆中的索引和超时值，libevent使用小根堆来管理定时事件，这将在后面定时事件处理时专门讲解；</p>
+</li>
+<li>
+<p><strong>ev_base</strong>该事件所属的反应堆实例，这是一个event_base结构体，下一节将会详细讲解；</p>
+</li>
+<li>
+<p><strong>ev_fd</strong>，对于I/O事件，是绑定的文件描述符；对于signal事件，是绑定的信号；</p>
+</li>
+<li>
+<p><strong>ev_callback</strong>，event的回调函数，被ev_base调用，执行事件处理程序，这是一个函数指针，原型为：</p>
+<pre tabindex="0"><code>1void (*ev_callback)(int fd, short events, void *arg)
+</code></pre><p>其中参数fd对应于ev_fd；events对应于ev_events；arg对应于ev_arg；</p>
+</li>
+<li>
+<p><strong>ev_arg</strong>：void*，表明可以是任意类型的数据，在设置event时指定；</p>
+</li>
+<li>
+<p><strong>eb_flags</strong>：libevent用于标记event信息的字段，表明其当前的状态，可能的值有：</p>
+<pre tabindex="0"><code> 1#define EVLIST_TIMEOUT 0x01 // event在time堆中
+ 2
+ 3#define EVLIST_INSERTED 0x02 // event在已注册事件链表中
+ 4
+ 5#define EVLIST_SIGNAL 0x04 // 未见使用
+ 6
+ 7#define EVLIST_ACTIVE 0x08 // event在激活链表中
+ 8
+ 9#define EVLIST_INTERNAL 0x10 // 内部使用标记
+10
+11#define EVLIST_INIT     0x80 // event已被初始化
+</code></pre></li>
+<li>
+<p><strong>ev_ncalls</strong>：事件就绪执行时，调用ev_callback的次数，通常为1；</p>
+</li>
+<li>
+<p><strong>ev_pncalls</strong>：指针，通常指向ev_ncalls或者为NULL；</p>
+</li>
+<li>
+<p><strong>ev_res</strong>：记录了当前激活事件的类型；</p>
+</li>
+</ol>
+<h3 id="2-libevent对event的管理">2. libevent对event的管理</h3>
+<p>从event结构体中的3个链表节点指针和一个堆索引出发，大体上也能窥出<strong>libevent对event的管理方法</strong>了，可以参见下面的示意图：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/7186f14b81a6fa30a38b88225bc0e09c.webp" alt=""  />
+</p>
+<ul>
+<li>每次当<strong>有事件event转变为就绪状态</strong>时，libevent就会把它移入到active event list[priority]中，其中priority是event的优先级；</li>
+<li>接着libevent会根据自己的调度策略选择就绪事件，调用其cb_callback()函数执行事件处理；并根据就绪的句柄和事件类型填充cb_callback函数的参数。</li>
+</ul>
+<h3 id="3-事件设置的接口函数">3. 事件设置的接口函数</h3>
+<p>要向libevent<strong>添加一个事件</strong>，需要<strong>首先设置event对象</strong>，这通过调用libevent提供的函数有：event_set(), event_base_set(), event_priority_set()来完成；下面分别进行讲解。</p>
+<pre tabindex="0"><code>void event_set(struct event *ev, int fd, short events, void (*callback)(int, short, void *), void *arg)
+</code></pre><ol>
+<li>设置事件ev绑定的<strong>文件描述符或者信号</strong>，对于定时事件，设为-1即可；</li>
+<li><strong>设置事件类型</strong>，比如EV_READ|EV_PERSIST, EV_WRITE, EV_SIGNAL等；</li>
+<li><strong>设置</strong>事件的<strong>回调函数以及参数arg</strong>；</li>
+<li>初始化其它字段，比如缺省的event_base和优先级；
+int event_base_set(struct event_base *base, struct event *ev)
+设置event ev将要注册到的event_base；
+libevent有一个<strong>全局event_base指针current_base</strong>，默认情况下事件ev将被注册到current_base上，使用该函数可以指定不同的event_base；
+如果一个进程中存**在多个libevent实例，**则必须要调用该函数为event设置不同的event_base；</li>
+</ol>
+<pre tabindex="0"><code>int event_priority_set(struct event *ev, int pri)
+</code></pre><p><strong>设置event ev的优先级</strong>，没什么可说的，<strong>注意</strong>的一点就是：当ev正处于就绪状态时，不能设置，返回-1。</p>
+<h3 id="4-小结">4. 小结</h3>
+<p>本节讲述了<strong>libevent的核心event结构，以及libevent支持的事件类型和libevent对event的管理模型</strong>；接下来将会描述libevent的事件处理框架，以及其中使用的重要的结构体event_base。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/7fd5744edc6741c18b5cb6187e662e40/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>libevent源码深度剖析04</span>
+  </a>
+  <a class="next" href="https://haokiu.com/fc115cade0c049a8ab14e737a22b37fe/">
+    <span class="title">Next »</span>
+    <br>
+    <span>libevent源码深度剖析06</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

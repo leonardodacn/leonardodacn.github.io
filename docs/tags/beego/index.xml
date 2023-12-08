@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>beego on haokiu</title>
+    <link>https://haokiu.com/tags/beego/</link>
+    <description>Recent content in beego on haokiu</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>haokiu.com</copyright>
+    <lastBuildDate>Fri, 22 Jan 2021 14:52:21 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/beego/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>beego restful path variable</title>
+      <link>https://haokiu.com/RNbgLz/</link>
+      <pubDate>Fri, 22 Jan 2021 14:52:21 +0000</pubDate>
+      
+      <guid>https://haokiu.com/RNbgLz/</guid>
+      <description>beego的url路径有多个变量的设置和获取方法。
+在 router.go 注册 url beego.Router(&amp;#34;/type/:type/?:page&amp;#34;, &amp;amp;controllers.WebController{}, &amp;#34;get:Type&amp;#34;) 获取变量 typeID, err := self.GetInt(&amp;#34;:type&amp;#34;) func (c *Controller) GetInt(key string, def ...int) (int, error) { strv := c.Ctx.Input.Query(key) if len(strv) == 0 &amp;amp;&amp;amp; len(def) &amp;gt; 0 { return def[0], nil } return strconv.Atoi(strv) } </description>
+    </item>
+    
+    <item>
+      <title>curl https 地址报异常</title>
+      <link>https://haokiu.com/KsbUyb/</link>
+      <pubDate>Fri, 23 Oct 2020 15:03:17 +0000</pubDate>
+      
+      <guid>https://haokiu.com/KsbUyb/</guid>
+      <description>用 acme.sh 生产了 Let&amp;rsquo;s Encrypt 的https 证书，在浏览器访问没有问题，但在服务器访问出现下面的异常：
+curl: (60) SSL certificate problem: unable to get local issuer certificate More details here: https://curl.haxx.se/docs/sslcerts.html curl failed to verify the legitimacy of the server and therefore could not establish a secure connection to it. To learn more about this situation and how to fix it, please visit the web page mentioned above. 网站用了beego，用 acme.sh 生成的证书。配置：
+EnableHTTPS = true HTTPSPort = 443 HTTPSCertFile = &amp;#34;/home/blog/cert/cert.pem&amp;#34; HTTPSKeyFile = &amp;#34;/home/blog/cert/key.pem&amp;#34; 要将 cert.pem 替换为：fullchain.pem
+EnableHTTPS = true HTTPSPort = 443 HTTPSCertFile = &amp;#34;/home/blog/cert/fullchain.pem&amp;#34; HTTPSKeyFile = &amp;#34;/home/blog/cert/key.pem&amp;#34; </description>
+    </item>
+    
+    <item>
+      <title>beego 让http请求跳转到 https</title>
+      <link>https://haokiu.com/ZSf4yF/</link>
+      <pubDate>Tue, 13 Oct 2020 16:33:55 +0000</pubDate>
+      
+      <guid>https://haokiu.com/ZSf4yF/</guid>
+      <description>如果beego配置了https，那么可以让 让http请求跳转到 https，怎样配置 beego 的https，可以参考beego 通过acms.sh 使用 https
+//siteUrl 是网站地址，比如:https://haokiu.com if &amp;#34;HTTP/1.1&amp;#34; == self.Ctx.Request.Proto &amp;amp;&amp;amp; siteUrl != &amp;#34;&amp;#34; &amp;amp;&amp;amp; strings.HasPrefix(siteUrl, &amp;#34;https&amp;#34;) { //如果支持https，则所有http请求跳转到https self.redirect(siteUrl + self.Ctx.Request.URL.Path) } </description>
+    </item>
+    
+    <item>
+      <title>beego bee 工具使用简介</title>
+      <link>https://haokiu.com/xVaucl/</link>
+      <pubDate>Wed, 16 Sep 2020 16:06:47 +0000</pubDate>
+      
+      <guid>https://haokiu.com/xVaucl/</guid>
+      <description>bee 工具是一个为了协助快速开发 beego 项目而创建的项目，通过 bee 您可以很容易的进行 beego 项目的创建、热编译、开发、测试、和部署。
+bee 工具的安装 您可以通过如下的方式安装 bee 工具：
+go get github.com/beego/bee 安装完之后，bee 可执行文件默认存放在 $GOPATH/bin 里面，所以您需要把 $GOPATH/bin 添加到您的环境变量中，才可以进行下一步。
+如何添加环境变量，请自行搜索 如果你本机设置了 GOBIN，那么上面的命令就会安装到 GOBIN 下，请添加 GOBIN 到你的环境变量中
+bee 工具命令详解 我们在命令行输入 bee，可以看到如下的信息：
+Bee is a Fast and Flexible tool for managing your Beego Web Application. Usage: bee command [arguments] The commands are: version show the bee &amp;amp; beego version migrate run database migrations api create an api application base on beego framework bale packs non-Go files to Go source files new create an application base on beego framework run run the app which can hot compile pack compress an beego project fix Fixes your application by making it compatible with newer versions of Beego dlv Start a debugging session using Delve dockerize Generates a Dockerfile for your Beego application generate Source code generator hprose Creates an RPC application based on Hprose and Beego frameworks pack Compresses a Beego application into a single file rs Run customized scripts run Run the application by starting a local development server server serving static content over HTTP on port Use bee help [command] for more information about a command.</description>
+    </item>
+    
+    <item>
+      <title>beego 日志配置</title>
+      <link>https://haokiu.com/gq7FUH/</link>
+      <pubDate>Wed, 16 Sep 2020 16:03:29 +0000</pubDate>
+      
+      <guid>https://haokiu.com/gq7FUH/</guid>
+      <description>beego logs 的设计思路来自于 database/sql，目前支持的引擎有 file、console、net、smtp，可以通过如下方式进行安装：
+go get github.com/astaxie/beego/logs 如何使用 通用方式 首先引入包：
+import ( &amp;#34;github.com/astaxie/beego/logs&amp;#34; ) 然后添加输出引擎（log 支持同时输出到多个引擎），这里我们以 console 为例，第一个参数是引擎名（包括：console、file、conn、smtp、es、multifile）
+logs.SetLogger(&amp;#34;console&amp;#34;) 添加输出引擎也支持第二个参数,用来表示配置信息，详细的配置请看下面介绍：
+logs.SetLogger(logs.AdapterFile,`{&amp;#34;filename&amp;#34;:&amp;#34;project.log&amp;#34;,&amp;#34;level&amp;#34;:7,&amp;#34;maxlines&amp;#34;:0,&amp;#34;maxsize&amp;#34;:0,&amp;#34;daily&amp;#34;:true,&amp;#34;maxdays&amp;#34;:10,&amp;#34;color&amp;#34;:true}`) 然后我们就可以在我们的逻辑中开始任意的使用了：
+package main import ( &amp;#34;github.com/astaxie/beego/logs&amp;#34; ) func main() { //an official log.Logger l := logs.GetLogger() l.Println(&amp;#34;this is a message of http&amp;#34;) //an official log.Logger with prefix ORM logs.GetLogger(&amp;#34;ORM&amp;#34;).Println(&amp;#34;this is a message of orm&amp;#34;) logs.Debug(&amp;#34;my book is bought in the year of &amp;#34;, 2016) logs.Info(&amp;#34;this %s cat is %v years old&amp;#34;, &amp;#34;yellow&amp;#34;, 3) logs.Warn(&amp;#34;json is a type of kv like&amp;#34;, map[string]int{&amp;#34;key&amp;#34;: 2016}) logs.Error(1024, &amp;#34;is a very&amp;#34;, &amp;#34;good game&amp;#34;) logs.Critical(&amp;#34;oh,crash&amp;#34;) } 多个实例 一般推荐使用通用方式进行日志，但依然支持单独声明来使用独立的日志
+package main import ( &amp;#34;github.com/astaxie/beego/logs&amp;#34; ) func main() { log := logs.</description>
+    </item>
+    
+    <item>
+      <title>beego 日志处理</title>
+      <link>https://haokiu.com/YAotkP/</link>
+      <pubDate>Wed, 16 Sep 2020 10:17:20 +0000</pubDate>
+      
+      <guid>https://haokiu.com/YAotkP/</guid>
+      <description>beego 的日志处理是基于 logs 模块搭建的，内置了一个变量 BeeLogger，默认已经是 logs.BeeLogger 类型，初始化了 console，也就是默认输出到 console。
+使用入门 一般在程序中我们使用如下的方式进行输出：
+beego.Emergency(&amp;#34;this is emergency&amp;#34;) beego.Alert(&amp;#34;this is alert&amp;#34;) beego.Critical(&amp;#34;this is critical&amp;#34;) beego.Error(&amp;#34;this is error&amp;#34;) beego.Warning(&amp;#34;this is warning&amp;#34;) beego.Notice(&amp;#34;this is notice&amp;#34;) beego.Informational(&amp;#34;this is informational&amp;#34;) beego.Debug(&amp;#34;this is debug&amp;#34;) 设置输出 我们的程序往往期望把信息输出到 log 中，现在设置输出到文件很方便，如下所示：
+beego.SetLogger(&amp;#34;file&amp;#34;, `{&amp;#34;filename&amp;#34;:&amp;#34;logs/test.log&amp;#34;}`) 更多详细的日志配置请查看 beego 日志配置
+这个默认情况就会同时输出到两个地方，一个 console，一个 file，如果只想输出到文件，就需要调用删除操作：
+beego.BeeLogger.DelLogger(&amp;#34;console&amp;#34;) 设置级别 日志的级别如上所示的代码这样分为八个级别：
+LevelEmergency LevelAlert LevelCritical LevelError LevelWarning LevelNotice LevelInformational LevelDebug 级别依次降低，默认全部打印，但是一般我们在部署环境，可以通过设置级别设置日志级别：
+beego.SetLevel(beego.LevelInformational) 输出文件名和行号 日志默认不输出调用的文件名和文件行号,如果你期望输出调用的文件名和文件行号,可以如下设置
+beego.SetLogFuncCall(true) 开启传入参数 true, 关闭传入参数 false, 默认是关闭的.
+完整示例 func internalCalculationFunc(x, y int) (result int, err error) { beego.Debug(&amp;#34;calculating z. x:&amp;#34;, x, &amp;#34; y:&amp;#34;, y) z := y switch { case x == 3: beego.Debug(&amp;#34;x == 3&amp;#34;) panic(&amp;#34;Failure.&amp;#34;) case y == 1: beego.</description>
+    </item>
+    
+  </channel>
+</rss>

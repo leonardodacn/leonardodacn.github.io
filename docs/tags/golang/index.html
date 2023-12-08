@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>golang | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/tags/golang/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="https://haokiu.com/tags/golang/index.xml">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="golang" />
+<meta property="og:description" content="" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://haokiu.com/tags/golang/" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="golang"/>
+<meta name="twitter:description" content=""/>
+
+</head>
+
+<body class="list" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header"><div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/tags/">Tags</a></div>
+  <h1>
+    golang
+  </h1>
+</header>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2>Go2编程指南
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>目录1.1 Go1的诺言1.2 Go1到Go1.101.3 Go1.10过渡到Go21.4 Go2诞生第1章 语法变迁2.1 Go1的包机制2.2 基于vendor的版本管理2.3 模块的设计⽬标2.4 模块快速⼊⻔2.5 子模块和多版本共存2.6 镜像和私有仓库2.7 模块化实践中的一些问题第2章 模块化第3章 错误处理Go2编程指南</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-22 15:40:43 +0000 UTC'>January 22, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to Go2编程指南" href="https://haokiu.com/bk-3/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2>golang 数组与切片的区别
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>golang 的数组与切片有两大区别：
+初始化：数组需要明确指定大小，切片不需要 函数传递：数组是值传递，切片是地址传递 初始化 数组 a := [...]int{1,2,3} a := [3]int{1,2,3} 切片 a:= []int{1,2,3} a := make([]int, 5) a := make([]int, 5, 10) slice的数据结构： go源码slice的数据结构定义：
+type slice struct { array unsafe.Pointer len int cap int } slice 有三个字段：
+指向真实 array 地址的指针 ptr slice 的长度 len 容量 cap 特性 通过例子说明 slice 和 array 的一些特性。
+函数传递 数组需要明确指定大小，切片不需要。数组是值传递，切片是地址传递
+a := [...]int{1, 2, 3, 4, 5, 6} fmt.Println(&#34;star deal array, orginal data is:&#34;) fmt.Println(a) aMaxIndex := len(a) - 1 fmt.Printf(&#34;aMaxIndex:%d\r&#34;, aMaxIndex) for i, e := range a { if i == aMaxIndex { a[0] &#43;= e fmt.Printf(&#34;index is 0, val is :%d\r&#34;, a[0]) } else { a[i&#43;1] &#43;= e fmt....</p>
+  </div>
+  <footer class="entry-footer"><span title='2020-11-19 17:09:23 +0000 UTC'>November 19, 2020</span></footer>
+  <a class="entry-link" aria-label="post link to golang 数组与切片的区别" href="https://haokiu.com/gnNp9N/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2>go 匿名结构体 数组 示例
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在用 vscode 生成测试用例的时候，生成了测试的匿名数组，没怎么用过，这里展示了 go 匿名结构体数组示例
+import &#34;testing&#34; func TestGetRandomString(t *testing.T) { type args struct { lens int } tests := []struct { name string args args want string }{ { name: &#34;test&#34;, args: args{ lens: 6, }, want: &#34;hi&#34;, }, { name: &#34;test&#34;, args: args{ lens: 6, }, want: &#34;hi&#34;, }, } for _, tt := range tests { t.Run(tt.name, func(t *testing.T) { if got := GetRandomString(tt.args.lens); got != tt.want { t.Logf(&#34;GetRandomString() = %v, want %v&#34;, got, tt.want) } }) } } 需要注意的是各个结构体后面有个逗号。</p>
+  </div>
+  <footer class="entry-footer"><span title='2020-11-09 10:54:29 +0000 UTC'>November 9, 2020</span></footer>
+  <a class="entry-link" aria-label="post link to go 匿名结构体 数组 示例" href="https://haokiu.com/XVVOUE/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2>beego 通过acme.sh 使用 https
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>beego 通过 acme.sh 使用 https
+安装acms.sh curl https://get.acme.sh | sh 生成证书 如果使用的是 beego 框架，需添加可访问的静态文件目录：
+//acme.sh 自动验证网站目录，不使用https可以忽略 beego.SetStaticPath(&#34;/.well-known&#34;, &#34;.well-known&#34;) acme.sh --issue -d haokiu.com -d www.haokiu.com --webroot /usr/local/pixiublog/ 设置pixiublog开机启动 1. 编写开机启动脚本 vim /usr/lib/systemd/system/pixiublog.service
+[Unit] Description=The pixiublog Process Manager After=syslog.target network.target [Service] Type=forking ExecStart=sh /usr/local/pixiublog/start.sh ExecReload=/bin/kill -USR2 $MAINPID ExecStop=/bin/kill -SIGINT $MAINPID [Install] WantedBy=multi-user.target 2. 设置开机启动 systemctl enable pixiublog 安装证书 acme.sh --install-cert -d haokiu.com \ --cert-file /home/blog/cert/cert.pem \ --key-file /home/blog/cert/key.pem \ --fullchain-file /home/blog/cert/fullchain.pem \ --reloadcmd &#34;systemctl restart pixiublog&#34; beego app.conf 配置 EnableHTTPS = true HTTPSPort = 443 HTTPSCertFile = &#34;/home/blog/cert/fullchain.pem&#34; HTTPSKeyFile = &#34;/home/blog/cert/key.pem&#34; 参考 acme.sh 使用</p>
+  </div>
+  <footer class="entry-footer"><span title='2020-10-13 15:20:09 +0000 UTC'>October 13, 2020</span></footer>
+  <a class="entry-link" aria-label="post link to beego 通过acme.sh 使用 https" href="https://haokiu.com/qP3u4V/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2>go ... 作用
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>… 是go的一种语法糖。
+作用 用于函数有多个不定参数的情况，可以接受多个不确定数量的参数 打散slice进行传递 例子 一、接受多个不确定数量的参数 func println(args ...string) { //可以接受任意个string参数 for _, v:= range args{ fmt.Println(v) } } func main(){ var strss= []string{ &#34;qwr&#34;, &#34;234&#34;, &#34;yui&#34;, &#34;cvbc&#34;, } println(strss...) //切片被打散传入 } 结果：
+qwr 234 yui cvbc 二、打散slice进行传递 var strss= []string{ &#34;qwr&#34;, &#34;234&#34;, &#34;yui&#34;, } var strss2= []string{ &#34;qqq&#34;, &#34;aaa&#34;, &#34;zzz&#34;, &#34;zzz&#34;, } strss=append(strss,strss2...) //strss2的元素被打散一个个append进strss fmt.Println(strss) 结果：
+[qwr 234 yui qqq aaa zzz zzz] 最后 如果没有’…’，面对上面的情况，无疑会增加代码量。</p>
+  </div>
+  <footer class="entry-footer"><span title='2020-10-12 17:12:09 +0000 UTC'>October 12, 2020</span></footer>
+  <a class="entry-link" aria-label="post link to go ... 作用" href="https://haokiu.com/hiUuGO/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2>golang 常用函数
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>1. 获取当前时间 时间戳(秒)：time.Now().Unix 日期：time.Now().Format(&#34;2006-01-02 15:04:05&#34;) 注意：参数必须是 2006-01-02 15:04:05 而不能是自定义的年月日时间 2. 字符串与int转换 i,_ := strconv.Atoi(&#34;3&#34;) a := strconv.Itoa(32) 3.结构体json序列化 chatMsg := &amp;ChatMsg{} err := json.Unmarshal([]byte(msg), chatMsg) //json转结构体 buf, _ := json.Marshal(chatMsg) //结构体转json return string(buf) 4.删除切片元素 mySlice := make([]int, 5) //创建一个初始元素个数为5的数组切片，元素初始值为0 mySlice = append(mySlice[:i], mySlice[i&#43;1:]...) //删除下标为i的元素 mySlice = append(mySlice[:0], mySlice[1:]...) //删除第1个元素 5. url encode/decode encodeUrl:= url.QueryEscape(urltest) decodeUrl,err := url.QueryUnescape(encodeUrl) 6. base64编码 encodeString := base64.StdEncoding.EncodeToString(input) decodeBytes, err := base64.StdEncoding.DecodeString(encodeString) 7. 获取字符串长度 tips := &#34;忍者&#34; len := len(tips) //len=6 len := utf8.RuneCountInString(tips) //len=2 8. SubString func SubString(str string, start int32, end int32) string { result := []rune(str) length := int32(len(result)) if start &lt; 0 || start &gt; length { return str } if end &lt; 0 || end &gt; length { return str } return string(result[start:end]) } result = SubString(result, 0, int32(len([]rune(result)))-1)//注意end参数的取值 9....</p>
+  </div>
+  <footer class="entry-footer"><span title='2020-10-10 10:23:10 +0000 UTC'>October 10, 2020</span></footer>
+  <a class="entry-link" aria-label="post link to golang 常用函数" href="https://haokiu.com/XtwuYL/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2>golang 计算文件和字符串的 md5 值
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>go MD5 所需要的包在”crypto/md5”包中，需要先实例化一个MD5对象，然后在此基础上调用sum方法即可
+文件的MD5 md5 := md5.New() io.Copy(md5,file) MD5Str := hex.EncodeToString(md5.Sum(nil)) 上面的代码实现了计算了文件MD5，其中file是multipart.File类型的，也可以是其他的已打开的其他文件类型。 当然也可以不使用io.copy，而是直接使用sum函数来计算：
+md5 := md5.New() MD5Str := hex.EncodeToString(md5.Sum(file)) 这样是直接调用了sum函数来计算文件的值可能要比io.copy稍微慢一些。
+字符串的MD5 有时候需要将已知的一段字符串加密，其实和文件加密大概是类似的，只需要调用write方法将字符串写入hash中：
+md5 := md5.New() md5.Write([]byte(&#34;hello,world!&#34;)) MD5Str := hex.EncodeToString(md5.Sum(nil)) </p>
+  </div>
+  <footer class="entry-footer"><span title='2020-09-19 11:10:59 +0000 UTC'>September 19, 2020</span></footer>
+  <a class="entry-link" aria-label="post link to golang 计算文件和字符串的 md5 值" href="https://haokiu.com/dpoeTs/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2>golang 判断目录或文件是否存在
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>golang 判断目录或文件是否存在：
+func Exist(path string) bool { _, err := os.Stat(path) return err == nil || os.IsExist(err) } </p>
+  </div>
+  <footer class="entry-footer"><span title='2020-09-17 15:05:46 +0000 UTC'>September 17, 2020</span></footer>
+  <a class="entry-link" aria-label="post link to golang 判断目录或文件是否存在" href="https://haokiu.com/Cd6WaZ/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2>beego bee 工具使用简介
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>bee 工具是一个为了协助快速开发 beego 项目而创建的项目，通过 bee 您可以很容易的进行 beego 项目的创建、热编译、开发、测试、和部署。
+bee 工具的安装 您可以通过如下的方式安装 bee 工具：
+go get github.com/beego/bee 安装完之后，bee 可执行文件默认存放在 $GOPATH/bin 里面，所以您需要把 $GOPATH/bin 添加到您的环境变量中，才可以进行下一步。
+如何添加环境变量，请自行搜索 如果你本机设置了 GOBIN，那么上面的命令就会安装到 GOBIN 下，请添加 GOBIN 到你的环境变量中
+bee 工具命令详解 我们在命令行输入 bee，可以看到如下的信息：
+Bee is a Fast and Flexible tool for managing your Beego Web Application. Usage: bee command [arguments] The commands are: version show the bee &amp; beego version migrate run database migrations api create an api application base on beego framework bale packs non-Go files to Go source files new create an application base on beego framework run run the app which can hot compile pack compress an beego project fix Fixes your application by making it compatible with newer versions of Beego dlv Start a debugging session using Delve dockerize Generates a Dockerfile for your Beego application generate Source code generator hprose Creates an RPC application based on Hprose and Beego frameworks pack Compresses a Beego application into a single file rs Run customized scripts run Run the application by starting a local development server server serving static content over HTTP on port Use bee help [command] for more information about a command....</p>
+  </div>
+  <footer class="entry-footer"><span title='2020-09-16 16:06:47 +0000 UTC'>September 16, 2020</span></footer>
+  <a class="entry-link" aria-label="post link to beego bee 工具使用简介" href="https://haokiu.com/xVaucl/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2>beego 日志配置
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>beego logs 的设计思路来自于 database/sql，目前支持的引擎有 file、console、net、smtp，可以通过如下方式进行安装：
+go get github.com/astaxie/beego/logs 如何使用 通用方式 首先引入包：
+import ( &#34;github.com/astaxie/beego/logs&#34; ) 然后添加输出引擎（log 支持同时输出到多个引擎），这里我们以 console 为例，第一个参数是引擎名（包括：console、file、conn、smtp、es、multifile）
+logs.SetLogger(&#34;console&#34;) 添加输出引擎也支持第二个参数,用来表示配置信息，详细的配置请看下面介绍：
+logs.SetLogger(logs.AdapterFile,`{&#34;filename&#34;:&#34;project.log&#34;,&#34;level&#34;:7,&#34;maxlines&#34;:0,&#34;maxsize&#34;:0,&#34;daily&#34;:true,&#34;maxdays&#34;:10,&#34;color&#34;:true}`) 然后我们就可以在我们的逻辑中开始任意的使用了：
+package main import ( &#34;github.com/astaxie/beego/logs&#34; ) func main() { //an official log.Logger l := logs.GetLogger() l.Println(&#34;this is a message of http&#34;) //an official log.Logger with prefix ORM logs.GetLogger(&#34;ORM&#34;).Println(&#34;this is a message of orm&#34;) logs.Debug(&#34;my book is bought in the year of &#34;, 2016) logs.Info(&#34;this %s cat is %v years old&#34;, &#34;yellow&#34;, 3) logs.Warn(&#34;json is a type of kv like&#34;, map[string]int{&#34;key&#34;: 2016}) logs.Error(1024, &#34;is a very&#34;, &#34;good game&#34;) logs.Critical(&#34;oh,crash&#34;) } 多个实例 一般推荐使用通用方式进行日志，但依然支持单独声明来使用独立的日志
+package main import ( &#34;github.com/astaxie/beego/logs&#34; ) func main() { log := logs....</p>
+  </div>
+  <footer class="entry-footer"><span title='2020-09-16 16:03:29 +0000 UTC'>September 16, 2020</span></footer>
+  <a class="entry-link" aria-label="post link to beego 日志配置" href="https://haokiu.com/gq7FUH/"></a>
+</article>
+<footer class="page-footer">
+  <nav class="pagination">
+    <a class="next" href="https://haokiu.com/tags/golang/index/2/">Next&nbsp;&nbsp;»
+    </a>
+  </nav>
+</footer>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

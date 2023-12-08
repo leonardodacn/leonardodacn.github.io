@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>非阻塞模式下 send 和 recv 函数的返回值 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="非阻塞模式下 send 和 recv 函数的返回值 我们来总结一下 send 和 recv 函数的各种返回值意义：
+返回值 n 返回值含义 大于 0 成功发送 n 个字节 0 对端关闭连接 小于 0（ -1） 出错或者被信号中断或者对端 TCP 窗口太小数据发不出去（send）或者当前网卡缓冲区已无数据可收（recv） 我们来逐一介绍下这三种情况：
+返回值大于 0
+对于 send 和 recv 函数返回值大于 0，表示发送或接收多少字节，需要注意的是，在这种情形下，我们一定要判断下 send 函数的返回值是不是我们期望发送的缓冲区长度，而不是简单判断其返回值大于 0。举个例子：
+1int n = send(socket, buf, buf_length, 0)； 2if (n &gt; 0) 3{ 4 printf(&#34;send data successfully\n&#34;); 5} 很多新手会写出上述代码，虽然返回值 n 大于 0，但是实际情形下，由于对端的 TCP 窗口可能因为缺少一部分字节就满了，所以返回值 n 的值可能在 (0, buf_length] 之间，当 0 &lt; n &lt; buf_length 时，虽然此时 send 函数是调用成功了，但是业务上并不算正确，因为有部分数据并没发出去。你可能在一次测试中测不出 n 不等于 buf_length 的情况，但是不代表实际中不存在。所以，建议要么认为返回值 n 等于 buf_length 才认为正确，要么在一个循环中调用 send 函数，如果数据一次性发不完，记录偏移量，下一次从偏移量处接着发，直到全部发送完为止。
+1 //推荐的方式一 2 int n = send(socket, buf, buf_length, 0)； 3 if (n == buf_length) 4 { 5 printf(&#34;send data successfully\n&#34;); 6 } 1//推荐的方式二：在一个循环里面根据偏移量发送数据 2bool SendData(const char* buf , int buf_length) 3{ 4 //已发送的字节数目 5 int sent_bytes = 0; 6 int ret = 0; 7 while (true) 8 { 9 ret = send(m_hSocket, buf &#43; sent_bytes, buf_length - sent_bytes, 0); 10 if (nRet == -1) 11 { 12 if (errno == EWOULDBLOCK) 13 { 14 //严谨的做法，这里如果发不出去，应该缓存尚未发出去的数据，后面介绍 15 break; 16 } 17 else if (errno == EINTR) 18 continue; 19 else 20 return false; 21 } 22 else if (nRet == 0) 23 { 24 return false; 25 } 26 27 sent_bytes &#43;= ret; 28 if (sent_bytes == buf_length) 29 break; 30 31 //稍稍降低 CPU 的使用率 32 usleep(1); 33 } 34 35 return true; 36} 返回值等于 0">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/7050b3d426bf44b29c25c3d30ae77006/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="非阻塞模式下 send 和 recv 函数的返回值" />
+<meta property="og:description" content="非阻塞模式下 send 和 recv 函数的返回值 我们来总结一下 send 和 recv 函数的各种返回值意义：
+返回值 n 返回值含义 大于 0 成功发送 n 个字节 0 对端关闭连接 小于 0（ -1） 出错或者被信号中断或者对端 TCP 窗口太小数据发不出去（send）或者当前网卡缓冲区已无数据可收（recv） 我们来逐一介绍下这三种情况：
+返回值大于 0
+对于 send 和 recv 函数返回值大于 0，表示发送或接收多少字节，需要注意的是，在这种情形下，我们一定要判断下 send 函数的返回值是不是我们期望发送的缓冲区长度，而不是简单判断其返回值大于 0。举个例子：
+1int n = send(socket, buf, buf_length, 0)； 2if (n &gt; 0) 3{ 4 printf(&#34;send data successfully\n&#34;); 5} 很多新手会写出上述代码，虽然返回值 n 大于 0，但是实际情形下，由于对端的 TCP 窗口可能因为缺少一部分字节就满了，所以返回值 n 的值可能在 (0, buf_length] 之间，当 0 &lt; n &lt; buf_length 时，虽然此时 send 函数是调用成功了，但是业务上并不算正确，因为有部分数据并没发出去。你可能在一次测试中测不出 n 不等于 buf_length 的情况，但是不代表实际中不存在。所以，建议要么认为返回值 n 等于 buf_length 才认为正确，要么在一个循环中调用 send 函数，如果数据一次性发不完，记录偏移量，下一次从偏移量处接着发，直到全部发送完为止。
+1 //推荐的方式一 2 int n = send(socket, buf, buf_length, 0)； 3 if (n == buf_length) 4 { 5 printf(&#34;send data successfully\n&#34;); 6 } 1//推荐的方式二：在一个循环里面根据偏移量发送数据 2bool SendData(const char* buf , int buf_length) 3{ 4 //已发送的字节数目 5 int sent_bytes = 0; 6 int ret = 0; 7 while (true) 8 { 9 ret = send(m_hSocket, buf &#43; sent_bytes, buf_length - sent_bytes, 0); 10 if (nRet == -1) 11 { 12 if (errno == EWOULDBLOCK) 13 { 14 //严谨的做法，这里如果发不出去，应该缓存尚未发出去的数据，后面介绍 15 break; 16 } 17 else if (errno == EINTR) 18 continue; 19 else 20 return false; 21 } 22 else if (nRet == 0) 23 { 24 return false; 25 } 26 27 sent_bytes &#43;= ret; 28 if (sent_bytes == buf_length) 29 break; 30 31 //稍稍降低 CPU 的使用率 32 usleep(1); 33 } 34 35 return true; 36} 返回值等于 0" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/7050b3d426bf44b29c25c3d30ae77006/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:43+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:43+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="非阻塞模式下 send 和 recv 函数的返回值"/>
+<meta name="twitter:description" content="非阻塞模式下 send 和 recv 函数的返回值 我们来总结一下 send 和 recv 函数的各种返回值意义：
+返回值 n 返回值含义 大于 0 成功发送 n 个字节 0 对端关闭连接 小于 0（ -1） 出错或者被信号中断或者对端 TCP 窗口太小数据发不出去（send）或者当前网卡缓冲区已无数据可收（recv） 我们来逐一介绍下这三种情况：
+返回值大于 0
+对于 send 和 recv 函数返回值大于 0，表示发送或接收多少字节，需要注意的是，在这种情形下，我们一定要判断下 send 函数的返回值是不是我们期望发送的缓冲区长度，而不是简单判断其返回值大于 0。举个例子：
+1int n = send(socket, buf, buf_length, 0)； 2if (n &gt; 0) 3{ 4 printf(&#34;send data successfully\n&#34;); 5} 很多新手会写出上述代码，虽然返回值 n 大于 0，但是实际情形下，由于对端的 TCP 窗口可能因为缺少一部分字节就满了，所以返回值 n 的值可能在 (0, buf_length] 之间，当 0 &lt; n &lt; buf_length 时，虽然此时 send 函数是调用成功了，但是业务上并不算正确，因为有部分数据并没发出去。你可能在一次测试中测不出 n 不等于 buf_length 的情况，但是不代表实际中不存在。所以，建议要么认为返回值 n 等于 buf_length 才认为正确，要么在一个循环中调用 send 函数，如果数据一次性发不完，记录偏移量，下一次从偏移量处接着发，直到全部发送完为止。
+1 //推荐的方式一 2 int n = send(socket, buf, buf_length, 0)； 3 if (n == buf_length) 4 { 5 printf(&#34;send data successfully\n&#34;); 6 } 1//推荐的方式二：在一个循环里面根据偏移量发送数据 2bool SendData(const char* buf , int buf_length) 3{ 4 //已发送的字节数目 5 int sent_bytes = 0; 6 int ret = 0; 7 while (true) 8 { 9 ret = send(m_hSocket, buf &#43; sent_bytes, buf_length - sent_bytes, 0); 10 if (nRet == -1) 11 { 12 if (errno == EWOULDBLOCK) 13 { 14 //严谨的做法，这里如果发不出去，应该缓存尚未发出去的数据，后面介绍 15 break; 16 } 17 else if (errno == EINTR) 18 continue; 19 else 20 return false; 21 } 22 else if (nRet == 0) 23 { 24 return false; 25 } 26 27 sent_bytes &#43;= ret; 28 if (sent_bytes == buf_length) 29 break; 30 31 //稍稍降低 CPU 的使用率 32 usleep(1); 33 } 34 35 return true; 36} 返回值等于 0"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "非阻塞模式下 send 和 recv 函数的返回值",
+      "item": "https://haokiu.com/7050b3d426bf44b29c25c3d30ae77006/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "非阻塞模式下 send 和 recv 函数的返回值",
+  "name": "非阻塞模式下 send 和 recv 函数的返回值",
+  "description": "非阻塞模式下 send 和 recv 函数的返回值 我们来总结一下 send 和 recv 函数的各种返回值意义：\n返回值 n 返回值含义 大于 0 成功发送 n 个字节 0 对端关闭连接 小于 0（ -1） 出错或者被信号中断或者对端 TCP 窗口太小数据发不出去（send）或者当前网卡缓冲区已无数据可收（recv） 我们来逐一介绍下这三种情况：\n返回值大于 0\n对于 send 和 recv 函数返回值大于 0，表示发送或接收多少字节，需要注意的是，在这种情形下，我们一定要判断下 send 函数的返回值是不是我们期望发送的缓冲区长度，而不是简单判断其返回值大于 0。举个例子：\n1int n = send(socket, buf, buf_length, 0)； 2if (n \u0026gt; 0) 3{ 4 printf(\u0026#34;send data successfully\\n\u0026#34;); 5} 很多新手会写出上述代码，虽然返回值 n 大于 0，但是实际情形下，由于对端的 TCP 窗口可能因为缺少一部分字节就满了，所以返回值 n 的值可能在 (0, buf_length] 之间，当 0 \u0026lt; n \u0026lt; buf_length 时，虽然此时 send 函数是调用成功了，但是业务上并不算正确，因为有部分数据并没发出去。你可能在一次测试中测不出 n 不等于 buf_length 的情况，但是不代表实际中不存在。所以，建议要么认为返回值 n 等于 buf_length 才认为正确，要么在一个循环中调用 send 函数，如果数据一次性发不完，记录偏移量，下一次从偏移量处接着发，直到全部发送完为止。\n1 //推荐的方式一 2 int n = send(socket, buf, buf_length, 0)； 3 if (n == buf_length) 4 { 5 printf(\u0026#34;send data successfully\\n\u0026#34;); 6 } 1//推荐的方式二：在一个循环里面根据偏移量发送数据 2bool SendData(const char* buf , int buf_length) 3{ 4 //已发送的字节数目 5 int sent_bytes = 0; 6 int ret = 0; 7 while (true) 8 { 9 ret = send(m_hSocket, buf + sent_bytes, buf_length - sent_bytes, 0); 10 if (nRet == -1) 11 { 12 if (errno == EWOULDBLOCK) 13 { 14 //严谨的做法，这里如果发不出去，应该缓存尚未发出去的数据，后面介绍 15 break; 16 } 17 else if (errno == EINTR) 18 continue; 19 else 20 return false; 21 } 22 else if (nRet == 0) 23 { 24 return false; 25 } 26 27 sent_bytes += ret; 28 if (sent_bytes == buf_length) 29 break; 30 31 //稍稍降低 CPU 的使用率 32 usleep(1); 33 } 34 35 return true; 36} 返回值等于 0",
+  "keywords": [
+    
+  ],
+  "articleBody": "非阻塞模式下 send 和 recv 函数的返回值 我们来总结一下 send 和 recv 函数的各种返回值意义：\n返回值 n 返回值含义 大于 0 成功发送 n 个字节 0 对端关闭连接 小于 0（ -1） 出错或者被信号中断或者对端 TCP 窗口太小数据发不出去（send）或者当前网卡缓冲区已无数据可收（recv） 我们来逐一介绍下这三种情况：\n返回值大于 0\n对于 send 和 recv 函数返回值大于 0，表示发送或接收多少字节，需要注意的是，在这种情形下，我们一定要判断下 send 函数的返回值是不是我们期望发送的缓冲区长度，而不是简单判断其返回值大于 0。举个例子：\n1int n = send(socket, buf, buf_length, 0)； 2if (n \u003e 0) 3{ 4 printf(\"send data successfully\\n\"); 5} 很多新手会写出上述代码，虽然返回值 n 大于 0，但是实际情形下，由于对端的 TCP 窗口可能因为缺少一部分字节就满了，所以返回值 n 的值可能在 (0, buf_length] 之间，当 0 \u003c n \u003c buf_length 时，虽然此时 send 函数是调用成功了，但是业务上并不算正确，因为有部分数据并没发出去。你可能在一次测试中测不出 n 不等于 buf_length 的情况，但是不代表实际中不存在。所以，建议要么认为返回值 n 等于 buf_length 才认为正确，要么在一个循环中调用 send 函数，如果数据一次性发不完，记录偏移量，下一次从偏移量处接着发，直到全部发送完为止。\n1 //推荐的方式一 2 int n = send(socket, buf, buf_length, 0)； 3 if (n == buf_length) 4 { 5 printf(\"send data successfully\\n\"); 6 } 1//推荐的方式二：在一个循环里面根据偏移量发送数据 2bool SendData(const char* buf , int buf_length) 3{ 4 //已发送的字节数目 5 int sent_bytes = 0; 6 int ret = 0; 7 while (true) 8 { 9 ret = send(m_hSocket, buf + sent_bytes, buf_length - sent_bytes, 0); 10 if (nRet == -1) 11 { 12 if (errno == EWOULDBLOCK) 13 { 14 //严谨的做法，这里如果发不出去，应该缓存尚未发出去的数据，后面介绍 15 break; 16 } 17 else if (errno == EINTR) 18 continue; 19 else 20 return false; 21 } 22 else if (nRet == 0) 23 { 24 return false; 25 } 26 27 sent_bytes += ret; 28 if (sent_bytes == buf_length) 29 break; 30 31 //稍稍降低 CPU 的使用率 32 usleep(1); 33 } 34 35 return true; 36} 返回值等于 0\n通常情况下，如果 send 或者 recv 函数返回 0，我们就认为对端关闭了连接，我们这端也关闭连接即可，这是实际开发时最常见的处理逻辑。\n但是，现在还有一种情形就是，假设调用 send 函数传递的数据长度就是 0 呢？send 函数会是什么行为？对端会 recv 到一个 0 字节的数据吗？需要强调的是，在实际开发中，你不应该让你的程序有任何机会去 send 0 字节的数据，这是一种不好的做法。 这里仅仅用于实验性讨论，我们来通过一个例子，来看下 send 一个长度为 0 的数据，send 函数的返回值是什么？对端会 recv 到 0 字节的数据吗？\nserver 端代码：\n1 /** 2 * 验证recv函数接受0字节的行为，server端，server_recv_zero_bytes.cpp 3 * zhangyl 2018.12.17 4 */ 5 #include 6 #include 7 #include 8 #include 9 #include 10 #include 11 #include 12 13 int main(int argc, char* argv[]) 14 { 15 //1.创建一个侦听socket 16 int listenfd = socket(AF_INET, SOCK_STREAM, 0); 17 if (listenfd == -1) 18 { 19 std::cout \u003c\u003c \"create listen socket error.\" \u003c\u003c std::endl; 20 return -1; 21 } 22 23 //2.初始化服务器地址 24 struct sockaddr_in bindaddr; 25 bindaddr.sin_family = AF_INET; 26 bindaddr.sin_addr.s_addr = htonl(INADDR_ANY); 27 bindaddr.sin_port = htons(3000); 28 if (bind(listenfd, (struct sockaddr *)\u0026bindaddr, sizeof(bindaddr)) == -1) 29 { 30 std::cout \u003c\u003c \"bind listen socket error.\" \u003c\u003c std::endl; 31 close(listenfd); 32 return -1; 33 } 34 35 //3.启动侦听 36 if (listen(listenfd, SOMAXCONN) == -1) 37 { 38 std::cout \u003c\u003c \"listen error.\" \u003c\u003c std::endl; 39 close(listenfd); 40 return -1; 41 } 42 43 int clientfd; 44 45 struct sockaddr_in clientaddr; 46 socklen_t clientaddrlen = sizeof(clientaddr); 47 //4. 接受客户端连接 48 clientfd = accept(listenfd, (struct sockaddr *)\u0026clientaddr, \u0026clientaddrlen); 49 if (clientfd != -1) 50 { 51 while (true) 52 { 53 char recvBuf[32] = {0}; 54 //5. 从客户端接受数据,客户端没有数据来的时候会在recv函数处阻塞 55 int ret = recv(clientfd, recvBuf, 32, 0); 56 if (ret \u003e 0) 57 { 58 std::cout \u003c\u003c \"recv data from client, data: \" \u003c\u003c recvBuf \u003c\u003c std::endl; 59 } 60 else if (ret == 0) 61 { 62 std::cout \u003c\u003c \"recv 0 byte data.\" \u003c\u003c std::endl; 63 continue; 64 } 65 else 66 { 67 //出错 68 std::cout \u003c\u003c \"recv data error.\" \u003c\u003c std::endl; 69 break; 70 } 71 } 72 } 73 74 75 //关闭客户端socket 76 close(clientfd); 77 //7.关闭侦听socket 78 close(listenfd); 79 80 return 0; 81 } 上述代码侦听端口号是 3000，代码 55 行调用了 recv 函数，如果客户端一直没有数据，程序会阻塞在这里。\nclient 端代码：\n1/** 2 * 验证非阻塞模式下send函数发送0字节的行为，client端，nonblocking_client_send_zero_bytes.cpp 3 * zhangyl 2018.12.17 4 */ 5#include 6#include 7#include 8#include 9#include 10#include 11#include 12#include 13#include 14 15#define SERVER_ADDRESS \"127.0.0.1\" 16#define SERVER_PORT 3000 17#define SEND_DATA \"\" 18 19int main(int argc, char* argv[]) 20{ 21 //1.创建一个socket 22 int clientfd = socket(AF_INET, SOCK_STREAM, 0); 23 if (clientfd == -1) 24 { 25 std::cout \u003c\u003c \"create client socket error.\" \u003c\u003c std::endl; 26 return -1; 27 } 28 29 //2.连接服务器 30 struct sockaddr_in serveraddr; 31 serveraddr.sin_family = AF_INET; 32 serveraddr.sin_addr.s_addr = inet_addr(SERVER_ADDRESS); 33 serveraddr.sin_port = htons(SERVER_PORT); 34 if (connect(clientfd, (struct sockaddr *)\u0026serveraddr, sizeof(serveraddr)) == -1) 35 { 36 std::cout \u003c\u003c \"connect socket error.\" \u003c\u003c std::endl; 37 close(clientfd); 38 return -1; 39 } 40 41 //连接成功以后，我们再将 clientfd 设置成非阻塞模式， 42 //不能在创建时就设置，这样会影响到 connect 函数的行为 43 int oldSocketFlag = fcntl(clientfd, F_GETFL, 0); 44 int newSocketFlag = oldSocketFlag | O_NONBLOCK; 45 if (fcntl(clientfd, F_SETFL, newSocketFlag) == -1) 46 { 47 close(clientfd); 48 std::cout \u003c\u003c \"set socket to nonblock error.\" \u003c\u003c std::endl; 49 return -1; 50 } 51 52 //3. 不断向服务器发送数据，或者出错退出 53 int count = 0; 54 while (true) 55 { 56 //发送 0 字节的数据 57 int ret = send(clientfd, SEND_DATA, 0, 0); 58 if (ret == -1) 59 { 60 //非阻塞模式下send函数由于TCP窗口太小发不出去数据，错误码是EWOULDBLOCK 61 if (errno == EWOULDBLOCK) 62 { 63 std::cout \u003c\u003c \"send data error as TCP Window size is too small.\" \u003c\u003c std::endl; 64 continue; 65 } 66 else if (errno == EINTR) 67 { 68 //如果被信号中断，我们继续重试 69 std::cout \u003c\u003c \"sending data interrupted by signal.\" \u003c\u003c std::endl; 70 continue; 71 } 72 else 73 { 74 std::cout \u003c\u003c \"send data error.\" \u003c\u003c std::endl; 75 break; 76 } 77 } 78 else if (ret == 0) 79 { 80 //对端关闭了连接，我们也关闭 81 std::cout \u003c\u003c \"send 0 byte data.\" \u003c\u003c std::endl; 82 } 83 else 84 { 85 count ++; 86 std::cout \u003c\u003c \"send data successfully, count = \" \u003c\u003c count \u003c\u003c std::endl; 87 } 88 89 //每三秒发一次 90 sleep(3); 91 } 92 93 //5. 关闭socket 94 close(clientfd); 95 96 return 0; 97} client 端连接服务器成功以后，每隔 3 秒调用 send 一次发送一个 0 字节的数据。除了先启动 server 以外，我们使用 tcpdump 抓一下经过端口 3000 上的数据包，使用如下命令：\n1tcpdump -i any 'tcp port 3000' 然后启动 client ，我们看下结果：\n客户端确实是每隔 3 秒 send 一次数据。此时我们使用 lsof -i -Pn 命令查看连接状态，也是正常的：\n然后，tcpdump 抓包结果输出中，除了连接时的三次握手数据包，再也无其他数据包，也就是说，send 函数发送 0 字节数据，client 的协议栈并不会把这些数据发出去。\n1[root@localhost ~]# tcpdump -i any 'tcp port 3000' 2tcpdump: verbose output suppressed, use -v or -vv for full protocol decode 3listening on any, link-type LINUX_SLL (Linux cooked), capture size 262144 bytes 417:37:03.028449 IP localhost.48820 \u003e localhost.hbci: Flags [S], seq 1632283330, win 43690, options [mss 65495,sackOK,TS val 201295556 ecr 0,nop,wscale 7], length 0 517:37:03.028479 IP localhost.hbci \u003e localhost.48820: Flags [S.], seq 3669336158, ack 1632283331, win 43690, options [mss 65495,sackOK,TS val 201295556 ecr 201295556,nop,wscale 7], length 0 617:37:03.028488 IP localhost.48820 \u003e localhost.hbci: Flags [.], ack 1, win 342, options [nop,nop,TS val 201295556 ecr 201295556], length 0 因此，server 端也会一直没有输出，如果你用的是 gdb 启动 server，此时中断下来会发现，server 端由于没有数据会一直阻塞在 recv 函数调用处（55 行）。\n上述示例再次验证了，send 一个 0 字节的数据没有任何意思，希望读者在实际开发时，避免写出这样的代码。\n",
+  "wordCount" : "1013",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:43Z",
+  "dateModified": "2021-01-11T09:20:43Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/7050b3d426bf44b29c25c3d30ae77006/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      非阻塞模式下 send 和 recv 函数的返回值
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#%e9%9d%9e%e9%98%bb%e5%a1%9e%e6%a8%a1%e5%bc%8f%e4%b8%8b-send-%e5%92%8c-recv-%e5%87%bd%e6%95%b0%e7%9a%84%e8%bf%94%e5%9b%9e%e5%80%bc" aria-label="非阻塞模式下 send 和 recv 函数的返回值">非阻塞模式下 send 和 recv 函数的返回值</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h2 id="非阻塞模式下-send-和-recv-函数的返回值">非阻塞模式下 send 和 recv 函数的返回值</h2>
+<p>我们来总结一下 <strong>send</strong> 和 <strong>recv</strong> 函数的各种返回值意义：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">返回值 n</th>
+<th style="text-align:center">返回值含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">大于 0</td>
+<td style="text-align:center">成功发送 n 个字节</td>
+</tr>
+<tr>
+<td style="text-align:center">0</td>
+<td style="text-align:center">对端关闭连接</td>
+</tr>
+<tr>
+<td style="text-align:center">小于 0（ -1）</td>
+<td style="text-align:center">出错或者被信号中断或者对端 TCP 窗口太小数据发不出去（send）或者当前网卡缓冲区已无数据可收（recv）</td>
+</tr>
+</tbody>
+</table>
+<p>我们来逐一介绍下这三种情况：</p>
+<ul>
+<li>
+<p><strong>返回值大于 0</strong></p>
+<p>对于 <strong>send</strong> 和 <strong>recv</strong> 函数返回值大于 <strong>0</strong>，表示发送或接收多少字节，需要注意的是，在这种情形下，我们一定要判断下 send 函数的返回值是不是我们期望发送的缓冲区长度，而不是简单判断其返回值大于 0。举个例子：</p>
+<pre tabindex="0"><code>1int n = send(socket, buf, buf_length, 0)；
+2if (n &gt; 0)
+3{
+4  printf(&#34;send data successfully\n&#34;);
+5}
+</code></pre><p>很多新手会写出上述代码，虽然返回值 n 大于 0，但是实际情形下，由于对端的 TCP 窗口可能因为缺少一部分字节就满了，所以返回值 n 的值可能在 (0, buf_length] 之间，当 0 &lt; n &lt; buf_length 时，虽然此时 send 函数是调用成功了，但是业务上并不算正确，因为有部分数据并没发出去。你可能在一次测试中测不出 n 不等于 buf_length 的情况，但是不代表实际中不存在。所以，建议要么认为返回值 n 等于 buf_length 才认为正确，要么在一个循环中调用 send 函数，如果数据一次性发不完，记录偏移量，下一次从偏移量处接着发，直到全部发送完为止。</p>
+</li>
+</ul>
+<pre tabindex="0"><code>1  //推荐的方式一
+2  int n = send(socket, buf, buf_length, 0)；
+3  if (n == buf_length)
+4  {
+5      printf(&#34;send data successfully\n&#34;);
+6  }
+</code></pre><pre tabindex="0"><code> 1//推荐的方式二：在一个循环里面根据偏移量发送数据
+ 2bool SendData(const char* buf , int buf_length)
+ 3{
+ 4    //已发送的字节数目
+ 5    int sent_bytes = 0;
+ 6    int ret = 0;
+ 7    while (true)
+ 8    {
+ 9        ret = send(m_hSocket, buf + sent_bytes, buf_length - sent_bytes, 0);
+10        if (nRet == -1)
+11        {
+12            if (errno == EWOULDBLOCK)
+13            {
+14                //严谨的做法，这里如果发不出去，应该缓存尚未发出去的数据，后面介绍
+15                break;
+16            }             
+17            else if (errno == EINTR)
+18                continue;
+19            else
+20                return false;
+21        }
+22        else if (nRet == 0)
+23        {
+24            return false;
+25        }
+26
+27        sent_bytes += ret;
+28        if (sent_bytes == buf_length)
+29            break;
+30
+31        //稍稍降低 CPU 的使用率
+32        usleep(1);
+33    }
+34
+35    return true;
+36}
+</code></pre><ul>
+<li>
+<p><strong>返回值等于 0</strong></p>
+<p>通常情况下，如果 <strong>send</strong> 或者 <strong>recv</strong> 函数返回 <strong>0</strong>，我们就认为对端关闭了连接，我们这端也关闭连接即可，这是实际开发时最常见的处理逻辑。</p>
+<p>但是，现在还有一种情形就是，假设调用 <strong>send</strong> 函数传递的数据长度就是 0 呢？<strong>send</strong> 函数会是什么行为？对端会 <strong>recv</strong> 到一个 0 字节的数据吗？需要强调的是，<strong>在实际开发中，你不应该让你的程序有任何机会去 send 0 字节的数据，这是一种不好的做法。</strong> 这里仅仅用于实验性讨论，我们来通过一个例子，来看下 <strong>send</strong> 一个长度为 <strong>0</strong> 的数据，<strong>send</strong> 函数的返回值是什么？对端会 <strong>recv</strong> 到 <strong>0</strong> 字节的数据吗？</p>
+<p><strong>server</strong> 端代码：</p>
+</li>
+</ul>
+<pre tabindex="0"><code> 1  /**
+ 2   * 验证recv函数接受0字节的行为，server端，server_recv_zero_bytes.cpp
+ 3   * zhangyl 2018.12.17
+ 4   */
+ 5  #include &lt;sys/types.h&gt; 
+ 6  #include &lt;sys/socket.h&gt;
+ 7  #include &lt;arpa/inet.h&gt;
+ 8  #include &lt;unistd.h&gt;
+ 9  #include &lt;iostream&gt;
+10  #include &lt;string.h&gt;
+11  #include &lt;vector&gt;
+12
+13  int main(int argc, char* argv[])
+14  {
+15      //1.创建一个侦听socket
+16      int listenfd = socket(AF_INET, SOCK_STREAM, 0);
+17      if (listenfd == -1)
+18      {
+19          std::cout &lt;&lt; &#34;create listen socket error.&#34; &lt;&lt; std::endl;
+20          return -1;
+21      }
+22
+23      //2.初始化服务器地址
+24      struct sockaddr_in bindaddr;
+25      bindaddr.sin_family = AF_INET;
+26      bindaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+27      bindaddr.sin_port = htons(3000);
+28      if (bind(listenfd, (struct sockaddr *)&amp;bindaddr, sizeof(bindaddr)) == -1)
+29      {
+30          std::cout &lt;&lt; &#34;bind listen socket error.&#34; &lt;&lt; std::endl;
+31          close(listenfd);
+32          return -1;
+33      }
+34
+35      //3.启动侦听
+36      if (listen(listenfd, SOMAXCONN) == -1)
+37      {
+38          std::cout &lt;&lt; &#34;listen error.&#34; &lt;&lt; std::endl;
+39          close(listenfd);
+40          return -1;
+41      }
+42
+43      int clientfd;
+44
+45      struct sockaddr_in clientaddr;
+46      socklen_t clientaddrlen = sizeof(clientaddr);
+47      //4. 接受客户端连接
+48      clientfd = accept(listenfd, (struct sockaddr *)&amp;clientaddr, &amp;clientaddrlen);
+49      if (clientfd != -1)
+50      {           
+51          while (true)
+52          {
+53              char recvBuf[32] = {0};
+54              //5. 从客户端接受数据,客户端没有数据来的时候会在recv函数处阻塞
+55              int ret = recv(clientfd, recvBuf, 32, 0);
+56              if (ret &gt; 0) 
+57              {
+58                  std::cout &lt;&lt; &#34;recv data from client, data: &#34; &lt;&lt; recvBuf &lt;&lt; std::endl;               
+59              } 
+60              else if (ret == 0)
+61              {
+62                  std::cout &lt;&lt; &#34;recv 0 byte data.&#34; &lt;&lt; std::endl;
+63                  continue;
+64              } 
+65              else
+66              {
+67                  //出错
+68                  std::cout &lt;&lt; &#34;recv data error.&#34; &lt;&lt; std::endl;
+69                  break;
+70              }
+71          }               
+72      }
+73
+74
+75      //关闭客户端socket
+76      close(clientfd);
+77      //7.关闭侦听socket
+78      close(listenfd);
+79
+80      return 0;
+81  }
+</code></pre><p>上述代码侦听端口号是 <strong>3000</strong>，代码 <strong>55</strong> 行调用了 <strong>recv</strong> 函数，如果客户端一直没有数据，程序会阻塞在这里。</p>
+<p><strong>client</strong> 端代码：</p>
+<pre tabindex="0"><code> 1/**
+ 2 * 验证非阻塞模式下send函数发送0字节的行为，client端，nonblocking_client_send_zero_bytes.cpp
+ 3 * zhangyl 2018.12.17
+ 4 */
+ 5#include &lt;sys/types.h&gt; 
+ 6#include &lt;sys/socket.h&gt;
+ 7#include &lt;arpa/inet.h&gt;
+ 8#include &lt;unistd.h&gt;
+ 9#include &lt;iostream&gt;
+10#include &lt;string.h&gt;
+11#include &lt;stdio.h&gt;
+12#include &lt;fcntl.h&gt;
+13#include &lt;errno.h&gt;
+14
+15#define SERVER_ADDRESS &#34;127.0.0.1&#34;
+16#define SERVER_PORT     3000
+17#define SEND_DATA       &#34;&#34;
+18
+19int main(int argc, char* argv[])
+20{
+21    //1.创建一个socket
+22    int clientfd = socket(AF_INET, SOCK_STREAM, 0);
+23    if (clientfd == -1)
+24    {
+25        std::cout &lt;&lt; &#34;create client socket error.&#34; &lt;&lt; std::endl;
+26        return -1;
+27    }
+28
+29    //2.连接服务器
+30    struct sockaddr_in serveraddr;
+31    serveraddr.sin_family = AF_INET;
+32    serveraddr.sin_addr.s_addr = inet_addr(SERVER_ADDRESS);
+33    serveraddr.sin_port = htons(SERVER_PORT);
+34    if (connect(clientfd, (struct sockaddr *)&amp;serveraddr, sizeof(serveraddr)) == -1)
+35    {
+36        std::cout &lt;&lt; &#34;connect socket error.&#34; &lt;&lt; std::endl;
+37        close(clientfd);
+38        return -1;
+39    }
+40
+41    //连接成功以后，我们再将 clientfd 设置成非阻塞模式，
+42    //不能在创建时就设置，这样会影响到 connect 函数的行为
+43    int oldSocketFlag = fcntl(clientfd, F_GETFL, 0);
+44    int newSocketFlag = oldSocketFlag | O_NONBLOCK;
+45    if (fcntl(clientfd, F_SETFL,  newSocketFlag) == -1)
+46    {
+47        close(clientfd);
+48        std::cout &lt;&lt; &#34;set socket to nonblock error.&#34; &lt;&lt; std::endl;
+49        return -1;
+50    }
+51
+52    //3. 不断向服务器发送数据，或者出错退出
+53    int count = 0;
+54    while (true)
+55    {
+56        //发送 0 字节的数据
+57        int ret = send(clientfd, SEND_DATA, 0, 0);
+58        if (ret == -1) 
+59        {
+60            //非阻塞模式下send函数由于TCP窗口太小发不出去数据，错误码是EWOULDBLOCK
+61            if (errno == EWOULDBLOCK)
+62            {
+63                std::cout &lt;&lt; &#34;send data error as TCP Window size is too small.&#34; &lt;&lt; std::endl;
+64                continue;
+65            } 
+66            else if (errno == EINTR)
+67            {
+68                //如果被信号中断，我们继续重试
+69                std::cout &lt;&lt; &#34;sending data interrupted by signal.&#34; &lt;&lt; std::endl;
+70                continue;
+71            } 
+72            else 
+73            {
+74                std::cout &lt;&lt; &#34;send data error.&#34; &lt;&lt; std::endl;
+75                break;
+76            }
+77        }
+78        else if (ret == 0)
+79        {
+80            //对端关闭了连接，我们也关闭
+81            std::cout &lt;&lt; &#34;send 0 byte data.&#34; &lt;&lt; std::endl;
+82        } 
+83        else
+84        {
+85            count ++;
+86            std::cout &lt;&lt; &#34;send data successfully, count = &#34; &lt;&lt; count &lt;&lt; std::endl;
+87        }
+88
+89        //每三秒发一次
+90        sleep(3);
+91    }
+92
+93    //5. 关闭socket
+94    close(clientfd);
+95
+96    return 0;
+97}
+</code></pre><p><strong>client</strong> 端连接服务器成功以后，每隔 3 秒调用 <strong>send</strong> 一次发送一个 0 字节的数据。除了先启动 <strong>server</strong> 以外，我们使用 tcpdump 抓一下经过端口 <strong>3000</strong> 上的数据包，使用如下命令：</p>
+<pre tabindex="0"><code>1tcpdump -i any &#39;tcp port 3000&#39;
+</code></pre><p>然后启动 <strong>client</strong> ，我们看下结果：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/8361bad5867e66d738a668e6309b6fdd.png" alt=""  />
+</p>
+<p>客户端确实是每隔 3 秒 <strong>send</strong> 一次数据。此时我们使用 <strong>lsof -i -Pn</strong> 命令查看连接状态，也是正常的：</p>
+<p><img loading="lazy" src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="img"  />
+</p>
+<p>然后，tcpdump 抓包结果输出中，除了连接时的三次握手数据包，再也无其他数据包，也就是说，<strong>send</strong> 函数发送 <strong>0</strong> 字节数据，<strong>client</strong> 的协议栈并不会把这些数据发出去。</p>
+<pre tabindex="0"><code>1[root@localhost ~]# tcpdump -i any &#39;tcp port 3000&#39;
+2tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+3listening on any, link-type LINUX_SLL (Linux cooked), capture size 262144 bytes
+417:37:03.028449 IP localhost.48820 &gt; localhost.hbci: Flags [S], seq 1632283330, win 43690, options [mss 65495,sackOK,TS val 201295556 ecr 0,nop,wscale 7], length 0
+517:37:03.028479 IP localhost.hbci &gt; localhost.48820: Flags [S.], seq 3669336158, ack 1632283331, win 43690, options [mss 65495,sackOK,TS val 201295556 ecr 201295556,nop,wscale 7], length 0
+617:37:03.028488 IP localhost.48820 &gt; localhost.hbci: Flags [.], ack 1, win 342, options [nop,nop,TS val 201295556 ecr 201295556], length 0
+</code></pre><p>因此，<strong>server</strong> 端也会一直没有输出，如果你用的是 gdb 启动 <strong>server</strong>，此时中断下来会发现，<strong>server</strong> 端由于没有数据会一直阻塞在 <strong>recv</strong> 函数调用处（<strong>55</strong> 行）。</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/afc6f1ee2742df0b427672806d4e8a34.png" alt=""  />
+</p>
+<p>上述示例再次验证了，<strong>send</strong> 一个 0 字节的数据没有任何意思，希望读者在实际开发时，避免写出这样的代码。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/32ba3bce20124dd380cdde0bba6ef5b9/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>错误码系统的设计</span>
+  </a>
+  <a class="next" href="https://haokiu.com/67da065d5a2a4917804acd4875f0f0a8/">
+    <span class="title">Next »</span>
+    <br>
+    <span>高性能服务器架构设计总结</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

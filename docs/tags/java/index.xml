@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>java on haokiu</title>
+    <link>https://haokiu.com/tags/java/</link>
+    <description>Recent content in java on haokiu</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>haokiu.com</copyright>
+    <lastBuildDate>Wed, 24 Feb 2021 10:24:56 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/java/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>java 到底要不要收费</title>
+      <link>https://haokiu.com/AWAwA5/</link>
+      <pubDate>Wed, 24 Feb 2021 10:24:56 +0000</pubDate>
+      
+      <guid>https://haokiu.com/AWAwA5/</guid>
+      <description>随着JDK 11发布, Oracle同时调整了JDK的授权许可证,里面包含了好几个动作。
+首先, Oracle从JDK 11起把以前的商业特性全部开源给OpenJDK,这样OpenJDK 11和OracleJDK 11的代码和功能,在本质上就是完全相同的(官方原文是Essentially Identical)。
+然后, Oracle宣布以后将会同时发行两个JDK:一个是以GPLV2+CE协议下由Oracle发行的OpenJDK (本书后面章节称其为Oracle OpenJDK) ,另一个是在新的OTN协议下发行的传统的OracleJDK。
+这两个JDK共享绝大部分源码,在功能上是几乎一样的,核心差异是前者可以免费在开发、测试或生产环境中使用，但是只有半年时间的更新支持;后者个人依然可以免费使用，但若在生产环境中商用就必须付费，可以有三年时间的更新支持。
+如果说由此能得出&amp;quot;Java要收费&amp;quot;的结论,那是纯属标题党,最多只能说Oracle在迫使商业用户要么不断升级JDK的版本,要么就去购买商业支持。
+JDK选择建议 JDK8 分情况 8u211和之后的版本商用需付费，JDK 9/10 免费 JDK 11及以上所有版本商用需付费
+免费建议：JDK8 使用 8u202 版本，JDK8 以上版本使用 OpenJDK 或大型机构替代版本Zulu JDK 、Amazon Corretto JDK等
+说明 Java 的版本发布周期变更为每六个月一次 ， 每半年发布一个大版本，每个季度发布一个中间特性版本，Java 9 和 Java 10 这两个被称为“功能性的版本”，两者均只提供半年的技术支持，Java 11 不仅提供了长期支持服务，还将作为 Java 平台的参考实现。Oracle 直到2023年9月都会为 Java 11 提供技术支持，而补丁和安全警告等扩展支持将持续到2026年。所以，Java11 必将是下一代长期使用的版本。</description>
+    </item>
+    
+  </channel>
+</rss>

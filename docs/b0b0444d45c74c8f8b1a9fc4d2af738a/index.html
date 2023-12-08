@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>CassandraReader 插件文档 | haokiu</title>
+<meta name="keywords" content="datax">
+<meta name="description" content="CassandraReader 插件文档 1 快速介绍 CassandraReader插件实现了从Cassandra读取数据。在底层实现上，CassandraReader通过datastax的java driver连接Cassandra实例，并执行相应的cql语句将数据从cassandra中SELECT出来。
+2 实现原理 简而言之，CassandraReader通过java driver连接到Cassandra实例，并根据用户配置的信息生成查询SELECT CQL语句，然后发送到Cassandra，并将该CQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+对于用户配置Table、Column的信息，CassandraReader将其拼接为CQL语句发送到Cassandra。
+3 功能说明 3.1 配置样例 配置一个从Cassandra同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 3 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;cassandrareader&#34;, &#34;parameter&#34;: { &#34;host&#34;: &#34;localhost&#34;, &#34;port&#34;: 9042, &#34;useSSL&#34;: false, &#34;keyspace&#34;: &#34;test&#34;, &#34;table&#34;: &#34;datax_src&#34;, &#34;column&#34;: [ &#34;textCol&#34;, &#34;blobCol&#34;, &#34;writetime(blobCol)&#34;, &#34;boolCol&#34;, &#34;smallintCol&#34;, &#34;tinyintCol&#34;, &#34;intCol&#34;, &#34;bigintCol&#34;, &#34;varintCol&#34;, &#34;floatCol&#34;, &#34;doubleCol&#34;, &#34;decimalCol&#34;, &#34;dateCol&#34;, &#34;timeCol&#34;, &#34;timeStampCol&#34;, &#34;uuidCol&#34;, &#34;inetCol&#34;, &#34;durationCol&#34;, &#34;listCol&#34;, &#34;mapCol&#34;, &#34;setCol&#34; &#34;tupleCol&#34; &#34;udtCol&#34;, ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;:true } } } ] } } 3.2 参数说明 host
+描述：Cassandra连接点的域名或ip，多个node之间用逗号分隔。 必选：是 默认值：无 port
+描述：Cassandra端口。 必选：是 默认值：9042 username
+描述：数据源的用户名 必选：否 默认值：无 password">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/b0b0444d45c74c8f8b1a9fc4d2af738a/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="CassandraReader 插件文档" />
+<meta property="og:description" content="CassandraReader 插件文档 1 快速介绍 CassandraReader插件实现了从Cassandra读取数据。在底层实现上，CassandraReader通过datastax的java driver连接Cassandra实例，并执行相应的cql语句将数据从cassandra中SELECT出来。
+2 实现原理 简而言之，CassandraReader通过java driver连接到Cassandra实例，并根据用户配置的信息生成查询SELECT CQL语句，然后发送到Cassandra，并将该CQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+对于用户配置Table、Column的信息，CassandraReader将其拼接为CQL语句发送到Cassandra。
+3 功能说明 3.1 配置样例 配置一个从Cassandra同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 3 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;cassandrareader&#34;, &#34;parameter&#34;: { &#34;host&#34;: &#34;localhost&#34;, &#34;port&#34;: 9042, &#34;useSSL&#34;: false, &#34;keyspace&#34;: &#34;test&#34;, &#34;table&#34;: &#34;datax_src&#34;, &#34;column&#34;: [ &#34;textCol&#34;, &#34;blobCol&#34;, &#34;writetime(blobCol)&#34;, &#34;boolCol&#34;, &#34;smallintCol&#34;, &#34;tinyintCol&#34;, &#34;intCol&#34;, &#34;bigintCol&#34;, &#34;varintCol&#34;, &#34;floatCol&#34;, &#34;doubleCol&#34;, &#34;decimalCol&#34;, &#34;dateCol&#34;, &#34;timeCol&#34;, &#34;timeStampCol&#34;, &#34;uuidCol&#34;, &#34;inetCol&#34;, &#34;durationCol&#34;, &#34;listCol&#34;, &#34;mapCol&#34;, &#34;setCol&#34; &#34;tupleCol&#34; &#34;udtCol&#34;, ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;:true } } } ] } } 3.2 参数说明 host
+描述：Cassandra连接点的域名或ip，多个node之间用逗号分隔。 必选：是 默认值：无 port
+描述：Cassandra端口。 必选：是 默认值：9042 username
+描述：数据源的用户名 必选：否 默认值：无 password" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/b0b0444d45c74c8f8b1a9fc4d2af738a/" /><meta property="article:section" content="4" />
+<meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
+<meta property="article:modified_time" content="2021-02-02T17:45:01+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CassandraReader 插件文档"/>
+<meta name="twitter:description" content="CassandraReader 插件文档 1 快速介绍 CassandraReader插件实现了从Cassandra读取数据。在底层实现上，CassandraReader通过datastax的java driver连接Cassandra实例，并执行相应的cql语句将数据从cassandra中SELECT出来。
+2 实现原理 简而言之，CassandraReader通过java driver连接到Cassandra实例，并根据用户配置的信息生成查询SELECT CQL语句，然后发送到Cassandra，并将该CQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+对于用户配置Table、Column的信息，CassandraReader将其拼接为CQL语句发送到Cassandra。
+3 功能说明 3.1 配置样例 配置一个从Cassandra同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 3 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;cassandrareader&#34;, &#34;parameter&#34;: { &#34;host&#34;: &#34;localhost&#34;, &#34;port&#34;: 9042, &#34;useSSL&#34;: false, &#34;keyspace&#34;: &#34;test&#34;, &#34;table&#34;: &#34;datax_src&#34;, &#34;column&#34;: [ &#34;textCol&#34;, &#34;blobCol&#34;, &#34;writetime(blobCol)&#34;, &#34;boolCol&#34;, &#34;smallintCol&#34;, &#34;tinyintCol&#34;, &#34;intCol&#34;, &#34;bigintCol&#34;, &#34;varintCol&#34;, &#34;floatCol&#34;, &#34;doubleCol&#34;, &#34;decimalCol&#34;, &#34;dateCol&#34;, &#34;timeCol&#34;, &#34;timeStampCol&#34;, &#34;uuidCol&#34;, &#34;inetCol&#34;, &#34;durationCol&#34;, &#34;listCol&#34;, &#34;mapCol&#34;, &#34;setCol&#34; &#34;tupleCol&#34; &#34;udtCol&#34;, ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;:true } } } ] } } 3.2 参数说明 host
+描述：Cassandra连接点的域名或ip，多个node之间用逗号分隔。 必选：是 默认值：无 port
+描述：Cassandra端口。 必选：是 默认值：9042 username
+描述：数据源的用户名 必选：否 默认值：无 password"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "4s",
+      "item": "https://haokiu.com/4/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "CassandraReader 插件文档",
+      "item": "https://haokiu.com/b0b0444d45c74c8f8b1a9fc4d2af738a/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "CassandraReader 插件文档",
+  "name": "CassandraReader 插件文档",
+  "description": "CassandraReader 插件文档 1 快速介绍 CassandraReader插件实现了从Cassandra读取数据。在底层实现上，CassandraReader通过datastax的java driver连接Cassandra实例，并执行相应的cql语句将数据从cassandra中SELECT出来。\n2 实现原理 简而言之，CassandraReader通过java driver连接到Cassandra实例，并根据用户配置的信息生成查询SELECT CQL语句，然后发送到Cassandra，并将该CQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。\n对于用户配置Table、Column的信息，CassandraReader将其拼接为CQL语句发送到Cassandra。\n3 功能说明 3.1 配置样例 配置一个从Cassandra同步抽取数据到本地的作业: { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { \u0026#34;channel\u0026#34;: 3 } }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;cassandrareader\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;host\u0026#34;: \u0026#34;localhost\u0026#34;, \u0026#34;port\u0026#34;: 9042, \u0026#34;useSSL\u0026#34;: false, \u0026#34;keyspace\u0026#34;: \u0026#34;test\u0026#34;, \u0026#34;table\u0026#34;: \u0026#34;datax_src\u0026#34;, \u0026#34;column\u0026#34;: [ \u0026#34;textCol\u0026#34;, \u0026#34;blobCol\u0026#34;, \u0026#34;writetime(blobCol)\u0026#34;, \u0026#34;boolCol\u0026#34;, \u0026#34;smallintCol\u0026#34;, \u0026#34;tinyintCol\u0026#34;, \u0026#34;intCol\u0026#34;, \u0026#34;bigintCol\u0026#34;, \u0026#34;varintCol\u0026#34;, \u0026#34;floatCol\u0026#34;, \u0026#34;doubleCol\u0026#34;, \u0026#34;decimalCol\u0026#34;, \u0026#34;dateCol\u0026#34;, \u0026#34;timeCol\u0026#34;, \u0026#34;timeStampCol\u0026#34;, \u0026#34;uuidCol\u0026#34;, \u0026#34;inetCol\u0026#34;, \u0026#34;durationCol\u0026#34;, \u0026#34;listCol\u0026#34;, \u0026#34;mapCol\u0026#34;, \u0026#34;setCol\u0026#34; \u0026#34;tupleCol\u0026#34; \u0026#34;udtCol\u0026#34;, ] } }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;streamwriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;print\u0026#34;:true } } } ] } } 3.2 参数说明 host\n描述：Cassandra连接点的域名或ip，多个node之间用逗号分隔。 必选：是 默认值：无 port\n描述：Cassandra端口。 必选：是 默认值：9042 username\n描述：数据源的用户名 必选：否 默认值：无 password",
+  "keywords": [
+    "datax"
+  ],
+  "articleBody": "CassandraReader 插件文档 1 快速介绍 CassandraReader插件实现了从Cassandra读取数据。在底层实现上，CassandraReader通过datastax的java driver连接Cassandra实例，并执行相应的cql语句将数据从cassandra中SELECT出来。\n2 实现原理 简而言之，CassandraReader通过java driver连接到Cassandra实例，并根据用户配置的信息生成查询SELECT CQL语句，然后发送到Cassandra，并将该CQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。\n对于用户配置Table、Column的信息，CassandraReader将其拼接为CQL语句发送到Cassandra。\n3 功能说明 3.1 配置样例 配置一个从Cassandra同步抽取数据到本地的作业: { \"job\": { \"setting\": { \"speed\": { \"channel\": 3 } }, \"content\": [ { \"reader\": { \"name\": \"cassandrareader\", \"parameter\": { \"host\": \"localhost\", \"port\": 9042, \"useSSL\": false, \"keyspace\": \"test\", \"table\": \"datax_src\", \"column\": [ \"textCol\", \"blobCol\", \"writetime(blobCol)\", \"boolCol\", \"smallintCol\", \"tinyintCol\", \"intCol\", \"bigintCol\", \"varintCol\", \"floatCol\", \"doubleCol\", \"decimalCol\", \"dateCol\", \"timeCol\", \"timeStampCol\", \"uuidCol\", \"inetCol\", \"durationCol\", \"listCol\", \"mapCol\", \"setCol\" \"tupleCol\" \"udtCol\", ] } }, \"writer\": { \"name\": \"streamwriter\", \"parameter\": { \"print\":true } } } ] } } 3.2 参数说明 host\n描述：Cassandra连接点的域名或ip，多个node之间用逗号分隔。 必选：是 默认值：无 port\n描述：Cassandra端口。 必选：是 默认值：9042 username\n描述：数据源的用户名 必选：否 默认值：无 password\n描述：数据源指定用户名的密码 必选：否 默认值：无 useSSL\n描述：是否使用SSL连接。\n必选：否 默认值：false keyspace\n描述：需要同步的表所在的keyspace。\n必选：是 默认值：无 table\n描述：所选取的需要同步的表。\n必选：是 默认值：无 column\n描述：所配置的表中需要同步的列集合。 其中的元素可以指定列的名称或writetime(column_name)，后一种形式会读取column_name列的时间戳而不是数据。\n必选：是 默认值：无 where\n描述：数据筛选条件的cql表达式，例如: \"where\":\"textcol='a'\" 必选：否 默认值：无 allowFiltering\n描述：是否在服务端过滤数据。参考cassandra文档中ALLOW FILTERING关键字的相关描述。\n必选：否 默认值：无 consistancyLevel\n描述：数据一致性级别。可选ONE|QUORUM|LOCAL_QUORUM|EACH_QUORUM|ALL|ANY|TWO|THREE|LOCAL_ONE\n必选：否 默认值：LOCAL_QUORUM 3.3 类型转换 目前CassandraReader支持除counter和Custom类型之外的所有类型。\n下面列出CassandraReader针对Cassandra类型转换列表:\nDataX 内部类型 Cassandra 数据类型 Long int, tinyint, smallint,varint,bigint,time Double float, double, decimal String ascii,varchar, text,uuid,timeuuid,duration,list,map,set,tuple,udt,inet Date date, timestamp Boolean bool Bytes blob 请注意:\n目前不支持counter类型和custom类型。 4 性能报告 略\n5 约束限制 5.1 主备同步数据恢复问题 略\n6 FAQ ",
+  "wordCount" : "175",
+  "inLanguage": "en",
+  "datePublished": "2021-02-02T17:45:01Z",
+  "dateModified": "2021-02-02T17:45:01Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/b0b0444d45c74c8f8b1a9fc4d2af738a/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    <h1 class="post-title">
+      CassandraReader 插件文档
+    </h1>
+    <div class="post-meta"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#cassandrareader-%e6%8f%92%e4%bb%b6%e6%96%87%e6%a1%a3" aria-label="CassandraReader 插件文档">CassandraReader 插件文档</a><ul>
+                        
+                <li>
+                    <a href="#1-%e5%bf%ab%e9%80%9f%e4%bb%8b%e7%bb%8d" aria-label="1 快速介绍">1 快速介绍</a></li>
+                <li>
+                    <a href="#2-%e5%ae%9e%e7%8e%b0%e5%8e%9f%e7%90%86" aria-label="2 实现原理">2 实现原理</a></li>
+                <li>
+                    <a href="#3-%e5%8a%9f%e8%83%bd%e8%af%b4%e6%98%8e" aria-label="3 功能说明">3 功能说明</a><ul>
+                        
+                <li>
+                    <a href="#31-%e9%85%8d%e7%bd%ae%e6%a0%b7%e4%be%8b" aria-label="3.1 配置样例">3.1 配置样例</a></li>
+                <li>
+                    <a href="#32-%e5%8f%82%e6%95%b0%e8%af%b4%e6%98%8e" aria-label="3.2 参数说明">3.2 参数说明</a></li>
+                <li>
+                    <a href="#33-%e7%b1%bb%e5%9e%8b%e8%bd%ac%e6%8d%a2" aria-label="3.3 类型转换">3.3 类型转换</a></li></ul>
+                </li>
+                <li>
+                    <a href="#4-%e6%80%a7%e8%83%bd%e6%8a%a5%e5%91%8a" aria-label="4 性能报告">4 性能报告</a></li>
+                <li>
+                    <a href="#5-%e7%ba%a6%e6%9d%9f%e9%99%90%e5%88%b6" aria-label="5 约束限制">5 约束限制</a><ul>
+                        
+                <li>
+                    <a href="#51-%e4%b8%bb%e5%a4%87%e5%90%8c%e6%ad%a5%e6%95%b0%e6%8d%ae%e6%81%a2%e5%a4%8d%e9%97%ae%e9%a2%98" aria-label="5.1 主备同步数据恢复问题">5.1 主备同步数据恢复问题</a></li></ul>
+                </li>
+                <li>
+                    <a href="#6-faq" aria-label="6 FAQ">6 FAQ</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="cassandrareader-插件文档">CassandraReader 插件文档</h1>
+<hr>
+<h2 id="1-快速介绍">1 快速介绍</h2>
+<p>CassandraReader插件实现了从Cassandra读取数据。在底层实现上，CassandraReader通过datastax的java driver连接Cassandra实例，并执行相应的cql语句将数据从cassandra中SELECT出来。</p>
+<h2 id="2-实现原理">2 实现原理</h2>
+<p>简而言之，CassandraReader通过java driver连接到Cassandra实例，并根据用户配置的信息生成查询SELECT CQL语句，然后发送到Cassandra，并将该CQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。</p>
+<p>对于用户配置Table、Column的信息，CassandraReader将其拼接为CQL语句发送到Cassandra。</p>
+<h2 id="3-功能说明">3 功能说明</h2>
+<h3 id="31-配置样例">3.1 配置样例</h3>
+<ul>
+<li>配置一个从Cassandra同步抽取数据到本地的作业:</li>
+</ul>
+<pre tabindex="0"><code>{
+    &#34;job&#34;: {
+        &#34;setting&#34;: {
+            &#34;speed&#34;: {
+                 &#34;channel&#34;: 3
+            }
+        },
+        &#34;content&#34;: [
+            {
+               &#34;reader&#34;: {
+                    &#34;name&#34;: &#34;cassandrareader&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;host&#34;: &#34;localhost&#34;,
+                        &#34;port&#34;: 9042,
+                        &#34;useSSL&#34;: false,
+                        &#34;keyspace&#34;: &#34;test&#34;,
+                        &#34;table&#34;: &#34;datax_src&#34;,
+                        &#34;column&#34;: [
+                            &#34;textCol&#34;,
+                            &#34;blobCol&#34;,
+                            &#34;writetime(blobCol)&#34;,
+                            &#34;boolCol&#34;,
+                            &#34;smallintCol&#34;,
+                            &#34;tinyintCol&#34;,
+                            &#34;intCol&#34;,
+                            &#34;bigintCol&#34;,
+                            &#34;varintCol&#34;,
+                            &#34;floatCol&#34;,
+                            &#34;doubleCol&#34;,
+                            &#34;decimalCol&#34;,
+                            &#34;dateCol&#34;,
+                            &#34;timeCol&#34;,
+                            &#34;timeStampCol&#34;,
+                            &#34;uuidCol&#34;,
+                            &#34;inetCol&#34;,
+                            &#34;durationCol&#34;,
+                            &#34;listCol&#34;,
+                            &#34;mapCol&#34;,
+                            &#34;setCol&#34;
+                            &#34;tupleCol&#34;
+                            &#34;udtCol&#34;,
+                        ]
+                    }
+               },
+               &#34;writer&#34;: {
+                    &#34;name&#34;: &#34;streamwriter&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;print&#34;:true
+                    }
+                }
+            }
+        ]
+    }
+}
+</code></pre><h3 id="32-参数说明">3.2 参数说明</h3>
+<ul>
+<li>
+<p><strong>host</strong></p>
+<ul>
+<li>
+<p>描述：Cassandra连接点的域名或ip，多个node之间用逗号分隔。 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>port</strong></p>
+<ul>
+<li>
+<p>描述：Cassandra端口。 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：9042 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>username</strong></p>
+<ul>
+<li>
+<p>描述：数据源的用户名 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>password</strong></p>
+<ul>
+<li>
+<p>描述：数据源指定用户名的密码 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>useSSL</strong></p>
+<ul>
+<li>
+<p>描述：是否使用SSL连接。<!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：false <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>keyspace</strong></p>
+<ul>
+<li>
+<p>描述：需要同步的表所在的keyspace。<!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>table</strong></p>
+<ul>
+<li>
+<p>描述：所选取的需要同步的表。<!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>column</strong></p>
+<ul>
+<li>
+<p>描述：所配置的表中需要同步的列集合。<!-- raw HTML omitted -->
+其中的元素可以指定列的名称或writetime(column_name)，后一种形式会读取column_name列的时间戳而不是数据。</p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>where</strong></p>
+<ul>
+<li>描述：数据筛选条件的cql表达式，例如:<!-- raw HTML omitted --></li>
+</ul>
+<pre tabindex="0"><code>&#34;where&#34;:&#34;textcol=&#39;a&#39;&#34;
+</code></pre><ul>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>allowFiltering</strong></p>
+<ul>
+<li>
+<p>描述：是否在服务端过滤数据。参考cassandra文档中ALLOW FILTERING关键字的相关描述。<!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>consistancyLevel</strong></p>
+<ul>
+<li>
+<p>描述：数据一致性级别。可选ONE|QUORUM|LOCAL_QUORUM|EACH_QUORUM|ALL|ANY|TWO|THREE|LOCAL_ONE<!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：LOCAL_QUORUM <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="33-类型转换">3.3 类型转换</h3>
+<p>目前CassandraReader支持除counter和Custom类型之外的所有类型。</p>
+<p>下面列出CassandraReader针对Cassandra类型转换列表:</p>
+<table>
+<thead>
+<tr>
+<th>DataX 内部类型</th>
+<th>Cassandra 数据类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Long</td>
+<td>int, tinyint, smallint,varint,bigint,time</td>
+</tr>
+<tr>
+<td>Double</td>
+<td>float, double, decimal</td>
+</tr>
+<tr>
+<td>String</td>
+<td>ascii,varchar, text,uuid,timeuuid,duration,list,map,set,tuple,udt,inet</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>date, timestamp</td>
+</tr>
+<tr>
+<td>Boolean</td>
+<td>bool</td>
+</tr>
+<tr>
+<td>Bytes</td>
+<td>blob</td>
+</tr>
+</tbody>
+</table>
+<p>请注意:</p>
+<ul>
+<li>目前不支持counter类型和custom类型。</li>
+</ul>
+<h2 id="4-性能报告">4 性能报告</h2>
+<p>略</p>
+<h2 id="5-约束限制">5 约束限制</h2>
+<h3 id="51-主备同步数据恢复问题">5.1 主备同步数据恢复问题</h3>
+<p>略</p>
+<h2 id="6-faq">6 FAQ</h2>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

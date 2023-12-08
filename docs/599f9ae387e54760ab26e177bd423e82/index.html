@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>DataX TxtFileWriter 说明 | haokiu</title>
+<meta name="keywords" content="datax">
+<meta name="description" content="DataX TxtFileWriter 说明 1 快速介绍 TxtFileWriter提供了向本地文件写入类CSV格式的一个或者多个表文件。TxtFileWriter服务的用户主要在于DataX开发、测试同学。
+写入本地文件内容存放的是一张逻辑意义上的二维表，例如CSV格式的文本信息。
+2 功能与限制 TxtFileWriter实现了从DataX协议转为本地TXT文件功能，本地文件本身是无结构化数据存储，TxtFileWriter如下几个方面约定:
+支持且仅支持写入 TXT的文件，且要求TXT中shema为一张二维表。
+支持类CSV格式文件，自定义分隔符。
+支持文本压缩，现有压缩格式为gzip、bzip2。
+支持多线程写入，每个线程写入不同子文件。
+文件支持滚动，当文件大于某个size值或者行数值，文件需要切换。 [暂不支持]
+我们不能做到：
+单个文件不能支持并发写入。 3 功能说明 3.1 配置样例 { &#34;setting&#34;: {}, &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 2 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;txtfilereader&#34;, &#34;parameter&#34;: { &#34;path&#34;: [&#34;/home/haiwei.luo/case00/data&#34;], &#34;encoding&#34;: &#34;UTF-8&#34;, &#34;column&#34;: [ { &#34;index&#34;: 0, &#34;type&#34;: &#34;long&#34; }, { &#34;index&#34;: 1, &#34;type&#34;: &#34;boolean&#34; }, { &#34;index&#34;: 2, &#34;type&#34;: &#34;double&#34; }, { &#34;index&#34;: 3, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 4, &#34;type&#34;: &#34;date&#34;, &#34;format&#34;: &#34;yyyy.MM.dd&#34; } ], &#34;fieldDelimiter&#34;: &#34;,&#34; } }, &#34;writer&#34;: { &#34;name&#34;: &#34;txtfilewriter&#34;, &#34;parameter&#34;: { &#34;path&#34;: &#34;/home/haiwei.luo/case00/result&#34;, &#34;fileName&#34;: &#34;luohw&#34;, &#34;writeMode&#34;: &#34;truncate&#34;, &#34;dateFormat&#34;: &#34;yyyy-MM-dd&#34; } } } ] } } 3.">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/599f9ae387e54760ab26e177bd423e82/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="DataX TxtFileWriter 说明" />
+<meta property="og:description" content="DataX TxtFileWriter 说明 1 快速介绍 TxtFileWriter提供了向本地文件写入类CSV格式的一个或者多个表文件。TxtFileWriter服务的用户主要在于DataX开发、测试同学。
+写入本地文件内容存放的是一张逻辑意义上的二维表，例如CSV格式的文本信息。
+2 功能与限制 TxtFileWriter实现了从DataX协议转为本地TXT文件功能，本地文件本身是无结构化数据存储，TxtFileWriter如下几个方面约定:
+支持且仅支持写入 TXT的文件，且要求TXT中shema为一张二维表。
+支持类CSV格式文件，自定义分隔符。
+支持文本压缩，现有压缩格式为gzip、bzip2。
+支持多线程写入，每个线程写入不同子文件。
+文件支持滚动，当文件大于某个size值或者行数值，文件需要切换。 [暂不支持]
+我们不能做到：
+单个文件不能支持并发写入。 3 功能说明 3.1 配置样例 { &#34;setting&#34;: {}, &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 2 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;txtfilereader&#34;, &#34;parameter&#34;: { &#34;path&#34;: [&#34;/home/haiwei.luo/case00/data&#34;], &#34;encoding&#34;: &#34;UTF-8&#34;, &#34;column&#34;: [ { &#34;index&#34;: 0, &#34;type&#34;: &#34;long&#34; }, { &#34;index&#34;: 1, &#34;type&#34;: &#34;boolean&#34; }, { &#34;index&#34;: 2, &#34;type&#34;: &#34;double&#34; }, { &#34;index&#34;: 3, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 4, &#34;type&#34;: &#34;date&#34;, &#34;format&#34;: &#34;yyyy.MM.dd&#34; } ], &#34;fieldDelimiter&#34;: &#34;,&#34; } }, &#34;writer&#34;: { &#34;name&#34;: &#34;txtfilewriter&#34;, &#34;parameter&#34;: { &#34;path&#34;: &#34;/home/haiwei.luo/case00/result&#34;, &#34;fileName&#34;: &#34;luohw&#34;, &#34;writeMode&#34;: &#34;truncate&#34;, &#34;dateFormat&#34;: &#34;yyyy-MM-dd&#34; } } } ] } } 3." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/599f9ae387e54760ab26e177bd423e82/" /><meta property="article:section" content="4" />
+<meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
+<meta property="article:modified_time" content="2021-02-02T17:45:01+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="DataX TxtFileWriter 说明"/>
+<meta name="twitter:description" content="DataX TxtFileWriter 说明 1 快速介绍 TxtFileWriter提供了向本地文件写入类CSV格式的一个或者多个表文件。TxtFileWriter服务的用户主要在于DataX开发、测试同学。
+写入本地文件内容存放的是一张逻辑意义上的二维表，例如CSV格式的文本信息。
+2 功能与限制 TxtFileWriter实现了从DataX协议转为本地TXT文件功能，本地文件本身是无结构化数据存储，TxtFileWriter如下几个方面约定:
+支持且仅支持写入 TXT的文件，且要求TXT中shema为一张二维表。
+支持类CSV格式文件，自定义分隔符。
+支持文本压缩，现有压缩格式为gzip、bzip2。
+支持多线程写入，每个线程写入不同子文件。
+文件支持滚动，当文件大于某个size值或者行数值，文件需要切换。 [暂不支持]
+我们不能做到：
+单个文件不能支持并发写入。 3 功能说明 3.1 配置样例 { &#34;setting&#34;: {}, &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 2 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;txtfilereader&#34;, &#34;parameter&#34;: { &#34;path&#34;: [&#34;/home/haiwei.luo/case00/data&#34;], &#34;encoding&#34;: &#34;UTF-8&#34;, &#34;column&#34;: [ { &#34;index&#34;: 0, &#34;type&#34;: &#34;long&#34; }, { &#34;index&#34;: 1, &#34;type&#34;: &#34;boolean&#34; }, { &#34;index&#34;: 2, &#34;type&#34;: &#34;double&#34; }, { &#34;index&#34;: 3, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 4, &#34;type&#34;: &#34;date&#34;, &#34;format&#34;: &#34;yyyy.MM.dd&#34; } ], &#34;fieldDelimiter&#34;: &#34;,&#34; } }, &#34;writer&#34;: { &#34;name&#34;: &#34;txtfilewriter&#34;, &#34;parameter&#34;: { &#34;path&#34;: &#34;/home/haiwei.luo/case00/result&#34;, &#34;fileName&#34;: &#34;luohw&#34;, &#34;writeMode&#34;: &#34;truncate&#34;, &#34;dateFormat&#34;: &#34;yyyy-MM-dd&#34; } } } ] } } 3."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "4s",
+      "item": "https://haokiu.com/4/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "DataX TxtFileWriter 说明",
+      "item": "https://haokiu.com/599f9ae387e54760ab26e177bd423e82/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "DataX TxtFileWriter 说明",
+  "name": "DataX TxtFileWriter 说明",
+  "description": "DataX TxtFileWriter 说明 1 快速介绍 TxtFileWriter提供了向本地文件写入类CSV格式的一个或者多个表文件。TxtFileWriter服务的用户主要在于DataX开发、测试同学。\n写入本地文件内容存放的是一张逻辑意义上的二维表，例如CSV格式的文本信息。\n2 功能与限制 TxtFileWriter实现了从DataX协议转为本地TXT文件功能，本地文件本身是无结构化数据存储，TxtFileWriter如下几个方面约定:\n支持且仅支持写入 TXT的文件，且要求TXT中shema为一张二维表。\n支持类CSV格式文件，自定义分隔符。\n支持文本压缩，现有压缩格式为gzip、bzip2。\n支持多线程写入，每个线程写入不同子文件。\n文件支持滚动，当文件大于某个size值或者行数值，文件需要切换。 [暂不支持]\n我们不能做到：\n单个文件不能支持并发写入。 3 功能说明 3.1 配置样例 { \u0026#34;setting\u0026#34;: {}, \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { \u0026#34;channel\u0026#34;: 2 } }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;txtfilereader\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;path\u0026#34;: [\u0026#34;/home/haiwei.luo/case00/data\u0026#34;], \u0026#34;encoding\u0026#34;: \u0026#34;UTF-8\u0026#34;, \u0026#34;column\u0026#34;: [ { \u0026#34;index\u0026#34;: 0, \u0026#34;type\u0026#34;: \u0026#34;long\u0026#34; }, { \u0026#34;index\u0026#34;: 1, \u0026#34;type\u0026#34;: \u0026#34;boolean\u0026#34; }, { \u0026#34;index\u0026#34;: 2, \u0026#34;type\u0026#34;: \u0026#34;double\u0026#34; }, { \u0026#34;index\u0026#34;: 3, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34; }, { \u0026#34;index\u0026#34;: 4, \u0026#34;type\u0026#34;: \u0026#34;date\u0026#34;, \u0026#34;format\u0026#34;: \u0026#34;yyyy.MM.dd\u0026#34; } ], \u0026#34;fieldDelimiter\u0026#34;: \u0026#34;,\u0026#34; } }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;txtfilewriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;path\u0026#34;: \u0026#34;/home/haiwei.luo/case00/result\u0026#34;, \u0026#34;fileName\u0026#34;: \u0026#34;luohw\u0026#34;, \u0026#34;writeMode\u0026#34;: \u0026#34;truncate\u0026#34;, \u0026#34;dateFormat\u0026#34;: \u0026#34;yyyy-MM-dd\u0026#34; } } } ] } } 3.",
+  "keywords": [
+    "datax"
+  ],
+  "articleBody": "DataX TxtFileWriter 说明 1 快速介绍 TxtFileWriter提供了向本地文件写入类CSV格式的一个或者多个表文件。TxtFileWriter服务的用户主要在于DataX开发、测试同学。\n写入本地文件内容存放的是一张逻辑意义上的二维表，例如CSV格式的文本信息。\n2 功能与限制 TxtFileWriter实现了从DataX协议转为本地TXT文件功能，本地文件本身是无结构化数据存储，TxtFileWriter如下几个方面约定:\n支持且仅支持写入 TXT的文件，且要求TXT中shema为一张二维表。\n支持类CSV格式文件，自定义分隔符。\n支持文本压缩，现有压缩格式为gzip、bzip2。\n支持多线程写入，每个线程写入不同子文件。\n文件支持滚动，当文件大于某个size值或者行数值，文件需要切换。 [暂不支持]\n我们不能做到：\n单个文件不能支持并发写入。 3 功能说明 3.1 配置样例 { \"setting\": {}, \"job\": { \"setting\": { \"speed\": { \"channel\": 2 } }, \"content\": [ { \"reader\": { \"name\": \"txtfilereader\", \"parameter\": { \"path\": [\"/home/haiwei.luo/case00/data\"], \"encoding\": \"UTF-8\", \"column\": [ { \"index\": 0, \"type\": \"long\" }, { \"index\": 1, \"type\": \"boolean\" }, { \"index\": 2, \"type\": \"double\" }, { \"index\": 3, \"type\": \"string\" }, { \"index\": 4, \"type\": \"date\", \"format\": \"yyyy.MM.dd\" } ], \"fieldDelimiter\": \",\" } }, \"writer\": { \"name\": \"txtfilewriter\", \"parameter\": { \"path\": \"/home/haiwei.luo/case00/result\", \"fileName\": \"luohw\", \"writeMode\": \"truncate\", \"dateFormat\": \"yyyy-MM-dd\" } } } ] } } 3.2 参数说明 path\n描述：本地文件系统的路径信息，TxtFileWriter会写入Path目录下属多个文件。 必选：是 默认值：无 fileName\n描述：TxtFileWriter写入的文件名，该文件名会添加随机的后缀作为每个线程写入实际文件名。 必选：是 默认值：无 writeMode\n描述：TxtFileWriter写入前数据清理处理模式： truncate，写入前清理目录下一fileName前缀的所有文件。 append，写入前不做任何处理，DataX TxtFileWriter直接使用filename写入，并保证文件名不冲突。 nonConflict，如果目录下有fileName前缀的文件，直接报错。 必选：是 默认值：无 fieldDelimiter\n描述：读取的字段分隔符 必选：否 默认值：, compress\n描述：文本压缩类型，默认不填写意味着没有压缩。支持压缩类型为zip、lzo、lzop、tgz、bzip2。 必选：否 默认值：无压缩 encoding\n描述：读取文件的编码配置。\n必选：否 默认值：utf-8 nullFormat\n描述：文本文件中无法使用标准字符串定义null(空指针)，DataX提供nullFormat定义哪些字符串可以表示为null。\n例如如果用户配置: nullFormat=\"\\N\"，那么如果源头数据是\"\\N\"，DataX视作null字段。\n必选：否 默认值：\\N dateFormat\n描述：日期类型的数据序列化到文件中时的格式，例如 “dateFormat”: “yyyy-MM-dd”。\n必选：否 默认值：无 fileFormat\n描述：文件写出的格式，包括csv (http://zh.wikipedia.org/wiki/%E9%80%97%E5%8F%B7%E5%88%86%E9%9A%94%E5%80%BC) 和text两种，csv是严格的csv格式，如果待写数据包括列分隔符，则会按照csv的转义语法转义，转义符号为双引号\"；text格式是用列分隔符简单分割待写数据，对于待写数据包括列分隔符情况下不做转义。\n必选：否 默认值：text header\n描述：txt写出时的表头，示例[‘id’, ’name’, ‘age’]。\n必选：否 默认值：无 3.3 类型转换 本地文件本身不提供数据类型，该类型是DataX TxtFileWriter定义：\nDataX 内部类型 本地文件 数据类型 Long Long Double Double String String Boolean Boolean Date Date 其中：\n本地文件 Long是指本地文件文本中使用整形的字符串表示形式，例如\"19901219\"。 本地文件 Double是指本地文件文本中使用Double的字符串表示形式，例如\"3.1415\"。 本地文件 Boolean是指本地文件文本中使用Boolean的字符串表示形式，例如\"true\"、“false”。不区分大小写。 本地文件 Date是指本地文件文本中使用Date的字符串表示形式，例如\"2014-12-31\"，Date可以指定format格式。 4 性能报告 5 约束限制 略\n6 FAQ 略\n",
+  "wordCount" : "197",
+  "inLanguage": "en",
+  "datePublished": "2021-02-02T17:45:01Z",
+  "dateModified": "2021-02-02T17:45:01Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/599f9ae387e54760ab26e177bd423e82/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    <h1 class="post-title">
+      DataX TxtFileWriter 说明
+    </h1>
+    <div class="post-meta"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#datax-txtfilewriter-%e8%af%b4%e6%98%8e" aria-label="DataX TxtFileWriter 说明">DataX TxtFileWriter 说明</a><ul>
+                        
+                <li>
+                    <a href="#1-%e5%bf%ab%e9%80%9f%e4%bb%8b%e7%bb%8d" aria-label="1 快速介绍">1 快速介绍</a></li>
+                <li>
+                    <a href="#2-%e5%8a%9f%e8%83%bd%e4%b8%8e%e9%99%90%e5%88%b6" aria-label="2 功能与限制">2 功能与限制</a></li>
+                <li>
+                    <a href="#3-%e5%8a%9f%e8%83%bd%e8%af%b4%e6%98%8e" aria-label="3 功能说明">3 功能说明</a><ul>
+                        
+                <li>
+                    <a href="#31-%e9%85%8d%e7%bd%ae%e6%a0%b7%e4%be%8b" aria-label="3.1 配置样例">3.1 配置样例</a></li>
+                <li>
+                    <a href="#32-%e5%8f%82%e6%95%b0%e8%af%b4%e6%98%8e" aria-label="3.2 参数说明">3.2 参数说明</a></li>
+                <li>
+                    <a href="#33-%e7%b1%bb%e5%9e%8b%e8%bd%ac%e6%8d%a2" aria-label="3.3 类型转换">3.3 类型转换</a></li></ul>
+                </li>
+                <li>
+                    <a href="#4-%e6%80%a7%e8%83%bd%e6%8a%a5%e5%91%8a" aria-label="4 性能报告">4 性能报告</a></li>
+                <li>
+                    <a href="#5-%e7%ba%a6%e6%9d%9f%e9%99%90%e5%88%b6" aria-label="5 约束限制">5 约束限制</a></li>
+                <li>
+                    <a href="#6-faq" aria-label="6 FAQ">6 FAQ</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="datax-txtfilewriter-说明">DataX TxtFileWriter 说明</h1>
+<hr>
+<h2 id="1-快速介绍">1 快速介绍</h2>
+<p>TxtFileWriter提供了向本地文件写入类CSV格式的一个或者多个表文件。TxtFileWriter服务的用户主要在于DataX开发、测试同学。</p>
+<p><strong>写入本地文件内容存放的是一张逻辑意义上的二维表，例如CSV格式的文本信息。</strong></p>
+<h2 id="2-功能与限制">2 功能与限制</h2>
+<p>TxtFileWriter实现了从DataX协议转为本地TXT文件功能，本地文件本身是无结构化数据存储，TxtFileWriter如下几个方面约定:</p>
+<ol>
+<li>
+<p>支持且仅支持写入 TXT的文件，且要求TXT中shema为一张二维表。</p>
+</li>
+<li>
+<p>支持类CSV格式文件，自定义分隔符。</p>
+</li>
+<li>
+<p>支持文本压缩，现有压缩格式为gzip、bzip2。</p>
+</li>
+<li>
+<p>支持多线程写入，每个线程写入不同子文件。</p>
+</li>
+<li>
+<p>文件支持滚动，当文件大于某个size值或者行数值，文件需要切换。 [暂不支持]</p>
+</li>
+</ol>
+<p>我们不能做到：</p>
+<ol>
+<li>单个文件不能支持并发写入。</li>
+</ol>
+<h2 id="3-功能说明">3 功能说明</h2>
+<h3 id="31-配置样例">3.1 配置样例</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;setting&#34;</span>: {},
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;job&#34;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;setting&#34;</span>: {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;speed&#34;</span>: {
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;channel&#34;</span>: <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;content&#34;</span>: [
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;reader&#34;</span>: {
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;txtfilereader&#34;</span>,
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">&#34;parameter&#34;</span>: {
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;path&#34;</span>: [<span style="color:#e6db74">&#34;/home/haiwei.luo/case00/data&#34;</span>],
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;encoding&#34;</span>: <span style="color:#e6db74">&#34;UTF-8&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;column&#34;</span>: [
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;index&#34;</span>: <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;long&#34;</span>
+</span></span><span style="display:flex;"><span>                            },
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;index&#34;</span>: <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;boolean&#34;</span>
+</span></span><span style="display:flex;"><span>                            },
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;index&#34;</span>: <span style="color:#ae81ff">2</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;double&#34;</span>
+</span></span><span style="display:flex;"><span>                            },
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;index&#34;</span>: <span style="color:#ae81ff">3</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;string&#34;</span>
+</span></span><span style="display:flex;"><span>                            },
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;index&#34;</span>: <span style="color:#ae81ff">4</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;date&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;format&#34;</span>: <span style="color:#e6db74">&#34;yyyy.MM.dd&#34;</span>
+</span></span><span style="display:flex;"><span>                            }
+</span></span><span style="display:flex;"><span>                        ],
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;fieldDelimiter&#34;</span>: <span style="color:#e6db74">&#34;,&#34;</span>
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                },
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;writer&#34;</span>: {
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;txtfilewriter&#34;</span>,
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">&#34;parameter&#34;</span>: {
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;path&#34;</span>: <span style="color:#e6db74">&#34;/home/haiwei.luo/case00/result&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;fileName&#34;</span>: <span style="color:#e6db74">&#34;luohw&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;writeMode&#34;</span>: <span style="color:#e6db74">&#34;truncate&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;dateFormat&#34;</span>: <span style="color:#e6db74">&#34;yyyy-MM-dd&#34;</span>
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        ]
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="32-参数说明">3.2 参数说明</h3>
+<ul>
+<li>
+<p><strong>path</strong></p>
+<ul>
+<li>
+<p>描述：本地文件系统的路径信息，TxtFileWriter会写入Path目录下属多个文件。 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>fileName</strong></p>
+<ul>
+<li>
+<p>描述：TxtFileWriter写入的文件名，该文件名会添加随机的后缀作为每个线程写入实际文件名。 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>writeMode</strong></p>
+<ul>
+<li>
+<p>描述：TxtFileWriter写入前数据清理处理模式： <!-- raw HTML omitted --></p>
+<ul>
+<li>truncate，写入前清理目录下一fileName前缀的所有文件。</li>
+<li>append，写入前不做任何处理，DataX TxtFileWriter直接使用filename写入，并保证文件名不冲突。</li>
+<li>nonConflict，如果目录下有fileName前缀的文件，直接报错。</li>
+</ul>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>fieldDelimiter</strong></p>
+<ul>
+<li>
+<p>描述：读取的字段分隔符 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：, <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>compress</strong></p>
+<ul>
+<li>
+<p>描述：文本压缩类型，默认不填写意味着没有压缩。支持压缩类型为zip、lzo、lzop、tgz、bzip2。 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无压缩 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>encoding</strong></p>
+<ul>
+<li>
+<p>描述：读取文件的编码配置。<!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：utf-8 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>nullFormat</strong></p>
+<ul>
+<li>
+<p>描述：文本文件中无法使用标准字符串定义null(空指针)，DataX提供nullFormat定义哪些字符串可以表示为null。<!-- raw HTML omitted --></p>
+<p>例如如果用户配置: nullFormat=&quot;\N&quot;，那么如果源头数据是&quot;\N&quot;，DataX视作null字段。</p>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：\N <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>dateFormat</strong></p>
+<ul>
+<li>
+<p>描述：日期类型的数据序列化到文件中时的格式，例如 &ldquo;dateFormat&rdquo;: &ldquo;yyyy-MM-dd&rdquo;。<!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>fileFormat</strong></p>
+<ul>
+<li>
+<p>描述：文件写出的格式，包括csv (<a href="http://zh.wikipedia.org/wiki/%E9%80%97%E5%8F%B7%E5%88%86%E9%9A%94%E5%80%BC">http://zh.wikipedia.org/wiki/%E9%80%97%E5%8F%B7%E5%88%86%E9%9A%94%E5%80%BC</a>) 和text两种，csv是严格的csv格式，如果待写数据包括列分隔符，则会按照csv的转义语法转义，转义符号为双引号&quot;；text格式是用列分隔符简单分割待写数据，对于待写数据包括列分隔符情况下不做转义。<!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：text <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>header</strong></p>
+<ul>
+<li>
+<p>描述：txt写出时的表头，示例[&lsquo;id&rsquo;, &rsquo;name&rsquo;, &lsquo;age&rsquo;]。<!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="33-类型转换">3.3 类型转换</h3>
+<p>本地文件本身不提供数据类型，该类型是DataX TxtFileWriter定义：</p>
+<table>
+<thead>
+<tr>
+<th>DataX 内部类型</th>
+<th>本地文件 数据类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Long</td>
+<td>Long</td>
+</tr>
+<tr>
+<td>Double</td>
+<td>Double</td>
+</tr>
+<tr>
+<td>String</td>
+<td>String</td>
+</tr>
+<tr>
+<td>Boolean</td>
+<td>Boolean</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>Date</td>
+</tr>
+</tbody>
+</table>
+<p>其中：</p>
+<ul>
+<li>本地文件 Long是指本地文件文本中使用整形的字符串表示形式，例如&quot;19901219&quot;。</li>
+<li>本地文件 Double是指本地文件文本中使用Double的字符串表示形式，例如&quot;3.1415&quot;。</li>
+<li>本地文件 Boolean是指本地文件文本中使用Boolean的字符串表示形式，例如&quot;true&quot;、&ldquo;false&rdquo;。不区分大小写。</li>
+<li>本地文件 Date是指本地文件文本中使用Date的字符串表示形式，例如&quot;2014-12-31&quot;，Date可以指定format格式。</li>
+</ul>
+<h2 id="4-性能报告">4 性能报告</h2>
+<h2 id="5-约束限制">5 约束限制</h2>
+<p>略</p>
+<h2 id="6-faq">6 FAQ</h2>
+<p>略</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

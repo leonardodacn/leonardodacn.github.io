@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>libevent源码深度剖析07 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="libevent源码深度剖析07 事件主循环
+现在我们已经初步了解了libevent的Reactor组件——event_base和事件管理框架，接下来就是libevent事件处理的中心部分——事件主循环，根据系统提供的事件多路分发机制执行事件循环，对已注册的就绪事件，调用注册事件的回调函数来处理事件。
+1. 阶段性的胜利 libevent将I/O事件、定时器和信号事件处理很好的结合到了一起，本节也会介绍libevent是如何做到这一点的。 在看完本节的内容后，读者应该会对Libevent的基本框架：事件管理和主循环有比较清晰的认识了，并能够把libevent的事件控制流程清晰的串通起来，剩下的就是一些细节的内容了。
+2. 事件处理主循环 libevent的事件主循环主要是通过**event_base_loop ()**函数完成的，其主要操作如下面的流程图所示，event_base_loop所作的就是持续执行下面的循环。 清楚了event_base_loop所作的主要操作，就可以对比源代码看个究竟了，代码结构还是相当清晰的。
+int event_base_loop(struct event_base *base, int flags){ const struct eventop *evsel = base-&gt;evsel; void *evbase = base-&gt;evbase; struct timeval tv; struct timeval *tv_p; int res, done; // 清空时间缓存 base-&gt;tv_cache.tv_sec = 0; // evsignal_base是全局变量，在处理signal时，用于指名signal所属的event_base实例 if (base-&gt;sig.ev_signal_added) evsignal_base = base; done = 0; while (!done) { // 事件主循环 // 查看是否需要跳出循环，程序可以调用event_loopexit_cb()设置event_gotterm标记 // 调用event_base_loopbreak()设置event_break标记 if (base-&gt;event_gotterm) { base-&gt;event_gotterm = 0; break; } if (base-&gt;event_break) { base-&gt;event_break = 0; break; } // 校正系统时间，如果系统使用的是非MONOTONIC时间，用户可能会向后调整了系统时间 // 在timeout_correct函数里，比较last wait time和当前时间，如果当前时间&lt; last wait time // 表明时间有问题，这是需要更新timer_heap中所有定时事件的超时时间。 timeout_correct(base, &amp;tv); // 根据timer heap中事件的最小超时时间，计算系统I/O demultiplexer的最大等待时间 tv_p = &amp;tv; if (!base-&gt;event_count_active &amp;&amp; !">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/1fa932a07dd84e9fbdde728e110c098f/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="libevent源码深度剖析07" />
+<meta property="og:description" content="libevent源码深度剖析07 事件主循环
+现在我们已经初步了解了libevent的Reactor组件——event_base和事件管理框架，接下来就是libevent事件处理的中心部分——事件主循环，根据系统提供的事件多路分发机制执行事件循环，对已注册的就绪事件，调用注册事件的回调函数来处理事件。
+1. 阶段性的胜利 libevent将I/O事件、定时器和信号事件处理很好的结合到了一起，本节也会介绍libevent是如何做到这一点的。 在看完本节的内容后，读者应该会对Libevent的基本框架：事件管理和主循环有比较清晰的认识了，并能够把libevent的事件控制流程清晰的串通起来，剩下的就是一些细节的内容了。
+2. 事件处理主循环 libevent的事件主循环主要是通过**event_base_loop ()**函数完成的，其主要操作如下面的流程图所示，event_base_loop所作的就是持续执行下面的循环。 清楚了event_base_loop所作的主要操作，就可以对比源代码看个究竟了，代码结构还是相当清晰的。
+int event_base_loop(struct event_base *base, int flags){ const struct eventop *evsel = base-&gt;evsel; void *evbase = base-&gt;evbase; struct timeval tv; struct timeval *tv_p; int res, done; // 清空时间缓存 base-&gt;tv_cache.tv_sec = 0; // evsignal_base是全局变量，在处理signal时，用于指名signal所属的event_base实例 if (base-&gt;sig.ev_signal_added) evsignal_base = base; done = 0; while (!done) { // 事件主循环 // 查看是否需要跳出循环，程序可以调用event_loopexit_cb()设置event_gotterm标记 // 调用event_base_loopbreak()设置event_break标记 if (base-&gt;event_gotterm) { base-&gt;event_gotterm = 0; break; } if (base-&gt;event_break) { base-&gt;event_break = 0; break; } // 校正系统时间，如果系统使用的是非MONOTONIC时间，用户可能会向后调整了系统时间 // 在timeout_correct函数里，比较last wait time和当前时间，如果当前时间&lt; last wait time // 表明时间有问题，这是需要更新timer_heap中所有定时事件的超时时间。 timeout_correct(base, &amp;tv); // 根据timer heap中事件的最小超时时间，计算系统I/O demultiplexer的最大等待时间 tv_p = &amp;tv; if (!base-&gt;event_count_active &amp;&amp; !" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/1fa932a07dd84e9fbdde728e110c098f/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="libevent源码深度剖析07"/>
+<meta name="twitter:description" content="libevent源码深度剖析07 事件主循环
+现在我们已经初步了解了libevent的Reactor组件——event_base和事件管理框架，接下来就是libevent事件处理的中心部分——事件主循环，根据系统提供的事件多路分发机制执行事件循环，对已注册的就绪事件，调用注册事件的回调函数来处理事件。
+1. 阶段性的胜利 libevent将I/O事件、定时器和信号事件处理很好的结合到了一起，本节也会介绍libevent是如何做到这一点的。 在看完本节的内容后，读者应该会对Libevent的基本框架：事件管理和主循环有比较清晰的认识了，并能够把libevent的事件控制流程清晰的串通起来，剩下的就是一些细节的内容了。
+2. 事件处理主循环 libevent的事件主循环主要是通过**event_base_loop ()**函数完成的，其主要操作如下面的流程图所示，event_base_loop所作的就是持续执行下面的循环。 清楚了event_base_loop所作的主要操作，就可以对比源代码看个究竟了，代码结构还是相当清晰的。
+int event_base_loop(struct event_base *base, int flags){ const struct eventop *evsel = base-&gt;evsel; void *evbase = base-&gt;evbase; struct timeval tv; struct timeval *tv_p; int res, done; // 清空时间缓存 base-&gt;tv_cache.tv_sec = 0; // evsignal_base是全局变量，在处理signal时，用于指名signal所属的event_base实例 if (base-&gt;sig.ev_signal_added) evsignal_base = base; done = 0; while (!done) { // 事件主循环 // 查看是否需要跳出循环，程序可以调用event_loopexit_cb()设置event_gotterm标记 // 调用event_base_loopbreak()设置event_break标记 if (base-&gt;event_gotterm) { base-&gt;event_gotterm = 0; break; } if (base-&gt;event_break) { base-&gt;event_break = 0; break; } // 校正系统时间，如果系统使用的是非MONOTONIC时间，用户可能会向后调整了系统时间 // 在timeout_correct函数里，比较last wait time和当前时间，如果当前时间&lt; last wait time // 表明时间有问题，这是需要更新timer_heap中所有定时事件的超时时间。 timeout_correct(base, &amp;tv); // 根据timer heap中事件的最小超时时间，计算系统I/O demultiplexer的最大等待时间 tv_p = &amp;tv; if (!base-&gt;event_count_active &amp;&amp; !"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "libevent源码深度剖析07",
+      "item": "https://haokiu.com/1fa932a07dd84e9fbdde728e110c098f/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "libevent源码深度剖析07",
+  "name": "libevent源码深度剖析07",
+  "description": "libevent源码深度剖析07 事件主循环\n现在我们已经初步了解了libevent的Reactor组件——event_base和事件管理框架，接下来就是libevent事件处理的中心部分——事件主循环，根据系统提供的事件多路分发机制执行事件循环，对已注册的就绪事件，调用注册事件的回调函数来处理事件。\n1. 阶段性的胜利 libevent将I/O事件、定时器和信号事件处理很好的结合到了一起，本节也会介绍libevent是如何做到这一点的。 在看完本节的内容后，读者应该会对Libevent的基本框架：事件管理和主循环有比较清晰的认识了，并能够把libevent的事件控制流程清晰的串通起来，剩下的就是一些细节的内容了。\n2. 事件处理主循环 libevent的事件主循环主要是通过**event_base_loop ()**函数完成的，其主要操作如下面的流程图所示，event_base_loop所作的就是持续执行下面的循环。 清楚了event_base_loop所作的主要操作，就可以对比源代码看个究竟了，代码结构还是相当清晰的。\nint event_base_loop(struct event_base *base, int flags){ const struct eventop *evsel = base-\u0026gt;evsel; void *evbase = base-\u0026gt;evbase; struct timeval tv; struct timeval *tv_p; int res, done; // 清空时间缓存 base-\u0026gt;tv_cache.tv_sec = 0; // evsignal_base是全局变量，在处理signal时，用于指名signal所属的event_base实例 if (base-\u0026gt;sig.ev_signal_added) evsignal_base = base; done = 0; while (!done) { // 事件主循环 // 查看是否需要跳出循环，程序可以调用event_loopexit_cb()设置event_gotterm标记 // 调用event_base_loopbreak()设置event_break标记 if (base-\u0026gt;event_gotterm) { base-\u0026gt;event_gotterm = 0; break; } if (base-\u0026gt;event_break) { base-\u0026gt;event_break = 0; break; } // 校正系统时间，如果系统使用的是非MONOTONIC时间，用户可能会向后调整了系统时间 // 在timeout_correct函数里，比较last wait time和当前时间，如果当前时间\u0026lt; last wait time // 表明时间有问题，这是需要更新timer_heap中所有定时事件的超时时间。 timeout_correct(base, \u0026amp;tv); // 根据timer heap中事件的最小超时时间，计算系统I/O demultiplexer的最大等待时间 tv_p = \u0026amp;tv; if (!base-\u0026gt;event_count_active \u0026amp;\u0026amp; !",
+  "keywords": [
+    
+  ],
+  "articleBody": "libevent源码深度剖析07 事件主循环\n现在我们已经初步了解了libevent的Reactor组件——event_base和事件管理框架，接下来就是libevent事件处理的中心部分——事件主循环，根据系统提供的事件多路分发机制执行事件循环，对已注册的就绪事件，调用注册事件的回调函数来处理事件。\n1. 阶段性的胜利 libevent将I/O事件、定时器和信号事件处理很好的结合到了一起，本节也会介绍libevent是如何做到这一点的。 在看完本节的内容后，读者应该会对Libevent的基本框架：事件管理和主循环有比较清晰的认识了，并能够把libevent的事件控制流程清晰的串通起来，剩下的就是一些细节的内容了。\n2. 事件处理主循环 libevent的事件主循环主要是通过**event_base_loop ()**函数完成的，其主要操作如下面的流程图所示，event_base_loop所作的就是持续执行下面的循环。 清楚了event_base_loop所作的主要操作，就可以对比源代码看个究竟了，代码结构还是相当清晰的。\nint event_base_loop(struct event_base *base, int flags){ const struct eventop *evsel = base-\u003eevsel; void *evbase = base-\u003eevbase; struct timeval tv; struct timeval *tv_p; int res, done; // 清空时间缓存 base-\u003etv_cache.tv_sec = 0; // evsignal_base是全局变量，在处理signal时，用于指名signal所属的event_base实例 if (base-\u003esig.ev_signal_added) evsignal_base = base; done = 0; while (!done) { // 事件主循环 // 查看是否需要跳出循环，程序可以调用event_loopexit_cb()设置event_gotterm标记 // 调用event_base_loopbreak()设置event_break标记 if (base-\u003eevent_gotterm) { base-\u003eevent_gotterm = 0; break; } if (base-\u003eevent_break) { base-\u003eevent_break = 0; break; } // 校正系统时间，如果系统使用的是非MONOTONIC时间，用户可能会向后调整了系统时间 // 在timeout_correct函数里，比较last wait time和当前时间，如果当前时间\u003c last wait time // 表明时间有问题，这是需要更新timer_heap中所有定时事件的超时时间。 timeout_correct(base, \u0026tv); // 根据timer heap中事件的最小超时时间，计算系统I/O demultiplexer的最大等待时间 tv_p = \u0026tv; if (!base-\u003eevent_count_active \u0026\u0026 !(flags \u0026 EVLOOP_NONBLOCK)) { timeout_next(base, \u0026tv_p); } else { // 依然有未处理的就绪时间，就让I/O demultiplexer立即返回，不必等待 // 下面会提到，在libevent中，低优先级的就绪事件可能不能立即被处理 evutil_timerclear(\u0026tv); } // 如果当前没有注册事件，就退出 if (!event_haveevents(base)) { event_debug((\"%s: no events registered.\", __func__)); return (1); } // 更新last wait time，并清空time cache gettime(base, \u0026base-\u003eevent_tv); base-\u003etv_cache.tv_sec = 0; // 调用系统I/O demultiplexer等待就绪I/O events，可能是epoll_wait，或者select等； // 在evsel-\u003edispatch()中，会把就绪signal event、I/O event插入到激活链表中 res = evsel-\u003edispatch(base, evbase, tv_p); if (res == -1) return (-1); // 将time cache赋值为当前系统时间 gettime(base, \u0026base-\u003etv_cache); // 检查heap中的timer events，将就绪的timer event从heap上删除，并插入到激活链表中 timeout_process(base); // 调用event_process_active()处理激活链表中的就绪event，调用其回调函数执行事件处理 // 该函数会寻找最高优先级（priority值越小优先级越高）的激活事件链表， // 然后处理链表中的所有就绪事件； // 因此低优先级的就绪事件可能得不到及时处理； if (base-\u003eevent_count_active) { event_process_active(base); if (!base-\u003eevent_count_active \u0026\u0026 (flags \u0026 EVLOOP_ONCE)) done = 1; } else if (flags \u0026 EVLOOP_NONBLOCK) done = 1; } // 循环结束，清空时间缓存 base-\u003etv_cache.tv_sec = 0; event_debug((\"%s: asked to terminate loop.\", __func__)); return (0); } 3. I/O和Timer事件的统一 libevent将Timer和Signal事件都统一到了系统的I/O 的demultiplex机制中了，相信读者从上面的流程和代码中也能窥出一斑了，下面就再啰嗦一次了。 首先将Timer事件融合到系统I/O多路复用机制中，还是相当清晰的，因为系统的I/O机制像select()和epoll_wait()都允许程序制定一个最大等待时间（也称为最大超时时间）timeout，即使没有I/O事件发生，它们也保证能在timeout时间内返回。 那么根据所有Timer事件的最小超时时间来设置系统I/O的timeout时间；当系统I/O返回时，再激活所有就绪的Timer事件就可以了，这样就能将Timer事件完美的融合到系统的I/O机制中了。 这是在Reactor和Proactor模式（主动器模式，比如Windows上的IOCP）中处理Timer事件的经典方法了，ACE采用的也是这种方法，大家可以参考POSA vol2书中的Reactor模式一节。 堆是一种经典的数据结构，向堆中插入、删除元素时间复杂度都是O(lgN)，N为堆中元素的个数，而获取最小key值（小根堆）的复杂度为O(1)；因此变成了管理Timer事件的绝佳人选（当然是非唯一的），libevent就是采用的堆结构。\n4. I/O和Signal事件的统一 Signal是异步事件的经典事例，将Signal事件统一到系统的I/O多路复用中就不像Timer事件那么自然了，Signal事件的出现对于进程来讲是完全随机的，进程不能只是测试一个变量来判别是否发生了一个信号，而是必须告诉内核“在此信号发生时，请执行如下的操作”。 如果当Signal发生时，并不立即调用event的callback函数处理信号，而是设法通知系统的I/O机制，让其返回，然后再统一和I/O事件以及Timer一起处理，不就可以了嘛。是的，这也是libevent中使用的方法。 问题的核心在于，当Signal发生时，如何通知系统的I/O多路复用机制，这里先买个小关子，放到信号处理一节再详细说明，我想读者肯定也能想出通知的方法，比如使用pipe。\n5 小节 介绍了libevent的事件主循环，描述了libevent是如何处理就绪的I/O事件、定时器和信号事件，以及如何将它们无缝的融合到一起。\n",
+  "wordCount" : "230",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/1fa932a07dd84e9fbdde728e110c098f/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      libevent源码深度剖析07
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#libevent%e6%ba%90%e7%a0%81%e6%b7%b1%e5%ba%a6%e5%89%96%e6%9e%9007" aria-label="libevent源码深度剖析07">libevent源码深度剖析07</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#1-%e9%98%b6%e6%ae%b5%e6%80%a7%e7%9a%84%e8%83%9c%e5%88%a9" aria-label="1. 阶段性的胜利">1. 阶段性的胜利</a></li>
+                <li>
+                    <a href="#2-%e4%ba%8b%e4%bb%b6%e5%a4%84%e7%90%86%e4%b8%bb%e5%be%aa%e7%8e%af" aria-label="2. 事件处理主循环">2. 事件处理主循环</a></li>
+                <li>
+                    <a href="#3-io%e5%92%8ctimer%e4%ba%8b%e4%bb%b6%e7%9a%84%e7%bb%9f%e4%b8%80" aria-label="3. I/O和Timer事件的统一">3. I/O和Timer事件的统一</a></li>
+                <li>
+                    <a href="#4-io%e5%92%8csignal%e4%ba%8b%e4%bb%b6%e7%9a%84%e7%bb%9f%e4%b8%80" aria-label="4. I/O和Signal事件的统一">4. I/O和Signal事件的统一</a></li>
+                <li>
+                    <a href="#5-%e5%b0%8f%e8%8a%82" aria-label="5 小节">5 小节</a>
+                </li>
+            </ul>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="libevent源码深度剖析07">libevent源码深度剖析07</h1>
+<p><strong>事件主循环</strong></p>
+<p>现在我们已经初步了解了libevent的Reactor组件——<strong>event_base</strong>和<strong>事件管理框架</strong>，接下来就是libevent事件处理的中心部分——<strong>事件主循环</strong>，根据系统提供的事件多路分发机制执行事件循环，对已注册的就绪事件，调用注册事件的回调函数来处理事件。</p>
+<h3 id="1-阶段性的胜利">1. 阶段性的胜利</h3>
+<p>libevent将I/O事件、定时器和信号事件处理很好的结合到了一起，本节也会介绍libevent是如何做到这一点的。
+在看完本节的内容后，读者应该会对Libevent的基本框架：事件管理和主循环有比较清晰的认识了，并能够把libevent的事件控制流程清晰的串通起来，剩下的就是一些细节的内容了。</p>
+<h3 id="2-事件处理主循环">2. 事件处理主循环</h3>
+<p>libevent的事件主循环主要是通过**event_base_loop ()**函数完成的，其主要操作如下面的流程图所示，<strong>event_base_loop</strong>所作的就是持续执行下面的循环。
+<img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/5ff6393dc3f90057980f8ce1c0bc3608.webp" alt=""  />
+</p>
+<p>清楚了event_base_loop所作的主要操作，就可以对比源代码看个究竟了，代码结构还是相当清晰的。</p>
+<pre tabindex="0"><code>int event_base_loop(struct event_base *base, int flags){
+    const struct eventop *evsel = base-&gt;evsel;
+    void *evbase = base-&gt;evbase;
+    struct timeval tv;
+    struct timeval *tv_p;
+    int res, done;
+    // 清空时间缓存
+    base-&gt;tv_cache.tv_sec = 0;
+    // evsignal_base是全局变量，在处理signal时，用于指名signal所属的event_base实例
+    if (base-&gt;sig.ev_signal_added)
+        evsignal_base = base;
+    done = 0;
+    while (!done) { // 事件主循环
+        // 查看是否需要跳出循环，程序可以调用event_loopexit_cb()设置event_gotterm标记
+        // 调用event_base_loopbreak()设置event_break标记
+        if (base-&gt;event_gotterm) {
+            base-&gt;event_gotterm = 0;
+            break;
+        }
+        if (base-&gt;event_break) {
+            base-&gt;event_break = 0;
+            break;
+        }
+        // 校正系统时间，如果系统使用的是非MONOTONIC时间，用户可能会向后调整了系统时间
+        // 在timeout_correct函数里，比较last wait time和当前时间，如果当前时间&lt; last wait time
+        // 表明时间有问题，这是需要更新timer_heap中所有定时事件的超时时间。
+        timeout_correct(base, &amp;tv);
+        // 根据timer heap中事件的最小超时时间，计算系统I/O demultiplexer的最大等待时间
+        tv_p = &amp;tv;
+        if (!base-&gt;event_count_active &amp;&amp; !(flags &amp; EVLOOP_NONBLOCK)) {
+            timeout_next(base, &amp;tv_p);
+        } else {
+            // 依然有未处理的就绪时间，就让I/O demultiplexer立即返回，不必等待
+            // 下面会提到，在libevent中，低优先级的就绪事件可能不能立即被处理
+            evutil_timerclear(&amp;tv);
+        }
+        // 如果当前没有注册事件，就退出
+        if (!event_haveevents(base)) {
+            event_debug((&#34;%s: no events registered.&#34;, __func__));
+            return (1);
+        }
+        // 更新last wait time，并清空time cache
+        gettime(base, &amp;base-&gt;event_tv);
+        base-&gt;tv_cache.tv_sec = 0;
+        // 调用系统I/O demultiplexer等待就绪I/O events，可能是epoll_wait，或者select等；
+        // 在evsel-&gt;dispatch()中，会把就绪signal event、I/O event插入到激活链表中
+        res = evsel-&gt;dispatch(base, evbase, tv_p);
+        if (res == -1)
+            return (-1);
+        // 将time cache赋值为当前系统时间
+        gettime(base, &amp;base-&gt;tv_cache);
+        // 检查heap中的timer events，将就绪的timer event从heap上删除，并插入到激活链表中
+        timeout_process(base);
+        // 调用event_process_active()处理激活链表中的就绪event，调用其回调函数执行事件处理
+        // 该函数会寻找最高优先级（priority值越小优先级越高）的激活事件链表，
+        // 然后处理链表中的所有就绪事件；
+        // 因此低优先级的就绪事件可能得不到及时处理；
+        if (base-&gt;event_count_active) {
+            event_process_active(base);
+            if (!base-&gt;event_count_active &amp;&amp; (flags &amp; EVLOOP_ONCE))
+                done = 1;
+        } else if (flags &amp; EVLOOP_NONBLOCK)
+            done = 1;
+    }
+    // 循环结束，清空时间缓存
+    base-&gt;tv_cache.tv_sec = 0;
+    event_debug((&#34;%s: asked to terminate loop.&#34;, __func__));
+    return (0);
+}
+</code></pre><h3 id="3-io和timer事件的统一">3. I/O和Timer事件的统一</h3>
+<p>libevent将Timer和Signal事件都统一到了系统的I/O 的<strong>demultiplex</strong>机制中了，相信读者从上面的流程和代码中也能窥出一斑了，下面就再啰嗦一次了。
+首先将Timer事件融合到系统I/O多路复用机制中，还是相当清晰的，因为系统的I/O机制像select()和epoll_wait()都允许程序制定一个最大等待时间（也称为最大超时时间）<strong>timeout</strong>，即使没有I/O事件发生，它们也保证能在timeout时间内返回。
+那么根据所有Timer事件的最小超时时间来设置系统I/O的timeout时间；当系统I/O返回时，再激活所有就绪的Timer事件就可以了，这样就能将Timer事件完美的融合到系统的I/O机制中了。
+这是在Reactor和Proactor模式（主动器模式，比如Windows上的IOCP）中处理Timer事件的经典方法了，ACE采用的也是这种方法，大家可以参考POSA vol2书中的Reactor模式一节。
+堆是一种经典的数据结构，向堆中插入、删除元素时间复杂度都是O(lgN)，N为堆中元素的个数，而获取最小key值（小根堆）的复杂度为O(1)；因此变成了管理Timer事件的绝佳人选（当然是非唯一的），libevent就是采用的堆结构。</p>
+<h3 id="4-io和signal事件的统一">4. I/O和Signal事件的统一</h3>
+<p>Signal是异步事件的经典事例，将Signal事件统一到系统的I/O多路复用中就不像Timer事件那么自然了，Signal事件的出现对于进程来讲是完全随机的，进程不能只是测试一个变量来判别是否发生了一个信号，而是必须告诉内核“在此信号发生时，请执行如下的操作”。
+如果当Signal发生时，并不立即调用event的callback函数处理信号，而是设法通知系统的I/O机制，让其返回，然后再统一和I/O事件以及Timer一起处理，不就可以了嘛。是的，这也是libevent中使用的方法。
+问题的核心在于，当Signal发生时，如何通知系统的I/O多路复用机制，这里先买个小关子，放到信号处理一节再详细说明，我想读者肯定也能想出通知的方法，比如使用<strong>pipe</strong>。</p>
+<h3 id="5-小节">5 小节</h3>
+<p>介绍了libevent的事件主循环，描述了libevent是如何处理就绪的I/O事件、定时器和信号事件，以及如何将它们无缝的融合到一起。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/fc115cade0c049a8ab14e737a22b37fe/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>libevent源码深度剖析06</span>
+  </a>
+  <a class="next" href="https://haokiu.com/4a5e0c5a568b4187b207ec0ada2dbdfb/">
+    <span class="title">Next »</span>
+    <br>
+    <span>libevent源码深度剖析08</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

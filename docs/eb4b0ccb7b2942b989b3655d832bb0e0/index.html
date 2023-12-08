@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>网络通信面试题集锦 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="网络通信面试题集锦 TCP/IP协议栈层次结构
+TCP三次握手需要知道的细节点
+TCP四次挥手需要知道的细节点(CLOSE_WAIT、TIME_WAIT、MSL)
+TCP与UDP的区别与适用场景
+linux常见网络模型详解(select、poll与epoll)
+epoll_event结构中的epoll_data_t的fd与ptr的使用场景
+Windows常见的网络模型详解(select、WSAEventSelect、WSAAsyncSelect)
+Windows上的完成端口模型(IOCP)
+异步的connect函数如何编写
+select函数可以检测网络异常吗？
+epoll的水平模式和边缘模式
+如何将socket设置成非阻塞的(创建时设置与创建完成后设置)，非阻塞socket与阻塞的socket在收发数据上的区别
+send/recv(read/write)返回值大于0、等于0、小于0的区别
+如何编写正确的收数据代码与发数据代码
+发送数据缓冲区与接收数据缓冲区如何设计
+socket选项SO_SNDTIMEO和SO_RCVTIMEO
+socket选项TCP_NODELAY
+socket选项SO_REUSEADDR和SO_REUSEPORT（Windows平台与linux平台的区别）
+socket选项SO_LINGER
+shutdown与优雅关闭
+socket选项SO_KEEPALIVE
+关于错误码EINTR
+如何解决tcp粘包问题
+信号SIGPIPE与EPIPE错误码
+gethostbyname阻塞与错误码获取问题
+心跳包的设计技巧（保活心跳包与业务心跳包）
+断线重连机制如何设计
+如何检测对端已经关闭
+如何清除无效的死链（端与端之间的线路故障）
+定时器的不同实现及优缺点
+http协议的具体格式
+http head、get与post方法的细节
+http代理、socks4代理与socks5代理如何编码实现
+ping
+telnet
+关于以上问题的答案，有兴趣可以参考我的知乎live：https://www.zhihu.com/lives/922110858308485120
+或者如果你有任何不明白的地方，可以加我微信 easy_coder 交流。">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/eb4b0ccb7b2942b989b3655d832bb0e0/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="网络通信面试题集锦" />
+<meta property="og:description" content="网络通信面试题集锦 TCP/IP协议栈层次结构
+TCP三次握手需要知道的细节点
+TCP四次挥手需要知道的细节点(CLOSE_WAIT、TIME_WAIT、MSL)
+TCP与UDP的区别与适用场景
+linux常见网络模型详解(select、poll与epoll)
+epoll_event结构中的epoll_data_t的fd与ptr的使用场景
+Windows常见的网络模型详解(select、WSAEventSelect、WSAAsyncSelect)
+Windows上的完成端口模型(IOCP)
+异步的connect函数如何编写
+select函数可以检测网络异常吗？
+epoll的水平模式和边缘模式
+如何将socket设置成非阻塞的(创建时设置与创建完成后设置)，非阻塞socket与阻塞的socket在收发数据上的区别
+send/recv(read/write)返回值大于0、等于0、小于0的区别
+如何编写正确的收数据代码与发数据代码
+发送数据缓冲区与接收数据缓冲区如何设计
+socket选项SO_SNDTIMEO和SO_RCVTIMEO
+socket选项TCP_NODELAY
+socket选项SO_REUSEADDR和SO_REUSEPORT（Windows平台与linux平台的区别）
+socket选项SO_LINGER
+shutdown与优雅关闭
+socket选项SO_KEEPALIVE
+关于错误码EINTR
+如何解决tcp粘包问题
+信号SIGPIPE与EPIPE错误码
+gethostbyname阻塞与错误码获取问题
+心跳包的设计技巧（保活心跳包与业务心跳包）
+断线重连机制如何设计
+如何检测对端已经关闭
+如何清除无效的死链（端与端之间的线路故障）
+定时器的不同实现及优缺点
+http协议的具体格式
+http head、get与post方法的细节
+http代理、socks4代理与socks5代理如何编码实现
+ping
+telnet
+关于以上问题的答案，有兴趣可以参考我的知乎live：https://www.zhihu.com/lives/922110858308485120
+或者如果你有任何不明白的地方，可以加我微信 easy_coder 交流。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/eb4b0ccb7b2942b989b3655d832bb0e0/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="网络通信面试题集锦"/>
+<meta name="twitter:description" content="网络通信面试题集锦 TCP/IP协议栈层次结构
+TCP三次握手需要知道的细节点
+TCP四次挥手需要知道的细节点(CLOSE_WAIT、TIME_WAIT、MSL)
+TCP与UDP的区别与适用场景
+linux常见网络模型详解(select、poll与epoll)
+epoll_event结构中的epoll_data_t的fd与ptr的使用场景
+Windows常见的网络模型详解(select、WSAEventSelect、WSAAsyncSelect)
+Windows上的完成端口模型(IOCP)
+异步的connect函数如何编写
+select函数可以检测网络异常吗？
+epoll的水平模式和边缘模式
+如何将socket设置成非阻塞的(创建时设置与创建完成后设置)，非阻塞socket与阻塞的socket在收发数据上的区别
+send/recv(read/write)返回值大于0、等于0、小于0的区别
+如何编写正确的收数据代码与发数据代码
+发送数据缓冲区与接收数据缓冲区如何设计
+socket选项SO_SNDTIMEO和SO_RCVTIMEO
+socket选项TCP_NODELAY
+socket选项SO_REUSEADDR和SO_REUSEPORT（Windows平台与linux平台的区别）
+socket选项SO_LINGER
+shutdown与优雅关闭
+socket选项SO_KEEPALIVE
+关于错误码EINTR
+如何解决tcp粘包问题
+信号SIGPIPE与EPIPE错误码
+gethostbyname阻塞与错误码获取问题
+心跳包的设计技巧（保活心跳包与业务心跳包）
+断线重连机制如何设计
+如何检测对端已经关闭
+如何清除无效的死链（端与端之间的线路故障）
+定时器的不同实现及优缺点
+http协议的具体格式
+http head、get与post方法的细节
+http代理、socks4代理与socks5代理如何编码实现
+ping
+telnet
+关于以上问题的答案，有兴趣可以参考我的知乎live：https://www.zhihu.com/lives/922110858308485120
+或者如果你有任何不明白的地方，可以加我微信 easy_coder 交流。"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "网络通信面试题集锦",
+      "item": "https://haokiu.com/eb4b0ccb7b2942b989b3655d832bb0e0/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "网络通信面试题集锦",
+  "name": "网络通信面试题集锦",
+  "description": "网络通信面试题集锦 TCP/IP协议栈层次结构\nTCP三次握手需要知道的细节点\nTCP四次挥手需要知道的细节点(CLOSE_WAIT、TIME_WAIT、MSL)\nTCP与UDP的区别与适用场景\nlinux常见网络模型详解(select、poll与epoll)\nepoll_event结构中的epoll_data_t的fd与ptr的使用场景\nWindows常见的网络模型详解(select、WSAEventSelect、WSAAsyncSelect)\nWindows上的完成端口模型(IOCP)\n异步的connect函数如何编写\nselect函数可以检测网络异常吗？\nepoll的水平模式和边缘模式\n如何将socket设置成非阻塞的(创建时设置与创建完成后设置)，非阻塞socket与阻塞的socket在收发数据上的区别\nsend/recv(read/write)返回值大于0、等于0、小于0的区别\n如何编写正确的收数据代码与发数据代码\n发送数据缓冲区与接收数据缓冲区如何设计\nsocket选项SO_SNDTIMEO和SO_RCVTIMEO\nsocket选项TCP_NODELAY\nsocket选项SO_REUSEADDR和SO_REUSEPORT（Windows平台与linux平台的区别）\nsocket选项SO_LINGER\nshutdown与优雅关闭\nsocket选项SO_KEEPALIVE\n关于错误码EINTR\n如何解决tcp粘包问题\n信号SIGPIPE与EPIPE错误码\ngethostbyname阻塞与错误码获取问题\n心跳包的设计技巧（保活心跳包与业务心跳包）\n断线重连机制如何设计\n如何检测对端已经关闭\n如何清除无效的死链（端与端之间的线路故障）\n定时器的不同实现及优缺点\nhttp协议的具体格式\nhttp head、get与post方法的细节\nhttp代理、socks4代理与socks5代理如何编码实现\nping\ntelnet\n关于以上问题的答案，有兴趣可以参考我的知乎live：https://www.zhihu.com/lives/922110858308485120\n或者如果你有任何不明白的地方，可以加我微信 easy_coder 交流。",
+  "keywords": [
+    
+  ],
+  "articleBody": "网络通信面试题集锦 TCP/IP协议栈层次结构\nTCP三次握手需要知道的细节点\nTCP四次挥手需要知道的细节点(CLOSE_WAIT、TIME_WAIT、MSL)\nTCP与UDP的区别与适用场景\nlinux常见网络模型详解(select、poll与epoll)\nepoll_event结构中的epoll_data_t的fd与ptr的使用场景\nWindows常见的网络模型详解(select、WSAEventSelect、WSAAsyncSelect)\nWindows上的完成端口模型(IOCP)\n异步的connect函数如何编写\nselect函数可以检测网络异常吗？\nepoll的水平模式和边缘模式\n如何将socket设置成非阻塞的(创建时设置与创建完成后设置)，非阻塞socket与阻塞的socket在收发数据上的区别\nsend/recv(read/write)返回值大于0、等于0、小于0的区别\n如何编写正确的收数据代码与发数据代码\n发送数据缓冲区与接收数据缓冲区如何设计\nsocket选项SO_SNDTIMEO和SO_RCVTIMEO\nsocket选项TCP_NODELAY\nsocket选项SO_REUSEADDR和SO_REUSEPORT（Windows平台与linux平台的区别）\nsocket选项SO_LINGER\nshutdown与优雅关闭\nsocket选项SO_KEEPALIVE\n关于错误码EINTR\n如何解决tcp粘包问题\n信号SIGPIPE与EPIPE错误码\ngethostbyname阻塞与错误码获取问题\n心跳包的设计技巧（保活心跳包与业务心跳包）\n断线重连机制如何设计\n如何检测对端已经关闭\n如何清除无效的死链（端与端之间的线路故障）\n定时器的不同实现及优缺点\nhttp协议的具体格式\nhttp head、get与post方法的细节\nhttp代理、socks4代理与socks5代理如何编码实现\nping\ntelnet\n关于以上问题的答案，有兴趣可以参考我的知乎live：https://www.zhihu.com/lives/922110858308485120\n或者如果你有任何不明白的地方，可以加我微信 easy_coder 交流。\n",
+  "wordCount" : "41",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/eb4b0ccb7b2942b989b3655d832bb0e0/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      网络通信面试题集锦
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#%e7%bd%91%e7%bb%9c%e9%80%9a%e4%bf%a1%e9%9d%a2%e8%af%95%e9%a2%98%e9%9b%86%e9%94%a6" aria-label="网络通信面试题集锦">网络通信面试题集锦</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h2 id="网络通信面试题集锦">网络通信面试题集锦</h2>
+<ol>
+<li>
+<p>TCP/IP协议栈层次结构</p>
+</li>
+<li>
+<p>TCP三次握手需要知道的细节点</p>
+</li>
+<li>
+<p>TCP四次挥手需要知道的细节点(CLOSE_WAIT、TIME_WAIT、MSL)</p>
+</li>
+<li>
+<p>TCP与UDP的区别与适用场景</p>
+</li>
+<li>
+<p>linux常见网络模型详解(select、poll与epoll)</p>
+</li>
+<li>
+<p>epoll_event结构中的epoll_data_t的fd与ptr的使用场景</p>
+</li>
+<li>
+<p>Windows常见的网络模型详解(select、WSAEventSelect、WSAAsyncSelect)</p>
+</li>
+<li>
+<p>Windows上的完成端口模型(IOCP)</p>
+</li>
+<li>
+<p>异步的connect函数如何编写</p>
+</li>
+<li>
+<p>select函数可以检测网络异常吗？</p>
+</li>
+<li>
+<p>epoll的水平模式和边缘模式</p>
+</li>
+<li>
+<p>如何将socket设置成非阻塞的(创建时设置与创建完成后设置)，非阻塞socket与阻塞的socket在收发数据上的区别</p>
+</li>
+<li>
+<p>send/recv(read/write)返回值大于0、等于0、小于0的区别</p>
+</li>
+<li>
+<p>如何编写正确的收数据代码与发数据代码</p>
+</li>
+<li>
+<p>发送数据缓冲区与接收数据缓冲区如何设计</p>
+</li>
+<li>
+<p>socket选项SO_SNDTIMEO和SO_RCVTIMEO</p>
+</li>
+<li>
+<p>socket选项TCP_NODELAY</p>
+</li>
+<li>
+<p>socket选项SO_REUSEADDR和SO_REUSEPORT（Windows平台与linux平台的区别）</p>
+</li>
+<li>
+<p>socket选项SO_LINGER</p>
+</li>
+<li>
+<p>shutdown与优雅关闭</p>
+</li>
+<li>
+<p>socket选项SO_KEEPALIVE</p>
+</li>
+<li>
+<p>关于错误码EINTR</p>
+</li>
+<li>
+<p>如何解决tcp粘包问题</p>
+</li>
+<li>
+<p>信号SIGPIPE与EPIPE错误码</p>
+</li>
+<li>
+<p>gethostbyname阻塞与错误码获取问题</p>
+</li>
+<li>
+<p>心跳包的设计技巧（保活心跳包与业务心跳包）</p>
+</li>
+<li>
+<p>断线重连机制如何设计</p>
+</li>
+<li>
+<p>如何检测对端已经关闭</p>
+</li>
+<li>
+<p>如何清除无效的死链（端与端之间的线路故障）</p>
+</li>
+<li>
+<p>定时器的不同实现及优缺点</p>
+</li>
+<li>
+<p>http协议的具体格式</p>
+</li>
+<li>
+<p>http head、get与post方法的细节</p>
+</li>
+<li>
+<p>http代理、socks4代理与socks5代理如何编码实现</p>
+</li>
+<li>
+<p>ping</p>
+</li>
+<li>
+<p>telnet</p>
+</li>
+</ol>
+<p>关于以上问题的答案，有兴趣可以参考我的知乎live：https://www.zhihu.com/lives/922110858308485120</p>
+<p>或者如果你有任何不明白的地方，可以加我微信 <strong>easy_coder</strong> 交流。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/ec34cfea56f74c0d9a622ef5cbc4f812/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>网络通信中收发数据的正确姿势</span>
+  </a>
+  <a class="next" href="https://haokiu.com/cbd700214d4e4bc691c5f33f6e905343/">
+    <span class="title">Next »</span>
+    <br>
+    <span>聊一聊程序员如何增加收入</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

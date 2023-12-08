@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Memcached源码阅读五 资源初始化 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="Memcached源码阅读五 资源初始化 Memcached内部有hash表，各种统计信息，工作线程，网络，连接，内存结构等，在memcached启动时(执行main函数)，会对这些资源进行初始化的，网络和内存的初始化操作放到后续分析，这次分析hash表，统计信息，工作线程，网络连接的初始化过程。
+1 hash表的初始化
+//hash表的初始化，传入的参数是启动时传入的 assoc_init(settings.hashpower_init); //hashsize的实现 #define hashsize(n) ((ub4)1&lt;&lt;(n)) //主hash表结构定义，在hash表扩容时，会有次hash表，所以有主次hash表区分，该结构是指针的指针，也即相当于数组指针 static item** primary_hashtable = 0; void assoc_init(const int hashtable_init) { if (hashtable_init) { //如果设置了初始化参数，则按设置的参数进行初始化 hashpower = hashtable_init; } //hashpower的默认值为16,如果未设置新值，则按默认值进行初始化 primary_hashtable = calloc(hashsize(hashpower), sizeof(void *)); if (! primary_hashtable) { fprintf(stderr, &#34;Failed to init hashtable.\n&#34;); exit(EXIT_FAILURE); } STATS_LOCK();//全局统计信息加锁，保证数据同步 stats.hash_power_level = hashpower; stats.hash_bytes = hashsize(hashpower) * sizeof(void *); STATS_UNLOCK(); } 2 统计信息的初始化
+Memcached内部有很多全局的统计信息，用于实时获取各个资源的使用情况，后面将会看到，所有对统计信息的更新都需要加锁，而这些信息的更新是和Memcached的操作次数同数量级的，所以，在一定程度来说，这些统计信息对性能有影响。
+stats结构是对统计信息的一个抽象，各个字段都比较好理解，不做解释。
+struct stats { pthread_mutex_t mutex; unsigned int curr_items; unsigned int total_items; uint64_t curr_bytes; unsigned int curr_conns; unsigned int total_conns; uint64_t rejected_conns; unsigned int reserved_fds; unsigned int conn_structs; uint64_t get_cmds; uint64_t set_cmds; uint64_t touch_cmds; uint64_t get_hits; uint64_t get_misses; uint64_t touch_hits; uint64_t touch_misses; uint64_t evictions; uint64_t reclaimed; time_t started; /* when the process was started */ bool accepting_conns; /* whether we are currently accepting */ uint64_t listen_disabled_num; unsigned int hash_power_level; /* Better hope it&#39;s not over 9000 */ uint64_t hash_bytes; /* size used for hash tables */ bool hash_is_expanding; /* If the hash table is being expanded */ uint64_t expired_unfetched; /* items reclaimed but never touched */ uint64_t evicted_unfetched; /* items evicted but never touched */ bool slab_reassign_running; /* slab reassign in progress */ uint64_t slabs_moved; /* times slabs were moved around */ }; 统计信息的初始化也就是对stats变量的一个初始化。">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/f56b1e30eede4a21b7fd293a33a1e47a/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Memcached源码阅读五 资源初始化" />
+<meta property="og:description" content="Memcached源码阅读五 资源初始化 Memcached内部有hash表，各种统计信息，工作线程，网络，连接，内存结构等，在memcached启动时(执行main函数)，会对这些资源进行初始化的，网络和内存的初始化操作放到后续分析，这次分析hash表，统计信息，工作线程，网络连接的初始化过程。
+1 hash表的初始化
+//hash表的初始化，传入的参数是启动时传入的 assoc_init(settings.hashpower_init); //hashsize的实现 #define hashsize(n) ((ub4)1&lt;&lt;(n)) //主hash表结构定义，在hash表扩容时，会有次hash表，所以有主次hash表区分，该结构是指针的指针，也即相当于数组指针 static item** primary_hashtable = 0; void assoc_init(const int hashtable_init) { if (hashtable_init) { //如果设置了初始化参数，则按设置的参数进行初始化 hashpower = hashtable_init; } //hashpower的默认值为16,如果未设置新值，则按默认值进行初始化 primary_hashtable = calloc(hashsize(hashpower), sizeof(void *)); if (! primary_hashtable) { fprintf(stderr, &#34;Failed to init hashtable.\n&#34;); exit(EXIT_FAILURE); } STATS_LOCK();//全局统计信息加锁，保证数据同步 stats.hash_power_level = hashpower; stats.hash_bytes = hashsize(hashpower) * sizeof(void *); STATS_UNLOCK(); } 2 统计信息的初始化
+Memcached内部有很多全局的统计信息，用于实时获取各个资源的使用情况，后面将会看到，所有对统计信息的更新都需要加锁，而这些信息的更新是和Memcached的操作次数同数量级的，所以，在一定程度来说，这些统计信息对性能有影响。
+stats结构是对统计信息的一个抽象，各个字段都比较好理解，不做解释。
+struct stats { pthread_mutex_t mutex; unsigned int curr_items; unsigned int total_items; uint64_t curr_bytes; unsigned int curr_conns; unsigned int total_conns; uint64_t rejected_conns; unsigned int reserved_fds; unsigned int conn_structs; uint64_t get_cmds; uint64_t set_cmds; uint64_t touch_cmds; uint64_t get_hits; uint64_t get_misses; uint64_t touch_hits; uint64_t touch_misses; uint64_t evictions; uint64_t reclaimed; time_t started; /* when the process was started */ bool accepting_conns; /* whether we are currently accepting */ uint64_t listen_disabled_num; unsigned int hash_power_level; /* Better hope it&#39;s not over 9000 */ uint64_t hash_bytes; /* size used for hash tables */ bool hash_is_expanding; /* If the hash table is being expanded */ uint64_t expired_unfetched; /* items reclaimed but never touched */ uint64_t evicted_unfetched; /* items evicted but never touched */ bool slab_reassign_running; /* slab reassign in progress */ uint64_t slabs_moved; /* times slabs were moved around */ }; 统计信息的初始化也就是对stats变量的一个初始化。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/f56b1e30eede4a21b7fd293a33a1e47a/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Memcached源码阅读五 资源初始化"/>
+<meta name="twitter:description" content="Memcached源码阅读五 资源初始化 Memcached内部有hash表，各种统计信息，工作线程，网络，连接，内存结构等，在memcached启动时(执行main函数)，会对这些资源进行初始化的，网络和内存的初始化操作放到后续分析，这次分析hash表，统计信息，工作线程，网络连接的初始化过程。
+1 hash表的初始化
+//hash表的初始化，传入的参数是启动时传入的 assoc_init(settings.hashpower_init); //hashsize的实现 #define hashsize(n) ((ub4)1&lt;&lt;(n)) //主hash表结构定义，在hash表扩容时，会有次hash表，所以有主次hash表区分，该结构是指针的指针，也即相当于数组指针 static item** primary_hashtable = 0; void assoc_init(const int hashtable_init) { if (hashtable_init) { //如果设置了初始化参数，则按设置的参数进行初始化 hashpower = hashtable_init; } //hashpower的默认值为16,如果未设置新值，则按默认值进行初始化 primary_hashtable = calloc(hashsize(hashpower), sizeof(void *)); if (! primary_hashtable) { fprintf(stderr, &#34;Failed to init hashtable.\n&#34;); exit(EXIT_FAILURE); } STATS_LOCK();//全局统计信息加锁，保证数据同步 stats.hash_power_level = hashpower; stats.hash_bytes = hashsize(hashpower) * sizeof(void *); STATS_UNLOCK(); } 2 统计信息的初始化
+Memcached内部有很多全局的统计信息，用于实时获取各个资源的使用情况，后面将会看到，所有对统计信息的更新都需要加锁，而这些信息的更新是和Memcached的操作次数同数量级的，所以，在一定程度来说，这些统计信息对性能有影响。
+stats结构是对统计信息的一个抽象，各个字段都比较好理解，不做解释。
+struct stats { pthread_mutex_t mutex; unsigned int curr_items; unsigned int total_items; uint64_t curr_bytes; unsigned int curr_conns; unsigned int total_conns; uint64_t rejected_conns; unsigned int reserved_fds; unsigned int conn_structs; uint64_t get_cmds; uint64_t set_cmds; uint64_t touch_cmds; uint64_t get_hits; uint64_t get_misses; uint64_t touch_hits; uint64_t touch_misses; uint64_t evictions; uint64_t reclaimed; time_t started; /* when the process was started */ bool accepting_conns; /* whether we are currently accepting */ uint64_t listen_disabled_num; unsigned int hash_power_level; /* Better hope it&#39;s not over 9000 */ uint64_t hash_bytes; /* size used for hash tables */ bool hash_is_expanding; /* If the hash table is being expanded */ uint64_t expired_unfetched; /* items reclaimed but never touched */ uint64_t evicted_unfetched; /* items evicted but never touched */ bool slab_reassign_running; /* slab reassign in progress */ uint64_t slabs_moved; /* times slabs were moved around */ }; 统计信息的初始化也就是对stats变量的一个初始化。"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Memcached源码阅读五 资源初始化",
+      "item": "https://haokiu.com/f56b1e30eede4a21b7fd293a33a1e47a/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Memcached源码阅读五 资源初始化",
+  "name": "Memcached源码阅读五 资源初始化",
+  "description": "Memcached源码阅读五 资源初始化 Memcached内部有hash表，各种统计信息，工作线程，网络，连接，内存结构等，在memcached启动时(执行main函数)，会对这些资源进行初始化的，网络和内存的初始化操作放到后续分析，这次分析hash表，统计信息，工作线程，网络连接的初始化过程。\n1 hash表的初始化\n//hash表的初始化，传入的参数是启动时传入的 assoc_init(settings.hashpower_init); //hashsize的实现 #define hashsize(n) ((ub4)1\u0026lt;\u0026lt;(n)) //主hash表结构定义，在hash表扩容时，会有次hash表，所以有主次hash表区分，该结构是指针的指针，也即相当于数组指针 static item** primary_hashtable = 0; void assoc_init(const int hashtable_init) { if (hashtable_init) { //如果设置了初始化参数，则按设置的参数进行初始化 hashpower = hashtable_init; } //hashpower的默认值为16,如果未设置新值，则按默认值进行初始化 primary_hashtable = calloc(hashsize(hashpower), sizeof(void *)); if (! primary_hashtable) { fprintf(stderr, \u0026#34;Failed to init hashtable.\\n\u0026#34;); exit(EXIT_FAILURE); } STATS_LOCK();//全局统计信息加锁，保证数据同步 stats.hash_power_level = hashpower; stats.hash_bytes = hashsize(hashpower) * sizeof(void *); STATS_UNLOCK(); } 2 统计信息的初始化\nMemcached内部有很多全局的统计信息，用于实时获取各个资源的使用情况，后面将会看到，所有对统计信息的更新都需要加锁，而这些信息的更新是和Memcached的操作次数同数量级的，所以，在一定程度来说，这些统计信息对性能有影响。\nstats结构是对统计信息的一个抽象，各个字段都比较好理解，不做解释。\nstruct stats { pthread_mutex_t mutex; unsigned int curr_items; unsigned int total_items; uint64_t curr_bytes; unsigned int curr_conns; unsigned int total_conns; uint64_t rejected_conns; unsigned int reserved_fds; unsigned int conn_structs; uint64_t get_cmds; uint64_t set_cmds; uint64_t touch_cmds; uint64_t get_hits; uint64_t get_misses; uint64_t touch_hits; uint64_t touch_misses; uint64_t evictions; uint64_t reclaimed; time_t started; /* when the process was started */ bool accepting_conns; /* whether we are currently accepting */ uint64_t listen_disabled_num; unsigned int hash_power_level; /* Better hope it\u0026#39;s not over 9000 */ uint64_t hash_bytes; /* size used for hash tables */ bool hash_is_expanding; /* If the hash table is being expanded */ uint64_t expired_unfetched; /* items reclaimed but never touched */ uint64_t evicted_unfetched; /* items evicted but never touched */ bool slab_reassign_running; /* slab reassign in progress */ uint64_t slabs_moved; /* times slabs were moved around */ }; 统计信息的初始化也就是对stats变量的一个初始化。",
+  "keywords": [
+    
+  ],
+  "articleBody": "Memcached源码阅读五 资源初始化 Memcached内部有hash表，各种统计信息，工作线程，网络，连接，内存结构等，在memcached启动时(执行main函数)，会对这些资源进行初始化的，网络和内存的初始化操作放到后续分析，这次分析hash表，统计信息，工作线程，网络连接的初始化过程。\n1 hash表的初始化\n//hash表的初始化，传入的参数是启动时传入的 assoc_init(settings.hashpower_init); //hashsize的实现 #define hashsize(n) ((ub4)1\u003c\u003c(n)) //主hash表结构定义，在hash表扩容时，会有次hash表，所以有主次hash表区分，该结构是指针的指针，也即相当于数组指针 static item** primary_hashtable = 0; void assoc_init(const int hashtable_init) { if (hashtable_init) { //如果设置了初始化参数，则按设置的参数进行初始化 hashpower = hashtable_init; } //hashpower的默认值为16,如果未设置新值，则按默认值进行初始化 primary_hashtable = calloc(hashsize(hashpower), sizeof(void *)); if (! primary_hashtable) { fprintf(stderr, \"Failed to init hashtable.\\n\"); exit(EXIT_FAILURE); } STATS_LOCK();//全局统计信息加锁，保证数据同步 stats.hash_power_level = hashpower; stats.hash_bytes = hashsize(hashpower) * sizeof(void *); STATS_UNLOCK(); } 2 统计信息的初始化\nMemcached内部有很多全局的统计信息，用于实时获取各个资源的使用情况，后面将会看到，所有对统计信息的更新都需要加锁，而这些信息的更新是和Memcached的操作次数同数量级的，所以，在一定程度来说，这些统计信息对性能有影响。\nstats结构是对统计信息的一个抽象，各个字段都比较好理解，不做解释。\nstruct stats { pthread_mutex_t mutex; unsigned int curr_items; unsigned int total_items; uint64_t curr_bytes; unsigned int curr_conns; unsigned int total_conns; uint64_t rejected_conns; unsigned int reserved_fds; unsigned int conn_structs; uint64_t get_cmds; uint64_t set_cmds; uint64_t touch_cmds; uint64_t get_hits; uint64_t get_misses; uint64_t touch_hits; uint64_t touch_misses; uint64_t evictions; uint64_t reclaimed; time_t started; /* when the process was started */ bool accepting_conns; /* whether we are currently accepting */ uint64_t listen_disabled_num; unsigned int hash_power_level; /* Better hope it's not over 9000 */ uint64_t hash_bytes; /* size used for hash tables */ bool hash_is_expanding; /* If the hash table is being expanded */ uint64_t expired_unfetched; /* items reclaimed but never touched */ uint64_t evicted_unfetched; /* items evicted but never touched */ bool slab_reassign_running; /* slab reassign in progress */ uint64_t slabs_moved; /* times slabs were moved around */ }; 统计信息的初始化也就是对stats变量的一个初始化。\n//全局对象的定义 struct stats stats; //全局变量的初始化，该全局变量在memcached启动之后，一直使用 static void stats_init(void) { stats.curr_items = stats.total_items = stats.curr_conns = stats.total_conns = stats.conn_structs = 0; stats.get_cmds = stats.set_cmds = stats.get_hits = stats.get_misses = stats.evictions = stats.reclaimed = 0; stats.touch_cmds = stats.touch_misses = stats.touch_hits = stats.rejected_conns = 0; stats.curr_bytes = stats.listen_disabled_num = 0; stats.hash_power_level = stats.hash_bytes = stats.hash_is_expanding = 0; stats.expired_unfetched = stats.evicted_unfetched = 0; stats.slabs_moved = 0; stats.accepting_conns = true; /* assuming we start in this state. */ stats.slab_reassign_running = false; /* make the time we started always be 2 seconds before we really did, so time(0) - time.started is never zero. if so, things like 'settings.oldest_live' which act as booleans as well as values are now false in boolean context... */ process_started = time(0) - 2; stats_prefix_init(); } 3 工作线程的初始化\nMemcached采用了典型的Master-Worker的线程模式，Master就是由main线程来充当，而Worker线程则是通过Pthread创建的。\n//传入线程个数和libevent的main_base实例 thread_init(settings.num_threads, main_base); //工作线程初始化 void thread_init(int nthreads, struct event_base *main_base) { int i; int power; //初始化各种锁和条件变量 pthread_mutex_init(\u0026cache_lock, NULL); pthread_mutex_init(\u0026stats_lock, NULL); pthread_mutex_init(\u0026init_lock, NULL); pthread_cond_init(\u0026init_cond, NULL); pthread_mutex_init(\u0026cqi_freelist_lock, NULL); cqi_freelist = NULL; //Memcached对hash桶的锁采用分段锁，按线程个数来分段，默认总共是1\u003c\u003c16个hash桶，而锁的数目是1\u003c",
+  "wordCount" : "872",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/f56b1e30eede4a21b7fd293a33a1e47a/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      Memcached源码阅读五 资源初始化
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#memcached%e6%ba%90%e7%a0%81%e9%98%85%e8%af%bb%e4%ba%94-%e8%b5%84%e6%ba%90%e5%88%9d%e5%a7%8b%e5%8c%96" aria-label="Memcached源码阅读五 资源初始化">Memcached源码阅读五 资源初始化</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="memcached源码阅读五-资源初始化">Memcached源码阅读五 资源初始化</h1>
+<p><code>Memcached</code>内部有<strong>hash表，各种统计信息，工作线程，网络，连接，内存结构</strong>等，在memcached启动时(执行main函数)，会对这些资源进行初始化的，网络和内存的初始化操作放到后续分析，这次分析hash表，统计信息，工作线程，网络连接的初始化过程。</p>
+<p><strong>1 hash表的初始化</strong></p>
+<pre tabindex="0"><code>//hash表的初始化，传入的参数是启动时传入的
+assoc_init(settings.hashpower_init);
+//hashsize的实现
+#define hashsize(n) ((ub4)1&lt;&lt;(n))
+//主hash表结构定义，在hash表扩容时，会有次hash表，所以有主次hash表区分，该结构是指针的指针，也即相当于数组指针
+static item** primary_hashtable = 0;
+
+void assoc_init(const int hashtable_init) {
+    if (hashtable_init) {
+        //如果设置了初始化参数，则按设置的参数进行初始化
+        hashpower = hashtable_init;
+    }
+
+    //hashpower的默认值为16,如果未设置新值，则按默认值进行初始化
+    primary_hashtable = calloc(hashsize(hashpower), sizeof(void *));
+    if (! primary_hashtable) {
+        fprintf(stderr, &#34;Failed to init hashtable.\n&#34;);
+        exit(EXIT_FAILURE);
+    }
+
+    STATS_LOCK();//全局统计信息加锁，保证数据同步
+    stats.hash_power_level = hashpower;
+    stats.hash_bytes = hashsize(hashpower) * sizeof(void *);
+    STATS_UNLOCK();
+}
+</code></pre><p><strong>2 统计信息的初始化</strong></p>
+<p><code>Memcached</code>内部有很多全局的统计信息，用于实时获取各个资源的使用情况，后面将会看到，所有对统计信息的更新都需要加锁，而这些信息的更新是和Memcached的操作次数同数量级的，所以，在一定程度来说，这些统计信息对<strong>性能</strong>有影响。</p>
+<p>stats结构是对统计信息的一个抽象，各个字段都比较好理解，不做解释。</p>
+<pre tabindex="0"><code>struct stats {
+    pthread_mutex_t mutex;
+    unsigned int    curr_items;
+    unsigned int    total_items;
+    uint64_t        curr_bytes;
+    unsigned int    curr_conns;
+    unsigned int    total_conns;
+    uint64_t        rejected_conns;
+    unsigned int    reserved_fds;
+    unsigned int    conn_structs;
+    uint64_t        get_cmds;
+    uint64_t        set_cmds;
+    uint64_t        touch_cmds;
+    uint64_t        get_hits;
+    uint64_t        get_misses;
+    uint64_t        touch_hits;
+    uint64_t        touch_misses;
+    uint64_t        evictions;
+    uint64_t        reclaimed;
+    time_t          started;          /* when the process was started */
+    bool            accepting_conns;  /* whether we are currently accepting */
+    uint64_t        listen_disabled_num;
+    unsigned int    hash_power_level; /* Better hope it&#39;s not over 9000 */
+    uint64_t        hash_bytes;       /* size used for hash tables */
+    bool            hash_is_expanding; /* If the hash table is being expanded */
+    uint64_t        expired_unfetched; /* items reclaimed but never touched */
+    uint64_t        evicted_unfetched; /* items evicted but never touched */
+    bool            slab_reassign_running; /* slab reassign in progress */
+    uint64_t        slabs_moved;       /* times slabs were moved around */
+};
+</code></pre><p>统计信息的初始化也就是对stats变量的一个初始化。</p>
+<pre tabindex="0"><code>//全局对象的定义
+struct stats stats;
+//全局变量的初始化，该全局变量在memcached启动之后，一直使用
+static void stats_init(void)
+{
+    stats.curr_items = stats.total_items = stats.curr_conns =
+                       stats.total_conns = stats.conn_structs = 0;
+    stats.get_cmds = stats.set_cmds = stats.get_hits = stats.get_misses =
+                     stats.evictions = stats.reclaimed = 0;
+    stats.touch_cmds = stats.touch_misses = stats.touch_hits =
+                       stats.rejected_conns = 0;
+    stats.curr_bytes = stats.listen_disabled_num = 0;
+    stats.hash_power_level = stats.hash_bytes = stats.hash_is_expanding = 0;
+    stats.expired_unfetched = stats.evicted_unfetched = 0;
+    stats.slabs_moved = 0;
+    stats.accepting_conns = true; /* assuming we start in this state. */
+    stats.slab_reassign_running = false;
+
+    /* make the time we started always be 2 seconds before we really
+     did, so time(0) - time.started is never zero.  if so, things
+     like &#39;settings.oldest_live&#39; which act as booleans as well as
+     values are now false in boolean context... */
+    process_started = time(0) - 2;
+    stats_prefix_init();
+}
+</code></pre><p><strong>3 工作线程的初始化</strong></p>
+<p><code>Memcached</code>采用了典型的<code>Master-Worker</code>的线程模式，Master就是由main线程来充当，而Worker线程则是通过Pthread创建的。</p>
+<pre tabindex="0"><code>//传入线程个数和libevent的main_base实例
+thread_init(settings.num_threads, main_base);
+
+
+//工作线程初始化
+void thread_init(int nthreads, struct event_base *main_base) {
+    int         i;
+    int         power;
+    //初始化各种锁和条件变量
+    pthread_mutex_init(&amp;cache_lock, NULL);
+    pthread_mutex_init(&amp;stats_lock, NULL);
+
+    pthread_mutex_init(&amp;init_lock, NULL);
+    pthread_cond_init(&amp;init_cond, NULL);
+
+    pthread_mutex_init(&amp;cqi_freelist_lock, NULL);
+    cqi_freelist = NULL;
+
+    //Memcached对hash桶的锁采用分段锁，按线程个数来分段，默认总共是1&lt;&lt;16个hash桶，而锁的数目是1&lt;&lt;power个 
+    /* Want a wide lock table, but don&#39;t waste memory */
+    if (nthreads &lt; 3) {
+        power = 10;
+    } else if (nthreads &lt; 4) {
+        power = 11;
+    } else if (nthreads &lt; 5) {
+        power = 12;
+    } else {
+        /* 8192 buckets, and central locks don&#39;t scale much past 5 threads */
+        power = 13;
+    }
+
+    item_lock_count = hashsize(power);
+    //申请1&lt;&lt;power个pthread_mutex_t锁，保存在item_locks数组。
+    item_locks = calloc(item_lock_count, sizeof(pthread_mutex_t));
+    if (! item_locks) {
+        perror(&#34;Can&#39;t allocate item locks&#34;);
+        exit(1);
+    }
+
+    //对这些锁进行初始化，这部分可参考APUE的线程部分
+    for (i = 0; i &lt; item_lock_count; i++) {
+        pthread_mutex_init(&amp;item_locks[i], NULL);
+    }
+
+    /*创建线程的局部变量，该局部变量的名称为item_lock_type_key,用于保存主hash表所持有的锁的类型
+    主hash表在进行扩容时，该锁类型会变为全局的锁，否则(不在扩容过程中)，则是局部锁*/
+    pthread_key_create(&amp;item_lock_type_key, NULL);
+    pthread_mutex_init(&amp;item_global_lock, NULL);
+
+    //申请nthreds个工作线程,LIBEVENT_THREAD是Memcached内部对工作线程的一个封装
+    threads = calloc(nthreads, sizeof(LIBEVENT_THREAD));
+    if (! threads) {
+        perror(&#34;Can&#39;t allocate thread descriptors&#34;);
+        exit(1);
+    }
+
+    /*分发线程的初始化,分发线程的base为main_base
+    线程id为main线程的线程id*/
+    dispatcher_thread.base = main_base;
+    dispatcher_thread.thread_id = pthread_self();
+    //工作线程的初始化,工作线程和主线程(main线程)是通过pipe管道进行通信的
+    for (i = 0; i &lt; nthreads; i++) {
+        int fds[2];
+        if (pipe(fds)) {//初始化pipe管道
+            perror(&#34;Can&#39;t create notify pipe&#34;);
+            exit(1);
+        }
+
+        threads[i].notify_receive_fd = fds[0];//读管道绑定到工作线程的接收消息的描述符
+        threads[i].notify_send_fd = fds[1];//写管道绑定到工作线程的发送消息的描述符
+
+        setup_thread(&amp;threads[i]);//添加工作线程到libevent中
+        /* Reserve three fds for the libevent base, and two for the pipe */
+        stats.reserved_fds += 5;//统计信息更新
+    }
+
+    //创建工作线程
+    for (i = 0; i &lt; nthreads; i++) {
+        create_worker(worker_libevent, &amp;threads[i]);
+    }
+
+    //等待所有工作线程创建完毕
+    pthread_mutex_lock(&amp;init_lock);
+    wait_for_thread_registration(nthreads);
+    pthread_mutex_unlock(&amp;init_lock);
+}
+
+//Memcached内部工作线程的封装
+typedef struct {
+    pthread_t thread_id;       //线程ID
+    struct event_base *base;   //libevent的不是线程安全的，每个工作线程持有一个libevent实例，用于pipe管道通信和socket通信
+    struct event notify_event; //用于监听pipe管道的libevent事件
+    int notify_receive_fd;      //接收pipe管道消息描述符
+    int notify_send_fd;         //发送pipe管道消息描述符
+    struct thread_stats stats;  //每个线程对应的统计信息
+    struct conn_queue *new_conn_queue; //每个线程都有一个工作队列，主线程接受的连接，挂载到该消息队列中
+    cache_t *suffix_cache;      //后缀cache
+    uint8_t item_lock_type;     //线程操作hash表持有的锁类型，有局部锁和全局锁
+} LIBEVENT_THREAD;
+
+//分发线程的封装
+typedef struct {
+    pthread_t thread_id;        //线程id
+    struct event_base *base;    //libevent实例
+} LIBEVENT_DISPATCHER_THREAD;
+
+//工作线程绑定到libevent实例
+static void setup_thread(LIBEVENT_THREAD *me) {
+    me-&gt;base = event_init();//创建libevent实例
+    if (! me-&gt;base) {
+        fprintf(stderr, &#34;Can&#39;t allocate event base\n&#34;);
+        exit(1);
+    }
+
+    //创建管道读的libevent事件，事件的回调函数处理具体的业务信息，关于回调函数的处理，后续分析
+    event_set(&amp;me-&gt;notify_event, me-&gt;notify_receive_fd,
+              EV_READ | EV_PERSIST, thread_libevent_process, me);
+    event_base_set(me-&gt;base, &amp;me-&gt;notify_event);//设置libevent实例
+
+    //添加事件到libevent中
+    if (event_add(&amp;me-&gt;notify_event, 0) == -1) {
+        fprintf(stderr, &#34;Can&#39;t monitor libevent notify pipe\n&#34;);
+        exit(1);
+    }
+
+    //创建消息队列，用于接受主线程连接
+    me-&gt;new_conn_queue = malloc(sizeof(struct conn_queue));
+    if (me-&gt;new_conn_queue == NULL) {
+        perror(&#34;Failed to allocate memory for connection queue&#34;);
+        exit(EXIT_FAILURE);
+    }
+    cq_init(me-&gt;new_conn_queue);//消息队列初始化
+
+    if (pthread_mutex_init(&amp;me-&gt;stats.mutex, NULL) != 0) {
+        perror(&#34;Failed to initialize mutex&#34;);
+        exit(EXIT_FAILURE);
+    }
+
+    //创建线程的后缀cache,没搞懂这个cache有什么作用。
+    me-&gt;suffix_cache = cache_create(&#34;suffix&#34;, SUFFIX_SIZE, sizeof(char*),
+                                    NULL, NULL);
+    if (me-&gt;suffix_cache == NULL) {
+        fprintf(stderr, &#34;Failed to create suffix cache\n&#34;);
+        exit(EXIT_FAILURE);
+    }
+} 
+
+//创建工作线程
+static void create_worker(void *(*func)(void *), void *arg) {
+    pthread_t       thread;
+    pthread_attr_t  attr;
+    int             ret;
+
+    pthread_attr_init(&amp;attr);//Posix线程部分，线程属性初始化
+    //通过pthread_create创建线程，线程处理函数是通过外部传入的处理函数为worker_libevent
+    if ((ret = pthread_create(&amp;thread, &amp;attr, func, arg)) != 0) {
+        fprintf(stderr, &#34;Can&#39;t create thread: %s\n&#34;,
+                strerror(ret));
+        exit(1);
+    }
+}
+
+//线程处理函数
+static void *worker_libevent(void *arg) {
+    LIBEVENT_THREAD *me = arg;
+    //默认的hash表的锁为局部锁
+    me-&gt;item_lock_type = ITEM_LOCK_GRANULAR;
+    pthread_setspecific(item_lock_type_key, &amp;me-&gt;item_lock_type);//设定线程的属性
+    //用于控制工作线程初始化，通过条件变量来控制
+    register_thread_initialized();
+    //工作线程的libevent实例启动
+    event_base_loop(me-&gt;base, 0);
+    return NULL;
+}
+
+//阻塞工作线程
+static void wait_for_thread_registration(int nthreads) {
+    while (init_count &lt; nthreads) {
+        pthread_cond_wait(&amp;init_cond, &amp;init_lock);//在条件变量init_cond上面阻塞，阻塞个数为nthreads-init_count
+    }
+}
+
+//唤醒工作线程
+static void register_thread_initialized(void) {
+    pthread_mutex_lock(&amp;init_lock);
+    init_count++;
+    pthread_cond_signal(&amp;init_cond);
+    pthread_mutex_unlock(&amp;init_lock);
+}
+
+//每个线程持有的统计信息
+struct thread_stats {
+    pthread_mutex_t   mutex;
+    uint64_t          get_cmds;
+    uint64_t          get_misses;
+    uint64_t          touch_cmds;
+    uint64_t          touch_misses;
+    uint64_t          delete_misses;
+    uint64_t          incr_misses;
+    uint64_t          decr_misses;
+    uint64_t          cas_misses;
+    uint64_t          bytes_read;
+    uint64_t          bytes_written;
+    uint64_t          flush_cmds;
+    uint64_t          conn_yields; /* # of yields for connections (-R option)*/
+    uint64_t          auth_cmds;
+    uint64_t          auth_errors;
+    struct slab_stats slab_stats[MAX_NUMBER_OF_SLAB_CLASSES];
+}; 
+
+//每个slab的统计信息
+struct slab_stats {
+    uint64_t  set_cmds;
+    uint64_t  get_hits;
+    uint64_t  touch_hits;
+    uint64_t  delete_hits;
+    uint64_t  cas_hits;
+    uint64_t  cas_badval;
+    uint64_t  incr_hits;
+    uint64_t  decr_hits;
+};
+</code></pre><p><strong>4 连接的初始化</strong></p>
+<pre tabindex="0"><code>static conn **freeconns;//空闲连接列表
+//连接初始化
+static void conn_init(void)
+{
+    freetotal = 200;//空闲连接总数
+    freecurr = 0;//当前空闲的索引
+        //申请200个空间
+        if ((freeconns = calloc(freetotal, sizeof(conn *))) == NULL)
+    {
+        fprintf(stderr, &#34;Failed to allocate connection structures\n&#34;);
+    }
+    return;
+}
+</code></pre>
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/9a03435a987949d28e30905f7a0c839b/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Memcached源码阅读二 网络监听的建立</span>
+  </a>
+  <a class="next" href="https://haokiu.com/63c41390d91c4392a0d3cc433c49a4ac/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Memcached源码阅读八 内存池</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>libevent源码深度剖析02 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="libevent源码深度剖析02 Reactor模式
+前面讲到，整个libevent本身就是一个Reactor，因此本节将专门对Reactor模式进行必要的介绍，并列出libevnet中的几个重要组件和Reactor的对应关系，在后面的章节中可能还会提到本节介绍的基本概念。
+1. Reactor的事件处理机制 首先来回想一下普通函数调用的机制：程序调用某函数?函数执行，程序等待?函数将结果和控制权返回给程序?程序继续处理。
+Reactor释义**“反应堆”，是一种事件驱动机制。和普通函数调用的不同之处在于：应用程序不是主动的调用某个API完成处理，而是恰恰相反，Reactor逆置了事件处理流程，应用程序需要提供相应的接口并注册到Reactor上，如果相应的时间发生，Reactor将主动调用应用程序注册的接口，这些接口又称为“回调函数”**。使用libevent也是想libevent框架注册相应的事件和回调函数；当这些事件发生时，libevent会调用这些回调函数处理相应的事件（I/O读写、定时和信号）。
+用“好莱坞原则”来形容Reactor再合适不过了：不要打电话给我们，我们会打电话通知你。
+举个例子：你去应聘某xx公司，面试结束后。
+“普通函数调用机制”公司HR比较懒，不会记你的联系方式，那怎么办呢，你只能面试完后自己打电话去问结果；有没有被录取啊，还是被据了；
+“Reactor”公司HR就记下了你的联系方式，结果出来后会主动打电话通知你：有没有被录取啊，还是被据了；你不用自己打电话去问结果，事实上也不能，你没有HR的留联系方式。
+2. Reactor模式的优点 Reactor模式是编写高性能网络服务器的必备技术之一，它具有如下的优点
+1）响应快，不必为单个同步时间所阻塞，虽然Reactor本身依然是同步的；
+2）编程相对简单，可以最大程度的避免复杂的多线程及同步问题，并且避免了多线程/进程的切换开销； 3）可扩展性，可以方便的通过增加Reactor实例个数来充分利用CPU资源； 4）可复用性，reactor框架本身与具体事件处理逻辑无关，具有很高的复用性；
+3. Reactor模式框架 使用Reactor模型，必备的几个组件：事件源、Reactor框架、多路复用机制和事件处理程序，先来看看Reactor模型的整体框架，接下来再对每个组件做逐一说明。
+1） 事件源 Linux上是文件描述符，Windows上就是Socket或者Handle了，这里统一称为“句柄集”；程序在指定的句柄上注册关心的事件，比如I/O事件。
+2） event demultiplexer——事件多路分发机制 由操作系统提供的I/O多路复用机制，比如select和epoll。 程序首先将其关心的句柄（事件源）及其事件注册到event demultiplexer上； 当有事件到达时，event demultiplexer会发出通知“在已经注册的句柄集中，一个或多个句柄的事件已经就绪”； 程序收到通知后，就可以在非阻塞的情况下对事件进行处理了。 对应到libevent中，依然是select、poll、epoll等，但是libevent使用结构体eventop进行了封装，以统一的接口来支持这些I/O多路复用机制，达到了对外隐藏底层系统机制的目的。
+3） Reactor——反应器 Reactor，是事件管理的接口，内部使用event demultiplexer注册、注销事件；并运行事件循环，当有事件进入“就绪”状态时，调用注册事件的回调函数处理事件。 对应到libevent中，就是event_base结构体。 一个典型的Reactor声明方式：
+class Reactor{ public: int register_handler(Event_Handler *pHandler, int event); int remove_handler(Event_Handler *pHandler, int event); void handle_events(timeval *ptv); // ... }; 4） Event Handler——事件处理程序
+事件处理程序提供了一组接口，每个接口对应了一种类型的事件，供Reactor在相应的事件发生时调用，执行相应的事件处理。通常它会绑定一个有效的句柄。 对应到libevent中，就是event结构体。 下面是两种典型的Event Handler类声明方式，二者互有优缺点。
+class Event_Handler{ public: virtual void handle_read() = 0; virtual void handle_write() = 0; virtual void handle_timeout() = 0; virtual void handle_close() = 0; virtual HANDLE get_handle() = 0; // ... }; class Event_Handler{ public: // events maybe read/write/timeout/close .">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/d62a9a215b334817945e5814d92a423a/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="libevent源码深度剖析02" />
+<meta property="og:description" content="libevent源码深度剖析02 Reactor模式
+前面讲到，整个libevent本身就是一个Reactor，因此本节将专门对Reactor模式进行必要的介绍，并列出libevnet中的几个重要组件和Reactor的对应关系，在后面的章节中可能还会提到本节介绍的基本概念。
+1. Reactor的事件处理机制 首先来回想一下普通函数调用的机制：程序调用某函数?函数执行，程序等待?函数将结果和控制权返回给程序?程序继续处理。
+Reactor释义**“反应堆”，是一种事件驱动机制。和普通函数调用的不同之处在于：应用程序不是主动的调用某个API完成处理，而是恰恰相反，Reactor逆置了事件处理流程，应用程序需要提供相应的接口并注册到Reactor上，如果相应的时间发生，Reactor将主动调用应用程序注册的接口，这些接口又称为“回调函数”**。使用libevent也是想libevent框架注册相应的事件和回调函数；当这些事件发生时，libevent会调用这些回调函数处理相应的事件（I/O读写、定时和信号）。
+用“好莱坞原则”来形容Reactor再合适不过了：不要打电话给我们，我们会打电话通知你。
+举个例子：你去应聘某xx公司，面试结束后。
+“普通函数调用机制”公司HR比较懒，不会记你的联系方式，那怎么办呢，你只能面试完后自己打电话去问结果；有没有被录取啊，还是被据了；
+“Reactor”公司HR就记下了你的联系方式，结果出来后会主动打电话通知你：有没有被录取啊，还是被据了；你不用自己打电话去问结果，事实上也不能，你没有HR的留联系方式。
+2. Reactor模式的优点 Reactor模式是编写高性能网络服务器的必备技术之一，它具有如下的优点
+1）响应快，不必为单个同步时间所阻塞，虽然Reactor本身依然是同步的；
+2）编程相对简单，可以最大程度的避免复杂的多线程及同步问题，并且避免了多线程/进程的切换开销； 3）可扩展性，可以方便的通过增加Reactor实例个数来充分利用CPU资源； 4）可复用性，reactor框架本身与具体事件处理逻辑无关，具有很高的复用性；
+3. Reactor模式框架 使用Reactor模型，必备的几个组件：事件源、Reactor框架、多路复用机制和事件处理程序，先来看看Reactor模型的整体框架，接下来再对每个组件做逐一说明。
+1） 事件源 Linux上是文件描述符，Windows上就是Socket或者Handle了，这里统一称为“句柄集”；程序在指定的句柄上注册关心的事件，比如I/O事件。
+2） event demultiplexer——事件多路分发机制 由操作系统提供的I/O多路复用机制，比如select和epoll。 程序首先将其关心的句柄（事件源）及其事件注册到event demultiplexer上； 当有事件到达时，event demultiplexer会发出通知“在已经注册的句柄集中，一个或多个句柄的事件已经就绪”； 程序收到通知后，就可以在非阻塞的情况下对事件进行处理了。 对应到libevent中，依然是select、poll、epoll等，但是libevent使用结构体eventop进行了封装，以统一的接口来支持这些I/O多路复用机制，达到了对外隐藏底层系统机制的目的。
+3） Reactor——反应器 Reactor，是事件管理的接口，内部使用event demultiplexer注册、注销事件；并运行事件循环，当有事件进入“就绪”状态时，调用注册事件的回调函数处理事件。 对应到libevent中，就是event_base结构体。 一个典型的Reactor声明方式：
+class Reactor{ public: int register_handler(Event_Handler *pHandler, int event); int remove_handler(Event_Handler *pHandler, int event); void handle_events(timeval *ptv); // ... }; 4） Event Handler——事件处理程序
+事件处理程序提供了一组接口，每个接口对应了一种类型的事件，供Reactor在相应的事件发生时调用，执行相应的事件处理。通常它会绑定一个有效的句柄。 对应到libevent中，就是event结构体。 下面是两种典型的Event Handler类声明方式，二者互有优缺点。
+class Event_Handler{ public: virtual void handle_read() = 0; virtual void handle_write() = 0; virtual void handle_timeout() = 0; virtual void handle_close() = 0; virtual HANDLE get_handle() = 0; // ... }; class Event_Handler{ public: // events maybe read/write/timeout/close ." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/d62a9a215b334817945e5814d92a423a/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="libevent源码深度剖析02"/>
+<meta name="twitter:description" content="libevent源码深度剖析02 Reactor模式
+前面讲到，整个libevent本身就是一个Reactor，因此本节将专门对Reactor模式进行必要的介绍，并列出libevnet中的几个重要组件和Reactor的对应关系，在后面的章节中可能还会提到本节介绍的基本概念。
+1. Reactor的事件处理机制 首先来回想一下普通函数调用的机制：程序调用某函数?函数执行，程序等待?函数将结果和控制权返回给程序?程序继续处理。
+Reactor释义**“反应堆”，是一种事件驱动机制。和普通函数调用的不同之处在于：应用程序不是主动的调用某个API完成处理，而是恰恰相反，Reactor逆置了事件处理流程，应用程序需要提供相应的接口并注册到Reactor上，如果相应的时间发生，Reactor将主动调用应用程序注册的接口，这些接口又称为“回调函数”**。使用libevent也是想libevent框架注册相应的事件和回调函数；当这些事件发生时，libevent会调用这些回调函数处理相应的事件（I/O读写、定时和信号）。
+用“好莱坞原则”来形容Reactor再合适不过了：不要打电话给我们，我们会打电话通知你。
+举个例子：你去应聘某xx公司，面试结束后。
+“普通函数调用机制”公司HR比较懒，不会记你的联系方式，那怎么办呢，你只能面试完后自己打电话去问结果；有没有被录取啊，还是被据了；
+“Reactor”公司HR就记下了你的联系方式，结果出来后会主动打电话通知你：有没有被录取啊，还是被据了；你不用自己打电话去问结果，事实上也不能，你没有HR的留联系方式。
+2. Reactor模式的优点 Reactor模式是编写高性能网络服务器的必备技术之一，它具有如下的优点
+1）响应快，不必为单个同步时间所阻塞，虽然Reactor本身依然是同步的；
+2）编程相对简单，可以最大程度的避免复杂的多线程及同步问题，并且避免了多线程/进程的切换开销； 3）可扩展性，可以方便的通过增加Reactor实例个数来充分利用CPU资源； 4）可复用性，reactor框架本身与具体事件处理逻辑无关，具有很高的复用性；
+3. Reactor模式框架 使用Reactor模型，必备的几个组件：事件源、Reactor框架、多路复用机制和事件处理程序，先来看看Reactor模型的整体框架，接下来再对每个组件做逐一说明。
+1） 事件源 Linux上是文件描述符，Windows上就是Socket或者Handle了，这里统一称为“句柄集”；程序在指定的句柄上注册关心的事件，比如I/O事件。
+2） event demultiplexer——事件多路分发机制 由操作系统提供的I/O多路复用机制，比如select和epoll。 程序首先将其关心的句柄（事件源）及其事件注册到event demultiplexer上； 当有事件到达时，event demultiplexer会发出通知“在已经注册的句柄集中，一个或多个句柄的事件已经就绪”； 程序收到通知后，就可以在非阻塞的情况下对事件进行处理了。 对应到libevent中，依然是select、poll、epoll等，但是libevent使用结构体eventop进行了封装，以统一的接口来支持这些I/O多路复用机制，达到了对外隐藏底层系统机制的目的。
+3） Reactor——反应器 Reactor，是事件管理的接口，内部使用event demultiplexer注册、注销事件；并运行事件循环，当有事件进入“就绪”状态时，调用注册事件的回调函数处理事件。 对应到libevent中，就是event_base结构体。 一个典型的Reactor声明方式：
+class Reactor{ public: int register_handler(Event_Handler *pHandler, int event); int remove_handler(Event_Handler *pHandler, int event); void handle_events(timeval *ptv); // ... }; 4） Event Handler——事件处理程序
+事件处理程序提供了一组接口，每个接口对应了一种类型的事件，供Reactor在相应的事件发生时调用，执行相应的事件处理。通常它会绑定一个有效的句柄。 对应到libevent中，就是event结构体。 下面是两种典型的Event Handler类声明方式，二者互有优缺点。
+class Event_Handler{ public: virtual void handle_read() = 0; virtual void handle_write() = 0; virtual void handle_timeout() = 0; virtual void handle_close() = 0; virtual HANDLE get_handle() = 0; // ... }; class Event_Handler{ public: // events maybe read/write/timeout/close ."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "libevent源码深度剖析02",
+      "item": "https://haokiu.com/d62a9a215b334817945e5814d92a423a/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "libevent源码深度剖析02",
+  "name": "libevent源码深度剖析02",
+  "description": "libevent源码深度剖析02 Reactor模式\n前面讲到，整个libevent本身就是一个Reactor，因此本节将专门对Reactor模式进行必要的介绍，并列出libevnet中的几个重要组件和Reactor的对应关系，在后面的章节中可能还会提到本节介绍的基本概念。\n1. Reactor的事件处理机制 首先来回想一下普通函数调用的机制：程序调用某函数?函数执行，程序等待?函数将结果和控制权返回给程序?程序继续处理。\nReactor释义**“反应堆”，是一种事件驱动机制。和普通函数调用的不同之处在于：应用程序不是主动的调用某个API完成处理，而是恰恰相反，Reactor逆置了事件处理流程，应用程序需要提供相应的接口并注册到Reactor上，如果相应的时间发生，Reactor将主动调用应用程序注册的接口，这些接口又称为“回调函数”**。使用libevent也是想libevent框架注册相应的事件和回调函数；当这些事件发生时，libevent会调用这些回调函数处理相应的事件（I/O读写、定时和信号）。\n用“好莱坞原则”来形容Reactor再合适不过了：不要打电话给我们，我们会打电话通知你。\n举个例子：你去应聘某xx公司，面试结束后。\n“普通函数调用机制”公司HR比较懒，不会记你的联系方式，那怎么办呢，你只能面试完后自己打电话去问结果；有没有被录取啊，还是被据了；\n“Reactor”公司HR就记下了你的联系方式，结果出来后会主动打电话通知你：有没有被录取啊，还是被据了；你不用自己打电话去问结果，事实上也不能，你没有HR的留联系方式。\n2. Reactor模式的优点 Reactor模式是编写高性能网络服务器的必备技术之一，它具有如下的优点\n1）响应快，不必为单个同步时间所阻塞，虽然Reactor本身依然是同步的；\n2）编程相对简单，可以最大程度的避免复杂的多线程及同步问题，并且避免了多线程/进程的切换开销； 3）可扩展性，可以方便的通过增加Reactor实例个数来充分利用CPU资源； 4）可复用性，reactor框架本身与具体事件处理逻辑无关，具有很高的复用性；\n3. Reactor模式框架 使用Reactor模型，必备的几个组件：事件源、Reactor框架、多路复用机制和事件处理程序，先来看看Reactor模型的整体框架，接下来再对每个组件做逐一说明。\n1） 事件源 Linux上是文件描述符，Windows上就是Socket或者Handle了，这里统一称为“句柄集”；程序在指定的句柄上注册关心的事件，比如I/O事件。\n2） event demultiplexer——事件多路分发机制 由操作系统提供的I/O多路复用机制，比如select和epoll。 程序首先将其关心的句柄（事件源）及其事件注册到event demultiplexer上； 当有事件到达时，event demultiplexer会发出通知“在已经注册的句柄集中，一个或多个句柄的事件已经就绪”； 程序收到通知后，就可以在非阻塞的情况下对事件进行处理了。 对应到libevent中，依然是select、poll、epoll等，但是libevent使用结构体eventop进行了封装，以统一的接口来支持这些I/O多路复用机制，达到了对外隐藏底层系统机制的目的。\n3） Reactor——反应器 Reactor，是事件管理的接口，内部使用event demultiplexer注册、注销事件；并运行事件循环，当有事件进入“就绪”状态时，调用注册事件的回调函数处理事件。 对应到libevent中，就是event_base结构体。 一个典型的Reactor声明方式：\nclass Reactor{ public: int register_handler(Event_Handler *pHandler, int event); int remove_handler(Event_Handler *pHandler, int event); void handle_events(timeval *ptv); // ... }; 4） Event Handler——事件处理程序\n事件处理程序提供了一组接口，每个接口对应了一种类型的事件，供Reactor在相应的事件发生时调用，执行相应的事件处理。通常它会绑定一个有效的句柄。 对应到libevent中，就是event结构体。 下面是两种典型的Event Handler类声明方式，二者互有优缺点。\nclass Event_Handler{ public: virtual void handle_read() = 0; virtual void handle_write() = 0; virtual void handle_timeout() = 0; virtual void handle_close() = 0; virtual HANDLE get_handle() = 0; // ... }; class Event_Handler{ public: // events maybe read/write/timeout/close .",
+  "keywords": [
+    
+  ],
+  "articleBody": "libevent源码深度剖析02 Reactor模式\n前面讲到，整个libevent本身就是一个Reactor，因此本节将专门对Reactor模式进行必要的介绍，并列出libevnet中的几个重要组件和Reactor的对应关系，在后面的章节中可能还会提到本节介绍的基本概念。\n1. Reactor的事件处理机制 首先来回想一下普通函数调用的机制：程序调用某函数?函数执行，程序等待?函数将结果和控制权返回给程序?程序继续处理。\nReactor释义**“反应堆”，是一种事件驱动机制。和普通函数调用的不同之处在于：应用程序不是主动的调用某个API完成处理，而是恰恰相反，Reactor逆置了事件处理流程，应用程序需要提供相应的接口并注册到Reactor上，如果相应的时间发生，Reactor将主动调用应用程序注册的接口，这些接口又称为“回调函数”**。使用libevent也是想libevent框架注册相应的事件和回调函数；当这些事件发生时，libevent会调用这些回调函数处理相应的事件（I/O读写、定时和信号）。\n用“好莱坞原则”来形容Reactor再合适不过了：不要打电话给我们，我们会打电话通知你。\n举个例子：你去应聘某xx公司，面试结束后。\n“普通函数调用机制”公司HR比较懒，不会记你的联系方式，那怎么办呢，你只能面试完后自己打电话去问结果；有没有被录取啊，还是被据了；\n“Reactor”公司HR就记下了你的联系方式，结果出来后会主动打电话通知你：有没有被录取啊，还是被据了；你不用自己打电话去问结果，事实上也不能，你没有HR的留联系方式。\n2. Reactor模式的优点 Reactor模式是编写高性能网络服务器的必备技术之一，它具有如下的优点\n1）响应快，不必为单个同步时间所阻塞，虽然Reactor本身依然是同步的；\n2）编程相对简单，可以最大程度的避免复杂的多线程及同步问题，并且避免了多线程/进程的切换开销； 3）可扩展性，可以方便的通过增加Reactor实例个数来充分利用CPU资源； 4）可复用性，reactor框架本身与具体事件处理逻辑无关，具有很高的复用性；\n3. Reactor模式框架 使用Reactor模型，必备的几个组件：事件源、Reactor框架、多路复用机制和事件处理程序，先来看看Reactor模型的整体框架，接下来再对每个组件做逐一说明。\n1） 事件源 Linux上是文件描述符，Windows上就是Socket或者Handle了，这里统一称为“句柄集”；程序在指定的句柄上注册关心的事件，比如I/O事件。\n2） event demultiplexer——事件多路分发机制 由操作系统提供的I/O多路复用机制，比如select和epoll。 程序首先将其关心的句柄（事件源）及其事件注册到event demultiplexer上； 当有事件到达时，event demultiplexer会发出通知“在已经注册的句柄集中，一个或多个句柄的事件已经就绪”； 程序收到通知后，就可以在非阻塞的情况下对事件进行处理了。 对应到libevent中，依然是select、poll、epoll等，但是libevent使用结构体eventop进行了封装，以统一的接口来支持这些I/O多路复用机制，达到了对外隐藏底层系统机制的目的。\n3） Reactor——反应器 Reactor，是事件管理的接口，内部使用event demultiplexer注册、注销事件；并运行事件循环，当有事件进入“就绪”状态时，调用注册事件的回调函数处理事件。 对应到libevent中，就是event_base结构体。 一个典型的Reactor声明方式：\nclass Reactor{ public: int register_handler(Event_Handler *pHandler, int event); int remove_handler(Event_Handler *pHandler, int event); void handle_events(timeval *ptv); // ... }; 4） Event Handler——事件处理程序\n事件处理程序提供了一组接口，每个接口对应了一种类型的事件，供Reactor在相应的事件发生时调用，执行相应的事件处理。通常它会绑定一个有效的句柄。 对应到libevent中，就是event结构体。 下面是两种典型的Event Handler类声明方式，二者互有优缺点。\nclass Event_Handler{ public: virtual void handle_read() = 0; virtual void handle_write() = 0; virtual void handle_timeout() = 0; virtual void handle_close() = 0; virtual HANDLE get_handle() = 0; // ... }; class Event_Handler{ public: // events maybe read/write/timeout/close .etc virtual void handle_events(int events) = 0; virtual HANDLE get_handle() = 0; // ... }; 4. Reactor事件处理流程 前面说过Reactor将事件流“逆置”了，那么使用Reactor模式后，事件控制流是什么样子呢？ 可以参见下面的序列图。\n5. 小结 上面讲到了Reactor的基本概念、框架和处理流程，对Reactor有个基本清晰的了解后，再来对比看libevent就会更容易理解了，接下来就正式进入到libevent的代码世界了，加油！\n参考资料： Pattern-Oriented Software Architecture, Patterns for Concurrent and Networked Objects, Volume 2\n",
+  "wordCount" : "138",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/d62a9a215b334817945e5814d92a423a/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      libevent源码深度剖析02
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#libevent%e6%ba%90%e7%a0%81%e6%b7%b1%e5%ba%a6%e5%89%96%e6%9e%9002" aria-label="libevent源码深度剖析02">libevent源码深度剖析02</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#1-reactor%e7%9a%84%e4%ba%8b%e4%bb%b6%e5%a4%84%e7%90%86%e6%9c%ba%e5%88%b6" aria-label="1. Reactor的事件处理机制">1. Reactor的事件处理机制</a></li>
+                <li>
+                    <a href="#2-reactor%e6%a8%a1%e5%bc%8f%e7%9a%84%e4%bc%98%e7%82%b9" aria-label="2. Reactor模式的优点">2. Reactor模式的优点</a></li>
+                <li>
+                    <a href="#3-reactor%e6%a8%a1%e5%bc%8f%e6%a1%86%e6%9e%b6" aria-label="3. Reactor模式框架">3. Reactor模式框架</a></li>
+                <li>
+                    <a href="#4-reactor%e4%ba%8b%e4%bb%b6%e5%a4%84%e7%90%86%e6%b5%81%e7%a8%8b" aria-label="4. Reactor事件处理流程">4. Reactor事件处理流程</a></li>
+                <li>
+                    <a href="#5-%e5%b0%8f%e7%bb%93" aria-label="5. 小结">5. 小结</a>
+                </li>
+            </ul>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="libevent源码深度剖析02">libevent源码深度剖析02</h1>
+<p>Reactor模式</p>
+<p>前面讲到，整个libevent本身就是一个<strong>Reactor</strong>，因此本节将专门对Reactor模式进行必要的介绍，并列出libevnet中的几个重要组件和Reactor的对应关系，在后面的章节中可能还会提到本节介绍的基本概念。</p>
+<h3 id="1-reactor的事件处理机制">1. Reactor的事件处理机制</h3>
+<p>首先来回想一下普通函数调用的机制：程序调用某函数?函数执行，程序等待?函数将结果和控制权返回给程序?程序继续处理。</p>
+<p>Reactor释义**“反应堆”<strong>，是一种事件驱动机制。和普通函数调用的不同之处在于：应用程序不是主动的调用某个</strong>API<strong>完成处理，而是恰恰相反，Reactor逆置了事件处理流程，应用程序需要提供相应的接口并注册到Reactor上，如果相应的时间发生，Reactor将主动调用应用程序注册的接口，这些接口又称为</strong>“回调函数”**。使用libevent也是想libevent框架注册相应的事件和回调函数；当这些事件发生时，libevent会调用这些回调函数处理相应的事件（I/O读写、定时和信号）。</p>
+<p>用“好莱坞原则”来形容Reactor再合适不过了：不要打电话给我们，我们会打电话通知你。</p>
+<p>举个例子：你去应聘某xx公司，面试结束后。</p>
+<p>“普通函数调用机制”公司HR比较懒，不会记你的联系方式，那怎么办呢，你只能面试完后自己打电话去问结果；有没有被录取啊，还是被据了；</p>
+<p>“Reactor”公司HR就记下了你的联系方式，结果出来后会主动打电话通知你：有没有被录取啊，还是被据了；你不用自己打电话去问结果，事实上也不能，你没有HR的留联系方式。</p>
+<h3 id="2-reactor模式的优点">2. Reactor模式的优点</h3>
+<p>Reactor模式是编写高性能网络服务器的必备技术之一，它具有如下的优点</p>
+<p>1）响应快，不必为单个同步时间所阻塞，虽然Reactor本身依然是同步的；</p>
+<p>2）编程相对简单，可以最大程度的避免复杂的多线程及同步问题，并且避免了多线程/进程的切换开销；
+3）可扩展性，可以方便的通过增加Reactor实例个数来充分利用CPU资源；
+4）可复用性，reactor框架本身与具体事件处理逻辑无关，具有很高的复用性；</p>
+<h3 id="3-reactor模式框架">3. Reactor模式框架</h3>
+<p>使用Reactor模型，必备的几个组件：<strong>事件源</strong>、<strong>Reactor框架</strong>、<strong>多路复用机制和事件处理程序</strong>，先来看看Reactor模型的整体框架，接下来再对每个组件做逐一说明。</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/4dcfb4786403e5a09e735f27b4e2c2d4.webp" alt=""  />
+</p>
+<p>1） 事件源
+Linux上是文件描述符，Windows上就是<strong>Socket</strong>或者<strong>Handle</strong>了，这里统一称为“句柄集”；程序在指定的句柄上注册关心的事件，比如I/O事件。</p>
+<p>2） event demultiplexer——事件多路分发机制
+由操作系统提供的I/O多路复用机制，比如<strong>select</strong>和<strong>epoll</strong>。
+程序首先将其关心的句柄（事件源）及其事件注册到<strong>event demultiplexer</strong>上；
+当有事件到达时，event demultiplexer会发出通知“在已经注册的句柄集中，一个或多个句柄的事件已经就绪”；
+程序收到通知后，就可以在非阻塞的情况下对事件进行处理了。
+对应到libevent中，依然是select、poll、epoll等，但是libevent使用结构体<strong>eventop</strong>进行了封装，以统一的接口来支持这些I/O多路复用机制，达到了对外隐藏底层系统机制的目的。</p>
+<p>3） Reactor——反应器
+Reactor，是事件管理的接口，内部使用<strong>event demultiplexer</strong>注册、注销事件；并运行事件循环，当有事件进入“就绪”状态时，调用注册事件的回调函数处理事件。
+对应到libevent中，就是<strong>event_base</strong>结构体。
+一个典型的Reactor声明方式：</p>
+<pre tabindex="0"><code>class Reactor{
+    public:
+        int register_handler(Event_Handler *pHandler, int event);
+        int remove_handler(Event_Handler *pHandler, int event);
+        void handle_events(timeval *ptv);
+        // ...
+};
+</code></pre><p>4） Event Handler——事件处理程序</p>
+<p>事件处理程序提供了一组接口，每个接口对应了一种类型的事件，供Reactor在相应的事件发生时调用，执行相应的事件处理。通常它会绑定一个有效的句柄。
+对应到libevent中，就是event结构体。
+下面是两种典型的Event Handler类声明方式，二者互有优缺点。</p>
+<pre tabindex="0"><code>class Event_Handler{
+    public:
+        virtual void handle_read() = 0;
+        virtual void handle_write() = 0;
+        virtual void handle_timeout() = 0;
+        virtual void handle_close() = 0;
+        virtual HANDLE get_handle() = 0;
+        // ...
+};
+
+class Event_Handler{
+    public:
+        // events maybe read/write/timeout/close .etc
+        virtual void handle_events(int events) = 0;
+        virtual HANDLE get_handle() = 0;
+        // ...
+};
+</code></pre><h3 id="heading"></h3>
+<h3 id="4-reactor事件处理流程">4. Reactor事件处理流程</h3>
+<p>前面说过Reactor将事件流“逆置”了，那么使用Reactor模式后，事件控制流是什么样子呢？
+可以参见下面的序列图。</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/cfa4cba6d4d5bd820a9c46067af03439.webp" alt=""  />
+</p>
+<h3 id="5-小结">5. 小结</h3>
+<p>上面讲到了Reactor的基本概念、框架和处理流程，对Reactor有个基本清晰的了解后，再来对比看libevent就会更容易理解了，接下来就正式进入到libevent的代码世界了，加油！</p>
+<p>参考资料：
+Pattern-Oriented Software Architecture, Patterns for Concurrent and Networked Objects, Volume 2</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/5d2f8fa20fdc4018a34afe19f8c23987/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>libevent源码深度剖析</span>
+  </a>
+  <a class="next" href="https://haokiu.com/88dcf812d9464727bdfa54410657cfaa/">
+    <span class="title">Next »</span>
+    <br>
+    <span>libevent源码深度剖析03</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

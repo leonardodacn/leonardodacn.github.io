@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>日志系统的设计 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="日志系统的设计 为什么需要日志 实际的软件项目产出都有一个流程，即先开发、测试，再发布生产，由于人的因素，既然是软件产品就不可能百分百没有 bug 或者逻辑错误，对于已经发布到生产的项目，一旦某个时刻产生非预期的结果，我们就需要去定位和排查问题。但是一般正式的生产环境的服务器或者产品是不允许开发人员通过附加调试器去排查问题的，主要有如下可能原因：
+在很多互联网企业，开发部门、测试部分和产品运维部门是分工明确的，软件产品一旦发布到生产环境以后，将全部交由运维部门人员去管理和维护，而原来开发此产品的开发人员不再拥有相关的操作程序的权限。 对于已经上了生产环境的服务，其数据和程序稳定性是公司的核心产值所在，一般不敢或不允许被开发人员随意调试或者操作，以免造成损失。 发布到生产环境的服务，一般为了让程序执行效率更高、文件体积更小，都是去掉调试符号后的版本，不方便也不利于调试。 既然我们无法通过调试器去调试，这个时候为了跟踪和回忆当时的程序行为进而定位问题，我们就需要日志系统。
+退一步说，即使在开发或者测试环境，我们可以把程序附加到调试器上去调试，但是对于一些特定的程序行为，我们无法通过设置断点，让程序在某个时刻暂停下来进行调试。例如，对于某些网络通信功能，如果暂停时间过长（相对于某些程序逻辑来说），通信的对端可能由于彼端没有在规定时间内响应而断开连接，导致程序逻辑无法进入我们想要的执行流中去；再例如，对于一些高频操作（如心跳包、定时器、界面绘制下的某些高频重复行为），可能在少量次数下无法触发我们想要的行为，而通过断点的暂停方式，我们不得不重复操作几十次、上百次甚至更多，这样排查问题效率是非常低下的。对于这类操作，我们可以通过打印日志，将当时的程序行为上下文现场记录下来，然后从日志系统中找到某次不正常的行为的上下文信息。这也是日志的另外一个作用。
+本文将从技术和业务上两个方面来介绍日志系统相关的设计与开发，所谓技术上，就是如何从程序开发的角度设计一款功能强大、性能优越、使用方便的日志系统；而业务上，是指我们在使用日志系统时，应该去记录哪些行为和数据，既简洁、不啰嗦，又方便需要时快速准确地定位到问题。
+日志系统的技术上的实现 日志的最初的原型即将程序运行的状态打印出来，对于 C/C&#43;&#43; 这门语言来说，即可以利用 printf、std::cout 等控制台输出函数，将日志信息输出到控制台，这类简单的情形我们不在此过多赘述。
+对于商业项目，为了方便排查问题，我们一般不将日志写到控制台，而是输出到文件或者数据库系统。不管哪一种，其思路基本上一致，我们这里以写文件为例来详细介绍。
+同步写日志 所谓同步写日志，指的是在输出日志的地方，将日志即时写入到文件中去。根据笔者的经验，这种设计广泛地用于相当多的的客户端软件。笔者曾从事过数年的客户端开发（包括 PC、安卓软件），设计过一些功能复杂的金融客户端产品，在这些系统中采用的就是这种同步写日志的方式。之所以使用这种方式其主要原因就是设计简单，而又不会影响用户使用体验。说到这里读者可能有这样一个疑问：一般的客户端软件，一般存在界面，而界面部分所属的逻辑就是程序的主线程，如果采取这种同步写日志的方式，当写日志时，写文件是磁盘 IO 操作，相比较程序其他部分是 CPU 操作，前者要慢很多，这样势必造成CPU等待，进而导致主线程“卡”在写文件处，进而造成界面卡顿，从而导致用户使用软件的体验不好。读者的这种顾虑确实是存在的。但是，很多时候我们不用担心这种问题，主要有两个原因：
+对于客户端程序，即使在主线程（UI 线程）中同步写文件，其单次或者几次磁盘操作累加时间，与人（用户）的可感知时间相比，也是非常小的，也就是说用户根本感觉不到这种同步写文件造成的延迟。当然，这里也给您一个提醒就是，如果在 UI 线程里面写日志，尤其是在一些高频操作中（如 Windows 的界面绘制消息 WM_PAINT 处理逻辑中），一定要控制写日志的长度和次数，否则就会因频繁写文件或一次写入数据过大而对界面造成卡顿。 客户端程序除了 UI 线程，还有其他与界面无关的工作线程，在这些线程中直接写文件，一般不会对用户的体验产生什么影响。 说了这么多，我们给出一个具体的例子。
+日志类的 .h 文件
+/** *@desc: IULog.h *@author: zhangyl *@date: 2014.12.25 */ #ifndef __LOG_H__ #define __LOG_H__ enum LOG_LEVEL { LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR }; //注意：如果打印的日志信息中有中文，则格式化字符串要用_T()宏包裹起来， #define LOG_INFO(...) CIULog::Log(LOG_LEVEL_INFO, __FUNCSIG__,__LINE__, __VA_ARGS__) #define LOG_WARNING(...) CIULog::Log(LOG_LEVEL_WARNING, __FUNCSIG__, __LINE__,__VA_ARGS__) #define LOG_ERROR(...) CIULog::Log(LOG_LEVEL_ERROR, __FUNCSIG__,__LINE__, __VA_ARGS__) class CIULog { public: static bool Init(bool bToFile, bool bTruncateLongLog, PCTSTR pszLogFileName); static void Uninit(); static void SetLevel(LOG_LEVEL nLevel); //不输出线程ID号和所在函数签名、行号 static bool Log(long nLevel, PCTSTR pszFmt, .">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/1549ab1669fe40dda14c41a84df83415/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="日志系统的设计" />
+<meta property="og:description" content="日志系统的设计 为什么需要日志 实际的软件项目产出都有一个流程，即先开发、测试，再发布生产，由于人的因素，既然是软件产品就不可能百分百没有 bug 或者逻辑错误，对于已经发布到生产的项目，一旦某个时刻产生非预期的结果，我们就需要去定位和排查问题。但是一般正式的生产环境的服务器或者产品是不允许开发人员通过附加调试器去排查问题的，主要有如下可能原因：
+在很多互联网企业，开发部门、测试部分和产品运维部门是分工明确的，软件产品一旦发布到生产环境以后，将全部交由运维部门人员去管理和维护，而原来开发此产品的开发人员不再拥有相关的操作程序的权限。 对于已经上了生产环境的服务，其数据和程序稳定性是公司的核心产值所在，一般不敢或不允许被开发人员随意调试或者操作，以免造成损失。 发布到生产环境的服务，一般为了让程序执行效率更高、文件体积更小，都是去掉调试符号后的版本，不方便也不利于调试。 既然我们无法通过调试器去调试，这个时候为了跟踪和回忆当时的程序行为进而定位问题，我们就需要日志系统。
+退一步说，即使在开发或者测试环境，我们可以把程序附加到调试器上去调试，但是对于一些特定的程序行为，我们无法通过设置断点，让程序在某个时刻暂停下来进行调试。例如，对于某些网络通信功能，如果暂停时间过长（相对于某些程序逻辑来说），通信的对端可能由于彼端没有在规定时间内响应而断开连接，导致程序逻辑无法进入我们想要的执行流中去；再例如，对于一些高频操作（如心跳包、定时器、界面绘制下的某些高频重复行为），可能在少量次数下无法触发我们想要的行为，而通过断点的暂停方式，我们不得不重复操作几十次、上百次甚至更多，这样排查问题效率是非常低下的。对于这类操作，我们可以通过打印日志，将当时的程序行为上下文现场记录下来，然后从日志系统中找到某次不正常的行为的上下文信息。这也是日志的另外一个作用。
+本文将从技术和业务上两个方面来介绍日志系统相关的设计与开发，所谓技术上，就是如何从程序开发的角度设计一款功能强大、性能优越、使用方便的日志系统；而业务上，是指我们在使用日志系统时，应该去记录哪些行为和数据，既简洁、不啰嗦，又方便需要时快速准确地定位到问题。
+日志系统的技术上的实现 日志的最初的原型即将程序运行的状态打印出来，对于 C/C&#43;&#43; 这门语言来说，即可以利用 printf、std::cout 等控制台输出函数，将日志信息输出到控制台，这类简单的情形我们不在此过多赘述。
+对于商业项目，为了方便排查问题，我们一般不将日志写到控制台，而是输出到文件或者数据库系统。不管哪一种，其思路基本上一致，我们这里以写文件为例来详细介绍。
+同步写日志 所谓同步写日志，指的是在输出日志的地方，将日志即时写入到文件中去。根据笔者的经验，这种设计广泛地用于相当多的的客户端软件。笔者曾从事过数年的客户端开发（包括 PC、安卓软件），设计过一些功能复杂的金融客户端产品，在这些系统中采用的就是这种同步写日志的方式。之所以使用这种方式其主要原因就是设计简单，而又不会影响用户使用体验。说到这里读者可能有这样一个疑问：一般的客户端软件，一般存在界面，而界面部分所属的逻辑就是程序的主线程，如果采取这种同步写日志的方式，当写日志时，写文件是磁盘 IO 操作，相比较程序其他部分是 CPU 操作，前者要慢很多，这样势必造成CPU等待，进而导致主线程“卡”在写文件处，进而造成界面卡顿，从而导致用户使用软件的体验不好。读者的这种顾虑确实是存在的。但是，很多时候我们不用担心这种问题，主要有两个原因：
+对于客户端程序，即使在主线程（UI 线程）中同步写文件，其单次或者几次磁盘操作累加时间，与人（用户）的可感知时间相比，也是非常小的，也就是说用户根本感觉不到这种同步写文件造成的延迟。当然，这里也给您一个提醒就是，如果在 UI 线程里面写日志，尤其是在一些高频操作中（如 Windows 的界面绘制消息 WM_PAINT 处理逻辑中），一定要控制写日志的长度和次数，否则就会因频繁写文件或一次写入数据过大而对界面造成卡顿。 客户端程序除了 UI 线程，还有其他与界面无关的工作线程，在这些线程中直接写文件，一般不会对用户的体验产生什么影响。 说了这么多，我们给出一个具体的例子。
+日志类的 .h 文件
+/** *@desc: IULog.h *@author: zhangyl *@date: 2014.12.25 */ #ifndef __LOG_H__ #define __LOG_H__ enum LOG_LEVEL { LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR }; //注意：如果打印的日志信息中有中文，则格式化字符串要用_T()宏包裹起来， #define LOG_INFO(...) CIULog::Log(LOG_LEVEL_INFO, __FUNCSIG__,__LINE__, __VA_ARGS__) #define LOG_WARNING(...) CIULog::Log(LOG_LEVEL_WARNING, __FUNCSIG__, __LINE__,__VA_ARGS__) #define LOG_ERROR(...) CIULog::Log(LOG_LEVEL_ERROR, __FUNCSIG__,__LINE__, __VA_ARGS__) class CIULog { public: static bool Init(bool bToFile, bool bTruncateLongLog, PCTSTR pszLogFileName); static void Uninit(); static void SetLevel(LOG_LEVEL nLevel); //不输出线程ID号和所在函数签名、行号 static bool Log(long nLevel, PCTSTR pszFmt, ." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/1549ab1669fe40dda14c41a84df83415/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:43+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:43+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="日志系统的设计"/>
+<meta name="twitter:description" content="日志系统的设计 为什么需要日志 实际的软件项目产出都有一个流程，即先开发、测试，再发布生产，由于人的因素，既然是软件产品就不可能百分百没有 bug 或者逻辑错误，对于已经发布到生产的项目，一旦某个时刻产生非预期的结果，我们就需要去定位和排查问题。但是一般正式的生产环境的服务器或者产品是不允许开发人员通过附加调试器去排查问题的，主要有如下可能原因：
+在很多互联网企业，开发部门、测试部分和产品运维部门是分工明确的，软件产品一旦发布到生产环境以后，将全部交由运维部门人员去管理和维护，而原来开发此产品的开发人员不再拥有相关的操作程序的权限。 对于已经上了生产环境的服务，其数据和程序稳定性是公司的核心产值所在，一般不敢或不允许被开发人员随意调试或者操作，以免造成损失。 发布到生产环境的服务，一般为了让程序执行效率更高、文件体积更小，都是去掉调试符号后的版本，不方便也不利于调试。 既然我们无法通过调试器去调试，这个时候为了跟踪和回忆当时的程序行为进而定位问题，我们就需要日志系统。
+退一步说，即使在开发或者测试环境，我们可以把程序附加到调试器上去调试，但是对于一些特定的程序行为，我们无法通过设置断点，让程序在某个时刻暂停下来进行调试。例如，对于某些网络通信功能，如果暂停时间过长（相对于某些程序逻辑来说），通信的对端可能由于彼端没有在规定时间内响应而断开连接，导致程序逻辑无法进入我们想要的执行流中去；再例如，对于一些高频操作（如心跳包、定时器、界面绘制下的某些高频重复行为），可能在少量次数下无法触发我们想要的行为，而通过断点的暂停方式，我们不得不重复操作几十次、上百次甚至更多，这样排查问题效率是非常低下的。对于这类操作，我们可以通过打印日志，将当时的程序行为上下文现场记录下来，然后从日志系统中找到某次不正常的行为的上下文信息。这也是日志的另外一个作用。
+本文将从技术和业务上两个方面来介绍日志系统相关的设计与开发，所谓技术上，就是如何从程序开发的角度设计一款功能强大、性能优越、使用方便的日志系统；而业务上，是指我们在使用日志系统时，应该去记录哪些行为和数据，既简洁、不啰嗦，又方便需要时快速准确地定位到问题。
+日志系统的技术上的实现 日志的最初的原型即将程序运行的状态打印出来，对于 C/C&#43;&#43; 这门语言来说，即可以利用 printf、std::cout 等控制台输出函数，将日志信息输出到控制台，这类简单的情形我们不在此过多赘述。
+对于商业项目，为了方便排查问题，我们一般不将日志写到控制台，而是输出到文件或者数据库系统。不管哪一种，其思路基本上一致，我们这里以写文件为例来详细介绍。
+同步写日志 所谓同步写日志，指的是在输出日志的地方，将日志即时写入到文件中去。根据笔者的经验，这种设计广泛地用于相当多的的客户端软件。笔者曾从事过数年的客户端开发（包括 PC、安卓软件），设计过一些功能复杂的金融客户端产品，在这些系统中采用的就是这种同步写日志的方式。之所以使用这种方式其主要原因就是设计简单，而又不会影响用户使用体验。说到这里读者可能有这样一个疑问：一般的客户端软件，一般存在界面，而界面部分所属的逻辑就是程序的主线程，如果采取这种同步写日志的方式，当写日志时，写文件是磁盘 IO 操作，相比较程序其他部分是 CPU 操作，前者要慢很多，这样势必造成CPU等待，进而导致主线程“卡”在写文件处，进而造成界面卡顿，从而导致用户使用软件的体验不好。读者的这种顾虑确实是存在的。但是，很多时候我们不用担心这种问题，主要有两个原因：
+对于客户端程序，即使在主线程（UI 线程）中同步写文件，其单次或者几次磁盘操作累加时间，与人（用户）的可感知时间相比，也是非常小的，也就是说用户根本感觉不到这种同步写文件造成的延迟。当然，这里也给您一个提醒就是，如果在 UI 线程里面写日志，尤其是在一些高频操作中（如 Windows 的界面绘制消息 WM_PAINT 处理逻辑中），一定要控制写日志的长度和次数，否则就会因频繁写文件或一次写入数据过大而对界面造成卡顿。 客户端程序除了 UI 线程，还有其他与界面无关的工作线程，在这些线程中直接写文件，一般不会对用户的体验产生什么影响。 说了这么多，我们给出一个具体的例子。
+日志类的 .h 文件
+/** *@desc: IULog.h *@author: zhangyl *@date: 2014.12.25 */ #ifndef __LOG_H__ #define __LOG_H__ enum LOG_LEVEL { LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR }; //注意：如果打印的日志信息中有中文，则格式化字符串要用_T()宏包裹起来， #define LOG_INFO(...) CIULog::Log(LOG_LEVEL_INFO, __FUNCSIG__,__LINE__, __VA_ARGS__) #define LOG_WARNING(...) CIULog::Log(LOG_LEVEL_WARNING, __FUNCSIG__, __LINE__,__VA_ARGS__) #define LOG_ERROR(...) CIULog::Log(LOG_LEVEL_ERROR, __FUNCSIG__,__LINE__, __VA_ARGS__) class CIULog { public: static bool Init(bool bToFile, bool bTruncateLongLog, PCTSTR pszLogFileName); static void Uninit(); static void SetLevel(LOG_LEVEL nLevel); //不输出线程ID号和所在函数签名、行号 static bool Log(long nLevel, PCTSTR pszFmt, ."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "日志系统的设计",
+      "item": "https://haokiu.com/1549ab1669fe40dda14c41a84df83415/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "日志系统的设计",
+  "name": "日志系统的设计",
+  "description": "日志系统的设计 为什么需要日志 实际的软件项目产出都有一个流程，即先开发、测试，再发布生产，由于人的因素，既然是软件产品就不可能百分百没有 bug 或者逻辑错误，对于已经发布到生产的项目，一旦某个时刻产生非预期的结果，我们就需要去定位和排查问题。但是一般正式的生产环境的服务器或者产品是不允许开发人员通过附加调试器去排查问题的，主要有如下可能原因：\n在很多互联网企业，开发部门、测试部分和产品运维部门是分工明确的，软件产品一旦发布到生产环境以后，将全部交由运维部门人员去管理和维护，而原来开发此产品的开发人员不再拥有相关的操作程序的权限。 对于已经上了生产环境的服务，其数据和程序稳定性是公司的核心产值所在，一般不敢或不允许被开发人员随意调试或者操作，以免造成损失。 发布到生产环境的服务，一般为了让程序执行效率更高、文件体积更小，都是去掉调试符号后的版本，不方便也不利于调试。 既然我们无法通过调试器去调试，这个时候为了跟踪和回忆当时的程序行为进而定位问题，我们就需要日志系统。\n退一步说，即使在开发或者测试环境，我们可以把程序附加到调试器上去调试，但是对于一些特定的程序行为，我们无法通过设置断点，让程序在某个时刻暂停下来进行调试。例如，对于某些网络通信功能，如果暂停时间过长（相对于某些程序逻辑来说），通信的对端可能由于彼端没有在规定时间内响应而断开连接，导致程序逻辑无法进入我们想要的执行流中去；再例如，对于一些高频操作（如心跳包、定时器、界面绘制下的某些高频重复行为），可能在少量次数下无法触发我们想要的行为，而通过断点的暂停方式，我们不得不重复操作几十次、上百次甚至更多，这样排查问题效率是非常低下的。对于这类操作，我们可以通过打印日志，将当时的程序行为上下文现场记录下来，然后从日志系统中找到某次不正常的行为的上下文信息。这也是日志的另外一个作用。\n本文将从技术和业务上两个方面来介绍日志系统相关的设计与开发，所谓技术上，就是如何从程序开发的角度设计一款功能强大、性能优越、使用方便的日志系统；而业务上，是指我们在使用日志系统时，应该去记录哪些行为和数据，既简洁、不啰嗦，又方便需要时快速准确地定位到问题。\n日志系统的技术上的实现 日志的最初的原型即将程序运行的状态打印出来，对于 C/C++ 这门语言来说，即可以利用 printf、std::cout 等控制台输出函数，将日志信息输出到控制台，这类简单的情形我们不在此过多赘述。\n对于商业项目，为了方便排查问题，我们一般不将日志写到控制台，而是输出到文件或者数据库系统。不管哪一种，其思路基本上一致，我们这里以写文件为例来详细介绍。\n同步写日志 所谓同步写日志，指的是在输出日志的地方，将日志即时写入到文件中去。根据笔者的经验，这种设计广泛地用于相当多的的客户端软件。笔者曾从事过数年的客户端开发（包括 PC、安卓软件），设计过一些功能复杂的金融客户端产品，在这些系统中采用的就是这种同步写日志的方式。之所以使用这种方式其主要原因就是设计简单，而又不会影响用户使用体验。说到这里读者可能有这样一个疑问：一般的客户端软件，一般存在界面，而界面部分所属的逻辑就是程序的主线程，如果采取这种同步写日志的方式，当写日志时，写文件是磁盘 IO 操作，相比较程序其他部分是 CPU 操作，前者要慢很多，这样势必造成CPU等待，进而导致主线程“卡”在写文件处，进而造成界面卡顿，从而导致用户使用软件的体验不好。读者的这种顾虑确实是存在的。但是，很多时候我们不用担心这种问题，主要有两个原因：\n对于客户端程序，即使在主线程（UI 线程）中同步写文件，其单次或者几次磁盘操作累加时间，与人（用户）的可感知时间相比，也是非常小的，也就是说用户根本感觉不到这种同步写文件造成的延迟。当然，这里也给您一个提醒就是，如果在 UI 线程里面写日志，尤其是在一些高频操作中（如 Windows 的界面绘制消息 WM_PAINT 处理逻辑中），一定要控制写日志的长度和次数，否则就会因频繁写文件或一次写入数据过大而对界面造成卡顿。 客户端程序除了 UI 线程，还有其他与界面无关的工作线程，在这些线程中直接写文件，一般不会对用户的体验产生什么影响。 说了这么多，我们给出一个具体的例子。\n日志类的 .h 文件\n/** *@desc: IULog.h *@author: zhangyl *@date: 2014.12.25 */ #ifndef __LOG_H__ #define __LOG_H__ enum LOG_LEVEL { LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR }; //注意：如果打印的日志信息中有中文，则格式化字符串要用_T()宏包裹起来， #define LOG_INFO(...) CIULog::Log(LOG_LEVEL_INFO, __FUNCSIG__,__LINE__, __VA_ARGS__) #define LOG_WARNING(...) CIULog::Log(LOG_LEVEL_WARNING, __FUNCSIG__, __LINE__,__VA_ARGS__) #define LOG_ERROR(...) CIULog::Log(LOG_LEVEL_ERROR, __FUNCSIG__,__LINE__, __VA_ARGS__) class CIULog { public: static bool Init(bool bToFile, bool bTruncateLongLog, PCTSTR pszLogFileName); static void Uninit(); static void SetLevel(LOG_LEVEL nLevel); //不输出线程ID号和所在函数签名、行号 static bool Log(long nLevel, PCTSTR pszFmt, .",
+  "keywords": [
+    
+  ],
+  "articleBody": "日志系统的设计 为什么需要日志 实际的软件项目产出都有一个流程，即先开发、测试，再发布生产，由于人的因素，既然是软件产品就不可能百分百没有 bug 或者逻辑错误，对于已经发布到生产的项目，一旦某个时刻产生非预期的结果，我们就需要去定位和排查问题。但是一般正式的生产环境的服务器或者产品是不允许开发人员通过附加调试器去排查问题的，主要有如下可能原因：\n在很多互联网企业，开发部门、测试部分和产品运维部门是分工明确的，软件产品一旦发布到生产环境以后，将全部交由运维部门人员去管理和维护，而原来开发此产品的开发人员不再拥有相关的操作程序的权限。 对于已经上了生产环境的服务，其数据和程序稳定性是公司的核心产值所在，一般不敢或不允许被开发人员随意调试或者操作，以免造成损失。 发布到生产环境的服务，一般为了让程序执行效率更高、文件体积更小，都是去掉调试符号后的版本，不方便也不利于调试。 既然我们无法通过调试器去调试，这个时候为了跟踪和回忆当时的程序行为进而定位问题，我们就需要日志系统。\n退一步说，即使在开发或者测试环境，我们可以把程序附加到调试器上去调试，但是对于一些特定的程序行为，我们无法通过设置断点，让程序在某个时刻暂停下来进行调试。例如，对于某些网络通信功能，如果暂停时间过长（相对于某些程序逻辑来说），通信的对端可能由于彼端没有在规定时间内响应而断开连接，导致程序逻辑无法进入我们想要的执行流中去；再例如，对于一些高频操作（如心跳包、定时器、界面绘制下的某些高频重复行为），可能在少量次数下无法触发我们想要的行为，而通过断点的暂停方式，我们不得不重复操作几十次、上百次甚至更多，这样排查问题效率是非常低下的。对于这类操作，我们可以通过打印日志，将当时的程序行为上下文现场记录下来，然后从日志系统中找到某次不正常的行为的上下文信息。这也是日志的另外一个作用。\n本文将从技术和业务上两个方面来介绍日志系统相关的设计与开发，所谓技术上，就是如何从程序开发的角度设计一款功能强大、性能优越、使用方便的日志系统；而业务上，是指我们在使用日志系统时，应该去记录哪些行为和数据，既简洁、不啰嗦，又方便需要时快速准确地定位到问题。\n日志系统的技术上的实现 日志的最初的原型即将程序运行的状态打印出来，对于 C/C++ 这门语言来说，即可以利用 printf、std::cout 等控制台输出函数，将日志信息输出到控制台，这类简单的情形我们不在此过多赘述。\n对于商业项目，为了方便排查问题，我们一般不将日志写到控制台，而是输出到文件或者数据库系统。不管哪一种，其思路基本上一致，我们这里以写文件为例来详细介绍。\n同步写日志 所谓同步写日志，指的是在输出日志的地方，将日志即时写入到文件中去。根据笔者的经验，这种设计广泛地用于相当多的的客户端软件。笔者曾从事过数年的客户端开发（包括 PC、安卓软件），设计过一些功能复杂的金融客户端产品，在这些系统中采用的就是这种同步写日志的方式。之所以使用这种方式其主要原因就是设计简单，而又不会影响用户使用体验。说到这里读者可能有这样一个疑问：一般的客户端软件，一般存在界面，而界面部分所属的逻辑就是程序的主线程，如果采取这种同步写日志的方式，当写日志时，写文件是磁盘 IO 操作，相比较程序其他部分是 CPU 操作，前者要慢很多，这样势必造成CPU等待，进而导致主线程“卡”在写文件处，进而造成界面卡顿，从而导致用户使用软件的体验不好。读者的这种顾虑确实是存在的。但是，很多时候我们不用担心这种问题，主要有两个原因：\n对于客户端程序，即使在主线程（UI 线程）中同步写文件，其单次或者几次磁盘操作累加时间，与人（用户）的可感知时间相比，也是非常小的，也就是说用户根本感觉不到这种同步写文件造成的延迟。当然，这里也给您一个提醒就是，如果在 UI 线程里面写日志，尤其是在一些高频操作中（如 Windows 的界面绘制消息 WM_PAINT 处理逻辑中），一定要控制写日志的长度和次数，否则就会因频繁写文件或一次写入数据过大而对界面造成卡顿。 客户端程序除了 UI 线程，还有其他与界面无关的工作线程，在这些线程中直接写文件，一般不会对用户的体验产生什么影响。 说了这么多，我们给出一个具体的例子。\n日志类的 .h 文件\n/** *@desc: IULog.h *@author: zhangyl *@date: 2014.12.25 */ #ifndef __LOG_H__ #define __LOG_H__ enum LOG_LEVEL { LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR }; //注意：如果打印的日志信息中有中文，则格式化字符串要用_T()宏包裹起来， #define LOG_INFO(...) CIULog::Log(LOG_LEVEL_INFO, __FUNCSIG__,__LINE__, __VA_ARGS__) #define LOG_WARNING(...) CIULog::Log(LOG_LEVEL_WARNING, __FUNCSIG__, __LINE__,__VA_ARGS__) #define LOG_ERROR(...) CIULog::Log(LOG_LEVEL_ERROR, __FUNCSIG__,__LINE__, __VA_ARGS__) class CIULog { public: static bool Init(bool bToFile, bool bTruncateLongLog, PCTSTR pszLogFileName); static void Uninit(); static void SetLevel(LOG_LEVEL nLevel); //不输出线程ID号和所在函数签名、行号 static bool Log(long nLevel, PCTSTR pszFmt, ...); //输出线程ID号和所在函数签名、行号 static bool Log(long nLevel, PCSTR pszFunctionSig, int nLineNo, PCTSTR pszFmt, ...); //注意:pszFunctionSig参数为Ansic版本 static bool Log(long nLevel, PCSTR pszFunctionSig, int nLineNo, PCSTR pszFmt, ...); private: CIULog() = delete; ~CIULog() = delete; CIULog(const CIULog\u0026 rhs) = delete; CIULog\u0026 operator=(const CIULog\u0026 rhs) = delete; static void GetTime(char* pszTime, int nTimeStrLength); private: static bool m_bToFile; //日志写入文件还是写到控制台 static HANDLE m_hLogFile; static bool m_bTruncateLongLog; //长日志是否截断 static LOG_LEVEL m_nLogLevel; //日志级别 }; #endif // !__LOG_H__ 日志的 cpp 文件\n/** *@desc: IULog.cpp *@author: zhangyl *@date: 2014.12.25 */ #include \"stdafx.h\" #include \"IULog.h\" #include \"EncodingUtil.h\" #include #ifndef LOG_OUTPUT #define LOG_OUTPUT #endif #define MAX_LINE_LENGTH 256 bool CIULog::m_bToFile = false; bool CIULog::m_bTruncateLongLog = false; HANDLE CIULog::m_hLogFile = INVALID_HANDLE_VALUE; LOG_LEVEL CIULog::m_nLogLevel = LOG_LEVEL_INFO; bool CIULog::Init(bool bToFile, bool bTruncateLongLog, PCTSTR pszLogFileName) { #ifdef LOG_OUTPUT m_bToFile = bToFile; m_bTruncateLongLog = bTruncateLongLog; if (pszLogFileName == NULL || pszLogFileName[0] == NULL) return FALSE; TCHAR szHomePath[MAX_PATH] = {0}; ::GetModuleFileName(NULL, szHomePath, MAX_PATH); for (int i = _tcslen(szHomePath); i \u003e= 0; --i) { if (szHomePath[i] == _T('\\\\')) { szHomePath[i] = _T('\\0'); break; } } TCHAR szLogDirectory[MAX_PATH] = { 0 }; _stprintf_s(szLogDirectory, _T(\"%s\\\\Logs\\\\\"), szHomePath); DWORD dwAttr = ::GetFileAttributes(szLogDirectory); if (!((dwAttr != 0xFFFFFFFF) \u0026\u0026 (dwAttr \u0026 FILE_ATTRIBUTE_DIRECTORY))) { TCHAR cPath[MAX_PATH] = { 0 }; TCHAR cTmpPath[MAX_PATH] = { 0 }; TCHAR* lpPos = NULL; TCHAR cTmp = _T('\\0'); _tcsncpy_s(cPath, szLogDirectory, MAX_PATH); for (int i = 0; i \u003c (int)_tcslen(cPath); i++) { if (_T('\\\\') == cPath[i]) cPath[i] = _T('/'); } lpPos = _tcschr(cPath, _T('/')); while (lpPos != NULL) { if (lpPos == cPath) { lpPos++; } else { cTmp = *lpPos; *lpPos = _T('\\0'); _tcsncpy_s(cTmpPath, cPath, MAX_PATH); ::CreateDirectory(cTmpPath, NULL); *lpPos = cTmp; lpPos++; } lpPos = _tcschr(lpPos, _T('/')); } } m_hLogFile = ::CreateFile(pszLogFileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL); if (m_hLogFile == INVALID_HANDLE_VALUE) return false; #endif // end LOG_OUTPUT return true; } void CIULog::Uninit() { #ifdef LOG_OUTPUT if(m_hLogFile != INVALID_HANDLE_VALUE) { ::CloseHandle(m_hLogFile); m_hLogFile = INVALID_HANDLE_VALUE; } #endif //end LOG_OUTPUT } void CIULog::SetLevel(LOG_LEVEL nLevel) { m_nLogLevel = nLevel; } bool CIULog::Log(long nLevel, PCTSTR pszFmt, ...) { #ifdef LOG_OUTPUT if (nLevel \u003c m_nLogLevel) return false; char szTime[64] = { 0 }; GetTime(szTime,ARRAYSIZE(szTime)); std::string strDebugInfo(szTime); std::string strLevel(\"[INFO]\"); if (nLevel == LOG_LEVEL_WARNING) strLevel = \"[Warning]\"; else if (nLevel == LOG_LEVEL_ERROR) strLevel = \"[Error]\"; strDebugInfo += strLevel; //当前线程信息 char szThreadID[32] = { 0 }; DWORD dwThreadID = ::GetCurrentThreadId(); sprintf_s(szThreadID, ARRAYSIZE(szThreadID), \"[ThreadID: %u]\", dwThreadID); strDebugInfo += szThreadID; //log正文 std::wstring strLogMsg; va_list ap; va_start(ap, pszFmt); int nLogMsgLength = _vsctprintf(pszFmt, ap); //容量必须算上最后一个\\0 if ((int)strLogMsg.capacity() \u003c nLogMsgLength + 1) { strLogMsg.resize(nLogMsgLength + 1); } _vstprintf_s((TCHAR*)strLogMsg.data(), strLogMsg.capacity(), pszFmt, ap); va_end(ap); //string内容正确但length不对，恢复一下其length std::wstring strMsgFormal; strMsgFormal.append(strLogMsg.c_str(), nLogMsgLength); //如果日志开启截断，长日志只取前MAX_LINE_LENGTH个字符 if (m_bTruncateLongLog) strMsgFormal = strMsgFormal.substr(0, MAX_LINE_LENGTH); std::string strLogMsgAscii; strLogMsgAscii = EncodeUtil::UnicodeToAnsi(strMsgFormal); strDebugInfo += strLogMsgAscii; strDebugInfo += \"\\r\\n\"; if(m_bToFile) { if(m_hLogFile == INVALID_HANDLE_VALUE) return false; ::SetFilePointer(m_hLogFile, 0, NULL, FILE_END); DWORD dwBytesWritten = 0; ::WriteFile(m_hLogFile, strDebugInfo.c_str(), strDebugInfo.length(), \u0026dwBytesWritten, NULL); ::FlushFileBuffers(m_hLogFile); return true; } ::OutputDebugStringA(strDebugInfo.c_str()); #endif // end LOG_OUTPUT return true; } bool CIULog::Log(long nLevel, PCSTR pszFunctionSig, int nLineNo, PCTSTR pszFmt, ...) { #ifdef LOG_OUTPUT if (nLevel \u003c m_nLogLevel) return false; //时间 char szTime[64] = { 0 }; GetTime(szTime, ARRAYSIZE(szTime)); std::string strDebugInfo(szTime); //错误级别 std::string strLevel(\"[INFO]\"); if (nLevel == LOG_LEVEL_WARNING) strLevel = \"[Warning]\"; else if (nLevel == LOG_LEVEL_ERROR) strLevel = \"[Error]\"; strDebugInfo += strLevel; //当前线程信息 char szThreadID[32] = {0}; DWORD dwThreadID = ::GetCurrentThreadId(); sprintf_s(szThreadID, ARRAYSIZE(szThreadID), \"[ThreadID: %u]\", dwThreadID); strDebugInfo += szThreadID; //函数签名 char szFuncSig[512] = { 0 }; sprintf_s(szFuncSig, \"[%s:%d]\", pszFunctionSig, nLineNo); strDebugInfo += szFuncSig; //log正文 std::wstring strLogMsg; va_list ap; va_start(ap, pszFmt); int nLogMsgLength = _vsctprintf(pszFmt, ap); //容量必须算上最后一个\\0 if ((int)strLogMsg.capacity() \u003c nLogMsgLength + 1) { strLogMsg.resize(nLogMsgLength + 1); } _vstprintf_s((TCHAR*)strLogMsg.data(), strLogMsg.capacity(), pszFmt, ap); va_end(ap); //string内容正确但length不对，恢复一下其length std::wstring strMsgFormal; strMsgFormal.append(strLogMsg.c_str(), nLogMsgLength); //如果日志开启截断，长日志只取前MAX_LINE_LENGTH个字符 if (m_bTruncateLongLog) strMsgFormal = strMsgFormal.substr(0, MAX_LINE_LENGTH); std::string strLogMsgAscii; strLogMsgAscii = EncodeUtil::UnicodeToAnsi(strMsgFormal); strDebugInfo += strLogMsgAscii; strDebugInfo += \"\\r\\n\"; if(m_bToFile) { if(m_hLogFile == INVALID_HANDLE_VALUE) return false; ::SetFilePointer(m_hLogFile, 0, NULL, FILE_END); DWORD dwBytesWritten = 0; ::WriteFile(m_hLogFile, strDebugInfo.c_str(), strDebugInfo.length(), \u0026dwBytesWritten, NULL); ::FlushFileBuffers(m_hLogFile); return true; } ::OutputDebugStringA(strDebugInfo.c_str()); #endif // end LOG_OUTPUT return true; } bool CIULog::Log(long nLevel, PCSTR pszFunctionSig, int nLineNo, PCSTR pszFmt, ...) { #ifdef LOG_OUTPUT if (nLevel \u003c m_nLogLevel) return false; //时间 char szTime[64] = { 0 }; GetTime(szTime, ARRAYSIZE(szTime)); std::string strDebugInfo(szTime); //错误级别 std::string strLevel(\"[INFO]\"); if (nLevel == LOG_LEVEL_WARNING) strLevel = \"[Warning]\"; else if (nLevel == LOG_LEVEL_ERROR) strLevel = \"[Error]\"; strDebugInfo += strLevel; //当前线程信息 char szThreadID[32] = {0}; DWORD dwThreadID = ::GetCurrentThreadId(); sprintf_s(szThreadID, ARRAYSIZE(szThreadID), \"[ThreadID: %u]\", dwThreadID); strDebugInfo += szThreadID; //函数签名 char szFuncSig[512] = { 0 }; sprintf_s(szFuncSig, \"[%s:%d]\", pszFunctionSig, nLineNo); strDebugInfo += szFuncSig; //日志正文 std::string strLogMsg; va_list ap; va_start(ap, pszFmt); int nLogMsgLength = _vscprintf(pszFmt, ap); //容量必须算上最后一个\\0 if ((int)strLogMsg.capacity() \u003c nLogMsgLength + 1) { strLogMsg.resize(nLogMsgLength + 1); } vsprintf_s((char*)strLogMsg.data(), strLogMsg.capacity(), pszFmt, ap); va_end(ap); //string内容正确但length不对，恢复一下其length std::string strMsgFormal; strMsgFormal.append(strLogMsg.c_str(), nLogMsgLength); //如果日志开启截断，长日志只取前MAX_LINE_LENGTH个字符 if (m_bTruncateLongLog) strMsgFormal = strMsgFormal.substr(0, MAX_LINE_LENGTH); strDebugInfo += strMsgFormal; strDebugInfo += \"\\r\\n\"; if(m_bToFile) { if(m_hLogFile == INVALID_HANDLE_VALUE) return false; ::SetFilePointer(m_hLogFile, 0, NULL, FILE_END); DWORD dwBytesWritten = 0; ::WriteFile(m_hLogFile, strDebugInfo.c_str(), strDebugInfo.length(), \u0026dwBytesWritten, NULL); ::FlushFileBuffers(m_hLogFile); return true; } ::OutputDebugStringA(strDebugInfo.c_str()); #endif // end LOG_OUTPUT return true; } void CIULog::GetTime(char* pszTime, int nTimeStrLength) { SYSTEMTIME st = {0}; ::GetLocalTime(\u0026st); sprintf_s(pszTime, nTimeStrLength, \"[%04d-%02d-%02d %02d:%02d:%02d:%04d]\", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds); } 上述代码中根据日志级别定义了三个宏 LOG_INFO、LOG_WARNING、LOG_ERROR，如果要使用该日志模块，只需要在程序启动处的地方调用 CIULog::Init 函数初始化日志：\nSYSTEMTIME st = {0}; ::GetLocalTime(\u0026st); TCHAR szLogFileName[MAX_PATH] = {0}; _stprintf_s(szLogFileName, MAX_PATH, _T(\"%s\\\\Logs\\\\%04d%02d%02d%02d%02d%02d.log\"), g_szHomePath, st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond); CIULog::Init(true, false, szLogFileName); 当然，最佳的做法，在程序退出的地方，调用 CIULog::Uninit 回收日志模块相关的资源：\nCIULog::Uninit(); 在做好这些准备工作以后，如果你想在程序的某个地方写一条日志，只需要这样写：\n//打印一条 INFO 级别的日志 LOG_INFO(\"Request logon: Account=%s, Password=*****, Status=%d, LoginType=%d.\", pLoginRequest-\u003em_szAccountName, pLoginRequest-\u003em_szPassword, pLoginRequest-\u003em_nStatus, (long)pLoginRequest-\u003em_nLoginType); //打印一条 WARNING 级别的日志 LOG_WARN(\"Some warning...\"); //打印一条 ERROR 级别的日志 LOG_ERROR(\"Recv data error, errorNO=%d.\", ::WSAGetLastError()); 关于 CIULog 这个日志模块类，如果读者要想实际运行查看效果，可以从链接（https://github.com/baloonwj/flamingo/tree/master/flamingoclient ）下载完整的项目代码来运行。该日志输出效果如下：\n[2018-11-09 23:52:54:0826][INFO][ThreadID: 7252][bool __thiscall CIUSocket::Login(const char *,const char *,int,int,int,class std::basic_string",
+  "wordCount" : "2206",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:43Z",
+  "dateModified": "2021-01-11T09:20:43Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/1549ab1669fe40dda14c41a84df83415/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      日志系统的设计
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#%e6%97%a5%e5%bf%97%e7%b3%bb%e7%bb%9f%e7%9a%84%e8%ae%be%e8%ae%a1" aria-label="日志系统的设计">日志系统的设计</a><ul>
+                        
+                <li>
+                    <a href="#%e4%b8%ba%e4%bb%80%e4%b9%88%e9%9c%80%e8%a6%81%e6%97%a5%e5%bf%97" aria-label="为什么需要日志">为什么需要日志</a></li>
+                <li>
+                    <a href="#%e6%97%a5%e5%bf%97%e7%b3%bb%e7%bb%9f%e7%9a%84%e6%8a%80%e6%9c%af%e4%b8%8a%e7%9a%84%e5%ae%9e%e7%8e%b0" aria-label="日志系统的技术上的实现">日志系统的技术上的实现</a><ul>
+                        
+                <li>
+                    <a href="#%e5%90%8c%e6%ad%a5%e5%86%99%e6%97%a5%e5%bf%97" aria-label="同步写日志">同步写日志</a><ul>
+                        
+                <li>
+                    <a href="#%e5%a4%9a%e7%ba%bf%e7%a8%8b%e5%90%8c%e6%ad%a5%e5%86%99%e6%97%a5%e5%bf%97%e5%87%ba%e7%8e%b0%e7%9a%84%e9%97%ae%e9%a2%98%e4%b8%80" aria-label="多线程同步写日志出现的问题一">多线程同步写日志出现的问题一</a></li>
+                <li>
+                    <a href="#%e5%a4%9a%e7%ba%bf%e7%a8%8b%e5%90%8c%e6%ad%a5%e5%86%99%e6%97%a5%e5%bf%97%e5%87%ba%e7%8e%b0%e7%9a%84%e9%97%ae%e9%a2%98%e4%ba%8c" aria-label="多线程同步写日志出现的问题二">多线程同步写日志出现的问题二</a></li></ul>
+                </li>
+                <li>
+                    <a href="#%e5%bc%82%e6%ad%a5%e5%86%99%e6%97%a5%e5%bf%97" aria-label="异步写日志">异步写日志</a><ul>
+                        
+                <li>
+                    <a href="#%e4%bc%98%e5%8c%96%e6%96%b9%e6%b3%95%e4%b8%80" aria-label="优化方法一">优化方法一</a></li>
+                <li>
+                    <a href="#%e4%bc%98%e5%8c%96%e6%96%b9%e6%b3%95%e4%ba%8c" aria-label="优化方法二">优化方法二</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h2 id="日志系统的设计">日志系统的设计</h2>
+<h3 id="为什么需要日志">为什么需要日志</h3>
+<p>实际的软件项目产出都有一个流程，即先开发、测试，再发布生产，由于人的因素，既然是软件产品就不可能百分百没有 bug 或者逻辑错误，对于已经发布到生产的项目，一旦某个时刻产生非预期的结果，我们就需要去定位和排查问题。但是一般正式的生产环境的服务器或者产品是不允许开发人员通过附加调试器去排查问题的，主要有如下可能原因：</p>
+<ol>
+<li>在很多互联网企业，开发部门、测试部分和产品运维部门是分工明确的，软件产品一旦发布到生产环境以后，将全部交由运维部门人员去管理和维护，而原来开发此产品的开发人员不再拥有相关的操作程序的权限。</li>
+<li>对于已经上了生产环境的服务，其数据和程序稳定性是公司的核心产值所在，一般不敢或不允许被开发人员随意调试或者操作，以免造成损失。</li>
+<li>发布到生产环境的服务，一般为了让程序执行效率更高、文件体积更小，都是去掉调试符号后的版本，不方便也不利于调试。</li>
+</ol>
+<p>既然我们无法通过调试器去调试，这个时候为了跟踪和回忆当时的程序行为进而定位问题，我们就需要日志系统。</p>
+<p>退一步说，即使在开发或者测试环境，我们可以把程序附加到调试器上去调试，但是对于一些特定的程序行为，我们无法通过设置断点，让程序在某个时刻暂停下来进行调试。例如，对于某些网络通信功能，如果暂停时间过长（相对于某些程序逻辑来说），通信的对端可能由于彼端没有在规定时间内响应而断开连接，导致程序逻辑无法进入我们想要的执行流中去；再例如，对于一些高频操作（如心跳包、定时器、界面绘制下的某些高频重复行为），可能在少量次数下无法触发我们想要的行为，而通过断点的暂停方式，我们不得不重复操作几十次、上百次甚至更多，这样排查问题效率是非常低下的。对于这类操作，我们可以通过打印日志，将当时的程序行为上下文现场记录下来，然后从日志系统中找到某次不正常的行为的上下文信息。这也是日志的另外一个作用。</p>
+<p>本文将从技术和业务上两个方面来介绍日志系统相关的设计与开发，所谓技术上，就是如何从程序开发的角度设计一款功能强大、性能优越、使用方便的日志系统；而业务上，是指我们在使用日志系统时，应该去记录哪些行为和数据，既简洁、不啰嗦，又方便需要时快速准确地定位到问题。</p>
+<h3 id="日志系统的技术上的实现">日志系统的技术上的实现</h3>
+<p>日志的最初的原型即将程序运行的状态打印出来，对于 C/C++ 这门语言来说，即可以利用 <strong>printf</strong>、<strong>std::cout</strong> 等控制台输出函数，将日志信息输出到控制台，这类简单的情形我们不在此过多赘述。</p>
+<p>对于商业项目，为了方便排查问题，我们一般不将日志写到控制台，而是输出到文件或者数据库系统。不管哪一种，其思路基本上一致，我们这里以写文件为例来详细介绍。</p>
+<h4 id="同步写日志">同步写日志</h4>
+<p>所谓同步写日志，指的是在输出日志的地方，将日志即时写入到文件中去。根据笔者的经验，这种设计广泛地用于相当多的的客户端软件。笔者曾从事过数年的客户端开发（包括 PC、安卓软件），设计过一些功能复杂的金融客户端产品，在这些系统中采用的就是这种同步写日志的方式。之所以使用这种方式其主要原因就是设计简单，而又不会影响用户使用体验。说到这里读者可能有这样一个疑问：一般的客户端软件，一般存在界面，而界面部分所属的逻辑就是程序的主线程，如果采取这种同步写日志的方式，当写日志时，写文件是磁盘 IO 操作，相比较程序其他部分是 CPU 操作，前者要慢很多，这样势必造成CPU等待，进而导致主线程“卡”在写文件处，进而造成界面卡顿，从而导致用户使用软件的体验不好。读者的这种顾虑确实是存在的。但是，很多时候我们不用担心这种问题，主要有两个原因：</p>
+<ol>
+<li>对于客户端程序，即使在主线程（UI 线程）中同步写文件，其单次或者几次磁盘操作累加时间，与人（用户）的可感知时间相比，也是非常小的，也就是说用户根本感觉不到这种同步写文件造成的延迟。当然，这里也给您一个提醒就是，如果在 UI 线程里面写日志，尤其是在一些高频操作中（如 Windows 的界面绘制消息 WM_PAINT 处理逻辑中），一定要控制写日志的长度和次数，否则就会因频繁写文件或一次写入数据过大而对界面造成卡顿。</li>
+<li>客户端程序除了 UI 线程，还有其他与界面无关的工作线程，在这些线程中直接写文件，一般不会对用户的体验产生什么影响。</li>
+</ol>
+<p>说了这么多，我们给出一个具体的例子。</p>
+<p><strong>日志类的 .h 文件</strong></p>
+<pre tabindex="0"><code>/**
+ *@desc:   IULog.h
+ *@author: zhangyl
+ *@date:   2014.12.25
+ */
+#ifndef __LOG_H__
+#define __LOG_H__
+
+enum LOG_LEVEL
+{
+    LOG_LEVEL_INFO,
+    LOG_LEVEL_WARNING,
+    LOG_LEVEL_ERROR
+};
+
+//注意：如果打印的日志信息中有中文，则格式化字符串要用_T()宏包裹起来，
+#define LOG_INFO(...)     CIULog::Log(LOG_LEVEL_INFO, __FUNCSIG__,__LINE__, __VA_ARGS__)
+#define LOG_WARNING(...)  CIULog::Log(LOG_LEVEL_WARNING, __FUNCSIG__, __LINE__,__VA_ARGS__)
+#define LOG_ERROR(...)    CIULog::Log(LOG_LEVEL_ERROR, __FUNCSIG__,__LINE__, __VA_ARGS__)
+
+class CIULog
+{
+public:
+    static bool Init(bool bToFile, bool bTruncateLongLog, PCTSTR pszLogFileName);
+    static void Uninit();
+
+    static void SetLevel(LOG_LEVEL nLevel);
+
+    //不输出线程ID号和所在函数签名、行号
+    static bool Log(long nLevel, PCTSTR pszFmt, ...);
+    //输出线程ID号和所在函数签名、行号
+    static bool Log(long nLevel, PCSTR pszFunctionSig, int nLineNo, PCTSTR pszFmt, ...);        //注意:pszFunctionSig参数为Ansic版本
+    static bool Log(long nLevel, PCSTR pszFunctionSig, int nLineNo, PCSTR pszFmt, ...);
+private:
+    CIULog() = delete;
+    ~CIULog() = delete;
+
+    CIULog(const CIULog&amp; rhs) = delete;
+    CIULog&amp; operator=(const CIULog&amp; rhs) = delete;
+
+    static void GetTime(char* pszTime, int nTimeStrLength);
+
+private:
+    static bool             m_bToFile;              //日志写入文件还是写到控制台  
+    static HANDLE           m_hLogFile;
+    static bool             m_bTruncateLongLog;     //长日志是否截断
+    static LOG_LEVEL        m_nLogLevel;            //日志级别
+};
+
+#endif // !__LOG_H__
+</code></pre><p><strong>日志的 cpp 文件</strong></p>
+<pre tabindex="0"><code>/**
+ *@desc:   IULog.cpp
+ *@author: zhangyl
+ *@date:   2014.12.25
+ */
+#include &#34;stdafx.h&#34;
+#include &#34;IULog.h&#34;
+#include &#34;EncodingUtil.h&#34;
+#include &lt;tchar.h&gt;
+
+#ifndef LOG_OUTPUT
+#define LOG_OUTPUT
+#endif
+
+#define MAX_LINE_LENGTH 256
+
+bool CIULog::m_bToFile = false;
+bool CIULog::m_bTruncateLongLog = false;
+HANDLE CIULog::m_hLogFile = INVALID_HANDLE_VALUE;
+LOG_LEVEL CIULog::m_nLogLevel = LOG_LEVEL_INFO;
+
+bool CIULog::Init(bool bToFile, bool bTruncateLongLog, PCTSTR pszLogFileName)
+{
+#ifdef LOG_OUTPUT
+    m_bToFile = bToFile;
+    m_bTruncateLongLog = bTruncateLongLog;
+
+    if (pszLogFileName == NULL || pszLogFileName[0] == NULL)
+        return FALSE;
+
+    TCHAR szHomePath[MAX_PATH] = {0};
+    ::GetModuleFileName(NULL, szHomePath, MAX_PATH);
+    for (int i = _tcslen(szHomePath); i &gt;= 0; --i)
+    {
+        if (szHomePath[i] == _T(&#39;\\&#39;))
+        {
+            szHomePath[i] = _T(&#39;\0&#39;);
+            break;
+        }
+    }
+
+    TCHAR szLogDirectory[MAX_PATH] = { 0 };
+    _stprintf_s(szLogDirectory, _T(&#34;%s\\Logs\\&#34;), szHomePath);
+
+    DWORD dwAttr = ::GetFileAttributes(szLogDirectory);
+    if (!((dwAttr != 0xFFFFFFFF) &amp;&amp; (dwAttr &amp; FILE_ATTRIBUTE_DIRECTORY)))
+    {
+        TCHAR cPath[MAX_PATH] = { 0 };
+        TCHAR cTmpPath[MAX_PATH] = { 0 };
+        TCHAR* lpPos = NULL;
+        TCHAR cTmp = _T(&#39;\0&#39;);
+
+        _tcsncpy_s(cPath, szLogDirectory, MAX_PATH);
+
+        for (int i = 0; i &lt; (int)_tcslen(cPath); i++)
+        {
+            if (_T(&#39;\\&#39;) == cPath[i])
+                cPath[i] = _T(&#39;/&#39;);
+        }
+
+        lpPos = _tcschr(cPath, _T(&#39;/&#39;));
+        while (lpPos != NULL)
+        {
+            if (lpPos == cPath)
+            {
+                lpPos++;
+            }
+            else
+            {
+                cTmp = *lpPos;
+                *lpPos = _T(&#39;\0&#39;);
+                _tcsncpy_s(cTmpPath, cPath, MAX_PATH);
+                ::CreateDirectory(cTmpPath, NULL);
+                *lpPos = cTmp;
+                lpPos++;
+            }
+            lpPos = _tcschr(lpPos, _T(&#39;/&#39;));
+        }
+    }
+
+    m_hLogFile = ::CreateFile(pszLogFileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (m_hLogFile == INVALID_HANDLE_VALUE)
+        return false;
+
+#endif // end LOG_OUTPUT
+
+    return true;
+}
+
+void CIULog::Uninit()
+{
+#ifdef LOG_OUTPUT
+    if(m_hLogFile != INVALID_HANDLE_VALUE)
+    {
+        ::CloseHandle(m_hLogFile);
+        m_hLogFile = INVALID_HANDLE_VALUE;
+    }
+#endif //end LOG_OUTPUT
+}
+
+void CIULog::SetLevel(LOG_LEVEL nLevel)
+{
+    m_nLogLevel = nLevel;
+}
+
+bool CIULog::Log(long nLevel, PCTSTR pszFmt, ...)
+{
+#ifdef LOG_OUTPUT
+    if (nLevel &lt; m_nLogLevel)
+        return false;
+
+    char szTime[64] = { 0 };
+    GetTime(szTime,ARRAYSIZE(szTime));
+    std::string strDebugInfo(szTime);
+
+    std::string strLevel(&#34;[INFO]&#34;);
+    if (nLevel == LOG_LEVEL_WARNING)
+        strLevel = &#34;[Warning]&#34;;
+    else if (nLevel == LOG_LEVEL_ERROR)
+        strLevel = &#34;[Error]&#34;;
+
+    strDebugInfo += strLevel;
+
+    //当前线程信息
+    char szThreadID[32] = { 0 };
+    DWORD dwThreadID = ::GetCurrentThreadId();
+    sprintf_s(szThreadID, ARRAYSIZE(szThreadID), &#34;[ThreadID: %u]&#34;, dwThreadID);  
+    strDebugInfo += szThreadID;
+
+    //log正文
+    std::wstring strLogMsg;
+    va_list ap;
+    va_start(ap, pszFmt);
+    int nLogMsgLength = _vsctprintf(pszFmt, ap);
+    //容量必须算上最后一个\0
+    if ((int)strLogMsg.capacity() &lt; nLogMsgLength + 1)
+    {
+        strLogMsg.resize(nLogMsgLength + 1);
+    }
+    _vstprintf_s((TCHAR*)strLogMsg.data(), strLogMsg.capacity(), pszFmt, ap);
+    va_end(ap);
+
+    //string内容正确但length不对，恢复一下其length
+    std::wstring strMsgFormal;
+    strMsgFormal.append(strLogMsg.c_str(), nLogMsgLength);
+
+    //如果日志开启截断，长日志只取前MAX_LINE_LENGTH个字符
+    if (m_bTruncateLongLog)
+        strMsgFormal = strMsgFormal.substr(0, MAX_LINE_LENGTH);
+
+    std::string strLogMsgAscii;
+    strLogMsgAscii = EncodeUtil::UnicodeToAnsi(strMsgFormal);
+
+    strDebugInfo += strLogMsgAscii;
+    strDebugInfo += &#34;\r\n&#34;;
+
+    if(m_bToFile)
+    {
+        if(m_hLogFile == INVALID_HANDLE_VALUE)
+            return false;
+
+        ::SetFilePointer(m_hLogFile, 0, NULL, FILE_END);
+        DWORD dwBytesWritten = 0;       
+        ::WriteFile(m_hLogFile, strDebugInfo.c_str(), strDebugInfo.length(), &amp;dwBytesWritten, NULL);
+        ::FlushFileBuffers(m_hLogFile);
+        return true;
+    }
+
+    ::OutputDebugStringA(strDebugInfo.c_str());
+
+#endif // end LOG_OUTPUT
+
+    return true;
+}
+
+bool CIULog::Log(long nLevel, PCSTR pszFunctionSig, int nLineNo, PCTSTR pszFmt, ...)
+{
+#ifdef LOG_OUTPUT
+    if (nLevel &lt; m_nLogLevel)
+        return false;
+
+    //时间
+    char szTime[64] = { 0 };
+    GetTime(szTime, ARRAYSIZE(szTime));
+    std::string strDebugInfo(szTime);
+
+    //错误级别
+    std::string strLevel(&#34;[INFO]&#34;);
+    if (nLevel == LOG_LEVEL_WARNING)
+        strLevel = &#34;[Warning]&#34;;
+    else if (nLevel == LOG_LEVEL_ERROR)
+        strLevel = &#34;[Error]&#34;;
+
+    strDebugInfo += strLevel;
+
+    //当前线程信息
+    char szThreadID[32] = {0};
+    DWORD dwThreadID = ::GetCurrentThreadId();
+    sprintf_s(szThreadID, ARRAYSIZE(szThreadID), &#34;[ThreadID: %u]&#34;, dwThreadID);
+    strDebugInfo += szThreadID;
+
+    //函数签名
+    char szFuncSig[512] = { 0 };
+    sprintf_s(szFuncSig, &#34;[%s:%d]&#34;, pszFunctionSig, nLineNo);
+    strDebugInfo += szFuncSig;
+
+    //log正文
+    std::wstring strLogMsg;
+    va_list ap;
+    va_start(ap, pszFmt);
+    int nLogMsgLength = _vsctprintf(pszFmt, ap);
+    //容量必须算上最后一个\0 
+    if ((int)strLogMsg.capacity() &lt; nLogMsgLength + 1)
+    {
+        strLogMsg.resize(nLogMsgLength + 1);
+    }
+    _vstprintf_s((TCHAR*)strLogMsg.data(), strLogMsg.capacity(), pszFmt, ap);
+    va_end(ap);
+
+    //string内容正确但length不对，恢复一下其length
+    std::wstring strMsgFormal;
+    strMsgFormal.append(strLogMsg.c_str(), nLogMsgLength);
+
+    //如果日志开启截断，长日志只取前MAX_LINE_LENGTH个字符
+    if (m_bTruncateLongLog)
+        strMsgFormal = strMsgFormal.substr(0, MAX_LINE_LENGTH);
+
+    std::string strLogMsgAscii;
+    strLogMsgAscii = EncodeUtil::UnicodeToAnsi(strMsgFormal);
+
+    strDebugInfo += strLogMsgAscii;
+    strDebugInfo += &#34;\r\n&#34;;
+
+    if(m_bToFile)
+    {
+        if(m_hLogFile == INVALID_HANDLE_VALUE)
+            return false;
+
+        ::SetFilePointer(m_hLogFile, 0, NULL, FILE_END);
+        DWORD dwBytesWritten = 0;
+        ::WriteFile(m_hLogFile, strDebugInfo.c_str(), strDebugInfo.length(), &amp;dwBytesWritten, NULL);
+        ::FlushFileBuffers(m_hLogFile);
+        return true;
+    }
+
+    ::OutputDebugStringA(strDebugInfo.c_str());
+
+#endif // end LOG_OUTPUT
+
+    return true;
+}
+
+bool CIULog::Log(long nLevel, PCSTR pszFunctionSig, int nLineNo, PCSTR pszFmt, ...)
+{
+#ifdef LOG_OUTPUT
+    if (nLevel &lt; m_nLogLevel)
+        return false;
+
+    //时间
+    char szTime[64] = { 0 };
+    GetTime(szTime, ARRAYSIZE(szTime));
+    std::string strDebugInfo(szTime);
+
+    //错误级别
+    std::string strLevel(&#34;[INFO]&#34;);
+    if (nLevel == LOG_LEVEL_WARNING)
+        strLevel = &#34;[Warning]&#34;;
+    else if (nLevel == LOG_LEVEL_ERROR)
+        strLevel = &#34;[Error]&#34;;
+
+    strDebugInfo += strLevel;
+
+    //当前线程信息
+    char szThreadID[32] = {0};
+    DWORD dwThreadID = ::GetCurrentThreadId();
+    sprintf_s(szThreadID, ARRAYSIZE(szThreadID), &#34;[ThreadID: %u]&#34;, dwThreadID);
+    strDebugInfo += szThreadID;
+
+    //函数签名
+    char szFuncSig[512] = { 0 };
+    sprintf_s(szFuncSig, &#34;[%s:%d]&#34;, pszFunctionSig, nLineNo);
+    strDebugInfo += szFuncSig;
+
+    //日志正文
+    std::string strLogMsg;
+    va_list ap;
+    va_start(ap, pszFmt);
+    int nLogMsgLength = _vscprintf(pszFmt, ap);
+    //容量必须算上最后一个\0
+    if ((int)strLogMsg.capacity() &lt; nLogMsgLength + 1)
+    {
+        strLogMsg.resize(nLogMsgLength + 1);
+    }
+    vsprintf_s((char*)strLogMsg.data(), strLogMsg.capacity(), pszFmt, ap);
+    va_end(ap);
+
+    //string内容正确但length不对，恢复一下其length
+    std::string strMsgFormal;
+    strMsgFormal.append(strLogMsg.c_str(), nLogMsgLength);
+
+    //如果日志开启截断，长日志只取前MAX_LINE_LENGTH个字符
+    if (m_bTruncateLongLog)
+        strMsgFormal = strMsgFormal.substr(0, MAX_LINE_LENGTH);
+
+    strDebugInfo += strMsgFormal;
+    strDebugInfo += &#34;\r\n&#34;;
+
+    if(m_bToFile)
+    {
+        if(m_hLogFile == INVALID_HANDLE_VALUE)
+            return false;
+
+        ::SetFilePointer(m_hLogFile, 0, NULL, FILE_END);
+        DWORD dwBytesWritten = 0;
+        ::WriteFile(m_hLogFile, strDebugInfo.c_str(), strDebugInfo.length(), &amp;dwBytesWritten, NULL);
+        ::FlushFileBuffers(m_hLogFile);
+        return true;
+    }
+
+    ::OutputDebugStringA(strDebugInfo.c_str());
+
+#endif // end LOG_OUTPUT
+
+    return true;
+}
+
+void CIULog::GetTime(char* pszTime, int nTimeStrLength)
+{
+    SYSTEMTIME st = {0};
+    ::GetLocalTime(&amp;st);
+    sprintf_s(pszTime, nTimeStrLength, &#34;[%04d-%02d-%02d %02d:%02d:%02d:%04d]&#34;, st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds);
+}
+</code></pre><p>上述代码中根据日志级别定义了三个宏 <strong>LOG_INFO</strong>、<strong>LOG_WARNING</strong>、<strong>LOG_ERROR</strong>，如果要使用该日志模块，只需要在程序启动处的地方调用 <strong>CIULog::Init</strong> 函数初始化日志：</p>
+<pre tabindex="0"><code>SYSTEMTIME st = {0};
+::GetLocalTime(&amp;st);
+TCHAR szLogFileName[MAX_PATH] = {0};
+_stprintf_s(szLogFileName, MAX_PATH, _T(&#34;%s\\Logs\\%04d%02d%02d%02d%02d%02d.log&#34;), g_szHomePath, st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+CIULog::Init(true, false, szLogFileName);
+</code></pre><p>当然，最佳的做法，在程序退出的地方，调用 <strong>CIULog::Uninit</strong> 回收日志模块相关的资源：</p>
+<pre tabindex="0"><code>CIULog::Uninit();
+</code></pre><p>在做好这些准备工作以后，如果你想在程序的某个地方写一条日志，只需要这样写：</p>
+<pre tabindex="0"><code>//打印一条 INFO 级别的日志
+LOG_INFO(&#34;Request logon: Account=%s, Password=*****, Status=%d, LoginType=%d.&#34;, pLoginRequest-&gt;m_szAccountName, pLoginRequest-&gt;m_szPassword, pLoginRequest-&gt;m_nStatus, (long)pLoginRequest-&gt;m_nLoginType);
+//打印一条 WARNING 级别的日志
+LOG_WARN(&#34;Some warning...&#34;);
+//打印一条 ERROR 级别的日志
+LOG_ERROR(&#34;Recv data error, errorNO=%d.&#34;, ::WSAGetLastError());
+</code></pre><p>关于 <strong>CIULog</strong> 这个日志模块类，如果读者要想实际运行查看效果，可以从链接（https://github.com/baloonwj/flamingo/tree/master/flamingoclient ）下载完整的项目代码来运行。该日志输出效果如下：</p>
+<pre tabindex="0"><code>[2018-11-09 23:52:54:0826][INFO][ThreadID: 7252][bool __thiscall CIUSocket::Login(const char *,const char *,int,int,int,class std::basic_string&lt;char,struct std::char_traits&lt;char&gt;,class std::allocator&lt;char&gt; &gt; &amp;):1107]Request logon: Account=zhangy, Password=*****, Status=76283204, LoginType=1.
+[2018-11-09 23:52:56:0352][INFO][ThreadID: 5828][void __thiscall CIUSocket::SendThreadProc(void):794]Recv data thread start...
+[2018-11-09 23:52:56:0385][INFO][ThreadID: 6032][void __thiscall CSendMsgThread::HandleUserBasicInfo(const class CUserBasicInfoRequest *):298]Request to get userinfo.
+[2018-11-09 23:52:56:0355][INFO][ThreadID: 7140][void __thiscall CIUSocket::RecvThreadProc(void):842]Recv data thread start...
+[2018-11-09 23:52:57:0254][INFO][ThreadID: 7220][int __thiscall CRecvMsgThread::HandleFriendListInfo(const class std::basic_string&lt;char,struct std::char_traits&lt;char&gt;,class std::allocator&lt;char&gt; &gt; &amp;):593]Recv user basic info, info count=1.
+</code></pre><h5 id="多线程同步写日志出现的问题一">多线程同步写日志出现的问题一</h5>
+<p>从上面的日志输出来看，这种同步的日志输出方式，也存在时间顺序不正确的问题（时间戳大的日志比时间戳小的日志靠前）。这是由于多线程同时写日志到同一个文件时，产生日志的时间和实际写入磁盘的时间不是一个原子操作。下图解释了该现象出现的根源：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/4cbd3ce5e31ae88361d2b6efa34118a8.png" alt=""  />
+</p>
+<p>多线程写同一个日志文件出现先产生的日志后写入到文件中的现象</p>
+<p>好在这种时间顺序不正确只会出现在不同线程之间，对于同一个线程的不同时间的日志记录顺序肯定是正确的。所以这种日期错乱现象，并不影响我们使用日志。</p>
+<h5 id="多线程同步写日志出现的问题二">多线程同步写日志出现的问题二</h5>
+<p>多线程同时写入同一个日志文件还有一个问题，就是假设线程 A 写某一个时刻追加日志内容为 “AAAAA” ，线程 B 在同一时刻追加日志内容为 “BBBBB” ，线程 C 在同一时刻追加日志内容为 “CCCCC” ，那么最终的日志文件中的内容会不会出现 “AABBCCABCAACCBB” 这种格式？</p>
+<p>在类 Unix 系统上（包括 Linux），同一个进程内针对同一个 <strong>FILE</strong>* 的操作是线程安全的，也就是说，在这类操作系统上得到的日志结果 A、B、C 各个字母组一定是连续在一起，也就是说最终得到的日志内容可能是 “<strong>AAAAACCCCCBBBBB</strong>” 或 “<strong>AAAAABBBBBCCCCC</strong>” 等这种连续的格式，绝不会出现 A、B、C 字母交错相间的现象。</p>
+<p>而在Windows系统上，对于 <strong>FILE</strong>* 的操作并不是线程安全的。但是笔者做了大量实验，在 Windows 系统上也没有出现这种 A、B、C 字母相间的现象。（关于这个问题的讨论，可以参考这里：https://www.zhihu.com/question/40472431 ）</p>
+<p>这种同步日志的实现方式，一般用于低频写日志的软件系统中（如客户端软件），所以我可以认为这种多线程同时写日志到一个文件中是可行的。</p>
+<h4 id="异步写日志">异步写日志</h4>
+<p>当然，对于性能要求不高的应用（如大多数客户端程序、某些并发数量不高的服务）来说，这种同步写日志的实现方式是可以满足要求的。但是对于 QPS 要求很高或者对性能有一定要求的服务器程序，同步写日志等待磁盘 IO 的完成对于服务的关键性逻辑的快速执行和及时响应性会造成一定的性能损失。为了减小这种损失，我们可以采用异步日志。</p>
+<p>所谓异步写日志，与同步写日志相反，即产生日志的地方，不会将日志实时写入到文件中去，而是通过一些线程同步技术将日志先暂存下来，然后再通过一个或多个专门的日志写入线程去将这些缓存的日志写入到磁盘中去，这样的话，原来输出日志的线程就不存在等待写日志到磁盘这样的效率损耗了。这本质上，其实就是一个生产者和消费者，产生日志的线程是生产者，将日志写入文件的线程是消费者。当然，对于日志的消费者线程，我这里提到“<strong>一个</strong>”或“<strong>多个</strong>”日志线程，在实际开发中，如果多个日志消费线程，我们又要考虑多个线程可能会造成写日志的时间顺序错位（时间较晚的日志写在时间较早的日志前面），这在上文中已经讨论过，这里不再赘述。</p>
+<p>总结起来，为了方便读者理解和编码，我们可以认为异步写日志的逻辑一般存在一组专门写日志的线程（一个或多个），程序的其他线程为这些日志线程生产日志。</p>
+<p>至于其他线程如何将产生的日志交给日志线程，这就是多线程之间资源同步的问题了。我们可以使用一个队列来存储其他线程产生的日志，日志线程从该队列中取出日志，然后将日志内容写入文件。最简单的方式是日志生产线程将每次产生的日志信息放入一个队列时、日志写入线程从队列中取出日志时，都使用一个**互斥体( mutex )**保护起来。代码示例如下（C++11 代码）：</p>
+<pre tabindex="0"><code>/**
+ *@desc: AsyncLogger.cpp
+ *@author: zhangyl
+ *@date: 2018.11.10
+ */
+#include &#34;stdafx.h&#34;
+#include &lt;thread&gt;
+#include &lt;mutex&gt;
+#include &lt;list&gt;
+#include &lt;string&gt;
+#include &lt;sstream&gt;
+#include &lt;iostream&gt;
+
+//保护队列的互斥体
+std::mutex log_mutex;
+std::list&lt;std::string&gt; cached_logs;
+FILE* log_file = NULL;
+
+bool init_log_file()
+{
+    //以追加内容的形式写入文件内容，如果文件不存在，则创建
+    log_file = fopen(&#34;my.log&#34;, &#34;a+&#34;);
+    return log_file != NULL;
+}
+
+void uninit_log_file()
+{
+    if (log_file != NULL)
+        fclose(log_file);
+}
+
+bool write_log_tofile(const std::string&amp; line)
+{
+    if (log_file == NULL)
+        return false;
+
+    if (fwrite((void*)line.c_str(), 1, line.length(), log_file) != line.length())
+        return false;
+
+    //将日志立即冲刷到文件中去
+    fflush(log_file);
+
+    return true;
+}
+
+void log_producer()
+{
+    int index = 0;
+    while (true)
+    {
+        ++ index;
+        std::ostringstream os;
+        os &lt;&lt; &#34;This is log, index: &#34; &lt;&lt; index &lt;&lt; &#34;, producer threadID: &#34; &lt;&lt; std::this_thread::get_id() &lt;&lt; &#34;\n&#34;;
+        //使用花括号括起来为的是减小锁的粒度
+        {
+            std::lock_guard&lt;std::mutex&gt; lock(log_mutex);
+            cached_logs.emplace_back(os.str());
+        }
+
+        std::chrono::milliseconds duration(100);
+        std::this_thread::sleep_for(duration);
+    }
+}
+
+void log_consumer()
+{
+    std::string line;
+    while (true)
+    {
+        //使用花括号括起来为的是减小锁的粒度
+        {
+            std::lock_guard&lt;std::mutex&gt; lock(log_mutex);
+            if (!cached_logs.empty())
+            {
+                line = cached_logs.front();
+                cached_logs.pop_front();
+            }
+        }
+
+        if (line.empty())
+        {        
+            std::chrono::milliseconds duration(1000);
+            std::this_thread::sleep_for(duration);
+
+            continue;
+        }
+
+        write_log_tofile(line);
+
+        line.clear();
+    }
+}
+
+int main(int argc, char* argv[])
+{
+    if (!init_log_file())
+    {
+        std::cout &lt;&lt; &#34;init log file error.&#34; &lt;&lt; std::endl;
+        return -1;
+    }
+
+    std::thread log_producer1(log_producer);
+    std::thread log_producer2(log_producer);
+    std::thread log_producer3(log_producer);
+
+    std::thread log_consumer1(log_consumer);
+    std::thread log_consumer2(log_consumer);
+    std::thread log_consumer3(log_consumer);
+
+    log_producer1.join();
+    log_producer2.join();
+    log_producer3.join();
+
+    log_consumer1.join();
+    log_consumer2.join();
+    log_consumer3.join();
+
+    uninit_log_file();
+
+    return 0;
+}
+</code></pre><p>上述代码分别模拟了三个生产日志的线程（<strong>log_producer1～3</strong>）和三个消费日志线程（<strong>log_consumer1～3</strong>）。当然上述代码可以继续优化，如果当前缓存队列中没有日志记录，那么消费日志线程会做无用功。</p>
+<h5 id="优化方法一">优化方法一</h5>
+<p>可以使用条件变量，如果当前队列中没有日志记录，则将日志消费线程挂起；当生产日志的线程产生了新的日志后，**置信（signal）**条件变量，这样日志消费线程会被唤醒，以将日志从队列中取出来并写入文件。我们来看下代码：</p>
+<pre tabindex="0"><code>/**
+ *@desc: AsyncLoggerLinux.cpp
+ *@author: zhangyl
+ *@date: 2018.11.10
+ */
+#include &#34;stdafx.h&#34;
+#include &lt;thread&gt;
+#include &lt;mutex&gt;
+#include &lt;condition_variable&gt;
+#include &lt;list&gt;
+#include &lt;string&gt;
+#include &lt;sstream&gt;
+#include &lt;iostream&gt;
+
+std::mutex log_mutex;
+std::condition_variable log_cv;
+std::list&lt;std::string&gt; cached_logs;
+FILE* log_file = NULL;
+
+bool init_log_file()
+{
+    //以追加内容的形式写入文件内容，如果文件不存在，则创建
+    log_file = fopen(&#34;my.log&#34;, &#34;a+&#34;);
+    return log_file != NULL;
+}
+
+void uninit_log_file()
+{
+    if (log_file != NULL)
+        fclose(log_file);
+}
+
+bool write_log_tofile(const std::string&amp; line)
+{
+    if (log_file == NULL)
+        return false;
+
+    if (fwrite((void*)line.c_str(), 1, line.length(), log_file) != line.length())
+        return false;
+
+    //将日志立即冲刷到文件中去
+    fflush(log_file);
+
+    return true;
+}
+
+void log_producer()
+{
+    int index = 0;
+    while (true)
+    {
+        ++ index;
+        std::ostringstream os;
+        os &lt;&lt; &#34;This is log, index: &#34; &lt;&lt; index &lt;&lt; &#34;, producer threadID: &#34; &lt;&lt; std::this_thread::get_id() &lt;&lt; &#34;\n&#34;;
+        //使用花括号括起来为的是减小锁的粒度
+        {
+            std::lock_guard&lt;std::mutex&gt; lock(log_mutex);
+            cached_logs.emplace_back(os.str());
+            log_cv.notify_one();
+        }
+
+        std::chrono::milliseconds duration(100);
+        std::this_thread::sleep_for(duration);
+    }
+}
+
+void log_consumer()
+{
+    std::string line;
+    while (true)
+    {
+        //使用花括号括起来为的是减小锁的粒度
+        {
+            std::unique_lock&lt;std::mutex&gt; lock(log_mutex);
+            if (cached_logs.empty())
+            {
+                //无限等待
+                log_cv.wait(lock);
+            }
+
+            line = cached_logs.front();
+            cached_logs.pop_front();
+        }
+
+        if (line.empty())
+        {        
+            std::chrono::milliseconds duration(1000);
+            std::this_thread::sleep_for(duration);
+
+            continue;
+        }
+
+        write_log_tofile(line);
+
+        line.clear();
+    }
+}
+
+int main(int argc, char* argv[])
+{
+    if (!init_log_file())
+    {
+        std::cout &lt;&lt; &#34;init log file error.&#34; &lt;&lt; std::endl;
+        return -1;
+    }
+
+    std::thread log_producer1(log_producer);
+    std::thread log_producer2(log_producer);
+    std::thread log_producer3(log_producer);
+
+    std::thread log_consumer1(log_consumer);
+    std::thread log_consumer2(log_consumer);
+    std::thread log_consumer3(log_consumer);
+
+    log_producer1.join();
+    log_producer2.join();
+    log_producer3.join();
+
+    log_consumer1.join();
+    log_consumer2.join();
+    log_consumer3.join();
+
+    uninit_log_file();
+
+    return 0;
+}
+</code></pre><h5 id="优化方法二">优化方法二</h5>
+<p>除了条件变量以外，我们还可以使用信号量来设计我们的异步日志系统，信号量是带有资源计数的线程同步对象，当每产生一条日志时，我们将信号量资源计数自增1，日志消费线程默认是等待这个信号量是否受信，如果受信，每唤醒一个日志消费线程，信号量字数计数将自动减1。通俗地说就是生成者每生产一个资源，就将资源计数加1，而消费者每消费一个资源数量，就将资源计数减一；如果当前资源计数已经为0，则消费者将自动挂起。</p>
+<p>由于 C++ 11 没有提供对不同平台的信号量对象的封装，我们这里分别给出 Windows 和 Linux 两个平台的实现代码，读者可以根据需要来学习其中一个或两个同时学习。注意，为了保持代码风格一致，对于线程和读写文件相关函数，在不同的操作系统平台，我们使用该系统平台相关的 API 接口，而不再使用 C++ 11 的相关函数和类库。</p>
+<p><strong>Windows 平台代码</strong></p>
+<pre tabindex="0"><code>/**
+ *@desc: AsyncLogger.cpp，Windows版本
+ *@author: zhangyl
+ *@date: 2018.11.10
+ */
+#include &#34;stdafx.h&#34;
+#include &lt;windows.h&gt;
+#include &lt;list&gt;
+#include &lt;string&gt;
+#include &lt;iostream&gt;
+#include &lt;sstream&gt;
+
+std::list&lt;std::string&gt; cached_logs;
+CRITICAL_SECTION g_cs;
+HANDLE g_hSemaphore = NULL;
+HANDLE g_hLogFile = INVALID_HANDLE_VALUE;
+
+bool Init()
+{
+    InitializeCriticalSection(&amp;g_cs);
+
+    //假设资源数量上限是0xFFFFFFFF
+    g_hSemaphore = CreateSemaphore(NULL, 0, 0xFFFFFFFF, NULL);
+
+    //如果文件不存在，则创建
+    g_hLogFile = CreateFile(_T(&#34;my.log&#34;), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (g_hLogFile == INVALID_HANDLE_VALUE)
+        return false;
+
+    return true;
+}
+
+void Uninit()
+{
+    DeleteCriticalSection(&amp;g_cs);
+
+    if (g_hSemaphore != NULL)
+        CloseHandle(g_hSemaphore);
+
+    if (g_hLogFile != INVALID_HANDLE_VALUE)
+        CloseHandle(g_hLogFile);
+}
+
+bool WriteLogToFile(const std::string&amp; line)
+{
+    if (g_hLogFile == INVALID_HANDLE_VALUE)
+        return false;
+
+    DWORD dwBytesWritten;
+    //如果对于比较长的日志，应该分段写入，因为单次写入可能只能写入部分，这里为了演示方便，逻辑从简
+    if (!WriteFile(g_hLogFile, line.c_str(), line.length(), &amp;dwBytesWritten, NULL) || dwBytesWritten != line.length())
+        return false;
+
+    //将日志立即冲刷到文件中去
+    FlushFileBuffers(g_hLogFile);
+
+    return true;
+}
+
+DWORD CALLBACK LogProduceThreadProc(LPVOID lpThreadParameter)
+{
+    int index = 0;
+    while (true)
+    {
+        ++ index;
+        std::ostringstream os;
+        os &lt;&lt; &#34;This is log, index: &#34; &lt;&lt; index &lt;&lt; &#34;, producer threadID: &#34; &lt;&lt; GetCurrentThreadId() &lt;&lt; &#34;\n&#34;;
+
+        EnterCriticalSection(&amp;g_cs);       
+        cached_logs.emplace_back(os.str());
+        LeaveCriticalSection(&amp;g_cs);
+
+        ReleaseSemaphore(g_hSemaphore, 1, NULL);
+
+        Sleep(100);
+    }
+
+    return 0;
+}
+
+DWORD CALLBACK LogConsumeThreadProc(LPVOID lpThreadParameter)
+{
+    std::string line;
+    while (true)
+    {     
+        //无限等待
+        WaitForSingleObject(g_hSemaphore, INFINITE);
+
+        EnterCriticalSection(&amp;g_cs);
+        if (!cached_logs.empty())
+        {
+            line = cached_logs.front();
+            cached_logs.pop_front();
+        }     
+        LeaveCriticalSection(&amp;g_cs);          
+
+        if (line.empty())
+        {        
+            Sleep(1000);
+
+            continue;
+        }
+
+        WriteLogToFile(line);
+
+        line.clear();
+    }
+}
+
+int main(int argc, char* argv[])
+{
+    if (!Init())
+    {
+        std::cout &lt;&lt; &#34;init log file error.&#34; &lt;&lt; std::endl;
+        return -1;
+    }
+
+    HANDLE hProducers[3];
+    for (int i = 0; i &lt; sizeof(hProducers) / sizeof(hProducers[0]); ++i)
+    {
+        hProducers[i] = CreateThread(NULL, 0, LogProduceThreadProc, NULL, 0, NULL);
+    }
+
+    HANDLE hConsumers[3];
+    for (int i = 0; i &lt; sizeof(hConsumers) / sizeof(hConsumers[0]); ++i)
+    {
+        hConsumers[i] = CreateThread(NULL, 0, LogConsumeThreadProc, NULL, 0, NULL);
+    }
+
+    //等待消费者线程退出
+    for (int i = 0; i &lt; sizeof(hProducers) / sizeof(hProducers[0]); ++i)
+    {
+        WaitForSingleObject(hProducers[i], INFINITE);
+    }
+
+    //等待生产者线程退出
+    for (int i = 0; i &lt; sizeof(hConsumers) / sizeof(hConsumers[0]); ++i)
+    {
+        WaitForSingleObject(hConsumers[i], INFINITE);
+    }
+
+    Uninit();
+
+    return 0;
+}
+</code></pre><p>上述代码，在多线程向队列中增加日志记录和从队列中取出日志记录使用了Windows的上的**临界区（CRITICAL_SECTION，有的书上译作“关键段”）**对象来对队列进行保护。</p>
+<p><strong>Linux 平台代码</strong></p>
+<pre tabindex="0"><code>/**
+ *@desc: AsyncLogger.cpp，linux版本
+ *@author: zhangyl
+ *@date: 2018.11.10
+ */
+#include &lt;unistd.h&gt;
+#include &lt;list&gt;
+#include &lt;stdio.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;semaphore.h&gt;
+#include &lt;string&gt;
+#include &lt;iostream&gt;
+#include &lt;sstream&gt;
+
+
+std::list&lt;std::string&gt; cached_logs;
+pthread_mutex_t log_mutex = PTHREAD_MUTEX_INITIALIZER;
+sem_t           log_semphore;
+FILE* plogfile = NULL;
+
+bool init()
+{
+    pthread_mutex_init(&amp;log_mutex, NULL);
+    //初始信号量资源数目是0
+    sem_init(&amp;log_semphore, 0, 0);
+
+    //如果文件不存在，则创建
+    plogfile = fopen(&#34;my.log&#34;, &#34;a++&#34;);
+
+    return plogfile != NULL;
+}
+
+void uninit()
+{
+    pthread_mutex_destroy(&amp;log_mutex);
+    sem_destroy(&amp;log_semphore);
+
+    if (plogfile != NULL)
+        fclose(plogfile);
+}
+
+bool write_log_to_file(const std::string&amp; line)
+{
+    if (plogfile == NULL)
+        return false;
+
+    //如果对于比较长的日志，应该分段写入，因为单次写入可能只能写入部分，这里为了演示方便，逻辑从简
+    if (fwrite((void*)line.c_str(), 1, line.length(), plogfile) != line.length())
+        return false;
+
+    //将日志立即冲刷到文件中去
+    fflush(plogfile);
+
+    return true;
+}
+
+void* producer_thread_proc(void* arg)
+{
+    int index = 0;
+    while (true)
+    {
+        ++ index;
+        std::ostringstream os;
+        os &lt;&lt; &#34;This is log, index: &#34; &lt;&lt; index &lt;&lt; &#34;, producer threadID: &#34; &lt;&lt; pthread_self() &lt;&lt; &#34;\n&#34;;
+
+        pthread_mutex_lock(&amp;log_mutex);
+        cached_logs.push_back(os.str());
+        pthread_mutex_unlock(&amp;log_mutex);
+
+        sem_post(&amp;log_semphore);
+
+        usleep(100000);
+    }
+}
+
+void* consumer_thread_proc(void* arg)
+{
+    std::string line;
+    while (true)
+    {     
+        //无限等待
+        sem_wait(&amp;log_semphore);
+
+        pthread_mutex_lock(&amp;log_mutex);
+        if (!cached_logs.empty())
+        {
+            line = cached_logs.front();
+            cached_logs.pop_front();
+        }     
+        pthread_mutex_unlock(&amp;log_mutex);
+
+        if (line.empty())
+        {        
+            sleep(1);
+
+            continue;
+        }
+
+        write_log_to_file(line);
+
+        line.clear();
+    }
+}
+
+int main(int argc, char* argv[])
+{
+    if (!init())
+    {
+        std::cout &lt;&lt; &#34;init log file error.&#34; &lt;&lt; std::endl;
+        return -1;
+    }
+
+    pthread_t producer_thread_id[3];
+    for (int i = 0; i &lt; sizeof(producer_thread_id) / sizeof(producer_thread_id[0]); ++i)
+    {
+        pthread_create(&amp;producer_thread_id[i], NULL, producer_thread_proc, NULL);
+    }
+
+    pthread_t consumer_thread_id[3];
+    for (int i = 0; i &lt; sizeof(consumer_thread_id) / sizeof(consumer_thread_id[0]); ++i)
+    {
+        pthread_create(&amp;consumer_thread_id[i], NULL, consumer_thread_proc, NULL);
+    }
+
+    //等待消费者线程退出
+    for (int i = 0; i &lt; sizeof(producer_thread_id) / sizeof(producer_thread_id[0]); ++i)
+    {
+        pthread_join(producer_thread_id[i], NULL);
+    }
+
+    //等待生产者线程退出
+    for (int i = 0; i &lt; sizeof(consumer_thread_id) / sizeof(consumer_thread_id[0]); ++i)
+    {
+        pthread_join(consumer_thread_id[i], NULL);
+    }
+
+    uninit();
+
+    return 0;
+}
+</code></pre><p>我们使用 g++ 编译器编译上述代码，使用如下命令生成可移植性文件 <strong>AsyncLoggerLinux</strong>：</p>
+<pre tabindex="0"><code>g++ -g -o AsyncLoggerLinux AsyncLoggerLinux.cpp -lpthread
+</code></pre><p>接着执行生成的 <strong>AsyncLoggerLinux</strong> 文件，然后生成的日志效果如下：</p>
+<pre tabindex="0"><code>This is log, index: 1, producer threadID: 140512358795008
+This is log, index: 1, producer threadID: 140512367187712
+This is log, index: 1, producer threadID: 140512375580416
+This is log, index: 2, producer threadID: 140512358795008
+This is log, index: 2, producer threadID: 140512367187712
+This is log, index: 2, producer threadID: 140512375580416
+This is log, index: 3, producer threadID: 140512358795008
+This is log, index: 3, producer threadID: 140512367187712
+This is log, index: 3, producer threadID: 140512375580416
+This is log, index: 4, producer threadID: 140512358795008
+This is log, index: 4, producer threadID: 140512367187712
+This is log, index: 4, producer threadID: 140512375580416
+This is log, index: 5, producer threadID: 140512358795008
+This is log, index: 5, producer threadID: 140512367187712
+This is log, index: 5, producer threadID: 140512375580416
+//省略...
+</code></pre><blockquote>
+<p>当然，您可能需要同时能在 Windows 和 Linux 同时运行的代码，我们自然而然想到用 C++11 语法的信号量，由于 C++ 11 本身没有提供现成的信号量库，我们可以自己利用<strong>std::mutex</strong>、<strong>std::condition_variable</strong>模拟一下信号量的功能，这里就不再详细介绍了，有兴趣的可以自行尝试一下。</p>
+</blockquote>
+<p>以上就是异步日志的基本原理，在这个原理的基础上，我们可以增加很多的特性。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/82046162d4f74d3b9745ef1e8f8cdf57/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>心跳包机制设计详解</span>
+  </a>
+  <a class="next" href="https://haokiu.com/049d41c798c54956b4c2b094aacec413/">
+    <span class="title">Next »</span>
+    <br>
+    <span>给工作 4 年迷茫的程序员们的一点建议</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

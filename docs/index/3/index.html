@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head>
+	<meta name="generator" content="Hugo 0.119.0"><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>haokiu</title>
+
+<meta name="description" content="">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="https://haokiu.com/index.xml">
+<link rel="alternate" type="application/json" href="https://haokiu.com/index.json">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="haokiu" />
+<meta property="og:description" content="" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://haokiu.com/" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="haokiu"/>
+<meta name="twitter:description" content=""/>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "haokiu",
+  "url": "https://haokiu.com/",
+  "description": "",
+  "thumbnailUrl": "https://haokiu.com/favicon.ico",
+  "sameAs": [
+      
+  ]
+}
+</script>
+</head>
+
+<body class="list" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span class="active">Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>beego restful path variable
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>beego的url路径有多个变量的设置和获取方法。
+在 router.go 注册 url beego.Router(&#34;/type/:type/?:page&#34;, &amp;controllers.WebController{}, &#34;get:Type&#34;) 获取变量 typeID, err := self.GetInt(&#34;:type&#34;) func (c *Controller) GetInt(key string, def ...int) (int, error) { strv := c.Ctx.Input.Query(key) if len(strv) == 0 &amp;&amp; len(def) &gt; 0 { return def[0], nil } return strconv.Atoi(strv) } </p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-22 14:52:21 +0000 UTC'>January 22, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to beego restful path variable" href="https://haokiu.com/RNbgLz/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>2020 年好好读一读开源代码吧
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>2020 年好好读一读开源代码吧 2019 年就这么结束了，2020 年也来临了，虽然我曾对过去 2019 年做了一份总结，但是认真的来说，其实我对自己的 2019 年的收获并不太满意，一个主要的原因是计划好好研读的几个开源项目的源码都没有去做。好在，2020 新的一年，不再像 2019 年创业一般忙碌，终于可以静下心来认真去把这些未完成的计划好好做完。
+其实，我一直想找个机会和我的读者，好好讨论一下阅读开源项目源码这个话题的，我这里观点无任何含糊或者模棱两可，我旗帜鲜明的亮出我的观点——想在技术上有所造诣或者想成为某一技术领域的专家的同学一定要认认真真的研读几个开源软件的源码。下面我会具体来展开说下这个问题。
+知识付费与阅读源码 大家都知道，时下&#34;知识付费&#34;这个词非常火热，各大平台各个领域都推出了许多基于知识付费的课程，有图文版、语音版和视频版（包括在线实时教育直播）。当然，知识付费是一个好东西。众所周知，互联网信息的特点是信息量大、有用信息少、信息质量良莠不齐，各大平台推出的各种付费课程，精心制作，用心分类和梳理，读者只要花费一定的费用，就能省去大量搜索、查找和遴选信息的时间，直接专注于获得相关知识本身。
+在各类知识付费课程中，有一类课程是介绍业界或者大家平常工作中用到的一些开源软件的原理的，进一步说，有的是分析这类软件的源码的，如 nginx、netty、Spring Boot。
+我个人觉得，虽然你可以购买一些这样那样的开源软件的教程或者图书（包括电子书）去学习，但一定不要以这些学习材料为主要的学习这些开源软件的方法和途径，有机会的话，或者说如果你要学习的开源软件所使用的开发语言正好是你熟悉或者使用的编程语言，那么你应该尽量多去以阅读这些开源项目的源码本身为主。举个例子，如果你是 C/C&#43;&#43; 后端开发者，那么像 redis、nginx（它们都是使用 C 编写的）这样的开源项目的源码你应该认真的去研读一下；如果你是做 Windows C/C&#43;&#43; 客户端或者一名 QT 客户端开发人员，那么像 MFC、DUILIB、金山卫士等源码，你可以拿来读一读；如果你是 Java 程序员，netty、Spring 等源码是你进阶路上必须迈过去的一关。
+为什么建议以阅读相关源码为主，而不是其他相关教程呢？
+首先，任何其他相关教程介绍的内容都是基于这个软件的源码实现创作出来的，虽然能帮助你快速理解一些东西，但是不同的教程作者在阅读同样一份代码时的注意点和侧重点不一样，加上如果作者在某些地方有理解偏差的，这种偏差会被引入你所学习的教程或者图书里面，也就是说，你学习的这些东西其实不是第一手的，而是经过别人加工或者理解意译过的，在这个过程中如果别人理解有偏差，那么你或多或少的会受一点影响。所以，为了&#34;不受制于人”，亲自去阅读一些源码时非常有必要的。
+其次，如果你按照别人的教程大纲，那么你的学习该软件的开源项目时，可能会受限于别人的视野和侧重点，通俗的说，假设一个开源项目其可以学习和借鉴的内容有 A、B、C、D、E 五个大的点，别人的教程可能只写了 A、B、C、D 四个点，如果你只局限于别人的教程，你就错过 E 这个点了。
+这里可以给读者讲一个具体的例子。我最初开始走上工作岗位时做的是 C/C&#43;&#43; 客户端开发，我无意中找到了一份完整的电驴源码，但是开始阅读这份代码比较吃力，于是我就在网上找相关的电驴源码分析教程来看。但是呢，网上的这方面的教程都是关于电驴的网络通信模块和通信协议介绍的，很多做客户端的读者是知道的，做客户端开发很大一部分工作是在开发 UI 界面方面的逻辑和布局，其实电驴源码中关于界面设计逻辑写的也是很精彩的，也非常值得当时的我去借鉴和学习。如果我只按照网上的教程去学习，那么就错过这方面的学习了。也就是同样一份电驴源码，不同的学习者汲取的其源码中的营养成分是不一样的。需要电驴源码的同学可以在公众号后台回复关键字【电驴源码】获取下载链接。
+如何去阅读源码呢？ 这应该是很多读者想知道的问题，先讨论几种老生常谈的阅读源码的方式。
+第一种方式就是所谓的精读和粗读。很多读者应该听说过这种所谓的阅读源代码的方式，有些人认为有些源码只需要搞清楚其主要结构和流程就可以了，而另外一些源码需要逐行认真去研读其某个或者某几个模块的源码。或者，只阅读自己感兴趣或者需要的模块。
+第二种方式，说的是先熟悉代码的整体结构，再去依次搞清楚各个模块的代码细节。
+第三种方式是所谓的调试法，通过开源项目的一个或几个典型的流程，去调试跟踪信息流，然后逐步搞清楚整个项目的结构。
+以上三种方式都是不错的阅读源码的方式，读者可以根据自己的水平、目的和阶段去使用。但是，我这里想说的并不是这些东西。
+我个人觉得，一个技术人员如果想通过源码去提高自己，应该以一种&#34;闲登小阁看新晴&#34;的心境去阅读源码，这也许是在某个节假日的清晨，某个下过雨的午后，某个夜黑人静的深夜。看源码尤其是看高质量源码本来就是一种享受，像品茗。闲暇时间去细细品味一些开源软件的源码，和锻炼身体一样，都是人生中重要不紧急的事情，这类事情做的越多，坚持的越久，越能提高你的人生厚度。虽然阅读源码的最终目的是功利性的，但是阅读源码的心态不建议是功利性的，喜欢做一件事本身的过程，比把这件事做好的目标更快乐。
+我从学生时代开始，就喜欢看一些开源软件的源码，当然，从现在的标准来看，看的很多源码都不是&#34;高质量&#34;的，择其善者而从之其不善者而改之，不是吗？有些源码可以学习其架构、结构设计，有些源码则可以学习其细节设计（如变量命名、编码风格等）。
+看过的这些源码对我的技术视野影响很大。我上大学的时候，迷恋 Flash 编程，当时非常崇拜 Flash 界的两位前辈——鼠标炸弹（https://mousebomb.org/）和寂寞火山（现在已成币圈有名的大佬），另外还有淘沙网的沙子。多年后再看他们的代码可能质量没有那么高，但是我从他们开源出来的代码中学到了很多东西。举个例子，我喜欢在一些成对结束的花括号后面加上明显的成对结束的注释就是从沙子的代码那里学来的。虽然，现在的 IDE 会清楚的标示出来各个花括号的范围，但是这种注释风格在某些时候大大方便了代码阅读和 review。
+//实例 class A { public: void someFunc() { for (int i = 0; i &lt; n; &#43;&#43;i) { for (int j = 0; j &lt; m; &#43;&#43;j) { //some codes... }// end inner-for-loop	}// end outer-for-loop }// end method someFunc }; // end class A 给大家阅读源码的一些建议 很多人阅读源码存在以下不当的习惯或者认知方式：...</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to 2020 年好好读一读开源代码吧" href="https://haokiu.com/ea1d963411184ea88648b092380ee687/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>C&#43;&#43; 高性能服务器网络框架设计细节
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>C&#43;&#43; 高性能服务器网络框架设计细节 这篇文章我们将介绍服务器的开发，并从多个方面探究如何开发一款高性能高并发的服务器程序。需要注意的是一般大型服务器，其复杂程度在于其业务，而不是在于其代码工程的基本框架。大型服务器一般有多个服务组成，可能会支持CDN，或者支持所谓的“分布式”等，这篇文章不会介绍这些东西，因为不管结构多么复杂的服务器，都是由单个服务器组成的。所以这篇文章的侧重点是讨论单个服务程序的结构，而且这里的结构指的也是单个服务器的网络通信层结构，如果你能真正地理解了我所说的，那么在这个基础的结构上面开展任何业务都是可以的，也可以将这种结构扩展成复杂的多个服务器组，例如“分布式”服务。文中的代码示例虽然是以C&#43;&#43;为例，但同样适合Java（我本人也是Java开发者），原理都是一样的，只不过Java可能在基本的操作系统网络通信API的基础上用虚拟机包裹了一层接口而已（Java甚至可能基于一些常用的网络通信框架思想提供了一些现成的API，例如NIO）。有鉴于此，这篇文章不讨论那些大而空、泛泛而谈的技术术语，而是讲的是实实在在的能指导读者在实际工作中实践的编码方案或优化已有编码的方法。另外这里讨论的技术同时涉及windows和linux两个平台。
+所谓高性能就是服务器能流畅地处理各个客户端的连接并尽量低延迟地应答客户端的请求；所谓高并发，不仅指的是服务器可以同时支持多的客户端连接，而且这些客户端在连接期间内会不断与服务器有数据来往。网络上经常有各种网络库号称单个服务能同时支持百万甚至千万的并发，然后我实际去看了下，结果发现只是能同时支持很多的连接而已。如果一个服务器能单纯地接受ｎ个连接（ｎ可能很大），但是不能有条不紊地处理与这些连接之间的数据来往也没有任何意义，这种服务器框架只是“玩具型”的，对实际生产和应用没有任何意义。
+这篇文章将从两个方面来介绍，一个是服务器中的基础的网络通信部件；另外一个是，如何利用这些基础通信部件整合成一个完整的高效的服务器框架。注意：本文以下内容中的客户端是相对概念，指的是连接到当前讨论的服务程序的终端，所以这里的客户端既可能是我们传统意义上的客户端程序，也可能是连接该服务的其他服务器程序。
+一、网络通信部件 按上面介绍的思路，我们先从服务程序的网络通信部件开始介绍。
+（一）、需要解决的问题 既然是服务器程序肯定会涉及到网络通信部分，那么服务器程序的网络通信模块要解决哪些问题？目前，网络上有很多网络通信框架，如libevent、boost asio、ACE，但都网络通信的常见的技术手段都大同小异，至少要解决以下问题：
+如何检测有新客户端连接？ 如何接受客户端连接？ 如何检测客户端是否有数据发来？ 如何收取客户端发来的数据？ 如何检测连接异常？发现连接异常之后，如何处理？ 如何给客户端发送数据？ 如何在给客户端发完数据后关闭连接？ 稍微有点网络基础的人，都能回答上面说的其中几个问题，比如接收客户端连接用socket API的accept函数，收取客户端数据用recv函数，给客户端发送数据用send函数，检测客户端是否有新连接和客户端是否有新数据可以用IO multiplexing技术（IO复用）的select、poll、epoll等socket API。确实是这样的，这些基础的socket API构成了服务器网络通信的地基，不管网络通信框架设计的如何巧妙，都是在这些基础的socket API的基础上构建的。但是如何巧妙地组织这些基础的socket API，才是问题的关键。我们说服务器很高效，支持高并发，实际上只是一个技术实现手段，不管怎样，从软件开发的角度来讲无非就是一个程序而已，所以，只要程序能最大可能地满足“尽量减少等待或者不等待”这一原则就是高效的，也就是说高效不是“忙的忙死，闲的闲死”，而是大家都可以闲着，但是如果有活要干，大家尽量一起干，而不是一部分忙着依次做事情123456789，另外一部分闲在那里无所事事。说的可能有点抽象，下面我们来举一些例子具体来说明一下。 例如：
+默认情况下，recv函数如果没有数据的时候，线程就会阻塞在那里； 默认情况下，send函数，如果tcp窗口不是足够大，数据发不出去也会阻塞在那里； connect函数默认连接另外一端的时候，也会阻塞在那里； 又或者是给对端发送一份数据，需要等待对端回答，如果对方一直不应答，当前线程就阻塞在这里。 以上都不是高效服务器的开发思维方式，因为上面的例子都不满足“尽量减少等待”的原则，为什么一定要等待呢？有没用一种方法，这些过程不需要等待，最好是不仅不需要等待，而且这些事情完成之后能通知我。这样在这些本来用于等待的cpu时间片内，我就可以做一些其他的事情。有，也就是我们下文要讨论的IO Multiplexing技术（IO复用技术）。
+（二）、几种IO复用机制的比较 目前windows系统支持select、WSAAsyncSelect、WSAEventSelect、完成端口（IOCP），linux系统支持select、poll、epoll。这里我们不具体介绍每个具体的函数的用法，我们来讨论一点深层次的东西，以上列举的API函数可以分为两个层次：
+层次一 select和poll 层次二 WSAAsyncSelect、WSAEventSelect、完成端口（IOCP）、epoll 为什么这么分呢？先来介绍第一层次，select和poll函数本质上还是在一定时间内主动去查询socket句柄（可能是一个也可能是多个）上是否有事件，比如可读事件，可写事件或者出错事件，也就是说我们还是需要每隔一段时间内去主动去做这些检测，如果在这段时间内检测出一些事件来，我们这段时间就算没白花，但是倘若这段时间内没有事件呢？我们只能是做无用功了，说白了，还是在浪费时间，因为假如一个服务器有多个连接，在cpu时间片有限的情况下，我们花费了一定的时间检测了一部分socket连接，却发现它们什么事件都没有，而在这段时间内我们却有一些事情需要处理，那我们为什么要花时间去做这个检测呢？把这个时间用在做我们需要做的事情不好吗？所以对于服务器程序来说，要想高效，我们应该尽量避免花费时间主动去查询一些socket是否有事件，而是等这些socket有事件的时候告诉我们去处理。这也就是层次二的各个函数做的事情，它们实际相当于变主动查询是否有事件为当有事件时，系统会告诉我们，此时我们再去处理，也就是“好钢用在刀刃”上了。只不过层次二的函数通知我们的方式是各不相同，比如WSAAsyncSelect是利用windows窗口消息队列的事件机制来通知我们设定的窗口过程函数，IOCP是利用GetQueuedCompletionStatus返回正确的状态，epoll是epoll_wait函数返回而已。
+例如，connect函数连接另外一端，如果用于连接socket是非阻塞的，那么connect虽然不能立刻连接完成，但是也是会立刻返回，无需等待，等连接完成之后，WSAAsyncSelect会返回FD_CONNECT事件告诉我们连接成功，epoll会产生EPOLLOUT事件，我们也能知道连接完成。甚至socket有数据可读时，WSAAsyncSelect产生FD_READ事件，epoll产生EPOLLIN事件，等等。所以有了上面的讨论，我们就可以得到网络通信检测可读可写或者出错事件的正确姿势。这是我这里提出的第二个原则：尽量减少做无用功的时间。这个在服务程序资源够用的情况下可能体现不出来什么优势，但是如果有大量的任务要处理，这里就成了性能的一个瓶颈。
+（三）、检测网络事件的正确姿势 根据上面的介绍，第一，为了避免无意义的等待时间，第二，不采用主动查询各个socket的事件，而是采用等待操作系统通知我们有事件的状态的策略。我们的socket都要设置成非阻塞的。在此基础上我们回到栏目（一）中提到的七个问题：
+如何检测有新客户端连接？
+如何接受客户端连接？ 默认accept函数会阻塞在那里，如果epoll检测到侦听socket上有EPOLLIN事件，或者WSAAsyncSelect检测到有FD_ACCEPT事件，那么就表明此时有新连接到来，这个时候调用accept函数，就不会阻塞了。当然产生的新socket你应该也设置成非阻塞的。这样我们就能在新socket上收发数据了。 如何检测客户端是否有数据发来？
+如何收取客户端发来的数据？ 同理，我们也应该在socket上有可读事件的时候才去收取数据，这样我们调用recv或者read函数时不用等待，至于一次性收多少数据好呢？我们可以根据自己的需求来决定，甚至你可以在一个循环里面反复recv或者read，对于非阻塞模式的socket，如果没有数据了，recv或者read也会立刻返回，错误码EWOULDBLOCK会表明当前已经没有数据了。示例：
+bool CIUSocket::Recv() { int nRet = 0; while(true) { char buff[512]; nRet = ::recv(m_hSocket, buff, 512, 0); if(nRet == SOCKET_ERROR) { if (::WSAGetLastError() == WSAEWOULDBLOCK) break; else return false; } else if(nRet &lt; 1) return false;
+m_strRecvBuf.append(buff, nRet); ::Sleep(1); } return true; }
+如何检测连接异常？发现连接异常之后，如何处理？ 同样当我们收到异常事件后例如EPOLLERR或关闭事件FD_CLOSE，我们就知道了有异常产生，我们对异常的处理一般就是关闭对应的socket。另外，如果send/recv或者read/write函数对一个socket进行操作时，如果返回0，那说明对端已经关闭了socket，此时这路连接也没必要存在了，我们也可以关闭对应的socket。
+如何给客户端发送数据？ 这也是一道常见的网络通信面试题，某一年的腾讯后台开发职位就问到过这样的问题。给客户端发送数据，比收数据要稍微麻烦一点，也是需要讲点技巧的。首先我们不能像注册检测数据可读事件一样一开始就注册检测数据可写事件，因为如果检测可写的话，一般情况下只要对端正常收取数据，我们的socket就都是可写的，如果我们设置监听可写事件，会导致频繁地触发可写事件，但是我们此时并不一定有数据需要发送。所以正确的做法是：如果有数据要发送，则先尝试着去发送，如果发送不了或者只发送出去部分，剩下的我们需要将其缓存起来，然后再设置检测该socket上可写事件，下次可写事件产生时，再继续发送，如果还是不能完全发出去，则继续设置侦听可写事件，如此往复，一直到所有数据都发出去为止。一旦所有数据都发出去以后，我们要移除侦听可写事件，避免无用的可写事件通知。不知道你注意到没有，如果某次只发出去部分数据，剩下的数据应该暂且存起来，这个时候我们就需要一个缓冲区来存放这部分数据，这个缓冲区我们称为“发送缓冲区”。发送缓冲区不仅存放本次没有发完的数据，还用来存放在发送过程中，上层又传来的新的需要发送的数据。为了保证顺序，新的数据应该追加在当前剩下的数据的后面，发送的时候从发送缓冲区的头部开始发送。也就是说先来的先发送，后来的后发送。 如何在给客户端发完数据后关闭连接？ 这个问题比较难处理，因为这里的“发送完”不一定是真正的发送完，我们调用send或者write函数即使成功，也只是向操作系统的协议栈里面成功写入数据，至于能否被发出去、何时被发出去很难判断，发出去对方是否收到就更难判断了。所以，我们目前只能简单地认为send或者write返回我们发出数据的字节数大小，我们就认为“发完数据”了。然后调用close等socket API关闭连接。当然，你也可以调用shutdown函数来实现所谓的“半关闭”。关于关闭连接的话题，我们再单独开一个小的标题来专门讨论一下。
+（四）被动关闭连接和主动关闭连接 在实际的应用中，被动关闭连接是由于我们检测到了连接的异常事件，比如EPOLLERR，或者对端关闭连接，send或recv返回0，这个时候这路连接已经没有存在必要的意义了，我们被迫关闭连接。
+而主动关闭连接，是我们主动调用close/closesocket来关闭连接。比如客户端给我们发送非法的数据，比如一些网络攻击的尝试性数据包。这个时候出于安全考虑，我们关闭socket连接。...</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to C&#43;&#43; 高性能服务器网络框架设计细节" href="https://haokiu.com/10dc93cb0ce148d1906354635024bb25/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>CppGuide
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Part IC&#43;&#43; 17 结构化绑定pimpl 惯用法C&#43;&#43;必知必会的知识点不定参数函数实现var_arg系列的宏你一定要搞明白的C函数调用方式与栈原理利用 cmake 工具生成 Visual Studio 工程文件如何使用 Visual Studio 管理和阅读开源项目代码如何成为一名合格的 C/C&#43;&#43; 开发者？深入理解C/C&#43;&#43;中的指针用Visual Studio调试Linux程序详解 C&#43;&#43; 11 中的智能指针Memcached源码阅读序 服务器资源调整Memcached源码阅读一 初始化参数解析Memcached源码阅读二 网络监听的建立Memcached源码分析三 网络连接建立Memcached源码阅读四 内存初始化Memcached源码阅读五 资源初始化Memcached源码阅读六 get过程Memcached源码阅读七 cas属性Memcached源码阅读八 内存池Memcached源码阅读九 连接队列Memcached源码阅读十 Hash表操作Memcached源码阅读十一 LRU操作Memcached源码阅读十二 set操作Memcached源码阅读十三 do_item_alloc操作Memcached源码阅读十四 item结构Memcached阅读十五 Hash表扩容Memcached源码阅读十六 线程交互Memcached源码阅读十七 状态机Memcached源码分析01 TeamTalk介绍02 服务器端的程序的编译与部署03 服务器端的程序架构介绍04 服务器端db_proxy_server源码分析05 服务器端msg_server源码分析06 服务器端login_server源码分析07 服务器端msfs源码分析08 服务器端file_server源码分析09 服务器端route_server源码分析10 开放一个TeamTalk测试服务器地址和几个测试账号11 pc客户端源码分析TeamTalk源码解析Leveldb源码分析16leveldb源码分析leveldb源码分析1leveldb源码分析10leveldb源码分析11leveldb源码分析12leveldb源码分析13leveldb源码分析14leveldb源码分析15leveldb源码分析17leveldb源码分析18leveldb源码分析19leveldb源码分析2leveldb源码分析20leveldb源码分析21leveldb源码分析22leveldb源码分析3leveldb源码分析4leveldb源码分析5leveldb源码分析6leveldb源码分析7leveldb源码分析8leveldb源码分析9libevent源码深度剖析libevent源码深度剖析一libevent源码深度剖析02libevent源码深度剖析03libevent源码深度剖析04libevent源码深度剖析05libevent源码深度剖析06libevent源码深度剖析07libevent源码深度剖析08libevent源码深度剖析09libevent源码深度剖析10libevent源码深度剖析11libevent源码深度剖析12libevent源码深度剖析13作者的故事我是如何年薪五十万的我的 2019后端开发相关的书籍后台开发应该读的书多线程后台C&#43;&#43;开发你一定要知道的条件变量整型变量赋值是原子操作吗？从零学习开源项目系列（一） 从一款多人联机实时对战游戏开始从零学习开源项目系列（二） 最后一战概况从零学习开源项目系列（三） CSBattleMgr服务源码研究从零学习开源项目系列（四）LogServer源码探究服务器开发案例实战从零实现一个http服务器从零实现一个邮件收发客户端从零实现一款12306刷票软件从零开发一个WebSocket服务器10 十万在线的WebGame的数据库设计思路11 一种高性能网络游戏服务器架构设计12 经典游戏服务器端架构概述13 游戏跨服架构进化之路1 游戏服务器开发的基本体系与服务器端开发的一些建议2 网络游戏服务器开发框架设计介绍3 游戏后端开发需要掌握的知识4 关于游戏服务端架构的整理5 各类游戏对应的服务端架构6 从腾讯QQgame高性能服务器集群架构看“分而治之”与“自治”等分布式架构设计原则7 QQ游戏百万人同时在线服务器架构实现8 大型多人在线游戏服务器架构设计9 百万用户级游戏服务器架构设计游戏开发专题Linux tcpdump 使用介绍Linux 网络故障排查的瑞士军刀程序员必知必会的网络命令从抓包的角度分析connect()函数的连接过程做 Java 或者 C&#43;&#43; 开发都应该知道的 lsof 命令利用 telnet 命令发电子邮件服务器开发中网络数据分析与故障排查经验漫谈程序员的烦心事我是一名程序员，结婚时女友要求我用两年的工资作为彩礼，我该不该答应？拒绝了一家公司的offer后，他们的副总和hr总监同时打电话来询问拒绝原因并极力要求加入，我该不该去？为什么你的简历没人看程序员如何写简历程序员的薪资与年终奖那些事儿技术面试与HR谈薪资技巧聊一聊程序员如何增加收入谈一谈年终奖Linux C/C&#43;&#43;后端开发面试问哪些问题程序员面试题精讲我面试后端开发经理的经历网络通信面试题集锦聊聊如何拿大厂的 offer腾讯后台开发实习生技能要求Linux epoll 模型（含LT 模式和 ET 模式详解）网络编程TCP 协议如何解决粘包、半包问题bind 函数重难点解析connect 函数在阻塞和非阻塞模式下的行为select 函数重难点解析socket 的阻塞模式和非阻塞模式服务器开发通信协议设计介绍服务器端发数据时，如果对端一直不收，怎么办？网络通信中收发数据的正确姿势非阻塞模式下 send 和 recv 函数的返回值职业规划写给那些傻傻想做服务器开发的朋友给工作 4 年迷茫的程序员们的一点建议聊聊技术人员的常见的职业问题2020 年好好读一读开源代码吧自我提升与开源代码C&#43;&#43; 高性能服务器网络框架设计细节高性能服务器框架设计Reactor模式业务数据处理一定要单独开线程吗主线程与工作线程的分工如何设计断线自动重连机制实例：一个服务器程序的架构介绍心跳包机制设计详解日志系统的设计错误码系统的设计高性能服务器架构设计总结</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to CppGuide" href="https://haokiu.com/bk-1/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>Reactor模式
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Reactor模式 最近一直在看游双的《高性能Linux服务器编程》一书，下载链接： http://download.csdn.net/detail/analogous_love/9673008
+书上是这么介绍Reactor模式的：
+按照这个思路，我写个简单的练习：
+/** *@desc: 用reactor模式练习服务器程序，main.cpp *@author: zhangyl *@date: 2016.11.23 */ #include &lt;iostream&gt; #include &lt;string.h&gt; #include &lt;sys/types.h&gt; #include &lt;sys/socket.h&gt; #include &lt;netinet/in.h&gt; #include &lt;arpa/inet.h&gt; //for htonl() and htons() #include &lt;unistd.h&gt; #include &lt;fcntl.h&gt; #include &lt;sys/epoll.h&gt; #include &lt;signal.h&gt; //for signal() #include &lt;pthread.h&gt; #include &lt;semaphore.h&gt; #include &lt;list&gt; #include &lt;errno.h&gt; #include &lt;time.h&gt; #include &lt;sstream&gt; #include &lt;iomanip&gt; //for std::setw()/setfill() #include &lt;stdlib.h&gt; #define WORKER_THREAD_NUM 5 #define min(a, b) ((a &lt;= b) ? (a) : (b)) int g_epollfd = 0; bool g_bStop = false; int g_listenfd = 0; pthread_t g_acceptthreadid = 0; pthread_t g_threadid[WORKER_THREAD_NUM] = { 0 }; pthread_cond_t g_acceptcond; pthread_mutex_t g_acceptmutex; pthread_cond_t g_cond /*= PTHREAD_COND_INITIALIZER*/; pthread_mutex_t g_mutex /*= PTHREAD_MUTEX_INITIALIZER*/; pthread_mutex_t g_clientmutex; std::list&lt;int&gt; g_listClients; void prog_exit(int signo) { ::signal(SIGINT, SIG_IGN); //::signal(SIGKILL, SIG_IGN);//该信号不能被阻塞、处理或者忽略 ::signal(SIGTERM, SIG_IGN); std::cout &lt;&lt; &#34;program recv signal &#34; &lt;&lt; signo &lt;&lt; &#34; to exit....</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to Reactor模式" href="https://haokiu.com/23cb111095cb47f3b6115efccd11086d/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>业务数据处理一定要单独开线程吗
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>业务数据处理一定要单独开线程吗 在 《one thread one loop 思想》一文我们介绍了一个 loop 的主要结构一般如下所示：
+while (!m_bQuitFlag) { epoll_or_select_func(); handle_io_events(); handle_other_things(); } 对于一些业务逻辑处理比较简单、不会太耗时的应用来说，handle_io_events() 方法除了收发数据也可以直接用来直接做业务的处理，即其结构如下：
+void handle_io_events() { //收发数据 recv_or_send_data(); //解包并处理数据 decode_packages_and_process(); } 其中 recv_or_send_data() 方法中调用 send/recv API 进行实际的网络数据收发。以收数据为例，收完数据存入接收缓冲区后，接下来进行解包处理，然后进行业务处理，例如一个登陆数据包，其业务就是验证登陆的账户密码是否正确、记录其登陆行为等等。从程序函数调用堆栈来看，这些业务处理逻辑其实是直接在网络收发数据线程中处理的。我的意思是：网络线程调用 handle_io_events() 方法，handle_io_events() 方法调用 decode_packages_and_process() 方法，decode_packages_and_process() 方法做具体的业务逻辑处理。
+需要注意的是，为了让网络层与业务层脱耦，网络层中通常会提供一些回调函数的接口，这些回调函数我们将其指向具体的业务处理函数。以 libevent 网络库的用法为例：
+int main(int argc, char **argv) { struct event_base *base; struct evconnlistener *listener; struct event *signal_event; struct sockaddr_in sin; base = event_base_new(); memset(&amp;sin, 0, sizeof(sin)); sin.sin_family = AF_INET; sin.sin_port = htons(PORT); //listener_cb是我们自定义回调函数 listener = evconnlistener_new_bind(base, listener_cb, (void *)base, LEV_OPT_REUSEABLE|LEV_OPT_CLOSE_ON_FREE, -1, (struct sockaddr*)&amp;sin, sizeof(sin)); if (!listener) { fprintf(stderr, &#34;Could not create a listener!\n&#34;); return 1; } //signal_cb是我们自定义回调函数 signal_event = evsignal_new(base, SIGINT, signal_cb, (void *)base); if (!...</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to 业务数据处理一定要单独开线程吗" href="https://haokiu.com/d7e436585f754029be5279a858049912/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>主线程与工作线程的分工
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>主线程与工作线程的分工 服务器端为了能流畅处理多个客户端链接，一般在某个线程A里面accept新的客户端连接并生成新连接的socket fd，然后将这些新连接的socketfd给另外开的数个工作线程B1、B2、B3、B4，这些工作线程处理这些新连接上的网络IO事件（即收发数据），同时，还处理系统中的另外一些事务。这里我们将线程A称为主线程，B1、B2、B3、B4等称为工作线程。工作线程的代码框架一般如下：
+while (!m_bQuit) { epoll_or_select_func(); handle_io_events(); handle_other_things(); } 在epoll_or_select_func()中通过select()或者poll/epoll()去检测socket fd上的io事件，若存在这些事件则下一步handle_io_events()来处理这些事件（收发数据），做完之后可能还要做一些系统其他的任务，即调用handle_other_things()。
+这样做有三个好处：
+线程A只需要处理新连接的到来即可，不用处理网络IO事件。由于网络IO事件处理一般相对比较慢，如果在线程A里面既处理新连接又处理网络IO，则可能由于线程忙于处理IO事件，而无法及时处理客户端的新连接，这是很不好的。
+线程A接收的新连接，可以根据一定的负载均衡原则将新的socket fd分配给工作线程。常用的算法，比如round robin，即轮询机制，即，假设不考虑中途有连接断开的情况，一个新连接来了分配给B1，又来一个分配给B2，再来一个分配给B3，再来一个分配给B4。如此反复，也就是说线程A记录了各个工作线程上的socket fd数量，这样可以最大化地来平衡资源，避免一些工作线程“忙死”，另外一些工作线程“闲死”的现象。
+即使工作线程不满载的情况下，也可以让工作线程做其他的事情。比如现在有四个工作线程，但只有三个连接。那么线程B4就可以在handle_other_thing()做一些其他事情。
+下面讨论一个很重要的效率问题：
+在上述while循环里面，epoll_or_selec_func()中的epoll_wait/poll/select等函数一般设置了一个超时时间。如果设置超时时间为0，那么在没有任何网络IO时间和其他任务处理的情况下，这些工作线程实际上会空转，白白地浪费cpu时间片。如果设置的超时时间大于0，在没有网络IO时间的情况，epoll_wait/poll/select仍然要挂起指定时间才能返回，导致handle_other_thing()不能及时执行，影响其他任务不能及时处理，也就是说其他任务一旦产生，其处理起来具有一定的延时性。这样也不好。那如何解决该问题呢？
+其实我们想达到的效果是，如果没有网络IO时间和其他任务要处理，那么这些工作线程最好直接挂起而不是空转；如果有其他任务要处理，这些工作线程要立刻能处理这些任务而不是在epoll_wait/poll/selec挂起指定时间后才开始处理这些任务。
+我们采取如下方法来解决该问题，以linux为例，不管epoll_fd上有没有文件描述符fd，我们都给它绑定一个默认的fd，这个fd被称为唤醒fd。当我们需要处理其他任务的时候，向这个唤醒fd上随便写入1个字节的，这样这个fd立即就变成可读的了，epoll_wait()/poll()/select()函数立即被唤醒，并返回，接下来马上就能执行handle_other_thing()，其他任务得到处理。反之，没有其他任务也没有网络IO事件时，epoll_or_select_func()就挂在那里什么也不做。
+这个唤醒fd，在linux平台上可以通过以下几种方法实现：
+管道pipe，创建一个管道，将管道绑定到epoll_fd上。需要时，向管道一端写入一个字节，工作线程立即被唤醒。
+linux 2.6新增的eventfd：
+int eventfd(unsigned int initval, int flags); 步骤也是一样，将生成的eventfd绑定到epoll_fd上。需要时，向这个eventfd上写入一个字节，工作线程立即被唤醒。
+第三种方法最方便。即linux特有的socketpair，socketpair是一对相互连接的socket，相当于服务器端和客户端的两个端点，每一端都可以读写数据。 int socketpair(int domain, int type, int protocol, int sv[2]); 调用这个函数返回的两个socket句柄就是sv[0]，和sv[1]，在一个其中任何一个写入字节，在另外一个收取字节。
+将收取的字节的socket绑定到epoll_fd上。需要时，向另外一个写入的socket上写入一个字节，工作线程立即被唤醒。如果是使用socketpair，那么domain参数一定要设置成AFX_UNIX。
+由于在windows，select函数只支持检测socket这一种fd，所以Windows上一般只能用方法3的原理。而且需要手动创建两个socket，然后一个连接另外一个，将读取的那一段绑定到select的fd上去。这在写跨两个平台代码时，需要注意的地方。</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to 主线程与工作线程的分工" href="https://haokiu.com/450c6c7995774bec88a383c0ce41cfdc/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>写给那些傻傻想做服务器开发的朋友
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>写给那些傻傻想做服务器开发的朋友 很久以前看过一篇标题为《写给那些傻傻的，想做服务器开发的应届生》文章，无意中看到知乎上也对这篇文章进行了激烈的讨论。下面谈谈我的看法。
+写在前面的话 我在七八年前就看过这篇文章，那个时候我还是一名学生，它深深地影响了我学生时代以及后来的人生轨迹。(所以原文绝对不是首次发表于2015年，我猜想可能是后来的作者2015年修改了原作者的一些内容，并增加了一些自己的东西，让它&#34;与时俱进&#34;)。我学生时代深受这篇文章的影响，以至于我印象中的服务器开发的样子和地位就是这篇文章中所描述的。
+我的工作经历 我毕业的时候，一心想做出Windows C/C&#43;&#43;客户端开发，当时为了做这个开发放弃了我熟悉的flash编程和web开发，当然薪资也是比较低的。做了几年Windows客户端后，我毅然以一定的代价转到了linux服务器开发。到今天为止，大致做过股票资讯、交易系统、游戏服务器、即时通讯系统和直播类型的服务器，架构的能力也由最初的千人到后来的百万在线。我从不后悔我当初转行服务器开发，甚至很庆幸当初的抉择，然而我可能更喜欢的还是客户端开发。
+《写给那些傻傻的，想做服务器开发的应届生》一文中的有些观点，根据我的经历，我不敢赞同，或者说我的感受与之大相径庭。
+加班的情况 首先说下加班的情况，不管是大公司还是小公司，由于现在的各种测试、预警机制、监控策略和公司发布流程的不断完善，一个月内经常为各种服务器bug、和应急的情况加班的现状已经大为改善不少，当然偶尔发版或者赶项目加班还是有的，不过一个月的频率也就那么一两次。如果你们团队频繁地为了修正紧急bug、解决服务器稳定性问题，那么你们真要好好考虑你们的方法是不是有问题了。
+服务器开发与轮子 其次，服务器开发，不仅仅如文中所说的，利用或者组装各种轮子。一个稳定的服务器架构，必须是建立在设计师良好的基础知识和见多识广的经验基础上，即使是使用现有的轮子，也是对这个轮子足够熟悉的基础上，才能让轮子最大地适用自己的公司的业务。也就是说，服务器核心项目人员虽然不一定要造轮子，但一定要具备造轮子的能力。开源的东西好用是好用，但是要么不出问题，一旦出问题往往很难修改。我们去年做类似“冲顶大会”、“百万英雄”这类直播答题应用，由于这类游戏是从美国HQ刮过来的风，国内各大公司为了迅速抢占市场与用户，都想着要比别人早点做出来上线，所以我们公司当时deadline压得比较紧。我们那个时候，最不想看到的人就是项目经理，天天跟着我们后面催项目的进度。项目进度紧不说，另外还有一个技术挑战，由于节目比较火热，同一个房间里面可能会达到百万人同时在线，而这百万人可能同时都会发弹幕消息。假设某个时刻，房间里面有n个人，某个人发一条消息，其他n-1个人收到，服务器需要推送n-1次。如果n个人同时发消息，那么服务器同一时间就要推送n*n，如果n等于1百万的时候，那么单秒的数据量将非常恐怖，这个是我们需要解决的一个技术难题，解决目标是最少延迟的情况下，弹幕最多的送达率；另外一个难题就是，保证出题和答案不能有太多的延时（小于1秒），并在用户给出答案后，服务器能够迅速统计出答案结果并应答客户端。（没办法，所以此时主持人的作用就发挥了，万一延迟太厉害，主持人可以和观众各种唠嗑，当然这是下下策，如果频繁出现这种情况，领导的脸色肯定也不好看，我们做技术的脸上也没有光彩。）那段时间基本上是周六周日都要加班，甚至连周末都可能要到凌晨才能回去。注意：我把这段经历并没有放在上面的关于服务器开发是否频繁地加班的栏目下，这里我想说明的并不是服务器开发要经常加班，我想说的是，如果你平常只会用轮子，而不注重基础内功的修养，这种场景你是很难应对的，首先是单机服务性能要做到极致，其次是多个服务之间的高效配合。很多人可能觉得这种场景也不难，甚至有的人号称单机服务就能解决，这些都是站着说话不腰疼了。像熊猫tv的“冲顶大会”和西瓜视频的“百万英雄”前几次的答题活动中，也出现了服务中断或者题目延迟厉害，甚至“百万英雄”还出现过一次因技术问题答题活动被迫延期的事故。
+技术与产品思维 接着说下，技术和产品方面的，服务器开发与客户端开发的思维方式和理念其实是不一样的，如果说客户端产品是一个产品的脸面，那么服务器端就是产品的灵魂。这里可能比喻有点不恰当，与客户端开发相比，优秀的服务器开发应该尽量在单机服务上的性能做到极致，必须尽量利用少的资源给尽可能多的客户端服务（在资源总量有限的情况下，你为单个客户端服务使用的资源越少，你才可能为越多的客户服务）。而服务器开发必须有条不紊地处理与每个客户端的交互，不能纠结或把资源花费在某一个客户端上。但是客户端不一样，客户端只需要管理好自己的一亩三分地就可以了，而且客户端的大多数逻辑和细节在界面（UI）逻辑上。但是我不赞成文中作者所说的客户端代码比服务器代码少很多，相反，我经历过的项目，都是客户度代码比服务器代码多很多。因为客户端代码往往有大量的界面逻辑，如果服务器端没有UI的话，其核心除了网路通信部分，剩下的就是各种业务逻辑（包括存储逻辑，也就是业务逻辑服务器和客户端都有，但是客户端还有界面逻辑）。而从开发团队的人数配比上来说，一般单个端（比如pc、安卓、ios中的一端）的人数要小于服务器开发人员的数量，因为一般一个高级客户端开发，往往可以一个人搞定一个客户端，但是一般很少有一个高级服务器开发可以单独搞定一套服务开发的。（说的是通常情形，请不要走极端）。服务器开发的核心字眼体现在“服务”上，如何为客户端提供稳定的、高效的服务，这是关键的地方。这里“稳定”也包括容灾容错。大凡有一定规模的用户群体的产品，如果服务器不稳定，那后果将是灾难性的，试想QQ或者微信服务器中断一两个小时，后果会怎样？而客户端更侧重的就是产品的细节、用户的体验，当然尽管有些用户体验可能是由服务器端决定的，但是最终还是由客户端反映出来。我不赞同文章中说，客户端更能积累除了技术以外的其他知识，服务器开发也一样的，不管是客户端还是服务器，只有具有产品思维的开发才是好的开发，而功能的设计与规划服务器端的开发在时间点上一般先于客户端开发的。而具体的功能点，也是需要服务器开发人员与产品人员乃至客户沟通的。
+薪资方面 最后说下，薪资方面。一般大于两年且同样的工作年限的服务器开发人员要比客户端开发人员高至少三分之一左右。当然不排除一些非常优秀的客户端开发人员可能不在这个规则内。
+结语 总结起来，选择了哪条路就选择了什么样的生活。做服务器开发的可以在高并发、高可用方向进一步努力，而做客户端开发可以在用户体验、设计细节方面下功夫。不管怎样，都是我们想要的生活，那里倾洒了我们的汗水，也收获了我们自己的成就感。</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to 写给那些傻傻想做服务器开发的朋友" href="https://haokiu.com/7f969a868ee54e84982aa97c89e7cdbd/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>如何设计断线自动重连机制
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>如何设计断线自动重连机制 在有连接依赖关系的服务与服务之间，或客户端与服务器之间，无论是出于方便使用、降低运维成本、提高工作效率（服务与服务之间），还是优化用户体验（客户端与服务器之间）自动重连机制通常都是一个非常重要的功能。
+情景一 对于一组服务之间，如果其中一些服务（主动连接方，下文以 A 代称）需要与另外一些服务（被连接方，下文以 B 代称）建立 TCP 长连接，如果 A 没有自动连接 B 的功能，那么在部署或者测试这些服务的时候，必须先启动 B，再启动 A，因为一旦先启动 A，A 此时去尝试连接 B（由于 B 还没有启动）会失败，之后 A 再也不会去连接 B了（即使随后 B 被启动了），从而导致整个系统不能正常工作。这是缺点一。
+情景二 即使部署或测试的时候，先启动了 B，再启动 A，A 与 B 之间的连接在运行期间内，可能由于网络波动等原因导致 A 与 B 之间连接断开，之后整个系统也不能再正常工作了。这是缺点二。
+情景三 如果我们想升级 B，更新完程序后，重启 B，也必须重启 A。如果这种依赖链比较长（例如 A 连接 B，B 连接 C，C 连接 D，D 连接 E，等等），那么更新某个程序的效率和成本会非常高。这是缺点三。
+情景四 对于客户端软件来说，如果因为用户的网络短暂故障导致客户端与服务器失去连接，等网络恢复后，较好的用户体验是客户端能检测到用户网络变化后，自动与服务器重连，以便用户能及时收到最新的消息。
+以上四个情景说明了断线自动重连功能的重要性，那如何去设计好的断线重连机制呢？
+重连本身的功能开发很简单，其实就是调用 socket 函数 connect 函数，不断去“重试”。这里的“重试”我使用了双引号，是为了说明重试的技巧非常有讲究：
+对于服务器端程序，例如 A 连接 B，如果连接不上，整个系统将无法工作，那么我们开发 A 服务时，重连的逻辑可以很简单，即 A 一旦发现与 B 断开了连接，就立即尝试与 B 重新连接，如果连接不上，隔一段时间再重试（一般设置为 3 秒或 5 秒即可），一直到连接成功为止。当然，期间可以不断发送报警邮件或者持续输出错误日志，来引起开发或者运维人员的尽快干预，以便尽早排查和解决连接不上的原因。 对于客户端软件，以上做法也是可以的，但是不是最优的。客户端所处的网络环境比服务器程序所处的网络环境一般要恶劣的多，等间隔的定时去重连，一般作用不大（例如用户拔掉了网线）。因此，对于客户端软件，一般出现断线，会尝试去重连，如果连接不上，会隔个比前一次时间更长的时间间隔去重连，例如这个时间间隔可以是 2 秒、4 秒、8 秒、16秒等等。但是，这样也存在一个问题，随着重连次数的变多，重连的时间间隔会越来越大（当然，你也可以设置一个最大重连时间间隔，之后恢复到之前较小的时间间隔）。如果网络此时已经恢复（例如用户重新插上网线），我们的程序需要等待一个很长的时间间隔（如 16 秒）才能恢复连接，这同样不利于用户体验。一般情况下，如果网络发生波动，我们的程序可以检测网络状态，如果网络状态恢复正常此时应该立即进行一次重连，而不是一成不变地按照设置的时间间隔去重连。 操作系统提供了检测网络状态变化的 API 函数，例如对于 Windows 可以使用 IsNetworkAlive() 函数去检测，对于 Android，网络变化时会发送消息类型是 WifiManager.NETWORK_STATE_CHANGED_ACTION 的广播通知。
+另外，还需要注意的是，如果客户端网络断开，一般会在界面某个地方显式地告诉用户当前连接状态，并提醒当前正在进行断线重连，且应该有一个可以让用户放弃断线重连或者立即进行一次断线重连的功能。
+综上所述，总结起来，对于服务器程序之间的重连可以设计成等时间间隔的定时重连，对于客户端程序要结合依次放大重连时间间隔、网络状态变化立即重连或用户主动发起重连这三个因素来设计。
+不需要重连的情形 不需要重连一般有以下情形：
+用户使用客户端主动放弃重连；
+因为一些业务上的规定，禁止客户端重连；
+举个例子，如果某个系统同一时刻同一个账户只允许登陆一个，某个账户在机器 A 上登陆，此时接着又在机器 B 上登陆，此时 A 将被服务器踢下线，那么此时 A 客户端的逻辑就应该禁止自动重连。...</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to 如何设计断线自动重连机制" href="https://haokiu.com/1469709fbebd462cb012819cdfb07156/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>实例：一个服务器程序的架构介绍
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>实例：一个服务器程序的架构介绍 本文将介绍我曾经做过的一个项目的服务器架构和服务器编程的一些重要细节。
+一、程序运行环境 操作系统：Centos 7.0
+编译器：gcc/g&#43;&#43; 4.8.3、cmake 2.8.11
+mysql数据库：5.5.47
+项目代码管理工具：Visual Studio 2013
+一、程序结构 该程序总共有 17 个线程，其中分为 9 个数据库工作线程 D 和一个日志线程 L，6 个普通工作线程 W，一个主线程 M。（以下会用这些字母来代指这些线程）
+（一）、数据库工作线程的用途 9 个数据库工作线程在线程启动之初，与 mysql 建立连接，也就是说每个线程都与 mysql 保持一路连接，共 9 个数据库连接。
+每个数据库工作线程同时存在两个任务队列，第一个队列 A 存放需要执行数据库增删查改操作的任务 sqlTask，第二个队列 B 存放 sqlTask 执行完成后的结果。sqlTask 执行完成后立即放入结果队列中，因而结果队列中任务也是一个个的需要执行的任务。大致伪代码如下：
+void db_thread_func() { while (!m_bExit) { if (NULL != (pTask = m_sqlTask.Pop())) { //从m_sqlTask中取出的任务先执行完成后，pTask将携带结果数据 pTask-&gt;Execute(); //得到结果后，立刻将该任务放入结果任务队列 m_resultTask.Push(pTask); continue; } sleep(1000); }//end while-loop } 现在的问题来了：
+任务队列 A 中的任务从何而来，目前只有消费者，没有生产者，那么生产者是谁？ 任务队列 B 中的任务将去何方，目前只有生产者没有消费者。 这两个问题先放一会儿，等到后面我再来回答。
+（二）工作线程和主线程 在介绍主线程和工作线程具体做什么时，我们介绍下服务器编程中常常抽象出来的几个概念（这里以 tcp 连接为例）：
+TcpServer 即 Tcp 服务，服务器需要绑定ip地址和端口号，并在该端口号上侦听客户端的连接（往往由一个成员变量 TcpListener 来管理侦听细节）。所以一个 TcpServer 要做的就是这些工作。除此之外，每当有新连接到来时，TcpServer 需要接收新连接，当多个新连接存在时，TcpServer 需要有条不紊地管理这些连接：连接的建立、断开等，即产生和管理下文中说的 TcpConnection 对象。 一个连接对应一个 TcpConnection 对象，TcpConnection 对象管理着这个连接的一些信息：如连接状态、本端和对端的 ip 地址和端口号等。 数据通道对象 Channel，Channel 记录了 socket 的句柄，因而是一个连接上执行数据收发的真正执行者，Channel 对象一般作为 TcpConnection 的成员变量。 TcpSession 对象，是将 Channel 收取的数据进行解包，或者对准备好的数据进行装包，并传给 Channel 发送。 归纳起来：一个 TcpServer 依靠 TcpListener 对新连接的侦听和处理，依靠 TcpConnection 对象对连接上的数据进行管理，TcpConnection 实际依靠 Channel 对数据进行收发，依靠 TcpSession 对数据进行装包和解包。也就是说一个 TcpServer 存在一个 TcpListener，对应多个 TcpConnection，有几个TcpConnection 就有几个 TcpSession，同时也就有几个 Channel。...</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to 实例：一个服务器程序的架构介绍" href="https://haokiu.com/f6db032966024846bbd5dbc28868bb17/"></a>
+</article>
+<footer class="page-footer">
+  <nav class="pagination">
+    <a class="prev" href="https://haokiu.com/index/2/">
+      «&nbsp;Prev&nbsp;
+    </a>
+    <a class="next" href="https://haokiu.com/index/4/">Next&nbsp;&nbsp;»
+    </a>
+  </nav>
+</footer>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

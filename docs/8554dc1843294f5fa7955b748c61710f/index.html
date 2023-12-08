@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>leveldb源码分析8 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="leveldb源码分析8 本系列《leveldb源码分析》共有22篇文章，这是第八篇
+6 SSTable之2 6.4 创建sstable文件 了解了sstable文件的存储格式，以及Data Block的组织，下面就可以分析如何创建sstable文件了。相关代码在table_builder.h/.cc以及block_builder.h/.cc（构建Block）中。
+6.4.1 TableBuilder类 构建sstable文件的类是TableBuilder，该类提供了几个有限的方法可以用来添加k/v对，Flush到文件中等等，它依赖于BlockBuilder来构建Block。
+TableBuilder的几个接口说明下：
+void Add(const Slice&amp; key, const Slice&amp; value)，向当前正在构建的表添加新的{key, value}对，要求根据Option指定的Comparator，key必须位于所有前面添加的key之后； void Flush()，将当前缓存的k/v全部flush到文件中，一个高级方法，大部分的client不需要直接调用该方法； void Finish()，结束表的构建，该方法被调用后，将不再会使用传入的WritableFile； void Abandon()，结束表的构建，并丢弃当前缓存的内容，该方法被调用后，将不再会使用传入的WritableFile；【只是设置closed为true，无其他操作】 一旦**Finish()/Abandon()**方法被调用，将不能再次执行Flush或者Add操作。 下面来看看涉及到的类，如图6.3-1所示。 图6.3-1
+其中WritableFile和op log一样，使用的都是内存映射文件。Options是一些调用者可设置的选项。
+TableBuilder只有一个成员变量Rep* rep_，实际上Rep结构体的成员就是TableBuilder所有的成员变量；这样做的目的，可能是为了隐藏其内部细节。Rep的定义也是在.cc文件中，对外是透明的。
+简单解释下成员的含义：
+Options options; // data block的选项 Options index_block_options; // index block的选项 WritableFile* file; // sstable文件 uint64_t offset; // 要写入data block在sstable文件中的偏移，初始0 Status status; //当前状态-初始ok BlockBuilder data_block; //当前操作的data block BlockBuilder index_block; // sstable的index block std::string last_key; //当前data block最后的k/v对的key int64_t num_entries; //当前data block的个数，初始0 bool closed; //调用了Finish() or Abandon()，初始false FilterBlockBuilder*filter_block; //根据filter数据快速定位key是否在block中 bool pending_index_entry; //见下面的Add函数，初始false BlockHandle pending_handle; //添加到index block的data block的信息 std::string compressed_output;//压缩后的data block，临时存储，写入后即被清空 Filter block是存储的过滤器信息，它会存储{key, 对应data block在sstable的偏移值}，不一定是完全精确的，以快速定位给定key是否在data block中。
+下面分析如何向sstable中添加k/v对，创建并持久化sstable。其它函数都比较简单，略过。另外对于Abandon，简单设置closed=true即返回。
+6.4.2 添加k/v对 这是通过方法**Add(constSlice&amp; key, const Slice&amp; value)**完成的，没有返回值。下面分析下函数的逻辑：">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/8554dc1843294f5fa7955b748c61710f/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="leveldb源码分析8" />
+<meta property="og:description" content="leveldb源码分析8 本系列《leveldb源码分析》共有22篇文章，这是第八篇
+6 SSTable之2 6.4 创建sstable文件 了解了sstable文件的存储格式，以及Data Block的组织，下面就可以分析如何创建sstable文件了。相关代码在table_builder.h/.cc以及block_builder.h/.cc（构建Block）中。
+6.4.1 TableBuilder类 构建sstable文件的类是TableBuilder，该类提供了几个有限的方法可以用来添加k/v对，Flush到文件中等等，它依赖于BlockBuilder来构建Block。
+TableBuilder的几个接口说明下：
+void Add(const Slice&amp; key, const Slice&amp; value)，向当前正在构建的表添加新的{key, value}对，要求根据Option指定的Comparator，key必须位于所有前面添加的key之后； void Flush()，将当前缓存的k/v全部flush到文件中，一个高级方法，大部分的client不需要直接调用该方法； void Finish()，结束表的构建，该方法被调用后，将不再会使用传入的WritableFile； void Abandon()，结束表的构建，并丢弃当前缓存的内容，该方法被调用后，将不再会使用传入的WritableFile；【只是设置closed为true，无其他操作】 一旦**Finish()/Abandon()**方法被调用，将不能再次执行Flush或者Add操作。 下面来看看涉及到的类，如图6.3-1所示。 图6.3-1
+其中WritableFile和op log一样，使用的都是内存映射文件。Options是一些调用者可设置的选项。
+TableBuilder只有一个成员变量Rep* rep_，实际上Rep结构体的成员就是TableBuilder所有的成员变量；这样做的目的，可能是为了隐藏其内部细节。Rep的定义也是在.cc文件中，对外是透明的。
+简单解释下成员的含义：
+Options options; // data block的选项 Options index_block_options; // index block的选项 WritableFile* file; // sstable文件 uint64_t offset; // 要写入data block在sstable文件中的偏移，初始0 Status status; //当前状态-初始ok BlockBuilder data_block; //当前操作的data block BlockBuilder index_block; // sstable的index block std::string last_key; //当前data block最后的k/v对的key int64_t num_entries; //当前data block的个数，初始0 bool closed; //调用了Finish() or Abandon()，初始false FilterBlockBuilder*filter_block; //根据filter数据快速定位key是否在block中 bool pending_index_entry; //见下面的Add函数，初始false BlockHandle pending_handle; //添加到index block的data block的信息 std::string compressed_output;//压缩后的data block，临时存储，写入后即被清空 Filter block是存储的过滤器信息，它会存储{key, 对应data block在sstable的偏移值}，不一定是完全精确的，以快速定位给定key是否在data block中。
+下面分析如何向sstable中添加k/v对，创建并持久化sstable。其它函数都比较简单，略过。另外对于Abandon，简单设置closed=true即返回。
+6.4.2 添加k/v对 这是通过方法**Add(constSlice&amp; key, const Slice&amp; value)**完成的，没有返回值。下面分析下函数的逻辑：" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/8554dc1843294f5fa7955b748c61710f/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="leveldb源码分析8"/>
+<meta name="twitter:description" content="leveldb源码分析8 本系列《leveldb源码分析》共有22篇文章，这是第八篇
+6 SSTable之2 6.4 创建sstable文件 了解了sstable文件的存储格式，以及Data Block的组织，下面就可以分析如何创建sstable文件了。相关代码在table_builder.h/.cc以及block_builder.h/.cc（构建Block）中。
+6.4.1 TableBuilder类 构建sstable文件的类是TableBuilder，该类提供了几个有限的方法可以用来添加k/v对，Flush到文件中等等，它依赖于BlockBuilder来构建Block。
+TableBuilder的几个接口说明下：
+void Add(const Slice&amp; key, const Slice&amp; value)，向当前正在构建的表添加新的{key, value}对，要求根据Option指定的Comparator，key必须位于所有前面添加的key之后； void Flush()，将当前缓存的k/v全部flush到文件中，一个高级方法，大部分的client不需要直接调用该方法； void Finish()，结束表的构建，该方法被调用后，将不再会使用传入的WritableFile； void Abandon()，结束表的构建，并丢弃当前缓存的内容，该方法被调用后，将不再会使用传入的WritableFile；【只是设置closed为true，无其他操作】 一旦**Finish()/Abandon()**方法被调用，将不能再次执行Flush或者Add操作。 下面来看看涉及到的类，如图6.3-1所示。 图6.3-1
+其中WritableFile和op log一样，使用的都是内存映射文件。Options是一些调用者可设置的选项。
+TableBuilder只有一个成员变量Rep* rep_，实际上Rep结构体的成员就是TableBuilder所有的成员变量；这样做的目的，可能是为了隐藏其内部细节。Rep的定义也是在.cc文件中，对外是透明的。
+简单解释下成员的含义：
+Options options; // data block的选项 Options index_block_options; // index block的选项 WritableFile* file; // sstable文件 uint64_t offset; // 要写入data block在sstable文件中的偏移，初始0 Status status; //当前状态-初始ok BlockBuilder data_block; //当前操作的data block BlockBuilder index_block; // sstable的index block std::string last_key; //当前data block最后的k/v对的key int64_t num_entries; //当前data block的个数，初始0 bool closed; //调用了Finish() or Abandon()，初始false FilterBlockBuilder*filter_block; //根据filter数据快速定位key是否在block中 bool pending_index_entry; //见下面的Add函数，初始false BlockHandle pending_handle; //添加到index block的data block的信息 std::string compressed_output;//压缩后的data block，临时存储，写入后即被清空 Filter block是存储的过滤器信息，它会存储{key, 对应data block在sstable的偏移值}，不一定是完全精确的，以快速定位给定key是否在data block中。
+下面分析如何向sstable中添加k/v对，创建并持久化sstable。其它函数都比较简单，略过。另外对于Abandon，简单设置closed=true即返回。
+6.4.2 添加k/v对 这是通过方法**Add(constSlice&amp; key, const Slice&amp; value)**完成的，没有返回值。下面分析下函数的逻辑："/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "leveldb源码分析8",
+      "item": "https://haokiu.com/8554dc1843294f5fa7955b748c61710f/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "leveldb源码分析8",
+  "name": "leveldb源码分析8",
+  "description": "leveldb源码分析8 本系列《leveldb源码分析》共有22篇文章，这是第八篇\n6 SSTable之2 6.4 创建sstable文件 了解了sstable文件的存储格式，以及Data Block的组织，下面就可以分析如何创建sstable文件了。相关代码在table_builder.h/.cc以及block_builder.h/.cc（构建Block）中。\n6.4.1 TableBuilder类 构建sstable文件的类是TableBuilder，该类提供了几个有限的方法可以用来添加k/v对，Flush到文件中等等，它依赖于BlockBuilder来构建Block。\nTableBuilder的几个接口说明下：\nvoid Add(const Slice\u0026amp; key, const Slice\u0026amp; value)，向当前正在构建的表添加新的{key, value}对，要求根据Option指定的Comparator，key必须位于所有前面添加的key之后； void Flush()，将当前缓存的k/v全部flush到文件中，一个高级方法，大部分的client不需要直接调用该方法； void Finish()，结束表的构建，该方法被调用后，将不再会使用传入的WritableFile； void Abandon()，结束表的构建，并丢弃当前缓存的内容，该方法被调用后，将不再会使用传入的WritableFile；【只是设置closed为true，无其他操作】 一旦**Finish()/Abandon()**方法被调用，将不能再次执行Flush或者Add操作。 下面来看看涉及到的类，如图6.3-1所示。 图6.3-1\n其中WritableFile和op log一样，使用的都是内存映射文件。Options是一些调用者可设置的选项。\nTableBuilder只有一个成员变量Rep* rep_，实际上Rep结构体的成员就是TableBuilder所有的成员变量；这样做的目的，可能是为了隐藏其内部细节。Rep的定义也是在.cc文件中，对外是透明的。\n简单解释下成员的含义：\nOptions options; // data block的选项 Options index_block_options; // index block的选项 WritableFile* file; // sstable文件 uint64_t offset; // 要写入data block在sstable文件中的偏移，初始0 Status status; //当前状态-初始ok BlockBuilder data_block; //当前操作的data block BlockBuilder index_block; // sstable的index block std::string last_key; //当前data block最后的k/v对的key int64_t num_entries; //当前data block的个数，初始0 bool closed; //调用了Finish() or Abandon()，初始false FilterBlockBuilder*filter_block; //根据filter数据快速定位key是否在block中 bool pending_index_entry; //见下面的Add函数，初始false BlockHandle pending_handle; //添加到index block的data block的信息 std::string compressed_output;//压缩后的data block，临时存储，写入后即被清空 Filter block是存储的过滤器信息，它会存储{key, 对应data block在sstable的偏移值}，不一定是完全精确的，以快速定位给定key是否在data block中。\n下面分析如何向sstable中添加k/v对，创建并持久化sstable。其它函数都比较简单，略过。另外对于Abandon，简单设置closed=true即返回。\n6.4.2 添加k/v对 这是通过方法**Add(constSlice\u0026amp; key, const Slice\u0026amp; value)**完成的，没有返回值。下面分析下函数的逻辑：",
+  "keywords": [
+    
+  ],
+  "articleBody": "leveldb源码分析8 本系列《leveldb源码分析》共有22篇文章，这是第八篇\n6 SSTable之2 6.4 创建sstable文件 了解了sstable文件的存储格式，以及Data Block的组织，下面就可以分析如何创建sstable文件了。相关代码在table_builder.h/.cc以及block_builder.h/.cc（构建Block）中。\n6.4.1 TableBuilder类 构建sstable文件的类是TableBuilder，该类提供了几个有限的方法可以用来添加k/v对，Flush到文件中等等，它依赖于BlockBuilder来构建Block。\nTableBuilder的几个接口说明下：\nvoid Add(const Slice\u0026 key, const Slice\u0026 value)，向当前正在构建的表添加新的{key, value}对，要求根据Option指定的Comparator，key必须位于所有前面添加的key之后； void Flush()，将当前缓存的k/v全部flush到文件中，一个高级方法，大部分的client不需要直接调用该方法； void Finish()，结束表的构建，该方法被调用后，将不再会使用传入的WritableFile； void Abandon()，结束表的构建，并丢弃当前缓存的内容，该方法被调用后，将不再会使用传入的WritableFile；【只是设置closed为true，无其他操作】 一旦**Finish()/Abandon()**方法被调用，将不能再次执行Flush或者Add操作。 下面来看看涉及到的类，如图6.3-1所示。 图6.3-1\n其中WritableFile和op log一样，使用的都是内存映射文件。Options是一些调用者可设置的选项。\nTableBuilder只有一个成员变量Rep* rep_，实际上Rep结构体的成员就是TableBuilder所有的成员变量；这样做的目的，可能是为了隐藏其内部细节。Rep的定义也是在.cc文件中，对外是透明的。\n简单解释下成员的含义：\nOptions options; // data block的选项 Options index_block_options; // index block的选项 WritableFile* file; // sstable文件 uint64_t offset; // 要写入data block在sstable文件中的偏移，初始0 Status status; //当前状态-初始ok BlockBuilder data_block; //当前操作的data block BlockBuilder index_block; // sstable的index block std::string last_key; //当前data block最后的k/v对的key int64_t num_entries; //当前data block的个数，初始0 bool closed; //调用了Finish() or Abandon()，初始false FilterBlockBuilder*filter_block; //根据filter数据快速定位key是否在block中 bool pending_index_entry; //见下面的Add函数，初始false BlockHandle pending_handle; //添加到index block的data block的信息 std::string compressed_output;//压缩后的data block，临时存储，写入后即被清空 Filter block是存储的过滤器信息，它会存储{key, 对应data block在sstable的偏移值}，不一定是完全精确的，以快速定位给定key是否在data block中。\n下面分析如何向sstable中添加k/v对，创建并持久化sstable。其它函数都比较简单，略过。另外对于Abandon，简单设置closed=true即返回。\n6.4.2 添加k/v对 这是通过方法**Add(constSlice\u0026 key, const Slice\u0026 value)**完成的，没有返回值。下面分析下函数的逻辑：\n1\nS1 首先保证文件没有close，也就是没有调用过Finish/Abandon，以及保证当前status是ok的；如果当前有缓存的kv对，保证新加入的key是最大的。\nRep* r = rep_; assert(!r-\u003eclosed); if (!ok()) return; if (r-\u003enum_entries \u003e 0) { assert(r-\u003eoptions.comparator-\u003eCompare(key, Slice(r-\u003elast_key))\u003e 0); } S2 如果标记r-\u003epending_index_entry为true，表明遇到下一个data block的第一个k/v，根据key调整r-\u003elast_key，这是通过Comparator的FindShortestSeparator完成的。\nif (r-\u003epending_index_entry) { assert(r-\u003edata_block.empty()); r-\u003eoptions.comparator-\u003eFindShortestSeparator(\u0026r-\u003elast_key,key); std::string handle_encoding; r-\u003epending_handle.EncodeTo(\u0026handle_encoding); r-\u003eindex_block.Add(r-\u003elast_key, Slice(handle_encoding)); r-\u003epending_index_entry =false; } 接下来将pending_handle加入到index block中{r-\u003elast_key, r-\u003epending_handle’sstring}。最后将r-\u003epending_index_entry设置为false。\n值得讲讲pending_index_entry这个标记的意义，见代码注释：\n直到遇到下一个databock的第一个key时，我们才为上一个datablock生成index entry，这样的好处是：可以为index使用较短的key；比如上一个data block最后一个k/v的key是\"the quick brown fox\"，其后继data block的第一个key是\"the who\"，我们就可以用一个较短的字符串“the r\"作为上一个data block的index block entry的key。\n简而言之，就是在开始下一个datablock时，Leveldb才将上一个data block加入到index block中。标记pending_index_entry就是干这个用的，对应data block的index entry信息就保存在（BlockHandle）pending_handle。\nS3 如果filter_block不为空，就把key加入到filter_block中。\nif (r-\u003efilter_block != NULL) { r-\u003efilter_block-\u003eAddKey(key); } S4 设置r-\u003elast_key = key，将(key, value)添加到r-\u003edata_block中，并更新entry数。\nr-\u003elast_key.assign(key.data(), key.size()); r-\u003enum_entries++; r-\u003edata_block.Add(key,value); S5 如果data block的个数超过限制，就立刻Flush到文件中。\nconst size_testimated_block_size = r-\u003edata_block.CurrentSizeEstimate(); if (estimated_block_size \u003e=r-\u003eoptions.block_size) Flush(); 6.4.3 Flush文件 该函数逻辑比较简单，直接见代码如下：\nRep* r = rep_; assert(!r-\u003eclosed); // 首先保证未关闭，且状态ok if (!ok()) return; if (r-\u003edata_block.empty())return; // data block是空的 // 保证pending_index_entry为false，即data block的Add已经完成 assert(!r-\u003epending_index_entry); // 写入data block，并设置其index entry信息—BlockHandle对象 WriteBlock(\u0026r-\u003edata_block, \u0026r-\u003epending_handle); //写入成功，则Flush文件，并设置r-\u003epending_index_entry为true， //以根据下一个data block的first key调整index entry的key—即r-\u003elast_key if (ok()) { r-\u003epending_index_entry =true; r-\u003estatus =r-\u003efile-\u003eFlush(); } if (r-\u003efilter_block != NULL) { //将data block在sstable中的便宜加入到filter block中 r-\u003efilter_block-\u003eStartBlock(r-\u003eoffset); // 并指明开始新的data block } 6.4.4 WriteBlock函数 在Flush文件时，会调用WriteBlock函数将data block写入到文件中，该函数同时还设置data block的index entry信息。原型为：\nvoid WriteBlock(BlockBuilder* block, BlockHandle* handle) 该函数做些预处理工作，序列化要写入的data block，根据需要压缩数据，真正的写入逻辑是在WriteRawBlock函数中。下面分析该函数的处理逻辑。\n2\nS1 获得block的序列化数据Slice，根据配置参数决定是否压缩，以及根据压缩格式压缩数据内容。对于Snappy压缩，如果压缩率太低\u003c12.5%，还是作为未压缩内容存储。\nBlockBuilder的Finish()函数将data block的数据序列化成一个Slice。\nRep* r = rep_; Slice raw = block-\u003eFinish(); // 获得data block的序列化字符串 Slice block_contents; CompressionType type =r-\u003eoptions.compression; switch (type) { case kNoCompression: block_contents= raw; break; // 不压缩 case kSnappyCompression: { // snappy压缩格式 std::string* compressed =\u0026r-\u003ecompressed_output; if(port::Snappy_Compress(raw.data(), raw.size(), compressed) \u0026\u0026 compressed-\u003esize()\u003c raw.size() - (raw.size() / 8u)) { block_contents =*compressed; } else { // 如果不支持Snappy，或者压缩率低于12.5%，依然当作不压缩存储 block_contents = raw; type = kNoCompression; } break; } } S2 将data内容写入到文件，并重置block成初始化状态，清空compressedoutput。\nWriteRawBlock(block_contents,type, handle); r-\u003ecompressed_output.clear(); block-\u003eReset(); 6.4.5 WriteRawBlock函数 在WriteBlock把准备工作都做好后，就可以写入到sstable文件中了。来看函数原型：\nvoid WriteRawBlock(const Slice\u0026 data, CompressionType, BlockHandle*handle); 函数逻辑很简单，见代码。\nRep* r = rep_; handle-\u003eset_offset(r-\u003eoffset); // 为index设置data block的handle信息 handle-\u003eset_size(block_contents.size()); r-\u003estatus =r-\u003efile-\u003eAppend(block_contents); // 写入data block内容 if (r-\u003estatus.ok()) { // 写入1byte的type和4bytes的crc32 chartrailer[kBlockTrailerSize]; trailer[0] = type; uint32_t crc = crc32c::Value(block_contents.data(), block_contents.size()); crc = crc32c::Extend(crc, trailer, 1); // Extend crc tocover block type EncodeFixed32(trailer+1, crc32c::Mask(crc)); r-\u003estatus =r-\u003efile-\u003eAppend(Slice(trailer, kBlockTrailerSize)); if (r-\u003estatus.ok()) { // 写入成功更新offset-下一个data block的写入偏移 r-\u003eoffset +=block_contents.size() + kBlockTrailerSize; } } 6.4.6 Finish函数 调用Finish函数，表明调用者将所有已经添加的k/v对持久化到sstable，并关闭sstable文件。\n该函数逻辑很清晰，可分为5部分。\n3\nS1 首先调用Flush，写入最后的一块data block，然后设置关闭标志closed=true。表明该sstable已经关闭，不能再添加k/v对。\n1 Rep* r = rep_; 2 Flush(); 3 assert(!r-\u003eclosed); 4 r-\u003eclosed = true; 5 BlockHandle filter_block_handle,metaindex_block_handle, index_block_handle; S2 写入filter block到文件中。\nif (ok() \u0026\u0026r-\u003efilter_block != NULL) { WriteRawBlock(r-\u003efilter_block-\u003eFinish(), kNoCompression,\u0026filter_block_handle); } S3 写入meta index block到文件中。\n如果filterblock不为NULL，则加入从\"filter.Name\"到filter data位置的映射。通过meta index block，可以根据filter名字快速定位到filter的数据区。\nif (ok()) { BlockBuildermeta_index_block(\u0026r-\u003eoptions); if (r-\u003efilter_block !=NULL) { //加入从\"filter.Name\"到filter data位置的映射 std::string key =\"filter.\"; key.append(r-\u003eoptions.filter_policy-\u003eName()); std::string handle_encoding; filter_block_handle.EncodeTo(\u0026handle_encoding); meta_index_block.Add(key,handle_encoding); } // TODO(postrelease): Add stats and other metablocks WriteBlock(\u0026meta_index_block, \u0026metaindex_block_handle); } S4 写入index block，如果成功Flush过data block，那么需要为最后一块data block设置index block，并加入到index block中。\nif (ok()) { if (r-\u003epending_index_entry) { // Flush时会被设置为true r-\u003eoptions.comparator-\u003eFindShortSuccessor(\u0026r-\u003elast_key); std::string handle_encoding; r-\u003epending_handle.EncodeTo(\u0026handle_encoding); r-\u003eindex_block.Add(r-\u003elast_key, Slice(handle_encoding)); // 加入到index block中 r-\u003epending_index_entry =false; } WriteBlock(\u0026r-\u003eindex_block, \u0026index_block_handle); } S5 写入Footer。\nif (ok()) { Footer footer; footer.set_metaindex_handle(metaindex_block_handle); footer.set_index_handle(index_block_handle); std::string footer_encoding; footer.EncodeTo(\u0026footer_encoding); r-\u003estatus =r-\u003efile-\u003eAppend(footer_encoding); if (r-\u003estatus.ok()) { r-\u003eoffset +=footer_encoding.size(); } } 整个写入流程就分析完了，对于Datablock和Filter Block的操作将在Data block和Filter Block中单独分析，下面的读取相同。\n",
+  "wordCount" : "525",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/8554dc1843294f5fa7955b748c61710f/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      leveldb源码分析8
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#leveldb%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%908" aria-label="leveldb源码分析8">leveldb源码分析8</a><ul>
+                        
+                <li>
+                    <a href="#6-sstable%e4%b9%8b2" aria-label="6 SSTable之2">6 SSTable之2</a><ul>
+                        
+                <li>
+                    <a href="#64-%e5%88%9b%e5%bb%basstable%e6%96%87%e4%bb%b6" aria-label="6.4 创建sstable文件">6.4 创建sstable文件</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#641-tablebuilder%e7%b1%bb" aria-label="6.4.1 TableBuilder类">6.4.1 TableBuilder类</a></li>
+                <li>
+                    <a href="#642-%e6%b7%bb%e5%8a%a0kv%e5%af%b9" aria-label="6.4.2 添加k/v对">6.4.2 添加k/v对</a></li>
+                <li>
+                    <a href="#643-flush%e6%96%87%e4%bb%b6" aria-label="6.4.3 Flush文件">6.4.3 Flush文件</a></li>
+                <li>
+                    <a href="#644-writeblock%e5%87%bd%e6%95%b0" aria-label="6.4.4 WriteBlock函数">6.4.4 WriteBlock函数</a></li>
+                <li>
+                    <a href="#645-writerawblock%e5%87%bd%e6%95%b0" aria-label="6.4.5 WriteRawBlock函数">6.4.5 WriteRawBlock函数</a></li>
+                <li>
+                    <a href="#646-finish%e5%87%bd%e6%95%b0" aria-label="6.4.6 Finish函数">6.4.6 Finish函数</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="leveldb源码分析8">leveldb源码分析8</h1>
+<p>本系列《leveldb源码分析》共有22篇文章，这是第八篇</p>
+<h2 id="6-sstable之2">6 SSTable之2</h2>
+<h3 id="64-创建sstable文件">6.4 创建sstable文件</h3>
+<p>了解了<strong>sstable</strong>文件的存储格式，以及<strong>Data Block</strong>的组织，下面就可以分析如何创建sstable文件了。相关代码在table_builder.h/.cc以及block_builder.h/.cc（构建Block）中。</p>
+<h5 id="641-tablebuilder类">6.4.1 TableBuilder类</h5>
+<p>构建sstable文件的类是<strong>TableBuilder</strong>，该类提供了几个有限的方法可以用来添加<strong>k/v对</strong>，Flush到文件中等等，它依赖于<strong>BlockBuilder</strong>来构建Block。</p>
+<p>TableBuilder的几个接口说明下：</p>
+<ol>
+<li><strong>void Add(const Slice&amp; key, const Slice&amp; value)</strong>，向当前正在构建的表添加新的{key, value}对，要求根据Option指定的<strong>Comparator</strong>，key必须位于所有前面添加的key之后；</li>
+<li><strong>void Flush()</strong>，将当前缓存的k/v全部flush到文件中，一个高级方法，大部分的client不需要直接调用该方法；</li>
+<li>void Finish()，<strong>结束表的构建</strong>，该方法被调用后，将不再会使用传入的WritableFile；</li>
+<li>void Abandon()，结束表的构建，并丢弃当前缓存的内容，该方法被调用后，将不再会使用传入的WritableFile；【<strong>只是设置closed为true，无其他操作</strong>】</li>
+<li>一旦**Finish()/Abandon()**方法被调用，将不能再次执行Flush或者Add操作。</li>
+</ol>
+<p>下面来看看涉及到的类，如图6.3-1所示。<img loading="lazy" src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="img"  />
+图6.3-1</p>
+<p>其中<strong>WritableFile和op log</strong>一样，使用的都是<strong>内存映射</strong>文件。Options是一些调用者可设置的选项。</p>
+<p>TableBuilder只有一个成员变量<strong>Rep* rep_</strong>，实际上Rep结构体的成员就是TableBuilder所有的成员变量；这样做的<strong>目的</strong>，<strong>可能是为了隐藏其内部细</strong>节。Rep的定义也是在.cc文件中，对外是透明的。</p>
+<p>简单解释下成员的含义：</p>
+<pre tabindex="0"><code>Options options;              // data block的选项
+Options index_block_options;  // index block的选项
+WritableFile* file;           // sstable文件
+uint64_t offset; 
+// 要写入data block在sstable文件中的偏移，初始0
+Status status;                //当前状态-初始ok
+BlockBuilder data_block;      //当前操作的data block
+BlockBuilder index_block;     // sstable的index block
+std::string last_key;         //当前data block最后的k/v对的key
+int64_t num_entries;          //当前data block的个数，初始0
+bool closed;                  //调用了Finish() or Abandon()，初始false
+FilterBlockBuilder*filter_block; 
+//根据filter数据快速定位key是否在block中
+bool pending_index_entry;     //见下面的Add函数，初始false
+BlockHandle pending_handle;   //添加到index block的data block的信息
+std::string compressed_output;//压缩后的data block，临时存储，写入后即被清空
+</code></pre><p>Filter block是存储的<strong>过滤器信息</strong>，它会存储{key, 对应data block在sstable的偏移值}，<strong>不一定</strong>是<strong>完全精确</strong>的，以快速定位给定key是否在data block中。</p>
+<p>下面分析如何向<strong>sstable中添加k/v对</strong>，创建并持久化sstable。其它函数都比较简单，略过。另外对于Abandon，简单设置<strong>closed=true</strong>即返回。</p>
+<h5 id="642-添加kv对">6.4.2 添加k/v对</h5>
+<p>这是通过方法**Add(constSlice&amp; key, const Slice&amp; value)**完成的，没有返回值。下面分析下函数的逻辑：</p>
+<p><em>1</em></p>
+<p><strong>S1 首先保证文件没有close，也就是没有调用过Finish/Abandon，以及保证当前status是ok的；如果当前有缓存的kv对，保证新加入的key是最大的。</strong></p>
+<pre tabindex="0"><code>Rep* r = rep_;
+assert(!r-&gt;closed);
+if (!ok()) return;
+if (r-&gt;num_entries &gt; 0) 
+{
+    assert(r-&gt;options.comparator-&gt;Compare(key, Slice(r-&gt;last_key))&gt; 0);
+}
+</code></pre><p><strong>S2 如果标记r-&gt;pending_index_entry为true，表明遇到下一个data block的第一个k/v，根据key调整r-&gt;last_key，这是通过Comparator的FindShortestSeparator完成的。</strong></p>
+<pre tabindex="0"><code>if (r-&gt;pending_index_entry) 
+{
+     assert(r-&gt;data_block.empty());
+     r-&gt;options.comparator-&gt;FindShortestSeparator(&amp;r-&gt;last_key,key);
+     std::string handle_encoding;
+     r-&gt;pending_handle.EncodeTo(&amp;handle_encoding);
+     r-&gt;index_block.Add(r-&gt;last_key, Slice(handle_encoding));
+     r-&gt;pending_index_entry =false;
+}
+</code></pre><p>接下来将pending_handle加入到<strong>index block中</strong>{r-&gt;last_key, r-&gt;pending_handle’sstring}。最后将r-&gt;pending_index_entry设置为false。</p>
+<p>值得讲讲<strong>pending_index_entry</strong>这个标记的意义，见代码注释：</p>
+<p><strong>直到</strong>遇到<strong>下一个databock</strong>的第一个key时，我们才为上一个datablock生成index entry，这样的<strong>好处</strong>是：可以为index使用较短的key；比如上一个data block最后一个k/v的key是&quot;the quick brown fox&quot;，其后继data block的第一个key是&quot;the who&quot;，我们就可以用一个<strong>较短的字符串</strong>&ldquo;the r&quot;作为上一个data block的index block entry的key。</p>
+<p>简而言之，就是在开始<strong>下一个datablock</strong>时，Leveldb才将上一个data block加入到index block中。标记<strong>pending_index_entry</strong>就是干这个用的，对应data block的index entry信息就保存在（BlockHandle）pending_handle。</p>
+<p><strong>S3 如果filter_block不为空，就把key加入到filter_block中。</strong></p>
+<pre tabindex="0"><code>if (r-&gt;filter_block != NULL) 
+{
+    r-&gt;filter_block-&gt;AddKey(key);
+}
+</code></pre><p><strong>S4 设置r-&gt;last_key = key，将(key, value)添加到r-&gt;data_block中，并更新entry数。</strong></p>
+<pre tabindex="0"><code>r-&gt;last_key.assign(key.data(), key.size());
+r-&gt;num_entries++;
+r-&gt;data_block.Add(key,value);
+</code></pre><p><strong>S5 如果data block的个数超过限制，就立刻Flush到文件中。</strong></p>
+<pre tabindex="0"><code>const size_testimated_block_size = r-&gt;data_block.CurrentSizeEstimate();
+if (estimated_block_size &gt;=r-&gt;options.block_size)  Flush();
+</code></pre><h5 id="643-flush文件">6.4.3 Flush文件</h5>
+<p>该函数逻辑比较简单，直接见代码如下：</p>
+<pre tabindex="0"><code>Rep* r = rep_;
+assert(!r-&gt;closed);               // 首先保证未关闭，且状态ok
+if (!ok()) return;
+if (r-&gt;data_block.empty())return; // data block是空的
+// 保证pending_index_entry为false，即data block的Add已经完成
+assert(!r-&gt;pending_index_entry);
+// 写入data block，并设置其index entry信息—BlockHandle对象
+WriteBlock(&amp;r-&gt;data_block, &amp;r-&gt;pending_handle);
+//写入成功，则Flush文件，并设置r-&gt;pending_index_entry为true，
+//以根据下一个data block的first key调整index entry的key—即r-&gt;last_key
+if (ok()) 
+{
+     r-&gt;pending_index_entry =true;
+     r-&gt;status =r-&gt;file-&gt;Flush();
+}
+if (r-&gt;filter_block != NULL)
+{ 
+     //将data block在sstable中的便宜加入到filter block中
+     r-&gt;filter_block-&gt;StartBlock(r-&gt;offset); 
+     // 并指明开始新的data block
+}
+</code></pre><h5 id="644-writeblock函数">6.4.4 WriteBlock函数</h5>
+<p>在Flush文件时，会调用WriteBlock函数将data block写入到文件中，该函数同时还设置<strong>data block的index entry</strong>信息。原型为：</p>
+<pre tabindex="0"><code>void WriteBlock(BlockBuilder* block, BlockHandle* handle)
+</code></pre><p>该函数做些预处理工作，<strong>序列化</strong>要写入的data block，根据需要压缩数据，真正的写入逻辑是在<strong>WriteRawBlock</strong>函数中。下面分析该函数的处理逻辑。</p>
+<p><em><strong>2</strong></em></p>
+<p><strong>S1 获得block的序列化数据Slice，根据配置参数决定是否压缩，以及根据压缩格式压缩数据内容。对于Snappy压缩，如果压缩率太低&lt;12.5%，还是作为未压缩内容存储。</strong></p>
+<p>BlockBuilder的Finish()函数将data block的数据序列化成一个<strong>Slice</strong>。</p>
+<pre tabindex="0"><code>Rep* r = rep_;
+Slice raw = block-&gt;Finish(); 
+// 获得data block的序列化字符串
+Slice block_contents;
+CompressionType type =r-&gt;options.compression;
+switch (type)
+{
+     case kNoCompression: block_contents= raw; break; // 不压缩
+     case kSnappyCompression: 
+     { 
+          // snappy压缩格式
+          std::string* compressed =&amp;r-&gt;compressed_output;
+          if(port::Snappy_Compress(raw.data(), raw.size(), compressed) &amp;&amp;
+             compressed-&gt;size()&lt; raw.size() - (raw.size() / 8u)) 
+          {
+                block_contents =*compressed;
+          } 
+          else 
+          { 
+                 // 如果不支持Snappy，或者压缩率低于12.5%，依然当作不压缩存储
+                 block_contents = raw;
+                 type = kNoCompression;
+          }
+          break;
+     }
+}  
+</code></pre><p><strong>S2 将data内容写入到文件，并重置block成初始化状态，清空compressedoutput。</strong></p>
+<pre tabindex="0"><code>WriteRawBlock(block_contents,type, handle);  
+r-&gt;compressed_output.clear();  
+block-&gt;Reset();
+</code></pre><h5 id="645-writerawblock函数">6.4.5 WriteRawBlock函数</h5>
+<p>在WriteBlock把准备工作都做好后，就可以写入到<strong>sstable</strong>文件中了。来看函数原型：</p>
+<pre tabindex="0"><code>void WriteRawBlock(const Slice&amp; data, CompressionType, BlockHandle*handle);
+</code></pre><p>函数逻辑很简单，见代码。</p>
+<pre tabindex="0"><code>Rep* r = rep_;
+handle-&gt;set_offset(r-&gt;offset); 
+// 为index设置data block的handle信息
+handle-&gt;set_size(block_contents.size());
+r-&gt;status =r-&gt;file-&gt;Append(block_contents); // 写入data block内容
+if (r-&gt;status.ok()) 
+{
+     // 写入1byte的type和4bytes的crc32
+     chartrailer[kBlockTrailerSize];
+     trailer[0] = type;
+     uint32_t crc = crc32c::Value(block_contents.data(),
+                                  block_contents.size());
+     crc = crc32c::Extend(crc, trailer, 1);  // Extend crc tocover block type
+     EncodeFixed32(trailer+1, crc32c::Mask(crc));
+     r-&gt;status =r-&gt;file-&gt;Append(Slice(trailer, kBlockTrailerSize));
+     if (r-&gt;status.ok()) 
+     { 
+          // 写入成功更新offset-下一个data block的写入偏移
+          r-&gt;offset +=block_contents.size() + kBlockTrailerSize;
+      }
+}
+</code></pre><h5 id="646-finish函数">6.4.6 Finish函数</h5>
+<p>调用Finish函数，表明调用者将所有已经添加的<strong>k/v对</strong>持久化到sstable，并关闭sstable文件。</p>
+<p>该函数逻辑很清晰，可<strong>分为5部分</strong>。</p>
+<p><em><strong>3</strong></em></p>
+<p><strong>S1 首先调用Flush，写入最后的一块data block，然后设置关闭标志closed=true。表明该sstable已经关闭，不能再添加k/v对。</strong></p>
+<pre tabindex="0"><code>1  Rep* r = rep_;
+2  Flush();
+3  assert(!r-&gt;closed);
+4  r-&gt;closed = true;
+5  BlockHandle filter_block_handle,metaindex_block_handle, index_block_handle;
+</code></pre><p><strong>S2 写入filter block到文件中。</strong></p>
+<pre tabindex="0"><code>if (ok() &amp;&amp;r-&gt;filter_block != NULL) 
+{
+     WriteRawBlock(r-&gt;filter_block-&gt;Finish(), kNoCompression,&amp;filter_block_handle);
+}
+</code></pre><p><strong>S3 写入meta index block到文件中。</strong></p>
+<p>如果filterblock不为NULL，则加入从&quot;filter.Name&quot;到filter data位置的映射。通过<strong>meta index block</strong>，可以根据filter名字快速定位到filter的数据区。</p>
+<pre tabindex="0"><code>if (ok()) 
+{
+     BlockBuildermeta_index_block(&amp;r-&gt;options);
+     if (r-&gt;filter_block !=NULL) 
+     {
+          //加入从&#34;filter.Name&#34;到filter data位置的映射
+          std::string key =&#34;filter.&#34;;
+          key.append(r-&gt;options.filter_policy-&gt;Name());
+          std::string handle_encoding;
+          filter_block_handle.EncodeTo(&amp;handle_encoding);
+          meta_index_block.Add(key,handle_encoding);
+     }
+     // TODO(postrelease): Add stats and other metablocks
+     WriteBlock(&amp;meta_index_block, &amp;metaindex_block_handle);
+}
+</code></pre><p><strong>S4 写入index block，如果成功Flush过data block，那么需要为最后一块data block设置index block，并加入到index block中。</strong></p>
+<pre tabindex="0"><code>if (ok()) 
+{
+     if (r-&gt;pending_index_entry)
+     { 
+          // Flush时会被设置为true
+          r-&gt;options.comparator-&gt;FindShortSuccessor(&amp;r-&gt;last_key);
+          std::string handle_encoding;
+          r-&gt;pending_handle.EncodeTo(&amp;handle_encoding);
+          r-&gt;index_block.Add(r-&gt;last_key, Slice(handle_encoding)); 
+          // 加入到index block中
+          r-&gt;pending_index_entry =false;
+      }
+      WriteBlock(&amp;r-&gt;index_block, &amp;index_block_handle);
+}
+</code></pre><p><strong>S5 写入Footer。</strong></p>
+<pre tabindex="0"><code>if (ok()) 
+{
+     Footer footer;
+     footer.set_metaindex_handle(metaindex_block_handle);
+     footer.set_index_handle(index_block_handle);
+     std::string footer_encoding;
+     footer.EncodeTo(&amp;footer_encoding);
+     r-&gt;status =r-&gt;file-&gt;Append(footer_encoding);
+     if (r-&gt;status.ok()) 
+     {
+          r-&gt;offset +=footer_encoding.size();
+     }
+}
+</code></pre><p>整个写入流程就分析完了，对于<strong>Datablock和Filter Block</strong>的操作将在<strong>Data block和Filter Block中</strong>单独分析，下面的读取相同。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/b3a81cdfb8624332bd1f184097675b32/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>leveldb源码分析7</span>
+  </a>
+  <a class="next" href="https://haokiu.com/899ada7f72f249e6938aef7f300eaf1a/">
+    <span class="title">Next »</span>
+    <br>
+    <span>leveldb源码分析9</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

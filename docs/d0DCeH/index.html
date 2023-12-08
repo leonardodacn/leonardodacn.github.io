@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>S3协议 | haokiu</title>
+<meta name="keywords" content="s3,oss,cos,qiniu">
+<meta name="description" content="S3是Simple Storage Service的缩写，即简单存储服务。亚马逊的名词缩写也都遵循这个习惯，例如Elastic Compute Cloud缩写为EC2等等。
+S3说的玄乎一点可以叫云存储，通俗一点就是大网盘。其概念类似于分布式文家系统，同Google的GFS应该在一个层面。
+目前的阿里的oss，腾讯的cos，七牛云存储都兼容aws的S3，所以要更换这些服务商之间提供的云存储非常容易，只需要简单的修改Access Key, Secrect Key等就行。
+S3的定义如下 Amazon S3 is a web service that enables you to store data in the cloud. You can then download the data or use the data with other AWS services, such as Amazon Elastic Cloud Computer (EC2).
+看来除了做网盘只用，S3存储的数据还可以被其他的亚马逊高层服务直接引用，这一点比国内的简单的网盘提供商高不少，亚马逊大网盘是其整体Solution中的有机组成部分。
+基本概念 1. bucket – 类比于文件系统的目录 A bucket is a Container for objects stored in Amazon S3. Every object is contained in a bucket. For example, if the object named photos/puppy.jpg is stored in the johnsmith bucket, then it is addressable using the URL http://johnsmith.s3.amazonaws.com/photos/puppy.jpg
+似乎目录不能嵌套，也就是不能有子目录，官方的说法是起到namespace的作用，是访问控制的基本单位，其实丫还是个目录。
+2. Object – 类比文件系统的文件 对象中带有对象名名，对象属性，对象本身最大5G，其实也还是个文件。
+目前object有Versioning的属性（即对象不同历史版本的cache概念），这个是文件系统不具备的，在早期看到的S3资料中没有这一概念，应该是演进的结果，其面对的应该是有版本控制的需求的用户。
+3. Keys – 类比文件名 key的样式也是URL，记住亚马逊的服务都是使用Web Service或REST方式访问的。">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/d0DCeH/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="S3协议" />
+<meta property="og:description" content="S3是Simple Storage Service的缩写，即简单存储服务。亚马逊的名词缩写也都遵循这个习惯，例如Elastic Compute Cloud缩写为EC2等等。
+S3说的玄乎一点可以叫云存储，通俗一点就是大网盘。其概念类似于分布式文家系统，同Google的GFS应该在一个层面。
+目前的阿里的oss，腾讯的cos，七牛云存储都兼容aws的S3，所以要更换这些服务商之间提供的云存储非常容易，只需要简单的修改Access Key, Secrect Key等就行。
+S3的定义如下 Amazon S3 is a web service that enables you to store data in the cloud. You can then download the data or use the data with other AWS services, such as Amazon Elastic Cloud Computer (EC2).
+看来除了做网盘只用，S3存储的数据还可以被其他的亚马逊高层服务直接引用，这一点比国内的简单的网盘提供商高不少，亚马逊大网盘是其整体Solution中的有机组成部分。
+基本概念 1. bucket – 类比于文件系统的目录 A bucket is a Container for objects stored in Amazon S3. Every object is contained in a bucket. For example, if the object named photos/puppy.jpg is stored in the johnsmith bucket, then it is addressable using the URL http://johnsmith.s3.amazonaws.com/photos/puppy.jpg
+似乎目录不能嵌套，也就是不能有子目录，官方的说法是起到namespace的作用，是访问控制的基本单位，其实丫还是个目录。
+2. Object – 类比文件系统的文件 对象中带有对象名名，对象属性，对象本身最大5G，其实也还是个文件。
+目前object有Versioning的属性（即对象不同历史版本的cache概念），这个是文件系统不具备的，在早期看到的S3资料中没有这一概念，应该是演进的结果，其面对的应该是有版本控制的需求的用户。
+3. Keys – 类比文件名 key的样式也是URL，记住亚马逊的服务都是使用Web Service或REST方式访问的。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/d0DCeH/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2020-09-18T15:17:51+00:00" />
+<meta property="article:modified_time" content="2020-09-18T15:17:51+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="S3协议"/>
+<meta name="twitter:description" content="S3是Simple Storage Service的缩写，即简单存储服务。亚马逊的名词缩写也都遵循这个习惯，例如Elastic Compute Cloud缩写为EC2等等。
+S3说的玄乎一点可以叫云存储，通俗一点就是大网盘。其概念类似于分布式文家系统，同Google的GFS应该在一个层面。
+目前的阿里的oss，腾讯的cos，七牛云存储都兼容aws的S3，所以要更换这些服务商之间提供的云存储非常容易，只需要简单的修改Access Key, Secrect Key等就行。
+S3的定义如下 Amazon S3 is a web service that enables you to store data in the cloud. You can then download the data or use the data with other AWS services, such as Amazon Elastic Cloud Computer (EC2).
+看来除了做网盘只用，S3存储的数据还可以被其他的亚马逊高层服务直接引用，这一点比国内的简单的网盘提供商高不少，亚马逊大网盘是其整体Solution中的有机组成部分。
+基本概念 1. bucket – 类比于文件系统的目录 A bucket is a Container for objects stored in Amazon S3. Every object is contained in a bucket. For example, if the object named photos/puppy.jpg is stored in the johnsmith bucket, then it is addressable using the URL http://johnsmith.s3.amazonaws.com/photos/puppy.jpg
+似乎目录不能嵌套，也就是不能有子目录，官方的说法是起到namespace的作用，是访问控制的基本单位，其实丫还是个目录。
+2. Object – 类比文件系统的文件 对象中带有对象名名，对象属性，对象本身最大5G，其实也还是个文件。
+目前object有Versioning的属性（即对象不同历史版本的cache概念），这个是文件系统不具备的，在早期看到的S3资料中没有这一概念，应该是演进的结果，其面对的应该是有版本控制的需求的用户。
+3. Keys – 类比文件名 key的样式也是URL，记住亚马逊的服务都是使用Web Service或REST方式访问的。"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "S3协议",
+      "item": "https://haokiu.com/d0DCeH/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "S3协议",
+  "name": "S3协议",
+  "description": "S3是Simple Storage Service的缩写，即简单存储服务。亚马逊的名词缩写也都遵循这个习惯，例如Elastic Compute Cloud缩写为EC2等等。\nS3说的玄乎一点可以叫云存储，通俗一点就是大网盘。其概念类似于分布式文家系统，同Google的GFS应该在一个层面。\n目前的阿里的oss，腾讯的cos，七牛云存储都兼容aws的S3，所以要更换这些服务商之间提供的云存储非常容易，只需要简单的修改Access Key, Secrect Key等就行。\nS3的定义如下 Amazon S3 is a web service that enables you to store data in the cloud. You can then download the data or use the data with other AWS services, such as Amazon Elastic Cloud Computer (EC2).\n看来除了做网盘只用，S3存储的数据还可以被其他的亚马逊高层服务直接引用，这一点比国内的简单的网盘提供商高不少，亚马逊大网盘是其整体Solution中的有机组成部分。\n基本概念 1. bucket – 类比于文件系统的目录 A bucket is a Container for objects stored in Amazon S3. Every object is contained in a bucket. For example, if the object named photos/puppy.jpg is stored in the johnsmith bucket, then it is addressable using the URL http://johnsmith.s3.amazonaws.com/photos/puppy.jpg\n似乎目录不能嵌套，也就是不能有子目录，官方的说法是起到namespace的作用，是访问控制的基本单位，其实丫还是个目录。\n2. Object – 类比文件系统的文件 对象中带有对象名名，对象属性，对象本身最大5G，其实也还是个文件。\n目前object有Versioning的属性（即对象不同历史版本的cache概念），这个是文件系统不具备的，在早期看到的S3资料中没有这一概念，应该是演进的结果，其面对的应该是有版本控制的需求的用户。\n3. Keys – 类比文件名 key的样式也是URL，记住亚马逊的服务都是使用Web Service或REST方式访问的。",
+  "keywords": [
+    "s3,oss,cos,qiniu"
+  ],
+  "articleBody": "S3是Simple Storage Service的缩写，即简单存储服务。亚马逊的名词缩写也都遵循这个习惯，例如Elastic Compute Cloud缩写为EC2等等。\nS3说的玄乎一点可以叫云存储，通俗一点就是大网盘。其概念类似于分布式文家系统，同Google的GFS应该在一个层面。\n目前的阿里的oss，腾讯的cos，七牛云存储都兼容aws的S3，所以要更换这些服务商之间提供的云存储非常容易，只需要简单的修改Access Key, Secrect Key等就行。\nS3的定义如下 Amazon S3 is a web service that enables you to store data in the cloud. You can then download the data or use the data with other AWS services, such as Amazon Elastic Cloud Computer (EC2).\n看来除了做网盘只用，S3存储的数据还可以被其他的亚马逊高层服务直接引用，这一点比国内的简单的网盘提供商高不少，亚马逊大网盘是其整体Solution中的有机组成部分。\n基本概念 1. bucket – 类比于文件系统的目录 A bucket is a Container for objects stored in Amazon S3. Every object is contained in a bucket. For example, if the object named photos/puppy.jpg is stored in the johnsmith bucket, then it is addressable using the URL http://johnsmith.s3.amazonaws.com/photos/puppy.jpg\n似乎目录不能嵌套，也就是不能有子目录，官方的说法是起到namespace的作用，是访问控制的基本单位，其实丫还是个目录。\n2. Object – 类比文件系统的文件 对象中带有对象名名，对象属性，对象本身最大5G，其实也还是个文件。\n目前object有Versioning的属性（即对象不同历史版本的cache概念），这个是文件系统不具备的，在早期看到的S3资料中没有这一概念，应该是演进的结果，其面对的应该是有版本控制的需求的用户。\n3. Keys – 类比文件名 key的样式也是URL，记住亚马逊的服务都是使用Web Service或REST方式访问的。\n例如，http://doc.s3.amazonaws.com/2006-03-01/AmazonS3.wsdl\n其中‘doc’就是目录名（桶名），”2006-03-01/AmazonS3.wsdl”是文件名（对象名）。\n如果引入了version则bucket + key + version唯一标示一个版本的文件。\n4. Versioning – 类比CVS中的一个版本 同名文件的写入，并不覆盖已有文件而是增加了一个最新的文件版本。\n同样的删除也不真正删除，而是mark了删除标记。\n当最新版本mark为deleted之后，对该对象的get操作返回404错误，除非明确指定一个历史版本。\n当然也可以指定版本永久删除其中一个拷贝。\n5. Regions – 文件存储的地理位置 这个也是文件系统中不存在的，就是不同的地理区域，用户可以指定将文件存在某个国家的服务器。我个人认为，这不是一个很好的概念，作为云的提供商，应该对于应用屏蔽这些部署细节。工程实现同技术理想还是有差距。目前其可以指定的server位置有美国、爱尔兰、新加坡等地。\n接口API 常用的API就是读、写、增、删、改、查等等。使用标准的SOAP和REST定义。\n尤其一提的是对于对象的获取，除了用http直接按照C/S方式获取之外，亚马逊支持BT协议，也就是说提供种子。从用户角度想，亚马逊会 charge更少的钱，但同时亚马逊自身也会减负。bt下载的速度就不太稳定了，基本取决于种子“质量”也就是取决于对文件感兴趣的人的多寡。例如命名为 “XX门”估计文件下载能够快很多。\n参考 http://aws.amazon.com/s3/#functionality\nhttp://docs.amazonwebservices.com/AmazonS3/2006-03-01/\nhttp://developer.amazonwebservices.com/connect/forum.jspa?forumID=24\n",
+  "wordCount" : "134",
+  "inLanguage": "en",
+  "datePublished": "2020-09-18T15:17:51Z",
+  "dateModified": "2020-09-18T15:17:51Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/d0DCeH/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      S3协议
+    </h1>
+    <div class="post-meta"><span title='2020-09-18 15:17:51 +0000 UTC'>September 18, 2020</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#s3%e7%9a%84%e5%ae%9a%e4%b9%89%e5%a6%82%e4%b8%8b" aria-label="S3的定义如下">S3的定义如下</a></li>
+                <li>
+                    <a href="#%e5%9f%ba%e6%9c%ac%e6%a6%82%e5%bf%b5" aria-label="基本概念">基本概念</a><ul>
+                        
+                <li>
+                    <a href="#1-bucket--%e7%b1%bb%e6%af%94%e4%ba%8e%e6%96%87%e4%bb%b6%e7%b3%bb%e7%bb%9f%e7%9a%84%e7%9b%ae%e5%bd%95" aria-label="1. bucket – 类比于文件系统的目录">1. bucket – 类比于文件系统的目录</a></li>
+                <li>
+                    <a href="#2-object--%e7%b1%bb%e6%af%94%e6%96%87%e4%bb%b6%e7%b3%bb%e7%bb%9f%e7%9a%84%e6%96%87%e4%bb%b6" aria-label="2. Object – 类比文件系统的文件">2. Object – 类比文件系统的文件</a></li>
+                <li>
+                    <a href="#3-keys--%e7%b1%bb%e6%af%94%e6%96%87%e4%bb%b6%e5%90%8d" aria-label="3. Keys – 类比文件名">3. Keys – 类比文件名</a></li>
+                <li>
+                    <a href="#4-versioning--%e7%b1%bb%e6%af%94cvs%e4%b8%ad%e7%9a%84%e4%b8%80%e4%b8%aa%e7%89%88%e6%9c%ac" aria-label="4. Versioning – 类比CVS中的一个版本">4. Versioning – 类比CVS中的一个版本</a></li>
+                <li>
+                    <a href="#5-regions--%e6%96%87%e4%bb%b6%e5%ad%98%e5%82%a8%e7%9a%84%e5%9c%b0%e7%90%86%e4%bd%8d%e7%bd%ae" aria-label="5. Regions – 文件存储的地理位置">5. Regions – 文件存储的地理位置</a></li></ul>
+                </li>
+                <li>
+                    <a href="#%e6%8e%a5%e5%8f%a3api" aria-label="接口API">接口API</a></li>
+                <li>
+                    <a href="#%e5%8f%82%e8%80%83" aria-label="参考">参考</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>S3是Simple Storage Service的缩写，即简单存储服务。亚马逊的名词缩写也都遵循这个习惯，例如Elastic Compute Cloud缩写为EC2等等。</p>
+<p>S3说的玄乎一点可以叫云存储，通俗一点就是大网盘。其概念类似于分布式文家系统，同Google的GFS应该在一个层面。</p>
+<p>目前的阿里的oss，腾讯的cos，七牛云存储都兼容aws的S3，所以要更换这些服务商之间提供的云存储非常容易，只需要简单的修改Access Key, Secrect Key等就行。</p>
+<h2 id="s3的定义如下">S3的定义如下</h2>
+<p>Amazon S3 is a web service that enables you to store data in the cloud. You can then download the data or use the data with other AWS services, such as Amazon Elastic Cloud Computer (EC2).</p>
+<p>看来除了做网盘只用，S3存储的数据还可以被其他的亚马逊高层服务直接引用，这一点比国内的简单的网盘提供商高不少，亚马逊大网盘是其整体Solution中的有机组成部分。</p>
+<h2 id="基本概念">基本概念</h2>
+<h3 id="1-bucket--类比于文件系统的目录">1. bucket – 类比于文件系统的目录</h3>
+<p>A bucket is a <a href="http://lib.csdn.net/base/docker">Container</a> for objects stored in Amazon S3. Every object is contained in a bucket. For example, if the object named photos/puppy.jpg is stored in the johnsmith bucket, then it is addressable using the URL <a href="http://johnsmith.s3.amazonaws.com/photos/puppy.jpg">http://johnsmith.s3.amazonaws.com/photos/puppy.jpg</a></p>
+<p>似乎目录不能嵌套，也就是不能有子目录，官方的说法是起到namespace的作用，是访问控制的基本单位，其实丫还是个目录。</p>
+<h3 id="2-object--类比文件系统的文件">2. Object – 类比文件系统的文件</h3>
+<p>对象中带有对象名名，对象属性，对象本身最大5G，其实也还是个文件。</p>
+<p>目前object有Versioning的属性（即对象不同历史版本的cache概念），这个是文件系统不具备的，在早期看到的S3资料中没有这一概念，应该是演进的结果，其面对的应该是有<a href="http://lib.csdn.net/base/git">版本控制</a>的需求的用户。</p>
+<h3 id="3-keys--类比文件名">3. Keys – 类比文件名</h3>
+<p>key的样式也是URL，记住亚马逊的服务都是使用Web Service或REST方式访问的。</p>
+<p>例如，http://doc.s3.amazonaws.com/2006-03-01/AmazonS3.wsdl</p>
+<p>其中‘doc’就是目录名（桶名），”2006-03-01/AmazonS3.wsdl”是文件名（对象名）。</p>
+<p>如果引入了version则bucket + key + version唯一标示一个版本的文件。</p>
+<h3 id="4-versioning--类比cvs中的一个版本">4. Versioning – 类比CVS中的一个版本</h3>
+<p>同名文件的写入，并不覆盖已有文件而是增加了一个最新的文件版本。</p>
+<p>同样的删除也不真正删除，而是mark了删除标记。</p>
+<p>当最新版本mark为deleted之后，对该对象的get操作返回404错误，除非明确指定一个历史版本。</p>
+<p>当然也可以指定版本永久删除其中一个拷贝。</p>
+<h3 id="5-regions--文件存储的地理位置">5. Regions – 文件存储的地理位置</h3>
+<p>这个也是文件系统中不存在的，就是不同的地理区域，用户可以指定将文件存在某个国家的服务器。我个人认为，这不是一个很好的概念，作为云的提供商，应该对于应用屏蔽这些部署细节。工程实现同技术理想还是有差距。目前其可以指定的server位置有美国、爱尔兰、新加坡等地。</p>
+<h2 id="接口api">接口API</h2>
+<p>常用的API就是读、写、增、删、改、查等等。使用标准的SOAP和REST定义。</p>
+<p>尤其一提的是对于对象的获取，除了用http直接按照C/S方式获取之外，亚马逊支持BT协议，也就是说提供种子。从用户角度想，亚马逊会 charge更少的钱，但同时亚马逊自身也会减负。bt下载的速度就不太稳定了，基本取决于种子“质量”也就是取决于对文件感兴趣的人的多寡。例如命名为 “XX门”估计文件下载能够快很多。</p>
+<h2 id="参考">参考</h2>
+<p><a href="http://aws.amazon.com/s3/#functionality">http://aws.amazon.com/s3/#functionality</a></p>
+<p><a href="http://docs.amazonwebservices.com/AmazonS3/2006-03-01/">http://docs.amazonwebservices.com/AmazonS3/2006-03-01/</a></p>
+<p><a href="http://developer.amazonwebservices.com/connect/forum.jspa?forumID=24">http://developer.amazonwebservices.com/connect/forum.jspa?forumID=24</a></p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://haokiu.com/tags/%E5%85%B6%E4%BB%96/">其他</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/dpoeTs/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>golang 计算文件和字符串的 md5 值</span>
+  </a>
+  <a class="next" href="https://haokiu.com/Cd6WaZ/">
+    <span class="title">Next »</span>
+    <br>
+    <span>golang 判断目录或文件是否存在</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

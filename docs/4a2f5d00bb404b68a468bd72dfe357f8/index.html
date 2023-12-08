@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>pimpl 惯用法 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="pimpl 惯用法 现在这里有一个名为 CSocketClient 的网络通信类，定义如下：
+/** * 网络通信的基础类, SocketClient.h * zhangyl 2017.07.11 */ class CSocketClient { public: CSocketClient(); ~CSocketClient(); public: void SetProxyWnd(HWND hProxyWnd); bool Init(CNetProxy* pNetProxy); bool Uninit(); int Register(const char* pszUser, const char* pszPassword); void GuestLogin(); BOOL IsClosed(); BOOL	Connect(int timeout = 3); void AddData(int cmd, const std::string&amp; strBuffer); void AddData(int cmd, const char* pszBuff, int nBuffLen); void Close(); BOOL ConnectServer(int timeout = 3); BOOL SendLoginMsg(); BOOL RecvLoginMsg(int&amp; nRet); BOOL Login(int&amp; nRet); private: void LoadConfig(); static UINT CALLBACK SendDataThreadProc(LPVOID lpParam); static UINT CALLBACK RecvDataThreadProc(LPVOID lpParam); bool Send(); bool Recv(); bool CheckReceivedData(); void SendHeartbeatPackage(); private: SOCKET m_hSocket; short m_nPort; char m_szServer[64]; long m_nLastDataTime; //最近一次收发数据的时间 long m_nHeartbeatInterval; //心跳包时间间隔，单位秒 CRITICAL_SECTION m_csLastDataTime; //保护m_nLastDataTime的互斥体 HANDLE m_hSendDataThread; //发送数据线程 HANDLE m_hRecvDataThread; //接收数据线程 std::string m_strSendBuf; std::string m_strRecvBuf; HANDLE m_hExitEvent; bool m_bConnected; CRITICAL_SECTION m_csSendBuf; HANDLE m_hSemaphoreSendBuf; HWND m_hProxyWnd; CNetProxy* m_pNetProxy; int m_nReconnectTimeInterval; //重连时间间隔 time_t m_nLastReconnectTime; //上次重连时刻 CFlowStatistics* m_pFlowStatistics; }; 这段代码来源于笔者实际项目中开发的一个股票客户端的软件。">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/4a2f5d00bb404b68a468bd72dfe357f8/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="pimpl 惯用法" />
+<meta property="og:description" content="pimpl 惯用法 现在这里有一个名为 CSocketClient 的网络通信类，定义如下：
+/** * 网络通信的基础类, SocketClient.h * zhangyl 2017.07.11 */ class CSocketClient { public: CSocketClient(); ~CSocketClient(); public: void SetProxyWnd(HWND hProxyWnd); bool Init(CNetProxy* pNetProxy); bool Uninit(); int Register(const char* pszUser, const char* pszPassword); void GuestLogin(); BOOL IsClosed(); BOOL	Connect(int timeout = 3); void AddData(int cmd, const std::string&amp; strBuffer); void AddData(int cmd, const char* pszBuff, int nBuffLen); void Close(); BOOL ConnectServer(int timeout = 3); BOOL SendLoginMsg(); BOOL RecvLoginMsg(int&amp; nRet); BOOL Login(int&amp; nRet); private: void LoadConfig(); static UINT CALLBACK SendDataThreadProc(LPVOID lpParam); static UINT CALLBACK RecvDataThreadProc(LPVOID lpParam); bool Send(); bool Recv(); bool CheckReceivedData(); void SendHeartbeatPackage(); private: SOCKET m_hSocket; short m_nPort; char m_szServer[64]; long m_nLastDataTime; //最近一次收发数据的时间 long m_nHeartbeatInterval; //心跳包时间间隔，单位秒 CRITICAL_SECTION m_csLastDataTime; //保护m_nLastDataTime的互斥体 HANDLE m_hSendDataThread; //发送数据线程 HANDLE m_hRecvDataThread; //接收数据线程 std::string m_strSendBuf; std::string m_strRecvBuf; HANDLE m_hExitEvent; bool m_bConnected; CRITICAL_SECTION m_csSendBuf; HANDLE m_hSemaphoreSendBuf; HWND m_hProxyWnd; CNetProxy* m_pNetProxy; int m_nReconnectTimeInterval; //重连时间间隔 time_t m_nLastReconnectTime; //上次重连时刻 CFlowStatistics* m_pFlowStatistics; }; 这段代码来源于笔者实际项目中开发的一个股票客户端的软件。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/4a2f5d00bb404b68a468bd72dfe357f8/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="pimpl 惯用法"/>
+<meta name="twitter:description" content="pimpl 惯用法 现在这里有一个名为 CSocketClient 的网络通信类，定义如下：
+/** * 网络通信的基础类, SocketClient.h * zhangyl 2017.07.11 */ class CSocketClient { public: CSocketClient(); ~CSocketClient(); public: void SetProxyWnd(HWND hProxyWnd); bool Init(CNetProxy* pNetProxy); bool Uninit(); int Register(const char* pszUser, const char* pszPassword); void GuestLogin(); BOOL IsClosed(); BOOL	Connect(int timeout = 3); void AddData(int cmd, const std::string&amp; strBuffer); void AddData(int cmd, const char* pszBuff, int nBuffLen); void Close(); BOOL ConnectServer(int timeout = 3); BOOL SendLoginMsg(); BOOL RecvLoginMsg(int&amp; nRet); BOOL Login(int&amp; nRet); private: void LoadConfig(); static UINT CALLBACK SendDataThreadProc(LPVOID lpParam); static UINT CALLBACK RecvDataThreadProc(LPVOID lpParam); bool Send(); bool Recv(); bool CheckReceivedData(); void SendHeartbeatPackage(); private: SOCKET m_hSocket; short m_nPort; char m_szServer[64]; long m_nLastDataTime; //最近一次收发数据的时间 long m_nHeartbeatInterval; //心跳包时间间隔，单位秒 CRITICAL_SECTION m_csLastDataTime; //保护m_nLastDataTime的互斥体 HANDLE m_hSendDataThread; //发送数据线程 HANDLE m_hRecvDataThread; //接收数据线程 std::string m_strSendBuf; std::string m_strRecvBuf; HANDLE m_hExitEvent; bool m_bConnected; CRITICAL_SECTION m_csSendBuf; HANDLE m_hSemaphoreSendBuf; HWND m_hProxyWnd; CNetProxy* m_pNetProxy; int m_nReconnectTimeInterval; //重连时间间隔 time_t m_nLastReconnectTime; //上次重连时刻 CFlowStatistics* m_pFlowStatistics; }; 这段代码来源于笔者实际项目中开发的一个股票客户端的软件。"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "pimpl 惯用法",
+      "item": "https://haokiu.com/4a2f5d00bb404b68a468bd72dfe357f8/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "pimpl 惯用法",
+  "name": "pimpl 惯用法",
+  "description": "pimpl 惯用法 现在这里有一个名为 CSocketClient 的网络通信类，定义如下：\n/** * 网络通信的基础类, SocketClient.h * zhangyl 2017.07.11 */ class CSocketClient { public: CSocketClient(); ~CSocketClient(); public: void SetProxyWnd(HWND hProxyWnd); bool Init(CNetProxy* pNetProxy); bool Uninit(); int Register(const char* pszUser, const char* pszPassword); void GuestLogin(); BOOL IsClosed(); BOOL\tConnect(int timeout = 3); void AddData(int cmd, const std::string\u0026amp; strBuffer); void AddData(int cmd, const char* pszBuff, int nBuffLen); void Close(); BOOL ConnectServer(int timeout = 3); BOOL SendLoginMsg(); BOOL RecvLoginMsg(int\u0026amp; nRet); BOOL Login(int\u0026amp; nRet); private: void LoadConfig(); static UINT CALLBACK SendDataThreadProc(LPVOID lpParam); static UINT CALLBACK RecvDataThreadProc(LPVOID lpParam); bool Send(); bool Recv(); bool CheckReceivedData(); void SendHeartbeatPackage(); private: SOCKET m_hSocket; short m_nPort; char m_szServer[64]; long m_nLastDataTime; //最近一次收发数据的时间 long m_nHeartbeatInterval; //心跳包时间间隔，单位秒 CRITICAL_SECTION m_csLastDataTime; //保护m_nLastDataTime的互斥体 HANDLE m_hSendDataThread; //发送数据线程 HANDLE m_hRecvDataThread; //接收数据线程 std::string m_strSendBuf; std::string m_strRecvBuf; HANDLE m_hExitEvent; bool m_bConnected; CRITICAL_SECTION m_csSendBuf; HANDLE m_hSemaphoreSendBuf; HWND m_hProxyWnd; CNetProxy* m_pNetProxy; int m_nReconnectTimeInterval; //重连时间间隔 time_t m_nLastReconnectTime; //上次重连时刻 CFlowStatistics* m_pFlowStatistics; }; 这段代码来源于笔者实际项目中开发的一个股票客户端的软件。",
+  "keywords": [
+    
+  ],
+  "articleBody": "pimpl 惯用法 现在这里有一个名为 CSocketClient 的网络通信类，定义如下：\n/** * 网络通信的基础类, SocketClient.h * zhangyl 2017.07.11 */ class CSocketClient { public: CSocketClient(); ~CSocketClient(); public: void SetProxyWnd(HWND hProxyWnd); bool Init(CNetProxy* pNetProxy); bool Uninit(); int Register(const char* pszUser, const char* pszPassword); void GuestLogin(); BOOL IsClosed(); BOOL\tConnect(int timeout = 3); void AddData(int cmd, const std::string\u0026 strBuffer); void AddData(int cmd, const char* pszBuff, int nBuffLen); void Close(); BOOL ConnectServer(int timeout = 3); BOOL SendLoginMsg(); BOOL RecvLoginMsg(int\u0026 nRet); BOOL Login(int\u0026 nRet); private: void LoadConfig(); static UINT CALLBACK SendDataThreadProc(LPVOID lpParam); static UINT CALLBACK RecvDataThreadProc(LPVOID lpParam); bool Send(); bool Recv(); bool CheckReceivedData(); void SendHeartbeatPackage(); private: SOCKET m_hSocket; short m_nPort; char m_szServer[64]; long m_nLastDataTime; //最近一次收发数据的时间 long m_nHeartbeatInterval; //心跳包时间间隔，单位秒 CRITICAL_SECTION m_csLastDataTime; //保护m_nLastDataTime的互斥体 HANDLE m_hSendDataThread; //发送数据线程 HANDLE m_hRecvDataThread; //接收数据线程 std::string m_strSendBuf; std::string m_strRecvBuf; HANDLE m_hExitEvent; bool m_bConnected; CRITICAL_SECTION m_csSendBuf; HANDLE m_hSemaphoreSendBuf; HWND m_hProxyWnd; CNetProxy* m_pNetProxy; int m_nReconnectTimeInterval; //重连时间间隔 time_t m_nLastReconnectTime; //上次重连时刻 CFlowStatistics* m_pFlowStatistics; }; 这段代码来源于笔者实际项目中开发的一个股票客户端的软件。\nCSocketClient 类的 public 方法提供对外接口供第三方使用，每个函数的具体实现在 SocketClient.cpp 中，对第三方使用者不可见。在 Windows 系统上作为提供给第三方使用的库，一般需要提供给使用者 .h、.lib 和 .dll 文件，在 Linux 系统上需要提供 .h、.a 或 .so 文件。\n不管是在哪个操作系统平台上，像 SocketClient.h 这样的头文件提供给第三方使用时，都会让库的作者心里隐隐不安——因为 SocketClient.h 文件中 SocketClient 类大量的成员变量和私有函数暴露了这个类太多的实现细节，很容易让使用者看出实现原理。这样的头文件，对于一些不想对使用者暴露核心技术实现的库和 sdk，是非常不好的。\n那有没有什么办法既能保持对外的接口不变，又能尽量不暴露一些关键性的成员变量和私有函数的实现方法呢？有的。我们可以将代码稍微修改一下：\n/** * 网络通信的基础类, SocketClient.h * zhangyl 2017.07.11 */ class Impl; class CSocketClient { public: CSocketClient(); ~CSocketClient(); public: void SetProxyWnd(HWND hProxyWnd); bool Init(CNetProxy* pNetProxy); bool Uninit(); int Register(const char* pszUser, const char* pszPassword); void GuestLogin(); BOOL IsClosed(); BOOL\tConnect(int timeout = 3); void AddData(int cmd, const std::string\u0026 strBuffer); void AddData(int cmd, const char* pszBuff, int nBuffLen); void Close(); BOOL ConnectServer(int timeout = 3); BOOL SendLoginMsg(); BOOL RecvLoginMsg(int\u0026 nRet); BOOL Login(int\u0026 nRet); private: Impl*\tm_pImpl; }; 上述代码中，所有的关键性成员变量已经没有了，取而代之的是一个类型为 Impl 的指针成员变量 m_pImpl。\n具体采用什么名称，读者完全可以根据自己的实际情况来定，不一定非要使用这里的 Impl 和 m_pImpl。\nImpl 类型现在是完全对使用者透明，为了在当前类中可以使用 Impl，使用了一个前置声明：\n//原代码第5行 class Impl; 然后我们就可以将刚才隐藏的成员变量放到这个类中去：\nclass Impl { public: Impl() { //TODO: 你可以在这里对成员变量做一些初始化工作 } ~Impl() { //TODO: 你可以在这里做一些清理工作 } public: SOCKET m_hSocket; short m_nPort; char m_szServer[64]; long m_nLastDataTime; //最近一次收发数据的时间 long m_nHeartbeatInterval; //心跳包时间间隔，单位秒 CRITICAL_SECTION m_csLastDataTime; //保护m_nLastDataTime的互斥体 HANDLE m_hSendDataThread; //发送数据线程 HANDLE m_hRecvDataThread; //接收数据线程 std::string m_strSendBuf; std::string m_strRecvBuf; HANDLE m_hExitEvent; bool m_bConnected; CRITICAL_SECTION m_csSendBuf; HANDLE m_hSemaphoreSendBuf; HWND m_hProxyWnd; CNetProxy* m_pNetProxy; int m_nReconnectTimeInterval; //重连时间间隔 time_t m_nLastReconnectTime; //上次重连时刻 CFlowStatistics* m_pFlowStatistics; }; 接着我们在 CSocketClient 的构造函数中创建这个 m_pImpl 对象，在 CSocketClient 析构函数中释放这个对象。\nCSocketClient::CSocketClient() { m_pImpl = new Impl(); } CSocketClient::~CSocketClient() { delete m_pImpl; } 这样，原来需要引用的成员变量，可以在 CSocketClient 内部使用 m_pImpl-\u003e变量名 来引用了。\n这里仅仅以演示隐藏 CSocketClient 的成员变量为例，隐藏其私有方法与此类似，都是变成类 Impl 的方法。\n需要强调的是，在实际开发中，由于 Impl 类是 CSocketClient 的辅助类， Impl 类没有独立存在的必要，所以一般会将 Impl 类定义成 CSocketClient 的内部类。即采用如下形式：\n/** * 网络通信的基础类, SocketClient.h * zhangyl 2017.07.11 */ class CSocketClient { public: CSocketClient(); ~CSocketClient(); //重复的代码省略... private: class Impl; Impl*\tm_pImpl; }; 然后在 ClientSocket.cpp 中定义 Impl 类的实现：\n/** * 网络通信的基础类, SocketClient.cpp * zhangyl 2017.07.11 */ class CSocketClient::Impl { public: void LoadConfig() { //方法的具体实现 } //其他方法省略... public: SOCKET m_hSocket; short m_nPort; char m_szServer[64]; long m_nLastDataTime; //最近一次收发数据的时间 long m_nHeartbeatInterval; //心跳包时间间隔，单位秒 CRITICAL_SECTION m_csLastDataTime; //保护m_nLastDataTime的互斥体 HANDLE m_hSendDataThread; //发送数据线程 HANDLE m_hRecvDataThread; //接收数据线程 std::string m_strSendBuf; std::string m_strRecvBuf; HANDLE m_hExitEvent; bool m_bConnected; CRITICAL_SECTION m_csSendBuf; HANDLE m_hSemaphoreSendBuf; HWND m_hProxyWnd; CNetProxy* m_pNetProxy; int m_nReconnectTimeInterval; //重连时间间隔 time_t m_nLastReconnectTime; //上次重连时刻 CFlowStatistics* m_pFlowStatistics; } CSocketClient::CSocketClient() { m_pImpl = new Impl(); } CSocketClient::~CSocketClient() { delete m_pImpl; } 现在CSocketClient 这个类除了保留对外的接口以外，其内部实现用到的变量和方法基本上对使用者不可见了。C++ 中对类的这种封装方式，我们称之为 pimpl 惯用法，即 Pointer to Implementation （也有人认为是 Private Implementation）。\n在实际的开发中，Impl 类的声明和定义既可以使用 class 关键字也可以使用 struct 关键字。在 C++ 语言中，struct 类型可以定义成员方法，但 struct 所有成员变量和方法默认都是 public 的。\n现在来总结一下这个方法的优点：\n核心数据成员被隐藏；\n核心数据成员被隐藏，不必暴露在头文件中，对使用者透明，提高了安全性。\n降低编译依赖，提高编译速度；\n由于原来的头文件的一些私有成员变量可能是非指针非引用类型的自定义类型，需要在当前类的头文件中包含这些类型的头文件，使用了 pimpl 惯用法以后，这些私有成员变量被移动到当前类的 cpp 文件中，因此头文件不再需要包含这些成员变量的类型头文件，当前头文件变“干净”，这样其他文件在引用这个头文件时，依赖的类型变少，加快了编译速度。\n接口与实现分离。\n使用了 pimpl 惯用法之后，即使 CSocketClient 或者 Impl 类的实现细节发生了变化，对使用者都是透明的，对外的 CSocketClient 类声明仍然可以保持不变。例如我们可以增删改 Impl 的成员变量和成员方法而保持 SocketClient.h 文件内容不变；如果不使用 pimpl 惯用法，我们做不到不改变 SocketClient.h 文件而增删改 CSocketClient 类的成员。\n智能指针用于 pimpl 惯用法\nC++ 11 标准引入了智能指针对象，我们可以使用 std::unique_ptr 对象来管理上述用于隐藏具体实现的 m_pImpl 指针。\nSocketClient.h 文件可以修改成如下方式：\n#include //for std::unique_ptr class CSocketClient { public: CSocketClient(); ~CSocketClient(); //重复的代码省略... private: struct Impl; std::unique_ptr m_pImpl; }; SocketClient.cpp 中修改 CSocketClient 对象的构造函数和析构函数的实现如下：\n构造函数\n如果你的编译器仅支持 C++ 11 标准，我们可以按如下修改：\nCSocketClient::CSocketClient() { //C++11 标准并未提供 std::make_unique()，该方法是 C++14 提供的 m_pImpl.reset(new Impl()); } 如果你的编译器支持 C++14 及以上标准，可以这么修改：\nCSocketClient::CSocketClient() : m_pImpl(std::make_unique()) { } 由于已经使用了智能指针来管理 m_pImpl 指向的堆内存，因此析构函数中不再需要显式释放堆内存：\nCSocketClient::~CSocketClient() { //不再需要显式 delete 了 //delete m_pImpl; } pimp 惯用法是 C/C++ 项目开发中一种非常实用的代码编写策略，建议读者掌握它。\n",
+  "wordCount" : "586",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/4a2f5d00bb404b68a468bd72dfe357f8/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      pimpl 惯用法
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#pimpl-%e6%83%af%e7%94%a8%e6%b3%95" aria-label="pimpl 惯用法">pimpl 惯用法</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="pimpl-惯用法">pimpl 惯用法</h1>
+<p>现在这里有一个名为 <strong>CSocketClient</strong> 的网络通信类，定义如下：</p>
+<pre tabindex="0"><code>/**
+ * 网络通信的基础类, SocketClient.h
+ * zhangyl 2017.07.11
+ */
+class CSocketClient
+{
+public:
+    CSocketClient();
+    ~CSocketClient();
+ 
+public:  
+    void SetProxyWnd(HWND hProxyWnd);
+
+    bool    Init(CNetProxy* pNetProxy);
+    bool    Uninit();
+    
+    int Register(const char* pszUser, const char* pszPassword); 
+    void GuestLogin();  
+    
+    BOOL    IsClosed();
+    BOOL	Connect(int timeout = 3);
+    void    AddData(int cmd, const std::string&amp; strBuffer);
+    void    AddData(int cmd, const char* pszBuff, int nBuffLen);
+    void    Close();
+
+    BOOL    ConnectServer(int timeout = 3);
+    BOOL    SendLoginMsg();
+    BOOL    RecvLoginMsg(int&amp; nRet);
+    BOOL    Login(int&amp; nRet);
+
+private:
+    void LoadConfig();
+    static UINT CALLBACK SendDataThreadProc(LPVOID lpParam);
+    static UINT CALLBACK RecvDataThreadProc(LPVOID lpParam);
+    bool Send();
+    bool Recv();
+    bool CheckReceivedData();
+    void SendHeartbeatPackage();
+
+private:
+    SOCKET                          m_hSocket;
+    short                           m_nPort;
+    char                            m_szServer[64];
+    long                            m_nLastDataTime;        //最近一次收发数据的时间
+    long                            m_nHeartbeatInterval;   //心跳包时间间隔，单位秒
+    CRITICAL_SECTION                m_csLastDataTime;       //保护m_nLastDataTime的互斥体 
+    HANDLE                          m_hSendDataThread;      //发送数据线程
+    HANDLE                          m_hRecvDataThread;      //接收数据线程
+    std::string                     m_strSendBuf;
+    std::string                     m_strRecvBuf;
+    HANDLE                          m_hExitEvent;
+    bool                            m_bConnected;
+    CRITICAL_SECTION                m_csSendBuf;
+    HANDLE                          m_hSemaphoreSendBuf;
+    HWND                            m_hProxyWnd;
+    CNetProxy*                      m_pNetProxy;
+    int                             m_nReconnectTimeInterval;    //重连时间间隔
+    time_t                          m_nLastReconnectTime;        //上次重连时刻
+    CFlowStatistics*                m_pFlowStatistics;
+};
+</code></pre><p>这段代码来源于笔者实际项目中开发的一个股票客户端的软件。</p>
+<p><strong>CSocketClient</strong> 类的 <strong>public</strong> 方法提供对外接口供第三方使用，每个函数的具体实现在 <strong>SocketClient.cpp</strong> 中，对第三方使用者不可见。在 Windows 系统上作为提供给第三方使用的库，一般需要提供给使用者 <em><strong>.h</strong>、</em><strong>.lib</strong> 和 <em><strong>.dll</strong> 文件，在 Linux 系统上需要提供 <em><strong>.h</strong>、</em></em><em>.a  或 <em>.so</em></em> 文件。</p>
+<p>不管是在哪个操作系统平台上，像 SocketClient.h 这样的头文件提供给第三方使用时，都会让库的作者心里<strong>隐隐不安</strong>——因为 SocketClient.h 文件中 SocketClient 类大量的成员变量和私有函数暴露了这个类太多的实现细节，很容易让使用者看出实现原理。这样的头文件，对于一些不想对使用者暴露核心技术实现的库和 sdk，是非常不好的。</p>
+<p>那有没有什么办法既能保持对外的接口不变，又能尽量不暴露一些关键性的成员变量和私有函数的实现方法呢？有的。我们可以将代码稍微修改一下：</p>
+<pre tabindex="0"><code>/**
+ * 网络通信的基础类, SocketClient.h
+ * zhangyl 2017.07.11
+ */
+class Impl;
+
+class CSocketClient
+{
+public:
+    CSocketClient();
+    ~CSocketClient();
+ 
+public:
+    void SetProxyWnd(HWND hProxyWnd);
+
+    bool    Init(CNetProxy* pNetProxy);
+    bool    Uninit();
+
+    int Register(const char* pszUser, const char* pszPassword);    
+    void GuestLogin();  
+    
+    BOOL    IsClosed();
+    BOOL	Connect(int timeout = 3);
+    void    AddData(int cmd, const std::string&amp; strBuffer);
+    void    AddData(int cmd, const char* pszBuff, int nBuffLen);
+    void    Close();
+
+    BOOL    ConnectServer(int timeout = 3);
+    BOOL    SendLoginMsg();
+    BOOL    RecvLoginMsg(int&amp; nRet);
+    BOOL    Login(int&amp; nRet);
+
+private:
+    Impl*	m_pImpl;
+};
+</code></pre><p>上述代码中，所有的关键性成员变量已经没有了，取而代之的是一个类型为 <strong>Impl</strong> 的指针成员变量 <strong>m_pImpl</strong>。</p>
+<blockquote>
+<p>具体采用什么名称，读者完全可以根据自己的实际情况来定，不一定非要使用这里的 <strong>Impl</strong> 和 <strong>m_pImpl</strong>。</p>
+</blockquote>
+<p><strong>Impl</strong> 类型现在是完全对使用者透明，为了在当前类中可以使用 <strong>Impl</strong>，使用了一个前置声明：</p>
+<pre tabindex="0"><code>//原代码第5行
+class Impl;
+</code></pre><p>然后我们就可以将刚才隐藏的成员变量放到这个类中去：</p>
+<pre tabindex="0"><code>class Impl
+{
+public:
+	Impl()
+	{
+        //TODO: 你可以在这里对成员变量做一些初始化工作
+	}
+	
+	~Impl()
+	{
+        //TODO: 你可以在这里做一些清理工作
+	}
+	
+public:
+	SOCKET                          m_hSocket;
+    short                           m_nPort;
+    char                            m_szServer[64];
+    long                            m_nLastDataTime;        //最近一次收发数据的时间
+    long                            m_nHeartbeatInterval;   //心跳包时间间隔，单位秒
+    CRITICAL_SECTION                m_csLastDataTime;       //保护m_nLastDataTime的互斥体 
+    HANDLE                          m_hSendDataThread;      //发送数据线程
+    HANDLE                          m_hRecvDataThread;      //接收数据线程
+    std::string                     m_strSendBuf;
+    std::string                     m_strRecvBuf;
+    HANDLE                          m_hExitEvent;
+    bool                            m_bConnected;
+    CRITICAL_SECTION                m_csSendBuf;
+    HANDLE                          m_hSemaphoreSendBuf;
+    HWND                            m_hProxyWnd;
+    CNetProxy*                      m_pNetProxy;
+    int                             m_nReconnectTimeInterval;    //重连时间间隔
+    time_t                          m_nLastReconnectTime;        //上次重连时刻
+    CFlowStatistics*                m_pFlowStatistics;
+};
+</code></pre><p>接着我们在 <strong>CSocketClient</strong> 的构造函数中创建这个 <strong>m_pImpl</strong> 对象，在 <strong>CSocketClient</strong> 析构函数中释放这个对象。</p>
+<pre tabindex="0"><code>CSocketClient::CSocketClient()
+{
+	m_pImpl = new Impl();
+}
+
+CSocketClient::~CSocketClient()
+{
+	delete m_pImpl;
+}
+</code></pre><p>这样，原来需要引用的成员变量，可以在 <strong>CSocketClient</strong> 内部使用 <strong>m_pImpl-&gt;变量名</strong> 来引用了。</p>
+<blockquote>
+<p>这里仅仅以演示隐藏 <strong>CSocketClient</strong> 的成员变量为例，隐藏其私有方法与此类似，都是变成类 <strong>Impl</strong> 的方法。</p>
+</blockquote>
+<p>需要强调的是，在实际开发中，由于 <strong>Impl</strong> 类是 <strong>CSocketClient</strong> 的辅助类， <strong>Impl</strong> 类没有独立存在的必要，所以一般会将 <strong>Impl</strong> 类定义成 <strong>CSocketClient</strong> 的内部类。即采用如下形式：</p>
+<pre tabindex="0"><code>/**
+ * 网络通信的基础类, SocketClient.h
+ * zhangyl 2017.07.11
+ */
+class CSocketClient
+{
+public:
+    CSocketClient();
+    ~CSocketClient();
+
+ //重复的代码省略...
+
+private:
+	class   Impl;
+    Impl*	m_pImpl;
+};
+</code></pre><p>然后在 <strong>ClientSocket.cpp</strong> 中定义 <strong>Impl</strong> 类的实现：</p>
+<pre tabindex="0"><code>/**
+ * 网络通信的基础类, SocketClient.cpp
+ * zhangyl 2017.07.11
+ */
+class  CSocketClient::Impl
+{
+public:
+    void LoadConfig()
+    {
+    	//方法的具体实现
+    }
+    
+    //其他方法省略...
+    
+public:
+	SOCKET                          m_hSocket;
+    short                           m_nPort;
+    char                            m_szServer[64];
+    long                            m_nLastDataTime;        //最近一次收发数据的时间
+    long                            m_nHeartbeatInterval;   //心跳包时间间隔，单位秒
+    CRITICAL_SECTION                m_csLastDataTime;       //保护m_nLastDataTime的互斥体 
+    HANDLE                          m_hSendDataThread;      //发送数据线程
+    HANDLE                          m_hRecvDataThread;      //接收数据线程
+    std::string                     m_strSendBuf;
+    std::string                     m_strRecvBuf;
+    HANDLE                          m_hExitEvent;
+    bool                            m_bConnected;
+    CRITICAL_SECTION                m_csSendBuf;
+    HANDLE                          m_hSemaphoreSendBuf;
+    HWND                            m_hProxyWnd;
+    CNetProxy*                      m_pNetProxy;
+    int                             m_nReconnectTimeInterval;    //重连时间间隔
+    time_t                          m_nLastReconnectTime;        //上次重连时刻
+    CFlowStatistics*                m_pFlowStatistics;
+}
+ 
+CSocketClient::CSocketClient()
+{
+	m_pImpl = new Impl();
+}
+
+CSocketClient::~CSocketClient()
+{
+	delete m_pImpl;
+}
+</code></pre><p>现在<strong>CSocketClient</strong> 这个类除了保留对外的接口以外，其内部实现用到的变量和方法基本上对使用者不可见了。C++ 中对类的这种封装方式，我们称之为 <strong>pimpl</strong> 惯用法，即 <strong>Pointer to Implementation</strong> （也有人认为是 <strong>Private Implementation</strong>）。</p>
+<blockquote>
+<p>在实际的开发中，<strong>Impl</strong> 类的声明和定义既可以使用 <strong>class</strong> 关键字也可以使用 <strong>struct</strong> 关键字。在 C++ 语言中，struct 类型可以定义成员方法，但 struct 所有成员变量和方法默认都是 public 的。</p>
+</blockquote>
+<p>现在来总结一下这个方法的优点：</p>
+<ul>
+<li>
+<p>核心数据成员被隐藏；</p>
+<p>核心数据成员被隐藏，不必暴露在头文件中，对使用者透明，提高了安全性。</p>
+</li>
+<li>
+<p>降低编译依赖，提高编译速度；</p>
+<p>由于原来的头文件的一些私有成员变量可能是非指针非引用类型的自定义类型，需要在当前类的头文件中包含这些类型的头文件，使用了 <strong>pimpl</strong> 惯用法以后，这些私有成员变量被移动到当前类的 cpp 文件中，因此头文件不再需要包含这些成员变量的类型头文件，当前头文件变“干净”，这样其他文件在引用这个头文件时，依赖的类型变少，加快了编译速度。</p>
+</li>
+<li>
+<p>接口与实现分离。</p>
+<p>使用了 <strong>pimpl</strong> 惯用法之后，即使 <strong>CSocketClient</strong> 或者 <strong>Impl</strong> 类的实现细节发生了变化，对使用者都是透明的，对外的 <strong>CSocketClient</strong> 类声明仍然可以保持不变。例如我们可以增删改 Impl 的成员变量和成员方法而保持 <strong>SocketClient.h</strong> 文件内容不变；如果不使用 <strong>pimpl</strong> 惯用法，我们做不到不改变 <strong>SocketClient.h</strong> 文件而增删改 <strong>CSocketClient</strong> 类的成员。</p>
+</li>
+</ul>
+<p><strong>智能指针用于 pimpl 惯用法</strong></p>
+<p>C++ 11 标准引入了智能指针对象，我们可以使用 <strong>std::unique_ptr</strong> 对象来管理上述用于隐藏具体实现的 <strong>m_pImpl</strong> 指针。</p>
+<p><strong>SocketClient.h</strong> 文件可以修改成如下方式：</p>
+<pre tabindex="0"><code>#include &lt;memory&gt; //for std::unique_ptr  
+
+class CSocketClient
+{
+public:
+    CSocketClient();
+    ~CSocketClient();
+
+    //重复的代码省略...
+
+private:
+    struct                  Impl;
+    std::unique_ptr&lt;Impl&gt;   m_pImpl;
+};
+</code></pre><p><strong>SocketClient.cpp</strong> 中修改 <strong>CSocketClient</strong> 对象的构造函数和析构函数的实现如下：</p>
+<p><strong>构造函数</strong></p>
+<p>如果你的编译器仅支持 C++ 11 标准，我们可以按如下修改：</p>
+<pre tabindex="0"><code>CSocketClient::CSocketClient()
+{
+    //C++11 标准并未提供 std::make_unique()，该方法是 C++14 提供的
+    m_pImpl.reset(new Impl());
+}
+</code></pre><p>如果你的编译器支持 C++14 及以上标准，可以这么修改：</p>
+<pre tabindex="0"><code>CSocketClient::CSocketClient() : m_pImpl(std::make_unique&lt;Impl&gt;())
+{    
+}
+</code></pre><p>由于已经使用了智能指针来管理 m_pImpl 指向的堆内存，因此析构函数中不再需要显式释放堆内存：</p>
+<pre tabindex="0"><code>CSocketClient::~CSocketClient()
+{
+    //不再需要显式 delete 了 
+    //delete m_pImpl;
+}
+</code></pre><p><strong>pimp</strong> 惯用法是 C/C++ 项目开发中一种非常实用的代码编写策略，建议读者掌握它。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/184a1ba071384d75b2da68fa7be54511/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Part I</span>
+  </a>
+  <a class="next" href="https://haokiu.com/2369cd70c2354e9c844815c14f31134c/">
+    <span class="title">Next »</span>
+    <br>
+    <span>select 函数重难点解析</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

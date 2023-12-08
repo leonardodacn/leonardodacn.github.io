@@ -1,0 +1,957 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>4 on haokiu</title>
+    <link>https://haokiu.com/categories/4/</link>
+    <description>Recent content in 4 on haokiu</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>haokiu.com</copyright>
+    <lastBuildDate>Tue, 02 Feb 2021 17:45:01 +0000</lastBuildDate><atom:link href="https://haokiu.com/categories/4/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>CassandraReader 插件文档</title>
+      <link>https://haokiu.com/b0b0444d45c74c8f8b1a9fc4d2af738a/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/b0b0444d45c74c8f8b1a9fc4d2af738a/</guid>
+      <description>CassandraReader 插件文档 1 快速介绍 CassandraReader插件实现了从Cassandra读取数据。在底层实现上，CassandraReader通过datastax的java driver连接Cassandra实例，并执行相应的cql语句将数据从cassandra中SELECT出来。
+2 实现原理 简而言之，CassandraReader通过java driver连接到Cassandra实例，并根据用户配置的信息生成查询SELECT CQL语句，然后发送到Cassandra，并将该CQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+对于用户配置Table、Column的信息，CassandraReader将其拼接为CQL语句发送到Cassandra。
+3 功能说明 3.1 配置样例 配置一个从Cassandra同步抽取数据到本地的作业: { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 3 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;cassandrareader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;host&amp;#34;: &amp;#34;localhost&amp;#34;, &amp;#34;port&amp;#34;: 9042, &amp;#34;useSSL&amp;#34;: false, &amp;#34;keyspace&amp;#34;: &amp;#34;test&amp;#34;, &amp;#34;table&amp;#34;: &amp;#34;datax_src&amp;#34;, &amp;#34;column&amp;#34;: [ &amp;#34;textCol&amp;#34;, &amp;#34;blobCol&amp;#34;, &amp;#34;writetime(blobCol)&amp;#34;, &amp;#34;boolCol&amp;#34;, &amp;#34;smallintCol&amp;#34;, &amp;#34;tinyintCol&amp;#34;, &amp;#34;intCol&amp;#34;, &amp;#34;bigintCol&amp;#34;, &amp;#34;varintCol&amp;#34;, &amp;#34;floatCol&amp;#34;, &amp;#34;doubleCol&amp;#34;, &amp;#34;decimalCol&amp;#34;, &amp;#34;dateCol&amp;#34;, &amp;#34;timeCol&amp;#34;, &amp;#34;timeStampCol&amp;#34;, &amp;#34;uuidCol&amp;#34;, &amp;#34;inetCol&amp;#34;, &amp;#34;durationCol&amp;#34;, &amp;#34;listCol&amp;#34;, &amp;#34;mapCol&amp;#34;, &amp;#34;setCol&amp;#34; &amp;#34;tupleCol&amp;#34; &amp;#34;udtCol&amp;#34;, ] } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;print&amp;#34;:true } } } ] } } 3.2 参数说明 host
+描述：Cassandra连接点的域名或ip，多个node之间用逗号分隔。 必选：是 默认值：无 port
+描述：Cassandra端口。 必选：是 默认值：9042 username
+描述：数据源的用户名 必选：否 默认值：无 password</description>
+    </item>
+    
+    <item>
+      <title>CassandraWriter 插件文档</title>
+      <link>https://haokiu.com/056d47f442c1471da1b62d7062dd00e2/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/056d47f442c1471da1b62d7062dd00e2/</guid>
+      <description>CassandraWriter 插件文档 1 快速介绍 CassandraWriter插件实现了向Cassandra写入数据。在底层实现上，CassandraWriter通过datastax的java driver连接Cassandra实例，并执行相应的cql语句将数据写入cassandra中。
+2 实现原理 简而言之，CassandraWriter通过java driver连接到Cassandra实例，并根据用户配置的信息生成INSERT CQL语句，然后发送到Cassandra。
+对于用户配置Table、Column的信息，CassandraReader将其拼接为CQL语句发送到Cassandra。
+3 功能说明 3.1 配置样例 配置一个从内存产生到Cassandra导入的作业: { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 5 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;column&amp;#34;: [ {&amp;#34;value&amp;#34;:&amp;#34;name&amp;#34;,&amp;#34;type&amp;#34;: &amp;#34;string&amp;#34;}, {&amp;#34;value&amp;#34;:&amp;#34;false&amp;#34;,&amp;#34;type&amp;#34;:&amp;#34;bool&amp;#34;}, {&amp;#34;value&amp;#34;:&amp;#34;1988-08-08 08:08:08&amp;#34;,&amp;#34;type&amp;#34;:&amp;#34;date&amp;#34;}, {&amp;#34;value&amp;#34;:&amp;#34;addr&amp;#34;,&amp;#34;type&amp;#34;:&amp;#34;bytes&amp;#34;}, {&amp;#34;value&amp;#34;:1.234,&amp;#34;type&amp;#34;:&amp;#34;double&amp;#34;}, {&amp;#34;value&amp;#34;:12345678,&amp;#34;type&amp;#34;:&amp;#34;long&amp;#34;}, {&amp;#34;value&amp;#34;:2.345,&amp;#34;type&amp;#34;:&amp;#34;double&amp;#34;}, {&amp;#34;value&amp;#34;:3456789,&amp;#34;type&amp;#34;:&amp;#34;long&amp;#34;}, {&amp;#34;value&amp;#34;:&amp;#34;4a0ef8c0-4d97-11d0-db82-ebecdb03ffa5&amp;#34;,&amp;#34;type&amp;#34;:&amp;#34;string&amp;#34;}, {&amp;#34;value&amp;#34;:&amp;#34;value&amp;#34;,&amp;#34;type&amp;#34;:&amp;#34;bytes&amp;#34;}, {&amp;#34;value&amp;#34;:&amp;#34;-838383838,37377373,-383883838,27272772,393993939,-38383883,83883838,-1350403181,817650816,1630642337,251398784,-622020148&amp;#34;,&amp;#34;type&amp;#34;:&amp;#34;string&amp;#34;}, ], &amp;#34;sliceRecordCount&amp;#34;: 10000000 } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;cassandrawriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;host&amp;#34;: &amp;#34;localhost&amp;#34;, &amp;#34;port&amp;#34;: 9042, &amp;#34;useSSL&amp;#34;: false, &amp;#34;keyspace&amp;#34;: &amp;#34;stresscql&amp;#34;, &amp;#34;table&amp;#34;: &amp;#34;dst&amp;#34;, &amp;#34;batchSize&amp;#34;:10, &amp;#34;column&amp;#34;: [ &amp;#34;name&amp;#34;, &amp;#34;choice&amp;#34;, &amp;#34;date&amp;#34;, &amp;#34;address&amp;#34;, &amp;#34;dbl&amp;#34;, &amp;#34;lval&amp;#34;, &amp;#34;fval&amp;#34;, &amp;#34;ival&amp;#34;, &amp;#34;uid&amp;#34;, &amp;#34;value&amp;#34;, &amp;#34;listval&amp;#34; ] } } } ] } } 3.2 参数说明 host
+描述：Cassandra连接点的域名或ip，多个node之间用逗号分隔。 必选：是 默认值：无 port</description>
+    </item>
+    
+    <item>
+      <title>DataX</title>
+      <link>https://haokiu.com/dcdba0138c4f45f0a08968ab48edb900/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/dcdba0138c4f45f0a08968ab48edb900/</guid>
+      <description>DataX DataX 是阿里巴巴集团内被广泛使用的离线数据同步工具/平台，实现包括 MySQL、Oracle、SqlServer、Postgre、HDFS、Hive、ADS、HBase、TableStore(OTS)、MaxCompute(ODPS)、DRDS 等各种异构数据源之间高效的数据同步功能。
+DataX 商业版本 阿里云DataWorks数据集成是DataX团队在阿里云上的商业化产品，致力于提供复杂网络环境下、丰富的异构数据源之间高速稳定的数据移动能力，以及繁杂业务背景下的数据同步解决方案。目前已经支持云上近3000家客户，单日同步数据超过3万亿条。DataWorks数据集成目前支持离线50+种数据源，可以进行整库迁移、批量上云、增量同步、分库分表等各类同步解决方案。2020年更新实时同步能力，2020年更新实时同步能力，支持10+种数据源的读写任意组合。提供MySQL，Oracle等多种数据源到阿里云MaxCompute，Hologres等大数据引擎的一键全增量同步解决方案。
+https://www.aliyun.com/product/bigdata/ide
+Features DataX本身作为数据同步框架，将不同数据源的同步抽象为从源头数据源读取数据的Reader插件，以及向目标端写入数据的Writer插件，理论上DataX框架可以支持任意数据源类型的数据同步工作。同时DataX插件体系作为一套生态系统, 每接入一套新数据源该新加入的数据源即可实现和现有的数据源互通。
+DataX详细介绍 请参考：DataX-Introduction Quick Start Download DataX下载地址 请点击：Quick Start Support Data Channels DataX目前已经有了比较全面的插件体系，主流的RDBMS数据库、NOSQL、大数据计算系统都已经接入，目前支持数据如下图，详情请点击：DataX数据源参考指南
+类型 数据源 Reader(读) Writer(写) 文档 RDBMS 关系型数据库 MySQL √ √ 读 、写 Oracle √ √ 读 、写 SQLServer √ √ 读 、写 PostgreSQL √ √ 读 、写 DRDS √ √ 读 、写 通用RDBMS(支持所有关系型数据库) √ √ 读 、写 阿里云数仓数据存储 ODPS √ √ 读 、写 ADS √ 写 OSS √ √ 读 、写 OCS √ √ 读 、写 NoSQL数据存储 OTS √ √ 读 、写 Hbase0.94 √ √ 读 、写 Hbase1.1 √ √ 读 、写 Phoenix4.x √ √ 读 、写 Phoenix5.</description>
+    </item>
+    
+    <item>
+      <title>DataX</title>
+      <link>https://haokiu.com/f4223fe7c5a64b12ae87c43ed48cc971/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/f4223fe7c5a64b12ae87c43ed48cc971/</guid>
+      <description>DataX DataX 是阿里巴巴集团内被广泛使用的离线数据同步工具/平台，实现包括 MySQL、SQL Server、Oracle、PostgreSQL、HDFS、Hive、HBase、OTS、ODPS 等各种异构数据源之间高效的数据同步功能。
+Features DataX本身作为数据同步框架，将不同数据源的同步抽象为从源头数据源读取数据的Reader插件，以及向目标端写入数据的Writer插件，理论上DataX框架可以支持任意数据源类型的数据同步工作。同时DataX插件体系作为一套生态系统, 每接入一套新数据源该新加入的数据源即可实现和现有的数据源互通。
+System Requirements Linux JDK(1.8以上，推荐1.8) Python(推荐Python2.6.X) Apache Maven 3.x (Compile DataX) Quick Start 工具部署
+方法一、直接下载DataX工具包：DataX下载地址
+下载后解压至本地某个目录，进入bin目录，即可运行同步作业：
+$ cd {YOUR_DATAX_HOME}/bin $ python datax.py {YOUR_JOB.json} 自检脚本： python {YOUR_DATAX_HOME}/bin/datax.py {YOUR_DATAX_HOME}/job/job.json
+方法二、下载DataX源码，自己编译：DataX源码
+(1)、下载DataX源码：
+$ git clone git@github.com:alibaba/DataX.git (2)、通过maven打包：
+$ cd {DataX_source_code_home} $ mvn -U clean package assembly:assembly -Dmaven.test.skip=true 打包成功，日志显示如下：
+[INFO] BUILD SUCCESS [INFO] ----------------------------------------------------------------- [INFO] Total time: 08:12 min [INFO] Finished at: 2015-12-13T16:26:48+08:00 [INFO] Final Memory: 133M/960M [INFO] ----------------------------------------------------------------- 打包成功后的DataX包位于 {DataX_source_code_home}/target/datax/datax/ ，结构如下：
+$ cd {DataX_source_code_home} $ ls ./target/datax/datax/ bin	conf	job	lib	log	log_perf	plugin	script	tmp 配置示例：从stream读取数据并打印到控制台
+第一步、创建作业的配置文件（json格式）
+可以通过命令查看配置模板： python datax.py -r {YOUR_READER} -w {YOUR_WRITER}</description>
+    </item>
+    
+    <item>
+      <title>datax 3.0 教程</title>
+      <link>https://haokiu.com/bk-4/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/bk-4/</guid>
+      <description>DataXDataX ADB PG WriterDataX ADS写入CassandraReader 插件文档CassandraWriter 插件文档Readme.mdDataX插件开发宝典DrdsReader 插件文档DataX DRDSWriterREADME.mdDataX ElasticSearchWriterDataX FtpReader 说明DataX FtpWriter 说明DataX GDBReaderDataX GDBWriterHbase094XReader &amp;amp; Hbase11XReader 插件文档Hbase094XWriter &amp;amp; Hbase11XWriter 插件文档Hbase094XReader &amp;amp; Hbase11XReader 插件文档hbase11xsqlreader 插件文档HBase11xsqlwriter插件文档Hbase094XWriter &amp;amp; Hbase11XWriter 插件文档hbase20xsqlreader 插件文档HBase20xsqlwriter插件文档DataX HdfsReader 插件文档DataX HdfsWriter 插件文档阿里云开源离线同步工具DataX3.0介绍KingbaseesReader 插件文档DataX KingbaseesWriterdatax-kudu-plugindatax-kudu-pluginsDatax MongoDBReaderDatax MongoDBWriterMysqlReader 插件文档DataX MysqlWriterDataX OCSWriter 适用memcached客户端写入ocsDataX ODPSReaderDataX ODPS写入OpenTSDBReader 插件文档OracleReader 插件文档DataX OracleWriterDataX OSSReader 说明DataX OSSWriter 说明OTSReader 插件文档TableStore增量数据导出通道：TableStoreStreamReaderOTSWriter 插件文档PostgresqlReader 插件文档DataX PostgresqlWriterRDBMSReader 插件文档RDBMSWriter 插件文档SqlServerReader 插件文档DataX SqlServerWriterDataX TransformerTSDBReader 插件文档TSDBWriter 插件文档DataX TxtFileReader 说明DataX TxtFileWriter 说明DataX</description>
+    </item>
+    
+    <item>
+      <title>DataX ADB PG Writer</title>
+      <link>https://haokiu.com/1c4beb639bad47a79445e1bb8ccd68a5/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/1c4beb639bad47a79445e1bb8ccd68a5/</guid>
+      <description>DataX ADB PG Writer 1 快速介绍 AdbpgWriter 插件实现了写入数据到 ABD PG版数据库的功能。在底层实现上，AdbpgWriter 插件会先缓存需要写入的数据，当缓存的 数据量达到 commitSize 时，插件会通过 JDBC 连接远程 ADB PG版 数据库，并执行 COPY 命令将数据写入 ADB PG 数据库。
+AdbpgWriter 可以作为数据迁移工具为用户提供服务。
+2 实现原理 AdbpgWriter 通过 DataX 框架获取 Reader 生成的协议数据，首先会将数据缓存，当缓存的数据量达到commitSize时，插件根据你配置生成相应的COPY语句，执行 COPY命令将数据写入ADB PG数据库中。
+3 功能说明 3.1 配置样例 这里使用一份从内存产生到 AdbpgWriter导入的数据 { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 32 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;column&amp;#34; : [ { &amp;#34;value&amp;#34;: &amp;#34;DataX&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;value&amp;#34;: 19880808, &amp;#34;type&amp;#34;: &amp;#34;long&amp;#34; }, { &amp;#34;value&amp;#34;: &amp;#34;1988-08-08 08:08:08&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;date&amp;#34; }, { &amp;#34;value&amp;#34;: true, &amp;#34;type&amp;#34;: &amp;#34;bool&amp;#34; }, { &amp;#34;value&amp;#34;: &amp;#34;test&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;bytes&amp;#34; } ] }, &amp;#34;sliceRecordCount&amp;#34;: 1000 }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;adbpgwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;username&amp;#34;: &amp;#34;username&amp;#34;, &amp;#34;password&amp;#34;: &amp;#34;password&amp;#34;, &amp;#34;host&amp;#34;: &amp;#34;host&amp;#34;, &amp;#34;port&amp;#34;: &amp;#34;1234&amp;#34;, &amp;#34;database&amp;#34;: &amp;#34;database&amp;#34;, &amp;#34;schema&amp;#34;: &amp;#34;schema&amp;#34;, &amp;#34;table&amp;#34;: &amp;#34;table&amp;#34;, &amp;#34;preSql&amp;#34;: [&amp;#34;delete * from table&amp;#34;], &amp;#34;postSql&amp;#34;: [&amp;#34;select * from table&amp;#34;], &amp;#34;column&amp;#34;: [&amp;#34;*&amp;#34;] } } } ] } } 3.</description>
+    </item>
+    
+    <item>
+      <title>DataX ADS写入</title>
+      <link>https://haokiu.com/5d26f13c5f3e4cda84adc613514cdd53/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/5d26f13c5f3e4cda84adc613514cdd53/</guid>
+      <description>DataX ADS写入 1 快速介绍 欢迎ADS加入DataX生态圈！ADSWriter插件实现了其他数据源向ADS写入功能，现有DataX所有的数据源均可以无缝接入ADS，实现数据快速导入ADS。
+ADS写入预计支持两种实现方式：
+ADSWriter 支持向ODPS中转落地导入ADS方式，优点在于当数据量较大时(&amp;gt;1KW)，可以以较快速度进行导入，缺点引入了ODPS作为落地中转，因此牵涉三方系统(DataX、ADS、ODPS)鉴权认证。
+ADSWriter 同时支持向ADS直接写入的方式，优点在于小批量数据写入能够较快完成(&amp;lt;1KW)，缺点在于大数据导入较慢。
+注意：
+如果从ODPS导入数据到ADS，请用户提前在源ODPS的Project中授权ADS Build账号具有读取你源表ODPS的权限，同时，ODPS源表创建人和ADS写入属于同一个阿里云账号。
+如果从非ODPS导入数据到ADS，请用户提前在目的端ADS空间授权ADS Build账号具备Load data权限。
+以上涉及ADS Build账号请联系ADS管理员提供。
+2 实现原理 ADS写入预计支持两种实现方式：
+2.1 Load模式 DataX 将数据导入ADS为当前导入任务分配的ADS项目表，随后DataX通知ADS完成数据加载。该类数据导入方式实际上是写ADS完成数据同步，由于ADS是分布式存储集群，因此该通道吞吐量较大，可以支持TB级别数据导入。
+DataX底层得到明文的 jdbc://host:port/dbname + username + password + table， 以此连接ADS， 执行show grants; 前置检查该用户是否有ADS中目标表的Load Data或者更高的权限。注意，此时ADSWriter使用用户填写的ADS用户名+密码信息完成登录鉴权工作。
+检查通过后，通过ADS中目标表的元数据反向生成ODPS DDL，在ODPS中间project中，以ADSWriter的账户建立ODPS表（非分区表，生命周期设为1-2Day), 并调用ODPSWriter把数据源的数据写入该ODPS表中。
+注意，这里需要使用中转ODPS的账号AK向中转ODPS写入数据。
+写入完成后，以中转ODPS账号连接ADS，发起Load Data From ‘odps://中转project/中转table/&amp;rsquo; [overwrite] into adsdb.adstable [partition (xx,xx=xx)]; 这个命令返回一个Job ID需要记录。
+注意，此时ADS使用自己的Build账号访问中转ODPS，因此需要中转ODPS对这个Build账号提前开放读取权限。
+连接ADS一分钟一次轮询执行 select state from information_schema.job_instances where job_id like ‘$Job ID’，查询状态，注意这个第一个一分钟可能查不到状态记录。
+Success或者Fail后返回给用户，然后删除中转ODPS表，任务结束。
+上述流程是从其他非ODPS数据源导入ADS流程，对于ODPS导入ADS流程使用如下流程：
+2.2 Insert模式 DataX 将数据直连ADS接口，利用ADS暴露的INSERT接口直写到ADS。该类数据导入方式写入吞吐量较小，不适合大批量数据写入。有如下注意点：
+ADSWriter使用JDBC连接直连ADS，并只使用了JDBC Statement进行数据插入。ADS不支持PreparedStatement，故ADSWriter只能单行多线程进行写入。
+ADSWriter支持筛选部分列，列换序等功能，即用户可以填写列。
+考虑到ADS负载问题，建议ADSWriter Insert模式建议用户使用TPS限流，最高在1W TPS。
+ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，保证数据在ADS整体更新。
+3 功能说明 3.1 配置样例 这里使用一份从内存产生到ADS，使用Load模式进行导入的数据。 { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 2 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;column&amp;#34;: [ { &amp;#34;value&amp;#34;: &amp;#34;DataX&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;value&amp;#34;: &amp;#34;test&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;bytes&amp;#34; } ], &amp;#34;sliceRecordCount&amp;#34;: 100000 } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;adswriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;odps&amp;#34;: { &amp;#34;accessId&amp;#34;: &amp;#34;xxx&amp;#34;, &amp;#34;accessKey&amp;#34;: &amp;#34;xxx&amp;#34;, &amp;#34;account&amp;#34;: &amp;#34;xxx@aliyun.</description>
+    </item>
+    
+    <item>
+      <title>DataX DRDSWriter</title>
+      <link>https://haokiu.com/d31c9e889b154a0f96e4eb4be5c50467/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/d31c9e889b154a0f96e4eb4be5c50467/</guid>
+      <description>DataX DRDSWriter 1 快速介绍 DRDSWriter 插件实现了写入数据到 DRDS 的目的表的功能。在底层实现上， DRDSWriter 通过 JDBC 连接远程 DRDS 数据库的 Proxy，并执行相应的 replace into &amp;hellip; 的 sql 语句将数据写入 DRDS，特别注意执行的 Sql 语句是 replace into，为了避免数据重复写入，需要你的表具备主键或者唯一性索引(Unique Key)。
+DRDSWriter 面向ETL开发工程师，他们使用 DRDSWriter 从数仓导入数据到 DRDS。同时 DRDSWriter 亦可以作为数据迁移工具为DBA等用户提供服务。
+2 实现原理 DRDSWriter 通过 DataX 框架获取 Reader 生成的协议数据，通过 replace into...(没有遇到主键/唯一性索引冲突时，与 insert into 行为一致，冲突时会用新行替换原有行所有字段) 的语句写入数据到 DRDS。DRDSWriter 累积一定数据，提交给 DRDS 的 Proxy，该 Proxy 内部决定数据是写入一张还是多张表以及多张表写入时如何路由数据。 注意：整个任务至少需要具备 replace into...的权限，是否需要其他权限，取决于你任务配置中在 preSql 和 postSql 中指定的语句。 3 功能说明 3.1 配置样例 这里使用一份从内存产生到 DRDS 导入的数据。 { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 1 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;column&amp;#34; : [ { &amp;#34;value&amp;#34;: &amp;#34;DataX&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;value&amp;#34;: 19880808, &amp;#34;type&amp;#34;: &amp;#34;long&amp;#34; }, { &amp;#34;value&amp;#34;: &amp;#34;1988-08-08 08:08:08&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;date&amp;#34; }, { &amp;#34;value&amp;#34;: true, &amp;#34;type&amp;#34;: &amp;#34;bool&amp;#34; }, { &amp;#34;value&amp;#34;: &amp;#34;test&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;bytes&amp;#34; } ], &amp;#34;sliceRecordCount&amp;#34;: 1000 } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;drdswriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;writeMode&amp;#34;: &amp;#34;insert&amp;#34;, &amp;#34;username&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;password&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;column&amp;#34;: [ &amp;#34;id&amp;#34;, &amp;#34;name&amp;#34; ], &amp;#34;preSql&amp;#34;: [ &amp;#34;delete from test&amp;#34; ], &amp;#34;connection&amp;#34;: [ { &amp;#34;jdbcUrl&amp;#34;: &amp;#34;jdbc:mysql://127.</description>
+    </item>
+    
+    <item>
+      <title>DataX ElasticSearchWriter</title>
+      <link>https://haokiu.com/5e857fe9cf5743dc837f14fbc9f0a876/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/5e857fe9cf5743dc837f14fbc9f0a876/</guid>
+      <description>DataX ElasticSearchWriter 1 快速介绍 数据导入elasticsearch的插件
+2 实现原理 使用elasticsearch的rest api接口， 批量把从reader读入的数据写入elasticsearch
+3 功能说明 3.1 配置样例 job.json { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 1 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { ... }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;elasticsearchwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;endpoint&amp;#34;: &amp;#34;http://xxx:9999&amp;#34;, &amp;#34;accessId&amp;#34;: &amp;#34;xxxx&amp;#34;, &amp;#34;accessKey&amp;#34;: &amp;#34;xxxx&amp;#34;, &amp;#34;index&amp;#34;: &amp;#34;test-1&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;default&amp;#34;, &amp;#34;cleanup&amp;#34;: true, &amp;#34;settings&amp;#34;: {&amp;#34;index&amp;#34; :{&amp;#34;number_of_shards&amp;#34;: 1, &amp;#34;number_of_replicas&amp;#34;: 0}}, &amp;#34;discovery&amp;#34;: false, &amp;#34;batchSize&amp;#34;: 1000, &amp;#34;splitter&amp;#34;: &amp;#34;,&amp;#34;, &amp;#34;column&amp;#34;: [ {&amp;#34;name&amp;#34;: &amp;#34;pk&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;id&amp;#34;}, { &amp;#34;name&amp;#34;: &amp;#34;col_ip&amp;#34;,&amp;#34;type&amp;#34;: &amp;#34;ip&amp;#34; }, { &amp;#34;name&amp;#34;: &amp;#34;col_double&amp;#34;,&amp;#34;type&amp;#34;: &amp;#34;double&amp;#34; }, { &amp;#34;name&amp;#34;: &amp;#34;col_long&amp;#34;,&amp;#34;type&amp;#34;: &amp;#34;long&amp;#34; }, { &amp;#34;name&amp;#34;: &amp;#34;col_integer&amp;#34;,&amp;#34;type&amp;#34;: &amp;#34;integer&amp;#34; }, { &amp;#34;name&amp;#34;: &amp;#34;col_keyword&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;keyword&amp;#34; }, { &amp;#34;name&amp;#34;: &amp;#34;col_text&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;text&amp;#34;, &amp;#34;analyzer&amp;#34;: &amp;#34;ik_max_word&amp;#34;}, { &amp;#34;name&amp;#34;: &amp;#34;col_geo_point&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;geo_point&amp;#34; }, { &amp;#34;name&amp;#34;: &amp;#34;col_date&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;date&amp;#34;, &amp;#34;format&amp;#34;: &amp;#34;yyyy-MM-dd HH:mm:ss&amp;#34;}, { &amp;#34;name&amp;#34;: &amp;#34;col_nested1&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;nested&amp;#34; }, { &amp;#34;name&amp;#34;: &amp;#34;col_nested2&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;nested&amp;#34; }, { &amp;#34;name&amp;#34;: &amp;#34;col_object1&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;object&amp;#34; }, { &amp;#34;name&amp;#34;: &amp;#34;col_object2&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;object&amp;#34; }, { &amp;#34;name&amp;#34;: &amp;#34;col_integer_array&amp;#34;, &amp;#34;type&amp;#34;:&amp;#34;integer&amp;#34;, &amp;#34;array&amp;#34;:true}, { &amp;#34;name&amp;#34;: &amp;#34;col_geo_shape&amp;#34;, &amp;#34;type&amp;#34;:&amp;#34;geo_shape&amp;#34;, &amp;#34;tree&amp;#34;: &amp;#34;quadtree&amp;#34;, &amp;#34;precision&amp;#34;: &amp;#34;10m&amp;#34;} ] } } } ] } } 3.</description>
+    </item>
+    
+    <item>
+      <title>DataX FtpReader 说明</title>
+      <link>https://haokiu.com/0b6970ee252d4875841a98382b04f30b/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/0b6970ee252d4875841a98382b04f30b/</guid>
+      <description>DataX FtpReader 说明 1 快速介绍 FtpReader提供了读取远程FTP文件系统数据存储的能力。在底层实现上，FtpReader获取远程FTP文件数据，并转换为DataX传输协议传递给Writer。
+本地文件内容存放的是一张逻辑意义上的二维表，例如CSV格式的文本信息。
+2 功能与限制 FtpReader实现了从远程FTP文件读取数据并转为DataX协议的功能，远程FTP文件本身是无结构化数据存储，对于DataX而言，FtpReader实现上类比TxtFileReader，有诸多相似之处。目前FtpReader支持功能如下：
+支持且仅支持读取TXT的文件，且要求TXT中shema为一张二维表。
+支持类CSV格式文件，自定义分隔符。
+支持多种类型数据读取(使用String表示)，支持列裁剪，支持列常量
+支持递归读取、支持文件名过滤。
+支持文本压缩，现有压缩格式为zip、gzip、bzip2。
+多个File可以支持并发读取。
+我们暂时不能做到：
+单个File支持多线程并发读取，这里涉及到单个File内部切分算法。二期考虑支持。
+单个File在压缩情况下，从技术上无法支持多线程并发读取。
+3 功能说明 3.1 配置样例 { &amp;#34;setting&amp;#34;: {}, &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 2 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;ftpreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;protocol&amp;#34;: &amp;#34;sftp&amp;#34;, &amp;#34;host&amp;#34;: &amp;#34;127.0.0.1&amp;#34;, &amp;#34;port&amp;#34;: 22, &amp;#34;username&amp;#34;: &amp;#34;xx&amp;#34;, &amp;#34;password&amp;#34;: &amp;#34;xxx&amp;#34;, &amp;#34;path&amp;#34;: [ &amp;#34;/home/hanfa.shf/ftpReaderTest/data&amp;#34; ], &amp;#34;column&amp;#34;: [ { &amp;#34;index&amp;#34;: 0, &amp;#34;type&amp;#34;: &amp;#34;long&amp;#34; }, { &amp;#34;index&amp;#34;: 1, &amp;#34;type&amp;#34;: &amp;#34;boolean&amp;#34; }, { &amp;#34;index&amp;#34;: 2, &amp;#34;type&amp;#34;: &amp;#34;double&amp;#34; }, { &amp;#34;index&amp;#34;: 3, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;index&amp;#34;: 4, &amp;#34;type&amp;#34;: &amp;#34;date&amp;#34;, &amp;#34;format&amp;#34;: &amp;#34;yyyy.MM.dd&amp;#34; } ], &amp;#34;encoding&amp;#34;: &amp;#34;UTF-8&amp;#34;, &amp;#34;fieldDelimiter&amp;#34;: &amp;#34;,&amp;#34; } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;ftpWriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;path&amp;#34;: &amp;#34;/home/hanfa.</description>
+    </item>
+    
+    <item>
+      <title>DataX FtpWriter 说明</title>
+      <link>https://haokiu.com/8f4c3b36705842458a8550717b87b66c/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/8f4c3b36705842458a8550717b87b66c/</guid>
+      <description>DataX FtpWriter 说明 1 快速介绍 FtpWriter提供了向远程FTP文件写入CSV格式的一个或者多个文件，在底层实现上，FtpWriter将DataX传输协议下的数据转换为csv格式，并使用FTP相关的网络协议写出到远程FTP服务器。
+写入FTP文件内容存放的是一张逻辑意义上的二维表，例如CSV格式的文本信息。
+2 功能与限制 FtpWriter实现了从DataX协议转为FTP文件功能，FTP文件本身是无结构化数据存储，FtpWriter如下几个方面约定:
+支持且仅支持写入文本类型(不支持BLOB如视频数据)的文件，且要求文本中shema为一张二维表。
+支持类CSV格式文件，自定义分隔符。
+写出时不支持文本压缩。
+支持多线程写入，每个线程写入不同子文件。
+我们不能做到：
+单个文件不能支持并发写入。 3 功能说明 3.1 配置样例 { &amp;#34;setting&amp;#34;: {}, &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 2 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: {}, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;ftpwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;protocol&amp;#34;: &amp;#34;sftp&amp;#34;, &amp;#34;host&amp;#34;: &amp;#34;***&amp;#34;, &amp;#34;port&amp;#34;: 22, &amp;#34;username&amp;#34;: &amp;#34;xxx&amp;#34;, &amp;#34;password&amp;#34;: &amp;#34;xxx&amp;#34;, &amp;#34;timeout&amp;#34;: &amp;#34;60000&amp;#34;, &amp;#34;connectPattern&amp;#34;: &amp;#34;PASV&amp;#34;, &amp;#34;path&amp;#34;: &amp;#34;/tmp/data/&amp;#34;, &amp;#34;fileName&amp;#34;: &amp;#34;yixiao&amp;#34;, &amp;#34;writeMode&amp;#34;: &amp;#34;truncate|append|nonConflict&amp;#34;, &amp;#34;fieldDelimiter&amp;#34;: &amp;#34;,&amp;#34;, &amp;#34;encoding&amp;#34;: &amp;#34;UTF-8&amp;#34;, &amp;#34;nullFormat&amp;#34;: &amp;#34;null&amp;#34;, &amp;#34;dateFormat&amp;#34;: &amp;#34;yyyy-MM-dd&amp;#34;, &amp;#34;fileFormat&amp;#34;: &amp;#34;csv&amp;#34;, &amp;#34;suffix&amp;#34;: &amp;#34;.csv&amp;#34;, &amp;#34;header&amp;#34;: [] } } } ] } } 3.2 参数说明 protocol
+描述：ftp服务器协议，目前支持传输协议有ftp和sftp。 必选：是 默认值：无 host
+描述：ftp服务器地址。 必选：是 默认值：无 port
+描述：ftp服务器端口。 必选：否 默认值：若传输协议是sftp协议，默认值是22；若传输协议是标准ftp协议，默认值是21 timeout
+描述：连接ftp服务器连接超时时间，单位毫秒。 必选：否 默认值：60000（1分钟）</description>
+    </item>
+    
+    <item>
+      <title>DataX GDBReader</title>
+      <link>https://haokiu.com/ef41ae35929b479db90214d2ebe5ff8a/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/ef41ae35929b479db90214d2ebe5ff8a/</guid>
+      <description>DataX GDBReader 1. 快速介绍 GDBReader插件实现读取GDB实例数据的功能，通过Gremlin Client连接远程GDB实例，按配置提供的label生成查询DSL，遍历点或边数据，包括属性数据，并将数据写入到Record中给到Writer使用。
+2. 实现原理 GDBReader使用Gremlin Client连接GDB实例，按label分不同Task取点或边数据。 单个Task中按label遍历点或边的id，再切分范围分多次请求查询点或边和属性数据，最后将点或边数据根据配置转换成指定格式记录发送给下游写插件。
+GDBReader按label切分多个Task并发，同一个label的数据批量异步获取来加快读取速度。如果配置读取的label列表为空，任务启动前会从GDB查询所有label再切分Task。
+3. 功能说明 GDB中点和边不同，读取需要区分点和边点配置。
+3.1 点配置样例 { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 1 } &amp;#34;errorLimit&amp;#34;: { &amp;#34;record&amp;#34;: 1 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;gdbreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;host&amp;#34;: &amp;#34;10.218.145.24&amp;#34;, &amp;#34;port&amp;#34;: 8182, &amp;#34;username&amp;#34;: &amp;#34;***&amp;#34;, &amp;#34;password&amp;#34;: &amp;#34;***&amp;#34;, &amp;#34;fetchBatchSize&amp;#34;: 100, &amp;#34;rangeSplitSize&amp;#34;: 1000, &amp;#34;labelType&amp;#34;: &amp;#34;VERTEX&amp;#34;, &amp;#34;labels&amp;#34;: [&amp;#34;label1&amp;#34;, &amp;#34;label2&amp;#34;], &amp;#34;column&amp;#34;: [ { &amp;#34;name&amp;#34;: &amp;#34;id&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34;, &amp;#34;columnType&amp;#34;: &amp;#34;primaryKey&amp;#34; }, { &amp;#34;name&amp;#34;: &amp;#34;label&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34;, &amp;#34;columnType&amp;#34;: &amp;#34;primaryLabel&amp;#34; }, { &amp;#34;name&amp;#34;: &amp;#34;age&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;int&amp;#34;, &amp;#34;columnType&amp;#34;: &amp;#34;vertexProperty&amp;#34; } ] } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;print&amp;#34;: true } } } ] } } 3.</description>
+    </item>
+    
+    <item>
+      <title>DataX GDBWriter</title>
+      <link>https://haokiu.com/3830a303d3e34cec88b98eab9934006d/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/3830a303d3e34cec88b98eab9934006d/</guid>
+      <description>DataX GDBWriter 1 快速介绍 GDBWriter插件实现了写入数据到GDB实例的功能。GDBWriter通过Gremlin Client连接远程GDB实例，获取Reader的数据，生成写入DSL语句，将数据写入到GDB。
+2 实现原理 GDBWriter通过DataX框架获取Reader生成的协议数据，使用g.addV/E(GDB___label).property(id, GDB___id).property(GDB___PK1, GDB___PV1)...语句写入数据到GDB实例。
+可以配置Gremlin Client工作在session模式，由客户端控制事务，在一次事务中实现多个记录的批量写入。
+3 功能说明 因为GDB中点和边的配置不同，导入时需要区分点和边的配置。
+3.1 点配置样例 这里是一份从内存生成点数据导入GDB实例的配置 { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 1 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;column&amp;#34; : [ { &amp;#34;random&amp;#34;: &amp;#34;1,100&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;double&amp;#34; }, { &amp;#34;random&amp;#34;: &amp;#34;1000,1200&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;long&amp;#34; }, { &amp;#34;random&amp;#34;: &amp;#34;60,64&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;random&amp;#34;: &amp;#34;100,1000&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;long&amp;#34; }, { &amp;#34;random&amp;#34;: &amp;#34;32,48&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; } ], &amp;#34;sliceRecordCount&amp;#34;: 1000 } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;gdbwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;host&amp;#34;: &amp;#34;gdb-endpoint&amp;#34;, &amp;#34;port&amp;#34;: 8182, &amp;#34;username&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;password&amp;#34;: &amp;#34;***&amp;#34;, &amp;#34;writeMode&amp;#34;: &amp;#34;INSERT&amp;#34;, &amp;#34;labelType&amp;#34;: &amp;#34;VERTEX&amp;#34;, &amp;#34;label&amp;#34;: &amp;#34;#{1}&amp;#34;, &amp;#34;idTransRule&amp;#34;: &amp;#34;none&amp;#34;, &amp;#34;session&amp;#34;: true, &amp;#34;maxRecordsInBatch&amp;#34;: 64, &amp;#34;column&amp;#34;: [ { &amp;#34;name&amp;#34;: &amp;#34;id&amp;#34;, &amp;#34;value&amp;#34;: &amp;#34;#{0}&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34;, &amp;#34;columnType&amp;#34;: &amp;#34;primaryKey&amp;#34; }, { &amp;#34;name&amp;#34;: &amp;#34;vertex_propKey&amp;#34;, &amp;#34;value&amp;#34;: &amp;#34;#{2}&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34;, &amp;#34;columnType&amp;#34;: &amp;#34;vertexSetProperty&amp;#34; }, { &amp;#34;name&amp;#34;: &amp;#34;vertex_propKey&amp;#34;, &amp;#34;value&amp;#34;: &amp;#34;#{3}&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;long&amp;#34;, &amp;#34;columnType&amp;#34;: &amp;#34;vertexSetProperty&amp;#34; }, { &amp;#34;name&amp;#34;: &amp;#34;vertex_propKey2&amp;#34;, &amp;#34;value&amp;#34;: &amp;#34;#{4}&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34;, &amp;#34;columnType&amp;#34;: &amp;#34;vertexProperty&amp;#34; } ] } } } ] } } 3.</description>
+    </item>
+    
+    <item>
+      <title>DataX HdfsReader 插件文档</title>
+      <link>https://haokiu.com/e123c1afd572427f9fa4d27ba10b1e99/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/e123c1afd572427f9fa4d27ba10b1e99/</guid>
+      <description>DataX HdfsReader 插件文档 1 快速介绍 HdfsReader提供了读取分布式文件系统数据存储的能力。在底层实现上，HdfsReader获取分布式文件系统上文件的数据，并转换为DataX传输协议传递给Writer。
+目前HdfsReader支持的文件格式有textfile（text）、orcfile（orc）、rcfile（rc）、sequence file（seq）和普通逻辑二维表（csv）类型格式的文件，且文件内容存放的必须是一张逻辑意义上的二维表。
+HdfsReader需要Jdk1.7及以上版本的支持。
+2 功能与限制 HdfsReader实现了从Hadoop分布式文件系统Hdfs中读取文件数据并转为DataX协议的功能。textfile是Hive建表时默认使用的存储格式，数据不做压缩，本质上textfile就是以文本的形式将数据存放在hdfs中，对于DataX而言，HdfsReader实现上类比TxtFileReader，有诸多相似之处。orcfile，它的全名是Optimized Row Columnar file，是对RCFile做了优化。据官方文档介绍，这种文件格式可以提供一种高效的方法来存储Hive数据。HdfsReader利用Hive提供的OrcSerde类，读取解析orcfile文件的数据。目前HdfsReader支持的功能如下：
+支持textfile、orcfile、rcfile、sequence file和csv格式的文件，且要求文件内容存放的是一张逻辑意义上的二维表。
+支持多种类型数据读取(使用String表示)，支持列裁剪，支持列常量
+支持递归读取、支持正则表达式（&amp;quot;*&amp;ldquo;和&amp;rdquo;?&amp;quot;）。
+支持orcfile数据压缩，目前支持SNAPPY，ZLIB两种压缩方式。
+多个File可以支持并发读取。
+支持sequence file数据压缩，目前支持lzo压缩方式。
+csv类型支持压缩格式有：gzip、bz2、zip、lzo、lzo_deflate、snappy。
+目前插件中Hive版本为1.1.1，Hadoop版本为2.7.1（Apache［为适配JDK1.7］,在Hadoop 2.5.0, Hadoop 2.6.0 和Hive 1.2.0测试环境中写入正常；其它版本需后期进一步测试；
+支持kerberos认证（注意：如果用户需要进行kerberos认证，那么用户使用的Hadoop集群版本需要和hdfsreader的Hadoop版本保持一致，如果高于hdfsreader的Hadoop版本，不保证kerberos认证有效）
+我们暂时不能做到：
+单个File支持多线程并发读取，这里涉及到单个File内部切分算法。二期考虑支持。 目前还不支持hdfs HA; 3 功能说明 3.1 配置样例 { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 3 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;hdfsreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;path&amp;#34;: &amp;#34;/user/hive/warehouse/mytable01/*&amp;#34;, &amp;#34;defaultFS&amp;#34;: &amp;#34;hdfs://xxx:port&amp;#34;, &amp;#34;column&amp;#34;: [ { &amp;#34;index&amp;#34;: 0, &amp;#34;type&amp;#34;: &amp;#34;long&amp;#34; }, { &amp;#34;index&amp;#34;: 1, &amp;#34;type&amp;#34;: &amp;#34;boolean&amp;#34; }, { &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34;, &amp;#34;value&amp;#34;: &amp;#34;hello&amp;#34; }, { &amp;#34;index&amp;#34;: 2, &amp;#34;type&amp;#34;: &amp;#34;double&amp;#34; } ], &amp;#34;fileType&amp;#34;: &amp;#34;orc&amp;#34;, &amp;#34;encoding&amp;#34;: &amp;#34;UTF-8&amp;#34;, &amp;#34;fieldDelimiter&amp;#34;: &amp;#34;,&amp;#34; } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;print&amp;#34;: true } } } ] } } 3.</description>
+    </item>
+    
+    <item>
+      <title>DataX HdfsWriter 插件文档</title>
+      <link>https://haokiu.com/dd5ebd2f221f4913ae09f61f3877725e/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/dd5ebd2f221f4913ae09f61f3877725e/</guid>
+      <description>DataX HdfsWriter 插件文档 1 快速介绍 HdfsWriter提供向HDFS文件系统指定路径中写入TEXTFile文件和ORCFile文件,文件内容可与hive中表关联。
+2 功能与限制 (1)、目前HdfsWriter仅支持textfile和orcfile两种格式的文件，且文件内容存放的必须是一张逻辑意义上的二维表; (2)、由于HDFS是文件系统，不存在schema的概念，因此不支持对部分列写入; (3)、目前仅支持与以下Hive数据类型： 数值型：TINYINT,SMALLINT,INT,BIGINT,FLOAT,DOUBLE 字符串类型：STRING,VARCHAR,CHAR 布尔类型：BOOLEAN 时间类型：DATE,TIMESTAMP 目前不支持：decimal、binary、arrays、maps、structs、union类型; (4)、对于Hive分区表目前仅支持一次写入单个分区; (5)、对于textfile需用户保证写入hdfs文件的分隔符与在Hive上创建表时的分隔符一致,从而实现写入hdfs数据与Hive表字段关联; (6)、HdfsWriter实现过程是：首先根据用户指定的path，创建一个hdfs文件系统上不存在的临时目录，创建规则：path_随机；然后将读取的文件写入这个临时目录；全部写入后再将这个临时目录下的文件移动到用户指定目录（在创建文件时保证文件名不重复）; 最后删除临时目录。如果在中间过程发生网络中断等情况造成无法与hdfs建立连接，需要用户手动删除已经写入的文件和临时目录。 (7)、目前插件中Hive版本为1.1.1，Hadoop版本为2.7.1（Apache［为适配JDK1.7］,在Hadoop 2.5.0, Hadoop 2.6.0 和Hive 1.2.0测试环境中写入正常；其它版本需后期进一步测试； (8)、目前HdfsWriter支持Kerberos认证（注意：如果用户需要进行kerberos认证，那么用户使用的Hadoop集群版本需要和hdfsreader的Hadoop版本保持一致，如果高于hdfsreader的Hadoop版本，不保证kerberos认证有效） 3 功能说明 3.1 配置样例 { &amp;#34;setting&amp;#34;: {}, &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 2 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;txtfilereader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;path&amp;#34;: [&amp;#34;/Users/shf/workplace/txtWorkplace/job/dataorcfull.txt&amp;#34;], &amp;#34;encoding&amp;#34;: &amp;#34;UTF-8&amp;#34;, &amp;#34;column&amp;#34;: [ { &amp;#34;index&amp;#34;: 0, &amp;#34;type&amp;#34;: &amp;#34;long&amp;#34; }, { &amp;#34;index&amp;#34;: 1, &amp;#34;type&amp;#34;: &amp;#34;long&amp;#34; }, { &amp;#34;index&amp;#34;: 2, &amp;#34;type&amp;#34;: &amp;#34;long&amp;#34; }, { &amp;#34;index&amp;#34;: 3, &amp;#34;type&amp;#34;: &amp;#34;long&amp;#34; }, { &amp;#34;index&amp;#34;: 4, &amp;#34;type&amp;#34;: &amp;#34;DOUBLE&amp;#34; }, { &amp;#34;index&amp;#34;: 5, &amp;#34;type&amp;#34;: &amp;#34;DOUBLE&amp;#34; }, { &amp;#34;index&amp;#34;: 6, &amp;#34;type&amp;#34;: &amp;#34;STRING&amp;#34; }, { &amp;#34;index&amp;#34;: 7, &amp;#34;type&amp;#34;: &amp;#34;STRING&amp;#34; }, { &amp;#34;index&amp;#34;: 8, &amp;#34;type&amp;#34;: &amp;#34;STRING&amp;#34; }, { &amp;#34;index&amp;#34;: 9, &amp;#34;type&amp;#34;: &amp;#34;BOOLEAN&amp;#34; }, { &amp;#34;index&amp;#34;: 10, &amp;#34;type&amp;#34;: &amp;#34;date&amp;#34; }, { &amp;#34;index&amp;#34;: 11, &amp;#34;type&amp;#34;: &amp;#34;date&amp;#34; } ], &amp;#34;fieldDelimiter&amp;#34;: &amp;#34;\t&amp;#34; } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;hdfswriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;defaultFS&amp;#34;: &amp;#34;hdfs://xxx:port&amp;#34;, &amp;#34;fileType&amp;#34;: &amp;#34;orc&amp;#34;, &amp;#34;path&amp;#34;: &amp;#34;/user/hive/warehouse/writerorc.</description>
+    </item>
+    
+    <item>
+      <title>DataX KingbaseesWriter</title>
+      <link>https://haokiu.com/a50c2cb341e14f7d995d470380e24d34/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/a50c2cb341e14f7d995d470380e24d34/</guid>
+      <description>DataX KingbaseesWriter 1 快速介绍 KingbaseesWriter插件实现了写入数据到 KingbaseES主库目的表的功能。在底层实现上，KingbaseesWriter通过JDBC连接远程 KingbaseES 数据库，并执行相应的 insert into &amp;hellip; sql 语句将数据写入 KingbaseES，内部会分批次提交入库。
+KingbaseesWriter面向ETL开发工程师，他们使用KingbaseesWriter从数仓导入数据到KingbaseES。同时 KingbaseesWriter亦可以作为数据迁移工具为DBA等用户提供服务。
+2 实现原理 KingbaseesWriter通过 DataX 框架获取 Reader 生成的协议数据，根据你配置生成相应的SQL插入语句
+insert into...(当主键/唯一性索引冲突时会写不进去冲突的行) 注意： 1. 目的表所在数据库必须是主库才能写入数据；整个任务至少需具备 insert into...的权限，是否需要其他权限，取决于你任务配置中在 preSql 和 postSql 中指定的语句。 2. KingbaseesWriter和MysqlWriter不同，不支持配置writeMode参数。 3 功能说明 3.1 配置样例 这里使用一份从内存产生到 KingbaseesWriter导入的数据。 { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 1 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;column&amp;#34; : [ { &amp;#34;value&amp;#34;: &amp;#34;DataX&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;value&amp;#34;: 19880808, &amp;#34;type&amp;#34;: &amp;#34;long&amp;#34; }, { &amp;#34;value&amp;#34;: &amp;#34;1988-08-08 08:08:08&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;date&amp;#34; }, { &amp;#34;value&amp;#34;: true, &amp;#34;type&amp;#34;: &amp;#34;bool&amp;#34; }, { &amp;#34;value&amp;#34;: &amp;#34;test&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;bytes&amp;#34; } ], &amp;#34;sliceRecordCount&amp;#34;: 1000 } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;kingbaseeswriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;username&amp;#34;: &amp;#34;xx&amp;#34;, &amp;#34;password&amp;#34;: &amp;#34;xx&amp;#34;, &amp;#34;column&amp;#34;: [ &amp;#34;id&amp;#34;, &amp;#34;name&amp;#34; ], &amp;#34;preSql&amp;#34;: [ &amp;#34;delete from test&amp;#34; ], &amp;#34;connection&amp;#34;: [ { &amp;#34;jdbcUrl&amp;#34;: &amp;#34;jdbc:kingbase8://127.</description>
+    </item>
+    
+    <item>
+      <title>Datax MongoDBReader</title>
+      <link>https://haokiu.com/41dfc822f8ca4bca812501f2801fc78e/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/41dfc822f8ca4bca812501f2801fc78e/</guid>
+      <description>Datax MongoDBReader 1 快速介绍 MongoDBReader 插件利用 MongoDB 的java客户端MongoClient进行MongoDB的读操作。最新版本的Mongo已经将DB锁的粒度从DB级别降低到document级别，配合上MongoDB强大的索引功能，基本可以达到高性能的读取MongoDB的需求。
+2 实现原理 MongoDBReader通过Datax框架从MongoDB并行的读取数据，通过主控的JOB程序按照指定的规则对MongoDB中的数据进行分片，并行读取，然后将MongoDB支持的类型通过逐一判断转换成Datax支持的类型。
+3 功能说明 该示例从ODPS读一份数据到MongoDB。
+{ &amp;quot;job&amp;quot;: { &amp;quot;setting&amp;quot;: { &amp;quot;speed&amp;quot;: { &amp;quot;channel&amp;quot;: 2 } }, &amp;quot;content&amp;quot;: [ { &amp;quot;reader&amp;quot;: { &amp;quot;name&amp;quot;: &amp;quot;mongodbreader&amp;quot;, &amp;quot;parameter&amp;quot;: { &amp;quot;address&amp;quot;: [&amp;quot;127.0.0.1:27017&amp;quot;], &amp;quot;userName&amp;quot;: &amp;quot;&amp;quot;, &amp;quot;userPassword&amp;quot;: &amp;quot;&amp;quot;, &amp;quot;dbName&amp;quot;: &amp;quot;tag_per_data&amp;quot;, &amp;quot;collectionName&amp;quot;: &amp;quot;tag_data12&amp;quot;, &amp;quot;column&amp;quot;: [ { &amp;quot;name&amp;quot;: &amp;quot;unique_id&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;string&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;sid&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;string&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;user_id&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;string&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;auction_id&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;string&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;content_type&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;string&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;pool_type&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;string&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;frontcat_id&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;Array&amp;quot;, &amp;quot;spliter&amp;quot;: &amp;quot;&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;categoryid&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;Array&amp;quot;, &amp;quot;spliter&amp;quot;: &amp;quot;&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;gmt_create&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;string&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;taglist&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;Array&amp;quot;, &amp;quot;spliter&amp;quot;: &amp;quot; &amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;property&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;string&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;scorea&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;int&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;scoreb&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;int&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;scorec&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;int&amp;quot; } ] } }, &amp;quot;writer&amp;quot;: { &amp;quot;name&amp;quot;: &amp;quot;odpswriter&amp;quot;, &amp;quot;parameter&amp;quot;: { &amp;quot;project&amp;quot;: &amp;quot;tb_ai_recommendation&amp;quot;, &amp;quot;table&amp;quot;: &amp;quot;jianying_tag_datax_read_test01&amp;quot;, &amp;quot;column&amp;quot;: [ &amp;quot;unique_id&amp;quot;, &amp;quot;sid&amp;quot;, &amp;quot;user_id&amp;quot;, &amp;quot;auction_id&amp;quot;, &amp;quot;content_type&amp;quot;, &amp;quot;pool_type&amp;quot;, &amp;quot;frontcat_id&amp;quot;, &amp;quot;categoryid&amp;quot;, &amp;quot;gmt_create&amp;quot;, &amp;quot;taglist&amp;quot;, &amp;quot;property&amp;quot;, &amp;quot;scorea&amp;quot;, &amp;quot;scoreb&amp;quot; ], &amp;quot;accessId&amp;quot;: &amp;quot;**************&amp;quot;, &amp;quot;accessKey&amp;quot;: &amp;quot;********************&amp;quot;, &amp;quot;truncate&amp;quot;: true, &amp;quot;odpsServer&amp;quot;: &amp;quot;xxx/api&amp;quot;, &amp;quot;tunnelServer&amp;quot;: &amp;quot;xxx&amp;quot;, &amp;quot;accountType&amp;quot;: &amp;quot;aliyun&amp;quot; } } } ] } } 4 参数说明 address： MongoDB的数据地址信息，因为MonogDB可能是个集群，则ip端口信息需要以Json数组的形式给出。【必填】 userName：MongoDB的用户名。【选填】 userPassword： MongoDB的密码。【选填】 collectionName： MonogoDB的集合名。【必填】 column：MongoDB的文档列名。【必填】 name：Column的名字。【必填】 type：Column的类型。【选填】 splitter：因为MongoDB支持数组类型，但是Datax框架本身不支持数组类型，所以mongoDB读出来的数组类型要通过这个分隔符合并成字符串。【选填】 query: MongoDB的额外查询条件。【选填】 5 类型转换 DataX 内部类型 MongoDB 数据类型 Long int, Long Double double String string, array Date date Boolean boolean Bytes bytes 6 性能报告 7 测试报告 </description>
+    </item>
+    
+    <item>
+      <title>Datax MongoDBWriter</title>
+      <link>https://haokiu.com/1b755458e9fa4e6f89a7d44321cd92ec/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/1b755458e9fa4e6f89a7d44321cd92ec/</guid>
+      <description>Datax MongoDBWriter 1 快速介绍 MongoDBWriter 插件利用 MongoDB 的java客户端MongoClient进行MongoDB的写操作。最新版本的Mongo已经将DB锁的粒度从DB级别降低到document级别，配合上MongoDB强大的索引功能，基本可以满足数据源向MongoDB写入数据的需求，针对数据更新的需求，通过配置业务主键的方式也可以实现。
+2 实现原理 MongoDBWriter通过Datax框架获取Reader生成的数据，然后将Datax支持的类型通过逐一判断转换成MongoDB支持的类型。其中一个值得指出的点就是Datax本身不支持数组类型，但是MongoDB支持数组类型，并且数组类型的索引还是蛮强大的。为了使用MongoDB的数组类型，则可以通过参数的特殊配置，将字符串可以转换成MongoDB中的数组。类型转换之后，就可以依托于Datax框架并行的写入MongoDB。
+3 功能说明 该示例从ODPS读一份数据到MongoDB。
+{ &amp;quot;job&amp;quot;: { &amp;quot;setting&amp;quot;: { &amp;quot;speed&amp;quot;: { &amp;quot;channel&amp;quot;: 2 } }, &amp;quot;content&amp;quot;: [ { &amp;quot;reader&amp;quot;: { &amp;quot;name&amp;quot;: &amp;quot;odpsreader&amp;quot;, &amp;quot;parameter&amp;quot;: { &amp;quot;accessId&amp;quot;: &amp;quot;********&amp;quot;, &amp;quot;accessKey&amp;quot;: &amp;quot;*********&amp;quot;, &amp;quot;project&amp;quot;: &amp;quot;tb_ai_recommendation&amp;quot;, &amp;quot;table&amp;quot;: &amp;quot;jianying_tag_datax_test&amp;quot;, &amp;quot;column&amp;quot;: [ &amp;quot;unique_id&amp;quot;, &amp;quot;sid&amp;quot;, &amp;quot;user_id&amp;quot;, &amp;quot;auction_id&amp;quot;, &amp;quot;content_type&amp;quot;, &amp;quot;pool_type&amp;quot;, &amp;quot;frontcat_id&amp;quot;, &amp;quot;categoryid&amp;quot;, &amp;quot;gmt_create&amp;quot;, &amp;quot;taglist&amp;quot;, &amp;quot;property&amp;quot;, &amp;quot;scorea&amp;quot;, &amp;quot;scoreb&amp;quot; ], &amp;quot;splitMode&amp;quot;: &amp;quot;record&amp;quot;, &amp;quot;odpsServer&amp;quot;: &amp;quot;http://xxx/api&amp;quot; } }, &amp;quot;writer&amp;quot;: { &amp;quot;name&amp;quot;: &amp;quot;mongodbwriter&amp;quot;, &amp;quot;parameter&amp;quot;: { &amp;quot;address&amp;quot;: [ &amp;quot;127.0.0.1:27017&amp;quot; ], &amp;quot;userName&amp;quot;: &amp;quot;&amp;quot;, &amp;quot;userPassword&amp;quot;: &amp;quot;&amp;quot;, &amp;quot;dbName&amp;quot;: &amp;quot;tag_per_data&amp;quot;, &amp;quot;collectionName&amp;quot;: &amp;quot;tag_data&amp;quot;, &amp;quot;column&amp;quot;: [ { &amp;quot;name&amp;quot;: &amp;quot;unique_id&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;string&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;sid&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;string&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;user_id&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;string&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;auction_id&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;string&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;content_type&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;string&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;pool_type&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;string&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;frontcat_id&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;Array&amp;quot;, &amp;quot;splitter&amp;quot;: &amp;quot; &amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;categoryid&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;Array&amp;quot;, &amp;quot;splitter&amp;quot;: &amp;quot; &amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;gmt_create&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;string&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;taglist&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;Array&amp;quot;, &amp;quot;splitter&amp;quot;: &amp;quot; &amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;property&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;string&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;scorea&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;int&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;scoreb&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;int&amp;quot; }, { &amp;quot;name&amp;quot;: &amp;quot;scorec&amp;quot;, &amp;quot;type&amp;quot;: &amp;quot;int&amp;quot; } ], &amp;quot;upsertInfo&amp;quot;: { &amp;quot;isUpsert&amp;quot;: &amp;quot;true&amp;quot;, &amp;quot;upsertKey&amp;quot;: &amp;quot;unique_id&amp;quot; } } } } ] } } 4 参数说明 address： MongoDB的数据地址信息，因为MonogDB可能是个集群，则ip端口信息需要以Json数组的形式给出。【必填】 userName：MongoDB的用户名。【选填】 userPassword： MongoDB的密码。【选填】 collectionName： MonogoDB的集合名。【必填】 column：MongoDB的文档列名。【必填】 name：Column的名字。【必填】 type：Column的类型。【选填】 splitter：特殊分隔符，当且仅当要处理的字符串要用分隔符分隔为字符数组时，才使用这个参数，通过这个参数指定的分隔符，将字符串分隔存储到MongoDB的数组中。【选填】 upsertInfo：指定了传输数据时更新的信息。【选填】 isUpsert：当设置为true时，表示针对相同的upsertKey做更新操作。【选填】 upsertKey：upsertKey指定了没行记录的业务主键。用来做更新时使用。【选填】 5 类型转换 DataX 内部类型 MongoDB 数据类型 Long int, Long Double double String string, array Date date Boolean boolean Bytes bytes 6 性能报告 7 测试报告 </description>
+    </item>
+    
+    <item>
+      <title>DataX MysqlWriter</title>
+      <link>https://haokiu.com/ee3103b29d5b4fa696cb69e35fefb970/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/ee3103b29d5b4fa696cb69e35fefb970/</guid>
+      <description>DataX MysqlWriter 1 快速介绍 MysqlWriter 插件实现了写入数据到 Mysql 主库的目的表的功能。在底层实现上， MysqlWriter 通过 JDBC 连接远程 Mysql 数据库，并执行相应的 insert into &amp;hellip; 或者 ( replace into &amp;hellip;) 的 sql 语句将数据写入 Mysql，内部会分批次提交入库，需要数据库本身采用 innodb 引擎。
+MysqlWriter 面向ETL开发工程师，他们使用 MysqlWriter 从数仓导入数据到 Mysql。同时 MysqlWriter 亦可以作为数据迁移工具为DBA等用户提供服务。
+2 实现原理 MysqlWriter 通过 DataX 框架获取 Reader 生成的协议数据，根据你配置的 writeMode 生成
+insert into...(当主键/唯一性索引冲突时会写不进去冲突的行) 或者 replace into...(没有遇到主键/唯一性索引冲突时，与 insert into 行为一致，冲突时会用新行替换原有行所有字段) 的语句写入数据到 Mysql。出于性能考虑，采用了 PreparedStatement + Batch，并且设置了：rewriteBatchedStatements=true，将数据缓冲到线程上下文 Buffer 中，当 Buffer 累计到预定阈值时，才发起写入请求。 注意：目的表所在数据库必须是主库才能写入数据；整个任务至少需要具备 insert/replace into...的权限，是否需要其他权限，取决于你任务配置中在 preSql 和 postSql 中指定的语句。 3 功能说明 3.1 配置样例 这里使用一份从内存产生到 Mysql 导入的数据。 { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 1 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;column&amp;#34; : [ { &amp;#34;value&amp;#34;: &amp;#34;DataX&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;value&amp;#34;: 19880808, &amp;#34;type&amp;#34;: &amp;#34;long&amp;#34; }, { &amp;#34;value&amp;#34;: &amp;#34;1988-08-08 08:08:08&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;date&amp;#34; }, { &amp;#34;value&amp;#34;: true, &amp;#34;type&amp;#34;: &amp;#34;bool&amp;#34; }, { &amp;#34;value&amp;#34;: &amp;#34;test&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;bytes&amp;#34; } ], &amp;#34;sliceRecordCount&amp;#34;: 1000 } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;mysqlwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;writeMode&amp;#34;: &amp;#34;insert&amp;#34;, &amp;#34;username&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;password&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;column&amp;#34;: [ &amp;#34;id&amp;#34;, &amp;#34;name&amp;#34; ], &amp;#34;session&amp;#34;: [ &amp;#34;set session sql_mode=&amp;#39;ANSI&amp;#39;&amp;#34; ], &amp;#34;preSql&amp;#34;: [ &amp;#34;delete from test&amp;#34; ], &amp;#34;connection&amp;#34;: [ { &amp;#34;jdbcUrl&amp;#34;: &amp;#34;jdbc:mysql://127.</description>
+    </item>
+    
+    <item>
+      <title>DataX OCSWriter 适用memcached客户端写入ocs</title>
+      <link>https://haokiu.com/d4b1e453f8274dda834a305a5e6a38bf/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/d4b1e453f8274dda834a305a5e6a38bf/</guid>
+      <description>DataX OCSWriter 适用memcached客户端写入ocs 1 快速介绍 1.1 OCS简介 开放缓存服务( Open Cache Service，简称OCS）是基于内存的缓存服务，支持海量小数据的高速访问。OCS可以极大缓解对后端存储的压力，提高网站或应用的响应速度。OCS支持Key-Value的数据结构，兼容Memcached协议的客户端都可与OCS通信。
+OCS 支持即开即用的方式快速部署；对于动态Web、APP应用，可通过缓存服务减轻对数据库的压力，从而提高网站整体的响应速度。
+与本地MemCache相同之处在于OCS兼容Memcached协议，与用户环境兼容，可直接用于OCS服务 不同之处在于硬件和数据部署在云端，有完善的基础设施、网络安全保障、系统维护服务。所有的这些服务，都不需要投资，只需根据使用量进行付费即可。
+1.2 OCSWriter简介 OCSWriter是DataX实现的，基于Memcached协议的数据写入OCS通道。
+2 功能说明 2.1 配置样例 这里使用一份从内存产生的数据导入到OCS。 { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 1 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;column&amp;#34;: [ { &amp;#34;value&amp;#34;: &amp;#34;DataX&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;value&amp;#34;: 19880808, &amp;#34;type&amp;#34;: &amp;#34;long&amp;#34; }, { &amp;#34;value&amp;#34;: &amp;#34;1988-08-08 08:08:08&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;date&amp;#34; }, { &amp;#34;value&amp;#34;: true, &amp;#34;type&amp;#34;: &amp;#34;bool&amp;#34; }, { &amp;#34;value&amp;#34;: &amp;#34;test&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;bytes&amp;#34; } ], &amp;#34;sliceRecordCount&amp;#34;: 1000 } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;ocswriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;proxy&amp;#34;: &amp;#34;xxxx&amp;#34;, &amp;#34;port&amp;#34;: &amp;#34;11211&amp;#34;, &amp;#34;userName&amp;#34;: &amp;#34;user&amp;#34;, &amp;#34;password&amp;#34;: &amp;#34;******&amp;#34;, &amp;#34;writeMode&amp;#34;: &amp;#34;set|add|replace|append|prepend&amp;#34;, &amp;#34;writeFormat&amp;#34;: &amp;#34;text|binary&amp;#34;, &amp;#34;fieldDelimiter&amp;#34;: &amp;#34;\u0001&amp;#34;, &amp;#34;expireTime&amp;#34;: 1000, &amp;#34;indexes&amp;#34;: &amp;#34;0,2&amp;#34;, &amp;#34;batchSize&amp;#34;: 1000 } } } ] } } 2.</description>
+    </item>
+    
+    <item>
+      <title>DataX ODPSReader</title>
+      <link>https://haokiu.com/5b1b6009df684895ab2ef943e412ee8a/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/5b1b6009df684895ab2ef943e412ee8a/</guid>
+      <description>DataX ODPSReader 1 快速介绍 ODPSReader 实现了从 ODPS读取数据的功能，有关ODPS请参看(https://help.aliyun.com/document_detail/27800.html?spm=5176.doc27803.6.101.NxCIgY)。 在底层实现上，ODPSReader 根据你配置的 源头项目 / 表 / 分区 / 表字段 等信息，通过 Tunnel 从 ODPS 系统中读取数据。
+注意 1、如果你需要使用ODPSReader/Writer插件，由于 AccessId/AccessKey 解密的需要，请务必使用 JDK 1.6.32 及以上版本。JDK 安装事项，请联系 PE 处理 2、ODPSReader 不是通过 ODPS SQL （select ... from ... where ... ）来抽取数据的 3、注意区分你要读取的表是线上环境还是线下环境 4、目前 DataX3 依赖的 SDK 版本是： &amp;lt;dependency&amp;gt; &amp;lt;groupId&amp;gt;com.aliyun.odps&amp;lt;/groupId&amp;gt; &amp;lt;artifactId&amp;gt;odps-sdk-core-internal&amp;lt;/artifactId&amp;gt; &amp;lt;version&amp;gt;0.13.2&amp;lt;/version&amp;gt; &amp;lt;/dependency&amp;gt; 2 实现原理 ODPSReader 支持读取分区表、非分区表，不支持读取虚拟视图。当要读取分区表时，需要指定出具体的分区配置，比如读取 t0 表，其分区为 pt=1,ds=hangzhou 那么你需要在配置中配置该值。当要读取非分区表时，你不能提供分区配置。表字段可以依序指定全部列，也可以指定部分列，或者调整列顺序，或者指定常量字段，但是表字段中不能指定分区列（分区列不是表字段）。
+注意：要特别注意 odpsServer、project、table、accessId、accessKey 的配置，因为直接影响到是否能够加载到你需要读取数据的表。很多权限问题都出现在这里。 3 功能说明 3.1 配置样例 这里使用一份读出 ODPS 数据然后打印到屏幕的配置样板。 { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 1 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;odpsreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;accessId&amp;#34;: &amp;#34;accessId&amp;#34;, &amp;#34;accessKey&amp;#34;: &amp;#34;accessKey&amp;#34;, &amp;#34;project&amp;#34;: &amp;#34;targetProjectName&amp;#34;, &amp;#34;table&amp;#34;: &amp;#34;tableName&amp;#34;, &amp;#34;partition&amp;#34;: [ &amp;#34;pt=1,ds=hangzhou&amp;#34; ], &amp;#34;column&amp;#34;: [ &amp;#34;customer_id&amp;#34;, &amp;#34;nickname&amp;#34; ], &amp;#34;packageAuthorizedProject&amp;#34;: &amp;#34;yourCurrentProjectName&amp;#34;, &amp;#34;splitMode&amp;#34;: &amp;#34;record&amp;#34;, &amp;#34;odpsServer&amp;#34;: &amp;#34;http://xxx/api&amp;#34;, &amp;#34;tunnelServer&amp;#34;: &amp;#34;http://dt.</description>
+    </item>
+    
+    <item>
+      <title>DataX ODPS写入</title>
+      <link>https://haokiu.com/ab33f89c494e47eaae02f9c21465b322/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/ab33f89c494e47eaae02f9c21465b322/</guid>
+      <description>DataX ODPS写入 1 快速介绍 ODPSWriter插件用于实现往ODPS插入或者更新数据，主要提供给etl开发同学将业务数据导入odps，适合于TB,GB数量级的数据传输，如果需要传输PB量级的数据，请选择dt task工具 ;
+2 实现原理 在底层实现上，ODPSWriter是通过DT Tunnel写入ODPS系统的，有关ODPS的更多技术细节请参看 ODPS主站 https://data.aliyun.com/product/odps 和ODPS产品文档 https://help.aliyun.com/product/27797.html
+目前 DataX3 依赖的 SDK 版本是：
+&amp;lt;dependency&amp;gt; &amp;lt;groupId&amp;gt;com.aliyun.odps&amp;lt;/groupId&amp;gt; &amp;lt;artifactId&amp;gt;odps-sdk-core-internal&amp;lt;/artifactId&amp;gt; &amp;lt;version&amp;gt;0.13.2&amp;lt;/version&amp;gt; &amp;lt;/dependency&amp;gt; 注意: 如果你需要使用ODPSReader/Writer插件，请务必使用JDK 1.6-32及以上版本 使用java -version查看Java版本号
+3 功能说明 3.1 配置样例 这里使用一份从内存产生到ODPS导入的数据。 { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;byte&amp;#34;: 1048576 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;column&amp;#34;: [ { &amp;#34;value&amp;#34;: &amp;#34;DataX&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;value&amp;#34;: &amp;#34;test&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;bytes&amp;#34; } ], &amp;#34;sliceRecordCount&amp;#34;: 100000 } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;odpswriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;project&amp;#34;: &amp;#34;chinan_test&amp;#34;, &amp;#34;table&amp;#34;: &amp;#34;odps_write_test00_partitioned&amp;#34;, &amp;#34;partition&amp;#34;: &amp;#34;school=SiChuan-School,class=1&amp;#34;, &amp;#34;column&amp;#34;: [ &amp;#34;id&amp;#34;, &amp;#34;name&amp;#34; ], &amp;#34;accessId&amp;#34;: &amp;#34;xxx&amp;#34;, &amp;#34;accessKey&amp;#34;: &amp;#34;xxxx&amp;#34;, &amp;#34;truncate&amp;#34;: true, &amp;#34;odpsServer&amp;#34;: &amp;#34;http://sxxx/api&amp;#34;, &amp;#34;tunnelServer&amp;#34;: &amp;#34;http://xxx&amp;#34;, &amp;#34;accountType&amp;#34;: &amp;#34;aliyun&amp;#34; } } } ] } } 3.</description>
+    </item>
+    
+    <item>
+      <title>DataX OracleWriter</title>
+      <link>https://haokiu.com/1eb2fdd8968d4f6e8bbc0312c6647246/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/1eb2fdd8968d4f6e8bbc0312c6647246/</guid>
+      <description>DataX OracleWriter 1 快速介绍 OracleWriter 插件实现了写入数据到 Oracle 主库的目的表的功能。在底层实现上， OracleWriter 通过 JDBC 连接远程 Oracle 数据库，并执行相应的 insert into &amp;hellip; sql 语句将数据写入 Oracle，内部会分批次提交入库。
+OracleWriter 面向ETL开发工程师，他们使用 OracleWriter 从数仓导入数据到 Oracle。同时 OracleWriter 亦可以作为数据迁移工具为DBA等用户提供服务。
+2 实现原理 OracleWriter 通过 DataX 框架获取 Reader 生成的协议数据，根据你配置生成相应的SQL语句
+insert into...(当主键/唯一性索引冲突时会写不进去冲突的行) 注意： 1. 目的表所在数据库必须是主库才能写入数据；整个任务至少需具备 insert into...的权限，是否需要其他权限，取决于你任务配置中在 preSql 和 postSql 中指定的语句。 2.OracleWriter和MysqlWriter不同，不支持配置writeMode参数。 3 功能说明 3.1 配置样例 这里使用一份从内存产生到 Oracle 导入的数据。 { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 1 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;column&amp;#34; : [ { &amp;#34;value&amp;#34;: &amp;#34;DataX&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;value&amp;#34;: 19880808, &amp;#34;type&amp;#34;: &amp;#34;long&amp;#34; }, { &amp;#34;value&amp;#34;: &amp;#34;1988-08-08 08:08:08&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;date&amp;#34; }, { &amp;#34;value&amp;#34;: true, &amp;#34;type&amp;#34;: &amp;#34;bool&amp;#34; }, { &amp;#34;value&amp;#34;: &amp;#34;test&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;bytes&amp;#34; } ], &amp;#34;sliceRecordCount&amp;#34;: 1000 } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;oraclewriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;username&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;password&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;column&amp;#34;: [ &amp;#34;id&amp;#34;, &amp;#34;name&amp;#34; ], &amp;#34;preSql&amp;#34;: [ &amp;#34;delete from test&amp;#34; ], &amp;#34;connection&amp;#34;: [ { &amp;#34;jdbcUrl&amp;#34;: &amp;#34;jdbc:oracle:thin:@[HOST_NAME]:PORT:[DATABASE_NAME]&amp;#34;, &amp;#34;table&amp;#34;: [ &amp;#34;test&amp;#34; ] } ] } } } ] } } 3.</description>
+    </item>
+    
+    <item>
+      <title>DataX OSSReader 说明</title>
+      <link>https://haokiu.com/bf15e9112ab546c9a6d8baab000d9601/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/bf15e9112ab546c9a6d8baab000d9601/</guid>
+      <description>DataX OSSReader 说明 1 快速介绍 OSSReader提供了读取OSS数据存储的能力。在底层实现上，OSSReader使用OSS官方Java SDK获取OSS数据，并转换为DataX传输协议传递给Writer。
+OSS 产品介绍, 参看[阿里云OSS Portal] OSS Java SDK, 参看[阿里云OSS Java SDK] 2 功能与限制 OSSReader实现了从OSS读取数据并转为DataX协议的功能，OSS本身是无结构化数据存储，对于DataX而言，OSSReader实现上类比TxtFileReader，有诸多相似之处。目前OSSReader支持功能如下：
+支持且仅支持读取TXT的文件，且要求TXT中shema为一张二维表。
+支持类CSV格式文件，自定义分隔符。
+支持多种类型数据读取(使用String表示)，支持列裁剪，支持列常量
+支持递归读取、支持文件名过滤。
+支持文本压缩，现有压缩格式为zip、gzip、bzip2。注意，一个压缩包不允许多文件打包压缩。
+多个object可以支持并发读取。
+我们暂时不能做到：
+单个Object(File)支持多线程并发读取，这里涉及到单个Object内部切分算法。二期考虑支持。
+单个Object在压缩情况下，从技术上无法支持多线程并发读取。
+3 功能说明 3.1 配置样例 { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: {}, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;ossreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;endpoint&amp;#34;: &amp;#34;http://oss.aliyuncs.com&amp;#34;, &amp;#34;accessId&amp;#34;: &amp;#34;&amp;#34;, &amp;#34;accessKey&amp;#34;: &amp;#34;&amp;#34;, &amp;#34;bucket&amp;#34;: &amp;#34;myBucket&amp;#34;, &amp;#34;object&amp;#34;: [ &amp;#34;bazhen/*&amp;#34; ], &amp;#34;column&amp;#34;: [ { &amp;#34;type&amp;#34;: &amp;#34;long&amp;#34;, &amp;#34;index&amp;#34;: 0 }, { &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34;, &amp;#34;value&amp;#34;: &amp;#34;alibaba&amp;#34; }, { &amp;#34;type&amp;#34;: &amp;#34;date&amp;#34;, &amp;#34;index&amp;#34;: 1, &amp;#34;format&amp;#34;: &amp;#34;yyyy-MM-dd&amp;#34; } ], &amp;#34;encoding&amp;#34;: &amp;#34;UTF-8&amp;#34;, &amp;#34;fieldDelimiter&amp;#34;: &amp;#34;\t&amp;#34;, &amp;#34;compress&amp;#34;: &amp;#34;gzip&amp;#34; } }, &amp;#34;writer&amp;#34;: {} } ] } } 3.2 参数说明 endpoint
+描述：OSS Server的EndPoint地址，例如http://oss.</description>
+    </item>
+    
+    <item>
+      <title>DataX OSSWriter 说明</title>
+      <link>https://haokiu.com/516202a7c10f4658ad32aa517c141a05/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/516202a7c10f4658ad32aa517c141a05/</guid>
+      <description>DataX OSSWriter 说明 1 快速介绍 OSSWriter提供了向OSS写入类CSV格式的一个或者多个表文件。
+写入OSS内容存放的是一张逻辑意义上的二维表，例如CSV格式的文本信息。
+OSS 产品介绍, 参看[阿里云OSS Portal] OSS Java SDK, 参看[阿里云OSS Java SDK] 2 功能与限制 OSSWriter实现了从DataX协议转为OSS中的TXT文件功能，OSS本身是无结构化数据存储，OSSWriter需要在如下几个方面增加:
+支持且仅支持写入 TXT的文件，且要求TXT中shema为一张二维表。
+支持类CSV格式文件，自定义分隔符。
+暂时不支持文本压缩。
+支持多线程写入，每个线程写入不同子文件。
+文件支持滚动，当文件大于某个size值或者行数值，文件需要切换。 [暂不支持]
+我们不能做到：
+单个文件不能支持并发写入。 3 功能说明 3.1 配置样例 { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: {}, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;osswriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;endpoint&amp;#34;: &amp;#34;http://oss.aliyuncs.com&amp;#34;, &amp;#34;accessId&amp;#34;: &amp;#34;&amp;#34;, &amp;#34;accessKey&amp;#34;: &amp;#34;&amp;#34;, &amp;#34;bucket&amp;#34;: &amp;#34;myBucket&amp;#34;, &amp;#34;object&amp;#34;: &amp;#34;cdo/datax&amp;#34;, &amp;#34;encoding&amp;#34;: &amp;#34;UTF-8&amp;#34;, &amp;#34;fieldDelimiter&amp;#34;: &amp;#34;,&amp;#34;, &amp;#34;writeMode&amp;#34;: &amp;#34;truncate|append|nonConflict&amp;#34; } } } ] } } 3.2 参数说明 endpoint
+描述：OSS Server的EndPoint地址，例如http://oss.aliyuncs.com。
+必选：是 默认值：无 accessId
+描述：OSS的accessId 必选：是 默认值：无 accessKey
+描述：OSS的accessKey 必选：是 默认值：无 bucket
+描述：OSS的bucket 必选：是 默认值：无 object
+描述：OSSWriter写入的文件名，OSS使用文件名模拟目录的实现。 使用&amp;quot;object&amp;quot;: &amp;ldquo;datax&amp;rdquo;，写入object以datax开头，后缀添加随机字符串。 使用&amp;quot;object&amp;quot;: &amp;ldquo;cdo/datax&amp;rdquo;，写入的object以cdo/datax开头，后缀随机添加字符串，/作为OSS模拟目录的分隔符。
+必选：是 默认值：无 writeMode</description>
+    </item>
+    
+    <item>
+      <title>DataX PostgresqlWriter</title>
+      <link>https://haokiu.com/1c01500e456b4ef6b6c14eb5a072696e/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/1c01500e456b4ef6b6c14eb5a072696e/</guid>
+      <description>DataX PostgresqlWriter 1 快速介绍 PostgresqlWriter插件实现了写入数据到 PostgreSQL主库目的表的功能。在底层实现上，PostgresqlWriter通过JDBC连接远程 PostgreSQL 数据库，并执行相应的 insert into &amp;hellip; sql 语句将数据写入 PostgreSQL，内部会分批次提交入库。
+PostgresqlWriter面向ETL开发工程师，他们使用PostgresqlWriter从数仓导入数据到PostgreSQL。同时 PostgresqlWriter亦可以作为数据迁移工具为DBA等用户提供服务。
+2 实现原理 PostgresqlWriter通过 DataX 框架获取 Reader 生成的协议数据，根据你配置生成相应的SQL插入语句
+insert into...(当主键/唯一性索引冲突时会写不进去冲突的行) 注意： 1. 目的表所在数据库必须是主库才能写入数据；整个任务至少需具备 insert into...的权限，是否需要其他权限，取决于你任务配置中在 preSql 和 postSql 中指定的语句。 2. PostgresqlWriter和MysqlWriter不同，不支持配置writeMode参数。 3 功能说明 3.1 配置样例 这里使用一份从内存产生到 PostgresqlWriter导入的数据。 { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 1 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;column&amp;#34; : [ { &amp;#34;value&amp;#34;: &amp;#34;DataX&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;value&amp;#34;: 19880808, &amp;#34;type&amp;#34;: &amp;#34;long&amp;#34; }, { &amp;#34;value&amp;#34;: &amp;#34;1988-08-08 08:08:08&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;date&amp;#34; }, { &amp;#34;value&amp;#34;: true, &amp;#34;type&amp;#34;: &amp;#34;bool&amp;#34; }, { &amp;#34;value&amp;#34;: &amp;#34;test&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;bytes&amp;#34; } ], &amp;#34;sliceRecordCount&amp;#34;: 1000 } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;postgresqlwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;username&amp;#34;: &amp;#34;xx&amp;#34;, &amp;#34;password&amp;#34;: &amp;#34;xx&amp;#34;, &amp;#34;column&amp;#34;: [ &amp;#34;id&amp;#34;, &amp;#34;name&amp;#34; ], &amp;#34;preSql&amp;#34;: [ &amp;#34;delete from test&amp;#34; ], &amp;#34;connection&amp;#34;: [ { &amp;#34;jdbcUrl&amp;#34;: &amp;#34;jdbc:postgresql://127.</description>
+    </item>
+    
+    <item>
+      <title>DataX SqlServerWriter</title>
+      <link>https://haokiu.com/f23fb4346cfa45459b6eaa8537ff5d17/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/f23fb4346cfa45459b6eaa8537ff5d17/</guid>
+      <description>DataX SqlServerWriter 1 快速介绍 SqlServerWriter 插件实现了写入数据到 SqlServer 库的目的表的功能。在底层实现上， SqlServerWriter 通过 JDBC 连接远程 SqlServer 数据库，并执行相应的 insert into &amp;hellip; sql 语句将数据写入 SqlServer，内部会分批次提交入库。
+SqlServerWriter 面向ETL开发工程师，他们使用 SqlServerWriter 从数仓导入数据到 SqlServer。同时 SqlServerWriter 亦可以作为数据迁移工具为DBA等用户提供服务。
+2 实现原理 SqlServerWriter 通过 DataX 框架获取 Reader 生成的协议数据，根据你配置生成相应的SQL语句
+insert into...(当主键/唯一性索引冲突时会写不进去冲突的行) 注意： 1. 目的表所在数据库必须是主库才能写入数据；整个任务至少需具备 insert into...的权限，是否需要其他权限，取决于你任务配置中在 preSql 和 postSql 中指定的语句。 2.SqlServerWriter和MysqlWriter不同，不支持配置writeMode参数。 3 功能说明 3.1 配置样例 这里使用一份从内存产生到 SqlServer 导入的数据。 { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 5 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: {}, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;sqlserverwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;username&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;password&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;column&amp;#34;: [ &amp;#34;db_id&amp;#34;, &amp;#34;db_type&amp;#34;, &amp;#34;db_ip&amp;#34;, &amp;#34;db_port&amp;#34;, &amp;#34;db_role&amp;#34;, &amp;#34;db_name&amp;#34;, &amp;#34;db_username&amp;#34;, &amp;#34;db_password&amp;#34;, &amp;#34;db_modify_time&amp;#34;, &amp;#34;db_modify_user&amp;#34;, &amp;#34;db_description&amp;#34;, &amp;#34;db_tddl_info&amp;#34; ], &amp;#34;connection&amp;#34;: [ { &amp;#34;table&amp;#34;: [ &amp;#34;db_info_for_writer&amp;#34; ], &amp;#34;jdbcUrl&amp;#34;: &amp;#34;jdbc:sqlserver://[HOST_NAME]:PORT;DatabaseName=[DATABASE_NAME]&amp;#34; } ], &amp;#34;preSql&amp;#34;: [ &amp;#34;delete from @table where db_id = -1;&amp;#34; ], &amp;#34;postSql&amp;#34;: [ &amp;#34;update @table set db_modify_time = now() where db_id = 1;&amp;#34; ] } } } ] } } 3.</description>
+    </item>
+    
+    <item>
+      <title>DataX Transformer</title>
+      <link>https://haokiu.com/760d0498cfcd435bafba3fe96793cd01/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/760d0498cfcd435bafba3fe96793cd01/</guid>
+      <description>DataX Transformer Transformer定义 在数据同步、传输过程中，存在用户对于数据传输进行特殊定制化的需求场景，包括裁剪列、转换列等工作，可以借助ETL的T过程实现(Transformer)。DataX包含了完整的E(Extract)、T(Transformer)、L(Load)支持。
+运行模型 UDF手册 dx_substr 参数：3个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：字段值的开始位置。 第三个参数：目标字段长度。 返回： 从字符串的指定位置（包含）截取指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer） 举例： dx_substr(1,&amp;#34;2&amp;#34;,&amp;#34;5&amp;#34;) column 1的value为“dataxTest”=&amp;gt;&amp;#34;taxTe&amp;#34; dx_substr(1,&amp;#34;5&amp;#34;,&amp;#34;10&amp;#34;) column 1的value为“dataxTest”=&amp;gt;&amp;#34;Test&amp;#34; dx_pad 参数：4个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：&amp;ldquo;l&amp;rdquo;,&amp;ldquo;r&amp;rdquo;, 指示是在头进行pad，还是尾进行pad。 第三个参数：目标字段长度。 第四个参数：需要pad的字符。 返回： 如果源字符串长度小于目标字段长度，按照位置添加pad字符后返回。如果长于，直接截断（都截右边）。如果字段为空值，转换为空字符串进行pad，即最后的字符串全是需要pad的字符 举例： dx_pad(1,&amp;#34;l&amp;#34;,&amp;#34;4&amp;#34;,&amp;#34;A&amp;#34;), 如果column 1 的值为 xyz=&amp;gt; Axyz， 值为 xyzzzzz =&amp;gt; xyzz dx_pad(1,&amp;#34;r&amp;#34;,&amp;#34;4&amp;#34;,&amp;#34;A&amp;#34;), 如果column 1 的值为 xyz=&amp;gt; xyzA， 值为 xyzzzzz =&amp;gt; xyzz dx_replace 参数：4个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：字段值的开始位置。 第三个参数：需要替换的字段长度。 第四个参数：需要替换的字符串。 返回： 从字符串的指定位置（包含）替换指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer） 举例： dx_replace(1,&amp;#34;2&amp;#34;,&amp;#34;4&amp;#34;,&amp;#34;****&amp;#34;) column 1的value为“dataxTest”=&amp;gt;&amp;#34;da****est&amp;#34; dx_replace(1,&amp;#34;5&amp;#34;,&amp;#34;10&amp;#34;,&amp;#34;****&amp;#34;) column 1的value为“dataxTest”=&amp;gt;&amp;#34;data****&amp;#34; dx_filter （关联filter暂不支持，即多个字段的联合判断，函参太过复杂，用户难以使用。） 参数： 第一个参数：字段编号，对应record中第几个字段。 第二个参数：运算符，支持一下运算符：like, not like, &amp;gt;, =, &amp;lt;, &amp;gt;=, !=, &amp;lt;= 第三个参数：正则表达式（java正则表达式）、值。 返回： 如果匹配正则表达式，返回Null，表示过滤该行。不匹配表达式时，表示保留该行。（注意是该行）。对于&amp;gt;=&amp;lt;都是对字段直接compare的结果. like ， not like是将字段转换成String，然后和目标正则表达式进行全匹配。 , =, &amp;lt;, &amp;gt;=, !=, &amp;lt;= 对于DoubleColumn比较double值，对于LongColumn和DateColumn比较long值，其他StringColumn，BooleanColumn以及ByteColumn均比较的是StringColumn值。
+如果目标colunn为空（null），对于 = null的过滤条件，将满足条件，被过滤。！=null的过滤条件，null不满足过滤条件，不被过滤。 like，字段为null不满足条件，不被过滤，和not like，字段为null满足条件，被过滤。 举例： dx_filter(1,&amp;#34;like&amp;#34;,&amp;#34;dataTest&amp;#34;) dx_filter(1,&amp;#34;&amp;gt;=&amp;#34;,&amp;#34;10&amp;#34;) dx_groovy 参数。 第一个参数： groovy code 第二个参数（列表或者为空）：extraPackage 备注： dx_groovy只能调用一次。不能多次调用。 groovy code中支持java.</description>
+    </item>
+    
+    <item>
+      <title>DataX TxtFileReader 说明</title>
+      <link>https://haokiu.com/cbeab748638041dfa63c78ebe4fa91db/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/cbeab748638041dfa63c78ebe4fa91db/</guid>
+      <description>DataX TxtFileReader 说明 1 快速介绍 TxtFileReader提供了读取本地文件系统数据存储的能力。在底层实现上，TxtFileReader获取本地文件数据，并转换为DataX传输协议传递给Writer。
+本地文件内容存放的是一张逻辑意义上的二维表，例如CSV格式的文本信息。
+2 功能与限制 TxtFileReader实现了从本地文件读取数据并转为DataX协议的功能，本地文件本身是无结构化数据存储，对于DataX而言，TxtFileReader实现上类比OSSReader，有诸多相似之处。目前TxtFileReader支持功能如下：
+支持且仅支持读取TXT的文件，且要求TXT中shema为一张二维表。
+支持类CSV格式文件，自定义分隔符。
+支持多种类型数据读取(使用String表示)，支持列裁剪，支持列常量
+支持递归读取、支持文件名过滤。
+支持文本压缩，现有压缩格式为zip、gzip、bzip2。
+多个File可以支持并发读取。
+我们暂时不能做到：
+单个File支持多线程并发读取，这里涉及到单个File内部切分算法。二期考虑支持。
+单个File在压缩情况下，从技术上无法支持多线程并发读取。
+3 功能说明 3.1 配置样例 { &amp;#34;setting&amp;#34;: {}, &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 2 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;txtfilereader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;path&amp;#34;: [&amp;#34;/home/haiwei.luo/case00/data&amp;#34;], &amp;#34;encoding&amp;#34;: &amp;#34;UTF-8&amp;#34;, &amp;#34;column&amp;#34;: [ { &amp;#34;index&amp;#34;: 0, &amp;#34;type&amp;#34;: &amp;#34;long&amp;#34; }, { &amp;#34;index&amp;#34;: 1, &amp;#34;type&amp;#34;: &amp;#34;boolean&amp;#34; }, { &amp;#34;index&amp;#34;: 2, &amp;#34;type&amp;#34;: &amp;#34;double&amp;#34; }, { &amp;#34;index&amp;#34;: 3, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;index&amp;#34;: 4, &amp;#34;type&amp;#34;: &amp;#34;date&amp;#34;, &amp;#34;format&amp;#34;: &amp;#34;yyyy.MM.dd&amp;#34; } ], &amp;#34;fieldDelimiter&amp;#34;: &amp;#34;,&amp;#34; } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;txtfilewriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;path&amp;#34;: &amp;#34;/home/haiwei.luo/case00/result&amp;#34;, &amp;#34;fileName&amp;#34;: &amp;#34;luohw&amp;#34;, &amp;#34;writeMode&amp;#34;: &amp;#34;truncate&amp;#34;, &amp;#34;format&amp;#34;: &amp;#34;yyyy-MM-dd&amp;#34; } } } ] } } 3.</description>
+    </item>
+    
+    <item>
+      <title>DataX TxtFileWriter 说明</title>
+      <link>https://haokiu.com/599f9ae387e54760ab26e177bd423e82/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/599f9ae387e54760ab26e177bd423e82/</guid>
+      <description>DataX TxtFileWriter 说明 1 快速介绍 TxtFileWriter提供了向本地文件写入类CSV格式的一个或者多个表文件。TxtFileWriter服务的用户主要在于DataX开发、测试同学。
+写入本地文件内容存放的是一张逻辑意义上的二维表，例如CSV格式的文本信息。
+2 功能与限制 TxtFileWriter实现了从DataX协议转为本地TXT文件功能，本地文件本身是无结构化数据存储，TxtFileWriter如下几个方面约定:
+支持且仅支持写入 TXT的文件，且要求TXT中shema为一张二维表。
+支持类CSV格式文件，自定义分隔符。
+支持文本压缩，现有压缩格式为gzip、bzip2。
+支持多线程写入，每个线程写入不同子文件。
+文件支持滚动，当文件大于某个size值或者行数值，文件需要切换。 [暂不支持]
+我们不能做到：
+单个文件不能支持并发写入。 3 功能说明 3.1 配置样例 { &amp;#34;setting&amp;#34;: {}, &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 2 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;txtfilereader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;path&amp;#34;: [&amp;#34;/home/haiwei.luo/case00/data&amp;#34;], &amp;#34;encoding&amp;#34;: &amp;#34;UTF-8&amp;#34;, &amp;#34;column&amp;#34;: [ { &amp;#34;index&amp;#34;: 0, &amp;#34;type&amp;#34;: &amp;#34;long&amp;#34; }, { &amp;#34;index&amp;#34;: 1, &amp;#34;type&amp;#34;: &amp;#34;boolean&amp;#34; }, { &amp;#34;index&amp;#34;: 2, &amp;#34;type&amp;#34;: &amp;#34;double&amp;#34; }, { &amp;#34;index&amp;#34;: 3, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;index&amp;#34;: 4, &amp;#34;type&amp;#34;: &amp;#34;date&amp;#34;, &amp;#34;format&amp;#34;: &amp;#34;yyyy.MM.dd&amp;#34; } ], &amp;#34;fieldDelimiter&amp;#34;: &amp;#34;,&amp;#34; } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;txtfilewriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;path&amp;#34;: &amp;#34;/home/haiwei.luo/case00/result&amp;#34;, &amp;#34;fileName&amp;#34;: &amp;#34;luohw&amp;#34;, &amp;#34;writeMode&amp;#34;: &amp;#34;truncate&amp;#34;, &amp;#34;dateFormat&amp;#34;: &amp;#34;yyyy-MM-dd&amp;#34; } } } ] } } 3.</description>
+    </item>
+    
+    <item>
+      <title>datax-kudu-plugin</title>
+      <link>https://haokiu.com/3909c1ec487c48198ae49ab46ba98dcb/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/3909c1ec487c48198ae49ab46ba98dcb/</guid>
+      <description>datax-kudu-plugin datax kudu的writer插件
+仅在kudu11进行过测试</description>
+    </item>
+    
+    <item>
+      <title>datax-kudu-plugins</title>
+      <link>https://haokiu.com/23a56c95c6c4402998fb8bf16e29fc05/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/23a56c95c6c4402998fb8bf16e29fc05/</guid>
+      <description>datax-kudu-plugins datax kudu的writer插件
+eg:
+{ &amp;#34;name&amp;#34;: &amp;#34;kuduwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;kuduConfig&amp;#34;: { &amp;#34;kudu.master_addresses&amp;#34;: &amp;#34;***&amp;#34;, &amp;#34;timeout&amp;#34;: 60000, &amp;#34;sessionTimeout&amp;#34;: 60000 }, &amp;#34;table&amp;#34;: &amp;#34;&amp;#34;, &amp;#34;replicaCount&amp;#34;: 3, &amp;#34;truncate&amp;#34;: false, &amp;#34;writeMode&amp;#34;: &amp;#34;upsert&amp;#34;, &amp;#34;partition&amp;#34;: { &amp;#34;range&amp;#34;: { &amp;#34;column1&amp;#34;: [ { &amp;#34;lower&amp;#34;: &amp;#34;2020-08-25&amp;#34;, &amp;#34;upper&amp;#34;: &amp;#34;2020-08-26&amp;#34; }, { &amp;#34;lower&amp;#34;: &amp;#34;2020-08-26&amp;#34;, &amp;#34;upper&amp;#34;: &amp;#34;2020-08-27&amp;#34; }, { &amp;#34;lower&amp;#34;: &amp;#34;2020-08-27&amp;#34;, &amp;#34;upper&amp;#34;: &amp;#34;2020-08-28&amp;#34; } ] }, &amp;#34;hash&amp;#34;: { &amp;#34;column&amp;#34;: [ &amp;#34;column1&amp;#34; ], &amp;#34;number&amp;#34;: 3 } }, &amp;#34;column&amp;#34;: [ { &amp;#34;index&amp;#34;: 0, &amp;#34;name&amp;#34;: &amp;#34;c1&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34;, &amp;#34;primaryKey&amp;#34;: true }, { &amp;#34;index&amp;#34;: 1, &amp;#34;name&amp;#34;: &amp;#34;c2&amp;#34;, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34;, &amp;#34;compress&amp;#34;: &amp;#34;DEFAULT_COMPRESSION&amp;#34;, &amp;#34;encoding&amp;#34;: &amp;#34;AUTO_ENCODING&amp;#34;, &amp;#34;comment&amp;#34;: &amp;#34;注解xxxx&amp;#34; } ], &amp;#34;batchSize&amp;#34;: 1024, &amp;#34;bufferSize&amp;#34;: 2048, &amp;#34;skipFail&amp;#34;: false, &amp;#34;encoding&amp;#34;: &amp;#34;UTF-8&amp;#34; } } 必须参数：</description>
+    </item>
+    
+    <item>
+      <title>DataX插件开发宝典</title>
+      <link>https://haokiu.com/7c5af007072741d2a1b8a4578137e185/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/7c5af007072741d2a1b8a4578137e185/</guid>
+      <description>DataX插件开发宝典 本文面向DataX插件开发人员，尝试尽可能全面地阐述开发一个DataX插件所经过的历程，力求消除开发者的困惑，让插件开发变得简单。
+一、开发之前 路走对了，就不怕远。✓ 路走远了，就不管对不对。✕
+当你打开这篇文档，想必已经不用在此解释什么是DataX了。那下一个问题便是：
+DataX为什么要使用插件机制？ 从设计之初，DataX就把异构数据源同步作为自身的使命，为了应对不同数据源的差异、同时提供一致的同步原语和扩展能力，DataX自然而然地采用了框架 + 插件 的模式：
+插件只需关心数据的读取或者写入本身。 而同步的共性问题，比如：类型转换、性能、统计，则交由框架来处理。 作为插件开发人员，则需要关注两个问题：
+数据源本身的读写数据正确性。 如何与框架沟通、合理正确地使用框架。 开工前需要想明白的问题 就插件本身而言，希望在您动手coding之前，能够回答我们列举的这些问题，不然路走远了发现没走对，就尴尬了。
+二、插件视角看框架 逻辑执行模型 插件开发者不用关心太多，基本只需要关注特定系统读和写，以及自己的代码在逻辑上是怎样被执行的，哪一个方法是在什么时候被调用的。在此之前，需要明确以下概念：
+Job: Job是DataX用以描述从一个源头到一个目的端的同步作业，是DataX数据同步的最小业务单元。比如：从一张mysql的表同步到odps的一个表的特定分区。 Task: Task是为最大化而把Job拆分得到的最小执行单元。比如：读一张有1024个分表的mysql分库分表的Job，拆分成1024个读Task，用若干个并发执行。 TaskGroup: 描述的是一组Task集合。在同一个TaskGroupContainer执行下的Task集合称之为TaskGroup JobContainer: Job执行器，负责Job全局拆分、调度、前置语句和后置语句等工作的工作单元。类似Yarn中的JobTracker TaskGroupContainer: TaskGroup执行器，负责执行一组Task的工作单元，类似Yarn中的TaskTracker。 简而言之， Job拆分成Task，在分别在框架提供的容器中执行，插件只需要实现Job和Task两部分逻辑。
+物理执行模型 框架为插件提供物理上的执行能力（线程）。DataX框架有三种运行模式：
+Standalone: 单进程运行，没有外部依赖。 Local: 单进程运行，统计信息、错误信息汇报到集中存储。 Distrubuted: 分布式多进程运行，依赖DataX Service服务。 当然，上述三种模式对插件的编写而言没有什么区别，你只需要避开一些小错误，插件就能够在单机/分布式之间无缝切换了。 当JobContainer和TaskGroupContainer运行在同一个进程内时，就是单机模式（Standalone和Local）；当它们分布在不同的进程中执行时，就是分布式（Distributed）模式。
+是不是很简单？
+编程接口 那么，Job和Task的逻辑应是怎么对应到具体的代码中的？
+首先，插件的入口类必须扩展Reader或Writer抽象类，并且实现分别实现Job和Task两个内部抽象类，Job和Task的实现必须是 内部类 的形式，原因见 加载原理 一节。以Reader为例：
+public class SomeReader extends Reader { public static class Job extends Reader.Job { @Override public void init() { } @Override public void prepare() { } @Override public List&amp;lt;Configuration&amp;gt; split(int adviceNumber) { return null; } @Override public void post() { } @Override public void destroy() { } } public static class Task extends Reader.</description>
+    </item>
+    
+    <item>
+      <title>DrdsReader 插件文档</title>
+      <link>https://haokiu.com/20f3c6090e2448838d8be1baca3a5e1c/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/20f3c6090e2448838d8be1baca3a5e1c/</guid>
+      <description>DrdsReader 插件文档 1 快速介绍 DrdsReader插件实现了从DRDS(分布式RDS)读取数据。在底层实现上，DrdsReader通过JDBC连接远程DRDS数据库，并执行相应的sql语句将数据从DRDS库中SELECT出来。
+DRDS的插件目前DataX只适配了Mysql引擎的场景，DRDS对于DataX而言，就是一套分布式Mysql数据库，并且大部分通信协议遵守Mysql使用场景。
+2 实现原理 简而言之，DrdsReader通过JDBC连接器连接到远程的DRDS数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程DRDS数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+对于用户配置Table、Column、Where的信息，DrdsReader将其拼接为SQL语句发送到DRDS数据库。不同于普通的Mysql数据库，DRDS作为分布式数据库系统，无法适配所有Mysql的协议，包括复杂的Join等语句，DRDS暂时无法支持。
+3 功能说明 3.1 配置样例 配置一个从DRDS数据库同步抽取数据到本地的作业: { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &amp;#34;byte&amp;#34;: 1048576 } //出错限制 &amp;#34;errorLimit&amp;#34;: { //出错的record条数上限，当大于该值即报错。 &amp;#34;record&amp;#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &amp;#34;percentage&amp;#34;: 0.02 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;drdsReader&amp;#34;, &amp;#34;parameter&amp;#34;: { // 数据库连接用户名 &amp;#34;username&amp;#34;: &amp;#34;root&amp;#34;, // 数据库连接密码 &amp;#34;password&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;column&amp;#34;: [ &amp;#34;id&amp;#34;，&amp;#34;name&amp;#34; ], &amp;#34;connection&amp;#34;: [ { &amp;#34;table&amp;#34;: [ &amp;#34;table&amp;#34; ], &amp;#34;jdbcUrl&amp;#34;: [ &amp;#34;jdbc:mysql://127.0.0.1:3306/database&amp;#34; ] } ] } }, &amp;#34;writer&amp;#34;: { //writer类型 &amp;#34;name&amp;#34;: &amp;#34;streamwriter&amp;#34;, //是否打印内容 &amp;#34;parameter&amp;#34;: { &amp;#34;print&amp;#34;:true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;drdsreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;username&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;password&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;where&amp;#34;: &amp;#34;&amp;#34;, &amp;#34;connection&amp;#34;: [ { &amp;#34;querySql&amp;#34;: [ &amp;#34;select db_id,on_line_flag from db_info where db_id &amp;lt; 10;&amp;#34; ], &amp;#34;jdbcUrl&amp;#34;: [ &amp;#34;jdbc:drds://localhost:3306/database&amp;#34;] } ] } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;print&amp;#34;: false, &amp;#34;encoding&amp;#34;: &amp;#34;UTF-8&amp;#34; } } } ] } } 3.</description>
+    </item>
+    
+    <item>
+      <title>Hbase094XReader &amp; Hbase11XReader 插件文档</title>
+      <link>https://haokiu.com/34ec6d7caba24a86b7a5e9a2f37d8c46/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/34ec6d7caba24a86b7a5e9a2f37d8c46/</guid>
+      <description>Hbase094XReader &amp;amp; Hbase11XReader 插件文档 1 快速介绍 HbaseReader 插件实现了从 Hbase中读取数据。在底层实现上，HbaseReader 通过 HBase 的 Java 客户端连接远程 HBase 服务，并通过 Scan 方式读取你指定 rowkey 范围内的数据，并将读取的数据使用 DataX 自定义的数据类型拼装为抽象的数据集，并传递给下游 Writer 处理。
+1.1支持的功能 1、目前HbaseReader支持的Hbase版本有：Hbase0.94.x和Hbase1.1.x。
+若您的hbase版本为Hbase0.94.x，reader端的插件请选择：hbase094xreader，即：
+&amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;hbase094xreader&amp;#34; } 若您的hbase版本为Hbase1.1.x，reader端的插件请选择：hbase11xreader,即：
+&amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;hbase11xreader&amp;#34; } 2、目前HbaseReader支持两模式读取：normal 模式、multiVersionFixedColumn模式；
+normal 模式：把HBase中的表，当成普通二维表（横表）进行读取,读取最新版本数据。如：
+hbase(main):017:0&amp;gt; scan &amp;lsquo;users&amp;rsquo; ROW COLUMN+CELL lisi column=address:city, timestamp=1457101972764, value=beijing lisi column=address:contry, timestamp=1457102773908, value=china lisi column=address:province, timestamp=1457101972736, value=beijing lisi column=info:age, timestamp=1457101972548, value=27 lisi column=info:birthday, timestamp=1457101972604, value=1987-06-17 lisi column=info:company, timestamp=1457101972653, value=baidu xiaoming column=address:city, timestamp=1457082196082, value=hangzhou xiaoming column=address:contry, timestamp=1457082195729, value=china xiaoming column=address:province, timestamp=1457082195773, value=zhejiang xiaoming column=info:age, timestamp=1457082218735, value=29 xiaoming column=info:birthday, timestamp=1457082186830, value=1987-06-17 xiaoming column=info:company, timestamp=1457082189826, value=alibaba 2 row(s) in 0.0580 seconds</description>
+    </item>
+    
+    <item>
+      <title>Hbase094XReader &amp; Hbase11XReader 插件文档</title>
+      <link>https://haokiu.com/7c5fc71d1a124a5396b1a17e8293be71/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/7c5fc71d1a124a5396b1a17e8293be71/</guid>
+      <description>Hbase094XReader &amp;amp; Hbase11XReader 插件文档 1 快速介绍 HbaseReader 插件实现了从 Hbase中读取数据。在底层实现上，HbaseReader 通过 HBase 的 Java 客户端连接远程 HBase 服务，并通过 Scan 方式读取你指定 rowkey 范围内的数据，并将读取的数据使用 DataX 自定义的数据类型拼装为抽象的数据集，并传递给下游 Writer 处理。
+1.1支持的功能 1、目前HbaseReader支持的Hbase版本有：Hbase0.94.x和Hbase1.1.x。
+若您的hbase版本为Hbase0.94.x，reader端的插件请选择：hbase094xreader，即：
+&amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;hbase094xreader&amp;#34; } 若您的hbase版本为Hbase1.1.x，reader端的插件请选择：hbase11xreader,即：
+&amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;hbase11xreader&amp;#34; } 2、目前HbaseReader支持两模式读取：normal 模式、multiVersionFixedColumn模式；
+normal 模式：把HBase中的表，当成普通二维表（横表）进行读取,读取最新版本数据。如：
+hbase(main):017:0&amp;gt; scan &amp;lsquo;users&amp;rsquo; ROW COLUMN+CELL lisi column=address:city, timestamp=1457101972764, value=beijing lisi column=address:contry, timestamp=1457102773908, value=china lisi column=address:province, timestamp=1457101972736, value=beijing lisi column=info:age, timestamp=1457101972548, value=27 lisi column=info:birthday, timestamp=1457101972604, value=1987-06-17 lisi column=info:company, timestamp=1457101972653, value=baidu xiaoming column=address:city, timestamp=1457082196082, value=hangzhou xiaoming column=address:contry, timestamp=1457082195729, value=china xiaoming column=address:province, timestamp=1457082195773, value=zhejiang xiaoming column=info:age, timestamp=1457082218735, value=29 xiaoming column=info:birthday, timestamp=1457082186830, value=1987-06-17 xiaoming column=info:company, timestamp=1457082189826, value=alibaba 2 row(s) in 0.0580 seconds</description>
+    </item>
+    
+    <item>
+      <title>Hbase094XWriter &amp; Hbase11XWriter 插件文档</title>
+      <link>https://haokiu.com/0172fbcbd4674f98a8782403fc6a7ca5/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/0172fbcbd4674f98a8782403fc6a7ca5/</guid>
+      <description>Hbase094XWriter &amp;amp; Hbase11XWriter 插件文档 1 快速介绍 HbaseWriter 插件实现了从向Hbase中写取数据。在底层实现上，HbaseWriter 通过 HBase 的 Java 客户端连接远程 HBase 服务，并通过 put 方式写入Hbase。
+1.1支持功能 1、目前HbaseWriter支持的Hbase版本有：Hbase0.94.x和Hbase1.1.x。
+若您的hbase版本为Hbase0.94.x，writer端的插件请选择：hbase094xwriter，即：
+&amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;hbase094xwriter&amp;#34; } 若您的hbase版本为Hbase1.1.x，writer端的插件请选择：hbase11xwriter,即：
+&amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;hbase11xwriter&amp;#34; } 2、目前HbaseWriter支持源端多个字段拼接作为hbase 表的 rowkey，具体配置参考：rowkeyColumn配置；
+3、写入hbase的时间戳（版本）支持：用当前时间作为版本，指定源端列作为版本，指定一个时间 三种方式作为版本；
+4、HbaseWriter中有一个必填配置项是：hbaseConfig，需要你联系 HBase PE，将hbase-site.xml 中与连接 HBase 相关的配置项提取出来，以 json 格式填入，同时可以补充更多HBase client的配置来优化与服务器的交互。
+如：hbase-site.xml的配置内容如下
+&amp;lt;configuration&amp;gt; &amp;lt;property&amp;gt; &amp;lt;name&amp;gt;hbase.rootdir&amp;lt;/name&amp;gt; &amp;lt;value&amp;gt;hdfs://ip:9000/hbase&amp;lt;/value&amp;gt; &amp;lt;/property&amp;gt; &amp;lt;property&amp;gt; &amp;lt;name&amp;gt;hbase.cluster.distributed&amp;lt;/name&amp;gt; &amp;lt;value&amp;gt;true&amp;lt;/value&amp;gt; &amp;lt;/property&amp;gt; &amp;lt;property&amp;gt; &amp;lt;name&amp;gt;hbase.zookeeper.quorum&amp;lt;/name&amp;gt; &amp;lt;value&amp;gt;***&amp;lt;/value&amp;gt; &amp;lt;/property&amp;gt; &amp;lt;/configuration&amp;gt; 转换后的json为：
+&amp;#34;hbaseConfig&amp;#34;: { &amp;#34;hbase.rootdir&amp;#34;: &amp;#34;hdfs: //ip: 9000/hbase&amp;#34;, &amp;#34;hbase.cluster.distributed&amp;#34;: &amp;#34;true&amp;#34;, &amp;#34;hbase.zookeeper.quorum&amp;#34;: &amp;#34;***&amp;#34; } 1.2 限制 1、目前只支持源端为横表写入，不支持竖表（源端读出的为四元组: rowKey，family:qualifier，timestamp，value）模式的数据写入；本期目标主要是替换DataX2中的habsewriter，下次迭代考虑支持。
+2、目前不支持写入hbase前清空表数据，若需要清空数据请联系HBase PE
+2 实现原理 简而言之，HbaseWriter 通过 HBase 的 Java 客户端，通过 HTable, Put等 API，将从上游Reader读取的数据写入HBase你hbase11xwriter与hbase094xwriter的主要不同在于API的调用不同，Hbase1.1.x废弃了很多Hbase0.94.x的api。
+3 功能说明 3.1 配置样例 配置一个从本地写入hbase1.1.x的作业： { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 5 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;txtfilereader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;path&amp;#34;: &amp;#34;/Users/shf/workplace/datax_test/hbase11xwriter/txt/normal.</description>
+    </item>
+    
+    <item>
+      <title>Hbase094XWriter &amp; Hbase11XWriter 插件文档</title>
+      <link>https://haokiu.com/745df21fdbd349ab9a9fc5c94551b336/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/745df21fdbd349ab9a9fc5c94551b336/</guid>
+      <description>Hbase094XWriter &amp;amp; Hbase11XWriter 插件文档 1 快速介绍 HbaseWriter 插件实现了从向Hbase中写取数据。在底层实现上，HbaseWriter 通过 HBase 的 Java 客户端连接远程 HBase 服务，并通过 put 方式写入Hbase。
+1.1支持功能 1、目前HbaseWriter支持的Hbase版本有：Hbase0.94.x和Hbase1.1.x。
+若您的hbase版本为Hbase0.94.x，writer端的插件请选择：hbase094xwriter，即：
+&amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;hbase094xwriter&amp;#34; } 若您的hbase版本为Hbase1.1.x，writer端的插件请选择：hbase11xwriter,即：
+&amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;hbase11xwriter&amp;#34; } 2、目前HbaseWriter支持源端多个字段拼接作为hbase 表的 rowkey，具体配置参考：rowkeyColumn配置；
+3、写入hbase的时间戳（版本）支持：用当前时间作为版本，指定源端列作为版本，指定一个时间 三种方式作为版本；
+1.2 限制 1、目前只支持源端为横表写入，不支持竖表（源端读出的为四元组: rowKey，family:qualifier，timestamp，value）模式的数据写入；本期目标主要是替换DataX2中的habsewriter，下次迭代考虑支持。
+2、目前不支持写入hbase前清空表数据，若需要清空数据请联系HBase PE
+2 实现原理 简而言之，HbaseWriter 通过 HBase 的 Java 客户端，通过 HTable, Put等 API，将从上游Reader读取的数据写入HBase你hbase11xwriter与hbase094xwriter的主要不同在于API的调用不同，Hbase1.1.x废弃了很多Hbase0.94.x的api。
+3 功能说明 3.1 配置样例 配置一个从本地写入hbase1.1.x的作业： { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 5 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;txtfilereader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;path&amp;#34;: &amp;#34;/Users/shf/workplace/datax_test/hbase11xwriter/txt/normal.txt&amp;#34;, &amp;#34;charset&amp;#34;: &amp;#34;UTF-8&amp;#34;, &amp;#34;column&amp;#34;: [ { &amp;#34;index&amp;#34;: 0, &amp;#34;type&amp;#34;: &amp;#34;String&amp;#34; }, { &amp;#34;index&amp;#34;: 1, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;index&amp;#34;: 2, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;index&amp;#34;: 3, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;index&amp;#34;: 4, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;index&amp;#34;: 5, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;index&amp;#34;: 6, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; } ], &amp;#34;fieldDelimiter&amp;#34;: &amp;#34;,&amp;#34; } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;hbase11xwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;hbaseConfig&amp;#34;: { &amp;#34;hbase.</description>
+    </item>
+    
+    <item>
+      <title>hbase11xsqlreader  插件文档</title>
+      <link>https://haokiu.com/283a89fffad54e6f909c2936a1ff08ad/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/283a89fffad54e6f909c2936a1ff08ad/</guid>
+      <description>hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。
+2 实现原理 简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。
+2 实现原理 简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+3 功能说明 3.1 配置样例 配置一个从Phoenix同步抽取数据到本地的作业: { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &amp;#34;byte&amp;#34;:10485760 }, //出错限制 &amp;#34;errorLimit&amp;#34;: { //出错的record条数上限，当大于该值即报错。 &amp;#34;record&amp;#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &amp;#34;percentage&amp;#34;: 0.02 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { //指定插件为hbase11xsqlreader &amp;#34;name&amp;#34;: &amp;#34;hbase11xsqlreader&amp;#34;, &amp;#34;parameter&amp;#34;: { //填写连接Phoenix的hbase集群zk地址 &amp;#34;hbaseConfig&amp;#34;: { &amp;#34;hbase.zookeeper.quorum&amp;#34;: &amp;#34;hb-proxy-xxx-002.hbase.rds.aliyuncs.com,hb-proxy-xxx-001.hbase.rds.aliyuncs.com,hb-proxy-xxx-003.hbase.rds.aliyuncs.com&amp;#34; }, //填写要读取的phoenix的表名 &amp;#34;table&amp;#34;: &amp;#34;US_POPULATION&amp;#34;, //填写要读取的列名，不填读取所有列 &amp;#34;column&amp;#34;: [ ] } }, &amp;#34;writer&amp;#34;: { //writer类型 &amp;#34;name&amp;#34;: &amp;#34;streamwriter&amp;#34;, //是否打印内容 &amp;#34;parameter&amp;#34;: { &amp;#34;print&amp;#34;:true, &amp;#34;encoding&amp;#34;: &amp;#34;UTF-8&amp;#34; } } } ] } } 3.2 参数说明 hbaseConfig
+描述：hbase11xsqlreader需要通过Phoenix客户端去连接hbase集群，因此这里需要填写对应hbase集群的zkurl地址，注意不要添加2181。
+必选：是 默认值：无 table
+描述：编写Phoenix中的表名,如果有namespace，该值设置为&amp;rsquo;namespace.tablename&#39;
+必选：是 默认值：无 column</description>
+    </item>
+    
+    <item>
+      <title>HBase11xsqlwriter插件文档</title>
+      <link>https://haokiu.com/1c329829c22c499d8e684735252966c1/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/1c329829c22c499d8e684735252966c1/</guid>
+      <description>HBase11xsqlwriter插件文档 1. 快速介绍 HBase11xsqlwriter实现了向hbase中的SQL表(phoenix)批量导入数据的功能。Phoenix因为对rowkey做了数据编码，所以，直接使用HBaseAPI进行写入会面临手工数据转换的问题，麻烦且易错。本插件提供了单间的SQL表的数据导入方式。
+在底层实现上，通过Phoenix的JDBC驱动，执行UPSERT语句向hbase写入数据。
+1.1 支持的功能 支持带索引的表的数据导入，可以同步更新所有的索引表 1.2 限制 仅支持1.x系列的hbase 仅支持通过phoenix创建的表，不支持原生HBase表 不支持带时间戳的数据导入 2. 实现原理 通过Phoenix的JDBC驱动，执行UPSERT语句向表中批量写入数据。因为使用上层接口，所以，可以同步更新索引表。
+3. 配置说明 3.1 配置样例 { &amp;#34;job&amp;#34;: { &amp;#34;entry&amp;#34;: { &amp;#34;jvm&amp;#34;: &amp;#34;-Xms2048m -Xmx2048m&amp;#34; }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;txtfilereader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;path&amp;#34;: &amp;#34;/Users/shf/workplace/datax_test/hbase11xsqlwriter/txt/normal.txt&amp;#34;, &amp;#34;charset&amp;#34;: &amp;#34;UTF-8&amp;#34;, &amp;#34;column&amp;#34;: [ { &amp;#34;index&amp;#34;: 0, &amp;#34;type&amp;#34;: &amp;#34;String&amp;#34; }, { &amp;#34;index&amp;#34;: 1, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;index&amp;#34;: 2, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;index&amp;#34;: 3, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; } ], &amp;#34;fieldDelimiter&amp;#34;: &amp;#34;,&amp;#34; } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;hbase11xsqlwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;batchSize&amp;#34;: &amp;#34;256&amp;#34;, &amp;#34;column&amp;#34;: [ &amp;#34;UID&amp;#34;, &amp;#34;TS&amp;#34;, &amp;#34;EVENTID&amp;#34;, &amp;#34;CONTENT&amp;#34; ], &amp;#34;hbaseConfig&amp;#34;: { &amp;#34;hbase.zookeeper.quorum&amp;#34;: &amp;#34;目标hbase集群的ZK服务器地址，向PE咨询&amp;#34;, &amp;#34;zookeeper.znode.parent&amp;#34;: &amp;#34;目标hbase集群的znode，向PE咨询&amp;#34; }, &amp;#34;nullMode&amp;#34;: &amp;#34;skip&amp;#34;, &amp;#34;table&amp;#34;: &amp;#34;目标hbase表名，大小写有关&amp;#34; } } } ], &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 5 } } } } 3.</description>
+    </item>
+    
+    <item>
+      <title>hbase20xsqlreader  插件文档</title>
+      <link>https://haokiu.com/d74e56a13f78424182e14164c8b4e5e4/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/d74e56a13f78424182e14164c8b4e5e4/</guid>
+      <description>hbase20xsqlreader 插件文档 1 快速介绍 hbase20xsqlreader插件实现了从Phoenix(HBase SQL)读取数据，对应版本为HBase2.X和Phoenix5.X。
+2 实现原理 简而言之，hbase20xsqlreader通过Phoenix轻客户端去连接Phoenix QueryServer，并根据用户配置信息生成查询SELECT 语句，然后发送到QueryServer读取HBase数据，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，最终传递给下游Writer处理。
+3 功能说明 3.1 配置样例 配置一个从Phoenix同步抽取数据到本地的作业: { &amp;#34;job&amp;#34;: { &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;hbase20xsqlreader&amp;#34;, //指定插件为hbase20xsqlreader &amp;#34;parameter&amp;#34;: { &amp;#34;queryServerAddress&amp;#34;: &amp;#34;http://127.0.0.1:8765&amp;#34;, //填写连接Phoenix QueryServer地址 &amp;#34;serialization&amp;#34;: &amp;#34;PROTOBUF&amp;#34;, //QueryServer序列化格式 &amp;#34;table&amp;#34;: &amp;#34;TEST&amp;#34;, //读取表名 &amp;#34;column&amp;#34;: [&amp;#34;ID&amp;#34;, &amp;#34;NAME&amp;#34;], //所要读取列名 &amp;#34;splitKey&amp;#34;: &amp;#34;ID&amp;#34; //切分列，必须是表主键 } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;encoding&amp;#34;: &amp;#34;UTF-8&amp;#34;, &amp;#34;print&amp;#34;: true } } } ], &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: &amp;#34;3&amp;#34; } } } } 3.2 参数说明 queryServerAddress
+描述：hbase20xsqlreader需要通过Phoenix轻客户端去连接Phoenix QueryServer，因此这里需要填写对应QueryServer地址。 增强版/Lindorm 用户若需透传user, password参数，可以在queryServerAddress后增加对应可选属性. 格式参考：http://127.0.0.1:8765;user=root;password=root
+必选：是 默认值：无 serialization
+描述：QueryServer使用的序列化协议
+必选：否 默认值：PROTOBUF table
+描述：所要读取表名
+必选：是 默认值：无 schema
+描述：表所在的schema
+必选：否 默认值：无 column
+描述：填写需要从phoenix表中读取的列名集合，使用JSON的数组描述字段信息，空值表示读取所有列。
+必选： 否
+默认值：全部列 splitKey</description>
+    </item>
+    
+    <item>
+      <title>HBase20xsqlwriter插件文档</title>
+      <link>https://haokiu.com/28250260969448579bc8cee8c2963319/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/28250260969448579bc8cee8c2963319/</guid>
+      <description>HBase20xsqlwriter插件文档 1. 快速介绍 HBase20xsqlwriter实现了向hbase中的SQL表(phoenix)批量导入数据的功能。Phoenix因为对rowkey做了数据编码，所以，直接使用HBaseAPI进行写入会面临手工数据转换的问题，麻烦且易错。本插件提供了SQL方式直接向Phoenix表写入数据。
+在底层实现上，通过Phoenix QueryServer的轻客户端驱动，执行UPSERT语句向Phoenix写入数据。
+1.1 支持的功能 支持带索引的表的数据导入，可以同步更新所有的索引表 1.2 限制 要求版本为Phoenix5.x及HBase2.x 仅支持通过Phoenix QeuryServer导入数据，因此您Phoenix必须启动QueryServer服务才能使用本插件 不支持清空已有表数据 仅支持通过phoenix创建的表，不支持原生HBase表 不支持带时间戳的数据导入 2. 实现原理 通过Phoenix轻客户端，连接Phoenix QueryServer服务，执行UPSERT语句向表中批量写入数据。因为使用上层接口，所以，可以同步更新索引表。
+3. 配置说明 3.1 配置样例 { &amp;#34;job&amp;#34;: { &amp;#34;entry&amp;#34;: { &amp;#34;jvm&amp;#34;: &amp;#34;-Xms2048m -Xmx2048m&amp;#34; }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;txtfilereader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;path&amp;#34;: &amp;#34;/Users/shf/workplace/datax_test/hbase20xsqlwriter/txt/normal.txt&amp;#34;, &amp;#34;charset&amp;#34;: &amp;#34;UTF-8&amp;#34;, &amp;#34;column&amp;#34;: [ { &amp;#34;index&amp;#34;: 0, &amp;#34;type&amp;#34;: &amp;#34;String&amp;#34; }, { &amp;#34;index&amp;#34;: 1, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;index&amp;#34;: 2, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; }, { &amp;#34;index&amp;#34;: 3, &amp;#34;type&amp;#34;: &amp;#34;string&amp;#34; } ], &amp;#34;fieldDelimiter&amp;#34;: &amp;#34;,&amp;#34; } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;hbase20xsqlwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;batchSize&amp;#34;: &amp;#34;100&amp;#34;, &amp;#34;column&amp;#34;: [ &amp;#34;UID&amp;#34;, &amp;#34;TS&amp;#34;, &amp;#34;EVENTID&amp;#34;, &amp;#34;CONTENT&amp;#34; ], &amp;#34;queryServerAddress&amp;#34;: &amp;#34;http://127.0.0.1:8765&amp;#34;, &amp;#34;nullMode&amp;#34;: &amp;#34;skip&amp;#34;, &amp;#34;table&amp;#34;: &amp;#34;目标hbase表名，大小写有关&amp;#34; } } } ], &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 5 } } } } 3.</description>
+    </item>
+    
+    <item>
+      <title>KingbaseesReader 插件文档</title>
+      <link>https://haokiu.com/cc7bd03f72154435ae9af2d67a214f6d/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/cc7bd03f72154435ae9af2d67a214f6d/</guid>
+      <description>KingbaseesReader 插件文档 1 快速介绍 KingbaseesReader插件实现了从KingbaseES读取数据。在底层实现上，KingbaseesReader通过JDBC连接远程KingbaseES数据库，并执行相应的sql语句将数据从KingbaseES库中SELECT出来。
+2 实现原理 简而言之，KingbaseesReader通过JDBC连接器连接到远程的KingbaseES数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程KingbaseES数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+对于用户配置Table、Column、Where的信息，KingbaseesReader将其拼接为SQL语句发送到KingbaseES数据库；对于用户配置querySql信息，KingbaseesReader直接将其发送到KingbaseES数据库。
+3 功能说明 3.1 配置样例 配置一个从KingbaseES数据库同步抽取数据到本地的作业: { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &amp;#34;byte&amp;#34;: 1048576 }, //出错限制 &amp;#34;errorLimit&amp;#34;: { //出错的record条数上限，当大于该值即报错。 &amp;#34;record&amp;#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &amp;#34;percentage&amp;#34;: 0.02 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;kingbaseesreader&amp;#34;, &amp;#34;parameter&amp;#34;: { // 数据库连接用户名 &amp;#34;username&amp;#34;: &amp;#34;xx&amp;#34;, // 数据库连接密码 &amp;#34;password&amp;#34;: &amp;#34;xx&amp;#34;, &amp;#34;column&amp;#34;: [ &amp;#34;id&amp;#34;，&amp;#34;name&amp;#34; ], //切分主键 &amp;#34;splitPk&amp;#34;: &amp;#34;id&amp;#34;, &amp;#34;connection&amp;#34;: [ { &amp;#34;table&amp;#34;: [ &amp;#34;table&amp;#34; ], &amp;#34;jdbcUrl&amp;#34;: [ &amp;#34;jdbc:kingbase8://host:port/database&amp;#34; ] } ] } }, &amp;#34;writer&amp;#34;: { //writer类型 &amp;#34;name&amp;#34;: &amp;#34;streamwriter&amp;#34;, //是否打印内容 &amp;#34;parameter&amp;#34;: { &amp;#34;print&amp;#34;:true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: 1048576 }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;kingbaseesreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;username&amp;#34;: &amp;#34;xx&amp;#34;, &amp;#34;password&amp;#34;: &amp;#34;xx&amp;#34;, &amp;#34;where&amp;#34;: &amp;#34;&amp;#34;, &amp;#34;connection&amp;#34;: [ { &amp;#34;querySql&amp;#34;: [ &amp;#34;select db_id,on_line_flag from db_info where db_id &amp;lt; 10;&amp;#34; ], &amp;#34;jdbcUrl&amp;#34;: [ &amp;#34;jdbc:kingbase8://host:port/database&amp;#34;, &amp;#34;jdbc:kingbase8://host:port/database&amp;#34; ] } ] } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;print&amp;#34;: false, &amp;#34;encoding&amp;#34;: &amp;#34;UTF-8&amp;#34; } } } ] } } 3.</description>
+    </item>
+    
+    <item>
+      <title>MysqlReader 插件文档</title>
+      <link>https://haokiu.com/29875f5b780c46929670f9b8699ed462/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/29875f5b780c46929670f9b8699ed462/</guid>
+      <description>MysqlReader 插件文档 1 快速介绍 MysqlReader插件实现了从Mysql读取数据。在底层实现上，MysqlReader通过JDBC连接远程Mysql数据库，并执行相应的sql语句将数据从mysql库中SELECT出来。
+不同于其他关系型数据库，MysqlReader不支持FetchSize.
+2 实现原理 简而言之，MysqlReader通过JDBC连接器连接到远程的Mysql数据库，并根据用户配置的信息生成查询SELECT SQL语句，然后发送到远程Mysql数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+对于用户配置Table、Column、Where的信息，MysqlReader将其拼接为SQL语句发送到Mysql数据库；对于用户配置querySql信息，MysqlReader直接将其发送到Mysql数据库。
+3 功能说明 3.1 配置样例 配置一个从Mysql数据库同步抽取数据到本地的作业: { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 3 }, &amp;#34;errorLimit&amp;#34;: { &amp;#34;record&amp;#34;: 0, &amp;#34;percentage&amp;#34;: 0.02 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;mysqlreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;username&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;password&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;column&amp;#34;: [ &amp;#34;id&amp;#34;, &amp;#34;name&amp;#34; ], &amp;#34;splitPk&amp;#34;: &amp;#34;db_id&amp;#34;, &amp;#34;connection&amp;#34;: [ { &amp;#34;table&amp;#34;: [ &amp;#34;table&amp;#34; ], &amp;#34;jdbcUrl&amp;#34;: [ &amp;#34;jdbc:mysql://127.0.0.1:3306/database&amp;#34; ] } ] } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;print&amp;#34;:true } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;:1 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;mysqlreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;username&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;password&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;connection&amp;#34;: [ { &amp;#34;querySql&amp;#34;: [ &amp;#34;select db_id,on_line_flag from db_info where db_id &amp;lt; 10;&amp;#34; ], &amp;#34;jdbcUrl&amp;#34;: [ &amp;#34;jdbc:mysql://bad_ip:3306/database&amp;#34;, &amp;#34;jdbc:mysql://127.</description>
+    </item>
+    
+    <item>
+      <title>OpenTSDBReader 插件文档</title>
+      <link>https://haokiu.com/4e39a8595b6247fabfd6f625f053b0b6/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/4e39a8595b6247fabfd6f625f053b0b6/</guid>
+      <description>OpenTSDBReader 插件文档 1 快速介绍 OpenTSDBReader 插件实现了从 OpenTSDB 读取数据。OpenTSDB 是主要由 Yahoo 维护的、可扩展的、分布式时序数据库，与阿里巴巴自研 TSDB 的关系与区别详见阿里云官网：《相比 OpenTSDB 优势》
+2 实现原理 在底层实现上，OpenTSDBReader 通过 HTTP 请求链接到 OpenTSDB 实例，利用 /api/config 接口获取到其底层存储 HBase 的连接信息，再利用 AsyncHBase 框架连接 HBase，通过 Scan 的方式将数据点扫描出来。整个同步的过程通过 metric 和时间段进行切分，即某个 metric 在某一个小时内的数据迁移，组合成一个迁移 Task。
+3 功能说明 3.1 配置样例 配置一个从 OpenTSDB 数据库同步抽取数据到本地的作业： { &amp;#34;job&amp;#34;: { &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;opentsdbreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;endpoint&amp;#34;: &amp;#34;http://localhost:4242&amp;#34;, &amp;#34;column&amp;#34;: [ &amp;#34;m&amp;#34; ], &amp;#34;beginDateTime&amp;#34;: &amp;#34;2019-01-01 00:00:00&amp;#34;, &amp;#34;endDateTime&amp;#34;: &amp;#34;2019-01-01 03:00:00&amp;#34; } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;encoding&amp;#34;: &amp;#34;UTF-8&amp;#34;, &amp;#34;print&amp;#34;: true } } } ], &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 1 } } } } 3.2 参数说明 name
+描述：本插件的名称 必选：是 默认值：opentsdbreader parameter</description>
+    </item>
+    
+    <item>
+      <title>OracleReader 插件文档</title>
+      <link>https://haokiu.com/0ffdd59e828b4bb0a53cef538910db12/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/0ffdd59e828b4bb0a53cef538910db12/</guid>
+      <description>OracleReader 插件文档 1 快速介绍 OracleReader插件实现了从Oracle读取数据。在底层实现上，OracleReader通过JDBC连接远程Oracle数据库，并执行相应的sql语句将数据从Oracle库中SELECT出来。
+2 实现原理 简而言之，OracleReader通过JDBC连接器连接到远程的Oracle数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程Oracle数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+对于用户配置Table、Column、Where的信息，OracleReader将其拼接为SQL语句发送到Oracle数据库；对于用户配置querySql信息，Oracle直接将其发送到Oracle数据库。
+3 功能说明 3.1 配置样例 配置一个从Oracle数据库同步抽取数据到本地的作业: { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { //设置传输速度 byte/s 尽量逼近这个速度但是不高于它. // channel 表示通道数量，byte表示通道速度，如果单通道速度1MB，配置byte为1048576表示一个channel &amp;#34;byte&amp;#34;: 1048576 }, //出错限制 &amp;#34;errorLimit&amp;#34;: { //先选择record &amp;#34;record&amp;#34;: 0, //百分比 1表示100% &amp;#34;percentage&amp;#34;: 0.02 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;oraclereader&amp;#34;, &amp;#34;parameter&amp;#34;: { // 数据库连接用户名 &amp;#34;username&amp;#34;: &amp;#34;root&amp;#34;, // 数据库连接密码 &amp;#34;password&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;column&amp;#34;: [ &amp;#34;id&amp;#34;,&amp;#34;name&amp;#34; ], //切分主键 &amp;#34;splitPk&amp;#34;: &amp;#34;db_id&amp;#34;, &amp;#34;connection&amp;#34;: [ { &amp;#34;table&amp;#34;: [ &amp;#34;table&amp;#34; ], &amp;#34;jdbcUrl&amp;#34;: [ &amp;#34;jdbc:oracle:thin:@[HOST_NAME]:PORT:[DATABASE_NAME]&amp;#34; ] } ] } }, &amp;#34;writer&amp;#34;: { //writer类型 &amp;#34;name&amp;#34;: &amp;#34;streamwriter&amp;#34;, // 是否打印内容 &amp;#34;parameter&amp;#34;: { &amp;#34;print&amp;#34;: true } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 5 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;oraclereader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;username&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;password&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;where&amp;#34;: &amp;#34;&amp;#34;, &amp;#34;connection&amp;#34;: [ { &amp;#34;querySql&amp;#34;: [ &amp;#34;select db_id,on_line_flag from db_info where db_id &amp;lt; 10&amp;#34; ], &amp;#34;jdbcUrl&amp;#34;: [ &amp;#34;jdbc:oracle:thin:@[HOST_NAME]:PORT:[DATABASE_NAME]&amp;#34; ] } ] } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;visible&amp;#34;: false, &amp;#34;encoding&amp;#34;: &amp;#34;UTF-8&amp;#34; } } } ] } } 3.</description>
+    </item>
+    
+    <item>
+      <title>OTSReader 插件文档</title>
+      <link>https://haokiu.com/2dc5ba5f4d58498e8453bd2d8efde079/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/2dc5ba5f4d58498e8453bd2d8efde079/</guid>
+      <description>OTSReader 插件文档 1 快速介绍 OTSReader插件实现了从OTS读取数据，并可以通过用户指定抽取数据范围可方便的实现数据增量抽取的需求。目前支持三种抽取方式：
+全表抽取 范围抽取 指定分片抽取 OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，提供海量结构化数据的存储和实时访问。OTS 以实例和表的形式组织数据，通过数据分片和负载均衡技术，实现规模上的无缝扩展。
+2 实现原理 简而言之，OTSReader通过OTS官方Java SDK连接到OTS服务端，获取并按照DataX官方协议标准转为DataX字段信息传递给下游Writer端。
+OTSReader会根据OTS的表范围，按照Datax并发的数目N，将范围等分为N份Task。每个Task都会有一个OTSReader线程来执行。
+3 功能说明 3.1 配置样例 配置一个从OTS全表同步抽取数据到本地的作业: { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;otsreader&amp;#34;, &amp;#34;parameter&amp;#34;: { /* ----------- 必填 --------------*/ &amp;#34;endpoint&amp;#34;:&amp;#34;&amp;#34;, &amp;#34;accessId&amp;#34;:&amp;#34;&amp;#34;, &amp;#34;accessKey&amp;#34;:&amp;#34;&amp;#34;, &amp;#34;instanceName&amp;#34;:&amp;#34;&amp;#34;, // 导出数据表的表名 &amp;#34;table&amp;#34;:&amp;#34;&amp;#34;, // 需要导出的列名，支持重复列和常量列，区分大小写 // 常量列：类型支持STRING，INT，DOUBLE，BOOL和BINARY // 备注：BINARY需要通过Base64转换为对应的字符串传入插件 &amp;#34;column&amp;#34;:[ {&amp;#34;name&amp;#34;:&amp;#34;col1&amp;#34;}, // 普通列 {&amp;#34;name&amp;#34;:&amp;#34;col2&amp;#34;}, // 普通列 {&amp;#34;name&amp;#34;:&amp;#34;col3&amp;#34;}, // 普通列 {&amp;#34;type&amp;#34;:&amp;#34;STRING&amp;#34;, &amp;#34;value&amp;#34; : &amp;#34;bazhen&amp;#34;}, // 常量列(字符串) {&amp;#34;type&amp;#34;:&amp;#34;INT&amp;#34;, &amp;#34;value&amp;#34; : &amp;#34;&amp;#34;}, // 常量列(整形) {&amp;#34;type&amp;#34;:&amp;#34;DOUBLE&amp;#34;, &amp;#34;value&amp;#34; : &amp;#34;&amp;#34;}, // 常量列(浮点) {&amp;#34;type&amp;#34;:&amp;#34;BOOL&amp;#34;, &amp;#34;value&amp;#34; : &amp;#34;&amp;#34;}, // 常量列(布尔) {&amp;#34;type&amp;#34;:&amp;#34;BINARY&amp;#34;, &amp;#34;value&amp;#34; : &amp;#34;Base64(bin)&amp;#34;} // 常量列(二进制),使用Base64编码完成 ], &amp;#34;range&amp;#34;:{ // 导出数据的起始范围 // 支持INF_MIN, INF_MAX, STRING, INT &amp;#34;begin&amp;#34;:[ {&amp;#34;type&amp;#34;:&amp;#34;INF_MIN&amp;#34;}, ], // 导出数据的结束范围 // 支持INF_MIN, INF_MAX, STRING, INT &amp;#34;end&amp;#34;:[ {&amp;#34;type&amp;#34;:&amp;#34;INF_MAX&amp;#34;}, ] } } }, &amp;#34;writer&amp;#34;: {} } ] } } 配置一个定义抽取范围的OTSReader： { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;byte&amp;#34;:10485760 }, &amp;#34;errorLimit&amp;#34;:0.</description>
+    </item>
+    
+    <item>
+      <title>OTSWriter 插件文档</title>
+      <link>https://haokiu.com/7d2496e6853044daa824d7a78226b07d/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/7d2496e6853044daa824d7a78226b07d/</guid>
+      <description>OTSWriter 插件文档 1 快速介绍 OTSWriter插件实现了向OTS写入数据，目前支持三种写入方式：
+PutRow，对应于OTS API PutRow，插入数据到指定的行，如果该行不存在，则新增一行；若该行存在，则覆盖原有行。
+UpdateRow，对应于OTS API UpdateRow，更新指定行的数据，如果该行不存在，则新增一行；若该行存在，则根据请求的内容在这一行中新增、修改或者删除指定列的值。
+DeleteRow，对应于OTS API DeleteRow，删除指定行的数据。
+OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，提供海量结构化数据的存储和实时访问。OTS 以实例和表的形式组织数据，通过数据分片和负载均衡技术，实现规模上的无缝扩展。
+2 实现原理 简而言之，OTSWriter通过OTS官方Java SDK连接到OTS服务端，并通过SDK写入OTS服务端。OTSWriter本身对于写入过程做了很多优化，包括写入超时重试、异常写入重试、批量提交等Feature。
+3 功能说明 3.1 配置样例 配置一个写入OTS作业: { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: {}, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;otswriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;endpoint&amp;#34;:&amp;#34;&amp;#34;, &amp;#34;accessId&amp;#34;:&amp;#34;&amp;#34;, &amp;#34;accessKey&amp;#34;:&amp;#34;&amp;#34;, &amp;#34;instanceName&amp;#34;:&amp;#34;&amp;#34;, // 导出数据表的表名 &amp;#34;table&amp;#34;:&amp;#34;&amp;#34;, // Writer支持不同类型之间进行相互转换 // 如下类型转换不支持: // ================================ // int -&amp;gt; binary // double -&amp;gt; bool, binary // bool -&amp;gt; binary // bytes -&amp;gt; int, double, bool // ================================ // 需要导入的PK列名，区分大小写 // 类型支持：STRING，INT // 1. 支持类型转换，注意类型转换时的精度丢失 // 2. 顺序不要求和表的Meta一致 &amp;#34;primaryKey&amp;#34; : [ {&amp;#34;name&amp;#34;:&amp;#34;pk1&amp;#34;, &amp;#34;type&amp;#34;:&amp;#34;string&amp;#34;}, {&amp;#34;name&amp;#34;:&amp;#34;pk2&amp;#34;, &amp;#34;type&amp;#34;:&amp;#34;int&amp;#34;} ], // 需要导入的列名，区分大小写 // 类型支持STRING，INT，DOUBLE，BOOL和BINARY &amp;#34;column&amp;#34; : [ {&amp;#34;name&amp;#34;:&amp;#34;col2&amp;#34;, &amp;#34;type&amp;#34;:&amp;#34;INT&amp;#34;}, {&amp;#34;name&amp;#34;:&amp;#34;col3&amp;#34;, &amp;#34;type&amp;#34;:&amp;#34;STRING&amp;#34;}, {&amp;#34;name&amp;#34;:&amp;#34;col4&amp;#34;, &amp;#34;type&amp;#34;:&amp;#34;STRING&amp;#34;}, {&amp;#34;name&amp;#34;:&amp;#34;col5&amp;#34;, &amp;#34;type&amp;#34;:&amp;#34;BINARY&amp;#34;}, {&amp;#34;name&amp;#34;:&amp;#34;col6&amp;#34;, &amp;#34;type&amp;#34;:&amp;#34;DOUBLE&amp;#34;} ], // 写入OTS的方式 // PutRow : 等同于OTS API中PutRow操作，检查条件是ignore // UpdateRow : 等同于OTS API中UpdateRow操作，检查条件是ignore // DeleteRow: 等同于OTS API中DeleteRow操作，检查条件是ignore &amp;#34;writeMode&amp;#34; : &amp;#34;PutRow&amp;#34; } } } ] } } 3.</description>
+    </item>
+    
+    <item>
+      <title>PostgresqlReader 插件文档</title>
+      <link>https://haokiu.com/0adf103bd70440a1978ecbcc7dd63787/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/0adf103bd70440a1978ecbcc7dd63787/</guid>
+      <description>PostgresqlReader 插件文档 1 快速介绍 PostgresqlReader插件实现了从PostgreSQL读取数据。在底层实现上，PostgresqlReader通过JDBC连接远程PostgreSQL数据库，并执行相应的sql语句将数据从PostgreSQL库中SELECT出来。
+2 实现原理 简而言之，PostgresqlReader通过JDBC连接器连接到远程的PostgreSQL数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程PostgreSQL数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+对于用户配置Table、Column、Where的信息，PostgresqlReader将其拼接为SQL语句发送到PostgreSQL数据库；对于用户配置querySql信息，PostgresqlReader直接将其发送到PostgreSQL数据库。
+3 功能说明 3.1 配置样例 配置一个从PostgreSQL数据库同步抽取数据到本地的作业: { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &amp;#34;byte&amp;#34;: 1048576 }, //出错限制 &amp;#34;errorLimit&amp;#34;: { //出错的record条数上限，当大于该值即报错。 &amp;#34;record&amp;#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &amp;#34;percentage&amp;#34;: 0.02 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;postgresqlreader&amp;#34;, &amp;#34;parameter&amp;#34;: { // 数据库连接用户名 &amp;#34;username&amp;#34;: &amp;#34;xx&amp;#34;, // 数据库连接密码 &amp;#34;password&amp;#34;: &amp;#34;xx&amp;#34;, &amp;#34;column&amp;#34;: [ &amp;#34;id&amp;#34;，&amp;#34;name&amp;#34; ], //切分主键 &amp;#34;splitPk&amp;#34;: &amp;#34;id&amp;#34;, &amp;#34;connection&amp;#34;: [ { &amp;#34;table&amp;#34;: [ &amp;#34;table&amp;#34; ], &amp;#34;jdbcUrl&amp;#34;: [ &amp;#34;jdbc:postgresql://host:port/database&amp;#34; ] } ] } }, &amp;#34;writer&amp;#34;: { //writer类型 &amp;#34;name&amp;#34;: &amp;#34;streamwriter&amp;#34;, //是否打印内容 &amp;#34;parameter&amp;#34;: { &amp;#34;print&amp;#34;:true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: 1048576 }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;postgresqlreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;username&amp;#34;: &amp;#34;xx&amp;#34;, &amp;#34;password&amp;#34;: &amp;#34;xx&amp;#34;, &amp;#34;where&amp;#34;: &amp;#34;&amp;#34;, &amp;#34;connection&amp;#34;: [ { &amp;#34;querySql&amp;#34;: [ &amp;#34;select db_id,on_line_flag from db_info where db_id &amp;lt; 10;&amp;#34; ], &amp;#34;jdbcUrl&amp;#34;: [ &amp;#34;jdbc:postgresql://host:port/database&amp;#34;, &amp;#34;jdbc:postgresql://host:port/database&amp;#34; ] } ] } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;print&amp;#34;: false, &amp;#34;encoding&amp;#34;: &amp;#34;UTF-8&amp;#34; } } } ] } } 3.</description>
+    </item>
+    
+    <item>
+      <title>RDBMSReader 插件文档</title>
+      <link>https://haokiu.com/34c79077064f4502a247f840e8b64c46/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/34c79077064f4502a247f840e8b64c46/</guid>
+      <description>RDBMSReader 插件文档 1 快速介绍 RDBMSReader插件实现了从RDBMS读取数据。在底层实现上，RDBMSReader通过JDBC连接远程RDBMS数据库，并执行相应的sql语句将数据从RDBMS库中SELECT出来。目前支持达梦、db2、PPAS、Sybase数据库的读取。RDBMSReader是一个通用的关系数据库读插件，您可以通过注册数据库驱动等方式增加任意多样的关系数据库读支持。
+2 实现原理 简而言之，RDBMSReader通过JDBC连接器连接到远程的RDBMS数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程RDBMS数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+对于用户配置Table、Column、Where的信息，RDBMSReader将其拼接为SQL语句发送到RDBMS数据库；对于用户配置querySql信息，RDBMS直接将其发送到RDBMS数据库。
+3 功能说明 3.1 配置样例 配置一个从RDBMS数据库同步抽取数据作业: {&amp;#34;job&amp;#34;: {&amp;#34;setting&amp;#34;: {&amp;#34;speed&amp;#34;: {&amp;#34;byte&amp;#34;: 1048576},&amp;#34;errorLimit&amp;#34;: {&amp;#34;record&amp;#34;: 0,&amp;#34;percentage&amp;#34;: 0.02}},&amp;#34;content&amp;#34;: [{&amp;#34;reader&amp;#34;: {&amp;#34;name&amp;#34;: &amp;#34;rdbmsreader&amp;#34;,&amp;#34;parameter&amp;#34;: {&amp;#34;username&amp;#34;: &amp;#34;xxx&amp;#34;,&amp;#34;password&amp;#34;: &amp;#34;xxx&amp;#34;,&amp;#34;column&amp;#34;: [&amp;#34;id&amp;#34;,&amp;#34;name&amp;#34;],&amp;#34;splitPk&amp;#34;: &amp;#34;pk&amp;#34;,&amp;#34;connection&amp;#34;: [{&amp;#34;table&amp;#34;: [&amp;#34;table&amp;#34;],&amp;#34;jdbcUrl&amp;#34;: [&amp;#34;jdbc:dm://ip:port/database&amp;#34;]}],&amp;#34;fetchSize&amp;#34;: 1024,&amp;#34;where&amp;#34;: &amp;#34;1 = 1&amp;#34;}},&amp;#34;writer&amp;#34;: {&amp;#34;name&amp;#34;: &amp;#34;streamwriter&amp;#34;,&amp;#34;parameter&amp;#34;: {&amp;#34;print&amp;#34;: true}}}]}} 配置一个自定义SQL的数据库同步任务到ODPS的作业： {&amp;#34;job&amp;#34;: {&amp;#34;setting&amp;#34;: {&amp;#34;speed&amp;#34;: {&amp;#34;byte&amp;#34;: 1048576},&amp;#34;errorLimit&amp;#34;: {&amp;#34;record&amp;#34;: 0,&amp;#34;percentage&amp;#34;: 0.</description>
+    </item>
+    
+    <item>
+      <title>RDBMSWriter 插件文档</title>
+      <link>https://haokiu.com/5d9d57b2e00d4d8ca994dc15ece38148/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/5d9d57b2e00d4d8ca994dc15ece38148/</guid>
+      <description>RDBMSWriter 插件文档 1 快速介绍 RDBMSWriter 插件实现了写入数据到 RDBMS 主库的目的表的功能。在底层实现上， RDBMSWriter 通过 JDBC 连接远程 RDBMS 数据库，并执行相应的 insert into &amp;hellip; 的 sql 语句将数据写入 RDBMS。 RDBMSWriter是一个通用的关系数据库写插件，您可以通过注册数据库驱动等方式增加任意多样的关系数据库写支持。
+RDBMSWriter 面向ETL开发工程师，他们使用 RDBMSWriter 从数仓导入数据到 RDBMS。同时 RDBMSWriter 亦可以作为数据迁移工具为DBA等用户提供服务。
+2 实现原理 RDBMSWriter 通过 DataX 框架获取 Reader 生成的协议数据，RDBMSWriter 通过 JDBC 连接远程 RDBMS 数据库，并执行相应的 insert into &amp;hellip; 的 sql 语句将数据写入 RDBMS。
+3 功能说明 3.1 配置样例 配置一个写入RDBMS的作业。 {&amp;#34;job&amp;#34;: {&amp;#34;setting&amp;#34;: {&amp;#34;speed&amp;#34;: {&amp;#34;channel&amp;#34;: 1}},&amp;#34;content&amp;#34;: [{&amp;#34;reader&amp;#34;: {&amp;#34;name&amp;#34;: &amp;#34;streamreader&amp;#34;,&amp;#34;parameter&amp;#34;: {&amp;#34;column&amp;#34;: [{&amp;#34;value&amp;#34;: &amp;#34;DataX&amp;#34;,&amp;#34;type&amp;#34;: &amp;#34;string&amp;#34;},{&amp;#34;value&amp;#34;: 19880808,&amp;#34;type&amp;#34;: &amp;#34;long&amp;#34;},{&amp;#34;value&amp;#34;: &amp;#34;1988-08-08 08:08:08&amp;#34;,&amp;#34;type&amp;#34;: &amp;#34;date&amp;#34;},{&amp;#34;value&amp;#34;: true,&amp;#34;type&amp;#34;: &amp;#34;bool&amp;#34;},{&amp;#34;value&amp;#34;: &amp;#34;test&amp;#34;,&amp;#34;type&amp;#34;: &amp;#34;bytes&amp;#34;}],&amp;#34;sliceRecordCount&amp;#34;: 1000}},&amp;#34;writer&amp;#34;: {&amp;#34;name&amp;#34;: &amp;#34;rdbmswriter&amp;#34;,&amp;#34;parameter&amp;#34;: {&amp;#34;connection&amp;#34;: [{&amp;#34;jdbcUrl&amp;#34;: &amp;#34;jdbc:dm://ip:port/database&amp;#34;,&amp;#34;table&amp;#34;: [&amp;#34;table&amp;#34;]}],&amp;#34;username&amp;#34;: &amp;#34;username&amp;#34;,&amp;#34;password&amp;#34;: &amp;#34;password&amp;#34;,&amp;#34;table&amp;#34;: &amp;#34;table&amp;#34;,&amp;#34;column&amp;#34;: [&amp;#34;*&amp;#34;],&amp;#34;preSql&amp;#34;: [&amp;#34;delete from XXX;&amp;#34;]}}}]}} 3.</description>
+    </item>
+    
+    <item>
+      <title>Readme.md</title>
+      <link>https://haokiu.com/b007b0bc6dca40458f17c7c1826e9da5/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/b007b0bc6dca40458f17c7c1826e9da5/</guid>
+      <description>some script here.</description>
+    </item>
+    
+    <item>
+      <title>README.md</title>
+      <link>https://haokiu.com/9dbd1273dcb848bbaa69f53c0105d5c4/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/9dbd1273dcb848bbaa69f53c0105d5c4/</guid>
+      <description>本插件仅在Elasticsearch 5.x上测试</description>
+    </item>
+    
+    <item>
+      <title>SqlServerReader 插件文档</title>
+      <link>https://haokiu.com/e30dc23cda1d465fa0872475e5c976a7/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/e30dc23cda1d465fa0872475e5c976a7/</guid>
+      <description>SqlServerReader 插件文档 1 快速介绍 SqlServerReader插件实现了从SqlServer读取数据。在底层实现上，SqlServerReader通过JDBC连接远程SqlServer数据库，并执行相应的sql语句将数据从SqlServer库中SELECT出来。
+2 实现原理 简而言之，SqlServerReader通过JDBC连接器连接到远程的SqlServer数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程SqlServer数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+对于用户配置Table、Column、Where的信息，SqlServerReader将其拼接为SQL语句发送到SqlServer数据库；对于用户配置querySql信息，SqlServer直接将其发送到SqlServer数据库。
+3 功能说明 3.1 配置样例 配置一个从SqlServer数据库同步抽取数据到本地的作业: { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;byte&amp;#34;: 1048576 } }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;sqlserverreader&amp;#34;, &amp;#34;parameter&amp;#34;: { // 数据库连接用户名 &amp;#34;username&amp;#34;: &amp;#34;root&amp;#34;, // 数据库连接密码 &amp;#34;password&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;column&amp;#34;: [ &amp;#34;id&amp;#34; ], &amp;#34;splitPk&amp;#34;: &amp;#34;db_id&amp;#34;, &amp;#34;connection&amp;#34;: [ { &amp;#34;table&amp;#34;: [ &amp;#34;table&amp;#34; ], &amp;#34;jdbcUrl&amp;#34;: [ &amp;#34;jdbc:sqlserver://localhost:3433;DatabaseName=dbname&amp;#34; ] } ] } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;print&amp;#34;: true, &amp;#34;encoding&amp;#34;: &amp;#34;UTF-8&amp;#34; } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &amp;#34;job&amp;#34;: { &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: 1048576 }, &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;sqlserverreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;username&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;password&amp;#34;: &amp;#34;root&amp;#34;, &amp;#34;where&amp;#34;: &amp;#34;&amp;#34;, &amp;#34;connection&amp;#34;: [ { &amp;#34;querySql&amp;#34;: [ &amp;#34;select db_id,on_line_flag from db_info where db_id &amp;lt; 10;&amp;#34; ], &amp;#34;jdbcUrl&amp;#34;: [ &amp;#34;jdbc:sqlserver://bad_ip:3433;DatabaseName=dbname&amp;#34;, &amp;#34;jdbc:sqlserver://127.</description>
+    </item>
+    
+    <item>
+      <title>TableStore增量数据导出通道：TableStoreStreamReader</title>
+      <link>https://haokiu.com/6851df08c78c4eb1aab41d312b920bf9/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/6851df08c78c4eb1aab41d312b920bf9/</guid>
+      <description>TableStore增量数据导出通道：TableStoreStreamReader 快速介绍 TableStoreStreamReader插件主要用于TableStore的增量数据导出，增量数据可以看作操作日志，除了数据本身外还附有操作信息。
+与全量导出插件不同，增量导出插件只有多版本模式，同时不支持指定列。这是与增量导出的原理有关的，导出的格式下面有详细介绍。
+使用插件前必须确保表上已经开启Stream功能，可以在建表的时候指定开启，或者使用SDK的UpdateTable接口开启。
+开启Stream的方法： SyncClient client = new SyncClient(&amp;quot;&amp;quot;, &amp;quot;&amp;quot;, &amp;quot;&amp;quot;, &amp;quot;&amp;quot;); 1. 建表的时候开启： CreateTableRequest createTableRequest = new CreateTableRequest(tableMeta); createTableRequest.setStreamSpecification(new StreamSpecification(true, 24)); // 24代表增量数据保留24小时 client.createTable(createTableRequest); 2. 如果建表时未开启，可以通过UpdateTable开启: UpdateTableRequest updateTableRequest = new UpdateTableRequest(&amp;quot;tableName&amp;quot;); updateTableRequest.setStreamSpecification(new StreamSpecification(true, 24)); client.updateTable(updateTableRequest); 实现原理 首先用户使用SDK的UpdateTable功能，指定开启Stream并设置过期时间，即开启了增量功能。
+开启后，TableStore服务端就会将用户的操作日志额外保存起来， 每个分区有一个有序的操作日志队列，每条操作日志会在一定时间后被垃圾回收，这个时间即用户指定的过期时间。
+TableStore的SDK提供了几个Stream相关的API用于将这部分操作日志读取出来，增量插件也是通过TableStore SDK的接口获取到增量数据的，并将 增量数据转化为多个6元组的形式(pk, colName, version, colValue, opType, sequenceInfo)导入到ODPS中。
+Reader的配置模版： &amp;quot;reader&amp;quot;: { &amp;quot;name&amp;quot; : &amp;quot;otsstreamreader&amp;quot;, &amp;quot;parameter&amp;quot; : { &amp;quot;endpoint&amp;quot; : &amp;quot;&amp;quot;, &amp;quot;accessId&amp;quot; : &amp;quot;&amp;quot;, &amp;quot;accessKey&amp;quot; : &amp;quot;&amp;quot;, &amp;quot;instanceName&amp;quot; : &amp;quot;&amp;quot;, //dataTable即需要导出数据的表。 &amp;quot;dataTable&amp;quot; : &amp;quot;&amp;quot;, //statusTable是Reader用于保存状态的表，若该表不存在，Reader会自动创建该表。 //一次离线导出任务完成后，用户不应删除该表，该表中记录的状态可用于下次导出任务中。 &amp;quot;statusTable&amp;quot; : &amp;quot;TableStoreStreamReaderStatusTable&amp;quot;, //增量数据的时间范围（左闭右开）的左边界。 &amp;quot;startTimestampMillis&amp;quot; : &amp;quot;&amp;quot;, //增量数据的时间范围（左闭右开）的右边界。 &amp;quot;endTimestampMillis&amp;quot; : &amp;quot;&amp;quot;, //采云间调度只支持天级别，所以提供该配置，作用与startTimestampMillis和endTimestampMillis类似。 &amp;quot;date&amp;quot;: &amp;quot;&amp;quot;, //是否导出时序信息。 &amp;quot;isExportSequenceInfo&amp;quot;: true, //从TableStore中读增量数据时，每次请求的最大重试次数，默认为30。 &amp;quot;maxRetries&amp;quot; : 30 } } 参数说明 名称 说明 类型 必选 endpoint TableStoreServer的Endpoint地址。 String 是 accessId 用于访问TableStore服务的accessId。 String 是 accessKey 用于访问TableStore服务的accessKey。 String 是 instanceName TableStore的实例名称。 String 是 dataTable 需要导出增量数据的表的名称。该表需要开启Stream，可以在建表时开启，或者使用UpdateTable接口开启。 String 是 statusTable Reader插件用于记录状态的表的名称，这些状态可用于减少对非目标范围内的数据的扫描，从而加快导出速度。 1.</description>
+    </item>
+    
+    <item>
+      <title>TSDBReader 插件文档</title>
+      <link>https://haokiu.com/66980d1599cc4aec9a2d6616d1f0c5e7/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/66980d1599cc4aec9a2d6616d1f0c5e7/</guid>
+      <description>TSDBReader 插件文档 1 快速介绍 TSDBReader 插件实现了从阿里云 TSDB 读取数据。阿里云时间序列数据库 ( Time Series Database , 简称 TSDB) 是一种集时序数据高效读写，压缩存储，实时计算能力为一体的数据库服务，可广泛应用于物联网和互联网领域，实现对设备及业务服务的实时监控，实时预测告警。详见 TSDB 的阿里云官网。
+2 实现原理 在底层实现上，TSDBReader 通过 HTTP 请求链接到 阿里云 TSDB 实例，利用 /api/query 或者 /api/mquery 接口将数据点扫描出来（更多细节详见：时序数据库 TSDB - HTTP API 概览）。而整个同步的过程，是通过时间线和查询时间线范围进行切分。
+3 功能说明 3.1 配置样例 配置一个从 阿里云 TSDB 数据库同步抽取数据到本地的作业，并以时序数据的格式输出： 时序数据样例：
+{&amp;#34;metric&amp;#34;:&amp;#34;m&amp;#34;,&amp;#34;tags&amp;#34;:{&amp;#34;app&amp;#34;:&amp;#34;a19&amp;#34;,&amp;#34;cluster&amp;#34;:&amp;#34;c5&amp;#34;,&amp;#34;group&amp;#34;:&amp;#34;g10&amp;#34;,&amp;#34;ip&amp;#34;:&amp;#34;i999&amp;#34;,&amp;#34;zone&amp;#34;:&amp;#34;z1&amp;#34;},&amp;#34;timestamp&amp;#34;:1546272263,&amp;#34;value&amp;#34;:1} { &amp;#34;job&amp;#34;: { &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;tsdbreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;sinkDbType&amp;#34;: &amp;#34;TSDB&amp;#34;, &amp;#34;endpoint&amp;#34;: &amp;#34;http://localhost:8242&amp;#34;, &amp;#34;column&amp;#34;: [ &amp;#34;m&amp;#34; ], &amp;#34;splitIntervalMs&amp;#34;: 60000, &amp;#34;beginDateTime&amp;#34;: &amp;#34;2019-01-01 00:00:00&amp;#34;, &amp;#34;endDateTime&amp;#34;: &amp;#34;2019-01-01 01:00:00&amp;#34; } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;streamwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;encoding&amp;#34;: &amp;#34;UTF-8&amp;#34;, &amp;#34;print&amp;#34;: true } } } ], &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 3 } } } } 配置一个从 阿里云 TSDB 数据库同步抽取数据到本地的作业，并以关系型数据的格式输出： 关系型数据样例：</description>
+    </item>
+    
+    <item>
+      <title>TSDBWriter 插件文档</title>
+      <link>https://haokiu.com/2a52431a701d4468a150a7986b3b4752/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/2a52431a701d4468a150a7986b3b4752/</guid>
+      <description>TSDBWriter 插件文档 1 快速介绍 TSDBWriter 插件实现了将数据点写入到阿里巴巴自研 TSDB 数据库中（后续简称 TSDB）。
+时间序列数据库（Time Series Database , 简称 TSDB）是一种高性能，低成本，稳定可靠的在线时序数据库服务；提供高效读写，高压缩比存储、时序数据插值及聚合计算，广泛应用于物联网（IoT）设备监控系统 ，企业能源管理系统（EMS），生产安全监控系统，电力检测系统等行业场景。 TSDB 提供百万级时序数据秒级写入，高压缩比低成本存储、预降采样、插值、多维聚合计算，查询结果可视化功能；解决由于设备采集点数量巨大，数据采集频率高，造成的存储成本高，写入和查询分析效率低的问题。更多关于 TSDB 的介绍，详见阿里云 TSDB 官网。
+2 实现原理 通过 HTTP 连接 TSDB 实例，并通过 /api/put 接口将数据点写入。关于写入接口详见 TSDB 的接口说明文档。
+3 功能说明 3.1 配置样例 配置一个从 OpenTSDB 数据库同步抽取数据到 TSDB： { &amp;#34;job&amp;#34;: { &amp;#34;content&amp;#34;: [ { &amp;#34;reader&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;opentsdbreader&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;endpoint&amp;#34;: &amp;#34;http://localhost:4242&amp;#34;, &amp;#34;column&amp;#34;: [ &amp;#34;m&amp;#34; ], &amp;#34;startTime&amp;#34;: &amp;#34;2019-01-01 00:00:00&amp;#34;, &amp;#34;endTime&amp;#34;: &amp;#34;2019-01-01 03:00:00&amp;#34; } }, &amp;#34;writer&amp;#34;: { &amp;#34;name&amp;#34;: &amp;#34;tsdbhttpwriter&amp;#34;, &amp;#34;parameter&amp;#34;: { &amp;#34;endpoint&amp;#34;: &amp;#34;http://localhost:8242&amp;#34; } } } ], &amp;#34;setting&amp;#34;: { &amp;#34;speed&amp;#34;: { &amp;#34;channel&amp;#34;: 1 } } } } 3.2 参数说明 name
+描述：本插件的名称 必选：是 默认值：tsdbhttpwriter parameter
+endpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Port 默认值：无 batchSize</description>
+    </item>
+    
+    <item>
+      <title>阿里云开源离线同步工具DataX3.0介绍</title>
+      <link>https://haokiu.com/408be8b90df543789f79c7b43375e5a3/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/408be8b90df543789f79c7b43375e5a3/</guid>
+      <description>阿里云开源离线同步工具DataX3.0介绍 一. DataX3.0概览 ​	DataX 是一个异构数据源离线同步工具，致力于实现包括关系型数据库(MySQL、Oracle等)、HDFS、Hive、ODPS、HBase、FTP等各种异构数据源之间稳定高效的数据同步功能。
+设计理念 为了解决异构数据源同步问题，DataX将复杂的网状的同步链路变成了星型数据链路，DataX作为中间传输载体负责连接各种数据源。当需要接入一个新的数据源的时候，只需要将此数据源对接到DataX，便能跟已有的数据源做到无缝数据同步。
+当前使用现状 DataX在阿里巴巴集团内被广泛使用，承担了所有大数据的离线同步业务，并已持续稳定运行了6年之久。目前每天完成同步8w多道作业，每日传输数据量超过300TB。
+此前已经开源DataX1.0版本，此次介绍为阿里云开源全新版本DataX3.0，有了更多更强大的功能和更好的使用体验。Github主页地址：https://github.com/alibaba/DataX
+二、DataX3.0框架设计 DataX本身作为离线数据同步框架，采用Framework + plugin架构构建。将数据源读取和写入抽象成为Reader/Writer插件，纳入到整个同步框架中。
+Reader：Reader为数据采集模块，负责采集数据源的数据，将数据发送给Framework。 Writer： Writer为数据写入模块，负责不断向Framework取数据，并将数据写入到目的端。 Framework：Framework用于连接reader和writer，作为两者的数据传输通道，并处理缓冲，流控，并发，数据转换等核心技术问题。 三. DataX3.0插件体系 ​	经过几年积累，DataX目前已经有了比较全面的插件体系，主流的RDBMS数据库、NOSQL、大数据计算系统都已经接入。DataX目前支持数据如下：
+类型 数据源 Reader(读) Writer(写) 文档 RDBMS 关系型数据库 MySQL √ √ 读 、写 Oracle √ √ 读 、写 SQLServer √ √ 读 、写 PostgreSQL √ √ 读 、写 DRDS √ √ 读 、写 达梦 √ √ 读 、写 通用RDBMS(支持所有关系型数据库) √ √ 读 、写 阿里云数仓数据存储 ODPS √ √ 读 、写 ADS √ 写 OSS √ √ 读 、写 OCS √ √ 读 、写 NoSQL数据存储 OTS √ √ 读 、写 Hbase0.94 √ √ 读 、写 Hbase1.1 √ √ 读 、写 MongoDB √ √ 读 、写 Hive √ √ 读 、写 无结构化数据存储 TxtFile √ √ 读 、写 FTP √ √ 读 、写 HDFS √ √ 读 、写 Elasticsearch √ 写 DataX Framework提供了简单的接口与插件交互，提供简单的插件接入机制，只需要任意加上一种插件，就能无缝对接其他数据源。详情请看：DataX数据源指南</description>
+    </item>
+    
+    <item>
+      <title>mysql replace </title>
+      <link>https://haokiu.com/nfvw4R/</link>
+      <pubDate>Mon, 01 Feb 2021 09:48:42 +0000</pubDate>
+      
+      <guid>https://haokiu.com/nfvw4R/</guid>
+      <description>mysql replace 可以将字段的字符串内容替换，语法：
+Update `table_name` SET `field_name` = replace (`field_name`,’from_str’,&amp;#39;to_str’) Where `field_name` LIKE ‘%from_str%’ 使用样例：
+# 将 blog 表的字段 coentent 里的 &amp;#34;https://haokiu.com&amp;#34; 替换为 &amp;#34;http://haokiu.com&amp;#34; update blog set content = replace(content, &amp;#34;https://haokiu.com&amp;#34;, &amp;#34;http://haokiu.com&amp;#34;) where content like &amp;#39;%https://haokiu.com%&amp;#39; </description>
+    </item>
+    
+    <item>
+      <title>OLAP</title>
+      <link>https://haokiu.com/OLAP/</link>
+      <pubDate>Thu, 05 Nov 2020 10:53:39 +0000</pubDate>
+      
+      <guid>https://haokiu.com/OLAP/</guid>
+      <description>OLAP 在数据仓库一章中我们讨论了数据仓库及其模型的概念，而数据库与数据仓库的区别实际讲的是 OLTP 与 OLAP 的区别。操作型处理，叫联机事务处理 OLTP（On-Line Transaction Processing），也可以称面向交易的处理系统，它是针对具体业务在数据库联机的日常操作，通常对少数记录进行查询、修改。用户较为关心操作的响应时间、数据的安全性、完整性和并发的支持用户数等问题。传统的数据库系统作为数据管理的主要手段，主要用于操作型处理。分析型处理，叫联机分析处理 OLAP（On-Line Analytical Processing）一般针对某些主题历史数据进行分析，支持管理决策。
+OLAP 与 OLTP 在互联网浪潮出现之前，企业的数据量普遍不大，特别是核心的业务数据，通常一个单机的数据库就可以保存。那时候的存储并不需要复杂的架构，所有的线上请求(OLTP, Online Transactional Processing) 和后台分析 (OLAP, Online Analytical Processing) 都跑在同一个数据库实例上。后来渐渐的业务越来越复杂，数据量越来越大，DBA 们再也优化不动 SQL 了。其中一个显著问题是：单机数据库支持线上的 TP 请求已经非常吃力，没办法再跑比较重的 AP 分析型任务。跑起来要么 OOM，要么影响线上业务，要么做了主从分离、分库分表之后很难实现业务需求。
+在这样的背景下，以 Hadoop 为代表的大数据技术开始蓬勃发展，它用许多相对廉价的 x86 机器构建了一个数据分析平台，用并行的能力破解大数据集的计算问题。所以从某种程度上说，大数据技术可以算是传统关系型数据库技术发展过程的一个分支。当然在过程中大数据领域也发展出了属于自己的全新场景，诞生了许多新的技术，这个不深入提了。
+由此，架构师把存储划分成线上业务和数据分析两个模块。如下图所示，业务库的数据通过 ETL 工具抽取出来，导入专用的分析平台。业务数据库专注提供 TP 能力，分析平台提供 AP 能力，各施其职，看起来已经很完美了。但其实这个架构也有自己的不足。
+HTAP 首先是复杂性问题。本身 ETL 过程就是一个很繁琐的过程，一个例证是 ETL 做的好，可以成为一个商业模式。因为是两个系统，必然带来更高的学习成本、维护成本和整合成本。如果你使用的是开源的大数据工具搭建的分析平台，那么肯定会遇到各种工具之间的磨合的问题，还有由于各种工具良莠不齐所导致的质量问题。
+其次是实时性问题。通常我们认为越接近实时的数据，它的价值越大。很多业务场景，对实时性有很高的要求，比如风控系统，它需要对数据不停的分析，并且在险情出现之后尽快响应。而通常的 ETL 是一个周期性的操作，比如一天或者一个小时导一次数据，数据实时性是没有办法保证的。最后是一致性问题。一致性在数据库里面是很重要的概念，数据库的事务就是用来保证一致性的。如果把数据分表存储在两个不同的系统内，那么很难保证一致性，即 AP 系统的查询结果没有办法与线上业务正确对应。那么这两个系统的联动效应就会受到限制，比如用户没办法在一个事务里面，同时访问两个系统的数据。
+由于现有的数据平台存在的以上局限性，我们认为开发一个HTAP（Hybrid Transactional/Analytical Processing）融合型数据库产品可以缓解大家在 TP or AP 抉择上的焦虑，或者说，让数据库的使用者不用考虑过度复杂的架构，在一套数据库中既能满足 OLTP 类需求，也能满足 OLAP 类需求。</description>
+    </item>
+    
+    <item>
+      <title>数据中台</title>
+      <link>https://haokiu.com/3OKmkr/</link>
+      <pubDate>Thu, 05 Nov 2020 10:50:55 +0000</pubDate>
+      
+      <guid>https://haokiu.com/3OKmkr/</guid>
+      <description>数据中台 阿里在 2018 年提出了所谓“数据中台”的概念：即数据被统一采集，规范数据语义和业务口径形成企业基础数据模型，提供统一的分析查询和新业务的数据对接能力。数据中台并不是新的颠覆式技术，而是一种企业数据资产管理和应用方法学，涵盖了数据集成、数据质量管理、元数据与主数据管理、数仓建模、支持高并发访问的数据服务接口层开发等内容。
+在数据中台建设中，结合企业自身的业务需求特点，架构和功能可能各不相同，但其中一个最基本的需求是数据采集的实时性和完整性。数据从源端产生，到被采集到数据汇集层的时间要尽可能短，至少应做到秒级延迟，这样中台的数据模型更新才可能做到近实时，构建在中台之上依赖实时数据流驱动的应用（例如商品推荐、欺诈检测等）才能够满足业务的需求。
+以阿里双十一为例，在极高的并发情况下，订单产生到大屏统计数据更新延迟不能超过 5s，一般在 2s 内。中台对外提供的数据应该是完整的，源端数据的 Create、Update 和 Delete 都要能够被捕获，不能少也不能多，即数据需要有端到端一致性的能力（Exactly Once Semantic，EOS）。当然，EOS 并非在任何业务场景下都需要，但从平台角度必须具备这种能力，并且允许用户根据业务需求灵活开启和关闭。
+数据中台的产生背景 起初，企业只有一个主营业务，比如电商，但随着公司战略和发展需要，会新增多支业务线，由于存在负责业务线开发的团队不一致，随之而来的就是风格迥异的代码风格和数据烟囱问题。
+数据中台的产生就是为了解决数据烟囱的问题，打通数据孤岛，让数据活起来，让数据产生价值，结合前台能力，达到快速响应用户的目标。
+中台只会同步能服务于超过两个业务线的数据，如果仅仅带有自身业务属性(不存在共性)的数据，不在中台的考虑范围内。例如:电商的产品产地信息，对于金融业务来说，其实是没有价值的，但电商的用户收货地址对金融业务来说是有价值的。所以不要简单的认为数据中台会汇集企业的所有数据，还是有侧重点的。导致这个结果的原因还包括数据中台建设本身是一个长周期的事，如果数据仅仅作用于一方，由业务方(前台)自行开发，更符合敏捷开发的特性。
+关于何时应该建立数据中台这个问题，我的思考是这样的。复杂的业务线、丰富的数据维度和公司上层领导主推。三者缺一，都没有实行的必要。 一只手都能数的过来的业务线量，跨多个项目的需求相对还是比较少的，取数也比较方便，直接走接口方式基本就能满足。反而，通过数据中台流转，将问题复杂化了。
+数据的维度越丰富，数据的价值越大。只知道性别数据，与知道性别和年龄，所得到的用户画像，肯定是维度丰富的准确性高。维度不丰富的情况下，没有计算的价值。
+可能会很奇怪为什么一定需要公司上层的同意。这里就可能涉及到动了谁的奶酪的问题，数据是每个业务线最重要的资源，在推行中台过程中，势必会遇到阻力，只有成为全公司的战略任务，才有可能把事情做好。
+中台如果没有考虑通用的业务能力，也会导致无法更专注于对中台技术的深入研究。中台如果不从抽象度、共性等角度出发，很有可能局限于某单一业务，导致中台无法很好地适应其他相关业务的要求，从而不能很好地应对业务的变化。如果中台的抽象程度低、扩展性差，则会导致中台无法满足前台业务需求。这时前台应用又因为业务本身的发展目标和压力不得不自行组织团队完成这部分功能，由此可能发生本应由中台提供的能力却最终实现在业务应用中，失去了中台存在的价值。</description>
+    </item>
+    
+    <item>
+      <title>presto 官网</title>
+      <link>https://haokiu.com/FhpG3z/</link>
+      <pubDate>Mon, 28 Sep 2020 14:50:12 +0000</pubDate>
+      
+      <guid>https://haokiu.com/FhpG3z/</guid>
+      <description>现在 presto 有两个官网：
+旧presto官网 新presto官网 </description>
+    </item>
+    
+    <item>
+      <title>presto 支持的数据源</title>
+      <link>https://haokiu.com/7mlwkW/</link>
+      <pubDate>Mon, 28 Sep 2020 14:40:32 +0000</pubDate>
+      
+      <guid>https://haokiu.com/7mlwkW/</guid>
+      <description>presto 有很多连接器以支持不同的数据源：
+Accumulo BigQuery Black Hole Cassandra Druid Elasticsearch Google Sheets Iceberg Hive JMX Kafka Kinesis Kudu Local File Memory MemSQL MongoDB MySQL Oracle Phoenix Pinot PostgreSQL Prometheus Redis Redshift SQL Server System Thrift TPCDS TPCH </description>
+    </item>
+    
+    <item>
+      <title>sql 优化</title>
+      <link>https://haokiu.com/XEhpYv/</link>
+      <pubDate>Wed, 23 Sep 2020 16:59:17 +0000</pubDate>
+      
+      <guid>https://haokiu.com/XEhpYv/</guid>
+      <description>SQL 优化已经成为衡量程序猿优秀与否的硬性指标，甚至在各大厂招聘岗位职能上都有明码标注。
+有朋友疑问到，SQL 优化真的有这么重要么？如下图所示，SQL 优化在提升系统性能中是：成本最低和优化效果最明显的途径。
+**优化成本：**硬件&amp;gt;系统配置&amp;gt;数据库表结构&amp;gt;SQL 及索引。
+**优化效果：**硬件&amp;lt;系统配置&amp;lt;数据库表结构&amp;lt;SQL 及索引。
+对于MySQL层优化我一般遵从五个原则：
+**减少数据访问：**设置合理的字段类型，启用压缩，通过索引访问等减少磁盘 IO。 **返回更少的数据：**只返回需要的字段和数据分页处理，减少磁盘 IO 及网络 IO。 **减少交互次数：**批量 DML 操作，函数存储等减少数据连接次数。 **减少服务器 CPU 开销：**尽量减少数据库排序操作以及全表查询，减少 CPU 内存占用。 **利用更多资源：**使用表分区，可以增加并行操作，更大限度利用 CPU 资源。 总结到 SQL 优化中，就如下三点：
+最大化利用索引。 尽可能避免全表扫描。 减少无效数据的查询。 理解 SQL 优化原理 ，首先要搞清楚 SQL 执行顺序。
+SELECT 语句，语法顺序如下：
+1. SELECT 2. DISTINCT &amp;lt;select_list&amp;gt; 3. FROM &amp;lt;left_table&amp;gt; 4. &amp;lt;join_type&amp;gt; JOIN &amp;lt;right_table&amp;gt; 5. ON &amp;lt;join_condition&amp;gt; 6. WHERE &amp;lt;where_condition&amp;gt; 7. GROUP BY &amp;lt;group_by_list&amp;gt; 8. HAVING &amp;lt;having_condition&amp;gt; 9. ORDER BY &amp;lt;order_by_condition&amp;gt; 10.LIMIT &amp;lt;limit_number&amp;gt; SELECT 语句，执行顺序如下：
+FROM &amp;lt;表名&amp;gt; # 选取表，将多个表数据通过笛卡尔积变成一个表。 ON &amp;lt;筛选条件&amp;gt; # 对笛卡尔积的虚表进行筛选 JOIN &amp;lt;join, left join, right join...&amp;gt; &amp;lt;join表&amp;gt; # 指定join，用于添加数据到on之后的虚表中，例如left join会将左表的剩余数据添加到虚表中 WHERE &amp;lt;where条件&amp;gt; # 对上述虚表进行筛选 GROUP BY &amp;lt;分组条件&amp;gt; # 分组 &amp;lt;SUM()等聚合函数&amp;gt; # 用于having子句进行判断，在书写上这类聚合函数是写在having判断里面的 HAVING &amp;lt;分组筛选&amp;gt; # 对分组后的结果进行聚合筛选 SELECT &amp;lt;返回数据列表&amp;gt; # 返回的单列必须在group by子句中，聚合函数除外 DISTINCT # 数据除重 ORDER BY &amp;lt;排序条件&amp;gt; # 排序 LIMIT &amp;lt;行数限制&amp;gt; 以下 SQL 优化策略适用于数据量较大的场景下，如果数据量较小，没必要以此为准，以免画蛇添足。</description>
+    </item>
+    
+    <item>
+      <title>elasticsearch</title>
+      <link>https://haokiu.com/3XTrh1/</link>
+      <pubDate>Wed, 23 Sep 2020 16:53:39 +0000</pubDate>
+      
+      <guid>https://haokiu.com/3XTrh1/</guid>
+      <description>基本概念 Node 与 Cluster Elastic 本质上是一个分布式数据库，允许多台服务器协同工作，每台服务器可以运行多个 Elastic 实例。
+单个 Elastic 实例称为一个节点（node）。一组节点构成一个集群（cluster）。
+Index Elastic 会索引所有字段，经过处理后写入一个反向索引（Inverted Index）。查找数据的时候，直接查找该索引。
+所以，Elastic 数据管理的顶层单位就叫做 Index（索引）。它是单个数据库的同义词。每个 Index （即数据库）的名字必须是小写。
+Document Index 里面单条的记录称为 Document（文档）。许多条 Document 构成了一个 Index。Document 使用 JSON 格式表示。同一个 Index 里面的 Document，不要求有相同的结构（scheme），但是最好保持相同，这样有利于提高搜索效率。
+Type Document 可以分组，比如weather这个 Index 里面，可以按城市分组（北京和上海），也可以按气候分组（晴天和雨天）。这种分组就叫做 Type，它是虚拟的逻辑分组，用来过滤 Document。
+不同的 Type 应该有相似的结构（schema），举例来说，id字段不能在这个组是字符串，在另一个组是数值。这是与关系型数据库的表的一个区别。性质完全不同的数据（比如products和logs）应该存成两个 Index，而不是一个 Index 里面的两个 Type（虽然可以做到）。
+在6.0之前的版本，一个ElasticSearch索引中，可以有多个类型；从6.0版本开始，，一个ElasticSearch索引中，只有1个类型。一个类型是索引的一个逻辑上的分类，通常具有一组相同字段的文档组成。ElasticSearch的类型概念相当于关系数据库的数据表。
+shard 当数据量较大时，索引的存储空间需求超出单个节点磁盘容量的限制，或者出现单个节点处理速度较慢。为了解决这些问题，ElasticSearch将索引中的数据进行切分成多个分片（shard），每个分片存储这个索引的一部分数据，分布在不同节点上。当需要查询索引时，ElasticSearch将查询发送到每个相关分片，之后将查询结果合并，这个过程对ElasticSearch应用来说是透明的，用户感知不到分片的存在。 一个索引的分片一旦指定，不再修改。
+副本 其实，分片全称是主分片，简称为分片。主分片是相对于副本来说的，副本是对主分片的一个或多个复制版本（或称拷贝），这些复制版本（拷贝）可以称为复制分片，可以直接称之为副本。当主分片丢失时，集群可以将一个副本升级为新的主分片。
+对比 ElasticSearch RDBMS 索引（index） 数据库（database） 类型（type） 表（table） 文档（document） 行（row） 字段（field） 列（column） 映射（mapping） 表结构（schema） 全文索引 索引 查询DSL SQL GET select PUT/POST update DELETE delete 节点信息 查看节点信息 curl localhost:9200 查看节点健康度 curl localhost:9200/_cat/health?v&amp;amp;pretty=true 查看集群状况 curl localhost:9200/_cat/nodes?v&amp;amp;pretty=true index(索引)操作 查看当前节点的所有 Index。 curl -X GET &amp;#39;http://localhost:9200/_cat/indices?v&amp;#39; 可以列出每个 Index 所包含的 Type curl &amp;#39;localhost:9200/_mapping?pretty=true&amp;#39; 新建一个名叫weather的 Index。 curl -X PUT &amp;#39;localhost:9200/weather&amp;#39; 删除这个 Index。 curl -X DELETE &amp;#39;localhost:9200/weather&amp;#39; 文档操作 获取 GET /website/blog/123?</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head>
+	<meta name="generator" content="Hugo 0.119.0"><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>haokiu</title>
+
+<meta name="description" content="">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="https://haokiu.com/index.xml">
+<link rel="alternate" type="application/json" href="https://haokiu.com/index.json">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="haokiu" />
+<meta property="og:description" content="" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://haokiu.com/" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="haokiu"/>
+<meta name="twitter:description" content=""/>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "haokiu",
+  "url": "https://haokiu.com/",
+  "description": "",
+  "thumbnailUrl": "https://haokiu.com/favicon.ico",
+  "sameAs": [
+      
+  ]
+}
+</script>
+</head>
+
+<body class="list" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span class="active">Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>leveldb源码分析9
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>leveldb源码分析9 本系列《leveldb源码分析》共有22篇文章，这是第九篇
+6 SSTable之3 6.5 读取sstable文件 6.5.1 类层次 Sstable文件的读取逻辑在类Table中，其中涉及到的类还是比较多的，如图6.5-1所示。
+Table类导出的函数只有3个，先从这三个导出函数开始分析。其中涉及到的类（包括上图中为画出的）都会一一遇到，然后再一一拆解。
+本节分析sstable的打开逻辑，后面再分析key的查找与数据遍历。
+6.5.2 Table::Open() 打开一个sstable文件，函数声明为：
+static Status Open(const Options&amp; options, RandomAccessFile* file, uint64_tfile_size, Table** table); 这是Table类的一个静态函数，如果操作成功，指针*table指向新打开的表，否则返回错误。
+要打开的文件和大小分别由参数file和file_size指定；option是一些选项；
+下面就分析下函数逻辑：
+*1* S1 首先从文件的结尾读取Footer，并Decode到Footer对象中，如果文件长度小于Footer的长度，则报错。Footer的decode很简单，就是根据前面的Footer结构，解析并判断magic number是否正确，解析出meta index和index block的偏移和长度。 *table = NULL; if (size &lt;Footer::kEncodedLength) { // 文件太短 returnStatus::InvalidArgument(&#34;file is too short to be an sstable&#34;); } charfooter_space[Footer::kEncodedLength]; // Footer大小是固定的 Slice footer_input; Status s = file-&gt;Read(size -Footer::kEncodedLength, Footer::kEncodedLength, &amp;footer_input, footer_space); if (!s.ok()) return s; Footer footer; s =footer.DecodeFrom(&amp;footer_input); if (!s.ok()) return s; S2 解析出了Footer，我们就可以读取index block和meta index了，首先读取index block。 BlockContents contents; Block* index_block = NULL; if (s.ok()) { s = ReadBlock(file, ReadOptions(),footer.index_handle(), &amp;contents); if (s.ok()) { index_block = newBlock(contents); } } 这是通过调用ReadBlock完成的，下面会分析这个函数。...</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to leveldb源码分析9" href="https://haokiu.com/899ada7f72f249e6938aef7f300eaf1a/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>libevent源码深度剖析
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>libevent源码深度剖析 libevent源码深度剖析01
+libevent源码深度剖析02
+libevent源码深度剖析03
+libevent源码深度剖析04
+libevent源码深度剖析05
+libevent源码深度剖析06
+libevent源码深度剖析07
+libevent源码深度剖析08
+libevent源码深度剖析09
+libevent源码深度剖析10
+libevent源码深度剖析11
+libevent源码深度剖析12
+libevent源码深度剖析13</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析" href="https://haokiu.com/5d2f8fa20fdc4018a34afe19f8c23987/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>libevent源码深度剖析02
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>libevent源码深度剖析02 Reactor模式
+前面讲到，整个libevent本身就是一个Reactor，因此本节将专门对Reactor模式进行必要的介绍，并列出libevnet中的几个重要组件和Reactor的对应关系，在后面的章节中可能还会提到本节介绍的基本概念。
+1. Reactor的事件处理机制 首先来回想一下普通函数调用的机制：程序调用某函数?函数执行，程序等待?函数将结果和控制权返回给程序?程序继续处理。
+Reactor释义**“反应堆”，是一种事件驱动机制。和普通函数调用的不同之处在于：应用程序不是主动的调用某个API完成处理，而是恰恰相反，Reactor逆置了事件处理流程，应用程序需要提供相应的接口并注册到Reactor上，如果相应的时间发生，Reactor将主动调用应用程序注册的接口，这些接口又称为“回调函数”**。使用libevent也是想libevent框架注册相应的事件和回调函数；当这些事件发生时，libevent会调用这些回调函数处理相应的事件（I/O读写、定时和信号）。
+用“好莱坞原则”来形容Reactor再合适不过了：不要打电话给我们，我们会打电话通知你。
+举个例子：你去应聘某xx公司，面试结束后。
+“普通函数调用机制”公司HR比较懒，不会记你的联系方式，那怎么办呢，你只能面试完后自己打电话去问结果；有没有被录取啊，还是被据了；
+“Reactor”公司HR就记下了你的联系方式，结果出来后会主动打电话通知你：有没有被录取啊，还是被据了；你不用自己打电话去问结果，事实上也不能，你没有HR的留联系方式。
+2. Reactor模式的优点 Reactor模式是编写高性能网络服务器的必备技术之一，它具有如下的优点
+1）响应快，不必为单个同步时间所阻塞，虽然Reactor本身依然是同步的；
+2）编程相对简单，可以最大程度的避免复杂的多线程及同步问题，并且避免了多线程/进程的切换开销； 3）可扩展性，可以方便的通过增加Reactor实例个数来充分利用CPU资源； 4）可复用性，reactor框架本身与具体事件处理逻辑无关，具有很高的复用性；
+3. Reactor模式框架 使用Reactor模型，必备的几个组件：事件源、Reactor框架、多路复用机制和事件处理程序，先来看看Reactor模型的整体框架，接下来再对每个组件做逐一说明。
+1） 事件源 Linux上是文件描述符，Windows上就是Socket或者Handle了，这里统一称为“句柄集”；程序在指定的句柄上注册关心的事件，比如I/O事件。
+2） event demultiplexer——事件多路分发机制 由操作系统提供的I/O多路复用机制，比如select和epoll。 程序首先将其关心的句柄（事件源）及其事件注册到event demultiplexer上； 当有事件到达时，event demultiplexer会发出通知“在已经注册的句柄集中，一个或多个句柄的事件已经就绪”； 程序收到通知后，就可以在非阻塞的情况下对事件进行处理了。 对应到libevent中，依然是select、poll、epoll等，但是libevent使用结构体eventop进行了封装，以统一的接口来支持这些I/O多路复用机制，达到了对外隐藏底层系统机制的目的。
+3） Reactor——反应器 Reactor，是事件管理的接口，内部使用event demultiplexer注册、注销事件；并运行事件循环，当有事件进入“就绪”状态时，调用注册事件的回调函数处理事件。 对应到libevent中，就是event_base结构体。 一个典型的Reactor声明方式：
+class Reactor{ public: int register_handler(Event_Handler *pHandler, int event); int remove_handler(Event_Handler *pHandler, int event); void handle_events(timeval *ptv); // ... }; 4） Event Handler——事件处理程序
+事件处理程序提供了一组接口，每个接口对应了一种类型的事件，供Reactor在相应的事件发生时调用，执行相应的事件处理。通常它会绑定一个有效的句柄。 对应到libevent中，就是event结构体。 下面是两种典型的Event Handler类声明方式，二者互有优缺点。
+class Event_Handler{ public: virtual void handle_read() = 0; virtual void handle_write() = 0; virtual void handle_timeout() = 0; virtual void handle_close() = 0; virtual HANDLE get_handle() = 0; // ... }; class Event_Handler{ public: // events maybe read/write/timeout/close ....</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析02" href="https://haokiu.com/d62a9a215b334817945e5814d92a423a/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>libevent源码深度剖析03
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>libevent源码深度剖析03 libevent基本使用场景和事件流程 1. 前言 学习源代码该从哪里入手？我觉得从程序的基本使用场景和代码的整体处理流程入手是个不错的方法，至少从个人的经验上讲，用此方法分析libevent是比较有效的。
+2. 基本应用场景 基本应用场景也是使用libevnet的基本流程，下面来考虑一个最简单的场景，使用livevent设置定时器，应用程序只需要执行下面几个简单的步骤即可。 1）首先初始化libevent库，并保存返回的指针
+struct event_base* base = event_init(); 实际上这一步相当于初始化一个Reactor实例；在初始化libevent后，就可以注册事件了。
+2）初始化事件event，设置回调函数和关注的事件
+evtimer_set(&amp;ev, timer_cb, NULL); 事实上这等价于调用 event_set(&amp;ev, -1, 0, timer_cb, NULL); event_set的函数原型是：
+void event_set(struct event *ev, int fd, short event, void (*cb)(int, short, void *), void *arg) ev：执行要初始化的event对象； fd：该event绑定的“句柄”，对于信号事件，它就是关注的信号； event：在该fd上关注的事件类型，它可以是EV_READ, EV_WRITE, EV_SIGNAL； cb：这是一个函数指针，当fd上的事件event发生时，调用该函数执行处理，它有三个参数，调用时由event_base负责传入，按顺序，实际上就是event_set时的fd, event和arg； arg：传递给cb函数指针的参数； 由于定时事件不需要fd，并且定时事件是根据添加时**（event_add）的超时值设定的，因此这里event也不需要设置。 这一步相当于初始化一个event handler**，在libevent中事件类型保存在event结构体中。 注意：libevent并不会管理event事件集合，这需要应用程序自行管理；
+3）设置event从属的event_base
+event_base_set(base, &amp;ev); 这一步相当于指明event要注册到哪个event_base实例上；
+4）是正式的添加事件的时候了
+event_add(&amp;ev, timeout); 基本信息都已设置完成，只要简单的调用**event_add()函数即可完成，其中timeout是定时值； 这一步相当于调用Reactor::register_handler()**函数注册事件。
+5）程序进入无限循环，等待就绪事件并执行事件处理
+event_base_dispatch(base); 3. 实例代码 上面例子的程序代码如下所示
+struct event ev; struct timeval tv; void time_cb(int fd, short event, void *argc){ printf(&#34;timer wakeup/n&#34;); event_add(&amp;ev, &amp;tv); // reschedule timer } int main(){ struct event_base *base = event_init(); tv.tv_sec = 10; // 10s period tv....</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析03" href="https://haokiu.com/88dcf812d9464727bdfa54410657cfaa/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>libevent源码深度剖析04
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>libevent源码深度剖析04 1. 前言 详细分析源代码之前，如果能对其代码文件的基本结构有个大概的认识和分类，对于代码的分析将是大有裨益的。本节内容不多，我想并不是说它不重要！
+2. 源代码组织结构 Libevent的源代码虽然都在一层文件夹下面，但是其代码分类还是相当清晰的，主要可分为头文件、内部使用的头文件、辅助功能函数、日志、libevent框架、对系统I/O多路复用机制的封装、信号管理、定时事件管理、缓冲区管理、基本数据结构和基于libevent的两个实用库等几个部分，有些部分可能就是一个源文件。 源代码中的test部分就不在我们关注的范畴了。 1）头文件 主要就是event.h：事件宏定义、接口函数声明，主要结构体event的声明； 2）内部头文件 xxx-internal.h：内部数据结构和函数，对外不可见，以达到信息隐藏的目的； 3）libevent框架 event.c：event整体框架的代码实现； 4）对系统I/O多路复用机制的封装 epoll.c：对epoll的封装； select.c：对select的封装； devpoll.c：对dev/poll的封装; kqueue.c：对kqueue的封装； 5）定时事件管理 min-heap.h：其实就是一个以时间作为key的小根堆结构； 6）信号管理 signal.c：对信号事件的处理； 7）辅助功能函数 evutil.h 和evutil.c：一些辅助功能函数，包括创建socket pair和一些时间操作函数：加、减和比较等。 8）日志 log.h和log.c：log日志函数 9）缓冲区管理 evbuffer.c和buffer.c：libevent对缓冲区的封装； 10）基本数据结构 compat/sys下的两个源文件：queue.h是libevent基本数据结构的实现，包括链表，双向链表，队列等；_libevent_time.h：一些用于时间操作的结构体定义、函数和宏定义； 11）实用网络库 http和evdns：是基于libevent实现的http服务器和异步dns查询库；
+3. 小结 本节介绍了libevent的组织和分类，下面将会详细介绍libevent的核心部分event结构。</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析04" href="https://haokiu.com/7fd5744edc6741c18b5cb6187e662e40/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>libevent源码深度剖析05
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>libevent源码深度剖析05 libevent的核心：事件event
+对事件处理流程有了高层的认识后，本节将详细介绍libevent的核心结构event，以及libevent对event的管理**。**
+1. libevent的核心-event libevent是基于**事件驱动（event-driven）**的，从名字也可以看到event是整个库的核心。event就是Reactor框架中的事件处理程序组件；它提供了函数接口，供Reactor在事件发生时调用，以执行相应的事件处理，通常它会绑定一个有效的句柄。
+首先给出event结构体的声明，它位于event.h文件中：
+struct event { TAILQ_ENTRY (event) ev_next; TAILQ_ENTRY (event) ev_active_next; TAILQ_ENTRY (event) ev_signal_next; unsigned int min_heap_idx; /* for managing timeouts */ struct event_base *ev_base; int ev_fd; short ev_events; short ev_ncalls; short *ev_pncalls; /* Allows deletes in callback */ struct timeval ev_timeout; int ev_pri; /* smaller numbers are higher priority */ void (*ev_callback)(int, short, void *arg); void *ev_arg; int ev_res; /* result passed to event callback */ int ev_flags; }; ev_events：event关注的事件类型，它可以是以下3种类型：
+I/O事件： EV_WRITE和EV_READ 定时事件：EV_TIMEOUT 信号： EV_SIGNAL 辅助选项：EV_PERSIST，表明是一个永久事件 Libevent中的定义为：
+#define EV_TIMEOUT 0x01 #define EV_READ 0x02 #define EV_WRITE 0x04 #define EV_SIGNAL 0x08 #define EV_PERSIST 0x10 /* Persistant event */ 可以看出事件类型可以使用“|”运算符进行组合，需要说明的是，信号和I/O事件不能同时设置；...</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析05" href="https://haokiu.com/1f6a82cdb17742a49514907b604e44c1/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>libevent源码深度剖析06
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>libevent源码深度剖析06 初见事件处理框架
+前面已经对libevent的事件处理框架和event结构体做了描述，现在是时候剖析libevent对事件的详细处理流程了，本节将分析libevent的事件处理框架event_base和libevent注册、删除事件的具体流程，可结合前一节libevent对event的管理。
+1. 事件处理框架-event_base 回想Reactor模式的几个基本组件，本节讲解的部分对应于Reactor框架组件。在libevent中，这就表现为event_base结构体，结构体声明如下，它位于event-internal.h文件中：
+struct event_base { const struct eventop *evsel; void *evbase;　int event_count; /* counts number of total events */ int event_count_active; /* counts number of active events */ int event_gotterm; /* Set to terminate loop */ int event_break; /* Set to terminate loop immediately */ /* active event management */ struct event_list **activequeues; int nactivequeues; /* signal handling info */ struct evsignal_info sig; struct event_list eventqueue; struct timeval event_tv; struct min_heap timeheap; struct timeval tv_cache; }; 下面详细解释一下结构体中各字段的含义。
+evsel和evbase这两个字段的设置可能会让人有些迷惑，这里你可以把evsel和evbase看作是类和静态函数的关系，比如添加事件时的调用行为：evsel-&gt;add(evbase, ev)，实际执行操作的是evbase；这相当于class::add(instance, ev)，instance就是class的一个对象实例。 evsel指向了全局变量static const struct eventop *eventops[]中的一个； 前面也说过，libevent将系统提供的I/O demultiplex机制统一封装成了eventop结构；因此eventops[]包含了select、poll、kequeue和epoll等等其中的若干个全局实例对象。 evbase实际上是一个eventop实例对象； 先来看看eventop结构体，它的成员是一系列的函数指针, 在event-internal.h文件中：
+struct eventop { const char *name; void *(*init)(struct event_base *); // 初始化 int (*add)(void *, struct event *); // 注册事件 int (*del)(void *, struct event *); // 删除事件 int (*dispatch)(struct event_base *, void *, struct timeval *); // 事件分发 void (*dealloc)(struct event_base *, void *); // 注销，释放资源 /* set if we need to reinitialize the event base */ int need_reinit; }; 也就是说，在libevent中，每种I/O demultiplex机制的实现都必须提供这五个函数接口，来完成自身的初始化、销毁释放；对事件的注册、注销和分发。 比如对于epoll，libevent实现了5个对应的接口函数，并在初始化时并将eventop的5个函数指针指向这5个函数，那么程序就可以使用epoll作为I/O demultiplex机制了，这个在后面会再次提到。...</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析06" href="https://haokiu.com/fc115cade0c049a8ab14e737a22b37fe/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>libevent源码深度剖析07
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>libevent源码深度剖析07 事件主循环
+现在我们已经初步了解了libevent的Reactor组件——event_base和事件管理框架，接下来就是libevent事件处理的中心部分——事件主循环，根据系统提供的事件多路分发机制执行事件循环，对已注册的就绪事件，调用注册事件的回调函数来处理事件。
+1. 阶段性的胜利 libevent将I/O事件、定时器和信号事件处理很好的结合到了一起，本节也会介绍libevent是如何做到这一点的。 在看完本节的内容后，读者应该会对Libevent的基本框架：事件管理和主循环有比较清晰的认识了，并能够把libevent的事件控制流程清晰的串通起来，剩下的就是一些细节的内容了。
+2. 事件处理主循环 libevent的事件主循环主要是通过**event_base_loop ()**函数完成的，其主要操作如下面的流程图所示，event_base_loop所作的就是持续执行下面的循环。 清楚了event_base_loop所作的主要操作，就可以对比源代码看个究竟了，代码结构还是相当清晰的。
+int event_base_loop(struct event_base *base, int flags){ const struct eventop *evsel = base-&gt;evsel; void *evbase = base-&gt;evbase; struct timeval tv; struct timeval *tv_p; int res, done; // 清空时间缓存 base-&gt;tv_cache.tv_sec = 0; // evsignal_base是全局变量，在处理signal时，用于指名signal所属的event_base实例 if (base-&gt;sig.ev_signal_added) evsignal_base = base; done = 0; while (!done) { // 事件主循环 // 查看是否需要跳出循环，程序可以调用event_loopexit_cb()设置event_gotterm标记 // 调用event_base_loopbreak()设置event_break标记 if (base-&gt;event_gotterm) { base-&gt;event_gotterm = 0; break; } if (base-&gt;event_break) { base-&gt;event_break = 0; break; } // 校正系统时间，如果系统使用的是非MONOTONIC时间，用户可能会向后调整了系统时间 // 在timeout_correct函数里，比较last wait time和当前时间，如果当前时间&lt; last wait time // 表明时间有问题，这是需要更新timer_heap中所有定时事件的超时时间。 timeout_correct(base, &amp;tv); // 根据timer heap中事件的最小超时时间，计算系统I/O demultiplexer的最大等待时间 tv_p = &amp;tv; if (!base-&gt;event_count_active &amp;&amp; !...</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析07" href="https://haokiu.com/1fa932a07dd84e9fbdde728e110c098f/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>libevent源码深度剖析08
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>libevent源码深度剖析08 集成信号处理
+现在我们已经了解了libevent的基本框架：事件管理框架和事件主循环。上节提到了libevent中I/O事件和Signal以及Timer事件的集成，这一节将分析如何将Signal集成到事件主循环的框架中。
+1. 集成策略——使用socket pair 前一节已经做了足够多的介绍了，基本方法就是采用“消息机制”。在libevent中这是通过socket pair完成的，下面就来详细分析一下。 Socket pair就是一个socket对，包含两个socket，一个读socket，一个写socket。工作方式如下图所示：
+创建一个socket pair并不是复杂的操作，可以参见下面的流程图，清晰起见，其中忽略了一些错误处理和检查。
+Libevent提供了辅助函数evutil_socketpair()来创建一个socket pair，可以结合上面的创建流程来分析该函数。
+2. 集成到事件主循环——通知event_base Socket pair创建好了，可是libevent的事件主循环还是不知道Signal是否发生了啊，看来我们还差了最后一步，那就是：为socket pair的读socket在libevent的event_base实例上注册一个persist的读事件。 这样当向写socket写入数据时，读socket就会得到通知，触发读事件，从而event_base就能相应的得到通知了。 前面提到过，Libevent会在事件主循环中检查标记，来确定是否有触发的signal，如果标记被设置就处理这些signal，这段代码在各个具体的I/O机制中，以Epoll为例，在**epoll_dispatch()**函数中，代码片段如下：
+res = epoll_wait(epollop-&gt;epfd, events, epollop-&gt;nevents, timeout); if (res == -1) { if (errno != EINTR) { event_warn(&#34;epoll_wait&#34;); return (-1); } evsignal_process(base);// 处理signal事件 return (0); } else if (base-&gt;sig.evsignal_caught) { evsignal_process(base);// 处理signal事件 } 完整的处理框架如下所示：
+注1：libevent中，初始化阶段并不注册读socket的读事件，而是在注册信号阶段才会测试并注册； 注2：libevent中，检查I/O事件是在各系统I/O机制的**dispatch()函数中完成的，该dispatch()函数在event_base_loop()**函数中被调用；
+3. evsignal_info结构体 libevent中Signal事件的管理是通过结构体evsignal_info完成的，结构体位于evsignal.h文件中，定义如下：
+struct evsignal_info { struct event ev_signal; int ev_signal_pair[2]; int ev_signal_added; volatile sig_atomic_t evsignal_caught; struct event_list evsigevents[NSIG]; sig_atomic_t evsigcaught[NSIG]; #ifdef HAVE_SIGACTION struct sigaction **sh_old; #else ev_sighandler_t **sh_old; #endif int sh_old_max; }; 下面详细介绍一下个字段的含义和作用： 1）ev_signal， 为socket pair的读socket向event_base注册读事件时使用的event结构体； 2）ev_signal_pair，socket pair对，作用见第一节的介绍； 3）ev_signal_added，记录ev_signal事件是否已经注册了； 4）evsignal_caught，是否有信号发生的标记；是volatile类型，因为它会在另外的线程中被修改； 5）evsigvents[NSIG]，数组，evsigevents[signo]表示注册到信号signo的事件链表； 6）evsigcaught[NSIG]，具体记录每个信号触发的次数，evsigcaught[signo]是记录信号signo被触发的次数； 7）sh_old记录了原来的signal处理函数指针，当信号signo注册的event被清空时，需要重新设置其处理函数； evsignal_info的初始化包括，创建socket pair，设置ev_signal事件（但并没有注册，而是等到有信号注册时才检查并注册），并将所有标记置零，初始化信号的注册事件链表指针等。...</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析08" href="https://haokiu.com/4a5e0c5a568b4187b207ec0ada2dbdfb/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>libevent源码深度剖析09
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>libevent源码深度剖析09 集成定时器事件
+现在再来详细分析libevent中I/O事件和Timer事件的集成，与Signal相比，Timer事件的集成会直观和简单很多。Libevent对堆的调整操作做了一些优化，本节还会描述这些优化方法。
+1. 集成到事件主循环 因为系统的I/O机制像select()和epoll_wait()都允许程序制定一个最大等待时间（也称为最大超时时间）timeout，即使没有I/O事件发生，它们也保证能在timeout时间内返回。 那么根据所有Timer事件的最小超时时间来设置系统I/O的timeout时间；当系统I/O返回时，再激活所有就绪的Timer事件就可以了，这样就能将Timer事件完美的融合到系统的I/O机制中了。 具体的代码在源文件event.c的**event_base_loop()**中，现在就对比代码来看看这一处理方法：
+if (!base-&gt;event_count_active &amp;&amp; !(flags &amp; EVLOOP_NONBLOCK)) { // 根据Timer事件计算evsel-&gt;dispatch的最大等待时间 timeout_next(base, &amp;tv_p); } else { // 如果还有活动事件，就不要等待，让evsel-&gt;dispatch立即返回 evutil_timerclear(&amp;tv); } // ... // 调用select() or epoll_wait() 等待就绪I/O事件 res = evsel-&gt;dispatch(base, evbase, tv_p); // ... // 处理超时事件，将超时事件插入到激活链表中 timeout_process(base); **timeout_next()**函数根据堆中具有最小超时值的事件和当前时间来计算等待时间，下面看看代码：
+1static int timeout_next(struct event_base *base, struct timeval **tv_p){ 2 struct timeval now; 3 struct event *ev; 4 struct timeval *tv = *tv_p; 5 // 堆的首元素具有最小的超时值 6 if ((ev = min_heap_top(&amp;base-&gt;timeheap)) == NULL) { 7 // 如果没有定时事件，将等待时间设置为NULL,表示一直阻塞直到有I/O事件发生 8 *tv_p = NULL; 9 return (0); 10 } 11 // 取得当前时间 12 gettime(base, &amp;now); 13 // 如果超时时间&lt;=当前值，不能等待，需要立即返回 14 if (evutil_timercmp(&amp;ev-&gt;ev_timeout, &amp;now, &lt;=)) { 15 evutil_timerclear(tv); 16 return (0); 17 } 18 // 计算等待的时间=当前时间-最小的超时时间 19 evutil_timersub(&amp;ev-&gt;ev_timeout, &amp;now, tv); 20 return (0); 21} 2....</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析09" href="https://haokiu.com/e65e0c91ca7e45ad9ad3081edbd423f8/"></a>
+</article>
+<footer class="page-footer">
+  <nav class="pagination">
+    <a class="prev" href="https://haokiu.com/index/9/">
+      «&nbsp;Prev&nbsp;
+    </a>
+    <a class="next" href="https://haokiu.com/index/11/">Next&nbsp;&nbsp;»
+    </a>
+  </nav>
+</footer>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

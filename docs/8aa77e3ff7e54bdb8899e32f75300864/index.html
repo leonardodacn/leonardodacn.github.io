@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>libevent源码深度剖析一 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="libevent源码深度剖析一 1. 前言 libevent是一个轻量级的开源高性能网络库，使用者众多，研究者更甚，相关文章也不少。写这一系列文章的用意在于，一则分享心得；二则对libevent代码和设计思想做系统的、更深层次的分析，写出来，也可供后来者参考。
+附带一句：libevent是用c语言编写的（大牛们都偏爱c语言哪），而且几乎是无处不函数指针，学习其源代码也需要相当的c语言基础。
+2. Libevent简介 上来当然要先夸奖啦，libevent 有几个显著的亮点： 事件驱动（event-driven），高性能; 轻量级，专注于网络，不如ACE那么臃肿庞大； 源代码相当精炼、易读； 跨平台，支持Windows、Linux、BSD和Mac Os； 支持多种I/O多路复用技术， epoll、poll、dev/poll、select和kqueue等； 支持I/O，定时器和信号等事件； 注册事件优先级；
+libevent已经被广泛的应用，作为底层的网络库；比如memcached、Vomit、Nylon、Netchat等等。 libevent当前的最新稳定版是1.4.13；这也是本文参照的版本。
+3. 学习的好处 学习libevent有助于提升程序设计功力，除了网络程序设计方面外，libevent的代码里有很多有用的设计技巧和基础数据结构，比如信息隐藏、函数指针、c语言的多态支持、链表和堆等等，都有助于提升自身的程序功力。 程序设计不止要了解框架，很多细节之处恰恰也是事关整个系统成败的关键。只对libevent本身的框架大概了解，那或许仅仅是一知半解，不深入代码分析，就难以了解其设计的精巧之处，也就难以为自己所用。
+事实上libevent本身就是一个典型的Reactor模型，理解Reactor模式是理解libevent的基石；因此下一节将介绍典型的事件驱动设计模式——Reactor模式。
+参考资料： libevent官方地址: http://monkey.org/~provos/libevent/">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/8aa77e3ff7e54bdb8899e32f75300864/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="libevent源码深度剖析一" />
+<meta property="og:description" content="libevent源码深度剖析一 1. 前言 libevent是一个轻量级的开源高性能网络库，使用者众多，研究者更甚，相关文章也不少。写这一系列文章的用意在于，一则分享心得；二则对libevent代码和设计思想做系统的、更深层次的分析，写出来，也可供后来者参考。
+附带一句：libevent是用c语言编写的（大牛们都偏爱c语言哪），而且几乎是无处不函数指针，学习其源代码也需要相当的c语言基础。
+2. Libevent简介 上来当然要先夸奖啦，libevent 有几个显著的亮点： 事件驱动（event-driven），高性能; 轻量级，专注于网络，不如ACE那么臃肿庞大； 源代码相当精炼、易读； 跨平台，支持Windows、Linux、BSD和Mac Os； 支持多种I/O多路复用技术， epoll、poll、dev/poll、select和kqueue等； 支持I/O，定时器和信号等事件； 注册事件优先级；
+libevent已经被广泛的应用，作为底层的网络库；比如memcached、Vomit、Nylon、Netchat等等。 libevent当前的最新稳定版是1.4.13；这也是本文参照的版本。
+3. 学习的好处 学习libevent有助于提升程序设计功力，除了网络程序设计方面外，libevent的代码里有很多有用的设计技巧和基础数据结构，比如信息隐藏、函数指针、c语言的多态支持、链表和堆等等，都有助于提升自身的程序功力。 程序设计不止要了解框架，很多细节之处恰恰也是事关整个系统成败的关键。只对libevent本身的框架大概了解，那或许仅仅是一知半解，不深入代码分析，就难以了解其设计的精巧之处，也就难以为自己所用。
+事实上libevent本身就是一个典型的Reactor模型，理解Reactor模式是理解libevent的基石；因此下一节将介绍典型的事件驱动设计模式——Reactor模式。
+参考资料： libevent官方地址: http://monkey.org/~provos/libevent/" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/8aa77e3ff7e54bdb8899e32f75300864/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="libevent源码深度剖析一"/>
+<meta name="twitter:description" content="libevent源码深度剖析一 1. 前言 libevent是一个轻量级的开源高性能网络库，使用者众多，研究者更甚，相关文章也不少。写这一系列文章的用意在于，一则分享心得；二则对libevent代码和设计思想做系统的、更深层次的分析，写出来，也可供后来者参考。
+附带一句：libevent是用c语言编写的（大牛们都偏爱c语言哪），而且几乎是无处不函数指针，学习其源代码也需要相当的c语言基础。
+2. Libevent简介 上来当然要先夸奖啦，libevent 有几个显著的亮点： 事件驱动（event-driven），高性能; 轻量级，专注于网络，不如ACE那么臃肿庞大； 源代码相当精炼、易读； 跨平台，支持Windows、Linux、BSD和Mac Os； 支持多种I/O多路复用技术， epoll、poll、dev/poll、select和kqueue等； 支持I/O，定时器和信号等事件； 注册事件优先级；
+libevent已经被广泛的应用，作为底层的网络库；比如memcached、Vomit、Nylon、Netchat等等。 libevent当前的最新稳定版是1.4.13；这也是本文参照的版本。
+3. 学习的好处 学习libevent有助于提升程序设计功力，除了网络程序设计方面外，libevent的代码里有很多有用的设计技巧和基础数据结构，比如信息隐藏、函数指针、c语言的多态支持、链表和堆等等，都有助于提升自身的程序功力。 程序设计不止要了解框架，很多细节之处恰恰也是事关整个系统成败的关键。只对libevent本身的框架大概了解，那或许仅仅是一知半解，不深入代码分析，就难以了解其设计的精巧之处，也就难以为自己所用。
+事实上libevent本身就是一个典型的Reactor模型，理解Reactor模式是理解libevent的基石；因此下一节将介绍典型的事件驱动设计模式——Reactor模式。
+参考资料： libevent官方地址: http://monkey.org/~provos/libevent/"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "libevent源码深度剖析一",
+      "item": "https://haokiu.com/8aa77e3ff7e54bdb8899e32f75300864/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "libevent源码深度剖析一",
+  "name": "libevent源码深度剖析一",
+  "description": "libevent源码深度剖析一 1. 前言 libevent是一个轻量级的开源高性能网络库，使用者众多，研究者更甚，相关文章也不少。写这一系列文章的用意在于，一则分享心得；二则对libevent代码和设计思想做系统的、更深层次的分析，写出来，也可供后来者参考。\n附带一句：libevent是用c语言编写的（大牛们都偏爱c语言哪），而且几乎是无处不函数指针，学习其源代码也需要相当的c语言基础。\n2. Libevent简介 上来当然要先夸奖啦，libevent 有几个显著的亮点： 事件驱动（event-driven），高性能; 轻量级，专注于网络，不如ACE那么臃肿庞大； 源代码相当精炼、易读； 跨平台，支持Windows、Linux、BSD和Mac Os； 支持多种I/O多路复用技术， epoll、poll、dev/poll、select和kqueue等； 支持I/O，定时器和信号等事件； 注册事件优先级；\nlibevent已经被广泛的应用，作为底层的网络库；比如memcached、Vomit、Nylon、Netchat等等。 libevent当前的最新稳定版是1.4.13；这也是本文参照的版本。\n3. 学习的好处 学习libevent有助于提升程序设计功力，除了网络程序设计方面外，libevent的代码里有很多有用的设计技巧和基础数据结构，比如信息隐藏、函数指针、c语言的多态支持、链表和堆等等，都有助于提升自身的程序功力。 程序设计不止要了解框架，很多细节之处恰恰也是事关整个系统成败的关键。只对libevent本身的框架大概了解，那或许仅仅是一知半解，不深入代码分析，就难以了解其设计的精巧之处，也就难以为自己所用。\n事实上libevent本身就是一个典型的Reactor模型，理解Reactor模式是理解libevent的基石；因此下一节将介绍典型的事件驱动设计模式——Reactor模式。\n参考资料： libevent官方地址: http://monkey.org/~provos/libevent/",
+  "keywords": [
+    
+  ],
+  "articleBody": "libevent源码深度剖析一 1. 前言 libevent是一个轻量级的开源高性能网络库，使用者众多，研究者更甚，相关文章也不少。写这一系列文章的用意在于，一则分享心得；二则对libevent代码和设计思想做系统的、更深层次的分析，写出来，也可供后来者参考。\n附带一句：libevent是用c语言编写的（大牛们都偏爱c语言哪），而且几乎是无处不函数指针，学习其源代码也需要相当的c语言基础。\n2. Libevent简介 上来当然要先夸奖啦，libevent 有几个显著的亮点： 事件驱动（event-driven），高性能; 轻量级，专注于网络，不如ACE那么臃肿庞大； 源代码相当精炼、易读； 跨平台，支持Windows、Linux、BSD和Mac Os； 支持多种I/O多路复用技术， epoll、poll、dev/poll、select和kqueue等； 支持I/O，定时器和信号等事件； 注册事件优先级；\nlibevent已经被广泛的应用，作为底层的网络库；比如memcached、Vomit、Nylon、Netchat等等。 libevent当前的最新稳定版是1.4.13；这也是本文参照的版本。\n3. 学习的好处 学习libevent有助于提升程序设计功力，除了网络程序设计方面外，libevent的代码里有很多有用的设计技巧和基础数据结构，比如信息隐藏、函数指针、c语言的多态支持、链表和堆等等，都有助于提升自身的程序功力。 程序设计不止要了解框架，很多细节之处恰恰也是事关整个系统成败的关键。只对libevent本身的框架大概了解，那或许仅仅是一知半解，不深入代码分析，就难以了解其设计的精巧之处，也就难以为自己所用。\n事实上libevent本身就是一个典型的Reactor模型，理解Reactor模式是理解libevent的基石；因此下一节将介绍典型的事件驱动设计模式——Reactor模式。\n参考资料： libevent官方地址: http://monkey.org/~provos/libevent/\n",
+  "wordCount" : "28",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/8aa77e3ff7e54bdb8899e32f75300864/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      libevent源码深度剖析一
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#libevent%e6%ba%90%e7%a0%81%e6%b7%b1%e5%ba%a6%e5%89%96%e6%9e%90%e4%b8%80" aria-label="libevent源码深度剖析一">libevent源码深度剖析一</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#1-%e5%89%8d%e8%a8%80" aria-label="1. 前言">1. 前言</a></li>
+                <li>
+                    <a href="#2-libevent%e7%ae%80%e4%bb%8b" aria-label="2. Libevent简介">2. Libevent简介</a></li>
+                <li>
+                    <a href="#3-%e5%ad%a6%e4%b9%a0%e7%9a%84%e5%a5%bd%e5%a4%84" aria-label="3. 学习的好处">3. 学习的好处</a>
+                </li>
+            </ul>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="libevent源码深度剖析一">libevent源码深度剖析一</h1>
+<h3 id="1-前言">1. 前言</h3>
+<p>libevent是一个轻量级的开源高性能网络库，使用者众多，研究者更甚，相关文章也不少。写这一系列文章的用意在于，一则分享心得；二则对libevent代码和设计思想做系统的、更深层次的分析，写出来，也可供后来者参考。</p>
+<p>附带一句：libevent是用<strong>c语言</strong>编写的（大牛们都偏爱c语言哪），而且几乎是无处不函数指针，学习其源代码也需要相当的c语言基础。</p>
+<h3 id="2-libevent简介">2. Libevent简介</h3>
+<p>上来当然要先夸奖啦，libevent 有几个显著的亮点：
+事件驱动（event-driven），高性能;
+轻量级，专注于网络，不如ACE那么臃肿庞大；
+源代码相当精炼、易读；
+跨平台，支持Windows、Linux、BSD和Mac Os；
+支持多种I/O多路复用技术， epoll、poll、dev/poll、select和kqueue等；
+支持I/O，定时器和信号等事件；
+注册事件优先级；</p>
+<p>libevent已经被广泛的应用，作为底层的网络库；比如memcached、Vomit、Nylon、Netchat等等。
+libevent当前的最新稳定版是1.4.13；这也是本文参照的版本。</p>
+<h3 id="3-学习的好处">3. 学习的好处</h3>
+<p>学习libevent有助于提升程序设计功力，除了网络程序设计方面外，libevent的代码里有很多有用的设计技巧和基础数据结构，比如信息隐藏、函数指针、c语言的多态支持、链表和堆等等，都有助于提升自身的程序功力。
+程序设计不止要了解框架，很多细节之处恰恰也是事关整个系统成败的关键。只对libevent本身的框架大概了解，那或许仅仅是一知半解，不深入代码分析，就难以了解其设计的精巧之处，也就难以为自己所用。</p>
+<p>事实上libevent本身就是一个典型的<strong>Reactor</strong>模型，理解Reactor模式是理解libevent的基石；因此下一节将介绍典型的事件驱动设计模式——Reactor模式。</p>
+<p>参考资料：
+libevent官方地址: <a href="http://monkey.org/~provos/libevent/">http://monkey.org/~provos/libevent/</a></p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/b05b12b227ee4ce494fe99d9116d6a23/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>libevent源码深度剖析13</span>
+  </a>
+  <a class="next" href="https://haokiu.com/8570010b5d82422da83500ab481816be/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Linux C/C&#43;&#43;后端开发面试问哪些问题</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

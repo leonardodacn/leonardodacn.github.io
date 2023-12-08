@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>DrdsReader 插件文档 | haokiu</title>
+<meta name="keywords" content="datax">
+<meta name="description" content="DrdsReader 插件文档 1 快速介绍 DrdsReader插件实现了从DRDS(分布式RDS)读取数据。在底层实现上，DrdsReader通过JDBC连接远程DRDS数据库，并执行相应的sql语句将数据从DRDS库中SELECT出来。
+DRDS的插件目前DataX只适配了Mysql引擎的场景，DRDS对于DataX而言，就是一套分布式Mysql数据库，并且大部分通信协议遵守Mysql使用场景。
+2 实现原理 简而言之，DrdsReader通过JDBC连接器连接到远程的DRDS数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程DRDS数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+对于用户配置Table、Column、Where的信息，DrdsReader将其拼接为SQL语句发送到DRDS数据库。不同于普通的Mysql数据库，DRDS作为分布式数据库系统，无法适配所有Mysql的协议，包括复杂的Join等语句，DRDS暂时无法支持。
+3 功能说明 3.1 配置样例 配置一个从DRDS数据库同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &#34;byte&#34;: 1048576 } //出错限制 &#34;errorLimit&#34;: { //出错的record条数上限，当大于该值即报错。 &#34;record&#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;drdsReader&#34;, &#34;parameter&#34;: { // 数据库连接用户名 &#34;username&#34;: &#34;root&#34;, // 数据库连接密码 &#34;password&#34;: &#34;root&#34;, &#34;column&#34;: [ &#34;id&#34;，&#34;name&#34; ], &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;table&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:mysql://127.0.0.1:3306/database&#34; ] } ] } }, &#34;writer&#34;: { //writer类型 &#34;name&#34;: &#34;streamwriter&#34;, //是否打印内容 &#34;parameter&#34;: { &#34;print&#34;:true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &#34;job&#34;: { &#34;setting&#34;: { }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;drdsreader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;root&#34;, &#34;password&#34;: &#34;root&#34;, &#34;where&#34;: &#34;&#34;, &#34;connection&#34;: [ { &#34;querySql&#34;: [ &#34;select db_id,on_line_flag from db_info where db_id &lt; 10;&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:drds://localhost:3306/database&#34;] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;: false, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3.">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/20f3c6090e2448838d8be1baca3a5e1c/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="DrdsReader 插件文档" />
+<meta property="og:description" content="DrdsReader 插件文档 1 快速介绍 DrdsReader插件实现了从DRDS(分布式RDS)读取数据。在底层实现上，DrdsReader通过JDBC连接远程DRDS数据库，并执行相应的sql语句将数据从DRDS库中SELECT出来。
+DRDS的插件目前DataX只适配了Mysql引擎的场景，DRDS对于DataX而言，就是一套分布式Mysql数据库，并且大部分通信协议遵守Mysql使用场景。
+2 实现原理 简而言之，DrdsReader通过JDBC连接器连接到远程的DRDS数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程DRDS数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+对于用户配置Table、Column、Where的信息，DrdsReader将其拼接为SQL语句发送到DRDS数据库。不同于普通的Mysql数据库，DRDS作为分布式数据库系统，无法适配所有Mysql的协议，包括复杂的Join等语句，DRDS暂时无法支持。
+3 功能说明 3.1 配置样例 配置一个从DRDS数据库同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &#34;byte&#34;: 1048576 } //出错限制 &#34;errorLimit&#34;: { //出错的record条数上限，当大于该值即报错。 &#34;record&#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;drdsReader&#34;, &#34;parameter&#34;: { // 数据库连接用户名 &#34;username&#34;: &#34;root&#34;, // 数据库连接密码 &#34;password&#34;: &#34;root&#34;, &#34;column&#34;: [ &#34;id&#34;，&#34;name&#34; ], &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;table&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:mysql://127.0.0.1:3306/database&#34; ] } ] } }, &#34;writer&#34;: { //writer类型 &#34;name&#34;: &#34;streamwriter&#34;, //是否打印内容 &#34;parameter&#34;: { &#34;print&#34;:true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &#34;job&#34;: { &#34;setting&#34;: { }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;drdsreader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;root&#34;, &#34;password&#34;: &#34;root&#34;, &#34;where&#34;: &#34;&#34;, &#34;connection&#34;: [ { &#34;querySql&#34;: [ &#34;select db_id,on_line_flag from db_info where db_id &lt; 10;&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:drds://localhost:3306/database&#34;] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;: false, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/20f3c6090e2448838d8be1baca3a5e1c/" /><meta property="article:section" content="4" />
+<meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
+<meta property="article:modified_time" content="2021-02-02T17:45:01+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="DrdsReader 插件文档"/>
+<meta name="twitter:description" content="DrdsReader 插件文档 1 快速介绍 DrdsReader插件实现了从DRDS(分布式RDS)读取数据。在底层实现上，DrdsReader通过JDBC连接远程DRDS数据库，并执行相应的sql语句将数据从DRDS库中SELECT出来。
+DRDS的插件目前DataX只适配了Mysql引擎的场景，DRDS对于DataX而言，就是一套分布式Mysql数据库，并且大部分通信协议遵守Mysql使用场景。
+2 实现原理 简而言之，DrdsReader通过JDBC连接器连接到远程的DRDS数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程DRDS数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+对于用户配置Table、Column、Where的信息，DrdsReader将其拼接为SQL语句发送到DRDS数据库。不同于普通的Mysql数据库，DRDS作为分布式数据库系统，无法适配所有Mysql的协议，包括复杂的Join等语句，DRDS暂时无法支持。
+3 功能说明 3.1 配置样例 配置一个从DRDS数据库同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &#34;byte&#34;: 1048576 } //出错限制 &#34;errorLimit&#34;: { //出错的record条数上限，当大于该值即报错。 &#34;record&#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;drdsReader&#34;, &#34;parameter&#34;: { // 数据库连接用户名 &#34;username&#34;: &#34;root&#34;, // 数据库连接密码 &#34;password&#34;: &#34;root&#34;, &#34;column&#34;: [ &#34;id&#34;，&#34;name&#34; ], &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;table&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:mysql://127.0.0.1:3306/database&#34; ] } ] } }, &#34;writer&#34;: { //writer类型 &#34;name&#34;: &#34;streamwriter&#34;, //是否打印内容 &#34;parameter&#34;: { &#34;print&#34;:true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &#34;job&#34;: { &#34;setting&#34;: { }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;drdsreader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;root&#34;, &#34;password&#34;: &#34;root&#34;, &#34;where&#34;: &#34;&#34;, &#34;connection&#34;: [ { &#34;querySql&#34;: [ &#34;select db_id,on_line_flag from db_info where db_id &lt; 10;&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:drds://localhost:3306/database&#34;] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;: false, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "4s",
+      "item": "https://haokiu.com/4/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "DrdsReader 插件文档",
+      "item": "https://haokiu.com/20f3c6090e2448838d8be1baca3a5e1c/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "DrdsReader 插件文档",
+  "name": "DrdsReader 插件文档",
+  "description": "DrdsReader 插件文档 1 快速介绍 DrdsReader插件实现了从DRDS(分布式RDS)读取数据。在底层实现上，DrdsReader通过JDBC连接远程DRDS数据库，并执行相应的sql语句将数据从DRDS库中SELECT出来。\nDRDS的插件目前DataX只适配了Mysql引擎的场景，DRDS对于DataX而言，就是一套分布式Mysql数据库，并且大部分通信协议遵守Mysql使用场景。\n2 实现原理 简而言之，DrdsReader通过JDBC连接器连接到远程的DRDS数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程DRDS数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。\n对于用户配置Table、Column、Where的信息，DrdsReader将其拼接为SQL语句发送到DRDS数据库。不同于普通的Mysql数据库，DRDS作为分布式数据库系统，无法适配所有Mysql的协议，包括复杂的Join等语句，DRDS暂时无法支持。\n3 功能说明 3.1 配置样例 配置一个从DRDS数据库同步抽取数据到本地的作业: { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. \u0026#34;byte\u0026#34;: 1048576 } //出错限制 \u0026#34;errorLimit\u0026#34;: { //出错的record条数上限，当大于该值即报错。 \u0026#34;record\u0026#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% \u0026#34;percentage\u0026#34;: 0.02 } }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;drdsReader\u0026#34;, \u0026#34;parameter\u0026#34;: { // 数据库连接用户名 \u0026#34;username\u0026#34;: \u0026#34;root\u0026#34;, // 数据库连接密码 \u0026#34;password\u0026#34;: \u0026#34;root\u0026#34;, \u0026#34;column\u0026#34;: [ \u0026#34;id\u0026#34;，\u0026#34;name\u0026#34; ], \u0026#34;connection\u0026#34;: [ { \u0026#34;table\u0026#34;: [ \u0026#34;table\u0026#34; ], \u0026#34;jdbcUrl\u0026#34;: [ \u0026#34;jdbc:mysql://127.0.0.1:3306/database\u0026#34; ] } ] } }, \u0026#34;writer\u0026#34;: { //writer类型 \u0026#34;name\u0026#34;: \u0026#34;streamwriter\u0026#34;, //是否打印内容 \u0026#34;parameter\u0026#34;: { \u0026#34;print\u0026#34;:true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;drdsreader\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;username\u0026#34;: \u0026#34;root\u0026#34;, \u0026#34;password\u0026#34;: \u0026#34;root\u0026#34;, \u0026#34;where\u0026#34;: \u0026#34;\u0026#34;, \u0026#34;connection\u0026#34;: [ { \u0026#34;querySql\u0026#34;: [ \u0026#34;select db_id,on_line_flag from db_info where db_id \u0026lt; 10;\u0026#34; ], \u0026#34;jdbcUrl\u0026#34;: [ \u0026#34;jdbc:drds://localhost:3306/database\u0026#34;] } ] } }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;streamwriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;print\u0026#34;: false, \u0026#34;encoding\u0026#34;: \u0026#34;UTF-8\u0026#34; } } } ] } } 3.",
+  "keywords": [
+    "datax"
+  ],
+  "articleBody": "DrdsReader 插件文档 1 快速介绍 DrdsReader插件实现了从DRDS(分布式RDS)读取数据。在底层实现上，DrdsReader通过JDBC连接远程DRDS数据库，并执行相应的sql语句将数据从DRDS库中SELECT出来。\nDRDS的插件目前DataX只适配了Mysql引擎的场景，DRDS对于DataX而言，就是一套分布式Mysql数据库，并且大部分通信协议遵守Mysql使用场景。\n2 实现原理 简而言之，DrdsReader通过JDBC连接器连接到远程的DRDS数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程DRDS数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。\n对于用户配置Table、Column、Where的信息，DrdsReader将其拼接为SQL语句发送到DRDS数据库。不同于普通的Mysql数据库，DRDS作为分布式数据库系统，无法适配所有Mysql的协议，包括复杂的Join等语句，DRDS暂时无法支持。\n3 功能说明 3.1 配置样例 配置一个从DRDS数据库同步抽取数据到本地的作业: { \"job\": { \"setting\": { \"speed\": { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. \"byte\": 1048576 } //出错限制 \"errorLimit\": { //出错的record条数上限，当大于该值即报错。 \"record\": 0, //出错的record百分比上限 1.0表示100%，0.02表示2% \"percentage\": 0.02 } }, \"content\": [ { \"reader\": { \"name\": \"drdsReader\", \"parameter\": { // 数据库连接用户名 \"username\": \"root\", // 数据库连接密码 \"password\": \"root\", \"column\": [ \"id\"，\"name\" ], \"connection\": [ { \"table\": [ \"table\" ], \"jdbcUrl\": [ \"jdbc:mysql://127.0.0.1:3306/database\" ] } ] } }, \"writer\": { //writer类型 \"name\": \"streamwriter\", //是否打印内容 \"parameter\": { \"print\":true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { \"job\": { \"setting\": { }, \"content\": [ { \"reader\": { \"name\": \"drdsreader\", \"parameter\": { \"username\": \"root\", \"password\": \"root\", \"where\": \"\", \"connection\": [ { \"querySql\": [ \"select db_id,on_line_flag from db_info where db_id \u003c 10;\" ], \"jdbcUrl\": [ \"jdbc:drds://localhost:3306/database\"] } ] } }, \"writer\": { \"name\": \"streamwriter\", \"parameter\": { \"print\": false, \"encoding\": \"UTF-8\" } } } ] } } 3.2 参数说明 jdbcUrl\n描述：描述的是到对端数据库的JDBC连接信息，使用JSON的数组描述.注意，jdbcUrl必须包含在connection配置单元中。DRDSReader中关于jdbcUrl中JSON数组填写一个JDBC连接即可。\njdbcUrl按照Mysql官方规范，并可以填写连接附件控制信息。具体请参看mysql官方文档。\n必选：是 默认值：无 username\n描述：数据源的用户名 必选：是 默认值：无 password\n描述：数据源指定用户名的密码 必选：是 默认值：无 table\n描述：所选取需要抽取的表。注意，由于DRDS本身就是分布式数据源，因此填写多张表无意义。系统对多表不做校验。\n必选：是 默认值：无 column\n描述：所配置的表中需要同步的列名集合，使用JSON的数组描述字段信息。用户使用*代表默认使用所有列配置，例如[’*’]。\n支持列裁剪，即列可以挑选部分列进行导出。\n支持列换序，即列可以不按照表schema信息进行导出。\n支持常量配置，用户需要按照Mysql SQL语法格式: [“id”, “`table`”, “1”, “‘bazhen.csy’”, “null”, “to_char(a + 1)”, “2.3” , “true”] id为普通列名，`table`为包含保留在的列名，1为整形数字常量，‘bazhen.csy’为字符串常量，null为空指针，to_char(a + 1)为表达式，2.3为浮点数，true为布尔值。\ncolumn必须用户显示指定同步的列集合，不允许为空！\n必选：是 默认值：无 where\n描述：筛选条件，DrdsReader根据指定的column、table、where条件拼接SQL，并根据这个SQL进行数据抽取。在实际业务场景中，往往会选择当天的数据进行同步，可以将where条件指定为gmt_create \u003e $bizdate 。。\nwhere条件可以有效地进行业务增量同步。where条件不配置或者为空，视作全表同步数据。 必选：否 默认值：无 querySql\n描述：暂时不支持配置querySql模式 3.3 类型转换 目前DrdsReader支持大部分DRDS类型，但也存在部分个别类型没有支持的情况，请注意检查你的类型。\n下面列出DrdsReader针对DRDS类型转换列表:\nDataX 内部类型 DRDS 数据类型 Long int, tinyint, smallint, mediumint, int, bigint Double float, double, decimal String varchar, char, tinytext, text, mediumtext, longtext Date date, datetime, timestamp, time, year Boolean bit, bool Bytes tinyblob, mediumblob, blob, longblob, varbinary 请注意:\n除上述罗列字段类型外，其他类型均不支持。 类似Mysql，tinyint(1)视作整形。 类似Mysql，bit类型读取目前是未定义状态。 4 性能报告 4.1 环境准备 4.1.1 数据特征 建表语句：\nCREATE TABLE `tc_biz_vertical_test_0000` ( `biz_order_id` bigint(20) NOT NULL COMMENT 'id', `key_value` varchar(4000) NOT NULL COMMENT 'Key-value的内容', `gmt_create` datetime NOT NULL COMMENT '创建时间', `gmt_modified` datetime NOT NULL COMMENT '修改时间', `attribute_cc` int(11) DEFAULT NULL COMMENT '防止并发修改的标志', `value_type` int(11) NOT NULL DEFAULT '0' COMMENT '类型', `buyer_id` bigint(20) DEFAULT NULL COMMENT 'buyerid', `seller_id` bigint(20) DEFAULT NULL COMMENT 'seller_id', PRIMARY KEY (`biz_order_id`,`value_type`), KEY `idx_biz_vertical_gmtmodified` (`gmt_modified`) ) ENGINE=InnoDB DEFAULT CHARSET=gbk COMMENT='tc_biz_vertical' 单行记录类似于：\nbiz_order_id: 888888888 key_value: ;orderIds:20148888888,2014888888813800; gmt_create: 2011-09-24 11:07:20 gmt_modified: 2011-10-24 17:56:34 attribute_cc: 1 value_type: 3 buyer_id: 8888888 seller_id: 1 4.1.2 机器参数 执行DataX的机器参数为:\ncpu: 24核 Intel(R) Xeon(R) CPU E5-2630 0 @ 2.30GHz mem: 48GB net: 千兆双网卡 disc: DataX 数据不落磁盘，不统计此项 DRDS数据库机器参数为:\ncpu: 32核 Intel(R) Xeon(R) CPU E5-2650 v2 @ 2.60GHz mem: 256GB net: 千兆双网卡 disc: BTWL419303E2800RGN INTEL SSDSC2BB800G4 D2010370 4.1.3 DataX jvm 参数 -Xms1024m -Xmx1024m -XX:+HeapDumpOnOutOfMemoryError 4.2 测试报告 4.2.1 单表测试报告 通道数 是否按照主键切分 DataX速度(Rec/s) DataX机器运行负载 DB网卡流出流量(MB/s) DB运行负载 说明：\n这里的单表，主键类型为 bigint(20),范围为：190247559466810-570722244711460，从主键范围划分看，数据分布均匀。 对单表如果没有安装主键切分，那么配置通道个数不会提升速度，效果与1个通道一样。 4.2.2 分表测试报告(2个分库，每个分库16张分表，共计32张分表) 通道数 DataX速度(Rec/s) DataX机器运行负载 DB网卡流出流量(MB/s) DB运行负载 5 约束限制 5.1 一致性视图问题 DRDS本身属于分布式数据库，对外无法提供一致性的多库多表视图，不同于Mysql等单库单表同步，DRDSReader无法抽取同一个时间切片的分库分表快照信息，也就是说DataX DrdsReader抽取底层不同的分表将获取不同的分表快照，无法保证强一致性。\n5.2 数据库编码问题 DRDS本身的编码设置非常灵活，包括指定编码到库、表、字段级别，甚至可以均不同编码。优先级从高到低为字段、表、库、实例。我们不推荐数据库用户设置如此混乱的编码，最好在库级别就统一到UTF-8。\nDrdsReader底层使用JDBC进行数据抽取，JDBC天然适配各类编码，并在底层进行了编码转换。因此DrdsReader不需用户指定编码，可以自动获取编码并转码。\n对于DRDS底层写入编码和其设定的编码不一致的混乱情况，DrdsReader对此无法识别，对此也无法提供解决方案，对于这类情况，导出有可能为乱码。\n5.3 增量数据同步 DrdsReader使用JDBC SELECT语句完成数据抽取工作，因此可以使用SELECT…WHERE…进行增量数据抽取，方式有多种：\n数据库在线应用写入数据库时，填充modify字段为更改时间戳，包括新增、更新、删除(逻辑删)。对于这类应用，DrdsReader只需要WHERE条件跟上一同步阶段时间戳即可。 对于新增流水型数据，DrdsReader可以WHERE条件后跟上一阶段最大自增ID即可。 对于业务上无字段区分新增、修改数据情况，DrdsReader也无法进行增量数据同步，只能同步全量数据。\n5.4 Sql安全性 DrdsReader提供querySql语句交给用户自己实现SELECT抽取语句，DrdsReader本身对querySql不做任何安全性校验。这块交由DataX用户方自己保证。\n6 FAQ Q: DrdsReader同步报错，报错信息为XXX\nA: 网络或者权限问题，请使用DRDS命令行测试：\nmysql -u -p -h -D -e “select * from \u003c表名\u003e”\n如果上述命令也报错，那可以证实是环境问题，请联系你的DBA。\nQ: 我想同步DRDS增量数据，怎么配置?\nA: DrdsReader必须业务支持增量字段DataX才能同步增量，例如在淘宝大部分业务表中，通过gmt_modified字段表征这条记录的最新修改时间，那么DataX DrdsReader只需要配置where条件为\n\"where\": \"Date(add_time) = '2014-06-01'\" ",
+  "wordCount" : "450",
+  "inLanguage": "en",
+  "datePublished": "2021-02-02T17:45:01Z",
+  "dateModified": "2021-02-02T17:45:01Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/20f3c6090e2448838d8be1baca3a5e1c/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    <h1 class="post-title">
+      DrdsReader 插件文档
+    </h1>
+    <div class="post-meta"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#drdsreader-%e6%8f%92%e4%bb%b6%e6%96%87%e6%a1%a3" aria-label="DrdsReader 插件文档">DrdsReader 插件文档</a><ul>
+                        
+                <li>
+                    <a href="#1-%e5%bf%ab%e9%80%9f%e4%bb%8b%e7%bb%8d" aria-label="1 快速介绍">1 快速介绍</a></li>
+                <li>
+                    <a href="#2-%e5%ae%9e%e7%8e%b0%e5%8e%9f%e7%90%86" aria-label="2 实现原理">2 实现原理</a></li>
+                <li>
+                    <a href="#3-%e5%8a%9f%e8%83%bd%e8%af%b4%e6%98%8e" aria-label="3 功能说明">3 功能说明</a><ul>
+                        
+                <li>
+                    <a href="#31-%e9%85%8d%e7%bd%ae%e6%a0%b7%e4%be%8b" aria-label="3.1 配置样例">3.1 配置样例</a></li>
+                <li>
+                    <a href="#32-%e5%8f%82%e6%95%b0%e8%af%b4%e6%98%8e" aria-label="3.2 参数说明">3.2 参数说明</a></li>
+                <li>
+                    <a href="#33-%e7%b1%bb%e5%9e%8b%e8%bd%ac%e6%8d%a2" aria-label="3.3 类型转换">3.3 类型转换</a></li></ul>
+                </li>
+                <li>
+                    <a href="#4-%e6%80%a7%e8%83%bd%e6%8a%a5%e5%91%8a" aria-label="4 性能报告">4 性能报告</a><ul>
+                        
+                <li>
+                    <a href="#41-%e7%8e%af%e5%a2%83%e5%87%86%e5%a4%87" aria-label="4.1 环境准备">4.1 环境准备</a><ul>
+                        
+                <li>
+                    <a href="#411-%e6%95%b0%e6%8d%ae%e7%89%b9%e5%be%81" aria-label="4.1.1 数据特征">4.1.1 数据特征</a></li>
+                <li>
+                    <a href="#412-%e6%9c%ba%e5%99%a8%e5%8f%82%e6%95%b0" aria-label="4.1.2 机器参数">4.1.2 机器参数</a></li>
+                <li>
+                    <a href="#413-datax-jvm-%e5%8f%82%e6%95%b0" aria-label="4.1.3 DataX jvm 参数">4.1.3 DataX jvm 参数</a></li></ul>
+                </li>
+                <li>
+                    <a href="#42-%e6%b5%8b%e8%af%95%e6%8a%a5%e5%91%8a" aria-label="4.2 测试报告">4.2 测试报告</a><ul>
+                        
+                <li>
+                    <a href="#421-%e5%8d%95%e8%a1%a8%e6%b5%8b%e8%af%95%e6%8a%a5%e5%91%8a" aria-label="4.2.1 单表测试报告">4.2.1 单表测试报告</a></li>
+                <li>
+                    <a href="#422-%e5%88%86%e8%a1%a8%e6%b5%8b%e8%af%95%e6%8a%a5%e5%91%8a2%e4%b8%aa%e5%88%86%e5%ba%93%e6%af%8f%e4%b8%aa%e5%88%86%e5%ba%9316%e5%bc%a0%e5%88%86%e8%a1%a8%e5%85%b1%e8%ae%a132%e5%bc%a0%e5%88%86%e8%a1%a8" aria-label="4.2.2 分表测试报告(2个分库，每个分库16张分表，共计32张分表)">4.2.2 分表测试报告(2个分库，每个分库16张分表，共计32张分表)</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#5-%e7%ba%a6%e6%9d%9f%e9%99%90%e5%88%b6" aria-label="5 约束限制">5 约束限制</a><ul>
+                        
+                <li>
+                    <a href="#51-%e4%b8%80%e8%87%b4%e6%80%a7%e8%a7%86%e5%9b%be%e9%97%ae%e9%a2%98" aria-label="5.1 一致性视图问题">5.1 一致性视图问题</a></li>
+                <li>
+                    <a href="#52-%e6%95%b0%e6%8d%ae%e5%ba%93%e7%bc%96%e7%a0%81%e9%97%ae%e9%a2%98" aria-label="5.2 数据库编码问题">5.2 数据库编码问题</a></li>
+                <li>
+                    <a href="#53-%e5%a2%9e%e9%87%8f%e6%95%b0%e6%8d%ae%e5%90%8c%e6%ad%a5" aria-label="5.3 增量数据同步">5.3 增量数据同步</a></li>
+                <li>
+                    <a href="#54-sql%e5%ae%89%e5%85%a8%e6%80%a7" aria-label="5.4 Sql安全性">5.4 Sql安全性</a></li></ul>
+                </li>
+                <li>
+                    <a href="#6-faq" aria-label="6 FAQ">6 FAQ</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="drdsreader-插件文档">DrdsReader 插件文档</h1>
+<hr>
+<h2 id="1-快速介绍">1 快速介绍</h2>
+<p>DrdsReader插件实现了从DRDS(分布式RDS)读取数据。在底层实现上，DrdsReader通过JDBC连接远程DRDS数据库，并执行相应的sql语句将数据从DRDS库中SELECT出来。</p>
+<p>DRDS的插件目前DataX只适配了Mysql引擎的场景，DRDS对于DataX而言，就是一套分布式Mysql数据库，并且大部分通信协议遵守Mysql使用场景。</p>
+<h2 id="2-实现原理">2 实现原理</h2>
+<p>简而言之，DrdsReader通过JDBC连接器连接到远程的DRDS数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程DRDS数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。</p>
+<p>对于用户配置Table、Column、Where的信息，DrdsReader将其拼接为SQL语句发送到DRDS数据库。不同于普通的Mysql数据库，DRDS作为分布式数据库系统，无法适配所有Mysql的协议，包括复杂的Join等语句，DRDS暂时无法支持。</p>
+<h2 id="3-功能说明">3 功能说明</h2>
+<h3 id="31-配置样例">3.1 配置样例</h3>
+<ul>
+<li>配置一个从DRDS数据库同步抽取数据到本地的作业:</li>
+</ul>
+<pre tabindex="0"><code>{
+    &#34;job&#34;: {
+        &#34;setting&#34;: {
+            &#34;speed&#34;: {
+            //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它.
+                 &#34;byte&#34;: 1048576
+            }
+            //出错限制
+                &#34;errorLimit&#34;: {
+                //出错的record条数上限，当大于该值即报错。
+                &#34;record&#34;: 0,
+                //出错的record百分比上限 1.0表示100%，0.02表示2%
+                &#34;percentage&#34;: 0.02
+            }
+        },
+        &#34;content&#34;: [
+            {
+                &#34;reader&#34;: {
+                    &#34;name&#34;: &#34;drdsReader&#34;,
+                    &#34;parameter&#34;: {
+                        // 数据库连接用户名
+                        &#34;username&#34;: &#34;root&#34;,
+                        // 数据库连接密码
+                        &#34;password&#34;: &#34;root&#34;,
+                        &#34;column&#34;: [
+                            &#34;id&#34;，&#34;name&#34;
+                        ],
+                        &#34;connection&#34;: [
+                            {
+                                &#34;table&#34;: [
+                                    &#34;table&#34;
+                                ],
+                                &#34;jdbcUrl&#34;: [
+     &#34;jdbc:mysql://127.0.0.1:3306/database&#34;
+                                ]
+                            }
+                        ]
+                    }
+                },
+               &#34;writer&#34;: {
+                    //writer类型
+                    &#34;name&#34;: &#34;streamwriter&#34;,
+                    //是否打印内容
+                    &#34;parameter&#34;: {
+                        &#34;print&#34;:true,
+                    }
+                }
+            }
+        ]
+    }
+}
+</code></pre><ul>
+<li>配置一个自定义SQL的数据库同步任务到本地内容的作业：</li>
+</ul>
+<pre tabindex="0"><code>{
+    &#34;job&#34;: {
+        &#34;setting&#34;: {
+        },
+        &#34;content&#34;: [
+            {
+                &#34;reader&#34;: {
+                    &#34;name&#34;: &#34;drdsreader&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;username&#34;: &#34;root&#34;,
+                        &#34;password&#34;: &#34;root&#34;,
+                        &#34;where&#34;: &#34;&#34;,
+                        &#34;connection&#34;: [
+                            {
+                                &#34;querySql&#34;: [
+                                    &#34;select db_id,on_line_flag from db_info where db_id &lt; 10;&#34;
+                                ],
+                                &#34;jdbcUrl&#34;: [
+                                    &#34;jdbc:drds://localhost:3306/database&#34;]
+                            }
+                        ]
+                    }
+                },
+                &#34;writer&#34;: {
+                    &#34;name&#34;: &#34;streamwriter&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;print&#34;: false,
+                        &#34;encoding&#34;: &#34;UTF-8&#34;
+                    }
+                }
+            }
+        ]
+    }
+}
+</code></pre><h3 id="32-参数说明">3.2 参数说明</h3>
+<ul>
+<li>
+<p><strong>jdbcUrl</strong></p>
+<ul>
+<li>
+<p>描述：描述的是到对端数据库的JDBC连接信息，使用JSON的数组描述.注意，jdbcUrl必须包含在connection配置单元中。DRDSReader中关于jdbcUrl中JSON数组填写一个JDBC连接即可。</p>
+<p>jdbcUrl按照Mysql官方规范，并可以填写连接附件控制信息。具体请参看<a href="http://dev.mysql.com/doc/connector-j/en/connector-j-reference-configuration-properties.html">mysql官方文档</a>。</p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>username</strong></p>
+<ul>
+<li>
+<p>描述：数据源的用户名 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>password</strong></p>
+<ul>
+<li>
+<p>描述：数据源指定用户名的密码 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>table</strong></p>
+<ul>
+<li>
+<p>描述：所选取需要抽取的表。注意，由于DRDS本身就是分布式数据源，因此填写多张表无意义。系统对多表不做校验。<!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>column</strong></p>
+<ul>
+<li>
+<p>描述：所配置的表中需要同步的列名集合，使用JSON的数组描述字段信息。用户使用*代表默认使用所有列配置，例如[&rsquo;*&rsquo;]。</p>
+<p>支持列裁剪，即列可以挑选部分列进行导出。</p>
+<p>支持列换序，即列可以不按照表schema信息进行导出。</p>
+<p>支持常量配置，用户需要按照Mysql SQL语法格式:
+[&ldquo;id&rdquo;, &ldquo;`table`&rdquo;, &ldquo;1&rdquo;, &ldquo;&lsquo;bazhen.csy&rsquo;&rdquo;, &ldquo;null&rdquo;, &ldquo;to_char(a + 1)&rdquo;, &ldquo;2.3&rdquo; , &ldquo;true&rdquo;]
+id为普通列名，`table`为包含保留在的列名，1为整形数字常量，&lsquo;bazhen.csy&rsquo;为字符串常量，null为空指针，to_char(a + 1)为表达式，2.3为浮点数，true为布尔值。</p>
+<p>column必须用户显示指定同步的列集合，不允许为空！</p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>where</strong></p>
+<ul>
+<li>
+<p>描述：筛选条件，DrdsReader根据指定的column、table、where条件拼接SQL，并根据这个SQL进行数据抽取。在实际业务场景中，往往会选择当天的数据进行同步，可以将where条件指定为gmt_create &gt; $bizdate 。<!-- raw HTML omitted -->。</p>
+<pre><code>where条件可以有效地进行业务增量同步。where条件不配置或者为空，视作全表同步数据。
+</code></pre>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>querySql</strong></p>
+<ul>
+<li>描述：暂时不支持配置querySql模式 <!-- raw HTML omitted --></li>
+</ul>
+</li>
+</ul>
+<h3 id="33-类型转换">3.3 类型转换</h3>
+<p>目前DrdsReader支持大部分DRDS类型，但也存在部分个别类型没有支持的情况，请注意检查你的类型。</p>
+<p>下面列出DrdsReader针对DRDS类型转换列表:</p>
+<table>
+<thead>
+<tr>
+<th>DataX 内部类型</th>
+<th>DRDS 数据类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Long</td>
+<td>int, tinyint, smallint, mediumint, int, bigint</td>
+</tr>
+<tr>
+<td>Double</td>
+<td>float, double, decimal</td>
+</tr>
+<tr>
+<td>String</td>
+<td>varchar, char, tinytext, text, mediumtext, longtext</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>date, datetime, timestamp, time, year</td>
+</tr>
+<tr>
+<td>Boolean</td>
+<td>bit, bool</td>
+</tr>
+<tr>
+<td>Bytes</td>
+<td>tinyblob, mediumblob, blob, longblob, varbinary</td>
+</tr>
+</tbody>
+</table>
+<p>请注意:</p>
+<ul>
+<li><code>除上述罗列字段类型外，其他类型均不支持</code>。</li>
+<li><code>类似Mysql，tinyint(1)视作整形</code>。</li>
+<li><code>类似Mysql，bit类型读取目前是未定义状态。</code></li>
+</ul>
+<h2 id="4-性能报告">4 性能报告</h2>
+<h3 id="41-环境准备">4.1 环境准备</h3>
+<h4 id="411-数据特征">4.1.1 数据特征</h4>
+<p>建表语句：</p>
+<pre><code>CREATE TABLE `tc_biz_vertical_test_0000` (
+`biz_order_id` bigint(20) NOT NULL COMMENT 'id',
+`key_value` varchar(4000) NOT NULL COMMENT 'Key-value的内容',
+`gmt_create` datetime NOT NULL COMMENT '创建时间',
+`gmt_modified` datetime NOT NULL COMMENT '修改时间',
+`attribute_cc` int(11) DEFAULT NULL COMMENT '防止并发修改的标志',
+`value_type` int(11) NOT NULL DEFAULT '0' COMMENT '类型',
+`buyer_id` bigint(20) DEFAULT NULL COMMENT 'buyerid',
+`seller_id` bigint(20) DEFAULT NULL COMMENT 'seller_id',
+PRIMARY KEY (`biz_order_id`,`value_type`),
+KEY `idx_biz_vertical_gmtmodified` (`gmt_modified`)
+) ENGINE=InnoDB DEFAULT CHARSET=gbk COMMENT='tc_biz_vertical'
+</code></pre>
+<p>单行记录类似于：</p>
+<pre><code>biz_order_id: 888888888
+   key_value: ;orderIds:20148888888,2014888888813800;
+  gmt_create: 2011-09-24 11:07:20
+gmt_modified: 2011-10-24 17:56:34
+attribute_cc: 1
+  value_type: 3
+	buyer_id: 8888888
+   seller_id: 1
+</code></pre>
+<h4 id="412-机器参数">4.1.2 机器参数</h4>
+<ul>
+<li>
+<p>执行DataX的机器参数为:</p>
+<ol>
+<li>cpu: 24核 Intel(R) Xeon(R) CPU E5-2630 0 @ 2.30GHz</li>
+<li>mem: 48GB</li>
+<li>net: 千兆双网卡</li>
+<li>disc: DataX 数据不落磁盘，不统计此项</li>
+</ol>
+</li>
+<li>
+<p>DRDS数据库机器参数为:</p>
+<ol>
+<li>cpu: 32核 Intel(R) Xeon(R) CPU E5-2650 v2 @ 2.60GHz</li>
+<li>mem: 256GB</li>
+<li>net: 千兆双网卡</li>
+<li>disc: BTWL419303E2800RGN  INTEL SSDSC2BB800G4   D2010370</li>
+</ol>
+</li>
+</ul>
+<h4 id="413-datax-jvm-参数">4.1.3 DataX jvm 参数</h4>
+<pre><code>-Xms1024m -Xmx1024m -XX:+HeapDumpOnOutOfMemoryError
+</code></pre>
+<h3 id="42-测试报告">4.2 测试报告</h3>
+<h4 id="421-单表测试报告">4.2.1 单表测试报告</h4>
+<table>
+<thead>
+<tr>
+<th>通道数</th>
+<th>是否按照主键切分</th>
+<th>DataX速度(Rec/s)</th>
+<th>DataX机器运行负载</th>
+<th>DB网卡流出流量(MB/s)</th>
+<th>DB运行负载</th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+</table>
+<p>说明：</p>
+<ol>
+<li>这里的单表，主键类型为 bigint(20),范围为：190247559466810-570722244711460，从主键范围划分看，数据分布均匀。</li>
+<li>对单表如果没有安装主键切分，那么配置通道个数不会提升速度，效果与1个通道一样。</li>
+</ol>
+<h4 id="422-分表测试报告2个分库每个分库16张分表共计32张分表">4.2.2 分表测试报告(2个分库，每个分库16张分表，共计32张分表)</h4>
+<table>
+<thead>
+<tr>
+<th>通道数</th>
+<th>DataX速度(Rec/s)</th>
+<th>DataX机器运行负载</th>
+<th>DB网卡流出流量(MB/s)</th>
+<th>DB运行负载</th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+</table>
+<h2 id="5-约束限制">5 约束限制</h2>
+<h3 id="51-一致性视图问题">5.1 一致性视图问题</h3>
+<p>DRDS本身属于分布式数据库，对外无法提供一致性的多库多表视图，不同于Mysql等单库单表同步，DRDSReader无法抽取同一个时间切片的分库分表快照信息，也就是说DataX DrdsReader抽取底层不同的分表将获取不同的分表快照，无法保证强一致性。</p>
+<h3 id="52-数据库编码问题">5.2 数据库编码问题</h3>
+<p>DRDS本身的编码设置非常灵活，包括指定编码到库、表、字段级别，甚至可以均不同编码。优先级从高到低为字段、表、库、实例。我们不推荐数据库用户设置如此混乱的编码，最好在库级别就统一到UTF-8。</p>
+<p>DrdsReader底层使用JDBC进行数据抽取，JDBC天然适配各类编码，并在底层进行了编码转换。因此DrdsReader不需用户指定编码，可以自动获取编码并转码。</p>
+<p>对于DRDS底层写入编码和其设定的编码不一致的混乱情况，DrdsReader对此无法识别，对此也无法提供解决方案，对于这类情况，<code>导出有可能为乱码</code>。</p>
+<h3 id="53-增量数据同步">5.3 增量数据同步</h3>
+<p>DrdsReader使用JDBC SELECT语句完成数据抽取工作，因此可以使用SELECT&hellip;WHERE&hellip;进行增量数据抽取，方式有多种：</p>
+<ul>
+<li>数据库在线应用写入数据库时，填充modify字段为更改时间戳，包括新增、更新、删除(逻辑删)。对于这类应用，DrdsReader只需要WHERE条件跟上一同步阶段时间戳即可。</li>
+<li>对于新增流水型数据，DrdsReader可以WHERE条件后跟上一阶段最大自增ID即可。</li>
+</ul>
+<p>对于业务上无字段区分新增、修改数据情况，DrdsReader也无法进行增量数据同步，只能同步全量数据。</p>
+<h3 id="54-sql安全性">5.4 Sql安全性</h3>
+<p>DrdsReader提供querySql语句交给用户自己实现SELECT抽取语句，DrdsReader本身对querySql不做任何安全性校验。这块交由DataX用户方自己保证。</p>
+<h2 id="6-faq">6 FAQ</h2>
+<hr>
+<p><strong>Q: DrdsReader同步报错，报错信息为XXX</strong></p>
+<p>A: 网络或者权限问题，请使用DRDS命令行测试：</p>
+<p>mysql -u<!-- raw HTML omitted --> -p<!-- raw HTML omitted --> -h<!-- raw HTML omitted --> -D<!-- raw HTML omitted --> -e &ldquo;select * from &lt;表名&gt;&rdquo;</p>
+<p>如果上述命令也报错，那可以证实是环境问题，请联系你的DBA。</p>
+<hr>
+<p><strong>Q: 我想同步DRDS增量数据，怎么配置?</strong></p>
+<p>A: DrdsReader必须业务支持增量字段DataX才能同步增量，例如在淘宝大部分业务表中，通过gmt_modified字段表征这条记录的最新修改时间，那么DataX DrdsReader只需要配置where条件为</p>
+<pre tabindex="0"><code>    &#34;where&#34;: &#34;Date(add_time) = &#39;2014-06-01&#39;&#34;
+</code></pre><hr>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

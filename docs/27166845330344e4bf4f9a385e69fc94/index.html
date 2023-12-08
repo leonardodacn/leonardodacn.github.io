@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>服务器开发通信协议设计介绍 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="服务器开发通信协议设计介绍 一、选择TCP还是UDP协议 由于我们的即时通讯软件的用户存在用户状态问题，即用户登录成功以后可以在他的好友列表中看到哪些好友在线，所以客户端和服务器需要保持长连接状态。另外即时通讯软件一般要求信息准确、有序、完整地到达对端，而这也是TCP协议的特点之一。综合这两个所以这里我们选择TCP协议，而不是UDP协议。
+二、协议的结构 由于TCP协议是流式协议，所谓流式协议即通讯的内容是无边界的字节流：如A给B连续发送了三个数据包，每个包的大小都是100个字节，那么B可能会一次性收到300个字节；也可能先收到100个字节，再收到200个字节；也可能先收到100个字节，再收到50个字节，再收到150个字节；或者先收到50个字节，再收到50个字节，再收到50个字节，最后收到150个字节。也就是说，B可能以任何组合形式收到这300个字节。即像水流一样无明确的边界。为了能让对端知道如何给包分界，目前一般有三种做法：
+以固定大小字节数目来分界，上文所说的就是属于这种类型，如每个包100个字节，对端每收齐100个字节，就当成一个包来解析； 以特定符号来分界，如每个包都以特定的字符来结尾（如\n），当在字节流中读取到该字符时，则表明上一个包到此为止。 固定包头&#43;包体结构，这种结构中一般包头部分是一个固定字节长度的结构，并且包头中会有一个特定的字段指定包体的大小。这是目前各种网络应用用的最多的一种包格式。 上面三种分包方式各有优缺点，方法1和方法2简单易操作，但是缺点也很明显，就是很不灵活，如方法一当包数据不足指定长度，只能使用占位符如0来凑，比较浪费；方法2中包中不能有包界定符，否则就会引起歧义，也就是要求包内容中不能有某些特殊符号。而方法3虽然解决了方法1和方法2的缺点，但是操作起来就比较麻烦。我们的即时通讯协议就采用第三种分包方式。所以我们的协议包的包头看起来像这样：
+struct package_header { int32_t bodysize; }; 一个应用中，有许多的应用数据，拿我们这里的即时通讯来说，有注册、登录、获取好友列表、好友消息等各种各样的协议数据包，而每个包因为业务内容不一样可能数据内容也不一样，所以各个包可能看起来像下面这样：
+struct package_header { int32_t bodysize; }; //登录数据包 struct register_package { package_header header; //命令号 int32_t cmd; //注册用户名 char username[16]; //注册密码 char password[16]; //注册昵称 char nickname[16]; //注册手机号 char mobileno[16]; }; //登录数据包 struct login_package { package_header header; //命令号 int32_t cmd; //登录用户名 char username[16]; //密码 char password[16]; //客户端类型 int32_t clienttype; //上线类型，如在线、隐身、忙碌、离开等 int32_t onlinetype; }; //获取好友列表 struct getfriend_package { package_header header; //命令号 int32_t cmd; }; //聊天内容 struct chat_package { package_header header; //命令号 int32_t cmd; //发送人userid int32_t senderid; //接收人userid int32_t targetid; //消息内容 char chatcontent[8192]; }; 看到没有？由于每一个业务的内容不一样，定义的结构体也不一样。如果业务比较多的话，我们需要定义各种各样的这种结构体，这简直是一场噩梦。那么有没有什么方法可以避免这个问题呢？有，我受jdk中的流对象的WriteInt32、WriteByte、WriteInt64、WriteString，这样的接口的启发，也发明了一套这样的协议，而且这套协议基本上是通用协议，可用于任何场景。我们的包还是分为包头和包体两部分，包头和上文所说的一样，包体是一个不固定大小的二进制流，其长度由包头中的指定包体长度的字段决定。
+struct package_protocol { int32_t bodysize; //注意：C/C&#43;&#43;语法不能这么定义结构体， //这里只是为了说明含义的伪代码 //bodycontent即为一个不固定大小的二进制流 char binarystream[bodysize]; }; 接下来的核心部分就是如何操作这个二进制流，我们将流分为二进制读和二进制写两种流，下面给出接口定义：">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/27166845330344e4bf4f9a385e69fc94/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="服务器开发通信协议设计介绍" />
+<meta property="og:description" content="服务器开发通信协议设计介绍 一、选择TCP还是UDP协议 由于我们的即时通讯软件的用户存在用户状态问题，即用户登录成功以后可以在他的好友列表中看到哪些好友在线，所以客户端和服务器需要保持长连接状态。另外即时通讯软件一般要求信息准确、有序、完整地到达对端，而这也是TCP协议的特点之一。综合这两个所以这里我们选择TCP协议，而不是UDP协议。
+二、协议的结构 由于TCP协议是流式协议，所谓流式协议即通讯的内容是无边界的字节流：如A给B连续发送了三个数据包，每个包的大小都是100个字节，那么B可能会一次性收到300个字节；也可能先收到100个字节，再收到200个字节；也可能先收到100个字节，再收到50个字节，再收到150个字节；或者先收到50个字节，再收到50个字节，再收到50个字节，最后收到150个字节。也就是说，B可能以任何组合形式收到这300个字节。即像水流一样无明确的边界。为了能让对端知道如何给包分界，目前一般有三种做法：
+以固定大小字节数目来分界，上文所说的就是属于这种类型，如每个包100个字节，对端每收齐100个字节，就当成一个包来解析； 以特定符号来分界，如每个包都以特定的字符来结尾（如\n），当在字节流中读取到该字符时，则表明上一个包到此为止。 固定包头&#43;包体结构，这种结构中一般包头部分是一个固定字节长度的结构，并且包头中会有一个特定的字段指定包体的大小。这是目前各种网络应用用的最多的一种包格式。 上面三种分包方式各有优缺点，方法1和方法2简单易操作，但是缺点也很明显，就是很不灵活，如方法一当包数据不足指定长度，只能使用占位符如0来凑，比较浪费；方法2中包中不能有包界定符，否则就会引起歧义，也就是要求包内容中不能有某些特殊符号。而方法3虽然解决了方法1和方法2的缺点，但是操作起来就比较麻烦。我们的即时通讯协议就采用第三种分包方式。所以我们的协议包的包头看起来像这样：
+struct package_header { int32_t bodysize; }; 一个应用中，有许多的应用数据，拿我们这里的即时通讯来说，有注册、登录、获取好友列表、好友消息等各种各样的协议数据包，而每个包因为业务内容不一样可能数据内容也不一样，所以各个包可能看起来像下面这样：
+struct package_header { int32_t bodysize; }; //登录数据包 struct register_package { package_header header; //命令号 int32_t cmd; //注册用户名 char username[16]; //注册密码 char password[16]; //注册昵称 char nickname[16]; //注册手机号 char mobileno[16]; }; //登录数据包 struct login_package { package_header header; //命令号 int32_t cmd; //登录用户名 char username[16]; //密码 char password[16]; //客户端类型 int32_t clienttype; //上线类型，如在线、隐身、忙碌、离开等 int32_t onlinetype; }; //获取好友列表 struct getfriend_package { package_header header; //命令号 int32_t cmd; }; //聊天内容 struct chat_package { package_header header; //命令号 int32_t cmd; //发送人userid int32_t senderid; //接收人userid int32_t targetid; //消息内容 char chatcontent[8192]; }; 看到没有？由于每一个业务的内容不一样，定义的结构体也不一样。如果业务比较多的话，我们需要定义各种各样的这种结构体，这简直是一场噩梦。那么有没有什么方法可以避免这个问题呢？有，我受jdk中的流对象的WriteInt32、WriteByte、WriteInt64、WriteString，这样的接口的启发，也发明了一套这样的协议，而且这套协议基本上是通用协议，可用于任何场景。我们的包还是分为包头和包体两部分，包头和上文所说的一样，包体是一个不固定大小的二进制流，其长度由包头中的指定包体长度的字段决定。
+struct package_protocol { int32_t bodysize; //注意：C/C&#43;&#43;语法不能这么定义结构体， //这里只是为了说明含义的伪代码 //bodycontent即为一个不固定大小的二进制流 char binarystream[bodysize]; }; 接下来的核心部分就是如何操作这个二进制流，我们将流分为二进制读和二进制写两种流，下面给出接口定义：" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/27166845330344e4bf4f9a385e69fc94/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="服务器开发通信协议设计介绍"/>
+<meta name="twitter:description" content="服务器开发通信协议设计介绍 一、选择TCP还是UDP协议 由于我们的即时通讯软件的用户存在用户状态问题，即用户登录成功以后可以在他的好友列表中看到哪些好友在线，所以客户端和服务器需要保持长连接状态。另外即时通讯软件一般要求信息准确、有序、完整地到达对端，而这也是TCP协议的特点之一。综合这两个所以这里我们选择TCP协议，而不是UDP协议。
+二、协议的结构 由于TCP协议是流式协议，所谓流式协议即通讯的内容是无边界的字节流：如A给B连续发送了三个数据包，每个包的大小都是100个字节，那么B可能会一次性收到300个字节；也可能先收到100个字节，再收到200个字节；也可能先收到100个字节，再收到50个字节，再收到150个字节；或者先收到50个字节，再收到50个字节，再收到50个字节，最后收到150个字节。也就是说，B可能以任何组合形式收到这300个字节。即像水流一样无明确的边界。为了能让对端知道如何给包分界，目前一般有三种做法：
+以固定大小字节数目来分界，上文所说的就是属于这种类型，如每个包100个字节，对端每收齐100个字节，就当成一个包来解析； 以特定符号来分界，如每个包都以特定的字符来结尾（如\n），当在字节流中读取到该字符时，则表明上一个包到此为止。 固定包头&#43;包体结构，这种结构中一般包头部分是一个固定字节长度的结构，并且包头中会有一个特定的字段指定包体的大小。这是目前各种网络应用用的最多的一种包格式。 上面三种分包方式各有优缺点，方法1和方法2简单易操作，但是缺点也很明显，就是很不灵活，如方法一当包数据不足指定长度，只能使用占位符如0来凑，比较浪费；方法2中包中不能有包界定符，否则就会引起歧义，也就是要求包内容中不能有某些特殊符号。而方法3虽然解决了方法1和方法2的缺点，但是操作起来就比较麻烦。我们的即时通讯协议就采用第三种分包方式。所以我们的协议包的包头看起来像这样：
+struct package_header { int32_t bodysize; }; 一个应用中，有许多的应用数据，拿我们这里的即时通讯来说，有注册、登录、获取好友列表、好友消息等各种各样的协议数据包，而每个包因为业务内容不一样可能数据内容也不一样，所以各个包可能看起来像下面这样：
+struct package_header { int32_t bodysize; }; //登录数据包 struct register_package { package_header header; //命令号 int32_t cmd; //注册用户名 char username[16]; //注册密码 char password[16]; //注册昵称 char nickname[16]; //注册手机号 char mobileno[16]; }; //登录数据包 struct login_package { package_header header; //命令号 int32_t cmd; //登录用户名 char username[16]; //密码 char password[16]; //客户端类型 int32_t clienttype; //上线类型，如在线、隐身、忙碌、离开等 int32_t onlinetype; }; //获取好友列表 struct getfriend_package { package_header header; //命令号 int32_t cmd; }; //聊天内容 struct chat_package { package_header header; //命令号 int32_t cmd; //发送人userid int32_t senderid; //接收人userid int32_t targetid; //消息内容 char chatcontent[8192]; }; 看到没有？由于每一个业务的内容不一样，定义的结构体也不一样。如果业务比较多的话，我们需要定义各种各样的这种结构体，这简直是一场噩梦。那么有没有什么方法可以避免这个问题呢？有，我受jdk中的流对象的WriteInt32、WriteByte、WriteInt64、WriteString，这样的接口的启发，也发明了一套这样的协议，而且这套协议基本上是通用协议，可用于任何场景。我们的包还是分为包头和包体两部分，包头和上文所说的一样，包体是一个不固定大小的二进制流，其长度由包头中的指定包体长度的字段决定。
+struct package_protocol { int32_t bodysize; //注意：C/C&#43;&#43;语法不能这么定义结构体， //这里只是为了说明含义的伪代码 //bodycontent即为一个不固定大小的二进制流 char binarystream[bodysize]; }; 接下来的核心部分就是如何操作这个二进制流，我们将流分为二进制读和二进制写两种流，下面给出接口定义："/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "服务器开发通信协议设计介绍",
+      "item": "https://haokiu.com/27166845330344e4bf4f9a385e69fc94/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "服务器开发通信协议设计介绍",
+  "name": "服务器开发通信协议设计介绍",
+  "description": "服务器开发通信协议设计介绍 一、选择TCP还是UDP协议 由于我们的即时通讯软件的用户存在用户状态问题，即用户登录成功以后可以在他的好友列表中看到哪些好友在线，所以客户端和服务器需要保持长连接状态。另外即时通讯软件一般要求信息准确、有序、完整地到达对端，而这也是TCP协议的特点之一。综合这两个所以这里我们选择TCP协议，而不是UDP协议。\n二、协议的结构 由于TCP协议是流式协议，所谓流式协议即通讯的内容是无边界的字节流：如A给B连续发送了三个数据包，每个包的大小都是100个字节，那么B可能会一次性收到300个字节；也可能先收到100个字节，再收到200个字节；也可能先收到100个字节，再收到50个字节，再收到150个字节；或者先收到50个字节，再收到50个字节，再收到50个字节，最后收到150个字节。也就是说，B可能以任何组合形式收到这300个字节。即像水流一样无明确的边界。为了能让对端知道如何给包分界，目前一般有三种做法：\n以固定大小字节数目来分界，上文所说的就是属于这种类型，如每个包100个字节，对端每收齐100个字节，就当成一个包来解析； 以特定符号来分界，如每个包都以特定的字符来结尾（如\\n），当在字节流中读取到该字符时，则表明上一个包到此为止。 固定包头+包体结构，这种结构中一般包头部分是一个固定字节长度的结构，并且包头中会有一个特定的字段指定包体的大小。这是目前各种网络应用用的最多的一种包格式。 上面三种分包方式各有优缺点，方法1和方法2简单易操作，但是缺点也很明显，就是很不灵活，如方法一当包数据不足指定长度，只能使用占位符如0来凑，比较浪费；方法2中包中不能有包界定符，否则就会引起歧义，也就是要求包内容中不能有某些特殊符号。而方法3虽然解决了方法1和方法2的缺点，但是操作起来就比较麻烦。我们的即时通讯协议就采用第三种分包方式。所以我们的协议包的包头看起来像这样：\nstruct package_header { int32_t bodysize; }; 一个应用中，有许多的应用数据，拿我们这里的即时通讯来说，有注册、登录、获取好友列表、好友消息等各种各样的协议数据包，而每个包因为业务内容不一样可能数据内容也不一样，所以各个包可能看起来像下面这样：\nstruct package_header { int32_t bodysize; }; //登录数据包 struct register_package { package_header header; //命令号 int32_t cmd; //注册用户名 char username[16]; //注册密码 char password[16]; //注册昵称 char nickname[16]; //注册手机号 char mobileno[16]; }; //登录数据包 struct login_package { package_header header; //命令号 int32_t cmd; //登录用户名 char username[16]; //密码 char password[16]; //客户端类型 int32_t clienttype; //上线类型，如在线、隐身、忙碌、离开等 int32_t onlinetype; }; //获取好友列表 struct getfriend_package { package_header header; //命令号 int32_t cmd; }; //聊天内容 struct chat_package { package_header header; //命令号 int32_t cmd; //发送人userid int32_t senderid; //接收人userid int32_t targetid; //消息内容 char chatcontent[8192]; }; 看到没有？由于每一个业务的内容不一样，定义的结构体也不一样。如果业务比较多的话，我们需要定义各种各样的这种结构体，这简直是一场噩梦。那么有没有什么方法可以避免这个问题呢？有，我受jdk中的流对象的WriteInt32、WriteByte、WriteInt64、WriteString，这样的接口的启发，也发明了一套这样的协议，而且这套协议基本上是通用协议，可用于任何场景。我们的包还是分为包头和包体两部分，包头和上文所说的一样，包体是一个不固定大小的二进制流，其长度由包头中的指定包体长度的字段决定。\nstruct package_protocol { int32_t bodysize; //注意：C/C++语法不能这么定义结构体， //这里只是为了说明含义的伪代码 //bodycontent即为一个不固定大小的二进制流 char binarystream[bodysize]; }; 接下来的核心部分就是如何操作这个二进制流，我们将流分为二进制读和二进制写两种流，下面给出接口定义：",
+  "keywords": [
+    
+  ],
+  "articleBody": "服务器开发通信协议设计介绍 一、选择TCP还是UDP协议 由于我们的即时通讯软件的用户存在用户状态问题，即用户登录成功以后可以在他的好友列表中看到哪些好友在线，所以客户端和服务器需要保持长连接状态。另外即时通讯软件一般要求信息准确、有序、完整地到达对端，而这也是TCP协议的特点之一。综合这两个所以这里我们选择TCP协议，而不是UDP协议。\n二、协议的结构 由于TCP协议是流式协议，所谓流式协议即通讯的内容是无边界的字节流：如A给B连续发送了三个数据包，每个包的大小都是100个字节，那么B可能会一次性收到300个字节；也可能先收到100个字节，再收到200个字节；也可能先收到100个字节，再收到50个字节，再收到150个字节；或者先收到50个字节，再收到50个字节，再收到50个字节，最后收到150个字节。也就是说，B可能以任何组合形式收到这300个字节。即像水流一样无明确的边界。为了能让对端知道如何给包分界，目前一般有三种做法：\n以固定大小字节数目来分界，上文所说的就是属于这种类型，如每个包100个字节，对端每收齐100个字节，就当成一个包来解析； 以特定符号来分界，如每个包都以特定的字符来结尾（如\\n），当在字节流中读取到该字符时，则表明上一个包到此为止。 固定包头+包体结构，这种结构中一般包头部分是一个固定字节长度的结构，并且包头中会有一个特定的字段指定包体的大小。这是目前各种网络应用用的最多的一种包格式。 上面三种分包方式各有优缺点，方法1和方法2简单易操作，但是缺点也很明显，就是很不灵活，如方法一当包数据不足指定长度，只能使用占位符如0来凑，比较浪费；方法2中包中不能有包界定符，否则就会引起歧义，也就是要求包内容中不能有某些特殊符号。而方法3虽然解决了方法1和方法2的缺点，但是操作起来就比较麻烦。我们的即时通讯协议就采用第三种分包方式。所以我们的协议包的包头看起来像这样：\nstruct package_header { int32_t bodysize; }; 一个应用中，有许多的应用数据，拿我们这里的即时通讯来说，有注册、登录、获取好友列表、好友消息等各种各样的协议数据包，而每个包因为业务内容不一样可能数据内容也不一样，所以各个包可能看起来像下面这样：\nstruct package_header { int32_t bodysize; }; //登录数据包 struct register_package { package_header header; //命令号 int32_t cmd; //注册用户名 char username[16]; //注册密码 char password[16]; //注册昵称 char nickname[16]; //注册手机号 char mobileno[16]; }; //登录数据包 struct login_package { package_header header; //命令号 int32_t cmd; //登录用户名 char username[16]; //密码 char password[16]; //客户端类型 int32_t clienttype; //上线类型，如在线、隐身、忙碌、离开等 int32_t onlinetype; }; //获取好友列表 struct getfriend_package { package_header header; //命令号 int32_t cmd; }; //聊天内容 struct chat_package { package_header header; //命令号 int32_t cmd; //发送人userid int32_t senderid; //接收人userid int32_t targetid; //消息内容 char chatcontent[8192]; }; 看到没有？由于每一个业务的内容不一样，定义的结构体也不一样。如果业务比较多的话，我们需要定义各种各样的这种结构体，这简直是一场噩梦。那么有没有什么方法可以避免这个问题呢？有，我受jdk中的流对象的WriteInt32、WriteByte、WriteInt64、WriteString，这样的接口的启发，也发明了一套这样的协议，而且这套协议基本上是通用协议，可用于任何场景。我们的包还是分为包头和包体两部分，包头和上文所说的一样，包体是一个不固定大小的二进制流，其长度由包头中的指定包体长度的字段决定。\nstruct package_protocol { int32_t bodysize; //注意：C/C++语法不能这么定义结构体， //这里只是为了说明含义的伪代码 //bodycontent即为一个不固定大小的二进制流 char binarystream[bodysize]; }; 接下来的核心部分就是如何操作这个二进制流，我们将流分为二进制读和二进制写两种流，下面给出接口定义：\n//写 class BinaryWriteStream { public: BinaryWriteStream(string* data); const char* GetData() const; size_t GetSize() const; bool WriteCString(const char* str, size_t len); bool WriteString(const string\u0026 str); bool WriteDouble(double value, bool isNULL = false); bool WriteInt64(int64_t value, bool isNULL = false); bool WriteInt32(int32_t i, bool isNULL = false); bool WriteShort(short i, bool isNULL = false); bool WriteChar(char c, bool isNULL = false); size_t GetCurrentPos() const{ return m_data-\u003elength(); } void Flush(); void Clear(); private: string* m_data; }; //读 class BinaryReadStream : public IReadStream { private: const char* const ptr; const size_t len; const char* cur; BinaryReadStream(const BinaryReadStream\u0026); BinaryReadStream\u0026 operator=(const BinaryReadStream\u0026); public: BinaryReadStream(const char* ptr, size_t len); const char* GetData() const; size_t GetSize() const; bool IsEmpty() const; bool ReadString(string* str, size_t maxlen, size_t\u0026 outlen); bool ReadCString(char* str, size_t strlen, size_t\u0026 len); bool ReadCCString(const char** str, size_t maxlen, size_t\u0026 outlen); bool ReadInt32(int32_t\u0026 i); bool ReadInt64(int64_t\u0026 i); bool ReadShort(short\u0026 i); bool ReadChar(char\u0026 c); size_t ReadAll(char* szBuffer, size_t iLen) const; bool IsEnd() const; const char* GetCurrent() const{ return cur; } public: bool ReadLength(size_t \u0026 len); bool ReadLengthWithoutOffset(size_t \u0026headlen, size_t \u0026 outlen); }; 这样如果是上文的一个登录数据包，我们只要写成如下形式就可以了：\nstd::string outbuf; BinaryWriteStream stream(\u0026outbuf); stream.WriteInt32(cmd); stream.WriteCString(username, 16); stream.WriteCString(password, 16); stream.WriteInt32(clienttype); stream.WriteInt32(onlinetype); //最终数据就存储到outbuf中去了 stream.Flush(); 接着我们再对端，解得正确的包体后，我们只要按写入的顺序依次读出来即可：\nBinaryWriteStream stream(outbuf.c_str(), outbuf.length()); int32_t cmd; stream.WriteInt32(cmd); char username[16]; stream.ReadCString(username, 16, NULL); char password[16]; stream.WriteCString(password, 16, NULL); int32_t clienttype; stream.WriteInt32(clienttype); int32_t onlinetype; stream.WriteInt32(onlinetype); 这里给出BinaryReadStream和BinaryWriteStream的完整实现：\n//计算校验和 unsigned short checksum(const unsigned short *buffer, int size) { unsigned int cksum = 0; while (size \u003e 1) { cksum += *buffer++; size -= sizeof(unsigned short); } if (size) { cksum += *(unsigned char*)buffer; } //将32位数转换成16 while (cksum \u003e\u003e 16) cksum = (cksum \u003e\u003e 16) + (cksum \u0026 0xffff); return (unsigned short)(~cksum); } bool compress_(unsigned int i, char *buf, size_t \u0026len) { len = 0; for (int a = 4; a \u003e= 0; a--) { char c; c = i \u003e\u003e (a * 7) \u0026 0x7f; if (c == 0x00 \u0026\u0026 len == 0) continue; if (a == 0) c \u0026= 0x7f; else c |= 0x80; buf[len] = c; len++; } if (len == 0) { len++; buf[0] = 0; } //cout \u003c\u003c \"compress:\" \u003c\u003c i \u003c\u003c endl; //cout \u003c\u003c \"compress len:\" \u003c\u003c len \u003c\u003c endl; return true; } bool uncompress_(char *buf, size_t len, unsigned int \u0026i) { i = 0; for (int index = 0; index \u003c (int)len; index++) { char c = *(buf + index); i = i \u003c\u003c 7; c \u0026= 0x7f; i |= c; } //cout \u003c\u003c \"uncompress:\" \u003c\u003c i \u003c\u003c endl; return true; } BinaryReadStream::BinaryReadStream(const char* ptr_, size_t len_) : ptr(ptr_), len(len_), cur(ptr_) { cur += BINARY_PACKLEN_LEN_2 + CHECKSUM_LEN; } bool BinaryReadStream::IsEmpty() const { return len \u003c= BINARY_PACKLEN_LEN_2; } size_t BinaryReadStream::GetSize() const { return len; } bool BinaryReadStream::ReadCString(char* str, size_t strlen, /* out */ size_t\u0026 outlen) { size_t fieldlen; size_t headlen; if (!ReadLengthWithoutOffset(headlen, fieldlen)) { return false; } // user buffer is not enough if (fieldlen \u003e strlen) { return false; } // 偏移到数据的位置 //cur += BINARY_PACKLEN_LEN_2; cur += headlen; if (cur + fieldlen \u003e ptr + len) { outlen = 0; return false; } memcpy(str, cur, fieldlen); outlen = fieldlen; cur += outlen; return true; } bool BinaryReadStream::ReadString(string* str, size_t maxlen, size_t\u0026 outlen) { size_t headlen; size_t fieldlen; if (!ReadLengthWithoutOffset(headlen, fieldlen)) { return false; } // user buffer is not enough if (maxlen != 0 \u0026\u0026 fieldlen \u003e maxlen) { return false; } // 偏移到数据的位置 //cur += BINARY_PACKLEN_LEN_2; cur += headlen; if (cur + fieldlen \u003e ptr + len) { outlen = 0; return false; } str-\u003eassign(cur, fieldlen); outlen = fieldlen; cur += outlen; return true; } bool BinaryReadStream::ReadCCString(const char** str, size_t maxlen, size_t\u0026 outlen) { size_t headlen; size_t fieldlen; if (!ReadLengthWithoutOffset(headlen, fieldlen)) { return false; } // user buffer is not enough if (maxlen != 0 \u0026\u0026 fieldlen \u003e maxlen) { return false; } // 偏移到数据的位置 //cur += BINARY_PACKLEN_LEN_2; cur += headlen; //memcpy(str, cur, fieldlen); if (cur + fieldlen \u003e ptr + len) { outlen = 0; return false; } *str = cur; outlen = fieldlen; cur += outlen; return true; } bool BinaryReadStream::ReadInt32(int32_t\u0026 i) { const int VALUE_SIZE = sizeof(int32_t); if (cur + VALUE_SIZE \u003e ptr + len) return false; memcpy(\u0026i, cur, VALUE_SIZE); i = ntohl(i); cur += VALUE_SIZE; return true; } bool BinaryReadStream::ReadInt64(int64_t\u0026 i) { char int64str[128]; size_t length; if (!ReadCString(int64str, 128, length)) return false; i = atoll(int64str); return true; } bool BinaryReadStream::ReadShort(short\u0026 i) { const int VALUE_SIZE = sizeof(short); if (cur + VALUE_SIZE \u003e ptr + len) { return false; } memcpy(\u0026i, cur, VALUE_SIZE); i = ntohs(i); cur += VALUE_SIZE; return true; } bool BinaryReadStream::ReadChar(char\u0026 c) { const int VALUE_SIZE = sizeof(char); if (cur + VALUE_SIZE \u003e ptr + len) { return false; } memcpy(\u0026c, cur, VALUE_SIZE); cur += VALUE_SIZE; return true; } bool BinaryReadStream::ReadLength(size_t \u0026 outlen) { size_t headlen; if (!ReadLengthWithoutOffset(headlen, outlen)) { return false; } //cur += BINARY_PACKLEN_LEN_2; cur += headlen; return true; } bool BinaryReadStream::ReadLengthWithoutOffset(size_t\u0026 headlen, size_t \u0026 outlen) { headlen = 0; const char *temp = cur; char buf[5]; for (size_t i = 0; i\u003e 7 | 0x0) == 0x0) if ((buf[i] \u0026 0x80) == 0x00) break; } if (cur + headlen \u003e ptr + len) return false; unsigned int value; uncompress_(buf, headlen, value); outlen = value; /*if ( cur + BINARY_PACKLEN_LEN_2 \u003e ptr + len ) { return false; } unsigned int tmp; memcpy(\u0026tmp, cur, sizeof(tmp)); outlen = ntohl(tmp);*/ return true; } bool BinaryReadStream::IsEnd() const { assert(cur \u003c= ptr + len); return cur == ptr + len; } const char* BinaryReadStream::GetData() const { return ptr; } size_t BinaryReadStream::ReadAll(char * szBuffer, size_t iLen) const { size_t iRealLen = min(iLen, len); memcpy(szBuffer, ptr, iRealLen); return iRealLen; } //=================class BinaryWriteStream implementation============// BinaryWriteStream::BinaryWriteStream(string *data) : m_data(data) { m_data-\u003eclear(); char str[BINARY_PACKLEN_LEN_2 + CHECKSUM_LEN]; m_data-\u003eappend(str, sizeof(str)); } bool BinaryWriteStream::WriteCString(const char* str, size_t len) { char buf[5]; size_t buflen; compress_(len, buf, buflen); m_data-\u003eappend(buf, sizeof(char)*buflen); m_data-\u003eappend(str, len); //unsigned int ulen = htonl(len); //m_data-\u003eappend((char*)\u0026ulen,sizeof(ulen)); //m_data-\u003eappend(str,len); return true; } bool BinaryWriteStream::WriteString(const string\u0026 str) { return WriteCString(str.c_str(), str.length()); } const char* BinaryWriteStream::GetData() const { return m_data-\u003edata(); } size_t BinaryWriteStream::GetSize() const { return m_data-\u003elength(); } bool BinaryWriteStream::WriteInt32(int32_t i, bool isNULL) { int32_t i2 = 999999999; if (isNULL == false) i2 = htonl(i); m_data-\u003eappend((char*)\u0026i2, sizeof(i2)); return true; } bool BinaryWriteStream::WriteInt64(int64_t value, bool isNULL) { char int64str[128]; if (isNULL == false) { #ifndef _WIN32 sprintf(int64str, \"%ld\", value); #else sprintf(int64str, \"%lld\", value); #endif WriteCString(int64str, strlen(int64str)); } else WriteCString(int64str, 0); return true; } bool BinaryWriteStream::WriteShort(short i, bool isNULL) { short i2 = 0; if (isNULL == false) i2 = htons(i); m_data-\u003eappend((char*)\u0026i2, sizeof(i2)); return true; } bool BinaryWriteStream::WriteChar(char c, bool isNULL) { char c2 = 0; if (isNULL == false) c2 = c; (*m_data) += c2; return true; } bool BinaryWriteStream::WriteDouble(double value, bool isNULL) { char doublestr[128]; if (isNULL == false) { sprintf(doublestr, \"%f\", value); WriteCString(doublestr, strlen(doublestr)); } else WriteCString(doublestr, 0); return true; } void BinaryWriteStream::Flush() { char *ptr = \u0026(*m_data)[0]; unsigned int ulen = htonl(m_data-\u003elength()); memcpy(ptr, \u0026ulen, sizeof(ulen)); } void BinaryWriteStream::Clear() { m_data-\u003eclear(); char str[BINARY_PACKLEN_LEN_2 + CHECKSUM_LEN]; m_data-\u003eappend(str, sizeof(str)); } 这里详细解释一下上面的实现原理，即如何把各种类型的字段写入这种所谓的流中，或者怎么从这种流中读出各种类型的数据。上文的字段在流中的格式如下图：\n这里最简便的方式就是每个字段的长度域都是固定字节数目，如4个字节。但是这里我们并没有这么做，而是使用了一个小小技巧去对字段长度进行了一点压缩。对于字符串类型的字段，我们将表示其字段长度域的整型值（int32类型，4字节）按照其数值的大小压缩成1～5个字节，对于每一个字节，如果我们只用其低7位。最高位为标志位，为1时，表示其左边的还有下一个字节，反之到此结束。例如，对于数字127，我们二进制表示成01111111，由于最高位是0，那么如果字段长度是127及以下，一个字节就可以存储下了。如果一个字段长度大于127，如等于256，对应二进制100000000，那么我们按照刚才的规则，先填充最低字节（从左往右依次是从低到高），由于最低的7位放不下，还有后续高位字节，所以我们在最低字节的最高位上填1，即10000000，接着次高位为00000100，由于次高位后面没有更高位的字节了，所以其最高位为0，组合起来两个字节就是10000000 0000100。对于数字50000，其二进制是1100001101010000，根据每7个一拆的原则是：11 0000110 1010000再加上标志位就是：10000011 10000110 01010000。采用这样一种策略将原来占4个字节的整型值根据数值大小压缩成了1～5个字节（由于我们对数据包最大长度有限制，所以不会出现长度需要占5个字节的情形）。反过来，解析每个字段的长度，就是先取出一个字节，看其最高位是否有标志位，如果有继续取下一个字节当字段长度的一部分继续解析，直到遇到某个字节最高位不为1为止。\n对一个整形压缩和解压缩的部分从上面的代码中摘录如下：\n压缩：\n1 //将一个四字节的整形数值压缩成1~5个字节 2 bool compress_(unsigned int i, char *buf, size_t \u0026len) 3 { 4 len = 0; 5 for (int a = 4; a \u003e= 0; a--) 6 { 7 char c; 8 c = i \u003e\u003e (a * 7) \u0026 0x7f; 9 if (c == 0x00 \u0026\u0026 len == 0) 10 continue; 11 if (a == 0) 12 c \u0026= 0x7f; 13 else 14 c |= 0x80; 15 buf[len] = c; 16 len++; 17 } 18 if (len == 0) 19 { 20 len++; 21 buf[0] = 0; 22 } 23 //cout \u003c\u003c \"compress:\" \u003c\u003c i \u003c\u003c endl; 24 //cout \u003c\u003c \"compress len:\" \u003c\u003c len \u003c\u003c endl; 25 return true; 26 } 解压\n1 //将一个1~5个字节的值还原成四字节的整形值 2 bool uncompress_(char *buf, size_t len, unsigned int \u0026i) 3 { 4 i = 0; 5 for (int index = 0; index \u003c (int)len; index++) 6 { 7 char c = *(buf + index); 8 i = i \u003c\u003c 7; 9 c \u0026= 0x7f; 10 i |= c; 11 } 12 //cout \u003c\u003c \"uncompress:\" \u003c\u003c i \u003c\u003c endl; 13 return true; 14 } 三、关于跨系统与跨语言之间的网络通信协议解析与识别问题 由于我们的即时通讯同时涉及到Java和C++两种编程语言，且有windows、linux、安卓三个平台，而我们为了保障学习的质量和效果，所以我们不用第三跨平台库（其实我们也是在学习如何编写这些跨平台库的原理），所以我们需要学习以下如何在Java语言中去解析C++的网络数据包或者反过来。安卓端发送的数据使用Java语言编写，pc与服务器发送的数据使用C++编写，这里以在Java中解析C++网络数据包为例。 这对于很多人来说是一件很困难的事情，所以只能变着法子使用第三方的库。其实只要你掌握了一定的基础知识，利用一些现成的字节流抓包工具（如tcpdump、wireshark）很容易解决这个问题。我们这里使用tcpdump工具来尝试分析和解决这个问题。 首先，我们需要明确字节序列这样一个概念，即我们说的大端编码(big endian)和小端编码(little endian)，x86和x64系列的cpu使用小端编码，而数据在网络上传输，以及Java语言中，使用的是大端编码。那么这是什么意思呢？ 我们举个例子，看一个x64机器上的32位数值在内存中的存储方式：\ni在内存中的地址序列是0x003CF7C4~0x003CF7C8，值为40 e2 01 00。\n十六进制0001e240正好等于10进制123456，也就是说小端编码中权重高的的字节值存储在内存地址高（地址值较大）的位置，权重值低的字节值存储在内存地址低（地址值较小）的位置，也就是所谓的高高低低。 相反，大端编码的规则应该是高低低高，也就是说权值高字节存储在内存地址低的位置，权值低的字节存储在内存地址高的位置。 所以，如果我们一个C++程序的int32值123456不作转换地传给Java程序，那么Java按照大端编码的形式读出来的值是：十六进制40E20100 = 十进制1088553216。 所以，我们要么在发送方将数据转换成网络字节序（大端编码），要么在接收端再进行转换。\n下面看一下如果C++端传送一个如下数据结构，Java端该如何解析（由于Java中是没有指针的，也无法操作内存地址，导致很多人无从下手），下面利用tcpdump来解决这个问题的思路。 我们客户端发送的数据包：\n其结构体定义如下：\n利用tcpdump抓到的包如下：\n放大一点：\n我们白色标识出来就是我们收到的数据包。这里我想说明两点：\n如果我们知道发送端发送的字节流，再比照接收端收到的字节流，我们就能检测数据包的完整性，或者利用这个来排查一些问题；\n对于Java程序只要按照这个顺序，先利用java.net.Socket的输出流java.io.DataOutputStream对象readByte、readInt32、readInt32、readBytes、readBytes方法依次读出一个char、int32、int32、16个字节的字节数组、63个字节数组即可，为了还原像int32这样的整形值，我们需要做一些小端编码向大端编码的转换。\n",
+  "wordCount" : "1465",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/27166845330344e4bf4f9a385e69fc94/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      服务器开发通信协议设计介绍
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#%e6%9c%8d%e5%8a%a1%e5%99%a8%e5%bc%80%e5%8f%91%e9%80%9a%e4%bf%a1%e5%8d%8f%e8%ae%ae%e8%ae%be%e8%ae%a1%e4%bb%8b%e7%bb%8d" aria-label="服务器开发通信协议设计介绍">服务器开发通信协议设计介绍</a></li>
+                <li>
+                    <a href="#%e4%b8%80%e9%80%89%e6%8b%a9tcp%e8%bf%98%e6%98%afudp%e5%8d%8f%e8%ae%ae" aria-label="一、选择TCP还是UDP协议">一、选择TCP还是UDP协议</a></li>
+                <li>
+                    <a href="#%e4%ba%8c%e5%8d%8f%e8%ae%ae%e7%9a%84%e7%bb%93%e6%9e%84" aria-label="二、协议的结构">二、协议的结构</a></li>
+                <li>
+                    <a href="#%e4%b8%89%e5%85%b3%e4%ba%8e%e8%b7%a8%e7%b3%bb%e7%bb%9f%e4%b8%8e%e8%b7%a8%e8%af%ad%e8%a8%80%e4%b9%8b%e9%97%b4%e7%9a%84%e7%bd%91%e7%bb%9c%e9%80%9a%e4%bf%a1%e5%8d%8f%e8%ae%ae%e8%a7%a3%e6%9e%90%e4%b8%8e%e8%af%86%e5%88%ab%e9%97%ae%e9%a2%98" aria-label="三、关于跨系统与跨语言之间的网络通信协议解析与识别问题">三、关于跨系统与跨语言之间的网络通信协议解析与识别问题</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h2 id="服务器开发通信协议设计介绍">服务器开发通信协议设计介绍</h2>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/792193e0c3b720eba574d0c94dc05513.webp" alt=""  />
+</p>
+<h2 id="一选择tcp还是udp协议">一、选择TCP还是UDP协议</h2>
+<p>由于我们的即时通讯软件的用户存在用户状态问题，即用户登录成功以后可以在他的好友列表中看到哪些好友在线，所以客户端和服务器需要保持长连接状态。另外即时通讯软件一般要求信息准确、有序、完整地到达对端，而这也是TCP协议的特点之一。综合这两个所以这里我们选择TCP协议，而不是UDP协议。</p>
+<h2 id="二协议的结构">二、协议的结构</h2>
+<p>由于TCP协议是流式协议，所谓流式协议即通讯的内容是无边界的字节流：如A给B连续发送了三个数据包，每个包的大小都是100个字节，那么B可能会一次性收到300个字节；也可能先收到100个字节，再收到200个字节；也可能先收到100个字节，再收到50个字节，再收到150个字节；或者先收到50个字节，再收到50个字节，再收到50个字节，最后收到150个字节。也就是说，B可能以任何组合形式收到这300个字节。即像水流一样无明确的边界。为了能让对端知道如何给包分界，目前一般有三种做法：</p>
+<ol>
+<li>以固定大小字节数目来分界，上文所说的就是属于这种类型，如每个包100个字节，对端每收齐100个字节，就当成一个包来解析；</li>
+<li>以特定符号来分界，如每个包都以特定的字符来结尾（如\n），当在字节流中读取到该字符时，则表明上一个包到此为止。</li>
+<li>固定包头+包体结构，这种结构中一般包头部分是一个固定字节长度的结构，并且包头中会有一个特定的字段指定包体的大小。这是目前各种网络应用用的最多的一种包格式。</li>
+</ol>
+<p>上面三种分包方式各有优缺点，方法1和方法2简单易操作，但是缺点也很明显，就是很不灵活，如方法一当包数据不足指定长度，只能使用占位符如0来凑，比较浪费；方法2中包中不能有包界定符，否则就会引起歧义，也就是要求包内容中不能有某些特殊符号。而方法3虽然解决了方法1和方法2的缺点，但是操作起来就比较麻烦。我们的即时通讯协议就采用第三种分包方式。所以我们的协议包的包头看起来像这样：</p>
+<pre tabindex="0"><code>struct package_header
+{
+    int32_t bodysize;
+};
+</code></pre><p>一个应用中，有许多的应用数据，拿我们这里的即时通讯来说，有注册、登录、获取好友列表、好友消息等各种各样的协议数据包，而每个包因为业务内容不一样可能数据内容也不一样，所以各个包可能看起来像下面这样：</p>
+<pre tabindex="0"><code>struct package_header
+{
+    int32_t bodysize;
+};
+
+//登录数据包
+struct register_package
+{
+    package_header header;
+    //命令号
+    int32_t cmd;
+    //注册用户名
+    char username[16];
+    //注册密码
+    char password[16];
+    //注册昵称
+    char nickname[16];
+    //注册手机号
+    char mobileno[16];
+};
+
+//登录数据包
+struct login_package
+{
+    package_header header;
+    //命令号
+    int32_t cmd;
+    //登录用户名
+    char username[16];
+    //密码
+    char password[16];
+    //客户端类型
+    int32_t clienttype;
+    //上线类型，如在线、隐身、忙碌、离开等
+    int32_t onlinetype;
+};
+
+//获取好友列表
+struct getfriend_package
+{
+    package_header header;
+    //命令号
+    int32_t cmd;
+};
+
+//聊天内容
+struct chat_package
+{
+    package_header header;
+    //命令号
+    int32_t cmd;
+    //发送人userid
+    int32_t senderid;
+    //接收人userid
+    int32_t targetid;
+    //消息内容
+    char chatcontent[8192];
+};
+</code></pre><p>看到没有？由于每一个业务的内容不一样，定义的结构体也不一样。如果业务比较多的话，我们需要定义各种各样的这种结构体，这简直是一场噩梦。那么有没有什么方法可以避免这个问题呢？有，我受jdk中的流对象的WriteInt32、WriteByte、WriteInt64、WriteString，这样的接口的启发，也发明了一套这样的协议，而且这套协议基本上是通用协议，可用于任何场景。我们的包还是分为包头和包体两部分，包头和上文所说的一样，包体是一个不固定大小的二进制流，其长度由包头中的指定包体长度的字段决定。</p>
+<pre tabindex="0"><code>struct package_protocol
+{
+    int32_t bodysize;
+    //注意：C/C++语法不能这么定义结构体，
+    //这里只是为了说明含义的伪代码
+    //bodycontent即为一个不固定大小的二进制流
+    char    binarystream[bodysize];
+};
+</code></pre><p>接下来的核心部分就是如何操作这个二进制流，我们将流分为二进制读和二进制写两种流，下面给出接口定义：</p>
+<pre tabindex="0"><code>//写
+class BinaryWriteStream
+{
+public:
+    BinaryWriteStream(string* data);
+    const char* GetData() const;
+    size_t GetSize() const;
+    bool WriteCString(const char* str, size_t len);
+    bool WriteString(const string&amp; str);
+    bool WriteDouble(double value, bool isNULL = false);
+    bool WriteInt64(int64_t value, bool isNULL = false);
+    bool WriteInt32(int32_t i, bool isNULL = false);
+    bool WriteShort(short i, bool isNULL = false);
+    bool WriteChar(char c, bool isNULL = false);
+    size_t GetCurrentPos() const{ return m_data-&gt;length(); }
+    void Flush();
+    void Clear();
+private:
+    string* m_data;
+};
+//读
+class BinaryReadStream : public IReadStream
+{
+private:
+    const char* const ptr;
+    const size_t      len;
+    const char*       cur;
+    BinaryReadStream(const BinaryReadStream&amp;);
+    BinaryReadStream&amp; operator=(const BinaryReadStream&amp;);
+public:
+    BinaryReadStream(const char* ptr, size_t len);
+    const char* GetData() const;
+    size_t GetSize() const;
+    bool IsEmpty() const;
+    bool ReadString(string* str, size_t maxlen, size_t&amp; outlen);
+    bool ReadCString(char* str, size_t strlen, size_t&amp; len);
+    bool ReadCCString(const char** str, size_t maxlen, size_t&amp; outlen);
+    bool ReadInt32(int32_t&amp; i);
+    bool ReadInt64(int64_t&amp; i);
+    bool ReadShort(short&amp; i);
+    bool ReadChar(char&amp; c);
+    size_t ReadAll(char* szBuffer, size_t iLen) const;
+    bool IsEnd() const;
+    const char* GetCurrent() const{ return cur; }
+public:
+    bool ReadLength(size_t &amp; len);
+    bool ReadLengthWithoutOffset(size_t &amp;headlen, size_t &amp; outlen);
+};
+</code></pre><p>这样如果是上文的一个登录数据包，我们只要写成如下形式就可以了：</p>
+<pre tabindex="0"><code>std::string outbuf;
+BinaryWriteStream stream(&amp;outbuf);
+stream.WriteInt32(cmd);
+stream.WriteCString(username, 16);
+stream.WriteCString(password, 16);
+stream.WriteInt32(clienttype);
+stream.WriteInt32(onlinetype);
+//最终数据就存储到outbuf中去了
+stream.Flush();
+</code></pre><p>接着我们再对端，解得正确的包体后，我们只要按写入的顺序依次读出来即可：</p>
+<pre tabindex="0"><code>BinaryWriteStream stream(outbuf.c_str(), outbuf.length());
+int32_t cmd;
+stream.WriteInt32(cmd);
+char username[16];
+stream.ReadCString(username, 16, NULL);
+char password[16];
+stream.WriteCString(password, 16, NULL);
+int32_t clienttype;
+stream.WriteInt32(clienttype);
+int32_t onlinetype;
+stream.WriteInt32(onlinetype);
+</code></pre><p>这里给出BinaryReadStream和BinaryWriteStream的完整实现：</p>
+<pre tabindex="0"><code>//计算校验和
+unsigned short checksum(const unsigned short *buffer, int size)
+{
+    unsigned int cksum = 0;
+    while (size &gt; 1)
+    {
+        cksum += *buffer++;
+        size -= sizeof(unsigned short);
+    }
+    if (size)
+    {
+        cksum += *(unsigned char*)buffer;
+    }
+    //将32位数转换成16
+    while (cksum &gt;&gt; 16)
+        cksum = (cksum &gt;&gt; 16) + (cksum &amp; 0xffff);
+    return (unsigned short)(~cksum);
+}
+
+bool compress_(unsigned int i, char *buf, size_t &amp;len)
+{
+    len = 0;
+    for (int a = 4; a &gt;= 0; a--)
+    {
+        char c;
+        c = i &gt;&gt; (a * 7) &amp; 0x7f;
+        if (c == 0x00 &amp;&amp; len == 0)
+            continue;
+        if (a == 0)
+            c &amp;= 0x7f;
+        else
+            c |= 0x80;
+        buf[len] = c;
+        len++;
+    }
+    if (len == 0)
+    {
+        len++;
+        buf[0] = 0;
+    }
+    //cout &lt;&lt; &#34;compress:&#34; &lt;&lt; i &lt;&lt; endl;
+    //cout &lt;&lt; &#34;compress len:&#34; &lt;&lt; len &lt;&lt; endl;
+    return true;
+}
+
+bool uncompress_(char *buf, size_t len, unsigned int &amp;i)
+{
+    i = 0;
+    for (int index = 0; index &lt; (int)len; index++)
+    {
+        char c = *(buf + index);
+        i = i &lt;&lt; 7;
+        c &amp;= 0x7f;
+        i |= c;
+    }
+    //cout &lt;&lt; &#34;uncompress:&#34; &lt;&lt; i &lt;&lt; endl;
+    return true;
+}
+
+BinaryReadStream::BinaryReadStream(const char* ptr_, size_t len_)
+    : ptr(ptr_), len(len_), cur(ptr_)
+{
+    cur += BINARY_PACKLEN_LEN_2 + CHECKSUM_LEN;
+}
+
+bool BinaryReadStream::IsEmpty() const
+{
+    return len &lt;= BINARY_PACKLEN_LEN_2;
+}
+
+size_t BinaryReadStream::GetSize() const
+{
+    return len;
+}
+
+bool BinaryReadStream::ReadCString(char* str, size_t strlen, /* out */ size_t&amp; outlen)
+{
+    size_t fieldlen;
+    size_t headlen;
+    if (!ReadLengthWithoutOffset(headlen, fieldlen)) {
+        return false;
+    }
+    // user buffer is not enough
+    if (fieldlen &gt; strlen) {
+        return false;
+    }
+    // 偏移到数据的位置
+    //cur += BINARY_PACKLEN_LEN_2;    
+    cur += headlen;
+    if (cur + fieldlen &gt; ptr + len)
+    {
+        outlen = 0;
+        return false;
+    }
+    memcpy(str, cur, fieldlen);
+    outlen = fieldlen;
+    cur += outlen;
+    return true;
+}
+
+bool BinaryReadStream::ReadString(string* str, size_t maxlen, size_t&amp; outlen)
+{
+    size_t headlen;
+    size_t fieldlen;
+    if (!ReadLengthWithoutOffset(headlen, fieldlen)) {
+        return false;
+    }
+    // user buffer is not enough
+    if (maxlen != 0 &amp;&amp; fieldlen &gt; maxlen) {
+        return false;
+    }
+    // 偏移到数据的位置
+    //cur += BINARY_PACKLEN_LEN_2;    
+    cur += headlen;
+    if (cur + fieldlen &gt; ptr + len)
+    {
+        outlen = 0;
+        return false;
+    }
+    str-&gt;assign(cur, fieldlen);
+    outlen = fieldlen;
+    cur += outlen;
+    return true;
+}
+
+bool BinaryReadStream::ReadCCString(const char** str, size_t maxlen, size_t&amp; outlen)
+{
+    size_t headlen;
+    size_t fieldlen;
+    if (!ReadLengthWithoutOffset(headlen, fieldlen)) {
+        return false;
+    }
+    // user buffer is not enough
+    if (maxlen != 0 &amp;&amp; fieldlen &gt; maxlen) {
+        return false;
+    }
+    // 偏移到数据的位置
+    //cur += BINARY_PACKLEN_LEN_2;    
+    cur += headlen;
+    //memcpy(str, cur, fieldlen);
+    if (cur + fieldlen &gt; ptr + len)
+    {
+        outlen = 0;
+        return false;
+    }
+    *str = cur;
+    outlen = fieldlen;
+    cur += outlen;
+    return true;
+}
+
+bool BinaryReadStream::ReadInt32(int32_t&amp; i)
+{
+    const int VALUE_SIZE = sizeof(int32_t);
+    if (cur + VALUE_SIZE &gt; ptr + len)
+        return false;
+    memcpy(&amp;i, cur, VALUE_SIZE);
+    i = ntohl(i);
+    cur += VALUE_SIZE;
+    return true;
+}
+
+bool BinaryReadStream::ReadInt64(int64_t&amp; i)
+{
+    char int64str[128];
+    size_t length;
+    if (!ReadCString(int64str, 128, length))
+        return false;
+    i = atoll(int64str);
+    return true;
+}
+
+bool BinaryReadStream::ReadShort(short&amp; i)
+{
+    const int VALUE_SIZE = sizeof(short);
+    if (cur + VALUE_SIZE &gt; ptr + len) {
+        return false;
+    }
+    memcpy(&amp;i, cur, VALUE_SIZE);
+    i = ntohs(i);
+    cur += VALUE_SIZE;
+    return true;
+}
+
+bool BinaryReadStream::ReadChar(char&amp; c)
+{
+    const int VALUE_SIZE = sizeof(char);
+    if (cur + VALUE_SIZE &gt; ptr + len) {
+        return false;
+    }
+    memcpy(&amp;c, cur, VALUE_SIZE);
+    cur += VALUE_SIZE;
+    return true;
+}
+
+bool BinaryReadStream::ReadLength(size_t &amp; outlen)
+{
+    size_t headlen;
+    if (!ReadLengthWithoutOffset(headlen, outlen)) {
+        return false;
+    }
+    //cur += BINARY_PACKLEN_LEN_2;
+    cur += headlen;
+    return true;
+}
+
+bool BinaryReadStream::ReadLengthWithoutOffset(size_t&amp; headlen, size_t &amp; outlen)
+{
+    headlen = 0;
+    const char *temp = cur;
+    char buf[5];
+    for (size_t i = 0; i&lt;sizeof(buf); i++)
+    {
+        memcpy(buf + i, temp, sizeof(char));
+        temp++;
+        headlen++;
+        //if ((buf[i] &gt;&gt; 7 | 0x0) == 0x0)
+        if ((buf[i] &amp; 0x80) == 0x00)
+            break;
+    }
+    if (cur + headlen &gt; ptr + len)
+        return false;
+    unsigned int value;
+    uncompress_(buf, headlen, value);
+    outlen = value;
+    /*if ( cur + BINARY_PACKLEN_LEN_2 &gt; ptr + len ) {
+    return false;
+    }
+    unsigned int tmp;
+    memcpy(&amp;tmp, cur, sizeof(tmp));
+    outlen = ntohl(tmp);*/
+    return true;
+}
+
+bool BinaryReadStream::IsEnd() const
+{
+    assert(cur &lt;= ptr + len);
+    return cur == ptr + len;
+}
+
+const char* BinaryReadStream::GetData() const
+{
+    return ptr;
+}
+
+size_t BinaryReadStream::ReadAll(char * szBuffer, size_t iLen) const
+{
+    size_t iRealLen = min(iLen, len);
+    memcpy(szBuffer, ptr, iRealLen);
+    return iRealLen;
+}
+
+//=================class BinaryWriteStream implementation============//
+BinaryWriteStream::BinaryWriteStream(string *data) :
+    m_data(data)
+{
+    m_data-&gt;clear();
+    char str[BINARY_PACKLEN_LEN_2 + CHECKSUM_LEN];
+    m_data-&gt;append(str, sizeof(str));
+}
+
+bool BinaryWriteStream::WriteCString(const char* str, size_t len)
+{
+    char buf[5];
+    size_t buflen;
+    compress_(len, buf, buflen);
+    m_data-&gt;append(buf, sizeof(char)*buflen);
+    m_data-&gt;append(str, len);
+    //unsigned int ulen = htonl(len);
+    //m_data-&gt;append((char*)&amp;ulen,sizeof(ulen));
+    //m_data-&gt;append(str,len);
+    return true;
+}
+
+bool BinaryWriteStream::WriteString(const string&amp; str)
+{
+    return WriteCString(str.c_str(), str.length());
+}
+
+const char* BinaryWriteStream::GetData() const
+{
+    return m_data-&gt;data();
+}
+
+size_t BinaryWriteStream::GetSize() const
+{
+    return m_data-&gt;length();
+}
+
+bool BinaryWriteStream::WriteInt32(int32_t i, bool isNULL)
+{
+    int32_t i2 = 999999999;
+    if (isNULL == false)
+        i2 = htonl(i);
+    m_data-&gt;append((char*)&amp;i2, sizeof(i2));
+    return true;
+}
+
+bool BinaryWriteStream::WriteInt64(int64_t value, bool isNULL)
+{
+    char int64str[128];
+    if (isNULL == false)
+    {
+    #ifndef _WIN32
+        sprintf(int64str, &#34;%ld&#34;, value);
+    #else
+        sprintf(int64str, &#34;%lld&#34;, value);
+    #endif
+        WriteCString(int64str, strlen(int64str));
+    }
+    else
+        WriteCString(int64str, 0);
+    return true;
+}
+
+bool BinaryWriteStream::WriteShort(short i, bool isNULL)
+{
+    short i2 = 0;
+    if (isNULL == false)
+        i2 = htons(i);
+    m_data-&gt;append((char*)&amp;i2, sizeof(i2));
+    return true;
+}
+
+bool BinaryWriteStream::WriteChar(char c, bool isNULL)
+{
+    char c2 = 0;
+    if (isNULL == false)
+        c2 = c;
+    (*m_data) += c2;
+    return true;
+}
+
+bool BinaryWriteStream::WriteDouble(double value, bool isNULL)
+{
+    char   doublestr[128];
+    if (isNULL == false)
+    {
+        sprintf(doublestr, &#34;%f&#34;, value);
+        WriteCString(doublestr, strlen(doublestr));
+    }
+    else
+        WriteCString(doublestr, 0);
+    return true;
+}
+
+void BinaryWriteStream::Flush()
+{
+    char *ptr = &amp;(*m_data)[0];
+    unsigned int ulen = htonl(m_data-&gt;length());
+    memcpy(ptr, &amp;ulen, sizeof(ulen));
+}
+
+void BinaryWriteStream::Clear()
+{
+    m_data-&gt;clear();
+    char str[BINARY_PACKLEN_LEN_2 + CHECKSUM_LEN];
+    m_data-&gt;append(str, sizeof(str));
+}
+</code></pre><p>这里详细解释一下上面的实现原理，即如何把各种类型的字段写入这种所谓的流中，或者怎么从这种流中读出各种类型的数据。上文的字段在流中的格式如下图：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/3341a7676c34df18ba136f0b38db36dd.webp" alt=""  />
+</p>
+<p>这里最简便的方式就是每个字段的长度域都是固定字节数目，如4个字节。但是这里我们并没有这么做，而是使用了一个小小技巧去对字段长度进行了一点压缩。对于字符串类型的字段，我们将表示其字段长度域的整型值（int32类型，4字节）按照其数值的大小压缩成1～5个字节，对于每一个字节，如果我们只用其低7位。最高位为标志位，为1时，表示其左边的还有下一个字节，反之到此结束。例如，对于数字127，我们二进制表示成01111111，由于最高位是0，那么如果字段长度是127及以下，一个字节就可以存储下了。如果一个字段长度大于127，如等于256，对应二进制100000000，那么我们按照刚才的规则，先填充最低字节（从左往右依次是从低到高），由于最低的7位放不下，还有后续高位字节，所以我们在最低字节的最高位上填1，即10000000，接着次高位为00000100，由于次高位后面没有更高位的字节了，所以其最高位为0，组合起来两个字节就是10000000 0000100。对于数字50000，其二进制是1100001101010000，根据每7个一拆的原则是：11 0000110 1010000再加上标志位就是：10000011 10000110 01010000。采用这样一种策略将原来占4个字节的整型值根据数值大小压缩成了1～5个字节（由于我们对数据包最大长度有限制，所以不会出现长度需要占5个字节的情形）。反过来，解析每个字段的长度，就是先取出一个字节，看其最高位是否有标志位，如果有继续取下一个字节当字段长度的一部分继续解析，直到遇到某个字节最高位不为1为止。</p>
+<p>对一个整形压缩和解压缩的部分从上面的代码中摘录如下：</p>
+<p>压缩：</p>
+<pre tabindex="0"><code> 1    //将一个四字节的整形数值压缩成1~5个字节
+ 2    bool compress_(unsigned int i, char *buf, size_t &amp;len)
+ 3    {
+ 4        len = 0;
+ 5        for (int a = 4; a &gt;= 0; a--)
+ 6        {
+ 7            char c;
+ 8            c = i &gt;&gt; (a * 7) &amp; 0x7f;
+ 9            if (c == 0x00 &amp;&amp; len == 0)
+10                continue;
+11            if (a == 0)
+12                c &amp;= 0x7f;
+13            else
+14                c |= 0x80;
+15            buf[len] = c;
+16            len++;
+17        }
+18        if (len == 0)
+19        {
+20            len++;
+21            buf[0] = 0;
+22        }
+23        //cout &lt;&lt; &#34;compress:&#34; &lt;&lt; i &lt;&lt; endl;
+24        //cout &lt;&lt; &#34;compress len:&#34; &lt;&lt; len &lt;&lt; endl;
+25        return true;
+26    }
+</code></pre><p>解压</p>
+<pre tabindex="0"><code> 1    //将一个1~5个字节的值还原成四字节的整形值
+ 2    bool uncompress_(char *buf, size_t len, unsigned int &amp;i)
+ 3    {
+ 4        i = 0;
+ 5        for (int index = 0; index &lt; (int)len; index++)
+ 6        {
+ 7            char c = *(buf + index);
+ 8            i = i &lt;&lt; 7;
+ 9            c &amp;= 0x7f;
+10            i |= c;
+11        }
+12        //cout &lt;&lt; &#34;uncompress:&#34; &lt;&lt; i &lt;&lt; endl;
+13        return true;
+14    }
+</code></pre><h2 id="三关于跨系统与跨语言之间的网络通信协议解析与识别问题">三、关于跨系统与跨语言之间的网络通信协议解析与识别问题</h2>
+<p>由于我们的即时通讯同时涉及到Java和C++两种编程语言，且有windows、linux、安卓三个平台，而我们为了保障学习的质量和效果，所以我们不用第三跨平台库（其实我们也是在学习如何编写这些跨平台库的原理），所以我们需要学习以下如何在Java语言中去解析C++的网络数据包或者反过来。安卓端发送的数据使用Java语言编写，pc与服务器发送的数据使用C++编写，这里以在Java中解析C++网络数据包为例。 这对于很多人来说是一件很困难的事情，所以只能变着法子使用第三方的库。其实只要你掌握了一定的基础知识，利用一些现成的字节流抓包工具（如tcpdump、wireshark）很容易解决这个问题。我们这里使用tcpdump工具来尝试分析和解决这个问题。
+首先，我们需要明确字节序列这样一个概念，即我们说的大端编码(big endian)和小端编码(little endian)，x86和x64系列的cpu使用小端编码，而数据在网络上传输，以及Java语言中，使用的是大端编码。那么这是什么意思呢？
+我们举个例子，看一个x64机器上的32位数值在内存中的存储方式：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/1118c6bb2e78c759539e7b92b68362e1.webp" alt=""  />
+</p>
+<p>i在内存中的地址序列是0x003CF7C4~0x003CF7C8，值为40 e2 01 00。</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/a63e1aae84bb6761a7eb3a2c138a2378.webp" alt=""  />
+</p>
+<p>十六进制0001e240正好等于10进制123456，也就是说小端编码中权重高的的字节值存储在内存地址高（地址值较大）的位置，权重值低的字节值存储在内存地址低（地址值较小）的位置，也就是所谓的高高低低。
+相反，大端编码的规则应该是高低低高，也就是说权值高字节存储在内存地址低的位置，权值低的字节存储在内存地址高的位置。
+所以，如果我们一个C++程序的int32值123456不作转换地传给Java程序，那么Java按照大端编码的形式读出来的值是：十六进制40E20100 = 十进制1088553216。
+所以，我们要么在发送方将数据转换成网络字节序（大端编码），要么在接收端再进行转换。</p>
+<p>下面看一下如果C++端传送一个如下数据结构，Java端该如何解析（由于Java中是没有指针的，也无法操作内存地址，导致很多人无从下手），下面利用tcpdump来解决这个问题的思路。
+我们客户端发送的数据包：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/ff3b8ed4abe6368d2a5245f112acc17e.webp" alt=""  />
+</p>
+<p>其结构体定义如下：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/c0af0571b4d9dc9ead1900a32792d0f2.jpeg" alt=""  />
+</p>
+<p>利用tcpdump抓到的包如下：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/9d268429d6bfc5c465a573566cce5efe.webp" alt=""  />
+</p>
+<p>放大一点：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/3312eaef2229bae8ad075d1d03d5d9f2.webp" alt=""  />
+</p>
+<p>我们白色标识出来就是我们收到的数据包。这里我想说明两点：</p>
+<ul>
+<li>
+<p>如果我们知道发送端发送的字节流，再比照接收端收到的字节流，我们就能检测数据包的完整性，或者利用这个来排查一些问题；</p>
+</li>
+<li>
+<p>对于Java程序只要按照这个顺序，先利用java.net.Socket的输出流java.io.DataOutputStream对象readByte、readInt32、readInt32、readBytes、readBytes方法依次读出一个char、int32、int32、16个字节的字节数组、63个字节数组即可，为了还原像int32这样的整形值，我们需要做一些小端编码向大端编码的转换。</p>
+</li>
+</ul>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/5d978400ccba478eaaa6a166b4ffba8d/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>服务器开发案例实战</span>
+  </a>
+  <a class="next" href="https://haokiu.com/bb7da7e0bc524808b2a072fb43da3a8e/">
+    <span class="title">Next »</span>
+    <br>
+    <span>服务器端发数据时，如果对端一直不收，怎么办？</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

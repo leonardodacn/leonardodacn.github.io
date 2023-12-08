@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>pixiublog on haokiu</title>
+    <link>https://haokiu.com/tags/pixiublog/</link>
+    <description>Recent content in pixiublog on haokiu</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>haokiu.com</copyright>
+    <lastBuildDate>Fri, 16 Oct 2020 17:10:58 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/pixiublog/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>简单脚本实现服务监控</title>
+      <link>https://haokiu.com/5XKHkb/</link>
+      <pubDate>Fri, 16 Oct 2020 17:10:58 +0000</pubDate>
+      
+      <guid>https://haokiu.com/5XKHkb/</guid>
+      <description>服务经常会重启失败，写了个简单的shell叫脚本，可以发现服务端口是否起来，没有发现监听端口会重启服务
+1.监控脚本 if [ -z &amp;#34;`lsof -i:443 | grep LISTEN`&amp;#34; ];then echo -e &amp;#34;restart $(date +&amp;#39;%Y-%m-%d %H:%M:%S&amp;#39;)&amp;#34; systemctl restart pixiublog fi 2.系统定时任务 */3 * * * * /usr/local/pixiublog/monitor.sh &amp;gt;&amp;gt; /usr/local/pixiublog/monitor.log 2&amp;gt;&amp;amp;1 </description>
+    </item>
+    
+    <item>
+      <title>haokiu网站启动脚本</title>
+      <link>https://haokiu.com/v3yn45/</link>
+      <pubDate>Thu, 15 Oct 2020 17:08:15 +0000</pubDate>
+      
+      <guid>https://haokiu.com/v3yn45/</guid>
+      <description>haokiu 的启动脚本，配置 https 可以参考beego 通过acms.sh 使用 https
+#!/bin/sh siteDir=&amp;#39;/usr/local/pixiublog&amp;#39; appName=&amp;#39;pixiublogMain&amp;#39; echo &amp;#34;kill the running program&amp;#34; ps -ef | grep $appName | grep -v grep | awk &amp;#39;{print $2}&amp;#39; | xargs kill -9 echo &amp;#34;sleep 3 secons for app to shutdown&amp;#34; sleep 3 echo &amp;#34;start program&amp;#34; cd $siteDir nohup $siteDir/$appName &amp;gt;&amp;gt; $siteDir/console.log 2&amp;gt;&amp;amp;1 &amp;amp; </description>
+    </item>
+    
+    <item>
+      <title>beego 通过acme.sh 使用 https</title>
+      <link>https://haokiu.com/qP3u4V/</link>
+      <pubDate>Tue, 13 Oct 2020 15:20:09 +0000</pubDate>
+      
+      <guid>https://haokiu.com/qP3u4V/</guid>
+      <description>beego 通过 acme.sh 使用 https
+安装acms.sh curl https://get.acme.sh | sh 生成证书 如果使用的是 beego 框架，需添加可访问的静态文件目录：
+//acme.sh 自动验证网站目录，不使用https可以忽略 beego.SetStaticPath(&amp;#34;/.well-known&amp;#34;, &amp;#34;.well-known&amp;#34;) acme.sh --issue -d haokiu.com -d www.haokiu.com --webroot /usr/local/pixiublog/ 设置pixiublog开机启动 1. 编写开机启动脚本 vim /usr/lib/systemd/system/pixiublog.service
+[Unit] Description=The pixiublog Process Manager After=syslog.target network.target [Service] Type=forking ExecStart=sh /usr/local/pixiublog/start.sh ExecReload=/bin/kill -USR2 $MAINPID ExecStop=/bin/kill -SIGINT $MAINPID [Install] WantedBy=multi-user.target 2. 设置开机启动 systemctl enable pixiublog 安装证书 acme.sh --install-cert -d haokiu.com \ --cert-file /home/blog/cert/cert.pem \ --key-file /home/blog/cert/key.pem \ --fullchain-file /home/blog/cert/fullchain.pem \ --reloadcmd &amp;#34;systemctl restart pixiublog&amp;#34; beego app.conf 配置 EnableHTTPS = true HTTPSPort = 443 HTTPSCertFile = &amp;#34;/home/blog/cert/fullchain.pem&amp;#34; HTTPSKeyFile = &amp;#34;/home/blog/cert/key.pem&amp;#34; 参考 acme.sh 使用</description>
+    </item>
+    
+    <item>
+      <title>网站部署脚本</title>
+      <link>https://haokiu.com/1gTd1h/</link>
+      <pubDate>Thu, 17 Sep 2020 21:52:12 +0000</pubDate>
+      
+      <guid>https://haokiu.com/1gTd1h/</guid>
+      <description>网站的部署脚本
+#!/bin/sh #部署目录 siteDir=&amp;#39;/usr/local/pixiublog&amp;#39; # 源代码目录 cd /root/pixiublog echo &amp;#34;update code&amp;#34; git pull echo &amp;#34;build pixiublog&amp;#34; go build main.go echo &amp;#34;remove old&amp;#34; rm -rf $siteDir/views rm -rf $siteDir/static rm -rf $siteDir/pixiublog echo &amp;#34;mv new program to $siteDir&amp;#34; cp main $siteDir/pixiublog cp -rf views $siteDir/ cp -rf static $siteDir/ echo &amp;#34;kill the running program&amp;#34; ps -ef | grep &amp;#39;pixiublog&amp;#39; | grep -v grep | awk &amp;#39;{print $2}&amp;#39; | xargs kill -9 echo &amp;#34;start program&amp;#34; cd $siteDir nohup $siteDir/pixiublog &amp;gt;&amp;gt; $siteDir/console.log 2&amp;gt;&amp;amp;1 &amp;amp; </description>
+    </item>
+    
+  </channel>
+</rss>

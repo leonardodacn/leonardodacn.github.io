@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Tags on haokiu</title>
+    <link>https://haokiu.com/tags/</link>
+    <description>Recent content in Tags on haokiu</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>haokiu.com</copyright>
+    <lastBuildDate>Sat, 24 Jun 2023 15:03:53 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>区块链</title>
+      <link>https://haokiu.com/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/</link>
+      <pubDate>Sat, 24 Jun 2023 15:03:53 +0000</pubDate>
+      
+      <guid>https://haokiu.com/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>bigdata</title>
+      <link>https://haokiu.com/tags/bigdata/</link>
+      <pubDate>Tue, 08 Jun 2021 17:51:46 +0000</pubDate>
+      
+      <guid>https://haokiu.com/tags/bigdata/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>其他</title>
+      <link>https://haokiu.com/tags/%E5%85%B6%E4%BB%96/</link>
+      <pubDate>Tue, 08 Jun 2021 10:09:53 +0000</pubDate>
+      
+      <guid>https://haokiu.com/tags/%E5%85%B6%E4%BB%96/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>java</title>
+      <link>https://haokiu.com/tags/java/</link>
+      <pubDate>Wed, 24 Feb 2021 10:24:56 +0000</pubDate>
+      
+      <guid>https://haokiu.com/tags/java/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>linux</title>
+      <link>https://haokiu.com/tags/linux/</link>
+      <pubDate>Tue, 02 Feb 2021 20:57:44 +0000</pubDate>
+      
+      <guid>https://haokiu.com/tags/linux/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>datax</title>
+      <link>https://haokiu.com/tags/datax/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/tags/datax/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>golang</title>
+      <link>https://haokiu.com/tags/golang/</link>
+      <pubDate>Fri, 22 Jan 2021 15:40:43 +0000</pubDate>
+      
+      <guid>https://haokiu.com/tags/golang/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>beego</title>
+      <link>https://haokiu.com/tags/beego/</link>
+      <pubDate>Fri, 22 Jan 2021 14:52:21 +0000</pubDate>
+      
+      <guid>https://haokiu.com/tags/beego/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>docker</title>
+      <link>https://haokiu.com/tags/docker/</link>
+      <pubDate>Tue, 24 Nov 2020 13:56:48 +0000</pubDate>
+      
+      <guid>https://haokiu.com/tags/docker/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>git</title>
+      <link>https://haokiu.com/tags/git/</link>
+      <pubDate>Mon, 09 Nov 2020 09:25:45 +0000</pubDate>
+      
+      <guid>https://haokiu.com/tags/git/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>pixiublog</title>
+      <link>https://haokiu.com/tags/pixiublog/</link>
+      <pubDate>Fri, 16 Oct 2020 17:10:58 +0000</pubDate>
+      
+      <guid>https://haokiu.com/tags/pixiublog/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>spring</title>
+      <link>https://haokiu.com/tags/spring/</link>
+      <pubDate>Sun, 27 Sep 2020 10:59:03 +0000</pubDate>
+      
+      <guid>https://haokiu.com/tags/spring/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>前端</title>
+      <link>https://haokiu.com/tags/%E5%89%8D%E7%AB%AF/</link>
+      <pubDate>Mon, 21 Sep 2020 09:30:35 +0000</pubDate>
+      
+      <guid>https://haokiu.com/tags/%E5%89%8D%E7%AB%AF/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

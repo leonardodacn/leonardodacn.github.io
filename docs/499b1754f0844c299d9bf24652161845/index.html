@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>第8章 虚拟机字节码执行系统 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="6.4字节码指令简介 Java虚拟机的指令由一个字节长度的、代表着某种特定操作含义的数字（称为操作码，Opcode）以及跟随其后的零至多个代表此操作所需参数（称为操作数，Operands）而构成。由于Java虚拟机采用面向操作数栈而不是寄存器的架构，所以大多数的指令都不包含操作数，而只有一个操作码。
+6.4.1 字节码与数据类型 Java虚拟机的指令集中，大多数的指令都包含了其操作数所对应的数据类型信息。
+如果每一种与数据类型相关的指令都支持Java虚拟机所有运行时数据类型的话，那指令的数量恐怕就会超出一个字节所能表示的数量范围了
+前面的被系统吞了 之后再补上
+第8章 虚拟机字节码执行系统 8.1概述 8.2 运行时栈帧结构 8.2.1 局部变量表 是一组变量存储空间，用于存放方法参数和方法内部定义的局部变量。
+用于存放方法参数和方法内部定义的局部变量。
+容量以变量槽（Variable Slot）为最小单位，虚拟机规范中并没有明确指明一个Slot应占用的内存空间大小，知识很有导向性地说道每个Slot都应该能存放一个boolean、byte、char、short、int、float、reference或returnAddress类型的数据。
+只要保证计时在64位虚拟机中使用了64位的物理内存空间去实现一个Slot，虚拟机仍要使用对齐和不败的手段让Slot在外观上看起来与32位虚拟机中的一致。
+Java中占用32位以内的数据类型有boolean、byte、char、short、int、float、reference和returnAddress8种类型。（Java语言与Java虚拟机种的剧本数据类型是存在本质差别的）。reference类型表示对一个对象实例的引用。虚拟机规范没有指明长度和结构。但需要做到如下两点：
+从引用中直接或间接地查找到对象在Java堆中的数据存放的起始地址索引； 引用中直接或简介地查找到对象所属数据类型在方法区中地存储的类型信息，否则无法实现Java语言规范中定义的语法约束。 returnAddress类型目前已经很少见了，为字节码指令jsr、jsr_w和ret服务的，指向一条字节码指令的地址，很古老的Java虚拟机曾经使用这几条指令来实现异常处理，现在已经由异常表替代。
+Java中明确的64位的数据类型只有long和double两种。分割存储的做法与“long和double的非原子性协定”类似。
+但在局部变量表中不会引起数据安全问题（线程私有）。
+索引定位。访问32位数据类型的变量，索引n就代表了使用第n个Slot。64位则会同时使用n和n&#43;1两个Slot。对于两个相邻的共同存放一个64位数据的两个Slot，不允许采用任何方式单独访问其中的某一个。
+在方法执行时，如果执行的实例（非static），局部变量表中第0位索引的Slot默认时用于传递方法所属对象实例的引用，在方法中可以通过关键字“this”来访问到这个隐含的参数。
+为了尽可能节省栈帧空间，局部变量表中的Slot是可以重用的，方法中定义的变量，其作用域并不一定会覆盖整个方法体。副作用：某些情况下会直接影响到GC。
+实例，placeholder能否被回收的根本原因是：局部变量表中的Slot是否还存有关于placeholder数组对象的引用。
+局部变量表是GC Roots的一部分。把不用的占用了大量内存的变量手动设置为null值。
+但冲编码角度讲，以恰当的变量作用域来控制变量回收时间才是最优雅的解决方法。
+———————————待补充———————————
+局部变量不负初值会编译不通过。">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/499b1754f0844c299d9bf24652161845/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="第8章 虚拟机字节码执行系统" />
+<meta property="og:description" content="6.4字节码指令简介 Java虚拟机的指令由一个字节长度的、代表着某种特定操作含义的数字（称为操作码，Opcode）以及跟随其后的零至多个代表此操作所需参数（称为操作数，Operands）而构成。由于Java虚拟机采用面向操作数栈而不是寄存器的架构，所以大多数的指令都不包含操作数，而只有一个操作码。
+6.4.1 字节码与数据类型 Java虚拟机的指令集中，大多数的指令都包含了其操作数所对应的数据类型信息。
+如果每一种与数据类型相关的指令都支持Java虚拟机所有运行时数据类型的话，那指令的数量恐怕就会超出一个字节所能表示的数量范围了
+前面的被系统吞了 之后再补上
+第8章 虚拟机字节码执行系统 8.1概述 8.2 运行时栈帧结构 8.2.1 局部变量表 是一组变量存储空间，用于存放方法参数和方法内部定义的局部变量。
+用于存放方法参数和方法内部定义的局部变量。
+容量以变量槽（Variable Slot）为最小单位，虚拟机规范中并没有明确指明一个Slot应占用的内存空间大小，知识很有导向性地说道每个Slot都应该能存放一个boolean、byte、char、short、int、float、reference或returnAddress类型的数据。
+只要保证计时在64位虚拟机中使用了64位的物理内存空间去实现一个Slot，虚拟机仍要使用对齐和不败的手段让Slot在外观上看起来与32位虚拟机中的一致。
+Java中占用32位以内的数据类型有boolean、byte、char、short、int、float、reference和returnAddress8种类型。（Java语言与Java虚拟机种的剧本数据类型是存在本质差别的）。reference类型表示对一个对象实例的引用。虚拟机规范没有指明长度和结构。但需要做到如下两点：
+从引用中直接或间接地查找到对象在Java堆中的数据存放的起始地址索引； 引用中直接或简介地查找到对象所属数据类型在方法区中地存储的类型信息，否则无法实现Java语言规范中定义的语法约束。 returnAddress类型目前已经很少见了，为字节码指令jsr、jsr_w和ret服务的，指向一条字节码指令的地址，很古老的Java虚拟机曾经使用这几条指令来实现异常处理，现在已经由异常表替代。
+Java中明确的64位的数据类型只有long和double两种。分割存储的做法与“long和double的非原子性协定”类似。
+但在局部变量表中不会引起数据安全问题（线程私有）。
+索引定位。访问32位数据类型的变量，索引n就代表了使用第n个Slot。64位则会同时使用n和n&#43;1两个Slot。对于两个相邻的共同存放一个64位数据的两个Slot，不允许采用任何方式单独访问其中的某一个。
+在方法执行时，如果执行的实例（非static），局部变量表中第0位索引的Slot默认时用于传递方法所属对象实例的引用，在方法中可以通过关键字“this”来访问到这个隐含的参数。
+为了尽可能节省栈帧空间，局部变量表中的Slot是可以重用的，方法中定义的变量，其作用域并不一定会覆盖整个方法体。副作用：某些情况下会直接影响到GC。
+实例，placeholder能否被回收的根本原因是：局部变量表中的Slot是否还存有关于placeholder数组对象的引用。
+局部变量表是GC Roots的一部分。把不用的占用了大量内存的变量手动设置为null值。
+但冲编码角度讲，以恰当的变量作用域来控制变量回收时间才是最优雅的解决方法。
+———————————待补充———————————
+局部变量不负初值会编译不通过。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/499b1754f0844c299d9bf24652161845/" /><meta property="article:section" content="6" />
+<meta property="article:published_time" content="2021-06-08T17:51:46+00:00" />
+<meta property="article:modified_time" content="2021-06-08T17:51:46+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="第8章 虚拟机字节码执行系统"/>
+<meta name="twitter:description" content="6.4字节码指令简介 Java虚拟机的指令由一个字节长度的、代表着某种特定操作含义的数字（称为操作码，Opcode）以及跟随其后的零至多个代表此操作所需参数（称为操作数，Operands）而构成。由于Java虚拟机采用面向操作数栈而不是寄存器的架构，所以大多数的指令都不包含操作数，而只有一个操作码。
+6.4.1 字节码与数据类型 Java虚拟机的指令集中，大多数的指令都包含了其操作数所对应的数据类型信息。
+如果每一种与数据类型相关的指令都支持Java虚拟机所有运行时数据类型的话，那指令的数量恐怕就会超出一个字节所能表示的数量范围了
+前面的被系统吞了 之后再补上
+第8章 虚拟机字节码执行系统 8.1概述 8.2 运行时栈帧结构 8.2.1 局部变量表 是一组变量存储空间，用于存放方法参数和方法内部定义的局部变量。
+用于存放方法参数和方法内部定义的局部变量。
+容量以变量槽（Variable Slot）为最小单位，虚拟机规范中并没有明确指明一个Slot应占用的内存空间大小，知识很有导向性地说道每个Slot都应该能存放一个boolean、byte、char、short、int、float、reference或returnAddress类型的数据。
+只要保证计时在64位虚拟机中使用了64位的物理内存空间去实现一个Slot，虚拟机仍要使用对齐和不败的手段让Slot在外观上看起来与32位虚拟机中的一致。
+Java中占用32位以内的数据类型有boolean、byte、char、short、int、float、reference和returnAddress8种类型。（Java语言与Java虚拟机种的剧本数据类型是存在本质差别的）。reference类型表示对一个对象实例的引用。虚拟机规范没有指明长度和结构。但需要做到如下两点：
+从引用中直接或间接地查找到对象在Java堆中的数据存放的起始地址索引； 引用中直接或简介地查找到对象所属数据类型在方法区中地存储的类型信息，否则无法实现Java语言规范中定义的语法约束。 returnAddress类型目前已经很少见了，为字节码指令jsr、jsr_w和ret服务的，指向一条字节码指令的地址，很古老的Java虚拟机曾经使用这几条指令来实现异常处理，现在已经由异常表替代。
+Java中明确的64位的数据类型只有long和double两种。分割存储的做法与“long和double的非原子性协定”类似。
+但在局部变量表中不会引起数据安全问题（线程私有）。
+索引定位。访问32位数据类型的变量，索引n就代表了使用第n个Slot。64位则会同时使用n和n&#43;1两个Slot。对于两个相邻的共同存放一个64位数据的两个Slot，不允许采用任何方式单独访问其中的某一个。
+在方法执行时，如果执行的实例（非static），局部变量表中第0位索引的Slot默认时用于传递方法所属对象实例的引用，在方法中可以通过关键字“this”来访问到这个隐含的参数。
+为了尽可能节省栈帧空间，局部变量表中的Slot是可以重用的，方法中定义的变量，其作用域并不一定会覆盖整个方法体。副作用：某些情况下会直接影响到GC。
+实例，placeholder能否被回收的根本原因是：局部变量表中的Slot是否还存有关于placeholder数组对象的引用。
+局部变量表是GC Roots的一部分。把不用的占用了大量内存的变量手动设置为null值。
+但冲编码角度讲，以恰当的变量作用域来控制变量回收时间才是最优雅的解决方法。
+———————————待补充———————————
+局部变量不负初值会编译不通过。"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "6s",
+      "item": "https://haokiu.com/6/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "第8章 虚拟机字节码执行系统",
+      "item": "https://haokiu.com/499b1754f0844c299d9bf24652161845/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "第8章 虚拟机字节码执行系统",
+  "name": "第8章 虚拟机字节码执行系统",
+  "description": "6.4字节码指令简介 Java虚拟机的指令由一个字节长度的、代表着某种特定操作含义的数字（称为操作码，Opcode）以及跟随其后的零至多个代表此操作所需参数（称为操作数，Operands）而构成。由于Java虚拟机采用面向操作数栈而不是寄存器的架构，所以大多数的指令都不包含操作数，而只有一个操作码。\n6.4.1 字节码与数据类型 Java虚拟机的指令集中，大多数的指令都包含了其操作数所对应的数据类型信息。\n如果每一种与数据类型相关的指令都支持Java虚拟机所有运行时数据类型的话，那指令的数量恐怕就会超出一个字节所能表示的数量范围了\n前面的被系统吞了 之后再补上\n第8章 虚拟机字节码执行系统 8.1概述 8.2 运行时栈帧结构 8.2.1 局部变量表 是一组变量存储空间，用于存放方法参数和方法内部定义的局部变量。\n用于存放方法参数和方法内部定义的局部变量。\n容量以变量槽（Variable Slot）为最小单位，虚拟机规范中并没有明确指明一个Slot应占用的内存空间大小，知识很有导向性地说道每个Slot都应该能存放一个boolean、byte、char、short、int、float、reference或returnAddress类型的数据。\n只要保证计时在64位虚拟机中使用了64位的物理内存空间去实现一个Slot，虚拟机仍要使用对齐和不败的手段让Slot在外观上看起来与32位虚拟机中的一致。\nJava中占用32位以内的数据类型有boolean、byte、char、short、int、float、reference和returnAddress8种类型。（Java语言与Java虚拟机种的剧本数据类型是存在本质差别的）。reference类型表示对一个对象实例的引用。虚拟机规范没有指明长度和结构。但需要做到如下两点：\n从引用中直接或间接地查找到对象在Java堆中的数据存放的起始地址索引； 引用中直接或简介地查找到对象所属数据类型在方法区中地存储的类型信息，否则无法实现Java语言规范中定义的语法约束。 returnAddress类型目前已经很少见了，为字节码指令jsr、jsr_w和ret服务的，指向一条字节码指令的地址，很古老的Java虚拟机曾经使用这几条指令来实现异常处理，现在已经由异常表替代。\nJava中明确的64位的数据类型只有long和double两种。分割存储的做法与“long和double的非原子性协定”类似。\n但在局部变量表中不会引起数据安全问题（线程私有）。\n索引定位。访问32位数据类型的变量，索引n就代表了使用第n个Slot。64位则会同时使用n和n+1两个Slot。对于两个相邻的共同存放一个64位数据的两个Slot，不允许采用任何方式单独访问其中的某一个。\n在方法执行时，如果执行的实例（非static），局部变量表中第0位索引的Slot默认时用于传递方法所属对象实例的引用，在方法中可以通过关键字“this”来访问到这个隐含的参数。\n为了尽可能节省栈帧空间，局部变量表中的Slot是可以重用的，方法中定义的变量，其作用域并不一定会覆盖整个方法体。副作用：某些情况下会直接影响到GC。\n实例，placeholder能否被回收的根本原因是：局部变量表中的Slot是否还存有关于placeholder数组对象的引用。\n局部变量表是GC Roots的一部分。把不用的占用了大量内存的变量手动设置为null值。\n但冲编码角度讲，以恰当的变量作用域来控制变量回收时间才是最优雅的解决方法。\n———————————待补充———————————\n局部变量不负初值会编译不通过。",
+  "keywords": [
+    
+  ],
+  "articleBody": "6.4字节码指令简介 Java虚拟机的指令由一个字节长度的、代表着某种特定操作含义的数字（称为操作码，Opcode）以及跟随其后的零至多个代表此操作所需参数（称为操作数，Operands）而构成。由于Java虚拟机采用面向操作数栈而不是寄存器的架构，所以大多数的指令都不包含操作数，而只有一个操作码。\n6.4.1 字节码与数据类型 Java虚拟机的指令集中，大多数的指令都包含了其操作数所对应的数据类型信息。\n如果每一种与数据类型相关的指令都支持Java虚拟机所有运行时数据类型的话，那指令的数量恐怕就会超出一个字节所能表示的数量范围了\n前面的被系统吞了 之后再补上\n第8章 虚拟机字节码执行系统 8.1概述 8.2 运行时栈帧结构 8.2.1 局部变量表 是一组变量存储空间，用于存放方法参数和方法内部定义的局部变量。\n用于存放方法参数和方法内部定义的局部变量。\n容量以变量槽（Variable Slot）为最小单位，虚拟机规范中并没有明确指明一个Slot应占用的内存空间大小，知识很有导向性地说道每个Slot都应该能存放一个boolean、byte、char、short、int、float、reference或returnAddress类型的数据。\n只要保证计时在64位虚拟机中使用了64位的物理内存空间去实现一个Slot，虚拟机仍要使用对齐和不败的手段让Slot在外观上看起来与32位虚拟机中的一致。\nJava中占用32位以内的数据类型有boolean、byte、char、short、int、float、reference和returnAddress8种类型。（Java语言与Java虚拟机种的剧本数据类型是存在本质差别的）。reference类型表示对一个对象实例的引用。虚拟机规范没有指明长度和结构。但需要做到如下两点：\n从引用中直接或间接地查找到对象在Java堆中的数据存放的起始地址索引； 引用中直接或简介地查找到对象所属数据类型在方法区中地存储的类型信息，否则无法实现Java语言规范中定义的语法约束。 returnAddress类型目前已经很少见了，为字节码指令jsr、jsr_w和ret服务的，指向一条字节码指令的地址，很古老的Java虚拟机曾经使用这几条指令来实现异常处理，现在已经由异常表替代。\nJava中明确的64位的数据类型只有long和double两种。分割存储的做法与“long和double的非原子性协定”类似。\n但在局部变量表中不会引起数据安全问题（线程私有）。\n索引定位。访问32位数据类型的变量，索引n就代表了使用第n个Slot。64位则会同时使用n和n+1两个Slot。对于两个相邻的共同存放一个64位数据的两个Slot，不允许采用任何方式单独访问其中的某一个。\n在方法执行时，如果执行的实例（非static），局部变量表中第0位索引的Slot默认时用于传递方法所属对象实例的引用，在方法中可以通过关键字“this”来访问到这个隐含的参数。\n为了尽可能节省栈帧空间，局部变量表中的Slot是可以重用的，方法中定义的变量，其作用域并不一定会覆盖整个方法体。副作用：某些情况下会直接影响到GC。\n实例，placeholder能否被回收的根本原因是：局部变量表中的Slot是否还存有关于placeholder数组对象的引用。\n局部变量表是GC Roots的一部分。把不用的占用了大量内存的变量手动设置为null值。\n但冲编码角度讲，以恰当的变量作用域来控制变量回收时间才是最优雅的解决方法。\n———————————待补充———————————\n局部变量不负初值会编译不通过。\n",
+  "wordCount" : "35",
+  "inLanguage": "en",
+  "datePublished": "2021-06-08T17:51:46Z",
+  "dateModified": "2021-06-08T17:51:46Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/499b1754f0844c299d9bf24652161845/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/6/">6s</a></div>
+    <h1 class="post-title">
+      第8章 虚拟机字节码执行系统
+    </h1>
+    <div class="post-meta"><span title='2021-06-08 17:51:46 +0000 UTC'>June 8, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul><ul>
+                <li>
+                    <a href="#64%e5%ad%97%e8%8a%82%e7%a0%81%e6%8c%87%e4%bb%a4%e7%ae%80%e4%bb%8b" aria-label="6.4字节码指令简介">6.4字节码指令简介</a><ul>
+                        
+                <li>
+                    <a href="#641-%e5%ad%97%e8%8a%82%e7%a0%81%e4%b8%8e%e6%95%b0%e6%8d%ae%e7%b1%bb%e5%9e%8b" aria-label="6.4.1 字节码与数据类型">6.4.1 字节码与数据类型</a></li></ul>
+                </li></ul>
+                    
+                <li>
+                    <a href="#%e7%ac%ac8%e7%ab%a0-%e8%99%9a%e6%8b%9f%e6%9c%ba%e5%ad%97%e8%8a%82%e7%a0%81%e6%89%a7%e8%a1%8c%e7%b3%bb%e7%bb%9f" aria-label="第8章 虚拟机字节码执行系统">第8章 虚拟机字节码执行系统</a><ul>
+                        
+                <li>
+                    <a href="#81%e6%a6%82%e8%bf%b0" aria-label="8.1概述">8.1概述</a></li>
+                <li>
+                    <a href="#82-%e8%bf%90%e8%a1%8c%e6%97%b6%e6%a0%88%e5%b8%a7%e7%bb%93%e6%9e%84" aria-label="8.2 运行时栈帧结构">8.2 运行时栈帧结构</a><ul>
+                        
+                <li>
+                    <a href="#821-%e5%b1%80%e9%83%a8%e5%8f%98%e9%87%8f%e8%a1%a8" aria-label="8.2.1 局部变量表">8.2.1 局部变量表</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h2 id="64字节码指令简介">6.4字节码指令简介</h2>
+<p>Java虚拟机的指令由一个字节长度的、代表着某种特定操作含义的数字（称为操作码，Opcode）以及跟随其后的零至多个代表此操作所需参数（称为操作数，Operands）而构成。由于Java虚拟机采用面向操作数栈而不是寄存器的架构，所以大多数的指令都不包含操作数，而只有一个操作码。</p>
+<h3 id="641-字节码与数据类型">6.4.1 字节码与数据类型</h3>
+<p>Java虚拟机的指令集中，大多数的指令都包含了其操作数所对应的数据类型信息。</p>
+<p>如果每一种与数据类型相关的指令都支持Java虚拟机所有运行时数据类型的话，那指令的数量恐怕就会超出一个字节所能表示的数量范围了</p>
+<blockquote>
+<p>前面的被系统吞了 之后再补上</p>
+</blockquote>
+<h1 id="第8章-虚拟机字节码执行系统">第8章 虚拟机字节码执行系统</h1>
+<h2 id="81概述">8.1概述</h2>
+<h2 id="82-运行时栈帧结构">8.2 运行时栈帧结构</h2>
+<h3 id="821-局部变量表">8.2.1 局部变量表</h3>
+<p>是一组变量存储空间，用于存放方法参数和方法内部定义的局部变量。</p>
+<p>用于存放方法参数和方法内部定义的局部变量。</p>
+<p>容量以变量槽（Variable Slot）为最小单位，虚拟机规范中并没有明确指明一个Slot应占用的内存空间大小，知识很有导向性地说道每个Slot都应该能存放一个boolean、byte、char、short、int、float、reference或returnAddress类型的数据。</p>
+<p>只要保证计时在64位虚拟机中使用了64位的物理内存空间去实现一个Slot，虚拟机仍要使用对齐和不败的手段让Slot在外观上看起来与32位虚拟机中的一致。</p>
+<p>Java中占用32位以内的数据类型有boolean、byte、char、short、int、float、reference和returnAddress8种类型。（Java语言与Java虚拟机种的剧本数据类型是存在本质差别的）。reference类型表示对一个对象实例的引用。虚拟机规范没有指明长度和结构。但需要做到如下两点：</p>
+<ol>
+<li>从引用中直接或间接地查找到对象在Java堆中的数据存放的起始地址索引；</li>
+<li>引用中直接或简介地查找到对象所属数据类型在方法区中地存储的类型信息，否则无法实现Java语言规范中定义的语法约束。</li>
+</ol>
+<p>returnAddress类型目前已经很少见了，为字节码指令jsr、jsr_w和ret服务的，指向一条字节码指令的地址，很古老的Java虚拟机曾经使用这几条指令来实现异常处理，现在已经由异常表替代。</p>
+<p>Java中明确的64位的数据类型只有long和double两种。分割存储的做法与“long和double的非原子性协定”类似。</p>
+<p>但在局部变量表中不会引起数据安全问题（线程私有）。</p>
+<p>索引定位。访问32位数据类型的变量，索引n就代表了使用第n个Slot。64位则会同时使用n和n+1两个Slot。对于两个相邻的共同存放一个64位数据的两个Slot，不允许采用任何方式单独访问其中的某一个。</p>
+<p>在方法执行时，如果执行的实例（非static），局部变量表中第0位索引的Slot默认时用于传递方法所属对象实例的引用，在方法中可以通过关键字“this”来访问到这个隐含的参数。</p>
+<p>为了尽可能节省栈帧空间，局部变量表中的Slot是可以重用的，方法中定义的变量，其作用域并不一定会覆盖整个方法体。副作用：某些情况下会直接影响到GC。</p>
+<p>实例，placeholder能否被回收的根本原因是：局部变量表中的Slot是否还存有关于placeholder数组对象的引用。</p>
+<p>局部变量表是GC Roots的一部分。把不用的占用了大量内存的变量手动设置为null值。</p>
+<p>但冲编码角度讲，以恰当的变量作用域来控制变量回收时间才是最优雅的解决方法。</p>
+<p><strong>———————————待补充———————————</strong></p>
+<p>局部变量不负初值会编译不通过。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>DataX GDBReader | haokiu</title>
+<meta name="keywords" content="datax">
+<meta name="description" content="DataX GDBReader 1. 快速介绍 GDBReader插件实现读取GDB实例数据的功能，通过Gremlin Client连接远程GDB实例，按配置提供的label生成查询DSL，遍历点或边数据，包括属性数据，并将数据写入到Record中给到Writer使用。
+2. 实现原理 GDBReader使用Gremlin Client连接GDB实例，按label分不同Task取点或边数据。 单个Task中按label遍历点或边的id，再切分范围分多次请求查询点或边和属性数据，最后将点或边数据根据配置转换成指定格式记录发送给下游写插件。
+GDBReader按label切分多个Task并发，同一个label的数据批量异步获取来加快读取速度。如果配置读取的label列表为空，任务启动前会从GDB查询所有label再切分Task。
+3. 功能说明 GDB中点和边不同，读取需要区分点和边点配置。
+3.1 点配置样例 { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 1 } &#34;errorLimit&#34;: { &#34;record&#34;: 1 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;gdbreader&#34;, &#34;parameter&#34;: { &#34;host&#34;: &#34;10.218.145.24&#34;, &#34;port&#34;: 8182, &#34;username&#34;: &#34;***&#34;, &#34;password&#34;: &#34;***&#34;, &#34;fetchBatchSize&#34;: 100, &#34;rangeSplitSize&#34;: 1000, &#34;labelType&#34;: &#34;VERTEX&#34;, &#34;labels&#34;: [&#34;label1&#34;, &#34;label2&#34;], &#34;column&#34;: [ { &#34;name&#34;: &#34;id&#34;, &#34;type&#34;: &#34;string&#34;, &#34;columnType&#34;: &#34;primaryKey&#34; }, { &#34;name&#34;: &#34;label&#34;, &#34;type&#34;: &#34;string&#34;, &#34;columnType&#34;: &#34;primaryLabel&#34; }, { &#34;name&#34;: &#34;age&#34;, &#34;type&#34;: &#34;int&#34;, &#34;columnType&#34;: &#34;vertexProperty&#34; } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;: true } } } ] } } 3.">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/ef41ae35929b479db90214d2ebe5ff8a/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="DataX GDBReader" />
+<meta property="og:description" content="DataX GDBReader 1. 快速介绍 GDBReader插件实现读取GDB实例数据的功能，通过Gremlin Client连接远程GDB实例，按配置提供的label生成查询DSL，遍历点或边数据，包括属性数据，并将数据写入到Record中给到Writer使用。
+2. 实现原理 GDBReader使用Gremlin Client连接GDB实例，按label分不同Task取点或边数据。 单个Task中按label遍历点或边的id，再切分范围分多次请求查询点或边和属性数据，最后将点或边数据根据配置转换成指定格式记录发送给下游写插件。
+GDBReader按label切分多个Task并发，同一个label的数据批量异步获取来加快读取速度。如果配置读取的label列表为空，任务启动前会从GDB查询所有label再切分Task。
+3. 功能说明 GDB中点和边不同，读取需要区分点和边点配置。
+3.1 点配置样例 { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 1 } &#34;errorLimit&#34;: { &#34;record&#34;: 1 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;gdbreader&#34;, &#34;parameter&#34;: { &#34;host&#34;: &#34;10.218.145.24&#34;, &#34;port&#34;: 8182, &#34;username&#34;: &#34;***&#34;, &#34;password&#34;: &#34;***&#34;, &#34;fetchBatchSize&#34;: 100, &#34;rangeSplitSize&#34;: 1000, &#34;labelType&#34;: &#34;VERTEX&#34;, &#34;labels&#34;: [&#34;label1&#34;, &#34;label2&#34;], &#34;column&#34;: [ { &#34;name&#34;: &#34;id&#34;, &#34;type&#34;: &#34;string&#34;, &#34;columnType&#34;: &#34;primaryKey&#34; }, { &#34;name&#34;: &#34;label&#34;, &#34;type&#34;: &#34;string&#34;, &#34;columnType&#34;: &#34;primaryLabel&#34; }, { &#34;name&#34;: &#34;age&#34;, &#34;type&#34;: &#34;int&#34;, &#34;columnType&#34;: &#34;vertexProperty&#34; } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;: true } } } ] } } 3." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/ef41ae35929b479db90214d2ebe5ff8a/" /><meta property="article:section" content="4" />
+<meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
+<meta property="article:modified_time" content="2021-02-02T17:45:01+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="DataX GDBReader"/>
+<meta name="twitter:description" content="DataX GDBReader 1. 快速介绍 GDBReader插件实现读取GDB实例数据的功能，通过Gremlin Client连接远程GDB实例，按配置提供的label生成查询DSL，遍历点或边数据，包括属性数据，并将数据写入到Record中给到Writer使用。
+2. 实现原理 GDBReader使用Gremlin Client连接GDB实例，按label分不同Task取点或边数据。 单个Task中按label遍历点或边的id，再切分范围分多次请求查询点或边和属性数据，最后将点或边数据根据配置转换成指定格式记录发送给下游写插件。
+GDBReader按label切分多个Task并发，同一个label的数据批量异步获取来加快读取速度。如果配置读取的label列表为空，任务启动前会从GDB查询所有label再切分Task。
+3. 功能说明 GDB中点和边不同，读取需要区分点和边点配置。
+3.1 点配置样例 { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 1 } &#34;errorLimit&#34;: { &#34;record&#34;: 1 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;gdbreader&#34;, &#34;parameter&#34;: { &#34;host&#34;: &#34;10.218.145.24&#34;, &#34;port&#34;: 8182, &#34;username&#34;: &#34;***&#34;, &#34;password&#34;: &#34;***&#34;, &#34;fetchBatchSize&#34;: 100, &#34;rangeSplitSize&#34;: 1000, &#34;labelType&#34;: &#34;VERTEX&#34;, &#34;labels&#34;: [&#34;label1&#34;, &#34;label2&#34;], &#34;column&#34;: [ { &#34;name&#34;: &#34;id&#34;, &#34;type&#34;: &#34;string&#34;, &#34;columnType&#34;: &#34;primaryKey&#34; }, { &#34;name&#34;: &#34;label&#34;, &#34;type&#34;: &#34;string&#34;, &#34;columnType&#34;: &#34;primaryLabel&#34; }, { &#34;name&#34;: &#34;age&#34;, &#34;type&#34;: &#34;int&#34;, &#34;columnType&#34;: &#34;vertexProperty&#34; } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;: true } } } ] } } 3."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "4s",
+      "item": "https://haokiu.com/4/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "DataX GDBReader",
+      "item": "https://haokiu.com/ef41ae35929b479db90214d2ebe5ff8a/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "DataX GDBReader",
+  "name": "DataX GDBReader",
+  "description": "DataX GDBReader 1. 快速介绍 GDBReader插件实现读取GDB实例数据的功能，通过Gremlin Client连接远程GDB实例，按配置提供的label生成查询DSL，遍历点或边数据，包括属性数据，并将数据写入到Record中给到Writer使用。\n2. 实现原理 GDBReader使用Gremlin Client连接GDB实例，按label分不同Task取点或边数据。 单个Task中按label遍历点或边的id，再切分范围分多次请求查询点或边和属性数据，最后将点或边数据根据配置转换成指定格式记录发送给下游写插件。\nGDBReader按label切分多个Task并发，同一个label的数据批量异步获取来加快读取速度。如果配置读取的label列表为空，任务启动前会从GDB查询所有label再切分Task。\n3. 功能说明 GDB中点和边不同，读取需要区分点和边点配置。\n3.1 点配置样例 { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { \u0026#34;channel\u0026#34;: 1 } \u0026#34;errorLimit\u0026#34;: { \u0026#34;record\u0026#34;: 1 } }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;gdbreader\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;host\u0026#34;: \u0026#34;10.218.145.24\u0026#34;, \u0026#34;port\u0026#34;: 8182, \u0026#34;username\u0026#34;: \u0026#34;***\u0026#34;, \u0026#34;password\u0026#34;: \u0026#34;***\u0026#34;, \u0026#34;fetchBatchSize\u0026#34;: 100, \u0026#34;rangeSplitSize\u0026#34;: 1000, \u0026#34;labelType\u0026#34;: \u0026#34;VERTEX\u0026#34;, \u0026#34;labels\u0026#34;: [\u0026#34;label1\u0026#34;, \u0026#34;label2\u0026#34;], \u0026#34;column\u0026#34;: [ { \u0026#34;name\u0026#34;: \u0026#34;id\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34;, \u0026#34;columnType\u0026#34;: \u0026#34;primaryKey\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;label\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34;, \u0026#34;columnType\u0026#34;: \u0026#34;primaryLabel\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;age\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;int\u0026#34;, \u0026#34;columnType\u0026#34;: \u0026#34;vertexProperty\u0026#34; } ] } }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;streamwriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;print\u0026#34;: true } } } ] } } 3.",
+  "keywords": [
+    "datax"
+  ],
+  "articleBody": "DataX GDBReader 1. 快速介绍 GDBReader插件实现读取GDB实例数据的功能，通过Gremlin Client连接远程GDB实例，按配置提供的label生成查询DSL，遍历点或边数据，包括属性数据，并将数据写入到Record中给到Writer使用。\n2. 实现原理 GDBReader使用Gremlin Client连接GDB实例，按label分不同Task取点或边数据。 单个Task中按label遍历点或边的id，再切分范围分多次请求查询点或边和属性数据，最后将点或边数据根据配置转换成指定格式记录发送给下游写插件。\nGDBReader按label切分多个Task并发，同一个label的数据批量异步获取来加快读取速度。如果配置读取的label列表为空，任务启动前会从GDB查询所有label再切分Task。\n3. 功能说明 GDB中点和边不同，读取需要区分点和边点配置。\n3.1 点配置样例 { \"job\": { \"setting\": { \"speed\": { \"channel\": 1 } \"errorLimit\": { \"record\": 1 } }, \"content\": [ { \"reader\": { \"name\": \"gdbreader\", \"parameter\": { \"host\": \"10.218.145.24\", \"port\": 8182, \"username\": \"***\", \"password\": \"***\", \"fetchBatchSize\": 100, \"rangeSplitSize\": 1000, \"labelType\": \"VERTEX\", \"labels\": [\"label1\", \"label2\"], \"column\": [ { \"name\": \"id\", \"type\": \"string\", \"columnType\": \"primaryKey\" }, { \"name\": \"label\", \"type\": \"string\", \"columnType\": \"primaryLabel\" }, { \"name\": \"age\", \"type\": \"int\", \"columnType\": \"vertexProperty\" } ] } }, \"writer\": { \"name\": \"streamwriter\", \"parameter\": { \"print\": true } } } ] } } 3.2 边配置样例 { \"job\": { \"setting\": { \"speed\": { \"channel\": 1 }, \"errorLimit\": { \"record\": 1 } }, \"content\": [ { \"reader\": { \"name\": \"gdbreader\", \"parameter\": { \"host\": \"10.218.145.24\", \"port\": 8182, \"username\": \"***\", \"password\": \"***\", \"fetchBatchSize\": 100, \"rangeSplitSize\": 1000, \"labelType\": \"EDGE\", \"labels\": [\"label1\", \"label2\"], \"column\": [ { \"name\": \"id\", \"type\": \"string\", \"columnType\": \"primaryKey\" }, { \"name\": \"label\", \"type\": \"string\", \"columnType\": \"primaryLabel\" }, { \"name\": \"srcId\", \"type\": \"string\", \"columnType\": \"srcPrimaryKey\" }, { \"name\": \"srcLabel\", \"type\": \"string\", \"columnType\": \"srcPrimaryLabel\" }, { \"name\": \"dstId\", \"type\": \"string\", \"columnType\": \"srcPrimaryKey\" }, { \"name\": \"dstLabel\", \"type\": \"string\", \"columnType\": \"srcPrimaryLabel\" }, { \"name\": \"name\", \"type\": \"string\", \"columnType\": \"edgeProperty\" }, { \"name\": \"weight\", \"type\": \"double\", \"columnType\": \"edgeProperty\" } ] } }, \"writer\": { \"name\": \"streamwriter\", \"parameter\": { \"print\": true } } } ] } } 3.3 参数说明 host\n描述：GDB实例连接地址，对应’实例管理’-\u003e‘基本信息’页面的网络地址 必选：是 默认值：无 port\n描述：GDB实例连接地址对应的端口 必选：是 默认值：8182 username\n描述：GDB实例账号名 必选：是 默认值：无 password\n描述：GDB实例账号名对应的密码 必选：是 默认值：无 fetchBatchSize\n描述：一次GDB请求读取点或边的数量，响应包含点或边以及属性 必选：是 默认值：100 rangeSplitSize\n描述：id遍历，一次遍历请求扫描的id个数 必选：是 默认值：10 * fetchBatchSize labels\n描述：标签数组，即需要导出的点或边标签，支持读取多个标签，用数组表示。如果留空([])，表示GDB中所有点或边标签 必选：是 默认值：无 labelType\n描述：数据标签类型，支持点、边两种枚举值 VERTEX：表示点 EDGE：表示边 必选：是 默认值：无 column\n描述：点或边字段映射关系配置 必选：是 默认值：无 column -\u003e name\n描述：点或边映射关系的字段名，指定属性时表示读取的属性名，读取其他字段时会被忽略 必选：是 默认值：无 column -\u003e type\n描述：点或边映射关系的字段类型 id, label在GDB中都是string类型，配置非string类型时可能会转换失败 普通属性支持基础类型，包括int, long, float, double, boolean, string GDBReader尽量将读取到的数据转换成配置要求的类型，但转换失败会导致该条记录错误 必选：是 默认值：无 column -\u003e columnType\n描述：GDB点或边数据到列数据的映射关系，支持以下枚举值： primaryKey： 表示该字段是点或边的id primaryLabel： 表示该字段是点或边的label srcPrimaryKey： 表示该字段是边关联的起点id，只在读取边时使用 srcPrimaryLabel： 表示该字段是边关联的起点label，只在读取边时使用 dstPrimaryKey： 表示该字段是边关联的终点id，只在读取边时使用 dstPrimaryLabel： 表示该字段是边关联的终点label，只在读取边时使用 vertexProperty： 表示该字段是点的属性，只在读取点时使用，应用到SET属性时只读取其中的一个属性值 vertexJsonProperty： 表示该字段是点的属性集合，只在读取点时使用。属性集合使用JSON格式输出，包含所有的属性，不能与其他vertexProperty配置一起使用 edgeProperty： 表示该字段是边的属性，只在读取边时使用 edgeJsonProperty： 表示该字段是边的属性集合，只在读取边时使用。属性集合使用JSON格式输出，包含所有的属性，不能与其他edgeProperty配置一起使用 必选：是 默认值：无 vertexJsonProperty格式示例，新增c字段区分SET属性，但是SET属性只包含单个属性值时会标记成普通属性 {\"properties\":[ {\"k\":\"name\",\"t\",\"string\",\"v\":\"Jack\",\"c\":\"set\"}, {\"k\":\"name\",\"t\",\"string\",\"v\":\"Luck\",\"c\":\"set\"}, {\"k\":\"age\",\"t\",\"int\",\"v\":\"20\",\"c\":\"single\"} ]} edgeJsonProperty格式示例，边不支持多值属性 {\"properties\":[ {\"k\":\"created_at\",\"t\",\"long\",\"v\":\"153498653\"}, {\"k\":\"weight\",\"t\",\"double\",\"v\":\"3.14\"} ]} 4 性能报告 (TODO)\n5 使用约束 无\n6 FAQ 无\n",
+  "wordCount" : "338",
+  "inLanguage": "en",
+  "datePublished": "2021-02-02T17:45:01Z",
+  "dateModified": "2021-02-02T17:45:01Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/ef41ae35929b479db90214d2ebe5ff8a/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    <h1 class="post-title">
+      DataX GDBReader
+    </h1>
+    <div class="post-meta"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#datax-gdbreader" aria-label="DataX GDBReader">DataX GDBReader</a><ul>
+                        
+                <li>
+                    <a href="#1-%e5%bf%ab%e9%80%9f%e4%bb%8b%e7%bb%8d" aria-label="1. 快速介绍">1. 快速介绍</a></li>
+                <li>
+                    <a href="#2-%e5%ae%9e%e7%8e%b0%e5%8e%9f%e7%90%86" aria-label="2. 实现原理">2. 实现原理</a></li>
+                <li>
+                    <a href="#3-%e5%8a%9f%e8%83%bd%e8%af%b4%e6%98%8e" aria-label="3. 功能说明">3. 功能说明</a><ul>
+                        
+                <li>
+                    <a href="#31-%e7%82%b9%e9%85%8d%e7%bd%ae%e6%a0%b7%e4%be%8b" aria-label="3.1 点配置样例">3.1 点配置样例</a></li>
+                <li>
+                    <a href="#32-%e8%be%b9%e9%85%8d%e7%bd%ae%e6%a0%b7%e4%be%8b" aria-label="3.2 边配置样例">3.2 边配置样例</a></li>
+                <li>
+                    <a href="#33-%e5%8f%82%e6%95%b0%e8%af%b4%e6%98%8e" aria-label="3.3 参数说明">3.3 参数说明</a></li></ul>
+                </li>
+                <li>
+                    <a href="#4-%e6%80%a7%e8%83%bd%e6%8a%a5%e5%91%8a" aria-label="4 性能报告">4 性能报告</a></li>
+                <li>
+                    <a href="#5-%e4%bd%bf%e7%94%a8%e7%ba%a6%e6%9d%9f" aria-label="5 使用约束">5 使用约束</a></li>
+                <li>
+                    <a href="#6-faq" aria-label="6 FAQ">6 FAQ</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="datax-gdbreader">DataX GDBReader</h1>
+<h2 id="1-快速介绍">1. 快速介绍</h2>
+<p>GDBReader插件实现读取GDB实例数据的功能，通过<code>Gremlin Client</code>连接远程GDB实例，按配置提供的<code>label</code>生成查询DSL，遍历点或边数据，包括属性数据，并将数据写入到Record中给到Writer使用。</p>
+<h2 id="2-实现原理">2. 实现原理</h2>
+<p>GDBReader使用<code>Gremlin Client</code>连接GDB实例，按<code>label</code>分不同Task取点或边数据。
+单个Task中按<code>label</code>遍历点或边的id，再切分范围分多次请求查询点或边和属性数据，最后将点或边数据根据配置转换成指定格式记录发送给下游写插件。</p>
+<p>GDBReader按<code>label</code>切分多个Task并发，同一个<code>label</code>的数据批量异步获取来加快读取速度。如果配置读取的<code>label</code>列表为空，任务启动前会从GDB查询所有<code>label</code>再切分Task。</p>
+<h2 id="3-功能说明">3. 功能说明</h2>
+<p>GDB中点和边不同，读取需要区分点和边点配置。</p>
+<h3 id="31-点配置样例">3.1 点配置样例</h3>
+<pre tabindex="0"><code>{
+  &#34;job&#34;: {
+    &#34;setting&#34;: {
+      &#34;speed&#34;: {
+        &#34;channel&#34;: 1
+      }
+      &#34;errorLimit&#34;: {
+        &#34;record&#34;: 1
+      }
+    },
+
+    &#34;content&#34;: [
+      {
+        &#34;reader&#34;: {
+          &#34;name&#34;: &#34;gdbreader&#34;,
+          &#34;parameter&#34;: {
+            &#34;host&#34;: &#34;10.218.145.24&#34;,
+            &#34;port&#34;: 8182,
+            &#34;username&#34;: &#34;***&#34;,
+            &#34;password&#34;: &#34;***&#34;,
+            &#34;fetchBatchSize&#34;: 100,
+            &#34;rangeSplitSize&#34;: 1000,
+            &#34;labelType&#34;: &#34;VERTEX&#34;,
+            &#34;labels&#34;: [&#34;label1&#34;, &#34;label2&#34;],
+            &#34;column&#34;: [
+              {
+                &#34;name&#34;: &#34;id&#34;,
+                &#34;type&#34;: &#34;string&#34;,
+                &#34;columnType&#34;: &#34;primaryKey&#34;
+              },
+              {
+                &#34;name&#34;: &#34;label&#34;,
+                &#34;type&#34;: &#34;string&#34;,
+                &#34;columnType&#34;: &#34;primaryLabel&#34;
+              },
+              {
+                &#34;name&#34;: &#34;age&#34;,
+                &#34;type&#34;: &#34;int&#34;,
+                &#34;columnType&#34;: &#34;vertexProperty&#34;
+              }
+            ]
+          }
+        },
+        &#34;writer&#34;: {
+          &#34;name&#34;: &#34;streamwriter&#34;,
+          &#34;parameter&#34;: {
+            &#34;print&#34;: true
+          }
+        }
+      }
+    ]
+  }
+}
+</code></pre><h3 id="32-边配置样例">3.2 边配置样例</h3>
+<pre tabindex="0"><code>{
+  &#34;job&#34;: {
+    &#34;setting&#34;: {
+      &#34;speed&#34;: {
+        &#34;channel&#34;: 1
+      },
+      &#34;errorLimit&#34;: {
+        &#34;record&#34;: 1
+      }
+    },
+
+    &#34;content&#34;: [
+      {
+        &#34;reader&#34;: {
+          &#34;name&#34;: &#34;gdbreader&#34;,
+          &#34;parameter&#34;: {
+            &#34;host&#34;: &#34;10.218.145.24&#34;,
+            &#34;port&#34;: 8182,
+            &#34;username&#34;: &#34;***&#34;,
+            &#34;password&#34;: &#34;***&#34;,
+            &#34;fetchBatchSize&#34;: 100,
+            &#34;rangeSplitSize&#34;: 1000,
+            &#34;labelType&#34;: &#34;EDGE&#34;,
+            &#34;labels&#34;: [&#34;label1&#34;, &#34;label2&#34;],
+            &#34;column&#34;: [
+              {
+                &#34;name&#34;: &#34;id&#34;,
+                &#34;type&#34;: &#34;string&#34;,
+                &#34;columnType&#34;: &#34;primaryKey&#34;
+              },
+              {
+                &#34;name&#34;: &#34;label&#34;,
+                &#34;type&#34;: &#34;string&#34;,
+                &#34;columnType&#34;: &#34;primaryLabel&#34;
+              },
+              {
+                &#34;name&#34;: &#34;srcId&#34;,
+                &#34;type&#34;: &#34;string&#34;,
+                &#34;columnType&#34;: &#34;srcPrimaryKey&#34;
+              },
+              {
+                &#34;name&#34;: &#34;srcLabel&#34;,
+                &#34;type&#34;: &#34;string&#34;,
+                &#34;columnType&#34;: &#34;srcPrimaryLabel&#34;
+              },
+              {
+                &#34;name&#34;: &#34;dstId&#34;,
+                &#34;type&#34;: &#34;string&#34;,
+                &#34;columnType&#34;: &#34;srcPrimaryKey&#34;
+              },
+              {
+                &#34;name&#34;: &#34;dstLabel&#34;,
+                &#34;type&#34;: &#34;string&#34;,
+                &#34;columnType&#34;: &#34;srcPrimaryLabel&#34;
+              },
+              {
+                &#34;name&#34;: &#34;name&#34;,
+                &#34;type&#34;: &#34;string&#34;,
+                &#34;columnType&#34;: &#34;edgeProperty&#34;
+              },
+              {
+                &#34;name&#34;: &#34;weight&#34;,
+                &#34;type&#34;: &#34;double&#34;,
+                &#34;columnType&#34;: &#34;edgeProperty&#34;
+              }
+            ]
+          }
+        },
+
+        &#34;writer&#34;: {
+          &#34;name&#34;: &#34;streamwriter&#34;,
+          &#34;parameter&#34;: {
+            &#34;print&#34;: true
+          }
+        }
+      }
+    ]
+  }
+}
+</code></pre><h3 id="33-参数说明">3.3 参数说明</h3>
+<ul>
+<li>
+<p><strong>host</strong></p>
+<ul>
+<li>描述：GDB实例连接地址，对应&rsquo;实例管理&rsquo;-&gt;&lsquo;基本信息&rsquo;页面的网络地址</li>
+<li>必选：是</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>port</strong></p>
+<ul>
+<li>描述：GDB实例连接地址对应的端口</li>
+<li>必选：是</li>
+<li>默认值：8182</li>
+</ul>
+</li>
+<li>
+<p><strong>username</strong></p>
+<ul>
+<li>描述：GDB实例账号名</li>
+<li>必选：是</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>password</strong></p>
+<ul>
+<li>描述：GDB实例账号名对应的密码</li>
+<li>必选：是</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>fetchBatchSize</strong></p>
+<ul>
+<li>描述：一次GDB请求读取点或边的数量，响应包含点或边以及属性</li>
+<li>必选：是</li>
+<li>默认值：100</li>
+</ul>
+</li>
+<li>
+<p><strong>rangeSplitSize</strong></p>
+<ul>
+<li>描述：id遍历，一次遍历请求扫描的id个数</li>
+<li>必选：是</li>
+<li>默认值：10 * fetchBatchSize</li>
+</ul>
+</li>
+<li>
+<p><strong>labels</strong></p>
+<ul>
+<li>描述：标签数组，即需要导出的点或边标签，支持读取多个标签，用数组表示。如果留空([])，表示GDB中所有点或边标签</li>
+<li>必选：是</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>labelType</strong></p>
+<ul>
+<li>描述：数据标签类型，支持点、边两种枚举值
+<ul>
+<li>VERTEX：表示点</li>
+<li>EDGE：表示边</li>
+</ul>
+</li>
+<li>必选：是</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>column</strong></p>
+<ul>
+<li>描述：点或边字段映射关系配置</li>
+<li>必选：是</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>column -&gt; name</strong></p>
+<ul>
+<li>描述：点或边映射关系的字段名，指定属性时表示读取的属性名，读取其他字段时会被忽略</li>
+<li>必选：是</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>column -&gt; type</strong></p>
+<ul>
+<li>描述：点或边映射关系的字段类型
+<ul>
+<li>id, label在GDB中都是string类型，配置非string类型时可能会转换失败</li>
+<li>普通属性支持基础类型，包括int, long, float, double, boolean, string</li>
+<li>GDBReader尽量将读取到的数据转换成配置要求的类型，但转换失败会导致该条记录错误</li>
+</ul>
+</li>
+<li>必选：是</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>column -&gt; columnType</strong></p>
+<ul>
+<li>描述：GDB点或边数据到列数据的映射关系，支持以下枚举值：
+<ul>
+<li>primaryKey： 表示该字段是点或边的id</li>
+<li>primaryLabel： 表示该字段是点或边的label</li>
+<li>srcPrimaryKey： 表示该字段是边关联的起点id，只在读取边时使用</li>
+<li>srcPrimaryLabel： 表示该字段是边关联的起点label，只在读取边时使用</li>
+<li>dstPrimaryKey： 表示该字段是边关联的终点id，只在读取边时使用</li>
+<li>dstPrimaryLabel： 表示该字段是边关联的终点label，只在读取边时使用</li>
+<li>vertexProperty： 表示该字段是点的属性，只在读取点时使用，应用到SET属性时只读取其中的一个属性值</li>
+<li>vertexJsonProperty： 表示该字段是点的属性集合，只在读取点时使用。属性集合使用JSON格式输出，包含所有的属性，不能与其他vertexProperty配置一起使用</li>
+<li>edgeProperty： 表示该字段是边的属性，只在读取边时使用</li>
+<li>edgeJsonProperty： 表示该字段是边的属性集合，只在读取边时使用。属性集合使用JSON格式输出，包含所有的属性，不能与其他edgeProperty配置一起使用</li>
+</ul>
+</li>
+<li>必选：是</li>
+<li>默认值：无</li>
+<li>vertexJsonProperty格式示例，新增<code>c</code>字段区分SET属性，但是SET属性只包含单个属性值时会标记成普通属性</li>
+</ul>
+<pre tabindex="0"><code>{&#34;properties&#34;:[
+  {&#34;k&#34;:&#34;name&#34;,&#34;t&#34;,&#34;string&#34;,&#34;v&#34;:&#34;Jack&#34;,&#34;c&#34;:&#34;set&#34;},
+  {&#34;k&#34;:&#34;name&#34;,&#34;t&#34;,&#34;string&#34;,&#34;v&#34;:&#34;Luck&#34;,&#34;c&#34;:&#34;set&#34;},
+  {&#34;k&#34;:&#34;age&#34;,&#34;t&#34;,&#34;int&#34;,&#34;v&#34;:&#34;20&#34;,&#34;c&#34;:&#34;single&#34;}
+]}
+</code></pre><ul>
+<li>edgeJsonProperty格式示例，边不支持多值属性</li>
+</ul>
+<pre tabindex="0"><code>{&#34;properties&#34;:[
+  {&#34;k&#34;:&#34;created_at&#34;,&#34;t&#34;,&#34;long&#34;,&#34;v&#34;:&#34;153498653&#34;},
+  {&#34;k&#34;:&#34;weight&#34;,&#34;t&#34;,&#34;double&#34;,&#34;v&#34;:&#34;3.14&#34;}
+]}
+</code></pre></li>
+</ul>
+<h2 id="4-性能报告">4 性能报告</h2>
+<p>(TODO)</p>
+<h2 id="5-使用约束">5 使用约束</h2>
+<p>无</p>
+<h2 id="6-faq">6 FAQ</h2>
+<p>无</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>libevent源码深度剖析11 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="libevent源码深度剖析11 时间管理
+为了支持定时器，libevent必须和系统时间打交道，这一部分的内容也比较简单，主要涉及到时间的加减辅助函数、时间缓存、时间校正和定时器堆的时间值调整等。下面就结合源代码来分析一下。
+1. 初始化检测 libevent在初始化时会检测系统时间的类型，通过调用函数**d****etect_monotonic()完成，它通过调用clock_gettime()**来检测系统是否支持monotonic时钟类型：
+static void detect_monotonic(void){ #if defined(HAVE_CLOCK_GETTIME) &amp;&amp; defined(CLOCK_MONOTONIC) struct timespec ts; if (clock_gettime(CLOCK_MONOTONIC, &amp;ts) == 0) use_monotonic = 1; // 系统支持monotonic时间 #endif } Monotonic时间指示的是系统从boot后到现在所经过的时间，如果系统支持Monotonic时间就将全局变量use_monotonic设置为1，设置use_monotonic到底有什么用，这个在后面说到时间校正时就能看出来了。
+2. 时间缓存 结构体event_base中的tv_cache，用来记录时间缓存。这个还要从函数**gettime()**说起，先来看看该函数的代码：
+static int gettime(struct event_base *base, struct timeval *tp){ // 如果tv_cache时间缓存已设置，就直接使用 if (base-&gt;tv_cache.tv_sec) { *tp = base-&gt;tv_cache; return (0); } // 如果支持monotonic，就用clock_gettime获取monotonic时间 #if defined(HAVE_CLOCK_GETTIME) &amp;&amp; defined(CLOCK_MONOTONIC) if (use_monotonic) { struct timespec ts; if (clock_gettime(CLOCK_MONOTONIC, &amp;ts) == -1) return (-1); tp-&gt;tv_sec = ts.tv_sec; tp-&gt;tv_usec = ts.tv_nsec / 1000; return (0); } #endif // 否则只能取得系统当前时间 return (evutil_gettimeofday(tp, NULL)); } 如果tv_cache已经设置，那么就直接使用缓存的时间；否则需要再次执行系统调用获取系统时间。 函数**evutil_gettimeofday()用来获取当前系统时间，在Linux下其实就是系统调用gettimeofday()；Windows没有提供函数gettimeofday，而是通过调用_ftime()**来完成的。 在每次系统事件循环中，时间缓存tv_cache将会被相应的清空和设置，再次来看看下面event_base_loop的主要代码逻辑：
+int event_base_loop(struct event_base *base, int flags){ // 清空时间缓存 base-&gt;tv_cache.tv_sec = 0; while(!">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/136973dd819b459bac605bcb1a25571c/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="libevent源码深度剖析11" />
+<meta property="og:description" content="libevent源码深度剖析11 时间管理
+为了支持定时器，libevent必须和系统时间打交道，这一部分的内容也比较简单，主要涉及到时间的加减辅助函数、时间缓存、时间校正和定时器堆的时间值调整等。下面就结合源代码来分析一下。
+1. 初始化检测 libevent在初始化时会检测系统时间的类型，通过调用函数**d****etect_monotonic()完成，它通过调用clock_gettime()**来检测系统是否支持monotonic时钟类型：
+static void detect_monotonic(void){ #if defined(HAVE_CLOCK_GETTIME) &amp;&amp; defined(CLOCK_MONOTONIC) struct timespec ts; if (clock_gettime(CLOCK_MONOTONIC, &amp;ts) == 0) use_monotonic = 1; // 系统支持monotonic时间 #endif } Monotonic时间指示的是系统从boot后到现在所经过的时间，如果系统支持Monotonic时间就将全局变量use_monotonic设置为1，设置use_monotonic到底有什么用，这个在后面说到时间校正时就能看出来了。
+2. 时间缓存 结构体event_base中的tv_cache，用来记录时间缓存。这个还要从函数**gettime()**说起，先来看看该函数的代码：
+static int gettime(struct event_base *base, struct timeval *tp){ // 如果tv_cache时间缓存已设置，就直接使用 if (base-&gt;tv_cache.tv_sec) { *tp = base-&gt;tv_cache; return (0); } // 如果支持monotonic，就用clock_gettime获取monotonic时间 #if defined(HAVE_CLOCK_GETTIME) &amp;&amp; defined(CLOCK_MONOTONIC) if (use_monotonic) { struct timespec ts; if (clock_gettime(CLOCK_MONOTONIC, &amp;ts) == -1) return (-1); tp-&gt;tv_sec = ts.tv_sec; tp-&gt;tv_usec = ts.tv_nsec / 1000; return (0); } #endif // 否则只能取得系统当前时间 return (evutil_gettimeofday(tp, NULL)); } 如果tv_cache已经设置，那么就直接使用缓存的时间；否则需要再次执行系统调用获取系统时间。 函数**evutil_gettimeofday()用来获取当前系统时间，在Linux下其实就是系统调用gettimeofday()；Windows没有提供函数gettimeofday，而是通过调用_ftime()**来完成的。 在每次系统事件循环中，时间缓存tv_cache将会被相应的清空和设置，再次来看看下面event_base_loop的主要代码逻辑：
+int event_base_loop(struct event_base *base, int flags){ // 清空时间缓存 base-&gt;tv_cache.tv_sec = 0; while(!" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/136973dd819b459bac605bcb1a25571c/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="libevent源码深度剖析11"/>
+<meta name="twitter:description" content="libevent源码深度剖析11 时间管理
+为了支持定时器，libevent必须和系统时间打交道，这一部分的内容也比较简单，主要涉及到时间的加减辅助函数、时间缓存、时间校正和定时器堆的时间值调整等。下面就结合源代码来分析一下。
+1. 初始化检测 libevent在初始化时会检测系统时间的类型，通过调用函数**d****etect_monotonic()完成，它通过调用clock_gettime()**来检测系统是否支持monotonic时钟类型：
+static void detect_monotonic(void){ #if defined(HAVE_CLOCK_GETTIME) &amp;&amp; defined(CLOCK_MONOTONIC) struct timespec ts; if (clock_gettime(CLOCK_MONOTONIC, &amp;ts) == 0) use_monotonic = 1; // 系统支持monotonic时间 #endif } Monotonic时间指示的是系统从boot后到现在所经过的时间，如果系统支持Monotonic时间就将全局变量use_monotonic设置为1，设置use_monotonic到底有什么用，这个在后面说到时间校正时就能看出来了。
+2. 时间缓存 结构体event_base中的tv_cache，用来记录时间缓存。这个还要从函数**gettime()**说起，先来看看该函数的代码：
+static int gettime(struct event_base *base, struct timeval *tp){ // 如果tv_cache时间缓存已设置，就直接使用 if (base-&gt;tv_cache.tv_sec) { *tp = base-&gt;tv_cache; return (0); } // 如果支持monotonic，就用clock_gettime获取monotonic时间 #if defined(HAVE_CLOCK_GETTIME) &amp;&amp; defined(CLOCK_MONOTONIC) if (use_monotonic) { struct timespec ts; if (clock_gettime(CLOCK_MONOTONIC, &amp;ts) == -1) return (-1); tp-&gt;tv_sec = ts.tv_sec; tp-&gt;tv_usec = ts.tv_nsec / 1000; return (0); } #endif // 否则只能取得系统当前时间 return (evutil_gettimeofday(tp, NULL)); } 如果tv_cache已经设置，那么就直接使用缓存的时间；否则需要再次执行系统调用获取系统时间。 函数**evutil_gettimeofday()用来获取当前系统时间，在Linux下其实就是系统调用gettimeofday()；Windows没有提供函数gettimeofday，而是通过调用_ftime()**来完成的。 在每次系统事件循环中，时间缓存tv_cache将会被相应的清空和设置，再次来看看下面event_base_loop的主要代码逻辑：
+int event_base_loop(struct event_base *base, int flags){ // 清空时间缓存 base-&gt;tv_cache.tv_sec = 0; while(!"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "libevent源码深度剖析11",
+      "item": "https://haokiu.com/136973dd819b459bac605bcb1a25571c/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "libevent源码深度剖析11",
+  "name": "libevent源码深度剖析11",
+  "description": "libevent源码深度剖析11 时间管理\n为了支持定时器，libevent必须和系统时间打交道，这一部分的内容也比较简单，主要涉及到时间的加减辅助函数、时间缓存、时间校正和定时器堆的时间值调整等。下面就结合源代码来分析一下。\n1. 初始化检测 libevent在初始化时会检测系统时间的类型，通过调用函数**d****etect_monotonic()完成，它通过调用clock_gettime()**来检测系统是否支持monotonic时钟类型：\nstatic void detect_monotonic(void){ #if defined(HAVE_CLOCK_GETTIME) \u0026amp;\u0026amp; defined(CLOCK_MONOTONIC) struct timespec ts; if (clock_gettime(CLOCK_MONOTONIC, \u0026amp;ts) == 0) use_monotonic = 1; // 系统支持monotonic时间 #endif } Monotonic时间指示的是系统从boot后到现在所经过的时间，如果系统支持Monotonic时间就将全局变量use_monotonic设置为1，设置use_monotonic到底有什么用，这个在后面说到时间校正时就能看出来了。\n2. 时间缓存 结构体event_base中的tv_cache，用来记录时间缓存。这个还要从函数**gettime()**说起，先来看看该函数的代码：\nstatic int gettime(struct event_base *base, struct timeval *tp){ // 如果tv_cache时间缓存已设置，就直接使用 if (base-\u0026gt;tv_cache.tv_sec) { *tp = base-\u0026gt;tv_cache; return (0); } // 如果支持monotonic，就用clock_gettime获取monotonic时间 #if defined(HAVE_CLOCK_GETTIME) \u0026amp;\u0026amp; defined(CLOCK_MONOTONIC) if (use_monotonic) { struct timespec ts; if (clock_gettime(CLOCK_MONOTONIC, \u0026amp;ts) == -1) return (-1); tp-\u0026gt;tv_sec = ts.tv_sec; tp-\u0026gt;tv_usec = ts.tv_nsec / 1000; return (0); } #endif // 否则只能取得系统当前时间 return (evutil_gettimeofday(tp, NULL)); } 如果tv_cache已经设置，那么就直接使用缓存的时间；否则需要再次执行系统调用获取系统时间。 函数**evutil_gettimeofday()用来获取当前系统时间，在Linux下其实就是系统调用gettimeofday()；Windows没有提供函数gettimeofday，而是通过调用_ftime()**来完成的。 在每次系统事件循环中，时间缓存tv_cache将会被相应的清空和设置，再次来看看下面event_base_loop的主要代码逻辑：\nint event_base_loop(struct event_base *base, int flags){ // 清空时间缓存 base-\u0026gt;tv_cache.tv_sec = 0; while(!",
+  "keywords": [
+    
+  ],
+  "articleBody": "libevent源码深度剖析11 时间管理\n为了支持定时器，libevent必须和系统时间打交道，这一部分的内容也比较简单，主要涉及到时间的加减辅助函数、时间缓存、时间校正和定时器堆的时间值调整等。下面就结合源代码来分析一下。\n1. 初始化检测 libevent在初始化时会检测系统时间的类型，通过调用函数**d****etect_monotonic()完成，它通过调用clock_gettime()**来检测系统是否支持monotonic时钟类型：\nstatic void detect_monotonic(void){ #if defined(HAVE_CLOCK_GETTIME) \u0026\u0026 defined(CLOCK_MONOTONIC) struct timespec ts; if (clock_gettime(CLOCK_MONOTONIC, \u0026ts) == 0) use_monotonic = 1; // 系统支持monotonic时间 #endif } Monotonic时间指示的是系统从boot后到现在所经过的时间，如果系统支持Monotonic时间就将全局变量use_monotonic设置为1，设置use_monotonic到底有什么用，这个在后面说到时间校正时就能看出来了。\n2. 时间缓存 结构体event_base中的tv_cache，用来记录时间缓存。这个还要从函数**gettime()**说起，先来看看该函数的代码：\nstatic int gettime(struct event_base *base, struct timeval *tp){ // 如果tv_cache时间缓存已设置，就直接使用 if (base-\u003etv_cache.tv_sec) { *tp = base-\u003etv_cache; return (0); } // 如果支持monotonic，就用clock_gettime获取monotonic时间 #if defined(HAVE_CLOCK_GETTIME) \u0026\u0026 defined(CLOCK_MONOTONIC) if (use_monotonic) { struct timespec ts; if (clock_gettime(CLOCK_MONOTONIC, \u0026ts) == -1) return (-1); tp-\u003etv_sec = ts.tv_sec; tp-\u003etv_usec = ts.tv_nsec / 1000; return (0); } #endif // 否则只能取得系统当前时间 return (evutil_gettimeofday(tp, NULL)); } 如果tv_cache已经设置，那么就直接使用缓存的时间；否则需要再次执行系统调用获取系统时间。 函数**evutil_gettimeofday()用来获取当前系统时间，在Linux下其实就是系统调用gettimeofday()；Windows没有提供函数gettimeofday，而是通过调用_ftime()**来完成的。 在每次系统事件循环中，时间缓存tv_cache将会被相应的清空和设置，再次来看看下面event_base_loop的主要代码逻辑：\nint event_base_loop(struct event_base *base, int flags){ // 清空时间缓存 base-\u003etv_cache.tv_sec = 0; while(!done){ timeout_correct(base, \u0026tv); // 时间校正 // 更新event_tv到tv_cache指示的时间或者当前时间（第一次） // event_tv \u003c--- tv_cache gettime(base, \u0026base-\u003eevent_tv); // 清空时间缓存-- 时间点1 base-\u003etv_cache.tv_sec = 0; // 等待I/O事件就绪 res = evsel-\u003edispatch(base, evbase, tv_p); // 缓存tv_cache存储了当前时间的值-- 时间点2 // tv_cache \u003c--- now gettime(base, \u0026base-\u003etv_cache); // .. 处理就绪事件 } // 退出时也要清空时间缓存 base-\u003etv_cache.tv_sec = 0; return (0); } 时间event_tv指示了dispatch()上次返回，也就是I/O事件就绪时的时间，第一次进入循环时，由于tv_cache被清空，因此gettime()执行系统调用获取当前系统时间；而后将会更新为tv_cache指示的时间。 时间tv_cache在dispatch()返回后被设置为当前系统时间，因此它缓存了本次I/O事件就绪时的时间（event_tv）。 从代码逻辑里可以看出event_tv取得的是tv_cache上一次的值，因此event_tv应该小于tv_cache的值。 设置时间缓存的优点是不必每次获取时间都执行系统调用，这是个相对费时的操作；在上面标注的时间点2到时间点1的这段时间（处理就绪事件时），调用gettime()取得的都是tv_cache缓存的时间。\n3. 时间校正 如果系统支持monotonic时间，该时间是系统从boot后到现在所经过的时间，因此不需要执行校正。 根据前面的代码逻辑，如果系统不支持monotonic时间，用户可能会手动的调整时间，如果时间被向前调整了（MS前面第7部分讲成了向后调整，要改正），比如从5点调整到了3点，那么在时间点2取得的值可能会小于上次的时间，这就需要调整了，下面来看看校正的具体代码，由函数**timeout_correct()**完成：\nstatic void timeout_correct(struct event_base *base, struct timeval *tv){ struct event **pev; unsigned int size; struct timeval off; if (use_monotonic) // monotonic时间就直接返回，无需调整 return; gettime(base, tv); // tv \u003c---tv_cache // 根据前面的分析可以知道event_tv应该小于tv_cache // 如果tv \u003c event_tv表明用户向前调整时间了，需要校正时间 if (evutil_timercmp(tv, \u0026base-\u003eevent_tv, \u003e=)) { base-\u003eevent_tv = *tv; return; } // 计算时间差值 evutil_timersub(\u0026base-\u003eevent_tv, tv, \u0026off); // 调整定时事件小根堆 pev = base-\u003etimeheap.p; size = base-\u003etimeheap.n; for (; size-- \u003e 0; ++pev) { struct timeval *ev_tv = \u0026(**pev).ev_timeout; evutil_timersub(ev_tv, \u0026off, ev_tv); } base-\u003eevent_tv = *tv; // 更新event_tv为tv_cache } 在调整小根堆时，因为所有定时事件的时间值都会被减去相同的值，因此虽然堆中元素的时间键值改变了，但是相对关系并没有改变，不会改变堆的整体结构。因此只需要遍历堆中的所有元素，将每个元素的时间键值减去相同的值即可完成调整，不需要重新调整堆的结构。 当然调整完后，要将event_tv值重新设置为tv_cache值了。\n4. 小节 主要分析了一下libevent对系统时间的处理，时间缓存、时间校正和定时堆的时间值调整等，逻辑还是很简单的，时间的加减、设置等辅助函数则非常简单，主要在头文件evutil.h中，就不再多说了。\n",
+  "wordCount" : "240",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/136973dd819b459bac605bcb1a25571c/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      libevent源码深度剖析11
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#libevent%e6%ba%90%e7%a0%81%e6%b7%b1%e5%ba%a6%e5%89%96%e6%9e%9011" aria-label="libevent源码深度剖析11">libevent源码深度剖析11</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#1-%e5%88%9d%e5%a7%8b%e5%8c%96%e6%a3%80%e6%b5%8b" aria-label="1. 初始化检测">1. 初始化检测</a></li>
+                <li>
+                    <a href="#2-%e6%97%b6%e9%97%b4%e7%bc%93%e5%ad%98" aria-label="2. 时间缓存">2. 时间缓存</a></li>
+                <li>
+                    <a href="#3-%e6%97%b6%e9%97%b4%e6%a0%a1%e6%ad%a3" aria-label="3. 时间校正">3. 时间校正</a></li>
+                <li>
+                    <a href="#4-%e5%b0%8f%e8%8a%82" aria-label="4. 小节">4. 小节</a>
+                </li>
+            </ul>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="libevent源码深度剖析11">libevent源码深度剖析11</h1>
+<p><strong>时间管理</strong></p>
+<p>为了支持定时器，libevent必须和系统时间打交道，这一部分的内容也比较简单，主要涉及到时间的加减辅助函数、时间缓存、时间校正和定时器堆的时间值调整等。下面就结合源代码来分析一下。</p>
+<h3 id="1-初始化检测">1. 初始化检测</h3>
+<p>libevent在初始化时会检测系统时间的类型，通过调用函数**d****etect_monotonic()<strong>完成，它通过调用</strong>clock_gettime()**来检测系统是否支持monotonic时钟类型：</p>
+<pre tabindex="0"><code>static void detect_monotonic(void){
+#if defined(HAVE_CLOCK_GETTIME) &amp;&amp; defined(CLOCK_MONOTONIC)
+    struct timespec    ts;
+    if (clock_gettime(CLOCK_MONOTONIC, &amp;ts) == 0)
+        use_monotonic = 1; // 系统支持monotonic时间
+#endif
+}
+</code></pre><p>Monotonic时间指示的是系统从boot后到现在所经过的时间，如果系统支持Monotonic时间就将全局变量<strong>use_monotonic</strong>设置为1，设置use_monotonic到底有什么用，这个在后面说到时间校正时就能看出来了。</p>
+<h3 id="2-时间缓存">2. 时间缓存</h3>
+<p>结构体event_base中的<strong>tv_cache</strong>，用来记录时间缓存。这个还要从函数**gettime()**说起，先来看看该函数的代码：</p>
+<pre tabindex="0"><code>static int gettime(struct event_base *base, struct timeval *tp){
+    // 如果tv_cache时间缓存已设置，就直接使用
+    if (base-&gt;tv_cache.tv_sec) {
+        *tp = base-&gt;tv_cache;
+        return (0);
+    }
+    // 如果支持monotonic，就用clock_gettime获取monotonic时间
+#if defined(HAVE_CLOCK_GETTIME) &amp;&amp; defined(CLOCK_MONOTONIC)
+    if (use_monotonic) {
+        struct timespec    ts;
+        if (clock_gettime(CLOCK_MONOTONIC, &amp;ts) == -1)
+            return (-1);
+        tp-&gt;tv_sec = ts.tv_sec;
+        tp-&gt;tv_usec = ts.tv_nsec / 1000;
+        return (0);
+    }
+#endif
+    // 否则只能取得系统当前时间
+    return (evutil_gettimeofday(tp, NULL));
+}
+</code></pre><p>如果tv_cache已经设置，那么就直接使用缓存的时间；否则需要再次执行系统调用获取系统时间。
+函数**evutil_gettimeofday()<strong>用来获取当前系统时间，在Linux下其实就是系统调用gettimeofday()；Windows没有提供函数gettimeofday，而是通过调用</strong>_ftime()**来完成的。
+在每次系统事件循环中，时间缓存tv_cache将会被相应的清空和设置，再次来看看下面event_base_loop的主要代码逻辑：</p>
+<pre tabindex="0"><code>int event_base_loop(struct event_base *base, int flags){
+    // 清空时间缓存
+    base-&gt;tv_cache.tv_sec = 0;
+    while(!done){
+        timeout_correct(base, &amp;tv); // 时间校正
+        // 更新event_tv到tv_cache指示的时间或者当前时间（第一次）
+         // event_tv &lt;--- tv_cache
+        gettime(base, &amp;base-&gt;event_tv);
+        // 清空时间缓存-- 时间点1
+        base-&gt;tv_cache.tv_sec = 0;
+        // 等待I/O事件就绪
+        res = evsel-&gt;dispatch(base, evbase, tv_p);
+        // 缓存tv_cache存储了当前时间的值-- 时间点2
+         // tv_cache &lt;--- now
+        gettime(base, &amp;base-&gt;tv_cache);
+        // .. 处理就绪事件
+    }
+    // 退出时也要清空时间缓存
+    base-&gt;tv_cache.tv_sec = 0;
+    return (0);
+}
+</code></pre><p>时间event_tv指示了<strong>dispatch()<strong>上次返回，也就是I/O事件就绪时的时间，第一次进入循环时，由于tv_cache被清空，因此</strong>gettime()<strong>执行系统调用获取当前系统时间；而后将会更新为tv_cache指示的时间。
+时间tv_cache在</strong>dispatch()<strong>返回后被设置为当前系统时间，因此它缓存了本次I/O事件就绪时的时间</strong>（event_tv）</strong>。
+从代码逻辑里可以看出event_tv取得的是tv_cache上一次的值，因此event_tv应该小于tv_cache的值。
+设置时间缓存的优点是不必每次获取时间都执行系统调用，这是个相对费时的操作；在上面标注的时间点2到时间点1的这段时间（处理就绪事件时），调用gettime()取得的都是tv_cache缓存的时间。</p>
+<h3 id="3-时间校正">3. 时间校正</h3>
+<p>如果系统支持<strong>monotonic</strong>时间，该时间是系统从boot后到现在所经过的时间，因此不需要执行校正。
+根据前面的代码逻辑，如果系统不支持monotonic时间，用户可能会手动的调整时间，如果时间被向前调整了（MS前面第7部分讲成了向后调整，要改正），比如从5点调整到了3点，那么在时间点2取得的值可能会小于上次的时间，这就需要调整了，下面来看看校正的具体代码，由函数**timeout_correct()**完成：</p>
+<pre tabindex="0"><code>static void timeout_correct(struct event_base *base, struct timeval *tv){
+    struct event **pev;
+    unsigned int size;
+    struct timeval off;
+    if (use_monotonic) // monotonic时间就直接返回，无需调整
+        return;
+    gettime(base, tv); // tv &lt;---tv_cache
+    // 根据前面的分析可以知道event_tv应该小于tv_cache
+    // 如果tv &lt; event_tv表明用户向前调整时间了，需要校正时间
+    if (evutil_timercmp(tv, &amp;base-&gt;event_tv, &gt;=)) {
+        base-&gt;event_tv = *tv;
+        return;
+    }
+    // 计算时间差值
+    evutil_timersub(&amp;base-&gt;event_tv, tv, &amp;off);
+    // 调整定时事件小根堆
+    pev = base-&gt;timeheap.p;
+    size = base-&gt;timeheap.n;
+    for (; size-- &gt; 0; ++pev) {
+        struct timeval *ev_tv = &amp;(**pev).ev_timeout;
+        evutil_timersub(ev_tv, &amp;off, ev_tv);
+    }
+    base-&gt;event_tv = *tv; // 更新event_tv为tv_cache
+}
+</code></pre><p>在调整小根堆时，因为所有定时事件的时间值都会被减去相同的值，因此虽然堆中元素的时间键值改变了，但是相对关系并没有改变，不会改变堆的整体结构。因此只需要遍历堆中的所有元素，将每个元素的时间键值减去相同的值即可完成调整，不需要重新调整堆的结构。
+当然调整完后，要将event_tv值重新设置为tv_cache值了。</p>
+<h3 id="4-小节">4. 小节</h3>
+<p>主要分析了一下libevent对系统时间的处理，时间缓存、时间校正和定时堆的时间值调整等，逻辑还是很简单的，时间的加减、设置等辅助函数则非常简单，主要在头文件evutil.h中，就不再多说了。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/f567712a9375435692b3217e444f19e5/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>libevent源码深度剖析10</span>
+  </a>
+  <a class="next" href="https://haokiu.com/1f455bc4e89944fe8fb0ca8f3bbcdc1b/">
+    <span class="title">Next »</span>
+    <br>
+    <span>libevent源码深度剖析12</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

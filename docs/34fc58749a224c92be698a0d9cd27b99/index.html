@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>leveldb源码分析3 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="leveldb源码分析3 本系列《leveldb源码分析》共有22篇文章，这是第三篇。
+4. Memtable之一 Memtable是leveldb很重要的一块，leveldb的核心之一。我们肯定关注KV数据在Memtable中是如何组织的，秘密在Skip list中。
+4.1 用途 在Leveldb中，所有内存中的KV数据都存储在Memtable中，物理disk则存储在SSTable中。在系统运行过程中，如果Memtable中的数据占用内存到达指定值(Options.write_buffer_size)，则Leveldb就自动将Memtable转换为Memtable，并自动生成新的Memtable，也就是Copy-On-Write机制了。
+Immutable Memtable则被新的线程Dump到磁盘中，Dump结束则该Immutable Memtable就可以释放了。因名知意，Immutable Memtable是只读的。
+所以可见，最新的数据都是存储在Memtable中的，Immutable Memtable和物理SSTable则是某个时点的数据。
+为了防止系统down机导致内存数据Memtable或者Immutable Memtable丢失，leveldb自然也依赖于log机制来保证可靠性了。
+Memtable提供了写入KV记录，删除以及读取KV记录的接口，但是事实上**Memtable并不执行真正的删除操作,**删除某个Key的Value在Memtable内是作为插入一条记录实施的，但是会打上一个Key的删除标记，真正的删除操作在后面的 Compaction过程中，lazy delete。
+4.2 核心是Skip list 另外，Memtable中的KV对是根据Key排序的，leveldb在插入等操作时保证key的有序性。想想，前面看到的Skip list不正是合适的人选吗，因此Memtable的核心数据结构是一个Skip list，Memtable只是一个接口类。当然随之而来的一个问题就是Skip list是如何组织KV数据对的，在后面分析Memtable的插入、查询接口时我们将会看到答案。
+4.3 接口说明 先来看看Memtable的接口：
+void Ref() { &#43;&#43;refs_; } void Unref(); Iterator* NewIterator(); void Add(SequenceNumber seq, ValueType type, const Slice&amp; key, const Slice&amp; value); bool Get(const LookupKey&amp; key, std::string* value, Status* s); 首先Memtable是基于引用计数的机制，如果引用计数为0，则在Unref中删除自己，Ref和Unref就是干这个的。
+NewIterator是返回一个迭代器，可以遍历访问table的内部数据，很好的设计思想，这种方式隐藏了table的内部实现。外部调用者必须保证使用Iterator访问Memtable的时候该Memtable是live的。 Add和Get是添加和获取记录的接口，没有Delete，还记得前面说过，memtable的delete实际上是插入一条type为kTypeDeletion的记录。 4.4 类图 先来看看Memtable相关的整体类层次吧，并不复杂，还是相当清晰的。见图4.4-1。
+4.5 Key结构 Memtable是一个KV存储结构，那么这个key肯定是个重点了，在分析接口实现之前，有必要仔细分析一下Memtable对key的使用。
+这里面有5个key的概念，可能会让人混淆，下面就来一个一个的分析。
+4.5.1 InternalKey &amp; ParsedInternalKey &amp; User Key InternalKey是一个复合概念，是有几个部分组合成的一个key，ParsedInternalKey就是对InternalKey分拆后的结果，先来看看ParsedInternalKey的成员，这是一个struct：
+Slice user_key; SequenceNumber sequence; ValueType type; 也就是说InternalKey是由User key &#43; SequenceNumber &#43; ValueType组合而成的，顺便先分析下几个Key相关的函数，它们是了解Internal Key和User Key的关键。
+首先是InternalKey和ParsedInternalKey相互转换的两个函数，如下。
+bool ParseInternalKey (const Slice&amp; internal_key, ParsedInternalKey* result); void AppendInternalKey (std::string* result, const ParsedInternalKey&amp; key); 函数实现很简单，就是字符串的拼接与把字符串按字节拆分，代码略过。根据实现，容易得到InternalKey的格式为：">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/34fc58749a224c92be698a0d9cd27b99/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="leveldb源码分析3" />
+<meta property="og:description" content="leveldb源码分析3 本系列《leveldb源码分析》共有22篇文章，这是第三篇。
+4. Memtable之一 Memtable是leveldb很重要的一块，leveldb的核心之一。我们肯定关注KV数据在Memtable中是如何组织的，秘密在Skip list中。
+4.1 用途 在Leveldb中，所有内存中的KV数据都存储在Memtable中，物理disk则存储在SSTable中。在系统运行过程中，如果Memtable中的数据占用内存到达指定值(Options.write_buffer_size)，则Leveldb就自动将Memtable转换为Memtable，并自动生成新的Memtable，也就是Copy-On-Write机制了。
+Immutable Memtable则被新的线程Dump到磁盘中，Dump结束则该Immutable Memtable就可以释放了。因名知意，Immutable Memtable是只读的。
+所以可见，最新的数据都是存储在Memtable中的，Immutable Memtable和物理SSTable则是某个时点的数据。
+为了防止系统down机导致内存数据Memtable或者Immutable Memtable丢失，leveldb自然也依赖于log机制来保证可靠性了。
+Memtable提供了写入KV记录，删除以及读取KV记录的接口，但是事实上**Memtable并不执行真正的删除操作,**删除某个Key的Value在Memtable内是作为插入一条记录实施的，但是会打上一个Key的删除标记，真正的删除操作在后面的 Compaction过程中，lazy delete。
+4.2 核心是Skip list 另外，Memtable中的KV对是根据Key排序的，leveldb在插入等操作时保证key的有序性。想想，前面看到的Skip list不正是合适的人选吗，因此Memtable的核心数据结构是一个Skip list，Memtable只是一个接口类。当然随之而来的一个问题就是Skip list是如何组织KV数据对的，在后面分析Memtable的插入、查询接口时我们将会看到答案。
+4.3 接口说明 先来看看Memtable的接口：
+void Ref() { &#43;&#43;refs_; } void Unref(); Iterator* NewIterator(); void Add(SequenceNumber seq, ValueType type, const Slice&amp; key, const Slice&amp; value); bool Get(const LookupKey&amp; key, std::string* value, Status* s); 首先Memtable是基于引用计数的机制，如果引用计数为0，则在Unref中删除自己，Ref和Unref就是干这个的。
+NewIterator是返回一个迭代器，可以遍历访问table的内部数据，很好的设计思想，这种方式隐藏了table的内部实现。外部调用者必须保证使用Iterator访问Memtable的时候该Memtable是live的。 Add和Get是添加和获取记录的接口，没有Delete，还记得前面说过，memtable的delete实际上是插入一条type为kTypeDeletion的记录。 4.4 类图 先来看看Memtable相关的整体类层次吧，并不复杂，还是相当清晰的。见图4.4-1。
+4.5 Key结构 Memtable是一个KV存储结构，那么这个key肯定是个重点了，在分析接口实现之前，有必要仔细分析一下Memtable对key的使用。
+这里面有5个key的概念，可能会让人混淆，下面就来一个一个的分析。
+4.5.1 InternalKey &amp; ParsedInternalKey &amp; User Key InternalKey是一个复合概念，是有几个部分组合成的一个key，ParsedInternalKey就是对InternalKey分拆后的结果，先来看看ParsedInternalKey的成员，这是一个struct：
+Slice user_key; SequenceNumber sequence; ValueType type; 也就是说InternalKey是由User key &#43; SequenceNumber &#43; ValueType组合而成的，顺便先分析下几个Key相关的函数，它们是了解Internal Key和User Key的关键。
+首先是InternalKey和ParsedInternalKey相互转换的两个函数，如下。
+bool ParseInternalKey (const Slice&amp; internal_key, ParsedInternalKey* result); void AppendInternalKey (std::string* result, const ParsedInternalKey&amp; key); 函数实现很简单，就是字符串的拼接与把字符串按字节拆分，代码略过。根据实现，容易得到InternalKey的格式为：" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/34fc58749a224c92be698a0d9cd27b99/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="leveldb源码分析3"/>
+<meta name="twitter:description" content="leveldb源码分析3 本系列《leveldb源码分析》共有22篇文章，这是第三篇。
+4. Memtable之一 Memtable是leveldb很重要的一块，leveldb的核心之一。我们肯定关注KV数据在Memtable中是如何组织的，秘密在Skip list中。
+4.1 用途 在Leveldb中，所有内存中的KV数据都存储在Memtable中，物理disk则存储在SSTable中。在系统运行过程中，如果Memtable中的数据占用内存到达指定值(Options.write_buffer_size)，则Leveldb就自动将Memtable转换为Memtable，并自动生成新的Memtable，也就是Copy-On-Write机制了。
+Immutable Memtable则被新的线程Dump到磁盘中，Dump结束则该Immutable Memtable就可以释放了。因名知意，Immutable Memtable是只读的。
+所以可见，最新的数据都是存储在Memtable中的，Immutable Memtable和物理SSTable则是某个时点的数据。
+为了防止系统down机导致内存数据Memtable或者Immutable Memtable丢失，leveldb自然也依赖于log机制来保证可靠性了。
+Memtable提供了写入KV记录，删除以及读取KV记录的接口，但是事实上**Memtable并不执行真正的删除操作,**删除某个Key的Value在Memtable内是作为插入一条记录实施的，但是会打上一个Key的删除标记，真正的删除操作在后面的 Compaction过程中，lazy delete。
+4.2 核心是Skip list 另外，Memtable中的KV对是根据Key排序的，leveldb在插入等操作时保证key的有序性。想想，前面看到的Skip list不正是合适的人选吗，因此Memtable的核心数据结构是一个Skip list，Memtable只是一个接口类。当然随之而来的一个问题就是Skip list是如何组织KV数据对的，在后面分析Memtable的插入、查询接口时我们将会看到答案。
+4.3 接口说明 先来看看Memtable的接口：
+void Ref() { &#43;&#43;refs_; } void Unref(); Iterator* NewIterator(); void Add(SequenceNumber seq, ValueType type, const Slice&amp; key, const Slice&amp; value); bool Get(const LookupKey&amp; key, std::string* value, Status* s); 首先Memtable是基于引用计数的机制，如果引用计数为0，则在Unref中删除自己，Ref和Unref就是干这个的。
+NewIterator是返回一个迭代器，可以遍历访问table的内部数据，很好的设计思想，这种方式隐藏了table的内部实现。外部调用者必须保证使用Iterator访问Memtable的时候该Memtable是live的。 Add和Get是添加和获取记录的接口，没有Delete，还记得前面说过，memtable的delete实际上是插入一条type为kTypeDeletion的记录。 4.4 类图 先来看看Memtable相关的整体类层次吧，并不复杂，还是相当清晰的。见图4.4-1。
+4.5 Key结构 Memtable是一个KV存储结构，那么这个key肯定是个重点了，在分析接口实现之前，有必要仔细分析一下Memtable对key的使用。
+这里面有5个key的概念，可能会让人混淆，下面就来一个一个的分析。
+4.5.1 InternalKey &amp; ParsedInternalKey &amp; User Key InternalKey是一个复合概念，是有几个部分组合成的一个key，ParsedInternalKey就是对InternalKey分拆后的结果，先来看看ParsedInternalKey的成员，这是一个struct：
+Slice user_key; SequenceNumber sequence; ValueType type; 也就是说InternalKey是由User key &#43; SequenceNumber &#43; ValueType组合而成的，顺便先分析下几个Key相关的函数，它们是了解Internal Key和User Key的关键。
+首先是InternalKey和ParsedInternalKey相互转换的两个函数，如下。
+bool ParseInternalKey (const Slice&amp; internal_key, ParsedInternalKey* result); void AppendInternalKey (std::string* result, const ParsedInternalKey&amp; key); 函数实现很简单，就是字符串的拼接与把字符串按字节拆分，代码略过。根据实现，容易得到InternalKey的格式为："/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "leveldb源码分析3",
+      "item": "https://haokiu.com/34fc58749a224c92be698a0d9cd27b99/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "leveldb源码分析3",
+  "name": "leveldb源码分析3",
+  "description": "leveldb源码分析3 本系列《leveldb源码分析》共有22篇文章，这是第三篇。\n4. Memtable之一 Memtable是leveldb很重要的一块，leveldb的核心之一。我们肯定关注KV数据在Memtable中是如何组织的，秘密在Skip list中。\n4.1 用途 在Leveldb中，所有内存中的KV数据都存储在Memtable中，物理disk则存储在SSTable中。在系统运行过程中，如果Memtable中的数据占用内存到达指定值(Options.write_buffer_size)，则Leveldb就自动将Memtable转换为Memtable，并自动生成新的Memtable，也就是Copy-On-Write机制了。\nImmutable Memtable则被新的线程Dump到磁盘中，Dump结束则该Immutable Memtable就可以释放了。因名知意，Immutable Memtable是只读的。\n所以可见，最新的数据都是存储在Memtable中的，Immutable Memtable和物理SSTable则是某个时点的数据。\n为了防止系统down机导致内存数据Memtable或者Immutable Memtable丢失，leveldb自然也依赖于log机制来保证可靠性了。\nMemtable提供了写入KV记录，删除以及读取KV记录的接口，但是事实上**Memtable并不执行真正的删除操作,**删除某个Key的Value在Memtable内是作为插入一条记录实施的，但是会打上一个Key的删除标记，真正的删除操作在后面的 Compaction过程中，lazy delete。\n4.2 核心是Skip list 另外，Memtable中的KV对是根据Key排序的，leveldb在插入等操作时保证key的有序性。想想，前面看到的Skip list不正是合适的人选吗，因此Memtable的核心数据结构是一个Skip list，Memtable只是一个接口类。当然随之而来的一个问题就是Skip list是如何组织KV数据对的，在后面分析Memtable的插入、查询接口时我们将会看到答案。\n4.3 接口说明 先来看看Memtable的接口：\nvoid Ref() { ++refs_; } void Unref(); Iterator* NewIterator(); void Add(SequenceNumber seq, ValueType type, const Slice\u0026amp; key, const Slice\u0026amp; value); bool Get(const LookupKey\u0026amp; key, std::string* value, Status* s); 首先Memtable是基于引用计数的机制，如果引用计数为0，则在Unref中删除自己，Ref和Unref就是干这个的。\nNewIterator是返回一个迭代器，可以遍历访问table的内部数据，很好的设计思想，这种方式隐藏了table的内部实现。外部调用者必须保证使用Iterator访问Memtable的时候该Memtable是live的。 Add和Get是添加和获取记录的接口，没有Delete，还记得前面说过，memtable的delete实际上是插入一条type为kTypeDeletion的记录。 4.4 类图 先来看看Memtable相关的整体类层次吧，并不复杂，还是相当清晰的。见图4.4-1。\n4.5 Key结构 Memtable是一个KV存储结构，那么这个key肯定是个重点了，在分析接口实现之前，有必要仔细分析一下Memtable对key的使用。\n这里面有5个key的概念，可能会让人混淆，下面就来一个一个的分析。\n4.5.1 InternalKey \u0026amp; ParsedInternalKey \u0026amp; User Key InternalKey是一个复合概念，是有几个部分组合成的一个key，ParsedInternalKey就是对InternalKey分拆后的结果，先来看看ParsedInternalKey的成员，这是一个struct：\nSlice user_key; SequenceNumber sequence; ValueType type; 也就是说InternalKey是由User key + SequenceNumber + ValueType组合而成的，顺便先分析下几个Key相关的函数，它们是了解Internal Key和User Key的关键。\n首先是InternalKey和ParsedInternalKey相互转换的两个函数，如下。\nbool ParseInternalKey (const Slice\u0026amp; internal_key, ParsedInternalKey* result); void AppendInternalKey (std::string* result, const ParsedInternalKey\u0026amp; key); 函数实现很简单，就是字符串的拼接与把字符串按字节拆分，代码略过。根据实现，容易得到InternalKey的格式为：",
+  "keywords": [
+    
+  ],
+  "articleBody": "leveldb源码分析3 本系列《leveldb源码分析》共有22篇文章，这是第三篇。\n4. Memtable之一 Memtable是leveldb很重要的一块，leveldb的核心之一。我们肯定关注KV数据在Memtable中是如何组织的，秘密在Skip list中。\n4.1 用途 在Leveldb中，所有内存中的KV数据都存储在Memtable中，物理disk则存储在SSTable中。在系统运行过程中，如果Memtable中的数据占用内存到达指定值(Options.write_buffer_size)，则Leveldb就自动将Memtable转换为Memtable，并自动生成新的Memtable，也就是Copy-On-Write机制了。\nImmutable Memtable则被新的线程Dump到磁盘中，Dump结束则该Immutable Memtable就可以释放了。因名知意，Immutable Memtable是只读的。\n所以可见，最新的数据都是存储在Memtable中的，Immutable Memtable和物理SSTable则是某个时点的数据。\n为了防止系统down机导致内存数据Memtable或者Immutable Memtable丢失，leveldb自然也依赖于log机制来保证可靠性了。\nMemtable提供了写入KV记录，删除以及读取KV记录的接口，但是事实上**Memtable并不执行真正的删除操作,**删除某个Key的Value在Memtable内是作为插入一条记录实施的，但是会打上一个Key的删除标记，真正的删除操作在后面的 Compaction过程中，lazy delete。\n4.2 核心是Skip list 另外，Memtable中的KV对是根据Key排序的，leveldb在插入等操作时保证key的有序性。想想，前面看到的Skip list不正是合适的人选吗，因此Memtable的核心数据结构是一个Skip list，Memtable只是一个接口类。当然随之而来的一个问题就是Skip list是如何组织KV数据对的，在后面分析Memtable的插入、查询接口时我们将会看到答案。\n4.3 接口说明 先来看看Memtable的接口：\nvoid Ref() { ++refs_; } void Unref(); Iterator* NewIterator(); void Add(SequenceNumber seq, ValueType type, const Slice\u0026 key, const Slice\u0026 value); bool Get(const LookupKey\u0026 key, std::string* value, Status* s); 首先Memtable是基于引用计数的机制，如果引用计数为0，则在Unref中删除自己，Ref和Unref就是干这个的。\nNewIterator是返回一个迭代器，可以遍历访问table的内部数据，很好的设计思想，这种方式隐藏了table的内部实现。外部调用者必须保证使用Iterator访问Memtable的时候该Memtable是live的。 Add和Get是添加和获取记录的接口，没有Delete，还记得前面说过，memtable的delete实际上是插入一条type为kTypeDeletion的记录。 4.4 类图 先来看看Memtable相关的整体类层次吧，并不复杂，还是相当清晰的。见图4.4-1。\n4.5 Key结构 Memtable是一个KV存储结构，那么这个key肯定是个重点了，在分析接口实现之前，有必要仔细分析一下Memtable对key的使用。\n这里面有5个key的概念，可能会让人混淆，下面就来一个一个的分析。\n4.5.1 InternalKey \u0026 ParsedInternalKey \u0026 User Key InternalKey是一个复合概念，是有几个部分组合成的一个key，ParsedInternalKey就是对InternalKey分拆后的结果，先来看看ParsedInternalKey的成员，这是一个struct：\nSlice user_key; SequenceNumber sequence; ValueType type; 也就是说InternalKey是由User key + SequenceNumber + ValueType组合而成的，顺便先分析下几个Key相关的函数，它们是了解Internal Key和User Key的关键。\n首先是InternalKey和ParsedInternalKey相互转换的两个函数，如下。\nbool ParseInternalKey (const Slice\u0026 internal_key, ParsedInternalKey* result); void AppendInternalKey (std::string* result, const ParsedInternalKey\u0026 key); 函数实现很简单，就是字符串的拼接与把字符串按字节拆分，代码略过。根据实现，容易得到InternalKey的格式为：\n| User key (string) | sequence number (7 bytes) | value type (1 byte) | 由此还可知道sequence number大小是7 bytes，sequence number是所有基于op log系统的关键数据，它唯一指定了不同操作的时间顺序。\n把user key放到前面****的原因是，这样对同一个user key的操作就可以按照sequence number顺序连续存放了，不同的user key是互不相干的，因此把它们的操作放在一起也没有什么意义。\n另外用户可以为user key定制比较函数，系统默认是字母序的。\n下面的两个函数是分别从InternalKey中拆分出User Key和Value Type的，非常直观，代码也附上吧。\ninline Slice ExtractUserKey(const Slice\u0026 internal_key) { assert(internal_key.size() \u003e= 8); return Slice(internal_key.data(), internal_key.size() - 8); } inline ValueType ExtractValueType(const Slice\u0026 internal_key) { assert(internal_key.size() \u003e= 8); const size_t n = internal_key.size(); uint64_t num = DecodeFixed64(internal_key.data() + n - 8); unsigned char c = num \u0026 0xff; return static_cast(c); } 4.5.2 LookupKey \u0026 Memtable Key Memtable的查询接口传入的是LookupKey，它也是由User Key和Sequence Number组合而成的，从其构造函数：\nLookupKey(const Slice\u0026 user_key, SequenceNumber s) 中分析出LookupKey的格式为：\n| Size (int32变长)| User key (string) | sequence number (7 bytes) | value type (1 byte) | 两点：\n这里的Size是user key长度+8，也就是整个字符串长度了； value type是kValueTypeForSeek，它等于kTypeValue。 由于LookupKey的size是变长存储的，因此它使用kstart_记录了user key string的起始地址，否则将不能正确的获取size和user key；\nLookupKey导出了三个函数，可以分别从LookupKey得到Internal Key，Memtable Key和User Key，如下：\n// Return a key suitable for lookup in a MemTable. Slice memtable_key() const { return Slice(start_, end_ - start_); } // Return an internal key (suitable for passing to an internal iterator) Slice internal_key() const { return Slice(kstart_, end_ - kstart_); } // Return the user key Slice user_key() const { return Slice(kstart_, end_ - kstart_ - 8); } 其中**start_**是LookupKey字符串的开始，**end_**是结束，**kstart_**是start_+4，也就是user key字符串的起始地址。\n",
+  "wordCount" : "288",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/34fc58749a224c92be698a0d9cd27b99/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      leveldb源码分析3
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#leveldb%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%903" aria-label="leveldb源码分析3">leveldb源码分析3</a><ul>
+                        
+                <li>
+                    <a href="#4-memtable%e4%b9%8b%e4%b8%80" aria-label="4. Memtable之一">4. Memtable之一</a><ul>
+                        
+                <li>
+                    <a href="#41-%e7%94%a8%e9%80%94" aria-label="4.1 用途">4.1 用途</a></li>
+                <li>
+                    <a href="#42-%e6%a0%b8%e5%bf%83%e6%98%afskip-list" aria-label="4.2 核心是Skip list">4.2 核心是Skip list</a></li>
+                <li>
+                    <a href="#43-%e6%8e%a5%e5%8f%a3%e8%af%b4%e6%98%8e" aria-label="4.3 接口说明">4.3 接口说明</a></li>
+                <li>
+                    <a href="#44-%e7%b1%bb%e5%9b%be" aria-label="4.4 类图">4.4 类图</a></li>
+                <li>
+                    <a href="#45-key%e7%bb%93%e6%9e%84" aria-label="4.5 Key结构">4.5 Key结构</a><ul>
+                        
+                <li>
+                    <a href="#451-internalkey--parsedinternalkey--user-key" aria-label="4.5.1 InternalKey &amp;amp; ParsedInternalKey &amp;amp; User Key">4.5.1 InternalKey &amp; ParsedInternalKey &amp; User Key</a></li>
+                <li>
+                    <a href="#452-lookupkey--memtable-key" aria-label="4.5.2 LookupKey &amp;amp; Memtable Key">4.5.2 LookupKey &amp; Memtable Key</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="leveldb源码分析3">leveldb源码分析3</h1>
+<p>本系列《leveldb源码分析》共有22篇文章，这是第三篇。</p>
+<h2 id="4-memtable之一">4. Memtable之一</h2>
+<p>Memtable是leveldb很重要的一块，leveldb的核心之一。我们肯定<strong>关注KV数据在Memtable中是如何组织的，秘密在Skip list中。</strong></p>
+<h3 id="41-用途">4.1 用途</h3>
+<p>在Leveldb中，所有内存中的KV数据都存储在Memtable中，物理disk则存储在SSTable中。在系统运行过程中，如果Memtable中的数据占用内存到达指定值(Options.write_buffer_size)，则Leveldb就自动将Memtable转换为Memtable，并自动生成新的Memtable，也就是<strong>Copy-On-Write机制</strong>了。</p>
+<p>Immutable Memtable则被新的线程Dump到磁盘中，Dump结束则该Immutable Memtable就可以释放了。因名知意，<strong>Immutable Memtable是只读的</strong>。</p>
+<p><strong>所以可见，最新的数据都是存储在Memtable中的，Immutable Memtable和物理SSTable则是某个时点的数据。</strong></p>
+<p>为了防止系统down机导致内存数据Memtable或者Immutable Memtable丢失，leveldb自然也<strong>依赖于log机制来保证可靠性</strong>了。</p>
+<p>Memtable提供了写入KV记录，删除以及读取KV记录的接口，但是事实上**Memtable并不执行真正的删除操作,**删除某个Key的Value在Memtable内是作为插入一条记录实施的，但是会打上一个Key的删除标记，<strong>真正的删除操作在后面的 Compaction过程中，lazy delete。</strong></p>
+<h3 id="42-核心是skip-list">4.2 核心是Skip list</h3>
+<p>另外，Memtable中的<strong>KV对是根据Key排序的</strong>，leveldb在插入等操作时保证key的有序性。想想，前面看到的Skip list不正是合适的人选吗，<strong>因此Memtable的核心数据结构是一个Skip list，Memtable只是一个接口类</strong>。当然随之而来的一个问题就是Skip list是如何组织KV数据对的，在后面分析Memtable的插入、查询接口时我们将会看到答案。</p>
+<h3 id="43-接口说明">4.3 接口说明</h3>
+<p>先来看看Memtable的接口：</p>
+<pre tabindex="0"><code>void Ref() { ++refs_; }
+
+void Unref();
+
+Iterator* NewIterator();
+
+void Add(SequenceNumber seq,
+          ValueType type,
+          const Slice&amp; key,
+          const Slice&amp; value);
+
+bool Get(const LookupKey&amp; key, std::string* value, Status* s);
+</code></pre><p>首先Memtable是基于引用计数的机制，如果引用计数为0，则在Unref中删除自己，<strong>Ref和Unref</strong>就是干这个的。</p>
+<ul>
+<li><strong>NewIterator</strong>是返回一个迭代器，可以遍历访问table的内部数据，很好的设计思想，这种方式隐藏了table的内部实现。外部调用者必须保证使用Iterator访问Memtable的时候该Memtable是live的。</li>
+<li><strong>Add和Get</strong>是添加和获取记录的接口，没有Delete，还记得前面说过，memtable的delete实际上是插入一条type为kTypeDeletion的记录。</li>
+</ul>
+<h3 id="44-类图">4.4 类图</h3>
+<p>先来看看Memtable相关的<strong>整体类层次</strong>吧，并不复杂，还是相当清晰的。见图4.4-1。</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/143d6fcc8aac2e19949a321c0addfb30.webp" alt=""  />
+</p>
+<h3 id="45-key结构">4.5 Key结构</h3>
+<p>Memtable是一个KV存储结构，那么这个<strong>key肯定是个重点</strong>了，在分析接口实现之前，有必要仔细分析一下Memtable对key的使用。</p>
+<p>这里面有5个key的概念，可能会让人混淆，下面就来一个一个的分析。</p>
+<h4 id="451-internalkey--parsedinternalkey--user-key">4.5.1 InternalKey &amp; ParsedInternalKey &amp; User Key</h4>
+<p><strong>InternalKey</strong>是一个复合概念，是有几个部分组合成的一个key，<strong>ParsedInternalKey</strong>就是对InternalKey分拆后的结果，先来看看ParsedInternalKey的成员，这是一个struct：</p>
+<pre tabindex="0"><code>Slice user_key;
+
+SequenceNumber sequence;
+
+ValueType type;
+</code></pre><p>也就是说InternalKey是由User key + SequenceNumber + ValueType组合而成的，顺便先分析下几个Key相关的函数，它们是了解Internal Key和User Key的关键。</p>
+<p>首先是<strong>InternalKey和ParsedInternalKey</strong>相互转换的两个函数，如下。</p>
+<pre tabindex="0"><code>bool ParseInternalKey (const Slice&amp; internal_key,
+                       ParsedInternalKey* result);
+
+void AppendInternalKey (std::string* result,
+                        const ParsedInternalKey&amp; key);
+</code></pre><p>函数实现很简单，就是字符串的拼接与把字符串按字节拆分，代码略过。根据实现，容易得到<strong>InternalKey的格式</strong>为：</p>
+<pre tabindex="0"><code>| User key (string) | sequence number (7 bytes) | value type (1 byte) |
+</code></pre><p>由此还可知道sequence number大小是7 bytes，<strong>sequence number是所有基于op log系统的关键数据</strong>，它唯一指定了不同操作的时间顺序。</p>
+<p>把<strong>user key放到前面****的原因</strong>是，这样对同一个user key的操作就可以按照sequence number顺序连续存放了，不同的user key是互不相干的，因此把它们的操作放在一起也没有什么意义。</p>
+<p>另外用户可以为user key定制比较函数，系统默认是字母序的。</p>
+<p>下面的两个函数是分别从InternalKey中拆分出<strong>User Key和Value Type</strong>的，非常直观，代码也附上吧。</p>
+<pre tabindex="0"><code>inline Slice ExtractUserKey(const Slice&amp; internal_key)
+{
+    assert(internal_key.size() &gt;= 8);
+    return Slice(internal_key.data(), internal_key.size() - 8);
+}
+
+inline ValueType ExtractValueType(const Slice&amp; internal_key)
+{
+    assert(internal_key.size() &gt;= 8);
+    const size_t n = internal_key.size();
+    uint64_t num = DecodeFixed64(internal_key.data() + n - 8);
+    unsigned char c = num &amp; 0xff;
+    return static_cast&lt;ValueType&gt;(c);
+}
+</code></pre><h4 id="452-lookupkey--memtable-key">4.5.2 LookupKey &amp; Memtable Key</h4>
+<p>Memtable的<strong>查询接口传入的是LookupKey</strong>，它也是由User Key和Sequence Number组合而成的，从其构造函数：</p>
+<pre tabindex="0"><code>LookupKey(const Slice&amp; user_key, SequenceNumber s)
+</code></pre><p>中分析出LookupKey的格式为：</p>
+<pre tabindex="0"><code>| Size (int32变长)| User key (string) | sequence number (7 bytes) | value type (1 byte) |
+</code></pre><p>两点：</p>
+<ul>
+<li>这里的Size是user key长度+8，也就是整个字符串长度了；</li>
+<li>value type是kValueTypeForSeek，它等于kTypeValue。</li>
+</ul>
+<p>由于LookupKey的size是变长存储的，因此它使用kstart_记录了user key string的起始地址，否则将不能正确的获取size和user key；</p>
+<p>LookupKey导出了三个函数，可以分别从LookupKey得到<strong>Internal Key，Memtable Key和User Key</strong>，如下：</p>
+<pre tabindex="0"><code>// Return a key suitable for lookup in a MemTable.
+Slice memtable_key() const { return Slice(start_, end_ - start_); }
+
+// Return an internal key (suitable for passing to an internal iterator)
+Slice internal_key() const { return Slice(kstart_, end_ - kstart_); }
+
+// Return the user key
+Slice user_key() const { return Slice(kstart_, end_ - kstart_ - 8); }
+</code></pre><p>其中**start_**是LookupKey字符串的开始，**end_**是结束，**kstart_**是start_+4，也就是user key字符串的起始地址。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/08d56462861f4df7b247921ba14a88e2/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>leveldb源码分析22</span>
+  </a>
+  <a class="next" href="https://haokiu.com/f4dfd0e7e33240c9807a11402d34ddb3/">
+    <span class="title">Next »</span>
+    <br>
+    <span>leveldb源码分析4</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

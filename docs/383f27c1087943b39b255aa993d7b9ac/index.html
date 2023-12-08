@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Leveldb源码分析16 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="Leveldb源码分析16 本系列《leveldb源码分析》共有22篇文章，这是第十六篇
+10.Version分析之一 先来分析leveldb对单版本的sstable文件管理，主要集中在Version类中。前面的10.4节已经说明了Version类的功能和成员，这里分析其函数接口和代码实现。 Version不会修改其管理的sstable文件，只有读取操作。
+10.1 Version接口 先来看看Version类的接口函数，接下来再一一分析。
+// 追加一系列iterator到 @*iters中， //将在merge到一起时生成该Version的内容 // 要求: Version已经保存了(见VersionSet::SaveTo) void AddIterators(constReadOptions&amp;, std::vector&lt;Iterator*&gt;* iters); // 给定@key查找value，如果找到保存在@*val并返回OK。 // 否则返回non-OK，设置@ *stats. // 要求：没有hold lock struct GetStats { FileMetaData* seek_file; int seek_file_level; }; Status Get(constReadOptions&amp;, const LookupKey&amp; key, std::string* val,GetStats* stats); // 把@stats加入到当前状态中，如果需要触发新的compaction返回true // 要求：hold lock bool UpdateStats(constGetStats&amp; stats); void GetOverlappingInputs(intlevel, const InternalKey*begin, // NULL 指在所有key之前 const InternalKey* end, // NULL指在所有key之后 std::vector&lt;FileMetaData*&gt;* inputs); // 如果指定level中的某些文件和[*smallest_user_key,*largest_user_key] //有重合就返回true。 // @smallest_user_key==NULL表示比DB中所有key都小的key. // @largest_user_key==NULL表示比DB中所有key都大的key. bool OverlapInLevel(int level,const Slice*smallest_user_key, const Slice* largest_user_key); // 返回我们应该在哪个level上放置新的memtable compaction， // 该compaction覆盖了范围[smallest_user_key,largest_user_key]. int PickLevelForMemTableOutput(const Slice&amp; smallest_user_key, const Slice&amp; largest_user_key); // 指定level的sstable个数 int NumFiles(int level) const {return files_[level].size(); 10.2 Version::AddIterators() 该函数最终在DB::NewIterators()接口中被调用，调用层次为： DBImpl::NewIterator()-&gt;DBImpl::NewInternalIterator()-&gt;Version::AddIterators()。 函数功能是为该Version中的所有sstable都创建一个Two Level Iterator，以遍历sstable的内容。">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/383f27c1087943b39b255aa993d7b9ac/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Leveldb源码分析16" />
+<meta property="og:description" content="Leveldb源码分析16 本系列《leveldb源码分析》共有22篇文章，这是第十六篇
+10.Version分析之一 先来分析leveldb对单版本的sstable文件管理，主要集中在Version类中。前面的10.4节已经说明了Version类的功能和成员，这里分析其函数接口和代码实现。 Version不会修改其管理的sstable文件，只有读取操作。
+10.1 Version接口 先来看看Version类的接口函数，接下来再一一分析。
+// 追加一系列iterator到 @*iters中， //将在merge到一起时生成该Version的内容 // 要求: Version已经保存了(见VersionSet::SaveTo) void AddIterators(constReadOptions&amp;, std::vector&lt;Iterator*&gt;* iters); // 给定@key查找value，如果找到保存在@*val并返回OK。 // 否则返回non-OK，设置@ *stats. // 要求：没有hold lock struct GetStats { FileMetaData* seek_file; int seek_file_level; }; Status Get(constReadOptions&amp;, const LookupKey&amp; key, std::string* val,GetStats* stats); // 把@stats加入到当前状态中，如果需要触发新的compaction返回true // 要求：hold lock bool UpdateStats(constGetStats&amp; stats); void GetOverlappingInputs(intlevel, const InternalKey*begin, // NULL 指在所有key之前 const InternalKey* end, // NULL指在所有key之后 std::vector&lt;FileMetaData*&gt;* inputs); // 如果指定level中的某些文件和[*smallest_user_key,*largest_user_key] //有重合就返回true。 // @smallest_user_key==NULL表示比DB中所有key都小的key. // @largest_user_key==NULL表示比DB中所有key都大的key. bool OverlapInLevel(int level,const Slice*smallest_user_key, const Slice* largest_user_key); // 返回我们应该在哪个level上放置新的memtable compaction， // 该compaction覆盖了范围[smallest_user_key,largest_user_key]. int PickLevelForMemTableOutput(const Slice&amp; smallest_user_key, const Slice&amp; largest_user_key); // 指定level的sstable个数 int NumFiles(int level) const {return files_[level].size(); 10.2 Version::AddIterators() 该函数最终在DB::NewIterators()接口中被调用，调用层次为： DBImpl::NewIterator()-&gt;DBImpl::NewInternalIterator()-&gt;Version::AddIterators()。 函数功能是为该Version中的所有sstable都创建一个Two Level Iterator，以遍历sstable的内容。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/383f27c1087943b39b255aa993d7b9ac/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Leveldb源码分析16"/>
+<meta name="twitter:description" content="Leveldb源码分析16 本系列《leveldb源码分析》共有22篇文章，这是第十六篇
+10.Version分析之一 先来分析leveldb对单版本的sstable文件管理，主要集中在Version类中。前面的10.4节已经说明了Version类的功能和成员，这里分析其函数接口和代码实现。 Version不会修改其管理的sstable文件，只有读取操作。
+10.1 Version接口 先来看看Version类的接口函数，接下来再一一分析。
+// 追加一系列iterator到 @*iters中， //将在merge到一起时生成该Version的内容 // 要求: Version已经保存了(见VersionSet::SaveTo) void AddIterators(constReadOptions&amp;, std::vector&lt;Iterator*&gt;* iters); // 给定@key查找value，如果找到保存在@*val并返回OK。 // 否则返回non-OK，设置@ *stats. // 要求：没有hold lock struct GetStats { FileMetaData* seek_file; int seek_file_level; }; Status Get(constReadOptions&amp;, const LookupKey&amp; key, std::string* val,GetStats* stats); // 把@stats加入到当前状态中，如果需要触发新的compaction返回true // 要求：hold lock bool UpdateStats(constGetStats&amp; stats); void GetOverlappingInputs(intlevel, const InternalKey*begin, // NULL 指在所有key之前 const InternalKey* end, // NULL指在所有key之后 std::vector&lt;FileMetaData*&gt;* inputs); // 如果指定level中的某些文件和[*smallest_user_key,*largest_user_key] //有重合就返回true。 // @smallest_user_key==NULL表示比DB中所有key都小的key. // @largest_user_key==NULL表示比DB中所有key都大的key. bool OverlapInLevel(int level,const Slice*smallest_user_key, const Slice* largest_user_key); // 返回我们应该在哪个level上放置新的memtable compaction， // 该compaction覆盖了范围[smallest_user_key,largest_user_key]. int PickLevelForMemTableOutput(const Slice&amp; smallest_user_key, const Slice&amp; largest_user_key); // 指定level的sstable个数 int NumFiles(int level) const {return files_[level].size(); 10.2 Version::AddIterators() 该函数最终在DB::NewIterators()接口中被调用，调用层次为： DBImpl::NewIterator()-&gt;DBImpl::NewInternalIterator()-&gt;Version::AddIterators()。 函数功能是为该Version中的所有sstable都创建一个Two Level Iterator，以遍历sstable的内容。"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Leveldb源码分析16",
+      "item": "https://haokiu.com/383f27c1087943b39b255aa993d7b9ac/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Leveldb源码分析16",
+  "name": "Leveldb源码分析16",
+  "description": "Leveldb源码分析16 本系列《leveldb源码分析》共有22篇文章，这是第十六篇\n10.Version分析之一 先来分析leveldb对单版本的sstable文件管理，主要集中在Version类中。前面的10.4节已经说明了Version类的功能和成员，这里分析其函数接口和代码实现。 Version不会修改其管理的sstable文件，只有读取操作。\n10.1 Version接口 先来看看Version类的接口函数，接下来再一一分析。\n// 追加一系列iterator到 @*iters中， //将在merge到一起时生成该Version的内容 // 要求: Version已经保存了(见VersionSet::SaveTo) void AddIterators(constReadOptions\u0026amp;, std::vector\u0026lt;Iterator*\u0026gt;* iters); // 给定@key查找value，如果找到保存在@*val并返回OK。 // 否则返回non-OK，设置@ *stats. // 要求：没有hold lock struct GetStats { FileMetaData* seek_file; int seek_file_level; }; Status Get(constReadOptions\u0026amp;, const LookupKey\u0026amp; key, std::string* val,GetStats* stats); // 把@stats加入到当前状态中，如果需要触发新的compaction返回true // 要求：hold lock bool UpdateStats(constGetStats\u0026amp; stats); void GetOverlappingInputs(intlevel, const InternalKey*begin, // NULL 指在所有key之前 const InternalKey* end, // NULL指在所有key之后 std::vector\u0026lt;FileMetaData*\u0026gt;* inputs); // 如果指定level中的某些文件和[*smallest_user_key,*largest_user_key] //有重合就返回true。 // @smallest_user_key==NULL表示比DB中所有key都小的key. // @largest_user_key==NULL表示比DB中所有key都大的key. bool OverlapInLevel(int level,const Slice*smallest_user_key, const Slice* largest_user_key); // 返回我们应该在哪个level上放置新的memtable compaction， // 该compaction覆盖了范围[smallest_user_key,largest_user_key]. int PickLevelForMemTableOutput(const Slice\u0026amp; smallest_user_key, const Slice\u0026amp; largest_user_key); // 指定level的sstable个数 int NumFiles(int level) const {return files_[level].size(); 10.2 Version::AddIterators() 该函数最终在DB::NewIterators()接口中被调用，调用层次为： DBImpl::NewIterator()-\u0026gt;DBImpl::NewInternalIterator()-\u0026gt;Version::AddIterators()。 函数功能是为该Version中的所有sstable都创建一个Two Level Iterator，以遍历sstable的内容。",
+  "keywords": [
+    
+  ],
+  "articleBody": "Leveldb源码分析16 本系列《leveldb源码分析》共有22篇文章，这是第十六篇\n10.Version分析之一 先来分析leveldb对单版本的sstable文件管理，主要集中在Version类中。前面的10.4节已经说明了Version类的功能和成员，这里分析其函数接口和代码实现。 Version不会修改其管理的sstable文件，只有读取操作。\n10.1 Version接口 先来看看Version类的接口函数，接下来再一一分析。\n// 追加一系列iterator到 @*iters中， //将在merge到一起时生成该Version的内容 // 要求: Version已经保存了(见VersionSet::SaveTo) void AddIterators(constReadOptions\u0026, std::vector* iters); // 给定@key查找value，如果找到保存在@*val并返回OK。 // 否则返回non-OK，设置@ *stats. // 要求：没有hold lock struct GetStats { FileMetaData* seek_file; int seek_file_level; }; Status Get(constReadOptions\u0026, const LookupKey\u0026 key, std::string* val,GetStats* stats); // 把@stats加入到当前状态中，如果需要触发新的compaction返回true // 要求：hold lock bool UpdateStats(constGetStats\u0026 stats); void GetOverlappingInputs(intlevel, const InternalKey*begin, // NULL 指在所有key之前 const InternalKey* end, // NULL指在所有key之后 std::vector* inputs); // 如果指定level中的某些文件和[*smallest_user_key,*largest_user_key] //有重合就返回true。 // @smallest_user_key==NULL表示比DB中所有key都小的key. // @largest_user_key==NULL表示比DB中所有key都大的key. bool OverlapInLevel(int level,const Slice*smallest_user_key, const Slice* largest_user_key); // 返回我们应该在哪个level上放置新的memtable compaction， // 该compaction覆盖了范围[smallest_user_key,largest_user_key]. int PickLevelForMemTableOutput(const Slice\u0026 smallest_user_key, const Slice\u0026 largest_user_key); // 指定level的sstable个数 int NumFiles(int level) const {return files_[level].size(); 10.2 Version::AddIterators() 该函数最终在DB::NewIterators()接口中被调用，调用层次为： DBImpl::NewIterator()-\u003eDBImpl::NewInternalIterator()-\u003eVersion::AddIterators()。 函数功能是为该Version中的所有sstable都创建一个Two Level Iterator，以遍历sstable的内容。\n对于level=0级别的sstable文件，直接通过TableCache::NewIterator()接口创建，这会直接载入sstable文件到内存cache中。 对于level\u003e0级别的sstable文件，通过函数NewTwoLevelIterator()创建一个TwoLevelIterator，这就使用了lazy open的机制。 下面来分析函数代码：\nS1 对于level=0级别的sstable文件，直接装入cache，level0的sstable文件可能有重合，需要merge。 for (size_t i = 0; i push_back(vset_-\u003etable_cache_-\u003eNewIterator(// versionset::table_cache_ options,files_[0][i]-\u003enumber, files_[0][i]-\u003efile_size)); } S2 对于level\u003e0级别的sstable文件，lazy open机制，它们不会有重叠。 for (int ll = 1; ll push_back(NewConcatenatingIterator(options,level)); } 函数NewConcatenatingIterator()直接返回一个TwoLevelIterator对象：\nreturn NewTwoLevelIterator(new LevelFileNumIterator(vset_-\u003eicmp_,\u0026files_[level]), \u0026GetFileIterator,vset_-\u003etable_cache_, options); 其第一级iterator是一个LevelFileNumIterator 第二级的迭代函数是GetFileIterator 下面就来分别分析之。 GetFileIterator是一个静态函数，很简单，直接返回TableCache::NewIterator()。函数声明为：\nstatic Iterator* GetFileIterator(void* arg,const ReadOptions\u0026 options, constSlice\u0026 file_value) TableCache* cache =reinterpret_cast(arg); if (file_value.size() != 16) { // 错误 return NewErrorIterator(Status::Corruption(\"xxx\")); } else { return cache-\u003eNewIterator(options, DecodeFixed64(file_value.data()), // filenumber DecodeFixed64(file_value.data() + 8)); // filesize } 这里的file_value是取自于LevelFileNumIterator的value，它的value()函数把file number和size以Fixed 8byte的方式压缩成一个Slice对象并返回。\n10.3 Version::LevelFileNumIterator类 这也是一个继承者Iterator的子类，一个内部Iterator。\n给定一个version/level对，生成该level内的文件信息。\n对于给定的entry：\nkey()返回的是文件中所包含的最大的key； value()返回的是|file number(8 bytes)|file size(8 bytes)|串； 它的构造函数接受两个参数：InternalKeyComparator\u0026，用于key的比较； vector*，指向version的所有sstable文件列表。 LevelFileNumIterator(const InternalKeyComparator\u0026 icmp, const std::vector* flist) : icmp_(icmp), flist_(flist),index_(flist-\u003esize()) {} // Marks as invalid 来看看其接口实现，不限啰嗦，全部都列出来。\nValid函数、SeekToxx和Next/Prev函数都很简单，毕竟容器是一个vector。Seek函数调用了FindFile，这个函数后面会分析。\nvirtual void Seek(constSlice\u0026 target) { index_ = FindFile(icmp_, *flist_, target);} virtual void SeekToFirst() {index_ = 0; } virtual void SeekToLast() {index_ = flist_-\u003eempty() ? 0 : flist_-\u003esize() - 1;} virtual void Next() { assert(Valid()); index_++; } virtual void Prev() { assert(Valid()); if (index_ == 0) index_ =flist_-\u003esize(); // Marks as invalid else index_--; } Slice key() const { assert(Valid()); return(*flist_)[index_]-\u003elargest.Encode(); // 返回当前sstable包含的largest key } Slice value() const { // 根据|number|size|的格式Fixed int压缩 assert(Valid()); EncodeFixed64(value_buf_,(*flist_)[index_]-\u003enumber); EncodeFixed64(value_buf_+8,(*flist_)[index_]-\u003efile_size); return Slice(value_buf_,sizeof(value_buf_)); } 来看FindFile，这其实是一个二分查找函数，因为传入的sstable文件列表是有序的，因此可以使用二分查找算法。就不再列出代码了。\n10.4 Version::Get() 查找函数，直接在DBImpl::Get()中被调用，函数原型为：\nStatus Version::Get(const ReadOptions\u0026 options, constLookupKey\u0026 k, std::string* value, GetStats* stats) 如果本次Get不止seek了一个文件（仅会发生在level 0的情况），就将搜索的第一个文件保存在stats中。如果stat有数据返回，表明本次读取在搜索到包含key的sstable文件之前，还做了其它无谓的搜索。这个结果将用在UpdateStats()中。 这个函数逻辑还是有些复杂的，来看看代码。\nS1 首先，取得必要的信息，初始化几个临时变量 Slice ikey = k.internal_key(); Slice user_key = k.user_key(); const Comparator* ucmp =vset_-\u003eicmp_.user_comparator(); Status s; stats-\u003eseek_file = NULL; stats-\u003eseek_file_level = -1; FileMetaData* last_file_read =NULL; // 在找到\u003e1个文件时，读取时记录上一个 int last_file_read_level = -1; // 这仅发生在level 0的情况下 std::vectortmp; FileMetaData* tmp2; S2 从0开始遍历所有的level，依次查找。因为entry不会跨越level，因此如果在某个level中找到了entry，那么就无需在后面的level中查找了。 for (int level = 0; level ",
+  "wordCount" : "665",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/383f27c1087943b39b255aa993d7b9ac/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      Leveldb源码分析16
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#leveldb%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%9016" aria-label="Leveldb源码分析16">Leveldb源码分析16</a><ul>
+                        
+                <li>
+                    <a href="#10version%e5%88%86%e6%9e%90%e4%b9%8b%e4%b8%80" aria-label="10.Version分析之一">10.Version分析之一</a><ul>
+                        
+                <li>
+                    <a href="#101-version%e6%8e%a5%e5%8f%a3" aria-label="10.1 Version接口">10.1 Version接口</a></li>
+                <li>
+                    <a href="#102-versionadditerators" aria-label="10.2 Version::AddIterators()">10.2 Version::AddIterators()</a><ul>
+                        
+                <li>
+                    <a href="#s1-%e5%af%b9%e4%ba%8elevel0%e7%ba%a7%e5%88%ab%e7%9a%84sstable%e6%96%87%e4%bb%b6%e7%9b%b4%e6%8e%a5%e8%a3%85%e5%85%a5cachelevel0%e7%9a%84sstable%e6%96%87%e4%bb%b6%e5%8f%af%e8%83%bd%e6%9c%89%e9%87%8d%e5%90%88%e9%9c%80%e8%a6%81merge" aria-label="S1 对于level=0级别的sstable文件，直接装入cache，level0的sstable文件可能有重合，需要merge。">S1 对于level=0级别的sstable文件，直接装入cache，level0的sstable文件可能有重合，需要merge。</a></li>
+                <li>
+                    <a href="#s2-%e5%af%b9%e4%ba%8elevel0%e7%ba%a7%e5%88%ab%e7%9a%84sstable%e6%96%87%e4%bb%b6lazy-open%e6%9c%ba%e5%88%b6%e5%ae%83%e4%bb%ac%e4%b8%8d%e4%bc%9a%e6%9c%89%e9%87%8d%e5%8f%a0" aria-label="S2 对于level&amp;gt;0级别的sstable文件，lazy open机制，它们不会有重叠。">S2 对于level&gt;0级别的sstable文件，lazy open机制，它们不会有重叠。</a></li></ul>
+                </li>
+                <li>
+                    <a href="#103-versionlevelfilenumiterator%e7%b1%bb" aria-label="10.3 Version::LevelFileNumIterator类">10.3 Version::LevelFileNumIterator类</a></li>
+                <li>
+                    <a href="#104-versionget" aria-label="10.4 Version::Get()">10.4 Version::Get()</a><ul>
+                        
+                <li>
+                    <a href="#s1-%e9%a6%96%e5%85%88%e5%8f%96%e5%be%97%e5%bf%85%e8%a6%81%e7%9a%84%e4%bf%a1%e6%81%af%e5%88%9d%e5%a7%8b%e5%8c%96%e5%87%a0%e4%b8%aa%e4%b8%b4%e6%97%b6%e5%8f%98%e9%87%8f" aria-label="S1 首先，取得必要的信息，初始化几个临时变量">S1 首先，取得必要的信息，初始化几个临时变量</a></li>
+                <li>
+                    <a href="#s2-%e4%bb%8e0%e5%bc%80%e5%a7%8b%e9%81%8d%e5%8e%86%e6%89%80%e6%9c%89%e7%9a%84level%e4%be%9d%e6%ac%a1%e6%9f%a5%e6%89%be%e5%9b%a0%e4%b8%baentry%e4%b8%8d%e4%bc%9a%e8%b7%a8%e8%b6%8alevel%e5%9b%a0%e6%ad%a4%e5%a6%82%e6%9e%9c%e5%9c%a8%e6%9f%90%e4%b8%aalevel%e4%b8%ad%e6%89%be%e5%88%b0%e4%ba%86entry%e9%82%a3%e4%b9%88%e5%b0%b1%e6%97%a0%e9%9c%80%e5%9c%a8%e5%90%8e%e9%9d%a2%e7%9a%84level%e4%b8%ad%e6%9f%a5%e6%89%be%e4%ba%86" aria-label="S2 从0开始遍历所有的level，依次查找。因为entry不会跨越level，因此如果在某个level中找到了entry，那么就无需在后面的level中查找了。">S2 从0开始遍历所有的level，依次查找。因为entry不会跨越level，因此如果在某个level中找到了entry，那么就无需在后面的level中查找了。</a></li>
+                <li>
+                    <a href="#s3-%e9%81%8d%e5%8e%86level%e4%b8%8b%e7%9a%84sstable%e6%96%87%e4%bb%b6%e5%88%97%e8%a1%a8%e6%90%9c%e7%b4%a2%e6%b3%a8%e6%84%8f%e5%af%b9%e4%ba%8elevel0%e5%92%8c0%e7%9a%84sstable%e6%96%87%e4%bb%b6%e7%9a%84%e5%a4%84%e7%90%86%e7%94%b1%e4%ba%8elevel-0%e6%96%87%e4%bb%b6%e4%b9%8b%e9%97%b4%e7%9a%84key%e5%8f%af%e8%83%bd%e6%9c%89%e9%87%8d%e5%8f%a0%e5%9b%a0%e6%ad%a4%e5%a4%84%e7%90%86%e9%80%bb%e8%be%91%e6%9c%89%e5%88%ab%e4%ba%8e0%e7%9a%84level" aria-label="S3 遍历level下的sstable文件列表，搜索，注意对于level=0和&amp;gt;0的sstable文件的处理，由于level 0文件之间的key可能有重叠，因此处理逻辑有别于&amp;gt;0的level。">S3 遍历level下的sstable文件列表，搜索，注意对于level=0和&gt;0的sstable文件的处理，由于level 0文件之间的key可能有重叠，因此处理逻辑有别于&gt;0的level。</a><ul>
+                        
+                <li>
+                    <a href="#s31-%e5%af%b9%e4%ba%8elevel-0%e6%96%87%e4%bb%b6%e5%8f%af%e8%83%bd%e6%9c%89%e9%87%8d%e5%8f%a0%e6%89%be%e5%88%b0%e6%89%80%e6%9c%89%e5%92%8cuser_key%e6%9c%89%e9%87%8d%e5%8f%a0%e7%9a%84%e6%96%87%e4%bb%b6%e7%84%b6%e5%90%8e%e6%a0%b9%e6%8d%ae%e6%97%b6%e9%97%b4%e9%a1%ba%e5%ba%8f%e4%bb%8e%e6%9c%80%e6%96%b0%e7%9a%84%e6%96%87%e4%bb%b6%e4%be%9d%e6%ac%a1%e5%a4%84%e7%90%86" aria-label="S3.1 对于level 0，文件可能有重叠，找到所有和user_key有重叠的文件，然后根据时间顺序从最新的文件依次处理。">S3.1 对于level 0，文件可能有重叠，找到所有和user_key有重叠的文件，然后根据时间顺序从最新的文件依次处理。</a></li>
+                <li>
+                    <a href="#s32-%e5%af%b9%e4%ba%8elevel0leveldb%e4%bf%9d%e8%af%81sstable%e6%96%87%e4%bb%b6%e4%b9%8b%e9%97%b4%e4%b8%8d%e4%bc%9a%e6%9c%89%e9%87%8d%e5%8f%a0%e6%89%80%e4%bb%a5%e5%a4%84%e7%90%86%e9%80%bb%e8%be%91%e6%9c%89%e5%88%ab%e4%ba%8elevel-0%e7%9b%b4%e6%8e%a5%e6%a0%b9%e6%8d%aeikey%e5%ae%9a%e4%bd%8d%e5%88%b0sstable%e6%96%87%e4%bb%b6%e5%8d%b3%e5%8f%af" aria-label="S3.2 对于level&amp;gt;0，leveldb保证sstable文件之间不会有重叠，所以处理逻辑有别于level 0，直接根据ikey定位到sstable文件即可。">S3.2 对于level&gt;0，leveldb保证sstable文件之间不会有重叠，所以处理逻辑有别于level 0，直接根据ikey定位到sstable文件即可。</a></li></ul>
+                </li>
+                <li>
+                    <a href="#s4-%e9%81%8d%e5%8e%86%e6%89%be%e5%88%b0%e7%9a%84%e6%96%87%e4%bb%b6%e5%ad%98%e5%9c%a8files%e4%b8%ad%e5%85%b6%e4%b8%aa%e6%95%b0%e4%b8%banum_files" aria-label="S4 遍历找到的文件，存在files中，其个数为num_files。">S4 遍历找到的文件，存在files中，其个数为num_files。</a><ul>
+                        
+                <li>
+                    <a href="#s41-%e5%a6%82%e6%9e%9c%e6%9c%ac%e6%ac%a1%e8%af%bb%e5%8f%96%e4%b8%8d%e6%ad%a2%e6%90%9c%e7%b4%a2%e4%ba%86%e4%b8%80%e4%b8%aa%e6%96%87%e4%bb%b6%e8%ae%b0%e5%bd%95%e4%b9%8b%e8%bf%99%e4%bb%85%e4%bc%9a%e5%8f%91%e7%94%9f%e5%9c%a8level-0%e7%9a%84%e6%83%85%e5%86%b5%e4%b8%8b" aria-label="S4.1 如果本次读取不止搜索了一个文件，记录之，这仅会发生在level 0的情况下。">S4.1 如果本次读取不止搜索了一个文件，记录之，这仅会发生在level 0的情况下。</a></li>
+                <li>
+                    <a href="#s42-%e8%b0%83%e7%94%a8tablecacheget%e5%b0%9d%e8%af%95%e8%8e%b7%e5%8f%96ikey-value%e5%a6%82%e6%9e%9c%e8%bf%94%e5%9b%9eok%e5%88%99%e8%bf%9b%e5%85%a5%e5%90%a6%e5%88%99%e7%9b%b4%e6%8e%a5%e8%bf%94%e5%9b%9e%e4%bc%a0%e9%80%92%e7%9a%84%e5%9b%9e%e8%b0%83%e5%87%bd%e6%95%b0%e6%98%afsavevalue" aria-label="S4.2 调用TableCache::Get()尝试获取{ikey, value}，如果返回OK则进入，否则直接返回，传递的回调函数是SaveValue()。">S4.2 调用TableCache::Get()尝试获取{ikey, value}，如果返回OK则进入，否则直接返回，传递的回调函数是SaveValue()。</a></li>
+                <li>
+                    <a href="#s43-%e6%a0%b9%e6%8d%aesaver%e7%9a%84%e7%8a%b6%e6%80%81%e5%88%a4%e6%96%ad%e5%a6%82%e6%9e%9c%e6%98%afnot-found%e5%88%99%e5%90%91%e4%b8%8b%e6%90%9c%e7%b4%a2%e4%b8%8b%e4%b8%80%e4%b8%aa%e6%9b%b4%e6%97%a9%e7%9a%84sstable%e6%96%87%e4%bb%b6%e5%85%b6%e5%ae%83%e5%80%bc%e5%88%99%e8%bf%94%e5%9b%9e" aria-label="S4.3 根据saver的状态判断，如果是Not Found则向下搜索下一个更早的sstable文件，其它值则返回。">S4.3 根据saver的状态判断，如果是Not Found则向下搜索下一个更早的sstable文件，其它值则返回。</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="leveldb源码分析16">Leveldb源码分析16</h1>
+<p>本系列《leveldb源码分析》共有22篇文章，这是第十六篇</p>
+<h2 id="10version分析之一">10.Version分析之一</h2>
+<p>先来<strong>分析leveldb对单版本的sstable文件管理</strong>，主要集中在Version类中。前面的10.4节已经说明了Version类的功能和成员，这里分析其函数接口和代码实现。
+<strong>Version不会修改其管理的sstable文件，只有读取操作。</strong></p>
+<h3 id="101-version接口">10.1 Version接口</h3>
+<p>先来看看Version类的接口函数，接下来再一一分析。</p>
+<pre tabindex="0"><code>// 追加一系列iterator到 @*iters中，
+//将在merge到一起时生成该Version的内容  
+
+// 要求: Version已经保存了(见VersionSet::SaveTo)  
+
+void AddIterators(constReadOptions&amp;, 
+                  std::vector&lt;Iterator*&gt;* iters);  
+
+
+// 给定@key查找value，如果找到保存在@*val并返回OK。  
+
+// 否则返回non-OK，设置@ *stats.  
+
+// 要求：没有hold lock  
+
+struct GetStats {  
+
+  FileMetaData* seek_file;  
+
+  int seek_file_level;  
+
+};  
+
+Status Get(constReadOptions&amp;, const LookupKey&amp; key, 
+           std::string* val,GetStats* stats);  
+
+
+
+// 把@stats加入到当前状态中，如果需要触发新的compaction返回true  
+
+// 要求：hold lock  
+
+bool UpdateStats(constGetStats&amp; stats);  
+
+void GetOverlappingInputs(intlevel,  
+
+    const InternalKey*begin,         // NULL 指在所有key之前  
+
+    const InternalKey* end,           // NULL指在所有key之后  
+
+    std::vector&lt;FileMetaData*&gt;* inputs);  
+
+
+
+// 如果指定level中的某些文件和[*smallest_user_key,*largest_user_key]
+//有重合就返回true。  
+
+// @smallest_user_key==NULL表示比DB中所有key都小的key.  
+
+// @largest_user_key==NULL表示比DB中所有key都大的key.  
+
+bool OverlapInLevel(int level,const Slice*smallest_user_key,
+                    const Slice* largest_user_key);  
+
+
+
+// 返回我们应该在哪个level上放置新的memtable compaction，  
+
+// 该compaction覆盖了范围[smallest_user_key,largest_user_key].  
+
+int PickLevelForMemTableOutput(const Slice&amp; smallest_user_key,  
+
+                           const Slice&amp; largest_user_key);  
+
+
+ // 指定level的sstable个数 
+int NumFiles(int level) const {return files_[level].size();
+</code></pre><h3 id="102-versionadditerators">10.2 Version::AddIterators()</h3>
+<p>该函数最终在DB::NewIterators()接口中被调用，调用层次为：
+<code>DBImpl::NewIterator()-&gt;DBImpl::NewInternalIterator()-&gt;Version::AddIterators()</code>。
+函数功能是为该Version中的所有sstable都创建一个Two Level Iterator，以遍历sstable的内容。</p>
+<ul>
+<li>对于<strong>level=0</strong>级别的sstable文件，直接通过TableCache::NewIterator()接口创建，这会直接载入sstable文件到内存cache中。</li>
+<li>对于<strong>level&gt;0</strong>级别的sstable文件，通过函数NewTwoLevelIterator()创建一个TwoLevelIterator，这就使用了lazy open的机制。</li>
+</ul>
+<p>下面来分析函数代码：</p>
+<h4 id="s1-对于level0级别的sstable文件直接装入cachelevel0的sstable文件可能有重合需要merge">S1 对于level=0级别的sstable文件，直接装入cache，level0的sstable文件可能有重合，需要merge。</h4>
+<pre tabindex="0"><code>for (size_t i = 0; i &lt;files_[0].size(); i++) {  
+	iters-&gt;push_back(vset_-&gt;table_cache_-&gt;NewIterator(// versionset::table_cache_  
+		options,files_[0][i]-&gt;number, files_[0][i]-&gt;file_size));  
+}  
+</code></pre><h4 id="s2-对于level0级别的sstable文件lazy-open机制它们不会有重叠">S2 对于level&gt;0级别的sstable文件，lazy open机制，它们不会有重叠。</h4>
+<pre tabindex="0"><code>for (int ll = 1; ll &lt;config::kNumLevels; ll++) {  
+	if(!files_[ll].empty()) iters-&gt;push_back(NewConcatenatingIterator(options,level));  
+}  
+</code></pre><p>函数NewConcatenatingIterator()直接返回一个TwoLevelIterator对象：</p>
+<pre tabindex="0"><code>return NewTwoLevelIterator(new LevelFileNumIterator(vset_-&gt;icmp_,&amp;files_[level]),
+                           &amp;GetFileIterator,vset_-&gt;table_cache_, options);
+</code></pre><ul>
+<li>其第一级iterator是一个LevelFileNumIterator</li>
+<li>第二级的迭代函数是GetFileIterator</li>
+</ul>
+<p>下面就来分别分析之。
+GetFileIterator是一个静态函数，很简单，直接返回TableCache::NewIterator()。函数声明为：</p>
+<pre tabindex="0"><code>static Iterator* GetFileIterator(void* arg,const ReadOptions&amp; options, constSlice&amp; file_value)
+TableCache* cache =reinterpret_cast&lt;TableCache*&gt;(arg);  
+
+	if (file_value.size() != 16) { // 错误  
+		return NewErrorIterator(Status::Corruption(&#34;xxx&#34;));  
+
+} else {  
+
+	return cache-&gt;NewIterator(options,  
+
+                DecodeFixed64(file_value.data()), // filenumber  
+
+                DecodeFixed64(file_value.data() + 8)); // filesize  
+
+}  
+</code></pre><p>这里的<strong>file_value</strong>是取自于LevelFileNumIterator的value，它的value()函数把file number和size以Fixed 8byte的方式压缩成一个Slice对象并返回。</p>
+<h3 id="103-versionlevelfilenumiterator类">10.3 Version::LevelFileNumIterator类</h3>
+<p>这也是一个继承者Iterator的子类，一个内部Iterator。</p>
+<p><strong>给定一个version/level对</strong>，生成该level内的文件信息。</p>
+<p><strong>对于给定的entry</strong>：</p>
+<ul>
+<li>key()返回的是文件中所包含的最大的key；</li>
+<li>value()返回的是|file number(8 bytes)|file size(8 bytes)|串；</li>
+<li>它的构造函数接受两个参数：InternalKeyComparator&amp;，用于key的比较；</li>
+<li>vector&lt;FileMetaData*&gt;*，指向version的所有sstable文件列表。</li>
+</ul>
+<pre tabindex="0"><code>LevelFileNumIterator(const InternalKeyComparator&amp; icmp,
+                                      const std::vector&lt;FileMetaData*&gt;* flist)
+                                      : icmp_(icmp), flist_(flist),index_(flist-&gt;size()) {} // Marks as invalid
+</code></pre><p>来看看其接口实现，不限啰嗦，全部都列出来。</p>
+<p>Valid函数、SeekToxx和Next/Prev函数都很简单，毕竟容器是一个vector。Seek函数调用了FindFile，这个函数后面会分析。</p>
+<pre tabindex="0"><code>virtual void Seek(constSlice&amp; target) { index_ = FindFile(icmp_, *flist_, target);}  
+
+virtual void SeekToFirst() {index_ = 0; }  
+
+virtual void SeekToLast() {index_ = flist_-&gt;empty() ? 0 : flist_-&gt;size() - 1;}  
+
+virtual void Next() {  
+
+    assert(Valid());  
+
+    index_++;  
+
+}  
+
+
+virtual void Prev() {  
+
+    assert(Valid());  
+
+    if (index_ == 0) index_ =flist_-&gt;size(); // Marks as invalid  
+
+    else index_--;  
+
+}  
+
+
+Slice key() const {  
+
+	assert(Valid());  
+
+	return(*flist_)[index_]-&gt;largest.Encode(); // 返回当前sstable包含的largest key  
+
+}  
+
+
+Slice value() const { // 根据|number|size|的格式Fixed int压缩  
+
+    assert(Valid());  
+
+    EncodeFixed64(value_buf_,(*flist_)[index_]-&gt;number);  
+
+    EncodeFixed64(value_buf_+8,(*flist_)[index_]-&gt;file_size);  
+
+    return Slice(value_buf_,sizeof(value_buf_));  
+
+}  
+</code></pre><p>来看FindFile，这其实是一个二分查找函数，因为传入的sstable文件列表是有序的，因此可以使用二分查找算法。就不再列出代码了。</p>
+<h3 id="104-versionget">10.4 Version::Get()</h3>
+<p>查找函数，直接在DBImpl::Get()中被调用，函数原型为：</p>
+<pre tabindex="0"><code>Status Version::Get(const ReadOptions&amp; options, constLookupKey&amp; k, std::string* value, GetStats* stats)
+</code></pre><p><strong>如果本次Get不止seek了一个文件</strong>（仅会发生在level 0的情况），就将搜索的第一个文件保存在stats中。<strong>如果stat有数据返回</strong>，表明本次读取在搜索到包含key的sstable文件之前，还做了其它无谓的搜索。这个结果将用在UpdateStats()中。
+这个函数逻辑还是有些复杂的，来看看代码。</p>
+<h4 id="s1-首先取得必要的信息初始化几个临时变量">S1 首先，取得必要的信息，初始化几个临时变量</h4>
+<pre tabindex="0"><code>Slice ikey = k.internal_key();  
+
+Slice user_key = k.user_key();  
+
+const Comparator* ucmp =vset_-&gt;icmp_.user_comparator();  
+
+Status s;  
+
+stats-&gt;seek_file = NULL;  
+
+stats-&gt;seek_file_level = -1;  
+
+FileMetaData* last_file_read =NULL; // 在找到&gt;1个文件时，读取时记录上一个  
+
+int last_file_read_level = -1;        // 这仅发生在level 0的情况下  
+
+std::vector&lt;FileMetaData*&gt;tmp;  
+
+FileMetaData* tmp2;  
+</code></pre><h4 id="s2-从0开始遍历所有的level依次查找因为entry不会跨越level因此如果在某个level中找到了entry那么就无需在后面的level中查找了">S2 从0开始遍历所有的level，依次查找。因为entry不会跨越level，因此如果在某个level中找到了entry，那么就无需在后面的level中查找了。</h4>
+<pre tabindex="0"><code>for (int level = 0; level &lt;config::kNumLevels; level++) {  
+
+    size_t num_files = files_[level].size();  
+
+    if (num_files == 0) continue; // 本层没有文件，则直接跳过  
+
+    // 取得level下的所有sstable文件列表，搜索本层  
+
+    FileMetaData* const* files = &amp;files_[level][0];   
+</code></pre><p>后面的所有逻辑都在for循环体中。</p>
+<h4 id="s3-遍历level下的sstable文件列表搜索注意对于level0和0的sstable文件的处理由于level-0文件之间的key可能有重叠因此处理逻辑有别于0的level">S3 遍历level下的sstable文件列表，搜索，注意对于level=0和&gt;0的sstable文件的处理，由于level 0文件之间的key可能有重叠，因此处理逻辑有别于&gt;0的level。</h4>
+<h5 id="s31-对于level-0文件可能有重叠找到所有和user_key有重叠的文件然后根据时间顺序从最新的文件依次处理">S3.1 对于level 0，文件可能有重叠，找到所有和user_key有重叠的文件，然后根据时间顺序从最新的文件依次处理。</h5>
+<pre tabindex="0"><code>tmp.reserve(num_files);  
+
+for (uint32_t i = 0; i &lt;num_files; i++) { // 遍历level 0下的所有sstable文件  
+
+    FileMetaData* f =files[i];  
+
+    if(ucmp-&gt;Compare(user_key, f-&gt;smallest.user_key()) &gt;= 0 &amp;&amp;  
+
+    ucmp-&gt;Compare(user_key, f-&gt;largest.user_key()) &lt;= 0)  
+
+    tmp.push_back(f); // sstable文件有user_key有重叠   
+
+}  
+
+if (tmp.empty()) continue;  
+
+std::sort(tmp.begin(),tmp.end(), NewestFirst); // 排序  
+
+files = &amp;tmp[0]; num_files= tmp.size();// 指向tmp指针和大小  
+</code></pre><h5 id="s32-对于level0leveldb保证sstable文件之间不会有重叠所以处理逻辑有别于level-0直接根据ikey定位到sstable文件即可">S3.2 对于level&gt;0，leveldb保证sstable文件之间不会有重叠，所以处理逻辑有别于level 0，直接根据ikey定位到sstable文件即可。</h5>
+<pre tabindex="0"><code>//二分查找，找到第一个largest key &gt;=ikey的file index  
+
+uint32_t index =FindFile(vset_-&gt;icmp_, files_[level], ikey);  
+
+if (index &gt;= num_files) { // 未找到，文件不存在  
+
+  files = NULL;  num_files = 0;  
+
+} else {  
+
+    tmp2 = files[index];  
+
+    if(ucmp-&gt;Compare(user_key, tmp2-&gt;smallest.user_key()) &lt; 0) {  
+
+        // 找到的文件其所有key都大于user_key，等于文件不存在  
+
+        files = NULL;  num_files = 0;  
+
+	} else {  
+
+		files = &amp;tmp2;  num_files = 1;  
+
+	}  
+
+}  
+</code></pre><h4 id="s4-遍历找到的文件存在files中其个数为num_files">S4 遍历找到的文件，存在files中，其个数为num_files。</h4>
+<pre tabindex="0"><code>for (uint32_t i = 0; i &lt;num_files; ++i) {
+</code></pre><p>后面的逻辑都在这一层循环中，只要在某个文件中找到了k/v对，就跳出for循环。</p>
+<h5 id="s41-如果本次读取不止搜索了一个文件记录之这仅会发生在level-0的情况下">S4.1 如果本次读取不止搜索了一个文件，记录之，这仅会发生在level 0的情况下。</h5>
+<pre tabindex="0"><code>if(last_file_read != NULL &amp;&amp; stats-&gt;seek_file == NULL) {  
+
+   // 本次读取不止seek了一个文件，记录第一个  
+
+   stats-&gt;seek_file =last_file_read;  
+
+   stats-&gt;seek_file_level= last_file_read_level;  
+
+}  
+
+FileMetaData* f = files[i];  
+
+last_file_read = f; // 记录本次读取的level和file  
+
+last_file_read_level =level;  
+</code></pre><h5 id="s42-调用tablecacheget尝试获取ikey-value如果返回ok则进入否则直接返回传递的回调函数是savevalue">S4.2 调用TableCache::Get()尝试获取{ikey, value}，如果返回OK则进入，否则直接返回，传递的回调函数是SaveValue()。</h5>
+<pre tabindex="0"><code>Saver saver; // 初始化saver  
+
+saver.state = kNotFound;  
+
+saver.ucmp = ucmp;  
+
+saver.user_key = user_key;  
+
+saver.value = value;  
+
+s = vset_-&gt;table_cache_-&gt;Get(options,f-&gt;number, f-&gt;file_size,  
+
+                            ikey, &amp;saver, SaveValue);  
+
+if (!s.ok()) return s;  
+</code></pre><h5 id="s43-根据saver的状态判断如果是not-found则向下搜索下一个更早的sstable文件其它值则返回">S4.3 根据saver的状态判断，如果是Not Found则向下搜索下一个更早的sstable文件，其它值则返回。</h5>
+<pre tabindex="0"><code>switch (saver.state) {  
+
+  case kNotFound: break; // 继续搜索下一个更早的sstable文件  
+
+  case kFound:  return s; // 找到  
+
+  case kDeleted: // 已删除  
+
+        s =Status::NotFound(Slice());  // 为了效率，使用空的错误字符串  
+
+        return s;  
+
+  case kCorrupt: // 数据损坏  
+
+        s =Status::Corruption(&#34;corrupted key for &#34;, user_key);  
+
+        return s;  
+}  
+</code></pre><p>以上就是Version::Get()的代码逻辑，如果level 0的sstable文件太多的话，会影响读取速度，这也是为什么进行compaction的原因。
+另外，还有一个传递给TableCache::Get()的saver函数，下面就来简单分析下。这是一个静态函数：static void SaveValue(void* arg,const Slice&amp; ikey, const Slice&amp; v)。它内部使用了结构体Saver：</p>
+<pre tabindex="0"><code>struct Saver {
+    SaverState state;
+    const Comparator* ucmp; // user key比较器
+    Slice user_key;
+    std::string* value;
+};
+</code></pre><p>函数SaveValue的逻辑很简单。<strong>首先</strong>解析Table传入的InternalKey，<strong>然后</strong>根据指定的Comparator判断user key是否是要查找的user key。<strong>如果</strong>是并且type是kTypeValue，则<strong>设置</strong>到Saver::*value中，并<strong>返回</strong>kFound，否则返回kDeleted。代码如下：</p>
+<pre tabindex="0"><code>Saver* s =reinterpret_cast&lt;Saver*&gt;(arg);  
+
+ParsedInternalKey parsed_key; // 解析ikey到ParsedInternalKey  
+
+if (!ParseInternalKey(ikey,&amp;parsed_key)) s-&gt;state = kCorrupt; // 解析失败  
+
+else {  
+
+    if(s-&gt;ucmp-&gt;Compare(parsed_key.user_key, s-&gt;user_key) == 0) { // 比较user key  
+
+        s-&gt;state =(parsed_key.type == kTypeValue) ? kFound : kDeleted;  
+
+        if (s-&gt;state == kFound) s-&gt;value-&gt;assign(v.data(), v.size()); // 找到，保存结果  
+
+    }  
+
+}  
+</code></pre><p>下面要分析的几个函数，或多或少都和compaction相关。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/bd56540c7f464f2e8e9392c3903b27f5/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>leveldb源码分析15</span>
+  </a>
+  <a class="next" href="https://haokiu.com/0d1705067c1d403889b748a57e0b3af5/">
+    <span class="title">Next »</span>
+    <br>
+    <span>leveldb源码分析17</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

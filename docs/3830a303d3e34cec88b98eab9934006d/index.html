@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>DataX GDBWriter | haokiu</title>
+<meta name="keywords" content="datax">
+<meta name="description" content="DataX GDBWriter 1 快速介绍 GDBWriter插件实现了写入数据到GDB实例的功能。GDBWriter通过Gremlin Client连接远程GDB实例，获取Reader的数据，生成写入DSL语句，将数据写入到GDB。
+2 实现原理 GDBWriter通过DataX框架获取Reader生成的协议数据，使用g.addV/E(GDB___label).property(id, GDB___id).property(GDB___PK1, GDB___PV1)...语句写入数据到GDB实例。
+可以配置Gremlin Client工作在session模式，由客户端控制事务，在一次事务中实现多个记录的批量写入。
+3 功能说明 因为GDB中点和边的配置不同，导入时需要区分点和边的配置。
+3.1 点配置样例 这里是一份从内存生成点数据导入GDB实例的配置 { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 1 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;streamreader&#34;, &#34;parameter&#34;: { &#34;column&#34; : [ { &#34;random&#34;: &#34;1,100&#34;, &#34;type&#34;: &#34;double&#34; }, { &#34;random&#34;: &#34;1000,1200&#34;, &#34;type&#34;: &#34;long&#34; }, { &#34;random&#34;: &#34;60,64&#34;, &#34;type&#34;: &#34;string&#34; }, { &#34;random&#34;: &#34;100,1000&#34;, &#34;type&#34;: &#34;long&#34; }, { &#34;random&#34;: &#34;32,48&#34;, &#34;type&#34;: &#34;string&#34; } ], &#34;sliceRecordCount&#34;: 1000 } }, &#34;writer&#34;: { &#34;name&#34;: &#34;gdbwriter&#34;, &#34;parameter&#34;: { &#34;host&#34;: &#34;gdb-endpoint&#34;, &#34;port&#34;: 8182, &#34;username&#34;: &#34;root&#34;, &#34;password&#34;: &#34;***&#34;, &#34;writeMode&#34;: &#34;INSERT&#34;, &#34;labelType&#34;: &#34;VERTEX&#34;, &#34;label&#34;: &#34;#{1}&#34;, &#34;idTransRule&#34;: &#34;none&#34;, &#34;session&#34;: true, &#34;maxRecordsInBatch&#34;: 64, &#34;column&#34;: [ { &#34;name&#34;: &#34;id&#34;, &#34;value&#34;: &#34;#{0}&#34;, &#34;type&#34;: &#34;string&#34;, &#34;columnType&#34;: &#34;primaryKey&#34; }, { &#34;name&#34;: &#34;vertex_propKey&#34;, &#34;value&#34;: &#34;#{2}&#34;, &#34;type&#34;: &#34;string&#34;, &#34;columnType&#34;: &#34;vertexSetProperty&#34; }, { &#34;name&#34;: &#34;vertex_propKey&#34;, &#34;value&#34;: &#34;#{3}&#34;, &#34;type&#34;: &#34;long&#34;, &#34;columnType&#34;: &#34;vertexSetProperty&#34; }, { &#34;name&#34;: &#34;vertex_propKey2&#34;, &#34;value&#34;: &#34;#{4}&#34;, &#34;type&#34;: &#34;string&#34;, &#34;columnType&#34;: &#34;vertexProperty&#34; } ] } } } ] } } 3.">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/3830a303d3e34cec88b98eab9934006d/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="DataX GDBWriter" />
+<meta property="og:description" content="DataX GDBWriter 1 快速介绍 GDBWriter插件实现了写入数据到GDB实例的功能。GDBWriter通过Gremlin Client连接远程GDB实例，获取Reader的数据，生成写入DSL语句，将数据写入到GDB。
+2 实现原理 GDBWriter通过DataX框架获取Reader生成的协议数据，使用g.addV/E(GDB___label).property(id, GDB___id).property(GDB___PK1, GDB___PV1)...语句写入数据到GDB实例。
+可以配置Gremlin Client工作在session模式，由客户端控制事务，在一次事务中实现多个记录的批量写入。
+3 功能说明 因为GDB中点和边的配置不同，导入时需要区分点和边的配置。
+3.1 点配置样例 这里是一份从内存生成点数据导入GDB实例的配置 { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 1 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;streamreader&#34;, &#34;parameter&#34;: { &#34;column&#34; : [ { &#34;random&#34;: &#34;1,100&#34;, &#34;type&#34;: &#34;double&#34; }, { &#34;random&#34;: &#34;1000,1200&#34;, &#34;type&#34;: &#34;long&#34; }, { &#34;random&#34;: &#34;60,64&#34;, &#34;type&#34;: &#34;string&#34; }, { &#34;random&#34;: &#34;100,1000&#34;, &#34;type&#34;: &#34;long&#34; }, { &#34;random&#34;: &#34;32,48&#34;, &#34;type&#34;: &#34;string&#34; } ], &#34;sliceRecordCount&#34;: 1000 } }, &#34;writer&#34;: { &#34;name&#34;: &#34;gdbwriter&#34;, &#34;parameter&#34;: { &#34;host&#34;: &#34;gdb-endpoint&#34;, &#34;port&#34;: 8182, &#34;username&#34;: &#34;root&#34;, &#34;password&#34;: &#34;***&#34;, &#34;writeMode&#34;: &#34;INSERT&#34;, &#34;labelType&#34;: &#34;VERTEX&#34;, &#34;label&#34;: &#34;#{1}&#34;, &#34;idTransRule&#34;: &#34;none&#34;, &#34;session&#34;: true, &#34;maxRecordsInBatch&#34;: 64, &#34;column&#34;: [ { &#34;name&#34;: &#34;id&#34;, &#34;value&#34;: &#34;#{0}&#34;, &#34;type&#34;: &#34;string&#34;, &#34;columnType&#34;: &#34;primaryKey&#34; }, { &#34;name&#34;: &#34;vertex_propKey&#34;, &#34;value&#34;: &#34;#{2}&#34;, &#34;type&#34;: &#34;string&#34;, &#34;columnType&#34;: &#34;vertexSetProperty&#34; }, { &#34;name&#34;: &#34;vertex_propKey&#34;, &#34;value&#34;: &#34;#{3}&#34;, &#34;type&#34;: &#34;long&#34;, &#34;columnType&#34;: &#34;vertexSetProperty&#34; }, { &#34;name&#34;: &#34;vertex_propKey2&#34;, &#34;value&#34;: &#34;#{4}&#34;, &#34;type&#34;: &#34;string&#34;, &#34;columnType&#34;: &#34;vertexProperty&#34; } ] } } } ] } } 3." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/3830a303d3e34cec88b98eab9934006d/" /><meta property="article:section" content="4" />
+<meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
+<meta property="article:modified_time" content="2021-02-02T17:45:01+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="DataX GDBWriter"/>
+<meta name="twitter:description" content="DataX GDBWriter 1 快速介绍 GDBWriter插件实现了写入数据到GDB实例的功能。GDBWriter通过Gremlin Client连接远程GDB实例，获取Reader的数据，生成写入DSL语句，将数据写入到GDB。
+2 实现原理 GDBWriter通过DataX框架获取Reader生成的协议数据，使用g.addV/E(GDB___label).property(id, GDB___id).property(GDB___PK1, GDB___PV1)...语句写入数据到GDB实例。
+可以配置Gremlin Client工作在session模式，由客户端控制事务，在一次事务中实现多个记录的批量写入。
+3 功能说明 因为GDB中点和边的配置不同，导入时需要区分点和边的配置。
+3.1 点配置样例 这里是一份从内存生成点数据导入GDB实例的配置 { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 1 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;streamreader&#34;, &#34;parameter&#34;: { &#34;column&#34; : [ { &#34;random&#34;: &#34;1,100&#34;, &#34;type&#34;: &#34;double&#34; }, { &#34;random&#34;: &#34;1000,1200&#34;, &#34;type&#34;: &#34;long&#34; }, { &#34;random&#34;: &#34;60,64&#34;, &#34;type&#34;: &#34;string&#34; }, { &#34;random&#34;: &#34;100,1000&#34;, &#34;type&#34;: &#34;long&#34; }, { &#34;random&#34;: &#34;32,48&#34;, &#34;type&#34;: &#34;string&#34; } ], &#34;sliceRecordCount&#34;: 1000 } }, &#34;writer&#34;: { &#34;name&#34;: &#34;gdbwriter&#34;, &#34;parameter&#34;: { &#34;host&#34;: &#34;gdb-endpoint&#34;, &#34;port&#34;: 8182, &#34;username&#34;: &#34;root&#34;, &#34;password&#34;: &#34;***&#34;, &#34;writeMode&#34;: &#34;INSERT&#34;, &#34;labelType&#34;: &#34;VERTEX&#34;, &#34;label&#34;: &#34;#{1}&#34;, &#34;idTransRule&#34;: &#34;none&#34;, &#34;session&#34;: true, &#34;maxRecordsInBatch&#34;: 64, &#34;column&#34;: [ { &#34;name&#34;: &#34;id&#34;, &#34;value&#34;: &#34;#{0}&#34;, &#34;type&#34;: &#34;string&#34;, &#34;columnType&#34;: &#34;primaryKey&#34; }, { &#34;name&#34;: &#34;vertex_propKey&#34;, &#34;value&#34;: &#34;#{2}&#34;, &#34;type&#34;: &#34;string&#34;, &#34;columnType&#34;: &#34;vertexSetProperty&#34; }, { &#34;name&#34;: &#34;vertex_propKey&#34;, &#34;value&#34;: &#34;#{3}&#34;, &#34;type&#34;: &#34;long&#34;, &#34;columnType&#34;: &#34;vertexSetProperty&#34; }, { &#34;name&#34;: &#34;vertex_propKey2&#34;, &#34;value&#34;: &#34;#{4}&#34;, &#34;type&#34;: &#34;string&#34;, &#34;columnType&#34;: &#34;vertexProperty&#34; } ] } } } ] } } 3."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "4s",
+      "item": "https://haokiu.com/4/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "DataX GDBWriter",
+      "item": "https://haokiu.com/3830a303d3e34cec88b98eab9934006d/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "DataX GDBWriter",
+  "name": "DataX GDBWriter",
+  "description": "DataX GDBWriter 1 快速介绍 GDBWriter插件实现了写入数据到GDB实例的功能。GDBWriter通过Gremlin Client连接远程GDB实例，获取Reader的数据，生成写入DSL语句，将数据写入到GDB。\n2 实现原理 GDBWriter通过DataX框架获取Reader生成的协议数据，使用g.addV/E(GDB___label).property(id, GDB___id).property(GDB___PK1, GDB___PV1)...语句写入数据到GDB实例。\n可以配置Gremlin Client工作在session模式，由客户端控制事务，在一次事务中实现多个记录的批量写入。\n3 功能说明 因为GDB中点和边的配置不同，导入时需要区分点和边的配置。\n3.1 点配置样例 这里是一份从内存生成点数据导入GDB实例的配置 { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { \u0026#34;channel\u0026#34;: 1 } }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;streamreader\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;column\u0026#34; : [ { \u0026#34;random\u0026#34;: \u0026#34;1,100\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;double\u0026#34; }, { \u0026#34;random\u0026#34;: \u0026#34;1000,1200\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;long\u0026#34; }, { \u0026#34;random\u0026#34;: \u0026#34;60,64\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34; }, { \u0026#34;random\u0026#34;: \u0026#34;100,1000\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;long\u0026#34; }, { \u0026#34;random\u0026#34;: \u0026#34;32,48\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34; } ], \u0026#34;sliceRecordCount\u0026#34;: 1000 } }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;gdbwriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;host\u0026#34;: \u0026#34;gdb-endpoint\u0026#34;, \u0026#34;port\u0026#34;: 8182, \u0026#34;username\u0026#34;: \u0026#34;root\u0026#34;, \u0026#34;password\u0026#34;: \u0026#34;***\u0026#34;, \u0026#34;writeMode\u0026#34;: \u0026#34;INSERT\u0026#34;, \u0026#34;labelType\u0026#34;: \u0026#34;VERTEX\u0026#34;, \u0026#34;label\u0026#34;: \u0026#34;#{1}\u0026#34;, \u0026#34;idTransRule\u0026#34;: \u0026#34;none\u0026#34;, \u0026#34;session\u0026#34;: true, \u0026#34;maxRecordsInBatch\u0026#34;: 64, \u0026#34;column\u0026#34;: [ { \u0026#34;name\u0026#34;: \u0026#34;id\u0026#34;, \u0026#34;value\u0026#34;: \u0026#34;#{0}\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34;, \u0026#34;columnType\u0026#34;: \u0026#34;primaryKey\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;vertex_propKey\u0026#34;, \u0026#34;value\u0026#34;: \u0026#34;#{2}\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34;, \u0026#34;columnType\u0026#34;: \u0026#34;vertexSetProperty\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;vertex_propKey\u0026#34;, \u0026#34;value\u0026#34;: \u0026#34;#{3}\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;long\u0026#34;, \u0026#34;columnType\u0026#34;: \u0026#34;vertexSetProperty\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;vertex_propKey2\u0026#34;, \u0026#34;value\u0026#34;: \u0026#34;#{4}\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34;, \u0026#34;columnType\u0026#34;: \u0026#34;vertexProperty\u0026#34; } ] } } } ] } } 3.",
+  "keywords": [
+    "datax"
+  ],
+  "articleBody": "DataX GDBWriter 1 快速介绍 GDBWriter插件实现了写入数据到GDB实例的功能。GDBWriter通过Gremlin Client连接远程GDB实例，获取Reader的数据，生成写入DSL语句，将数据写入到GDB。\n2 实现原理 GDBWriter通过DataX框架获取Reader生成的协议数据，使用g.addV/E(GDB___label).property(id, GDB___id).property(GDB___PK1, GDB___PV1)...语句写入数据到GDB实例。\n可以配置Gremlin Client工作在session模式，由客户端控制事务，在一次事务中实现多个记录的批量写入。\n3 功能说明 因为GDB中点和边的配置不同，导入时需要区分点和边的配置。\n3.1 点配置样例 这里是一份从内存生成点数据导入GDB实例的配置 { \"job\": { \"setting\": { \"speed\": { \"channel\": 1 } }, \"content\": [ { \"reader\": { \"name\": \"streamreader\", \"parameter\": { \"column\" : [ { \"random\": \"1,100\", \"type\": \"double\" }, { \"random\": \"1000,1200\", \"type\": \"long\" }, { \"random\": \"60,64\", \"type\": \"string\" }, { \"random\": \"100,1000\", \"type\": \"long\" }, { \"random\": \"32,48\", \"type\": \"string\" } ], \"sliceRecordCount\": 1000 } }, \"writer\": { \"name\": \"gdbwriter\", \"parameter\": { \"host\": \"gdb-endpoint\", \"port\": 8182, \"username\": \"root\", \"password\": \"***\", \"writeMode\": \"INSERT\", \"labelType\": \"VERTEX\", \"label\": \"#{1}\", \"idTransRule\": \"none\", \"session\": true, \"maxRecordsInBatch\": 64, \"column\": [ { \"name\": \"id\", \"value\": \"#{0}\", \"type\": \"string\", \"columnType\": \"primaryKey\" }, { \"name\": \"vertex_propKey\", \"value\": \"#{2}\", \"type\": \"string\", \"columnType\": \"vertexSetProperty\" }, { \"name\": \"vertex_propKey\", \"value\": \"#{3}\", \"type\": \"long\", \"columnType\": \"vertexSetProperty\" }, { \"name\": \"vertex_propKey2\", \"value\": \"#{4}\", \"type\": \"string\", \"columnType\": \"vertexProperty\" } ] } } } ] } } 3.2 边配置样例 这里是一份从内存生成边数据导入GDB实例的配置 注意 下面配置导入边时，需要提前在GDB实例中写入点，要求分别存在id为person-{{i}}和book-{{i}}的点，其中i取值0~100。\n{ \"job\": { \"setting\": { \"speed\": { \"channel\": 1 } }, \"content\": [ { \"reader\": { \"name\": \"streamreader\", \"parameter\": { \"column\" : [ { \"random\": \"100,200\", \"type\": \"double\" }, { \"random\": \"1,100\", \"type\": \"long\" }, { \"random\": \"1,100\", \"type\": \"long\" }, { \"random\": \"2000,2200\", \"type\": \"long\" }, { \"random\": \"60,64\", \"type\": \"string\" } ], \"sliceRecordCount\": 1000 } }, \"writer\": { \"name\": \"gdbwriter\", \"parameter\": { \"host\": \"gdb-endpoint\", \"port\": 8182, \"username\": \"root\", \"password\": \"***\", \"writeMode\": \"INSERT\", \"labelType\": \"EDGE\", \"label\": \"#{3}\", \"idTransRule\": \"none\", \"srcIdTransRule\": \"labelPrefix\", \"dstIdTransRule\": \"labelPrefix\", \"srcLabel\":\"person-\", \"dstLabel\":\"book-\", \"session\":false, \"column\": [ { \"name\": \"id\", \"value\": \"#{0}\", \"type\": \"string\", \"columnType\": \"primaryKey\" }, { \"name\": \"id\", \"value\": \"#{1}\", \"type\": \"string\", \"columnType\": \"srcPrimaryKey\" }, { \"name\": \"id\", \"value\": \"#{2}\", \"type\": \"string\", \"columnType\": \"dstPrimaryKey\" }, { \"name\": \"edge_propKey\", \"value\": \"#{4}\", \"type\": \"string\", \"columnType\": \"edgeProperty\" } ] } } } ] } } 3.3 参数说明 host\n描述：GDB实例连接域名，对应阿里云控制台-\u003e“图数据库 GDB”-\u003e“实例管理”-\u003e“基本信息” 中的\"内网地址\"； 必选：是 默认值：无 port\n描述：GDB实例连接端口 必选：是 默认值：8182 username\n描述：GDB实例账号名 必选：是 默认值：无 password\n描述：图实例账号名对应密码 必选：是 默认值：无 label\n描述：类型名，即点/边名称； label支持从源列中读取，如#{0}，表示取第一列字段作为label名。源列索引从0开始； 必选：是 默认值：无 labelType\n描述：label类型； 枚举值\"VERTEX\"表示点 枚举值\"EDGE\"表示边 必选：是 默认值：无 srcLabel\n描述：当label为边时，表示起点的点名称；srcLabel支持从源列中读取，如#{0}，表示取第一列字段作为label名。源列索引从0开始； 必选：labelType为边，srcIdTransRule为none时可不填写，否则必填； 默认值：无 dstLabel\n描述：当label为边时，表示终点的点名称；dstLabel支持从源列中读取，如#{0}，表示取第一列字段作为label名。源列索引从0开始； 必选：labelType为边，dstIdTransRule为none时可不填写，否则必填； 默认值：无 writeMode\n描述：导入id重复时的处理模式； 枚举值\"INSERT\"表示会报错，错误记录数加1； 枚举值\"MERGE\"表示更新属性值，不计入错误； 枚举值\"SKIP\"表示跳过，不计入错误 必选：是 默认值：INSERT idTransRule\n描述：主键id转换规则； 枚举值\"labelPrefix\"表示将映射的值转换为{label名}{源字段} 枚举值\"none\"表示映射的值不做转换 必选：是 默认值：“none” srcIdTransRule\n描述：当label为边时，表示起点的主键id转换规则； 枚举值\"labelPrefix\"表示映射的值转换为为{label名}{源字段} 枚举值\"none\"表示映射的值不做转换，此时srcLabel 可不填写 必选：label为边时必选 默认值：“none” dstIdTransRule\n描述：当label为边时，表示终点的主键id转换规则； 枚举值\"labelPrefix\"表示映射的值转换为为{label名}{源字段} 枚举值\"none\"表示映射的值不做转换，此时dstLabel 可不填写 必选：label为边时必选 默认值：“none” session\n描述：是否使用Gremlin Client的session模式写入数据 必选：否 默认值：false maxRecordsInBatch\n描述：使用Gremlin Client的session模式时，一次事务处理的记录数 必选：否 默认值：16 column\n描述：点/边字段映射关系配置 必选：是 默认值：无 column -\u003e name\n描述：点/边映射关系的字段名 必选：是 默认值：无 column -\u003e value\n描述：点/边映射关系的字段值； #{N}表示直接映射源端值，N为源端column索引，从0开始；#{0}表示映射源端column第1个字段； test-#{0} 表示源端值做拼接转换，#{0}值前/后可添加固定字符串; #{0}-#{1}表示做多字段拼接，也可在任意位置添加固定字符串，如test-#{0}-test1-#{1}-test2 必选：是 默认值：无 column -\u003e type\n描述：点/边映射关系的字段值类型； 主键id只支持string类型，GDBWriter插件会强制转换，源id必须保证可转换为string； 普通属性支持类型：int, long, float, double, boolean, string 必选：是 默认值：无 column -\u003e columnType\n描述：点/边映射关系字段对应到GDB点/边数据的类型，支持以下几类枚举值： 公共枚举值： primaryKey：表示该字段是主键id 点枚举值： vertexProperty：labelType为点时，表示该字段是点的普通属性 vertexSetProperty：labelType为点时，表示该字段是点的SET属性，value是SET属性中的一个属性值 vertexJsonProperty：labelType为点时，表示是点json属性，value结构请见备注json properties示例，点配置最多只允许出现一个json属性； 边枚举值： srcPrimaryKey：labelType为边时，表示该字段是起点主键id dstPrimaryKey：labelType为边时，表示该字段是终点主键id edgeProperty：labelType为边时，表示该字段是边的普通属性 edgeJsonProperty：labelType为边时，表示是边json属性，value结构请见备注json properties示例，边配置最多只允许出现一个json属性； 必选：是 默认值：无 备注：json properties示例 {\"properties\":[ {\"k\":\"name\",\"t\":\"string\",\"v\":\"tom\"}, {\"k\":\"age\",\"t\":\"int\",\"v\":\"20\"}, {\"k\":\"sex\",\"t\":\"string\",\"v\":\"male\"} ]} # json格式同样支持给点添加SET属性，格式如下 {\"properties\":[ {\"k\":\"name\",\"t\":\"string\",\"v\":\"tom\",\"c\":\"set\"}, {\"k\":\"name\",\"t\":\"string\",\"v\":\"jack\",\"c\":\"set\"}, {\"k\":\"age\",\"t\":\"int\",\"v\":\"20\"}, {\"k\":\"sex\",\"t\":\"string\",\"v\":\"male\"} ]} 4 性能报告 4.1 环境参数 GDB实例规格\n16core 128GB, 1TB SSD DataX压测机器\ncpu: 4 * Intel(R) Xeon(R) Platinum 8163 CPU @ 2.50GHz mem: 16GB net: 千兆双网卡 os: CentOS 7, 3.10.0-957.5.1.el7.x86_64 jvm: -Xms4g -Xmx4g 4.2 数据特征 { id: random double(1~10000) from: random long(1~40000000) to: random long(1~40000000) label: random long(20000000 ~ 20005000) propertyKey: random string(len: 120~128) propertyName: random string(len: 120~128) } 点/边都有一个属性，属性key和value都是长度120~128字节的随机字符串 label是范围20000000 ~ 20005000的随机整数转换的字符串 id是浮点数转换的字符串，防止重复 边包含关联起点和终点，测试边时已经提前导入twitter数据集的点数据(4200W) 4.3 任务配置 分点和边的配置，具体配置与上述的示例配置相似，下面列出关键的差异点\n增加并发任务数量 “channel”: 32\n使用session模式 “session”: true\n增加事务批量处理记录个数 “maxRecordsInBatch”: 128\n4.4 测试结果 点导入性能：\n任务平均流量： 4.07MB/s 任务总计耗时： 412s 记录写入速度： 15609rec/s 读出记录总数： 6400000 边导入性能：\n任务平均流量： 2.76MB/s 任务总计耗时： 1602s 记录写入速度： 10000rec/s 读出记录总数： 16000000 5 约束限制 导入边记录前要求GDB中已经存在边关联的起点/终点 GDBWriter插件与用户查询DSL使用相同的GDB实例端口，导入时可能会影响查询性能 FAQ 使用SET属性需要升级GDB实例到1.0.20版本及以上。 边只支持普通单值属性，不能给边写SET属性数据。 ",
+  "wordCount" : "538",
+  "inLanguage": "en",
+  "datePublished": "2021-02-02T17:45:01Z",
+  "dateModified": "2021-02-02T17:45:01Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/3830a303d3e34cec88b98eab9934006d/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    <h1 class="post-title">
+      DataX GDBWriter
+    </h1>
+    <div class="post-meta"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#datax-gdbwriter" aria-label="DataX GDBWriter">DataX GDBWriter</a><ul>
+                        
+                <li>
+                    <a href="#1-%e5%bf%ab%e9%80%9f%e4%bb%8b%e7%bb%8d" aria-label="1 快速介绍">1 快速介绍</a></li>
+                <li>
+                    <a href="#2-%e5%ae%9e%e7%8e%b0%e5%8e%9f%e7%90%86" aria-label="2 实现原理">2 实现原理</a></li>
+                <li>
+                    <a href="#3-%e5%8a%9f%e8%83%bd%e8%af%b4%e6%98%8e" aria-label="3 功能说明">3 功能说明</a><ul>
+                        
+                <li>
+                    <a href="#31-%e7%82%b9%e9%85%8d%e7%bd%ae%e6%a0%b7%e4%be%8b" aria-label="3.1 点配置样例">3.1 点配置样例</a></li>
+                <li>
+                    <a href="#32-%e8%be%b9%e9%85%8d%e7%bd%ae%e6%a0%b7%e4%be%8b" aria-label="3.2 边配置样例">3.2 边配置样例</a></li>
+                <li>
+                    <a href="#33-%e5%8f%82%e6%95%b0%e8%af%b4%e6%98%8e" aria-label="3.3 参数说明">3.3 参数说明</a></li></ul>
+                </li>
+                <li>
+                    <a href="#4-%e6%80%a7%e8%83%bd%e6%8a%a5%e5%91%8a" aria-label="4 性能报告">4 性能报告</a><ul>
+                        
+                <li>
+                    <a href="#41-%e7%8e%af%e5%a2%83%e5%8f%82%e6%95%b0" aria-label="4.1 环境参数">4.1 环境参数</a></li>
+                <li>
+                    <a href="#42-%e6%95%b0%e6%8d%ae%e7%89%b9%e5%be%81" aria-label="4.2 数据特征">4.2 数据特征</a></li>
+                <li>
+                    <a href="#43-%e4%bb%bb%e5%8a%a1%e9%85%8d%e7%bd%ae" aria-label="4.3 任务配置">4.3 任务配置</a></li>
+                <li>
+                    <a href="#44-%e6%b5%8b%e8%af%95%e7%bb%93%e6%9e%9c" aria-label="4.4 测试结果">4.4 测试结果</a></li></ul>
+                </li>
+                <li>
+                    <a href="#5-%e7%ba%a6%e6%9d%9f%e9%99%90%e5%88%b6" aria-label="5 约束限制">5 约束限制</a></li>
+                <li>
+                    <a href="#faq" aria-label="FAQ">FAQ</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="datax-gdbwriter">DataX GDBWriter</h1>
+<h2 id="1-快速介绍">1 快速介绍</h2>
+<p>GDBWriter插件实现了写入数据到GDB实例的功能。GDBWriter通过<code>Gremlin Client</code>连接远程GDB实例，获取Reader的数据，生成写入DSL语句，将数据写入到GDB。</p>
+<h2 id="2-实现原理">2 实现原理</h2>
+<p>GDBWriter通过DataX框架获取Reader生成的协议数据，使用<code>g.addV/E(GDB___label).property(id, GDB___id).property(GDB___PK1, GDB___PV1)...</code>语句写入数据到GDB实例。</p>
+<p>可以配置<code>Gremlin Client</code>工作在session模式，由客户端控制事务，在一次事务中实现多个记录的批量写入。</p>
+<h2 id="3-功能说明">3 功能说明</h2>
+<p>因为GDB中点和边的配置不同，导入时需要区分点和边的配置。</p>
+<h3 id="31-点配置样例">3.1 点配置样例</h3>
+<ul>
+<li>这里是一份从内存生成点数据导入GDB实例的配置</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;job&#34;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;setting&#34;</span>: {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;speed&#34;</span>: {
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;channel&#34;</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;content&#34;</span>: [
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                 <span style="color:#f92672">&#34;reader&#34;</span>: {
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;streamreader&#34;</span>,
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">&#34;parameter&#34;</span>: {
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;column&#34;</span> : [
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;random&#34;</span>: <span style="color:#e6db74">&#34;1,100&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;double&#34;</span>
+</span></span><span style="display:flex;"><span>                            },
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;random&#34;</span>: <span style="color:#e6db74">&#34;1000,1200&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;long&#34;</span>
+</span></span><span style="display:flex;"><span>                            },
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;random&#34;</span>: <span style="color:#e6db74">&#34;60,64&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;string&#34;</span>
+</span></span><span style="display:flex;"><span>                            },
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;random&#34;</span>: <span style="color:#e6db74">&#34;100,1000&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;long&#34;</span>
+</span></span><span style="display:flex;"><span>                            },
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;random&#34;</span>: <span style="color:#e6db74">&#34;32,48&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;string&#34;</span>
+</span></span><span style="display:flex;"><span>                            }
+</span></span><span style="display:flex;"><span>                        ],
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;sliceRecordCount&#34;</span>: <span style="color:#ae81ff">1000</span>
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                },
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;writer&#34;</span>: {
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;gdbwriter&#34;</span>,
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">&#34;parameter&#34;</span>: {
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;host&#34;</span>: <span style="color:#e6db74">&#34;gdb-endpoint&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;port&#34;</span>: <span style="color:#ae81ff">8182</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;username&#34;</span>: <span style="color:#e6db74">&#34;root&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;password&#34;</span>: <span style="color:#e6db74">&#34;***&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;writeMode&#34;</span>: <span style="color:#e6db74">&#34;INSERT&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;labelType&#34;</span>: <span style="color:#e6db74">&#34;VERTEX&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;label&#34;</span>: <span style="color:#e6db74">&#34;#{1}&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;idTransRule&#34;</span>: <span style="color:#e6db74">&#34;none&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;session&#34;</span>: <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;maxRecordsInBatch&#34;</span>: <span style="color:#ae81ff">64</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;column&#34;</span>: [
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;id&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#e6db74">&#34;#{0}&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;string&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;columnType&#34;</span>: <span style="color:#e6db74">&#34;primaryKey&#34;</span>
+</span></span><span style="display:flex;"><span>                            },
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;vertex_propKey&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#e6db74">&#34;#{2}&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;string&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;columnType&#34;</span>: <span style="color:#e6db74">&#34;vertexSetProperty&#34;</span>
+</span></span><span style="display:flex;"><span>                            },
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;vertex_propKey&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#e6db74">&#34;#{3}&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;long&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;columnType&#34;</span>: <span style="color:#e6db74">&#34;vertexSetProperty&#34;</span>
+</span></span><span style="display:flex;"><span>                            },
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;vertex_propKey2&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#e6db74">&#34;#{4}&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;string&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;columnType&#34;</span>: <span style="color:#e6db74">&#34;vertexProperty&#34;</span>
+</span></span><span style="display:flex;"><span>                            }
+</span></span><span style="display:flex;"><span>                        ]
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        ]
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="32-边配置样例">3.2 边配置样例</h3>
+<ul>
+<li>这里是一份从内存生成边数据导入GDB实例的配置</li>
+</ul>
+<blockquote>
+<p><strong>注意</strong>
+下面配置导入边时，需要提前在GDB实例中写入点，要求分别存在id为<code>person-{{i}}</code>和<code>book-{{i}}</code>的点，其中i取值0~100。</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;job&#34;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;setting&#34;</span>: {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;speed&#34;</span>: {
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;channel&#34;</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;content&#34;</span>: [
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                 <span style="color:#f92672">&#34;reader&#34;</span>: {
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;streamreader&#34;</span>,
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">&#34;parameter&#34;</span>: {
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;column&#34;</span> : [
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;random&#34;</span>: <span style="color:#e6db74">&#34;100,200&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;double&#34;</span>
+</span></span><span style="display:flex;"><span>                            },
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;random&#34;</span>: <span style="color:#e6db74">&#34;1,100&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;long&#34;</span>
+</span></span><span style="display:flex;"><span>                            },
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;random&#34;</span>: <span style="color:#e6db74">&#34;1,100&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;long&#34;</span>
+</span></span><span style="display:flex;"><span>                            },
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;random&#34;</span>: <span style="color:#e6db74">&#34;2000,2200&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;long&#34;</span>
+</span></span><span style="display:flex;"><span>                            },
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;random&#34;</span>: <span style="color:#e6db74">&#34;60,64&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;string&#34;</span>
+</span></span><span style="display:flex;"><span>                            }
+</span></span><span style="display:flex;"><span>                        ],
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;sliceRecordCount&#34;</span>: <span style="color:#ae81ff">1000</span>
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                },
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;writer&#34;</span>: {
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;gdbwriter&#34;</span>,
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">&#34;parameter&#34;</span>: {
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;host&#34;</span>: <span style="color:#e6db74">&#34;gdb-endpoint&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;port&#34;</span>: <span style="color:#ae81ff">8182</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;username&#34;</span>: <span style="color:#e6db74">&#34;root&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;password&#34;</span>: <span style="color:#e6db74">&#34;***&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;writeMode&#34;</span>: <span style="color:#e6db74">&#34;INSERT&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;labelType&#34;</span>: <span style="color:#e6db74">&#34;EDGE&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;label&#34;</span>: <span style="color:#e6db74">&#34;#{3}&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;idTransRule&#34;</span>: <span style="color:#e6db74">&#34;none&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;srcIdTransRule&#34;</span>: <span style="color:#e6db74">&#34;labelPrefix&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;dstIdTransRule&#34;</span>: <span style="color:#e6db74">&#34;labelPrefix&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;srcLabel&#34;</span>:<span style="color:#e6db74">&#34;person-&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;dstLabel&#34;</span>:<span style="color:#e6db74">&#34;book-&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;session&#34;</span>:<span style="color:#66d9ef">false</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#f92672">&#34;column&#34;</span>: [
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;id&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#e6db74">&#34;#{0}&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;string&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;columnType&#34;</span>: <span style="color:#e6db74">&#34;primaryKey&#34;</span>
+</span></span><span style="display:flex;"><span>                            },
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;id&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#e6db74">&#34;#{1}&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;string&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;columnType&#34;</span>: <span style="color:#e6db74">&#34;srcPrimaryKey&#34;</span>
+</span></span><span style="display:flex;"><span>                            },
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;id&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#e6db74">&#34;#{2}&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;string&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;columnType&#34;</span>: <span style="color:#e6db74">&#34;dstPrimaryKey&#34;</span>
+</span></span><span style="display:flex;"><span>                            },
+</span></span><span style="display:flex;"><span>                            {
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;edge_propKey&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#e6db74">&#34;#{4}&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;string&#34;</span>,
+</span></span><span style="display:flex;"><span>                                <span style="color:#f92672">&#34;columnType&#34;</span>: <span style="color:#e6db74">&#34;edgeProperty&#34;</span>
+</span></span><span style="display:flex;"><span>                            }
+</span></span><span style="display:flex;"><span>                        ]
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        ]
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="33-参数说明">3.3 参数说明</h3>
+<ul>
+<li>
+<p><strong>host</strong></p>
+<ul>
+<li>描述：GDB实例连接域名，对应阿里云控制台-&gt;&ldquo;图数据库 GDB&rdquo;-&gt;&ldquo;实例管理&rdquo;-&gt;&ldquo;基本信息&rdquo; 中的&quot;内网地址&quot;；</li>
+<li>必选：是</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>port</strong></p>
+<ul>
+<li>描述：GDB实例连接端口</li>
+<li>必选：是</li>
+<li>默认值：8182</li>
+</ul>
+</li>
+<li>
+<p><strong>username</strong></p>
+<ul>
+<li>描述：GDB实例账号名</li>
+<li>必选：是</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>password</strong></p>
+<ul>
+<li>描述：图实例账号名对应密码</li>
+<li>必选：是</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>label</strong></p>
+<ul>
+<li>描述：类型名，即点/边名称； label支持从源列中读取，如#{0}，表示取第一列字段作为label名。源列索引从0开始；</li>
+<li>必选：是</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>labelType</strong></p>
+<ul>
+<li>描述：label类型；
+<ul>
+<li>枚举值&quot;VERTEX&quot;表示点</li>
+<li>枚举值&quot;EDGE&quot;表示边</li>
+</ul>
+</li>
+<li>必选：是</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>srcLabel</strong></p>
+<ul>
+<li>描述：当label为边时，表示起点的点名称；srcLabel支持从源列中读取，如#{0}，表示取第一列字段作为label名。源列索引从0开始；</li>
+<li>必选：labelType为边，srcIdTransRule为none时可不填写，否则必填；</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>dstLabel</strong></p>
+<ul>
+<li>描述：当label为边时，表示终点的点名称；dstLabel支持从源列中读取，如#{0}，表示取第一列字段作为label名。源列索引从0开始；</li>
+<li>必选：labelType为边，dstIdTransRule为none时可不填写，否则必填；</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>writeMode</strong></p>
+<ul>
+<li>描述：导入id重复时的处理模式；
+<ul>
+<li>枚举值&quot;INSERT&quot;表示会报错，错误记录数加1；</li>
+<li>枚举值&quot;MERGE&quot;表示更新属性值，不计入错误；</li>
+<li>枚举值&quot;SKIP&quot;表示跳过，不计入错误</li>
+</ul>
+</li>
+<li>必选：是</li>
+<li>默认值：INSERT</li>
+</ul>
+</li>
+<li>
+<p><strong>idTransRule</strong></p>
+<ul>
+<li>描述：主键id转换规则；
+<ul>
+<li>枚举值&quot;labelPrefix&quot;表示将映射的值转换为{label名}{源字段}</li>
+<li>枚举值&quot;none&quot;表示映射的值不做转换</li>
+</ul>
+</li>
+<li>必选：是</li>
+<li>默认值：&ldquo;none&rdquo;</li>
+</ul>
+</li>
+<li>
+<p><strong>srcIdTransRule</strong></p>
+<ul>
+<li>描述：当label为边时，表示起点的主键id转换规则；
+<ul>
+<li>枚举值&quot;labelPrefix&quot;表示映射的值转换为为{label名}{源字段}</li>
+<li>枚举值&quot;none&quot;表示映射的值不做转换，此时srcLabel 可不填写</li>
+</ul>
+</li>
+<li>必选：label为边时必选</li>
+<li>默认值：&ldquo;none&rdquo;</li>
+</ul>
+</li>
+<li>
+<p><strong>dstIdTransRule</strong></p>
+<ul>
+<li>描述：当label为边时，表示终点的主键id转换规则；
+<ul>
+<li>枚举值&quot;labelPrefix&quot;表示映射的值转换为为{label名}{源字段}</li>
+<li>枚举值&quot;none&quot;表示映射的值不做转换，此时dstLabel 可不填写</li>
+</ul>
+</li>
+<li>必选：label为边时必选</li>
+<li>默认值：&ldquo;none&rdquo;</li>
+</ul>
+</li>
+<li>
+<p><strong>session</strong></p>
+<ul>
+<li>描述：是否使用<code>Gremlin Client</code>的session模式写入数据</li>
+<li>必选：否</li>
+<li>默认值：false</li>
+</ul>
+</li>
+<li>
+<p><strong>maxRecordsInBatch</strong></p>
+<ul>
+<li>描述：使用<code>Gremlin Client</code>的session模式时，一次事务处理的记录数</li>
+<li>必选：否</li>
+<li>默认值：16</li>
+</ul>
+</li>
+<li>
+<p><strong>column</strong></p>
+<ul>
+<li>描述：点/边字段映射关系配置</li>
+<li>必选：是</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>column -&gt; name</strong></p>
+<ul>
+<li>描述：点/边映射关系的字段名</li>
+<li>必选：是</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>column -&gt; value</strong></p>
+<ul>
+<li>描述：点/边映射关系的字段值；
+<ul>
+<li>#{N}表示直接映射源端值，N为源端column索引，从0开始；#{0}表示映射源端column第1个字段；</li>
+<li>test-#{0} 表示源端值做拼接转换，#{0}值前/后可添加固定字符串;</li>
+<li>#{0}-#{1}表示做多字段拼接，也可在任意位置添加固定字符串，如test-#{0}-test1-#{1}-test2</li>
+</ul>
+</li>
+<li>必选：是</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>column -&gt; type</strong></p>
+<ul>
+<li>描述：点/边映射关系的字段值类型；
+<ul>
+<li>主键id只支持string类型，GDBWriter插件会强制转换，源id必须保证可转换为string；</li>
+<li>普通属性支持类型：int, long, float, double, boolean, string</li>
+</ul>
+</li>
+<li>必选：是</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>column -&gt; columnType</strong></p>
+<ul>
+<li>描述：点/边映射关系字段对应到GDB点/边数据的类型，支持以下几类枚举值：
+<ul>
+<li>公共枚举值：
+<ul>
+<li>primaryKey：表示该字段是主键id</li>
+</ul>
+</li>
+<li>点枚举值：
+<ul>
+<li>vertexProperty：labelType为点时，表示该字段是点的普通属性</li>
+<li>vertexSetProperty：labelType为点时，表示该字段是点的SET属性，value是SET属性中的一个属性值</li>
+<li>vertexJsonProperty：labelType为点时，表示是点json属性，value结构请见备注<strong>json properties示例</strong>，点配置最多只允许出现一个json属性；</li>
+</ul>
+</li>
+<li>边枚举值：
+<ul>
+<li>srcPrimaryKey：labelType为边时，表示该字段是起点主键id</li>
+<li>dstPrimaryKey：labelType为边时，表示该字段是终点主键id</li>
+<li>edgeProperty：labelType为边时，表示该字段是边的普通属性</li>
+<li>edgeJsonProperty：labelType为边时，表示是边json属性，value结构请见备注<strong>json properties示例</strong>，边配置最多只允许出现一个json属性；</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>必选：是</li>
+<li>默认值：无</li>
+<li>备注：<strong>json properties示例</strong></li>
+</ul>
+<blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{<span style="color:#f92672">&#34;properties&#34;</span>:[
+</span></span><span style="display:flex;"><span>   {<span style="color:#f92672">&#34;k&#34;</span>:<span style="color:#e6db74">&#34;name&#34;</span>,<span style="color:#f92672">&#34;t&#34;</span>:<span style="color:#e6db74">&#34;string&#34;</span>,<span style="color:#f92672">&#34;v&#34;</span>:<span style="color:#e6db74">&#34;tom&#34;</span>},
+</span></span><span style="display:flex;"><span>   {<span style="color:#f92672">&#34;k&#34;</span>:<span style="color:#e6db74">&#34;age&#34;</span>,<span style="color:#f92672">&#34;t&#34;</span>:<span style="color:#e6db74">&#34;int&#34;</span>,<span style="color:#f92672">&#34;v&#34;</span>:<span style="color:#e6db74">&#34;20&#34;</span>},
+</span></span><span style="display:flex;"><span>   {<span style="color:#f92672">&#34;k&#34;</span>:<span style="color:#e6db74">&#34;sex&#34;</span>,<span style="color:#f92672">&#34;t&#34;</span>:<span style="color:#e6db74">&#34;string&#34;</span>,<span style="color:#f92672">&#34;v&#34;</span>:<span style="color:#e6db74">&#34;male&#34;</span>}
+</span></span><span style="display:flex;"><span>]}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">#</span> <span style="color:#960050;background-color:#1e0010">json格式同样支持给点添加SET属性，格式如下</span>
+</span></span><span style="display:flex;"><span>{<span style="color:#f92672">&#34;properties&#34;</span>:[
+</span></span><span style="display:flex;"><span>   {<span style="color:#f92672">&#34;k&#34;</span>:<span style="color:#e6db74">&#34;name&#34;</span>,<span style="color:#f92672">&#34;t&#34;</span>:<span style="color:#e6db74">&#34;string&#34;</span>,<span style="color:#f92672">&#34;v&#34;</span>:<span style="color:#e6db74">&#34;tom&#34;</span>,<span style="color:#f92672">&#34;c&#34;</span>:<span style="color:#e6db74">&#34;set&#34;</span>},
+</span></span><span style="display:flex;"><span>   {<span style="color:#f92672">&#34;k&#34;</span>:<span style="color:#e6db74">&#34;name&#34;</span>,<span style="color:#f92672">&#34;t&#34;</span>:<span style="color:#e6db74">&#34;string&#34;</span>,<span style="color:#f92672">&#34;v&#34;</span>:<span style="color:#e6db74">&#34;jack&#34;</span>,<span style="color:#f92672">&#34;c&#34;</span>:<span style="color:#e6db74">&#34;set&#34;</span>},
+</span></span><span style="display:flex;"><span>   {<span style="color:#f92672">&#34;k&#34;</span>:<span style="color:#e6db74">&#34;age&#34;</span>,<span style="color:#f92672">&#34;t&#34;</span>:<span style="color:#e6db74">&#34;int&#34;</span>,<span style="color:#f92672">&#34;v&#34;</span>:<span style="color:#e6db74">&#34;20&#34;</span>},
+</span></span><span style="display:flex;"><span>   {<span style="color:#f92672">&#34;k&#34;</span>:<span style="color:#e6db74">&#34;sex&#34;</span>,<span style="color:#f92672">&#34;t&#34;</span>:<span style="color:#e6db74">&#34;string&#34;</span>,<span style="color:#f92672">&#34;v&#34;</span>:<span style="color:#e6db74">&#34;male&#34;</span>}
+</span></span><span style="display:flex;"><span>]}
+</span></span></code></pre></div></blockquote>
+</li>
+</ul>
+<h2 id="4-性能报告">4 性能报告</h2>
+<h3 id="41-环境参数">4.1 环境参数</h3>
+<p>GDB实例规格</p>
+<ul>
+<li>16core 128GB, 1TB SSD</li>
+</ul>
+<p>DataX压测机器</p>
+<ul>
+<li>cpu: 4 * Intel(R) Xeon(R) Platinum 8163 CPU @ 2.50GHz</li>
+<li>mem: 16GB</li>
+<li>net: 千兆双网卡</li>
+<li>os: CentOS 7, 3.10.0-957.5.1.el7.x86_64</li>
+<li>jvm: -Xms4g -Xmx4g</li>
+</ul>
+<h3 id="42-数据特征">4.2 数据特征</h3>
+<pre tabindex="0"><code>{
+    id: random double(1~10000)
+    from: random long(1~40000000)
+    to: random long(1~40000000)
+    label: random long(20000000 ~ 20005000)
+    propertyKey: random string(len: 120~128)
+    propertyName: random string(len: 120~128)
+}
+</code></pre><ul>
+<li>点/边都有一个属性，属性key和value都是长度120~128字节的随机字符串</li>
+<li>label是范围20000000 ~ 20005000的随机整数转换的字符串</li>
+<li>id是浮点数转换的字符串，防止重复</li>
+<li>边包含关联起点和终点，测试边时已经提前导入twitter数据集的点数据(4200W)</li>
+</ul>
+<h3 id="43-任务配置">4.3 任务配置</h3>
+<p>分点和边的配置，具体配置与上述的示例配置相似，下面列出关键的差异点</p>
+<ul>
+<li>增加并发任务数量</li>
+</ul>
+<blockquote>
+<p>&ldquo;channel&rdquo;: 32</p>
+</blockquote>
+<ul>
+<li>使用session模式</li>
+</ul>
+<blockquote>
+<p>&ldquo;session&rdquo;: true</p>
+</blockquote>
+<ul>
+<li>增加事务批量处理记录个数</li>
+</ul>
+<blockquote>
+<p>&ldquo;maxRecordsInBatch&rdquo;: 128</p>
+</blockquote>
+<h3 id="44-测试结果">4.4 测试结果</h3>
+<p>点导入性能：</p>
+<ul>
+<li>任务平均流量： 4.07MB/s</li>
+<li>任务总计耗时： 412s</li>
+<li>记录写入速度： 15609rec/s</li>
+<li>读出记录总数： 6400000</li>
+</ul>
+<p>边导入性能：</p>
+<ul>
+<li>任务平均流量： 2.76MB/s</li>
+<li>任务总计耗时： 1602s</li>
+<li>记录写入速度： 10000rec/s</li>
+<li>读出记录总数： 16000000</li>
+</ul>
+<h2 id="5-约束限制">5 约束限制</h2>
+<ul>
+<li>导入边记录前要求GDB中已经存在边关联的起点/终点</li>
+<li>GDBWriter插件与用户查询DSL使用相同的GDB实例端口，导入时可能会影响查询性能</li>
+</ul>
+<h2 id="faq">FAQ</h2>
+<ol>
+<li>使用SET属性需要升级GDB实例到<code>1.0.20</code>版本及以上。</li>
+<li>边只支持普通单值属性，不能给边写SET属性数据。</li>
+</ol>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

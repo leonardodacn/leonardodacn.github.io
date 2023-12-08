@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>bigdata on haokiu</title>
+    <link>https://haokiu.com/tags/bigdata/</link>
+    <description>Recent content in bigdata on haokiu</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>haokiu.com</copyright>
+    <lastBuildDate>Tue, 08 Jun 2021 17:51:46 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/bigdata/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Hobert读书笔记</title>
+      <link>https://haokiu.com/bk-5/</link>
+      <pubDate>Tue, 08 Jun 2021 17:51:46 +0000</pubDate>
+      
+      <guid>https://haokiu.com/bk-5/</guid>
+      <description>第一章 并发编程的挑战第2章 InnoDB存储引擎第1章 Java的I/O演进之路第1章 Spring框架的由来第2章 Tomcat总体架构三、Paxos的工程实践序第1章 概述第6章 深入分析ClassLoader工作机制第8章 虚拟机字节码执行系统</description>
+    </item>
+    
+    <item>
+      <title>mysql replace </title>
+      <link>https://haokiu.com/nfvw4R/</link>
+      <pubDate>Mon, 01 Feb 2021 09:48:42 +0000</pubDate>
+      
+      <guid>https://haokiu.com/nfvw4R/</guid>
+      <description>mysql replace 可以将字段的字符串内容替换，语法：
+Update `table_name` SET `field_name` = replace (`field_name`,’from_str’,&amp;#39;to_str’) Where `field_name` LIKE ‘%from_str%’ 使用样例：
+# 将 blog 表的字段 coentent 里的 &amp;#34;https://haokiu.com&amp;#34; 替换为 &amp;#34;http://haokiu.com&amp;#34; update blog set content = replace(content, &amp;#34;https://haokiu.com&amp;#34;, &amp;#34;http://haokiu.com&amp;#34;) where content like &amp;#39;%https://haokiu.com%&amp;#39; </description>
+    </item>
+    
+    <item>
+      <title>OLAP</title>
+      <link>https://haokiu.com/OLAP/</link>
+      <pubDate>Thu, 05 Nov 2020 10:53:39 +0000</pubDate>
+      
+      <guid>https://haokiu.com/OLAP/</guid>
+      <description>OLAP 在数据仓库一章中我们讨论了数据仓库及其模型的概念，而数据库与数据仓库的区别实际讲的是 OLTP 与 OLAP 的区别。操作型处理，叫联机事务处理 OLTP（On-Line Transaction Processing），也可以称面向交易的处理系统，它是针对具体业务在数据库联机的日常操作，通常对少数记录进行查询、修改。用户较为关心操作的响应时间、数据的安全性、完整性和并发的支持用户数等问题。传统的数据库系统作为数据管理的主要手段，主要用于操作型处理。分析型处理，叫联机分析处理 OLAP（On-Line Analytical Processing）一般针对某些主题历史数据进行分析，支持管理决策。
+OLAP 与 OLTP 在互联网浪潮出现之前，企业的数据量普遍不大，特别是核心的业务数据，通常一个单机的数据库就可以保存。那时候的存储并不需要复杂的架构，所有的线上请求(OLTP, Online Transactional Processing) 和后台分析 (OLAP, Online Analytical Processing) 都跑在同一个数据库实例上。后来渐渐的业务越来越复杂，数据量越来越大，DBA 们再也优化不动 SQL 了。其中一个显著问题是：单机数据库支持线上的 TP 请求已经非常吃力，没办法再跑比较重的 AP 分析型任务。跑起来要么 OOM，要么影响线上业务，要么做了主从分离、分库分表之后很难实现业务需求。
+在这样的背景下，以 Hadoop 为代表的大数据技术开始蓬勃发展，它用许多相对廉价的 x86 机器构建了一个数据分析平台，用并行的能力破解大数据集的计算问题。所以从某种程度上说，大数据技术可以算是传统关系型数据库技术发展过程的一个分支。当然在过程中大数据领域也发展出了属于自己的全新场景，诞生了许多新的技术，这个不深入提了。
+由此，架构师把存储划分成线上业务和数据分析两个模块。如下图所示，业务库的数据通过 ETL 工具抽取出来，导入专用的分析平台。业务数据库专注提供 TP 能力，分析平台提供 AP 能力，各施其职，看起来已经很完美了。但其实这个架构也有自己的不足。
+HTAP 首先是复杂性问题。本身 ETL 过程就是一个很繁琐的过程，一个例证是 ETL 做的好，可以成为一个商业模式。因为是两个系统，必然带来更高的学习成本、维护成本和整合成本。如果你使用的是开源的大数据工具搭建的分析平台，那么肯定会遇到各种工具之间的磨合的问题，还有由于各种工具良莠不齐所导致的质量问题。
+其次是实时性问题。通常我们认为越接近实时的数据，它的价值越大。很多业务场景，对实时性有很高的要求，比如风控系统，它需要对数据不停的分析，并且在险情出现之后尽快响应。而通常的 ETL 是一个周期性的操作，比如一天或者一个小时导一次数据，数据实时性是没有办法保证的。最后是一致性问题。一致性在数据库里面是很重要的概念，数据库的事务就是用来保证一致性的。如果把数据分表存储在两个不同的系统内，那么很难保证一致性，即 AP 系统的查询结果没有办法与线上业务正确对应。那么这两个系统的联动效应就会受到限制，比如用户没办法在一个事务里面，同时访问两个系统的数据。
+由于现有的数据平台存在的以上局限性，我们认为开发一个HTAP（Hybrid Transactional/Analytical Processing）融合型数据库产品可以缓解大家在 TP or AP 抉择上的焦虑，或者说，让数据库的使用者不用考虑过度复杂的架构，在一套数据库中既能满足 OLTP 类需求，也能满足 OLAP 类需求。</description>
+    </item>
+    
+    <item>
+      <title>数据中台</title>
+      <link>https://haokiu.com/3OKmkr/</link>
+      <pubDate>Thu, 05 Nov 2020 10:50:55 +0000</pubDate>
+      
+      <guid>https://haokiu.com/3OKmkr/</guid>
+      <description>数据中台 阿里在 2018 年提出了所谓“数据中台”的概念：即数据被统一采集，规范数据语义和业务口径形成企业基础数据模型，提供统一的分析查询和新业务的数据对接能力。数据中台并不是新的颠覆式技术，而是一种企业数据资产管理和应用方法学，涵盖了数据集成、数据质量管理、元数据与主数据管理、数仓建模、支持高并发访问的数据服务接口层开发等内容。
+在数据中台建设中，结合企业自身的业务需求特点，架构和功能可能各不相同，但其中一个最基本的需求是数据采集的实时性和完整性。数据从源端产生，到被采集到数据汇集层的时间要尽可能短，至少应做到秒级延迟，这样中台的数据模型更新才可能做到近实时，构建在中台之上依赖实时数据流驱动的应用（例如商品推荐、欺诈检测等）才能够满足业务的需求。
+以阿里双十一为例，在极高的并发情况下，订单产生到大屏统计数据更新延迟不能超过 5s，一般在 2s 内。中台对外提供的数据应该是完整的，源端数据的 Create、Update 和 Delete 都要能够被捕获，不能少也不能多，即数据需要有端到端一致性的能力（Exactly Once Semantic，EOS）。当然，EOS 并非在任何业务场景下都需要，但从平台角度必须具备这种能力，并且允许用户根据业务需求灵活开启和关闭。
+数据中台的产生背景 起初，企业只有一个主营业务，比如电商，但随着公司战略和发展需要，会新增多支业务线，由于存在负责业务线开发的团队不一致，随之而来的就是风格迥异的代码风格和数据烟囱问题。
+数据中台的产生就是为了解决数据烟囱的问题，打通数据孤岛，让数据活起来，让数据产生价值，结合前台能力，达到快速响应用户的目标。
+中台只会同步能服务于超过两个业务线的数据，如果仅仅带有自身业务属性(不存在共性)的数据，不在中台的考虑范围内。例如:电商的产品产地信息，对于金融业务来说，其实是没有价值的，但电商的用户收货地址对金融业务来说是有价值的。所以不要简单的认为数据中台会汇集企业的所有数据，还是有侧重点的。导致这个结果的原因还包括数据中台建设本身是一个长周期的事，如果数据仅仅作用于一方，由业务方(前台)自行开发，更符合敏捷开发的特性。
+关于何时应该建立数据中台这个问题，我的思考是这样的。复杂的业务线、丰富的数据维度和公司上层领导主推。三者缺一，都没有实行的必要。 一只手都能数的过来的业务线量，跨多个项目的需求相对还是比较少的，取数也比较方便，直接走接口方式基本就能满足。反而，通过数据中台流转，将问题复杂化了。
+数据的维度越丰富，数据的价值越大。只知道性别数据，与知道性别和年龄，所得到的用户画像，肯定是维度丰富的准确性高。维度不丰富的情况下，没有计算的价值。
+可能会很奇怪为什么一定需要公司上层的同意。这里就可能涉及到动了谁的奶酪的问题，数据是每个业务线最重要的资源，在推行中台过程中，势必会遇到阻力，只有成为全公司的战略任务，才有可能把事情做好。
+中台如果没有考虑通用的业务能力，也会导致无法更专注于对中台技术的深入研究。中台如果不从抽象度、共性等角度出发，很有可能局限于某单一业务，导致中台无法很好地适应其他相关业务的要求，从而不能很好地应对业务的变化。如果中台的抽象程度低、扩展性差，则会导致中台无法满足前台业务需求。这时前台应用又因为业务本身的发展目标和压力不得不自行组织团队完成这部分功能，由此可能发生本应由中台提供的能力却最终实现在业务应用中，失去了中台存在的价值。</description>
+    </item>
+    
+    <item>
+      <title>presto 官网</title>
+      <link>https://haokiu.com/FhpG3z/</link>
+      <pubDate>Mon, 28 Sep 2020 14:50:12 +0000</pubDate>
+      
+      <guid>https://haokiu.com/FhpG3z/</guid>
+      <description>现在 presto 有两个官网：
+旧presto官网 新presto官网 </description>
+    </item>
+    
+    <item>
+      <title>presto 支持的数据源</title>
+      <link>https://haokiu.com/7mlwkW/</link>
+      <pubDate>Mon, 28 Sep 2020 14:40:32 +0000</pubDate>
+      
+      <guid>https://haokiu.com/7mlwkW/</guid>
+      <description>presto 有很多连接器以支持不同的数据源：
+Accumulo BigQuery Black Hole Cassandra Druid Elasticsearch Google Sheets Iceberg Hive JMX Kafka Kinesis Kudu Local File Memory MemSQL MongoDB MySQL Oracle Phoenix Pinot PostgreSQL Prometheus Redis Redshift SQL Server System Thrift TPCDS TPCH </description>
+    </item>
+    
+    <item>
+      <title>sql 优化</title>
+      <link>https://haokiu.com/XEhpYv/</link>
+      <pubDate>Wed, 23 Sep 2020 16:59:17 +0000</pubDate>
+      
+      <guid>https://haokiu.com/XEhpYv/</guid>
+      <description>SQL 优化已经成为衡量程序猿优秀与否的硬性指标，甚至在各大厂招聘岗位职能上都有明码标注。
+有朋友疑问到，SQL 优化真的有这么重要么？如下图所示，SQL 优化在提升系统性能中是：成本最低和优化效果最明显的途径。
+**优化成本：**硬件&amp;gt;系统配置&amp;gt;数据库表结构&amp;gt;SQL 及索引。
+**优化效果：**硬件&amp;lt;系统配置&amp;lt;数据库表结构&amp;lt;SQL 及索引。
+对于MySQL层优化我一般遵从五个原则：
+**减少数据访问：**设置合理的字段类型，启用压缩，通过索引访问等减少磁盘 IO。 **返回更少的数据：**只返回需要的字段和数据分页处理，减少磁盘 IO 及网络 IO。 **减少交互次数：**批量 DML 操作，函数存储等减少数据连接次数。 **减少服务器 CPU 开销：**尽量减少数据库排序操作以及全表查询，减少 CPU 内存占用。 **利用更多资源：**使用表分区，可以增加并行操作，更大限度利用 CPU 资源。 总结到 SQL 优化中，就如下三点：
+最大化利用索引。 尽可能避免全表扫描。 减少无效数据的查询。 理解 SQL 优化原理 ，首先要搞清楚 SQL 执行顺序。
+SELECT 语句，语法顺序如下：
+1. SELECT 2. DISTINCT &amp;lt;select_list&amp;gt; 3. FROM &amp;lt;left_table&amp;gt; 4. &amp;lt;join_type&amp;gt; JOIN &amp;lt;right_table&amp;gt; 5. ON &amp;lt;join_condition&amp;gt; 6. WHERE &amp;lt;where_condition&amp;gt; 7. GROUP BY &amp;lt;group_by_list&amp;gt; 8. HAVING &amp;lt;having_condition&amp;gt; 9. ORDER BY &amp;lt;order_by_condition&amp;gt; 10.LIMIT &amp;lt;limit_number&amp;gt; SELECT 语句，执行顺序如下：
+FROM &amp;lt;表名&amp;gt; # 选取表，将多个表数据通过笛卡尔积变成一个表。 ON &amp;lt;筛选条件&amp;gt; # 对笛卡尔积的虚表进行筛选 JOIN &amp;lt;join, left join, right join...&amp;gt; &amp;lt;join表&amp;gt; # 指定join，用于添加数据到on之后的虚表中，例如left join会将左表的剩余数据添加到虚表中 WHERE &amp;lt;where条件&amp;gt; # 对上述虚表进行筛选 GROUP BY &amp;lt;分组条件&amp;gt; # 分组 &amp;lt;SUM()等聚合函数&amp;gt; # 用于having子句进行判断，在书写上这类聚合函数是写在having判断里面的 HAVING &amp;lt;分组筛选&amp;gt; # 对分组后的结果进行聚合筛选 SELECT &amp;lt;返回数据列表&amp;gt; # 返回的单列必须在group by子句中，聚合函数除外 DISTINCT # 数据除重 ORDER BY &amp;lt;排序条件&amp;gt; # 排序 LIMIT &amp;lt;行数限制&amp;gt; 以下 SQL 优化策略适用于数据量较大的场景下，如果数据量较小，没必要以此为准，以免画蛇添足。</description>
+    </item>
+    
+    <item>
+      <title>elasticsearch</title>
+      <link>https://haokiu.com/3XTrh1/</link>
+      <pubDate>Wed, 23 Sep 2020 16:53:39 +0000</pubDate>
+      
+      <guid>https://haokiu.com/3XTrh1/</guid>
+      <description>基本概念 Node 与 Cluster Elastic 本质上是一个分布式数据库，允许多台服务器协同工作，每台服务器可以运行多个 Elastic 实例。
+单个 Elastic 实例称为一个节点（node）。一组节点构成一个集群（cluster）。
+Index Elastic 会索引所有字段，经过处理后写入一个反向索引（Inverted Index）。查找数据的时候，直接查找该索引。
+所以，Elastic 数据管理的顶层单位就叫做 Index（索引）。它是单个数据库的同义词。每个 Index （即数据库）的名字必须是小写。
+Document Index 里面单条的记录称为 Document（文档）。许多条 Document 构成了一个 Index。Document 使用 JSON 格式表示。同一个 Index 里面的 Document，不要求有相同的结构（scheme），但是最好保持相同，这样有利于提高搜索效率。
+Type Document 可以分组，比如weather这个 Index 里面，可以按城市分组（北京和上海），也可以按气候分组（晴天和雨天）。这种分组就叫做 Type，它是虚拟的逻辑分组，用来过滤 Document。
+不同的 Type 应该有相似的结构（schema），举例来说，id字段不能在这个组是字符串，在另一个组是数值。这是与关系型数据库的表的一个区别。性质完全不同的数据（比如products和logs）应该存成两个 Index，而不是一个 Index 里面的两个 Type（虽然可以做到）。
+在6.0之前的版本，一个ElasticSearch索引中，可以有多个类型；从6.0版本开始，，一个ElasticSearch索引中，只有1个类型。一个类型是索引的一个逻辑上的分类，通常具有一组相同字段的文档组成。ElasticSearch的类型概念相当于关系数据库的数据表。
+shard 当数据量较大时，索引的存储空间需求超出单个节点磁盘容量的限制，或者出现单个节点处理速度较慢。为了解决这些问题，ElasticSearch将索引中的数据进行切分成多个分片（shard），每个分片存储这个索引的一部分数据，分布在不同节点上。当需要查询索引时，ElasticSearch将查询发送到每个相关分片，之后将查询结果合并，这个过程对ElasticSearch应用来说是透明的，用户感知不到分片的存在。 一个索引的分片一旦指定，不再修改。
+副本 其实，分片全称是主分片，简称为分片。主分片是相对于副本来说的，副本是对主分片的一个或多个复制版本（或称拷贝），这些复制版本（拷贝）可以称为复制分片，可以直接称之为副本。当主分片丢失时，集群可以将一个副本升级为新的主分片。
+对比 ElasticSearch RDBMS 索引（index） 数据库（database） 类型（type） 表（table） 文档（document） 行（row） 字段（field） 列（column） 映射（mapping） 表结构（schema） 全文索引 索引 查询DSL SQL GET select PUT/POST update DELETE delete 节点信息 查看节点信息 curl localhost:9200 查看节点健康度 curl localhost:9200/_cat/health?v&amp;amp;pretty=true 查看集群状况 curl localhost:9200/_cat/nodes?v&amp;amp;pretty=true index(索引)操作 查看当前节点的所有 Index。 curl -X GET &amp;#39;http://localhost:9200/_cat/indices?v&amp;#39; 可以列出每个 Index 所包含的 Type curl &amp;#39;localhost:9200/_mapping?pretty=true&amp;#39; 新建一个名叫weather的 Index。 curl -X PUT &amp;#39;localhost:9200/weather&amp;#39; 删除这个 Index。 curl -X DELETE &amp;#39;localhost:9200/weather&amp;#39; 文档操作 获取 GET /website/blog/123?</description>
+    </item>
+    
+    <item>
+      <title>搜索引擎 及 elastic search </title>
+      <link>https://haokiu.com/oaXyUa/</link>
+      <pubDate>Wed, 23 Sep 2020 14:29:39 +0000</pubDate>
+      
+      <guid>https://haokiu.com/oaXyUa/</guid>
+      <description>搜索引擎是对数据的检索，所以我们先从生活中的数据说起。我们生活中的数据总体分为两种：
+结构化数据 非结构化数据 **结构化数据：**也称作行数据，是由二维表结构来逻辑表达和实现的数据，严格地遵循数据格式与长度规范，主要通过关系型数据库进行存储和管理。指具有固定格式或有限长度的数据，如数据库，元数据等。
+**非结构化数据：**又可称为全文数据，不定长或无固定格式，不适于由数据库二维表来表现，包括所有格式的办公文档、XML、HTML、Word 文档，邮件，各类报表、图片和咅频、视频信息等。
+**说明：**如果要更细致的区分的话，XML、HTML 可划分为半结构化数据。因为它们也具有自己特定的标签格式，所以既可以根据需要按结构化数据来处理，也可抽取出纯文本按非结构化数据来处理。
+根据两种数据分类，搜索也相应的分为两种：
+结构化数据搜索 非结构化数据搜索 **对于结构化数据，**因为它们具有特定的结构，所以我们一般都是可以通过关系型数据库（MySQL，Oracle 等）的二维表（Table）的方式存储和搜索，也可以建立索引。
+对于非结构化数据，也即对全文数据的搜索主要有两种方法：
+顺序扫描 全文检索 **顺序扫描：**通过文字名称也可了解到它的大概搜索方式，即按照顺序扫描的方式查询特定的关键字。
+例如给你一张报纸，让你找到该报纸中“平安”的文字在哪些地方出现过。你肯定需要从头到尾把报纸阅读扫描一遍然后标记出关键字在哪些版块出现过以及它的出现位置。
+这种方式无疑是最耗时的最低效的，如果报纸排版字体小，而且版块较多甚至有多份报纸，等你扫描完你的眼睛也差不多了。
+**全文搜索：**对非结构化数据顺序扫描很慢，我们是否可以进行优化？把我们的非结构化数据想办法弄得有一定结构不就行了吗？
+将非结构化数据中的一部分信息提取出来，重新组织，使其变得有一定结构，然后对此有一定结构的数据进行搜索，从而达到搜索相对较快的目的。
+这种方式就构成了全文检索的基本思路。这部分从非结构化数据中提取出的然后重新组织的信息，我们称之为索引。
+这种方式的主要工作量在前期索引的创建，但是对于后期搜索却是快速高效的。
+先说说 Lucene
+通过对生活中数据的类型作了一个简短了解之后，我们知道关系型数据库的 SQL 检索是处理不了这种非结构化数据的。
+这种非结构化数据的处理需要依赖全文搜索，而目前市场上开放源代码的最好全文检索引擎工具包就属于 Apache 的 Lucene了。
+但是 Lucene 只是一个工具包，它不是一个完整的全文检索引擎。Lucene 的目的是为软件开发人员提供一个简单易用的工具包，以方便的在目标系统中实现全文检索的功能，或者是以此为基础建立起完整的全文检索引擎。
+目前以 Lucene 为基础建立的开源可用全文搜索引擎主要是 Solr 和 Elasticsearch。
+Solr 和 Elasticsearch 都是比较成熟的全文搜索引擎，能完成的功能和性能也基本一样。
+但是 ES 本身就具有分布式的特性和易安装使用的特点，而 Solr 的分布式需要借助第三方来实现，例如通过使用 ZooKeeper 来达到分布式协调管理。
+不管是 Solr 还是 Elasticsearch 底层都是依赖于 Lucene，而 Lucene 能实现全文搜索主要是因为它实现了倒排索引的查询结构。
+如何理解倒排索引呢？假如现有三份数据文档，文档的内容如下分别是：
+Java is the best programming language. PHP is the best programming language. Javascript is the best programming language. 为了创建倒排索引，我们通过分词器将每个文档的内容域拆分成单独的词（我们称它为词条或 Term），创建一个包含所有不重复词条的排序列表，然后列出每个词条出现在哪个文档。
+结果如下所示：
+Term Doc_1 Doc_2 Doc_3 ------------------------------------- Java | X | | is | X | X | X the | X | X | X best | X | X | X programming | x | X | X language | X | X | X PHP | | X | Javascript | | | X ------------------------------------- 这种结构由文档中所有不重复词的列表构成，对于其中每个词都有一个文档列表与之关联。</description>
+    </item>
+    
+  </channel>
+</rss>

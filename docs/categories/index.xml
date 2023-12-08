@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Categories on haokiu</title>
+    <link>https://haokiu.com/categories/</link>
+    <description>Recent content in Categories on haokiu</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>haokiu.com</copyright>
+    <lastBuildDate>Sat, 24 Jun 2023 15:03:53 +0000</lastBuildDate><atom:link href="https://haokiu.com/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>3</title>
+      <link>https://haokiu.com/categories/3/</link>
+      <pubDate>Sat, 24 Jun 2023 15:03:53 +0000</pubDate>
+      
+      <guid>https://haokiu.com/categories/3/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>6</title>
+      <link>https://haokiu.com/categories/6/</link>
+      <pubDate>Sat, 18 Mar 2023 14:42:36 +0000</pubDate>
+      
+      <guid>https://haokiu.com/categories/6/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>1</title>
+      <link>https://haokiu.com/categories/1/</link>
+      <pubDate>Wed, 24 Feb 2021 10:24:56 +0000</pubDate>
+      
+      <guid>https://haokiu.com/categories/1/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>5</title>
+      <link>https://haokiu.com/categories/5/</link>
+      <pubDate>Tue, 02 Feb 2021 20:57:44 +0000</pubDate>
+      
+      <guid>https://haokiu.com/categories/5/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>4</title>
+      <link>https://haokiu.com/categories/4/</link>
+      <pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate>
+      
+      <guid>https://haokiu.com/categories/4/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>2</title>
+      <link>https://haokiu.com/categories/2/</link>
+      <pubDate>Mon, 21 Sep 2020 09:30:35 +0000</pubDate>
+      
+      <guid>https://haokiu.com/categories/2/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>leveldb源码分析18 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="leveldb源码分析18 本系列《leveldb源码分析》共有22篇文章，这是第十八篇
+11 VersionSet分析之1 Version之后就是VersionSet，它并不是Version的简单集合，还肩负了不少的处理逻辑。这里的分析不涉及到compaction相关的部分，这部分会单独分析。包括log等各种编号计数器，compaction点的管理等等。
+11.1 VersionSet接口 1 首先是构造函数，VersionSet会使用到TableCache，这个是调用者传入的。TableCache用于Get k/v操作。
+VersionSet(const std::string&amp; dbname, const Options* options, TableCache*table_cache, const InternalKeyComparator*); VersionSet的构造函数很简单，除了根据参数初始化，还有两个地方值得注意： N1 next_file_number_从2开始； N2 创建新的Version并加入到Version链表中，并设置CURRENT=新创建version； 其它的数字初始化为0，指针初始化为NULL。 2 恢复函数，从磁盘恢复最后保存的元信息
+Status Recover(); 3 标记指定的文件编号已经被使用了
+void MarkFileNumberUsed(uint64_t number); 逻辑很简单，就是根据编号更新文件编号计数器：
+if (next_file_number_ &lt;= number) next_file_number_ = number &#43; 1; 4 在current version上应用指定的VersionEdit，生成新的MANIFEST信息，保存到磁盘上，并用作current version。 要求：没有其它线程并发调用；要用于mu；
+Status LogAndApply(VersionEdit* edit, port::Mutex* mu)EXCLUSIVE_LOCKS_REQUIRED(mu); 5 对于@v中的@key，返回db中的大概位置
+uint64_t ApproximateOffsetOf(Version* v, const InternalKey&amp; key); 6 其它一些简单接口，信息获取或者设置，如下：
+//返回current version Version* current() const { return current_; } // 当前的MANIFEST文件号 uint64_t ManifestFileNumber() const { return manifest_file_number_; } // 分配并返回新的文件编号 uint64_t NewFileNumber() { return next_file_number_&#43;&#43;; } // 返回当前log文件编号 uint64_t LogNumber() const { return log_number_; } // 返回正在compact的log文件编号，如果没有返回0 uint64_t PrevLogNumber() const { return prev_log_number_; } // 获取、设置last sequence，set时不能后退 uint64_t LastSequence() const { return last_sequence_; } void SetLastSequence(uint64_t s) { assert(s &gt;=last_sequence_); last_sequence_ = s; } // 返回指定level中所有sstable文件大小的和 int64_t NumLevelBytes(int level) const; // 返回指定level的文件个数 int NumLevelFiles(int level) const; // 重用@file_number，限制很严格：@file_number必须是最后分配的那个 // 要求: @file_number是NewFileNumber()返回的.">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/9276872cee384cebb6d1c912acedf0a2/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="leveldb源码分析18" />
+<meta property="og:description" content="leveldb源码分析18 本系列《leveldb源码分析》共有22篇文章，这是第十八篇
+11 VersionSet分析之1 Version之后就是VersionSet，它并不是Version的简单集合，还肩负了不少的处理逻辑。这里的分析不涉及到compaction相关的部分，这部分会单独分析。包括log等各种编号计数器，compaction点的管理等等。
+11.1 VersionSet接口 1 首先是构造函数，VersionSet会使用到TableCache，这个是调用者传入的。TableCache用于Get k/v操作。
+VersionSet(const std::string&amp; dbname, const Options* options, TableCache*table_cache, const InternalKeyComparator*); VersionSet的构造函数很简单，除了根据参数初始化，还有两个地方值得注意： N1 next_file_number_从2开始； N2 创建新的Version并加入到Version链表中，并设置CURRENT=新创建version； 其它的数字初始化为0，指针初始化为NULL。 2 恢复函数，从磁盘恢复最后保存的元信息
+Status Recover(); 3 标记指定的文件编号已经被使用了
+void MarkFileNumberUsed(uint64_t number); 逻辑很简单，就是根据编号更新文件编号计数器：
+if (next_file_number_ &lt;= number) next_file_number_ = number &#43; 1; 4 在current version上应用指定的VersionEdit，生成新的MANIFEST信息，保存到磁盘上，并用作current version。 要求：没有其它线程并发调用；要用于mu；
+Status LogAndApply(VersionEdit* edit, port::Mutex* mu)EXCLUSIVE_LOCKS_REQUIRED(mu); 5 对于@v中的@key，返回db中的大概位置
+uint64_t ApproximateOffsetOf(Version* v, const InternalKey&amp; key); 6 其它一些简单接口，信息获取或者设置，如下：
+//返回current version Version* current() const { return current_; } // 当前的MANIFEST文件号 uint64_t ManifestFileNumber() const { return manifest_file_number_; } // 分配并返回新的文件编号 uint64_t NewFileNumber() { return next_file_number_&#43;&#43;; } // 返回当前log文件编号 uint64_t LogNumber() const { return log_number_; } // 返回正在compact的log文件编号，如果没有返回0 uint64_t PrevLogNumber() const { return prev_log_number_; } // 获取、设置last sequence，set时不能后退 uint64_t LastSequence() const { return last_sequence_; } void SetLastSequence(uint64_t s) { assert(s &gt;=last_sequence_); last_sequence_ = s; } // 返回指定level中所有sstable文件大小的和 int64_t NumLevelBytes(int level) const; // 返回指定level的文件个数 int NumLevelFiles(int level) const; // 重用@file_number，限制很严格：@file_number必须是最后分配的那个 // 要求: @file_number是NewFileNumber()返回的." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/9276872cee384cebb6d1c912acedf0a2/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="leveldb源码分析18"/>
+<meta name="twitter:description" content="leveldb源码分析18 本系列《leveldb源码分析》共有22篇文章，这是第十八篇
+11 VersionSet分析之1 Version之后就是VersionSet，它并不是Version的简单集合，还肩负了不少的处理逻辑。这里的分析不涉及到compaction相关的部分，这部分会单独分析。包括log等各种编号计数器，compaction点的管理等等。
+11.1 VersionSet接口 1 首先是构造函数，VersionSet会使用到TableCache，这个是调用者传入的。TableCache用于Get k/v操作。
+VersionSet(const std::string&amp; dbname, const Options* options, TableCache*table_cache, const InternalKeyComparator*); VersionSet的构造函数很简单，除了根据参数初始化，还有两个地方值得注意： N1 next_file_number_从2开始； N2 创建新的Version并加入到Version链表中，并设置CURRENT=新创建version； 其它的数字初始化为0，指针初始化为NULL。 2 恢复函数，从磁盘恢复最后保存的元信息
+Status Recover(); 3 标记指定的文件编号已经被使用了
+void MarkFileNumberUsed(uint64_t number); 逻辑很简单，就是根据编号更新文件编号计数器：
+if (next_file_number_ &lt;= number) next_file_number_ = number &#43; 1; 4 在current version上应用指定的VersionEdit，生成新的MANIFEST信息，保存到磁盘上，并用作current version。 要求：没有其它线程并发调用；要用于mu；
+Status LogAndApply(VersionEdit* edit, port::Mutex* mu)EXCLUSIVE_LOCKS_REQUIRED(mu); 5 对于@v中的@key，返回db中的大概位置
+uint64_t ApproximateOffsetOf(Version* v, const InternalKey&amp; key); 6 其它一些简单接口，信息获取或者设置，如下：
+//返回current version Version* current() const { return current_; } // 当前的MANIFEST文件号 uint64_t ManifestFileNumber() const { return manifest_file_number_; } // 分配并返回新的文件编号 uint64_t NewFileNumber() { return next_file_number_&#43;&#43;; } // 返回当前log文件编号 uint64_t LogNumber() const { return log_number_; } // 返回正在compact的log文件编号，如果没有返回0 uint64_t PrevLogNumber() const { return prev_log_number_; } // 获取、设置last sequence，set时不能后退 uint64_t LastSequence() const { return last_sequence_; } void SetLastSequence(uint64_t s) { assert(s &gt;=last_sequence_); last_sequence_ = s; } // 返回指定level中所有sstable文件大小的和 int64_t NumLevelBytes(int level) const; // 返回指定level的文件个数 int NumLevelFiles(int level) const; // 重用@file_number，限制很严格：@file_number必须是最后分配的那个 // 要求: @file_number是NewFileNumber()返回的."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "leveldb源码分析18",
+      "item": "https://haokiu.com/9276872cee384cebb6d1c912acedf0a2/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "leveldb源码分析18",
+  "name": "leveldb源码分析18",
+  "description": "leveldb源码分析18 本系列《leveldb源码分析》共有22篇文章，这是第十八篇\n11 VersionSet分析之1 Version之后就是VersionSet，它并不是Version的简单集合，还肩负了不少的处理逻辑。这里的分析不涉及到compaction相关的部分，这部分会单独分析。包括log等各种编号计数器，compaction点的管理等等。\n11.1 VersionSet接口 1 首先是构造函数，VersionSet会使用到TableCache，这个是调用者传入的。TableCache用于Get k/v操作。\nVersionSet(const std::string\u0026amp; dbname, const Options* options, TableCache*table_cache, const InternalKeyComparator*); VersionSet的构造函数很简单，除了根据参数初始化，还有两个地方值得注意： N1 next_file_number_从2开始； N2 创建新的Version并加入到Version链表中，并设置CURRENT=新创建version； 其它的数字初始化为0，指针初始化为NULL。 2 恢复函数，从磁盘恢复最后保存的元信息\nStatus Recover(); 3 标记指定的文件编号已经被使用了\nvoid MarkFileNumberUsed(uint64_t number); 逻辑很简单，就是根据编号更新文件编号计数器：\nif (next_file_number_ \u0026lt;= number) next_file_number_ = number + 1; 4 在current version上应用指定的VersionEdit，生成新的MANIFEST信息，保存到磁盘上，并用作current version。 要求：没有其它线程并发调用；要用于mu；\nStatus LogAndApply(VersionEdit* edit, port::Mutex* mu)EXCLUSIVE_LOCKS_REQUIRED(mu); 5 对于@v中的@key，返回db中的大概位置\nuint64_t ApproximateOffsetOf(Version* v, const InternalKey\u0026amp; key); 6 其它一些简单接口，信息获取或者设置，如下：\n//返回current version Version* current() const { return current_; } // 当前的MANIFEST文件号 uint64_t ManifestFileNumber() const { return manifest_file_number_; } // 分配并返回新的文件编号 uint64_t NewFileNumber() { return next_file_number_++; } // 返回当前log文件编号 uint64_t LogNumber() const { return log_number_; } // 返回正在compact的log文件编号，如果没有返回0 uint64_t PrevLogNumber() const { return prev_log_number_; } // 获取、设置last sequence，set时不能后退 uint64_t LastSequence() const { return last_sequence_; } void SetLastSequence(uint64_t s) { assert(s \u0026gt;=last_sequence_); last_sequence_ = s; } // 返回指定level中所有sstable文件大小的和 int64_t NumLevelBytes(int level) const; // 返回指定level的文件个数 int NumLevelFiles(int level) const; // 重用@file_number，限制很严格：@file_number必须是最后分配的那个 // 要求: @file_number是NewFileNumber()返回的.",
+  "keywords": [
+    
+  ],
+  "articleBody": "leveldb源码分析18 本系列《leveldb源码分析》共有22篇文章，这是第十八篇\n11 VersionSet分析之1 Version之后就是VersionSet，它并不是Version的简单集合，还肩负了不少的处理逻辑。这里的分析不涉及到compaction相关的部分，这部分会单独分析。包括log等各种编号计数器，compaction点的管理等等。\n11.1 VersionSet接口 1 首先是构造函数，VersionSet会使用到TableCache，这个是调用者传入的。TableCache用于Get k/v操作。\nVersionSet(const std::string\u0026 dbname, const Options* options, TableCache*table_cache, const InternalKeyComparator*); VersionSet的构造函数很简单，除了根据参数初始化，还有两个地方值得注意： N1 next_file_number_从2开始； N2 创建新的Version并加入到Version链表中，并设置CURRENT=新创建version； 其它的数字初始化为0，指针初始化为NULL。 2 恢复函数，从磁盘恢复最后保存的元信息\nStatus Recover(); 3 标记指定的文件编号已经被使用了\nvoid MarkFileNumberUsed(uint64_t number); 逻辑很简单，就是根据编号更新文件编号计数器：\nif (next_file_number_ \u003c= number) next_file_number_ = number + 1; 4 在current version上应用指定的VersionEdit，生成新的MANIFEST信息，保存到磁盘上，并用作current version。 要求：没有其它线程并发调用；要用于mu；\nStatus LogAndApply(VersionEdit* edit, port::Mutex* mu)EXCLUSIVE_LOCKS_REQUIRED(mu); 5 对于@v中的@key，返回db中的大概位置\nuint64_t ApproximateOffsetOf(Version* v, const InternalKey\u0026 key); 6 其它一些简单接口，信息获取或者设置，如下：\n//返回current version Version* current() const { return current_; } // 当前的MANIFEST文件号 uint64_t ManifestFileNumber() const { return manifest_file_number_; } // 分配并返回新的文件编号 uint64_t NewFileNumber() { return next_file_number_++; } // 返回当前log文件编号 uint64_t LogNumber() const { return log_number_; } // 返回正在compact的log文件编号，如果没有返回0 uint64_t PrevLogNumber() const { return prev_log_number_; } // 获取、设置last sequence，set时不能后退 uint64_t LastSequence() const { return last_sequence_; } void SetLastSequence(uint64_t s) { assert(s \u003e=last_sequence_); last_sequence_ = s; } // 返回指定level中所有sstable文件大小的和 int64_t NumLevelBytes(int level) const; // 返回指定level的文件个数 int NumLevelFiles(int level) const; // 重用@file_number，限制很严格：@file_number必须是最后分配的那个 // 要求: @file_number是NewFileNumber()返回的. void ReuseFileNumber(uint64_t file_number) { if (next_file_number_ ==file_number + 1) next_file_number_ = file_number; } // 对于所有level\u003e0，遍历文件，找到和下一层文件的重叠数据的最大值(in bytes) // 这个就是Version:: GetOverlappingInputs()函数的简单应用 int64_t MaxNextLevelOverlappingBytes(); // 获取函数，把所有version的所有level的文件加入到@live中 void AddLiveFiles(std::set* live); // 返回一个可读的单行信息——每个level的文件数，保存在*scratch中 struct LevelSummaryStorage {char buffer[100]; }; const char* LevelSummary(LevelSummaryStorage* scratch) const; 下面就来分析这两个接口Recover、LogAndApply以及ApproximateOffsetOf。\n11.2 VersionSet::Builder类 Builder是一个内部辅助类，其主要作用是： 1 把一个MANIFEST记录的元信息应用到版本管理器VersionSet中； 2 把当前的版本状态设置到一个Version对象中。\n11.2.1 成员与构造\nBuilder的vset_与base_都是调用者传入的，此外它还为FileMetaData定义了一个比较类BySmallestKey，首先依照文件的min key，小的在前；如果min key相等则file number小的在前。\ntypedefstd::set FileSet; // 这个是记录添加和删除的文件 struct LevelState { std::setdeleted_files; // 保证添加文件的顺序是有效定义的 FileSet* added_files; }; VersionSet* vset_; Version* base_; LevelStatelevels_[config::kNumLevels]; // 其接口有3个： void Apply(VersionEdit* edit); void SaveTo(Version* v); void MaybeAddFile(Version* v, int level, FileMetaData* f); 构造函数执行简单的初始化操作，在析构时，遍历检查LevelState::added_files，如果文件引用计数为0，则删除文件。\n11.2.2 Apply()\n函数声明：voidApply(VersionEdit* edit)，该函数将edit中的修改应用到当前状态中。注意除了compaction点直接修改了vset_，其它删除和新加文件的变动只是先存储在Builder自己的成员变量中，在调用SaveTo(v)函数时才施加到v上。\nS1 把edit记录的compaction点应用到当前状态\nedit-\u003ecompact_pointers_ =\u003e vset_-\u003ecompact_pointer_ S2 把edit记录的已删除文件应用到当前状态\nedit-\u003edeleted_files_ =\u003e levels_[level].deleted_files S3把edit记录的新加文件应用到当前状态，这里会初始化文件的allowed_seeks值，以在文件被无谓seek指定次数后自动执行compaction，这里作者阐述了其设置规则。\nfor (size_t i = 0; i new_files_.size(); i++) { const int level =edit-\u003enew_files_[i].first; FileMetaData* f = newFileMetaData(edit-\u003enew_files_[i].second); f-\u003erefs = 1; f-\u003eallowed_seeks = (f-\u003efile_size /16384); // 16KB-见下面 if (f-\u003eallowed_seeks \u003c100) f-\u003eallowed_seeks = 100; levels_[level].deleted_files.erase(f-\u003enumber); // 以防万一 levels_[level].added_files-\u003einsert(f); } 值allowed_seeks事关compaction的优化，其计算依据如下，首先假设：\n1 一次seek时间为10ms 2 写入10MB数据的时间为10ms（100MB/s） 3 compact 1MB的数据需要执行25MB的IO -\u003e从本层读取1MB -\u003e从下一层读取10-12MB（文件的key range边界可能是非对齐的） -\u003e向下一层写入10-12MB\n这意味这25次seek的代价等同于compact 1MB的数据，也就是一次seek花费的时间大约相当于compact 40KB的数据。基于保守的角度考虑，对于每16KB的数据，我们允许它在触发compaction之前能做一次seek。\n11.2.3 MaybeAddFile()\n函数声明：\nvoidMaybeAddFile(Version* v, int level, FileMetaData* f); 该函数尝试将f加入到levels_[level]文件set中。 要满足两个条件：\n1 文件不能被删除，也就是不能在levels_[level].deleted_files集合中； 2 保证文件之间的key是连续的，即基于比较器vset_-\u003eicmp_，f的min key要大于levels_[level]集合中最后一个文件的max key；\n11.2.4 SaveTo()\n把当前的状态存储到v中返回，函数声明：\nvoid SaveTo(Version* v); 函数逻辑：For循环遍历所有的level[0, config::kNumLevels-1]，把新加的文件和已存在的文件merge在一起，丢弃已删除的文件，结果保存在v中。对于level\u003e 0，还要确保集合中的文件没有重合。 S1 merge流程\n// 原文件集合 conststd::vector\u0026 base_files = base_-\u003efiles_[level]; std::vector::const_iterator base_iter =base_files.begin(); std::vector::const_iterator base_end =base_files.end(); const FileSet* added =levels_[level].added_files; v-\u003efiles_[level].reserve(base_files.size()+ added-\u003esize()); for (FileSet::const_iteratoradded_iter = added-\u003ebegin(); added_iter !=added-\u003eend(); ++added_iter) { //加入base_中小于added_iter的那些文件 for(std::vector::const_iterator bpos = std::upper_bound(base_iter,base_end,*added_iter, cmp); base_iter != bpos;++base_iter) { // base_iter逐次向后移到 MaybeAddFile(v, level,*base_iter); } // 加入added_iter MaybeAddFile(v, level,*added_iter); } // 添加base_剩余的那些文件 for (; base_iter != base_end;++base_iter) MaybeAddFile(v, level, *base_iter); 对象cmp就是前面定义的比较仿函数BySmallestKey对象。 S2 检查流程，保证level\u003e0的文件集合无重叠，基于vset_-\u003eicmp_，确保文件i-1的max key \u003c 文件i的min key。\n11.3 Recover() 对于VersionSet而言，Recover就是根据CURRENT指定的MANIFEST，读取db元信息。这是9.3介绍的Recovery流程的开始部分。\n11.3.1 函数流程\n下面就来分析其具体逻辑。\nS1 读取CURRENT文件，获得最新的MANIFEST文件名，根据文件名打开MANIFEST文件。CURRENT文件以\\n结尾，读取后需要trim下。\nstd::string current; // MANIFEST文件名 ReadFileToString(env_, CurrentFileName(dbname_), ¤t); std::string dscname = dbname_ + \"/\" + current; SequentialFile* file; env_-\u003eNewSequentialFile(dscname, \u0026file); S2 读取MANIFEST内容，MANIFEST是以log的方式写入的，因此这里调用的是log::Reader来读取。然后调用VersionEdit::DecodeFrom，从内容解析出VersionEdit对象，并将VersionEdit记录的改动应用到versionset中。读取MANIFEST中的log number, prev log number, nextfile number, last sequence。\nBuilder builder(this, current_); while (reader.ReadRecord(\u0026record, \u0026scratch) \u0026\u0026 s.ok()) { VersionEdit edit; s = edit.DecodeFrom(record); if (s.ok())builder.Apply(\u0026edit); // log number, file number, …逐个判断 if (edit.has_log_number_) { log_number =edit.log_number_; have_log_number = true; } … … } S3 将读取到的log number, prev log number标记为已使用。\nMarkFileNumberUsed(prev_log_number); MarkFileNumberUsed(log_number); S4 最后，如果一切顺利就创建新的Version，并应用读取的几个number。\nif (s.ok()) { Version* v = newVersion(this); builder.SaveTo(v); // 安装恢复的version Finalize(v); AppendVersion(v); manifest_file_number_ =next_file; next_file_number_ = next_file+ 1; last_sequence_ = last_sequence; log_number_ = log_number; prev_log_number_ =prev_log_number; } Finalize(v)和AppendVersion(v)用来安装并使用version v，在AppendVersion函数中会将current version设置为v。下面就来分别分析这两个函数。\n11.3.2 Finalize()\n函数声明：\nvoid Finalize(Version*v); 该函数依照规则为下次的compaction计算出最适用的level，对于level 0和\u003e0需要分别对待，逻辑如下。\nS1 对于level 0以文件个数计算，kL0_CompactionTrigger默认配置为4。\nscore =v-\u003efiles_[level].size()/static_cast(config::kL0_CompactionTrigger); S2 对于level\u003e0，根据level内的文件总大小计算\nconst uint64_t level_bytes = TotalFileSize(v-\u003efiles_[level]); score = static_cast(level_bytes) /MaxBytesForLevel(level); S3 最后把计算结果保存到v的两个成员compaction_level_和compaction_score_中。\n其中函数MaxBytesForLevel根据level返回其本层文件总大小的预定最大值。 计算规则为：1048576.0* level^10。 这里就有一个问题，为何level0和其它level计算方法不同，原因如下，这也是leveldb为compaction所做的另一个优化。\n1 对于较大的写缓存（write-buffer），做太多的level 0 compaction并不好 2 每次read操作都要merge level 0的所有文件，因此我们不希望level 0有太多的小文件存在（比如写缓存太小，或者压缩比较高，或者覆盖/删除较多导致小文件太多）。 看起来这里的写缓存应该就是配置的操作log大小。\n11.3.3 AppendVersion()\n函数声明：\nvoid AppendVersion(Version*v); 把v加入到versionset中，并设置为current version。并对老的current version执行Uref()。 在双向循环链表中的位置在dummy_versions_之前。\n",
+  "wordCount" : "549",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/9276872cee384cebb6d1c912acedf0a2/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      leveldb源码分析18
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#leveldb%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%9018" aria-label="leveldb源码分析18">leveldb源码分析18</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#111-versionset%e6%8e%a5%e5%8f%a3" aria-label="11.1 VersionSet接口">11.1 VersionSet接口</a></li>
+                <li>
+                    <a href="#112-versionsetbuilder%e7%b1%bb" aria-label="11.2 VersionSet::Builder类">11.2 VersionSet::Builder类</a></li>
+                <li>
+                    <a href="#113-recover" aria-label="11.3 Recover()">11.3 Recover()</a>
+                </li>
+            </ul>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="leveldb源码分析18">leveldb源码分析18</h1>
+<p>本系列《leveldb源码分析》共有22篇文章，这是第十八篇</p>
+<p><strong>11 VersionSet分析之1</strong>
+<code>Version</code>之后就是<code>VersionSet</code>，它并不是Version的简单集合，还肩负了不少的处理逻辑。这里的分析不涉及到<code>compaction</code>相关的部分，这部分会单独分析。包括log等各种编号计数器，compaction点的管理等等。</p>
+<h3 id="111-versionset接口">11.1 VersionSet接口</h3>
+<p><strong>1 首先是构造函数，VersionSet会使用到TableCache，这个是调用者传入的。TableCache用于Get k/v操作。</strong></p>
+<pre tabindex="0"><code>VersionSet(const std::string&amp; dbname, const Options* options,
+           TableCache*table_cache, const InternalKeyComparator*);
+</code></pre><p><code>VersionSet</code>的构造函数很简单，除了根据参数初始化，还有两个地方值得注意：
+<strong>N1</strong> next_file_number_从2开始；
+<strong>N2</strong> 创建新的Version并加入到Version链表中，并设置CURRENT=新创建version；
+其它的数字初始化为0，指针初始化为NULL。
+<strong>2 恢复函数，从磁盘恢复最后保存的元信息</strong></p>
+<pre tabindex="0"><code>Status Recover();
+</code></pre><p><strong>3 标记指定的文件编号已经被使用了</strong></p>
+<pre tabindex="0"><code>void MarkFileNumberUsed(uint64_t number);
+</code></pre><p>逻辑很简单，就是根据编号更新文件编号计数器：</p>
+<pre tabindex="0"><code>if (next_file_number_ &lt;= number) 
+     next_file_number_ = number + 1;
+</code></pre><p><strong>4 在current version上应用指定的VersionEdit，生成新的MANIFEST信息，保存到磁盘上，并用作current version。</strong>
+要求：没有其它线程并发调用；要用于mu；</p>
+<pre tabindex="0"><code>Status LogAndApply(VersionEdit* edit, port::Mutex* mu)EXCLUSIVE_LOCKS_REQUIRED(mu);
+</code></pre><p><strong>5 对于@v中的@key，返回db中的大概位置</strong></p>
+<pre tabindex="0"><code>uint64_t ApproximateOffsetOf(Version* v, const InternalKey&amp; key);
+</code></pre><p><strong>6 其它一些简单接口，信息获取或者设置，如下：</strong></p>
+<pre tabindex="0"><code>//返回current version
+Version* current() const {
+     return current_; 
+}   
+
+// 当前的MANIFEST文件号  
+uint64_t ManifestFileNumber() const {
+     return manifest_file_number_;
+} 
+
+// 分配并返回新的文件编号  
+uint64_t NewFileNumber() {
+     return next_file_number_++; 
+} 
+
+// 返回当前log文件编号  
+uint64_t LogNumber() const { 
+     return log_number_; 
+}
+
+// 返回正在compact的log文件编号，如果没有返回0  
+uint64_t PrevLogNumber() const {
+     return prev_log_number_; 
+}
+
+// 获取、设置last sequence，set时不能后退  
+uint64_t LastSequence() const {
+     return last_sequence_; 
+}
+
+void SetLastSequence(uint64_t s) {  
+    assert(s &gt;=last_sequence_);  
+    last_sequence_ = s;  
+}  
+
+// 返回指定level中所有sstable文件大小的和  
+int64_t NumLevelBytes(int level) const;  
+
+// 返回指定level的文件个数  
+int NumLevelFiles(int level) const;  
+
+// 重用@file_number，限制很严格：@file_number必须是最后分配的那个  
+// 要求: @file_number是NewFileNumber()返回的.  
+
+void ReuseFileNumber(uint64_t file_number) {  
+    if (next_file_number_ ==file_number + 1) next_file_number_ = file_number;  
+}  
+
+// 对于所有level&gt;0，遍历文件，找到和下一层文件的重叠数据的最大值(in bytes)  
+// 这个就是Version:: GetOverlappingInputs()函数的简单应用  
+int64_t MaxNextLevelOverlappingBytes(); 
+
+// 获取函数，把所有version的所有level的文件加入到@live中  
+void AddLiveFiles(std::set&lt;uint64_t&gt;* live);  
+
+// 返回一个可读的单行信息——每个level的文件数，保存在*scratch中  
+struct LevelSummaryStorage {char buffer[100]; };  
+const char* LevelSummary(LevelSummaryStorage* scratch) const; 
+</code></pre><p>下面就来分析这两个接口<code>Recover</code>、<code>LogAndApply</code>以及<code>ApproximateOffsetOf</code>。</p>
+<h3 id="112-versionsetbuilder类">11.2 VersionSet::Builder类</h3>
+<p><code>Builder</code>是一个<strong>内部辅助类</strong>，其主要作用是：
+1 把一个<code>MANIFEST</code>记录的元信息应用到版本管理器<code>VersionSet</code>中；
+2 把当前的版本状态设置到一个Version对象中。</p>
+<p><strong>11.2.1 成员与构造</strong></p>
+<p><code>Builder</code>的vset_与base_都是调用者传入的，此外它还为<code>FileMetaData</code>定义了一个比较类<code>BySmallestKey</code>，首先依照文件的min key，小的在前；如果min key相等则<code>file number</code>小的在前。</p>
+<pre tabindex="0"><code>typedefstd::set&lt;FileMetaData*, BySmallestKey&gt; FileSet;  
+// 这个是记录添加和删除的文件  
+struct LevelState { 
+  std::set&lt;uint64_t&gt;deleted_files;  
+  // 保证添加文件的顺序是有效定义的
+  FileSet* added_files;   
+};  
+VersionSet* vset_;  
+Version* base_;  
+LevelStatelevels_[config::kNumLevels];  
+
+// 其接口有3个：  
+void Apply(VersionEdit* edit);  
+void SaveTo(Version* v);  
+void MaybeAddFile(Version* v, int level, FileMetaData* f);  
+</code></pre><p>构造函数执行简单的初始化操作，在析构时，遍历检查<code>LevelState::added_files</code>，如果文件引用计数为0，则删除文件。</p>
+<p><strong>11.2.2 Apply()</strong></p>
+<p>函数声明：<code>voidApply(VersionEdit* edit)</code>，该函数将edit中的修改应用到当前状态中。注意除了<code>compaction</code>点直接修改了vset_，其它删除和新加文件的变动只是先存储在Builder自己的成员变量中，在调用SaveTo(v)函数时才施加到v上。</p>
+<p><strong>S1 把edit记录的compaction点应用到当前状态</strong></p>
+<pre tabindex="0"><code>edit-&gt;compact_pointers_ =&gt; vset_-&gt;compact_pointer_
+</code></pre><p><strong>S2 把edit记录的已删除文件应用到当前状态</strong></p>
+<pre tabindex="0"><code>edit-&gt;deleted_files_ =&gt; levels_[level].deleted_files
+</code></pre><p><strong>S3把edit记录的新加文件应用到当前状态，这里会初始化文件的allowed_seeks值，以在文件被无谓seek指定次数后自动执行compaction，这里作者阐述了其设置规则。</strong></p>
+<pre tabindex="0"><code>for (size_t i = 0; i &lt;edit-&gt;new_files_.size(); i++) {  
+    const int level =edit-&gt;new_files_[i].first;  
+    FileMetaData* f = newFileMetaData(edit-&gt;new_files_[i].second);  
+    f-&gt;refs = 1;  
+    f-&gt;allowed_seeks = (f-&gt;file_size /16384); // 16KB-见下面  
+    if (f-&gt;allowed_seeks &lt;100) f-&gt;allowed_seeks = 100;  
+    levels_[level].deleted_files.erase(f-&gt;number); // 以防万一  
+    levels_[level].added_files-&gt;insert(f);  
+}
+</code></pre><p>值allowed_seeks事关compaction的优化，其计算依据如下，首先假设：</p>
+<blockquote>
+<p>1 一次seek时间为10ms
+2 写入10MB数据的时间为10ms（100MB/s）
+3 compact 1MB的数据需要执行25MB的IO
+-&gt;从本层读取1MB
+-&gt;从下一层读取10-12MB（文件的key range边界可能是非对齐的）
+-&gt;向下一层写入10-12MB</p>
+</blockquote>
+<p>这意味这25次seek的代价等同于<code>compact 1MB</code>的数据，也就是一次seek花费的时间大约相当于<code>compact 40KB</code>的数据。基于保守的角度考虑，对于每16KB的数据，我们允许它在触发compaction之前能做一次seek。</p>
+<p><strong>11.2.3 MaybeAddFile()</strong></p>
+<p>函数声明：</p>
+<pre tabindex="0"><code>voidMaybeAddFile(Version* v, int level, FileMetaData* f);
+</code></pre><p>该函数尝试将f加入到<code>levels_[level]</code>文件set中。
+要满足两个条件：</p>
+<blockquote>
+<p>1 文件不能被删除，也就是不能在levels_[level].deleted_files集合中；
+2 保证文件之间的key是连续的，即基于比较器vset_-&gt;icmp_，f的min key要大于levels_[level]集合中最后一个文件的max key；</p>
+</blockquote>
+<p><strong>11.2.4 SaveTo()</strong></p>
+<p>把当前的状态存储到v中返回，函数声明：</p>
+<pre tabindex="0"><code>void SaveTo(Version* v);
+</code></pre><p>函数逻辑：For循环遍历所有的<code>level[0, config::kNumLevels-1]</code>，把新加的文件和已存在的文件merge在一起，丢弃已删除的文件，结果保存在v中。对于level&gt; 0，还要确保集合中的文件没有重合。
+<strong>S1 merge流程</strong></p>
+<pre tabindex="0"><code>// 原文件集合
+conststd::vector&lt;FileMetaData*&gt;&amp; base_files = base_-&gt;files_[level];   
+std::vector&lt;FileMetaData*&gt;::const_iterator base_iter =base_files.begin();  
+std::vector&lt;FileMetaData*&gt;::const_iterator base_end =base_files.end();  
+const FileSet* added =levels_[level].added_files;  
+v-&gt;files_[level].reserve(base_files.size()+ added-&gt;size());  
+for (FileSet::const_iteratoradded_iter = added-&gt;begin();
+    added_iter !=added-&gt;end(); ++added_iter) {  
+    //加入base_中小于added_iter的那些文件  
+
+      for(std::vector&lt;FileMetaData*&gt;::const_iterator bpos = std::upper_bound(base_iter,base_end,*added_iter, cmp);  
+        base_iter != bpos;++base_iter) { 
+        // base_iter逐次向后移到  
+        MaybeAddFile(v, level,*base_iter);  
+    }  
+    // 加入added_iter  
+    MaybeAddFile(v, level,*added_iter); 
+ }  
+
+   // 添加base_剩余的那些文件  
+   for (; base_iter != base_end;++base_iter) 
+      MaybeAddFile(v, level, *base_iter);
+</code></pre><p>对象cmp就是前面定义的比较仿函数<code>BySmallestKey</code>对象。
+<strong>S2 检查流程，保证level&gt;0的文件集合无重叠，基于vset_-&gt;icmp_，确保文件i-1的max key &lt; 文件i的min key。</strong></p>
+<h3 id="113-recover">11.3 Recover()</h3>
+<p>对于<code>VersionSet</code>而言，<code>Recover</code>就是根据<code>CURRENT</code>指定的<code>MANIFEST</code>，读取db元信息。这是9.3介绍的Recovery流程的开始部分。</p>
+<p><strong>11.3.1 函数流程</strong></p>
+<p>下面就来分析其具体逻辑。</p>
+<p><strong>S1 读取CURRENT文件，获得最新的MANIFEST文件名，根据文件名打开MANIFEST文件。CURRENT文件以\n结尾，读取后需要trim下。</strong></p>
+<pre tabindex="0"><code>std::string current; // MANIFEST文件名  
+ReadFileToString(env_, CurrentFileName(dbname_), ¤t);  
+std::string dscname = dbname_ + &#34;/&#34; + current;  
+SequentialFile* file;  
+env_-&gt;NewSequentialFile(dscname, &amp;file); 
+</code></pre><p><strong>S2 读取MANIFEST内容，MANIFEST是以log的方式写入的，因此这里调用的是log::Reader来读取。然后调用VersionEdit::DecodeFrom，从内容解析出VersionEdit对象，并将VersionEdit记录的改动应用到versionset中。读取MANIFEST中的log number, prev log number, nextfile number, last sequence。</strong></p>
+<pre tabindex="0"><code>Builder builder(this, current_);  
+while (reader.ReadRecord(&amp;record, &amp;scratch) &amp;&amp; s.ok()) {  
+      VersionEdit edit;  
+      s = edit.DecodeFrom(record);  
+      if (s.ok())builder.Apply(&amp;edit);  
+      // log number, file number, …逐个判断  
+      if (edit.has_log_number_) { 
+          log_number =edit.log_number_;  
+          have_log_number = true;  
+      }  
+      … …  
+}  
+</code></pre><p><strong>S3 将读取到的log number, prev log number标记为已使用。</strong></p>
+<pre tabindex="0"><code>MarkFileNumberUsed(prev_log_number);
+MarkFileNumberUsed(log_number);
+</code></pre><p><strong>S4 最后，如果一切顺利就创建新的Version，并应用读取的几个number。</strong></p>
+<pre tabindex="0"><code>if (s.ok()) {  
+    Version* v = newVersion(this);  
+    builder.SaveTo(v);  
+    // 安装恢复的version  
+    Finalize(v);  
+    AppendVersion(v);  
+    manifest_file_number_ =next_file;  
+    next_file_number_ = next_file+ 1;  
+    last_sequence_ = last_sequence;  
+    log_number_ = log_number;  
+    prev_log_number_ =prev_log_number;  
+}  
+</code></pre><p><code>Finalize(v)</code>和<code>AppendVersion(v)</code>用来安装并使用version v，在<code>AppendVersion</code>函数中会将<code>current version</code>设置为v。下面就来分别分析这两个函数。</p>
+<p><strong>11.3.2 Finalize()</strong></p>
+<p>函数声明：</p>
+<pre tabindex="0"><code>void Finalize(Version*v);
+</code></pre><p>该函数依照规则为下次的compaction计算出最适用的level，对于level 0和&gt;0需要分别对待，逻辑如下。</p>
+<p><strong>S1 对于level 0以文件个数计算，kL0_CompactionTrigger默认配置为4。</strong></p>
+<pre tabindex="0"><code>score =v-&gt;files_[level].size()/static_cast&lt;double&gt;(config::kL0_CompactionTrigger);
+</code></pre><p><strong>S2 对于level&gt;0，根据level内的文件总大小计算</strong></p>
+<pre tabindex="0"><code>const uint64_t level_bytes = TotalFileSize(v-&gt;files_[level]);
+score = static_cast&lt;double&gt;(level_bytes) /MaxBytesForLevel(level);
+</code></pre><p><strong>S3 最后把计算结果保存到v的两个成员compaction_level_和compaction_score_中。</strong></p>
+<p>其中函数MaxBytesForLevel根据level返回其本层文件总大小的预定最大值。
+计算规则为：<strong>1048576.0* level^10</strong>。
+这里就有一个问题，为何level0和其它level计算方法不同，原因如下，这也是leveldb为<code>compaction</code>所做的另一个优化。</p>
+<blockquote>
+<p>1 对于较大的写缓存（write-buffer），做太多的level 0 compaction并不好
+2 每次read操作都要merge level 0的所有文件，因此我们不希望level 0有太多的小文件存在（比如写缓存太小，或者压缩比较高，或者覆盖/删除较多导致小文件太多）。
+看起来这里的写缓存应该就是配置的操作log大小。</p>
+</blockquote>
+<p><strong>11.3.3 AppendVersion()</strong></p>
+<p>函数声明：</p>
+<pre tabindex="0"><code>void AppendVersion(Version*v);
+</code></pre><p>把v加入到<code>versionset</code>中，并设置为<code>current version</code>。并对老的<code>current version</code>执行Uref()。
+在双向循环链表中的位置在<code>dummy_versions_</code>之前。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/0d1705067c1d403889b748a57e0b3af5/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>leveldb源码分析17</span>
+  </a>
+  <a class="next" href="https://haokiu.com/2d765b7b763343038b1df047545b2017/">
+    <span class="title">Next »</span>
+    <br>
+    <span>leveldb源码分析19</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

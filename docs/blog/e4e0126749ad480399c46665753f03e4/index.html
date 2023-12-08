@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Linux epoll 模型（含LT 模式和 ET 模式详解） | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="Linux epoll 模型（含LT 模式和 ET 模式详解） 综合 select 和 poll 的一些优缺点，Linux 从内核 2.6 版本开始引入了更高效的 epoll 模型，本节我们来详细介绍 epoll 模型。
+要想使用 epoll 模型，必须先需要创建一个 epollfd，这需要使用 epoll_create 函数去创建：
+#include &lt;sys/epoll.h&gt; int epoll_create(int size); 参数 size 从 Linux 2.6.8 以后就不再使用，但是必须设置一个大于 0 的值。epoll_create 函数调用成功返回一个非负值的 epollfd，调用失败返回 -1。
+有了 epollfd 之后，我们需要将我们需要检测事件的其他 fd 绑定到这个 epollfd 上，或者修改一个已经绑定上去的 fd 的事件类型，或者在不需要时将 fd 从 epollfd 上解绑，这都可以使用 epoll_ctl 函数：
+int epoll_ctl(int epfd, int op, int fd, struct epoll_event* event); 参数说明：
+参数 epfd 即上文提到的 epollfd；
+参数 op，操作类型，取值有 EPOLL_CTL_ADD、EPOLL_CTL_MOD 和 EPOLL_CTL_DEL，分别表示向 epollfd 上添加、修改和移除一个其他 fd，当取值是 EPOLL_CTL_DEL，第四个参数 event 忽略不计，可以设置为 NULL；
+参数 fd，即需要被操作的 fd；
+参数 event，这是一个 epoll_event 结构体的地址，epoll_event 结构体定义如下：
+struct epoll_event { uint32_t events; /* 需要检测的 fd 事件，取值与 poll 函数一样 */ epoll_data_t data; /* 用户自定义数据 */ }; epoll_event 结构体的 data 字段的类型是 epoll_data_t，我们可以利用这个字段设置一个自己的自定义数据，它本质上是一个 Union 对象，在 64 位操作系统中其大小是 8 字节，其定义如下：">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/e4e0126749ad480399c46665753f03e4/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Linux epoll 模型（含LT 模式和 ET 模式详解）" />
+<meta property="og:description" content="Linux epoll 模型（含LT 模式和 ET 模式详解） 综合 select 和 poll 的一些优缺点，Linux 从内核 2.6 版本开始引入了更高效的 epoll 模型，本节我们来详细介绍 epoll 模型。
+要想使用 epoll 模型，必须先需要创建一个 epollfd，这需要使用 epoll_create 函数去创建：
+#include &lt;sys/epoll.h&gt; int epoll_create(int size); 参数 size 从 Linux 2.6.8 以后就不再使用，但是必须设置一个大于 0 的值。epoll_create 函数调用成功返回一个非负值的 epollfd，调用失败返回 -1。
+有了 epollfd 之后，我们需要将我们需要检测事件的其他 fd 绑定到这个 epollfd 上，或者修改一个已经绑定上去的 fd 的事件类型，或者在不需要时将 fd 从 epollfd 上解绑，这都可以使用 epoll_ctl 函数：
+int epoll_ctl(int epfd, int op, int fd, struct epoll_event* event); 参数说明：
+参数 epfd 即上文提到的 epollfd；
+参数 op，操作类型，取值有 EPOLL_CTL_ADD、EPOLL_CTL_MOD 和 EPOLL_CTL_DEL，分别表示向 epollfd 上添加、修改和移除一个其他 fd，当取值是 EPOLL_CTL_DEL，第四个参数 event 忽略不计，可以设置为 NULL；
+参数 fd，即需要被操作的 fd；
+参数 event，这是一个 epoll_event 结构体的地址，epoll_event 结构体定义如下：
+struct epoll_event { uint32_t events; /* 需要检测的 fd 事件，取值与 poll 函数一样 */ epoll_data_t data; /* 用户自定义数据 */ }; epoll_event 结构体的 data 字段的类型是 epoll_data_t，我们可以利用这个字段设置一个自己的自定义数据，它本质上是一个 Union 对象，在 64 位操作系统中其大小是 8 字节，其定义如下：" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/e4e0126749ad480399c46665753f03e4/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Linux epoll 模型（含LT 模式和 ET 模式详解）"/>
+<meta name="twitter:description" content="Linux epoll 模型（含LT 模式和 ET 模式详解） 综合 select 和 poll 的一些优缺点，Linux 从内核 2.6 版本开始引入了更高效的 epoll 模型，本节我们来详细介绍 epoll 模型。
+要想使用 epoll 模型，必须先需要创建一个 epollfd，这需要使用 epoll_create 函数去创建：
+#include &lt;sys/epoll.h&gt; int epoll_create(int size); 参数 size 从 Linux 2.6.8 以后就不再使用，但是必须设置一个大于 0 的值。epoll_create 函数调用成功返回一个非负值的 epollfd，调用失败返回 -1。
+有了 epollfd 之后，我们需要将我们需要检测事件的其他 fd 绑定到这个 epollfd 上，或者修改一个已经绑定上去的 fd 的事件类型，或者在不需要时将 fd 从 epollfd 上解绑，这都可以使用 epoll_ctl 函数：
+int epoll_ctl(int epfd, int op, int fd, struct epoll_event* event); 参数说明：
+参数 epfd 即上文提到的 epollfd；
+参数 op，操作类型，取值有 EPOLL_CTL_ADD、EPOLL_CTL_MOD 和 EPOLL_CTL_DEL，分别表示向 epollfd 上添加、修改和移除一个其他 fd，当取值是 EPOLL_CTL_DEL，第四个参数 event 忽略不计，可以设置为 NULL；
+参数 fd，即需要被操作的 fd；
+参数 event，这是一个 epoll_event 结构体的地址，epoll_event 结构体定义如下：
+struct epoll_event { uint32_t events; /* 需要检测的 fd 事件，取值与 poll 函数一样 */ epoll_data_t data; /* 用户自定义数据 */ }; epoll_event 结构体的 data 字段的类型是 epoll_data_t，我们可以利用这个字段设置一个自己的自定义数据，它本质上是一个 Union 对象，在 64 位操作系统中其大小是 8 字节，其定义如下："/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Linux epoll 模型（含LT 模式和 ET 模式详解）",
+      "item": "https://haokiu.com/blog/e4e0126749ad480399c46665753f03e4/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Linux epoll 模型（含LT 模式和 ET 模式详解）",
+  "name": "Linux epoll 模型（含LT 模式和 ET 模式详解）",
+  "description": "Linux epoll 模型（含LT 模式和 ET 模式详解） 综合 select 和 poll 的一些优缺点，Linux 从内核 2.6 版本开始引入了更高效的 epoll 模型，本节我们来详细介绍 epoll 模型。\n要想使用 epoll 模型，必须先需要创建一个 epollfd，这需要使用 epoll_create 函数去创建：\n#include \u0026lt;sys/epoll.h\u0026gt; int epoll_create(int size); 参数 size 从 Linux 2.6.8 以后就不再使用，但是必须设置一个大于 0 的值。epoll_create 函数调用成功返回一个非负值的 epollfd，调用失败返回 -1。\n有了 epollfd 之后，我们需要将我们需要检测事件的其他 fd 绑定到这个 epollfd 上，或者修改一个已经绑定上去的 fd 的事件类型，或者在不需要时将 fd 从 epollfd 上解绑，这都可以使用 epoll_ctl 函数：\nint epoll_ctl(int epfd, int op, int fd, struct epoll_event* event); 参数说明：\n参数 epfd 即上文提到的 epollfd；\n参数 op，操作类型，取值有 EPOLL_CTL_ADD、EPOLL_CTL_MOD 和 EPOLL_CTL_DEL，分别表示向 epollfd 上添加、修改和移除一个其他 fd，当取值是 EPOLL_CTL_DEL，第四个参数 event 忽略不计，可以设置为 NULL；\n参数 fd，即需要被操作的 fd；\n参数 event，这是一个 epoll_event 结构体的地址，epoll_event 结构体定义如下：\nstruct epoll_event { uint32_t events; /* 需要检测的 fd 事件，取值与 poll 函数一样 */ epoll_data_t data; /* 用户自定义数据 */ }; epoll_event 结构体的 data 字段的类型是 epoll_data_t，我们可以利用这个字段设置一个自己的自定义数据，它本质上是一个 Union 对象，在 64 位操作系统中其大小是 8 字节，其定义如下：",
+  "keywords": [
+    
+  ],
+  "articleBody": "Linux epoll 模型（含LT 模式和 ET 模式详解） 综合 select 和 poll 的一些优缺点，Linux 从内核 2.6 版本开始引入了更高效的 epoll 模型，本节我们来详细介绍 epoll 模型。\n要想使用 epoll 模型，必须先需要创建一个 epollfd，这需要使用 epoll_create 函数去创建：\n#include int epoll_create(int size); 参数 size 从 Linux 2.6.8 以后就不再使用，但是必须设置一个大于 0 的值。epoll_create 函数调用成功返回一个非负值的 epollfd，调用失败返回 -1。\n有了 epollfd 之后，我们需要将我们需要检测事件的其他 fd 绑定到这个 epollfd 上，或者修改一个已经绑定上去的 fd 的事件类型，或者在不需要时将 fd 从 epollfd 上解绑，这都可以使用 epoll_ctl 函数：\nint epoll_ctl(int epfd, int op, int fd, struct epoll_event* event); 参数说明：\n参数 epfd 即上文提到的 epollfd；\n参数 op，操作类型，取值有 EPOLL_CTL_ADD、EPOLL_CTL_MOD 和 EPOLL_CTL_DEL，分别表示向 epollfd 上添加、修改和移除一个其他 fd，当取值是 EPOLL_CTL_DEL，第四个参数 event 忽略不计，可以设置为 NULL；\n参数 fd，即需要被操作的 fd；\n参数 event，这是一个 epoll_event 结构体的地址，epoll_event 结构体定义如下：\nstruct epoll_event { uint32_t events; /* 需要检测的 fd 事件，取值与 poll 函数一样 */ epoll_data_t data; /* 用户自定义数据 */ }; epoll_event 结构体的 data 字段的类型是 epoll_data_t，我们可以利用这个字段设置一个自己的自定义数据，它本质上是一个 Union 对象，在 64 位操作系统中其大小是 8 字节，其定义如下：\ntypedef union epoll_data { void* ptr; int fd; uint32_t u32; uint64_t u64; } epoll_data_t; 函数返回值：epoll_ctl 调用成功返回 0，调用失败返回 -1，你可以通过 errno 错误码获取具体的错误原因。\n创建了 epollfd，设置好某个 fd 上需要检测事件并将该 fd 绑定到 epollfd 上去后，我们就可以调用 epoll_wait 检测事件了，epoll_wait 函数签名如下：\nint epoll_wait(int epfd, struct epoll_event* events, int maxevents, int timeout); 参数的形式和 poll 函数很类似，参数 events 是一个 epoll_event 结构数组的首地址，这是一个输出参数，函数调用成功后，events 中存放的是与就绪事件相关 epoll_event 结构体数组；参数 maxevents 是数组元素的个数；timeout 是超时时间，单位是毫秒，如果设置为 0，epoll_wait 会立即返回。\n当 epoll_wait 调用成功会返回有事件的 fd 数目；如果返回 0 表示超时；调用失败返回 -1。\nepoll_wait 使用示例如下：\nwhile (true) { epoll_event epoll_events[1024]; int n = epoll_wait(epollfd, epoll_events, 1024, 1000); if (n \u003c 0) { //被信号中断 if (errno == EINTR) continue; //出错，退出 break; } else if (n == 0) { //超时，继续 continue; } for (size_t i = 0; i \u003c n; ++i) { // 处理可读事件 if (epoll_events[i].events \u0026 POLLIN) { } // 处理可写事件 else if (epoll_events[i].events \u0026 POLLOUT) { } //处理出错事件 else if (epoll_events[i].events \u0026 POLLERR) { } } } epoll_wait 与 poll 的区别 通过前面介绍 poll 与 epoll_wait 函数的介绍，我们可以发现：\nepoll_wait 函数调用完之后，我们可以直接在 event 参数中拿到所有有事件就绪的 fd，直接处理即可（event 参数仅仅是个出参）；而 poll 函数的事件集合调用前后数量都未改变，只不过调用前我们通过 pollfd 结构体的 events 字段设置待检测事件，调用后我们需要通过 pollfd 结构体的 revents 字段去检测就绪的事件（ 参数 fds 既是入参也是出参）。\n举个生活中的例子，某人不断给你一些苹果，这些苹果有生有熟，调用 epoll_wait 相当于：\n1. 你把苹果挨个投入到 epoll 机器中(调用 epoll_ctl); 2. 调用 epoll_wait 加工，你直接通过另外一个袋子就能拿到所有熟苹果。 调用 poll 相当于：\n1. 把收到的苹果装入一个袋子里面然后调用 poll 加工； 2. 调用结束后，拿到原来的袋子，袋子中还是原来那么多苹果，只不过熟苹果被贴上了标签纸，你还是需要挨个去查看标签纸挑选熟苹果。 当然，这并不意味着，poll 函数的效率不如 epoll_wait，一般在 fd 数量比较多，但某段时间内，就绪事件 fd 数量较少的情况下，epoll_wait 才会体现出它的优势，也就是说 socket 连接数量较大时而活跃连接较少时 epoll 模型更高效。\nLT 模式和 ET 模式 与 poll 的事件宏相比，epoll 新增了一个事件宏 EPOLLET，这就是所谓的边缘触发模式（Edge Trigger，ET），而默认的模式我们称为 水平触发模式（Level Trigger，LT）。这两种模式的区别在于：\n对于水平触发模式，一个事件只要有，就会一直触发； 对于边缘触发模式，只有一个事件从无到有才会触发。 这两个词汇来自电学术语，你可以将 fd 上有数据认为是高电平，没有数据认为是低电平，将 fd 可写认为是高电平，fd 不可写认为是低电平。那么水平模式的触发条件是状态处于高电平，而边缘模式是状态改为高电平，即：\n水平模式的触发条件\n1. 低电平 =\u003e 高电平 2. 高电平 =\u003e 高电平 边缘模式的触发条件\n1. 低电平 =\u003e 高电平 说的有点抽象，以 socket 的读事件为例，对于水平模式，只要 socket 上有未读完的数据，就会一直产生 POLLIN 事件；而对于边缘模式，socket 上第一次有数据会触发一次，后续 socket 上存在数据也不会再触发，除非把数据读完后，再次产生数据才会继续触发。对于 socket 写事件，如果 socket 的 TCP 窗口一直不饱和，会一直触发 POLLOUT 事件；而对于边缘模式，只会触发一次，除非 TCP 窗口由不饱和变成饱和再一次变成不饱和，才会再次触发 POLLOUT 事件。\nsocket 可读事件水平模式触发条件：\n1. socket上无数据 =\u003e socket上有数据 2. socket上有数据 =\u003e socket上有数据 socket 可读事件边缘模式触发条件：\n1. socket上无数据 =\u003e socket上有数据 socket 可写事件水平模式触发条件：\n1. socket可写 =\u003e socket可写 2. socket不可写 =\u003e socket可写 socket 可写事件边缘模式触发条件：\n1. socket不可写 =\u003e socket可写 也就是说，如果对于一个非阻塞 socket，如果使用 epoll 边缘模式去检测数据是否可读，触发可读事件以后，一定要一次性把 socket 上的数据收取干净才行，也就是一定要循环调用 recv 函数直到 recv 出错，错误码是EWOULDBLOCK（EAGAIN 一样）；如果使用水平模式，则不用，你可以根据业务一次性收取固定的字节数，或者收完为止。边缘模式下收取数据的代码示例如下：\nbool TcpSession::RecvEtMode() { //每次只收取256个字节 char buff[256]; while (true) { int nRecv = ::recv(clientfd_, buff, 256, 0); if (nRecv == -1) { if (errno == EWOULDBLOCK) return true; else if (errno == EINTR) continue; return false; } //对端关闭了socket else if (nRecv == 0) return false; inputBuffer_.add(buff, (size_t)nRecv); } return true; } 最后，我们来看一个 epoll 模型的完整例子：\n/** * 演示 epoll 通信模型，epoll_server.cpp * zhangyl 2019.03.16 */ #include #include #include #include #include #include #include #include #include #include #include int main(int argc, char* argv[]) { //创建一个侦听socket int listenfd = socket(AF_INET, SOCK_STREAM, 0); if (listenfd == -1) { std::cout \u003c\u003c \"create listen socket error.\" \u003c\u003c std::endl; return -1; } //将侦听socket设置为非阻塞的 int oldSocketFlag = fcntl(listenfd, F_GETFL, 0); int newSocketFlag = oldSocketFlag | O_NONBLOCK; if (fcntl(listenfd, F_SETFL, newSocketFlag) == -1) { close(listenfd); std::cout \u003c\u003c \"set listenfd to nonblock error.\" \u003c\u003c std::endl; return -1; } //初始化服务器地址 struct sockaddr_in bindaddr; bindaddr.sin_family = AF_INET; bindaddr.sin_addr.s_addr = htonl(INADDR_ANY); bindaddr.sin_port = htons(3000); if (bind(listenfd, (struct sockaddr *)\u0026bindaddr, sizeof(bindaddr)) == -1) { std::cout \u003c\u003c \"bind listen socket error.\" \u003c\u003c std::endl; close(listenfd); return -1; } //启动侦听 if (listen(listenfd, SOMAXCONN) == -1) { std::cout \u003c\u003c \"listen error.\" \u003c\u003c std::endl; close(listenfd); return -1; } //复用地址和端口号 int on = 1; setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, (char *)\u0026on, sizeof(on)); setsockopt(listenfd, SOL_SOCKET, SO_REUSEPORT, (char *)\u0026on, sizeof(on)); //创建epollfd int epollfd = epoll_create(1); if (epollfd == -1) { std::cout \u003c\u003c \"create epollfd error.\" \u003c\u003c std::endl; close(listenfd); return -1; } epoll_event listen_fd_event; listen_fd_event.events = POLLIN; listen_fd_event.data.fd = listenfd; //将侦听socket绑定到epollfd上去 if(epoll_ctl(epollfd, EPOLL_CTL_ADD, listenfd, \u0026listen_fd_event) == -1) { std::cout \u003c\u003c \"epoll_ctl error.\" \u003c\u003c std::endl; close(listenfd); return -1; } int n; while (true) { epoll_event epoll_events[1024]; n = epoll_wait(epollfd, epoll_events, 1024, 1000); if (n \u003c 0) { //被信号中断 if (errno == EINTR) continue; //出错，退出 break; } else if (n == 0) { //超时，继续 continue; } for (size_t i = 0; i \u003c n; ++i) { // 事件可读 if (epoll_events[i].events \u0026 POLLIN) { if (epoll_events[i].data.fd == listenfd) { //侦听socket，接受新连接 struct sockaddr_in clientaddr; socklen_t clientaddrlen = sizeof(clientaddr); //接受客户端连接, 并加入到fds集合中 int clientfd = accept(listenfd, (struct sockaddr *)\u0026clientaddr, \u0026clientaddrlen); if (clientfd != -1) { //将客户端socket设置为非阻塞的 int oldSocketFlag = fcntl(clientfd, F_GETFL, 0); int newSocketFlag = oldSocketFlag | O_NONBLOCK; if (fcntl(clientfd, F_SETFL, newSocketFlag) == -1) { close(clientfd); std::cout \u003c\u003c \"set clientfd to nonblock error.\" \u003c\u003c std::endl; } else { epoll_event client_fd_event; client_fd_event.events = POLLIN; client_fd_event.data.fd = clientfd; if(epoll_ctl(epollfd, EPOLL_CTL_ADD, clientfd, \u0026client_fd_event) != -1) { std::cout \u003c\u003c \"new client accepted, clientfd: \" \u003c\u003c clientfd \u003c\u003c std::endl; } else { std::cout \u003c\u003c \"add client fd to epollfd error.\" \u003c\u003c std::endl; close(clientfd); } } } } else { //普通clientfd,收取数据 char buf[64] = { 0 }; int m = recv(epoll_events[i].data.fd, buf, 64, 0); if (m == 0) { //对端关闭了连接，从epollfd上移除clientfd if(epoll_ctl(epollfd, EPOLL_CTL_DEL, epoll_events[i].data.fd, NULL) != -1) { std::cout \u003c\u003c \"client disconnected, clientfd: \" \u003c\u003c epoll_events[i].data.fd \u003c\u003c std::endl; } close(epoll_events[i].data.fd); } else if (m \u003c 0) { //出错，从epollfd上移除clientfd if (errno != EWOULDBLOCK \u0026\u0026 errno != EINTR) { if(epoll_ctl(epollfd, EPOLL_CTL_DEL, epoll_events[i].data.fd, NULL) != -1) { std::cout \u003c\u003c \"client disconnected, clientfd: \" \u003c\u003c epoll_events[i].data.fd \u003c\u003c std::endl; } close(epoll_events[i].data.fd); } } else { //正常收到数据 std::cout \u003c\u003c \"recv from client: \" \u003c\u003c buf \u003c\u003c \", clientfd: \" \u003c\u003c epoll_events[i].data.fd \u003c\u003c std::endl; } } } else if (epoll_events[i].events \u0026 POLLERR) { //TODO: 暂且不处理 } }// end outer-for-loop }// end while-loop //关闭侦听socket //（理论上应该关闭包括所有clientfd在内的fd，但这里只是为了演示问题，就不写额外的代码来处理啦） close(listenfd); return 0; } 编译上述程序生成 epoll_server 并启动，然后使用 nc 命令启动三个客户端给服务器发数据效果如下图所示：\n",
+  "wordCount" : "963",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/e4e0126749ad480399c46665753f03e4/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      Linux epoll 模型（含LT 模式和 ET 模式详解）
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#linux-epoll-%e6%a8%a1%e5%9e%8b%e5%90%ablt-%e6%a8%a1%e5%bc%8f%e5%92%8c-et-%e6%a8%a1%e5%bc%8f%e8%af%a6%e8%a7%a3" aria-label="Linux epoll 模型（含LT 模式和 ET 模式详解）">Linux epoll 模型（含LT 模式和 ET 模式详解）</a><ul>
+                        
+                <li>
+                    <a href="#epoll_wait-%e4%b8%8e-poll-%e7%9a%84%e5%8c%ba%e5%88%ab" aria-label="epoll_wait 与 poll 的区别">epoll_wait 与 poll 的区别</a></li>
+                <li>
+                    <a href="#lt-%e6%a8%a1%e5%bc%8f%e5%92%8c-et-%e6%a8%a1%e5%bc%8f" aria-label="LT 模式和 ET 模式">LT 模式和 ET 模式</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="linux-epoll-模型含lt-模式和-et-模式详解">Linux epoll 模型（含LT 模式和 ET 模式详解）</h1>
+<p>综合 <strong>select</strong> 和 <strong>poll</strong> 的一些优缺点，Linux 从内核 2.6 版本开始引入了更高效的 epoll 模型，本节我们来详细介绍 epoll 模型。</p>
+<p>要想使用 epoll 模型，必须先需要创建一个 epollfd，这需要使用 <strong>epoll_create</strong> 函数去创建：</p>
+<pre tabindex="0"><code>#include &lt;sys/epoll.h&gt;
+
+int epoll_create(int size);
+</code></pre><p>参数 <strong>size</strong> 从 Linux 2.6.8 以后就不再使用，但是必须设置一个大于 0 的值。<strong>epoll_create</strong> 函数调用成功返回一个非负值的 epollfd，调用失败返回 -1。</p>
+<p>有了 epollfd 之后，我们需要将我们需要检测事件的其他 fd 绑定到这个 epollfd 上，或者修改一个已经绑定上去的 fd 的事件类型，或者在不需要时将 fd 从 epollfd 上解绑，这都可以使用 <strong>epoll_ctl</strong> 函数：</p>
+<pre tabindex="0"><code>int epoll_ctl(int epfd, int op, int fd, struct epoll_event* event);
+</code></pre><p><strong>参数说明：</strong></p>
+<ul>
+<li>
+<p>参数 <strong>epfd</strong> 即上文提到的 epollfd；</p>
+</li>
+<li>
+<p>参数 <strong>op</strong>，操作类型，取值有 <strong>EPOLL_CTL_ADD</strong>、<strong>EPOLL_CTL_MOD</strong> 和 <strong>EPOLL_CTL_DEL</strong>，分别表示向 epollfd 上添加、修改和移除一个其他 fd，当取值是 <strong>EPOLL_CTL_DEL</strong>，第四个参数 <strong>event</strong> 忽略不计，可以设置为 NULL；</p>
+</li>
+<li>
+<p>参数 <strong>fd</strong>，即需要被操作的 fd；</p>
+</li>
+<li>
+<p>参数 <strong>event</strong>，这是一个 <strong>epoll_event</strong> 结构体的地址，<strong>epoll_event</strong> 结构体定义如下：</p>
+<pre tabindex="0"><code>struct epoll_event
+{
+  uint32_t     events;      /* 需要检测的 fd 事件，取值与 poll 函数一样 */
+  epoll_data_t data;        /* 用户自定义数据 */
+};
+</code></pre><p><strong>epoll_event</strong> 结构体的 <strong>data</strong> 字段的类型是 <strong>epoll_data_t</strong>，我们可以利用这个字段设置一个自己的自定义数据，它本质上是一个 Union 对象，在 64 位操作系统中其大小是 8 字节，其定义如下：</p>
+<pre tabindex="0"><code>typedef union epoll_data
+{
+  void*         ptr;
+  int          fd;
+  uint32_t     u32;
+  uint64_t     u64;
+} epoll_data_t;
+</code></pre></li>
+<li>
+<p><strong>函数返回值</strong>：<strong>epoll_ctl</strong> 调用成功返回 0，调用失败返回 -1，你可以通过 <strong>errno</strong> 错误码获取具体的错误原因。</p>
+</li>
+</ul>
+<p>创建了 epollfd，设置好某个 fd 上需要检测事件并将该 fd 绑定到 epollfd 上去后，我们就可以调用 <strong>epoll_wait</strong> 检测事件了，<strong>epoll_wait</strong> 函数签名如下：</p>
+<pre tabindex="0"><code>int epoll_wait(int epfd, struct epoll_event* events, int maxevents, int timeout);
+</code></pre><p>参数的形式和 <strong>poll</strong> 函数很类似，参数 <strong>events</strong> 是一个 <strong>epoll_event</strong> 结构数组的首地址，这是一个输出参数，函数调用成功后，<strong>events</strong> 中存放的是与就绪事件相关 <strong>epoll_event</strong> 结构体数组；参数 <strong>maxevents</strong> 是数组元素的个数；<strong>timeout</strong> 是超时时间，单位是毫秒，如果设置为 0，<strong>epoll_wait</strong> 会立即返回。</p>
+<p>当 <strong>epoll_wait</strong> 调用成功会返回有事件的 fd 数目；如果返回 0 表示超时；调用失败返回 -1。</p>
+<p><strong>epoll_wait</strong> 使用示例如下：</p>
+<pre tabindex="0"><code>while (true)
+{
+    epoll_event epoll_events[1024];
+    int n = epoll_wait(epollfd, epoll_events, 1024, 1000);
+    if (n &lt; 0)
+    {
+        //被信号中断
+        if (errno == EINTR)
+            continue;
+
+        //出错，退出
+        break;
+    }
+    else if (n == 0)
+    {
+        //超时，继续
+        continue;
+    }
+
+    for (size_t i = 0; i &lt; n; ++i)
+    {
+        // 处理可读事件
+        if (epoll_events[i].events &amp; POLLIN)
+        {
+        }
+        // 处理可写事件
+        else if (epoll_events[i].events &amp; POLLOUT)
+        {
+        }
+        //处理出错事件
+        else if (epoll_events[i].events &amp; POLLERR)
+        {
+        }
+    }
+}
+</code></pre><h2 id="epoll_wait-与-poll-的区别">epoll_wait 与 poll 的区别</h2>
+<p>通过前面介绍 <strong>poll</strong> 与 <strong>epoll_wait</strong> 函数的介绍，我们可以发现：</p>
+<p><strong>epoll_wait</strong> 函数调用完之后，我们可以直接在 <strong>event</strong> 参数中拿到所有有事件就绪的 fd，直接处理即可（<strong>event</strong> 参数仅仅是个出参）；而 <strong>poll</strong> 函数的事件集合调用前后数量都未改变，只不过调用前我们通过 <strong>pollfd</strong> 结构体的 <strong>events</strong> 字段设置待检测事件，调用后我们需要通过 <strong>pollfd</strong> 结构体的 <strong>revents</strong> 字段去检测就绪的事件（ 参数 <strong>fds</strong> 既是入参也是出参）。</p>
+<p>举个生活中的例子，某人不断给你一些苹果，这些苹果有生有熟，调用 <strong>epoll_wait</strong> 相当于：</p>
+<pre tabindex="0"><code>1. 你把苹果挨个投入到 epoll 机器中(调用 epoll_ctl);
+2. 调用 epoll_wait 加工，你直接通过另外一个袋子就能拿到所有熟苹果。
+</code></pre><p>调用 <strong>poll</strong> 相当于：</p>
+<pre tabindex="0"><code>1. 把收到的苹果装入一个袋子里面然后调用 poll 加工；
+2. 调用结束后，拿到原来的袋子，袋子中还是原来那么多苹果，只不过熟苹果被贴上了标签纸，你还是需要挨个去查看标签纸挑选熟苹果。 
+</code></pre><p>当然，这并不意味着，<strong>poll</strong> 函数的效率不如 <strong>epoll_wait</strong>，一般在 fd 数量比较多，但某段时间内，就绪事件 fd 数量较少的情况下，<strong>epoll_wait</strong> 才会体现出它的优势，也就是说 socket 连接数量较大时而活跃连接较少时 epoll 模型更高效。</p>
+<h2 id="lt-模式和-et-模式">LT 模式和 ET 模式</h2>
+<p>与 poll 的事件宏相比，epoll 新增了一个事件宏 <strong>EPOLLET</strong>，这就是所谓的<strong>边缘触发模式</strong>（<strong>E</strong>dge <strong>T</strong>rigger，ET），而默认的模式我们称为 <strong>水平触发模式</strong>（<strong>L</strong>evel <strong>T</strong>rigger，LT）。这两种模式的区别在于：</p>
+<ul>
+<li>对于水平触发模式，一个事件只要有，就会一直触发；</li>
+<li>对于边缘触发模式，只有一个事件从无到有才会触发。</li>
+</ul>
+<p>这两个词汇来自电学术语，你可以将 fd 上有数据认为是<strong>高电平</strong>，没有数据认为是<strong>低电平</strong>，将 fd 可写认为是<strong>高电平</strong>，fd 不可写认为是<strong>低电平</strong>。那么水平模式的触发条件是状态处于高电平，而边缘模式是状态改为高电平，即：</p>
+<p><strong>水平模式的触发条件</strong></p>
+<pre tabindex="0"><code>1. 低电平 =&gt; 高电平
+2. 高电平 =&gt; 高电平
+</code></pre><p><strong>边缘模式的触发条件</strong></p>
+<pre tabindex="0"><code>1. 低电平 =&gt; 高电平
+</code></pre><p>说的有点抽象，以 socket 的读事件为例，对于水平模式，只要 socket 上有未读完的数据，就会一直产生 POLLIN 事件；而对于边缘模式，socket 上第一次有数据会触发一次，后续 socket 上存在数据也不会再触发，除非把数据读完后，再次产生数据才会继续触发。对于 socket 写事件，如果 socket 的 TCP 窗口一直不饱和，会一直触发 POLLOUT 事件；而对于边缘模式，只会触发一次，除非 TCP 窗口由不饱和变成饱和再一次变成不饱和，才会再次触发 POLLOUT 事件。</p>
+<p><strong>socket 可读事件水平模式触发条件：</strong></p>
+<pre tabindex="0"><code>1. socket上无数据 =&gt; socket上有数据
+2. socket上有数据 =&gt; socket上有数据
+</code></pre><p><strong>socket 可读事件边缘模式触发条件：</strong></p>
+<pre tabindex="0"><code>1. socket上无数据 =&gt; socket上有数据
+</code></pre><p><strong>socket 可写事件水平模式触发条件：</strong></p>
+<pre tabindex="0"><code>1. socket可写   =&gt; socket可写
+2. socket不可写 =&gt; socket可写
+</code></pre><p><strong>socket 可写事件边缘模式触发条件：</strong></p>
+<pre tabindex="0"><code>1. socket不可写 =&gt; socket可写
+</code></pre><p>也就是说，如果对于一个非阻塞 socket，如果使用 epoll 边缘模式去检测数据是否可读，触发可读事件以后，一定要一次性把 socket 上的数据收取干净才行，也就是一定要循环调用 recv 函数直到 recv 出错，错误码是<strong>EWOULDBLOCK</strong>（<strong>EAGAIN</strong> 一样）；如果使用水平模式，则不用，你可以根据业务一次性收取固定的字节数，或者收完为止。边缘模式下收取数据的代码示例如下：</p>
+<pre tabindex="0"><code>bool TcpSession::RecvEtMode()
+{
+    //每次只收取256个字节
+    char buff[256];
+    while (true)
+    {       
+        int nRecv = ::recv(clientfd_, buff, 256, 0);
+        if (nRecv == -1)
+        {
+            if (errno == EWOULDBLOCK)
+                return true;
+            else if (errno == EINTR)
+                continue;
+
+            return false;
+        }
+        //对端关闭了socket
+        else if (nRecv == 0)
+            return false;
+
+        inputBuffer_.add(buff, (size_t)nRecv);
+    }
+
+    return true;
+}
+</code></pre><p>最后，我们来看一个 epoll 模型的完整例子：</p>
+<pre tabindex="0"><code>/**
+ * 演示 epoll 通信模型，epoll_server.cpp
+ * zhangyl 2019.03.16
+ */
+#include &lt;sys/types.h&gt; 
+#include &lt;sys/socket.h&gt;
+#include &lt;arpa/inet.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;sys/epoll.h&gt;
+#include &lt;poll.h&gt;
+#include &lt;iostream&gt;
+#include &lt;string.h&gt;
+#include &lt;vector&gt;
+#include &lt;errno.h&gt;
+
+int main(int argc, char* argv[])
+{
+    //创建一个侦听socket
+    int listenfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (listenfd == -1)
+    {
+        std::cout &lt;&lt; &#34;create listen socket error.&#34; &lt;&lt; std::endl;
+        return -1;
+    }
+
+    //将侦听socket设置为非阻塞的
+    int oldSocketFlag = fcntl(listenfd, F_GETFL, 0);
+    int newSocketFlag = oldSocketFlag | O_NONBLOCK;
+    if (fcntl(listenfd, F_SETFL,  newSocketFlag) == -1)
+    {
+        close(listenfd);
+        std::cout &lt;&lt; &#34;set listenfd to nonblock error.&#34; &lt;&lt; std::endl;
+        return -1;
+    }
+
+    //初始化服务器地址
+    struct sockaddr_in bindaddr;
+    bindaddr.sin_family = AF_INET;
+    bindaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    bindaddr.sin_port = htons(3000);
+    if (bind(listenfd, (struct sockaddr *)&amp;bindaddr, sizeof(bindaddr)) == -1)
+    {
+        std::cout &lt;&lt; &#34;bind listen socket error.&#34; &lt;&lt; std::endl;
+        close(listenfd);
+        return -1;
+    }
+
+    //启动侦听
+    if (listen(listenfd, SOMAXCONN) == -1)
+    {
+        std::cout &lt;&lt; &#34;listen error.&#34; &lt;&lt; std::endl;
+        close(listenfd);
+        return -1;
+    }
+
+    //复用地址和端口号
+    int on = 1;
+    setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, (char *)&amp;on, sizeof(on));
+    setsockopt(listenfd, SOL_SOCKET, SO_REUSEPORT, (char *)&amp;on, sizeof(on));
+
+    //创建epollfd
+    int epollfd = epoll_create(1);
+    if (epollfd == -1)
+    {
+        std::cout &lt;&lt; &#34;create epollfd error.&#34; &lt;&lt; std::endl;
+        close(listenfd);
+        return -1;
+    }
+
+    epoll_event listen_fd_event;
+    listen_fd_event.events = POLLIN;
+    listen_fd_event.data.fd = listenfd;
+
+    //将侦听socket绑定到epollfd上去
+    if(epoll_ctl(epollfd, EPOLL_CTL_ADD, listenfd, &amp;listen_fd_event) == -1)
+    {
+        std::cout &lt;&lt; &#34;epoll_ctl error.&#34; &lt;&lt; std::endl;
+        close(listenfd);
+        return -1;
+    }
+
+    int n;
+    while (true)
+    {       
+        epoll_event epoll_events[1024];
+        n = epoll_wait(epollfd, epoll_events, 1024, 1000);
+        if (n &lt; 0)
+        {
+            //被信号中断
+            if (errno == EINTR)
+                continue;
+
+            //出错，退出
+            break;
+        }
+        else if (n == 0)
+        {
+            //超时，继续
+            continue;
+        }
+
+        for (size_t i = 0; i &lt; n; ++i)
+        {
+            // 事件可读
+            if (epoll_events[i].events &amp; POLLIN)
+            {
+                if (epoll_events[i].data.fd == listenfd)
+                {
+                    //侦听socket，接受新连接
+                    struct sockaddr_in clientaddr;
+                    socklen_t clientaddrlen = sizeof(clientaddr);
+                    //接受客户端连接, 并加入到fds集合中
+                    int clientfd = accept(listenfd, (struct sockaddr *)&amp;clientaddr, &amp;clientaddrlen);
+                    if (clientfd != -1)
+                    {
+                        //将客户端socket设置为非阻塞的
+                        int oldSocketFlag = fcntl(clientfd, F_GETFL, 0);
+                        int newSocketFlag = oldSocketFlag | O_NONBLOCK;
+                        if (fcntl(clientfd, F_SETFL,  newSocketFlag) == -1)
+                        {
+                            close(clientfd);
+                            std::cout &lt;&lt; &#34;set clientfd to nonblock error.&#34; &lt;&lt; std::endl;                        
+                        }
+                        else
+                        {
+                            epoll_event client_fd_event;
+                            client_fd_event.events = POLLIN;
+                            client_fd_event.data.fd = clientfd;                         
+                            if(epoll_ctl(epollfd, EPOLL_CTL_ADD, clientfd, &amp;client_fd_event) != -1)
+                            {
+                                std::cout &lt;&lt; &#34;new client accepted, clientfd: &#34; &lt;&lt; clientfd &lt;&lt; std::endl;
+                            }
+                            else
+                            {
+                                std::cout &lt;&lt; &#34;add client fd to epollfd error.&#34; &lt;&lt; std::endl;
+                                close(clientfd);                            
+                            }
+                        }       
+                    }
+                }
+                else 
+                {
+                    //普通clientfd,收取数据
+                    char buf[64] = { 0 };
+                    int m = recv(epoll_events[i].data.fd, buf, 64, 0);
+                    if (m == 0)
+                    {
+                        //对端关闭了连接，从epollfd上移除clientfd
+                        if(epoll_ctl(epollfd, EPOLL_CTL_DEL, epoll_events[i].data.fd, NULL) != -1)
+                        {
+                            std::cout &lt;&lt; &#34;client disconnected, clientfd: &#34; &lt;&lt; epoll_events[i].data.fd &lt;&lt; std::endl;
+                        }
+                        close(epoll_events[i].data.fd);
+                    }
+                    else if (m &lt; 0)
+                    {                                           
+                        //出错，从epollfd上移除clientfd
+                        if (errno != EWOULDBLOCK &amp;&amp; errno != EINTR)
+                        {
+                            if(epoll_ctl(epollfd, EPOLL_CTL_DEL, epoll_events[i].data.fd, NULL) != -1)
+                            {
+                                std::cout &lt;&lt; &#34;client disconnected, clientfd: &#34; &lt;&lt; epoll_events[i].data.fd &lt;&lt; std::endl;
+                            }
+                            close(epoll_events[i].data.fd);
+                        }
+                    }
+                    else
+                    {
+                        //正常收到数据
+                        std::cout &lt;&lt; &#34;recv from client: &#34; &lt;&lt; buf &lt;&lt; &#34;, clientfd: &#34; &lt;&lt; epoll_events[i].data.fd &lt;&lt; std::endl;
+                    }
+                }
+            }
+            else if (epoll_events[i].events &amp; POLLERR)
+            {
+                //TODO: 暂且不处理
+            }
+
+        }// end  outer-for-loop
+    }// end  while-loop
+
+
+    //关闭侦听socket
+    //（理论上应该关闭包括所有clientfd在内的fd，但这里只是为了演示问题，就不写额外的代码来处理啦）
+    close(listenfd);            
+
+    return 0;
+}
+</code></pre><p>编译上述程序生成 <strong>epoll_server</strong> 并启动，然后使用 <strong>nc</strong> 命令启动三个客户端给服务器发数据效果如下图所示：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/c37026326eda32d938a5df18440698f8.png" alt=""  />
+</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/blog/8570010b5d82422da83500ab481816be/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Linux C/C&#43;&#43;后端开发面试问哪些问题</span>
+  </a>
+  <a class="next" href="https://haokiu.com/blog/6eecf1781f7d4e1691c367ebf702d4d2/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Linux tcpdump 使用介绍</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

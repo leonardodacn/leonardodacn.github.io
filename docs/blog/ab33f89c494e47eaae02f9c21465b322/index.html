@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>DataX ODPS写入 | haokiu</title>
+<meta name="keywords" content="datax">
+<meta name="description" content="DataX ODPS写入 1 快速介绍 ODPSWriter插件用于实现往ODPS插入或者更新数据，主要提供给etl开发同学将业务数据导入odps，适合于TB,GB数量级的数据传输，如果需要传输PB量级的数据，请选择dt task工具 ;
+2 实现原理 在底层实现上，ODPSWriter是通过DT Tunnel写入ODPS系统的，有关ODPS的更多技术细节请参看 ODPS主站 https://data.aliyun.com/product/odps 和ODPS产品文档 https://help.aliyun.com/product/27797.html
+目前 DataX3 依赖的 SDK 版本是：
+&lt;dependency&gt; &lt;groupId&gt;com.aliyun.odps&lt;/groupId&gt; &lt;artifactId&gt;odps-sdk-core-internal&lt;/artifactId&gt; &lt;version&gt;0.13.2&lt;/version&gt; &lt;/dependency&gt; 注意: 如果你需要使用ODPSReader/Writer插件，请务必使用JDK 1.6-32及以上版本 使用java -version查看Java版本号
+3 功能说明 3.1 配置样例 这里使用一份从内存产生到ODPS导入的数据。 { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;byte&#34;: 1048576 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;streamreader&#34;, &#34;parameter&#34;: { &#34;column&#34;: [ { &#34;value&#34;: &#34;DataX&#34;, &#34;type&#34;: &#34;string&#34; }, { &#34;value&#34;: &#34;test&#34;, &#34;type&#34;: &#34;bytes&#34; } ], &#34;sliceRecordCount&#34;: 100000 } }, &#34;writer&#34;: { &#34;name&#34;: &#34;odpswriter&#34;, &#34;parameter&#34;: { &#34;project&#34;: &#34;chinan_test&#34;, &#34;table&#34;: &#34;odps_write_test00_partitioned&#34;, &#34;partition&#34;: &#34;school=SiChuan-School,class=1&#34;, &#34;column&#34;: [ &#34;id&#34;, &#34;name&#34; ], &#34;accessId&#34;: &#34;xxx&#34;, &#34;accessKey&#34;: &#34;xxxx&#34;, &#34;truncate&#34;: true, &#34;odpsServer&#34;: &#34;http://sxxx/api&#34;, &#34;tunnelServer&#34;: &#34;http://xxx&#34;, &#34;accountType&#34;: &#34;aliyun&#34; } } } ] } } 3.">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/ab33f89c494e47eaae02f9c21465b322/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="DataX ODPS写入" />
+<meta property="og:description" content="DataX ODPS写入 1 快速介绍 ODPSWriter插件用于实现往ODPS插入或者更新数据，主要提供给etl开发同学将业务数据导入odps，适合于TB,GB数量级的数据传输，如果需要传输PB量级的数据，请选择dt task工具 ;
+2 实现原理 在底层实现上，ODPSWriter是通过DT Tunnel写入ODPS系统的，有关ODPS的更多技术细节请参看 ODPS主站 https://data.aliyun.com/product/odps 和ODPS产品文档 https://help.aliyun.com/product/27797.html
+目前 DataX3 依赖的 SDK 版本是：
+&lt;dependency&gt; &lt;groupId&gt;com.aliyun.odps&lt;/groupId&gt; &lt;artifactId&gt;odps-sdk-core-internal&lt;/artifactId&gt; &lt;version&gt;0.13.2&lt;/version&gt; &lt;/dependency&gt; 注意: 如果你需要使用ODPSReader/Writer插件，请务必使用JDK 1.6-32及以上版本 使用java -version查看Java版本号
+3 功能说明 3.1 配置样例 这里使用一份从内存产生到ODPS导入的数据。 { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;byte&#34;: 1048576 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;streamreader&#34;, &#34;parameter&#34;: { &#34;column&#34;: [ { &#34;value&#34;: &#34;DataX&#34;, &#34;type&#34;: &#34;string&#34; }, { &#34;value&#34;: &#34;test&#34;, &#34;type&#34;: &#34;bytes&#34; } ], &#34;sliceRecordCount&#34;: 100000 } }, &#34;writer&#34;: { &#34;name&#34;: &#34;odpswriter&#34;, &#34;parameter&#34;: { &#34;project&#34;: &#34;chinan_test&#34;, &#34;table&#34;: &#34;odps_write_test00_partitioned&#34;, &#34;partition&#34;: &#34;school=SiChuan-School,class=1&#34;, &#34;column&#34;: [ &#34;id&#34;, &#34;name&#34; ], &#34;accessId&#34;: &#34;xxx&#34;, &#34;accessKey&#34;: &#34;xxxx&#34;, &#34;truncate&#34;: true, &#34;odpsServer&#34;: &#34;http://sxxx/api&#34;, &#34;tunnelServer&#34;: &#34;http://xxx&#34;, &#34;accountType&#34;: &#34;aliyun&#34; } } } ] } } 3." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/ab33f89c494e47eaae02f9c21465b322/" /><meta property="article:section" content="4" />
+<meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
+<meta property="article:modified_time" content="2021-02-02T17:45:01+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="DataX ODPS写入"/>
+<meta name="twitter:description" content="DataX ODPS写入 1 快速介绍 ODPSWriter插件用于实现往ODPS插入或者更新数据，主要提供给etl开发同学将业务数据导入odps，适合于TB,GB数量级的数据传输，如果需要传输PB量级的数据，请选择dt task工具 ;
+2 实现原理 在底层实现上，ODPSWriter是通过DT Tunnel写入ODPS系统的，有关ODPS的更多技术细节请参看 ODPS主站 https://data.aliyun.com/product/odps 和ODPS产品文档 https://help.aliyun.com/product/27797.html
+目前 DataX3 依赖的 SDK 版本是：
+&lt;dependency&gt; &lt;groupId&gt;com.aliyun.odps&lt;/groupId&gt; &lt;artifactId&gt;odps-sdk-core-internal&lt;/artifactId&gt; &lt;version&gt;0.13.2&lt;/version&gt; &lt;/dependency&gt; 注意: 如果你需要使用ODPSReader/Writer插件，请务必使用JDK 1.6-32及以上版本 使用java -version查看Java版本号
+3 功能说明 3.1 配置样例 这里使用一份从内存产生到ODPS导入的数据。 { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;byte&#34;: 1048576 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;streamreader&#34;, &#34;parameter&#34;: { &#34;column&#34;: [ { &#34;value&#34;: &#34;DataX&#34;, &#34;type&#34;: &#34;string&#34; }, { &#34;value&#34;: &#34;test&#34;, &#34;type&#34;: &#34;bytes&#34; } ], &#34;sliceRecordCount&#34;: 100000 } }, &#34;writer&#34;: { &#34;name&#34;: &#34;odpswriter&#34;, &#34;parameter&#34;: { &#34;project&#34;: &#34;chinan_test&#34;, &#34;table&#34;: &#34;odps_write_test00_partitioned&#34;, &#34;partition&#34;: &#34;school=SiChuan-School,class=1&#34;, &#34;column&#34;: [ &#34;id&#34;, &#34;name&#34; ], &#34;accessId&#34;: &#34;xxx&#34;, &#34;accessKey&#34;: &#34;xxxx&#34;, &#34;truncate&#34;: true, &#34;odpsServer&#34;: &#34;http://sxxx/api&#34;, &#34;tunnelServer&#34;: &#34;http://xxx&#34;, &#34;accountType&#34;: &#34;aliyun&#34; } } } ] } } 3."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "4s",
+      "item": "https://haokiu.com/4/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "DataX ODPS写入",
+      "item": "https://haokiu.com/blog/ab33f89c494e47eaae02f9c21465b322/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "DataX ODPS写入",
+  "name": "DataX ODPS写入",
+  "description": "DataX ODPS写入 1 快速介绍 ODPSWriter插件用于实现往ODPS插入或者更新数据，主要提供给etl开发同学将业务数据导入odps，适合于TB,GB数量级的数据传输，如果需要传输PB量级的数据，请选择dt task工具 ;\n2 实现原理 在底层实现上，ODPSWriter是通过DT Tunnel写入ODPS系统的，有关ODPS的更多技术细节请参看 ODPS主站 https://data.aliyun.com/product/odps 和ODPS产品文档 https://help.aliyun.com/product/27797.html\n目前 DataX3 依赖的 SDK 版本是：\n\u0026lt;dependency\u0026gt; \u0026lt;groupId\u0026gt;com.aliyun.odps\u0026lt;/groupId\u0026gt; \u0026lt;artifactId\u0026gt;odps-sdk-core-internal\u0026lt;/artifactId\u0026gt; \u0026lt;version\u0026gt;0.13.2\u0026lt;/version\u0026gt; \u0026lt;/dependency\u0026gt; 注意: 如果你需要使用ODPSReader/Writer插件，请务必使用JDK 1.6-32及以上版本 使用java -version查看Java版本号\n3 功能说明 3.1 配置样例 这里使用一份从内存产生到ODPS导入的数据。 { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { \u0026#34;byte\u0026#34;: 1048576 } }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;streamreader\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;column\u0026#34;: [ { \u0026#34;value\u0026#34;: \u0026#34;DataX\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34; }, { \u0026#34;value\u0026#34;: \u0026#34;test\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;bytes\u0026#34; } ], \u0026#34;sliceRecordCount\u0026#34;: 100000 } }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;odpswriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;project\u0026#34;: \u0026#34;chinan_test\u0026#34;, \u0026#34;table\u0026#34;: \u0026#34;odps_write_test00_partitioned\u0026#34;, \u0026#34;partition\u0026#34;: \u0026#34;school=SiChuan-School,class=1\u0026#34;, \u0026#34;column\u0026#34;: [ \u0026#34;id\u0026#34;, \u0026#34;name\u0026#34; ], \u0026#34;accessId\u0026#34;: \u0026#34;xxx\u0026#34;, \u0026#34;accessKey\u0026#34;: \u0026#34;xxxx\u0026#34;, \u0026#34;truncate\u0026#34;: true, \u0026#34;odpsServer\u0026#34;: \u0026#34;http://sxxx/api\u0026#34;, \u0026#34;tunnelServer\u0026#34;: \u0026#34;http://xxx\u0026#34;, \u0026#34;accountType\u0026#34;: \u0026#34;aliyun\u0026#34; } } } ] } } 3.",
+  "keywords": [
+    "datax"
+  ],
+  "articleBody": "DataX ODPS写入 1 快速介绍 ODPSWriter插件用于实现往ODPS插入或者更新数据，主要提供给etl开发同学将业务数据导入odps，适合于TB,GB数量级的数据传输，如果需要传输PB量级的数据，请选择dt task工具 ;\n2 实现原理 在底层实现上，ODPSWriter是通过DT Tunnel写入ODPS系统的，有关ODPS的更多技术细节请参看 ODPS主站 https://data.aliyun.com/product/odps 和ODPS产品文档 https://help.aliyun.com/product/27797.html\n目前 DataX3 依赖的 SDK 版本是：\ncom.aliyun.odps odps-sdk-core-internal 0.13.2 注意: 如果你需要使用ODPSReader/Writer插件，请务必使用JDK 1.6-32及以上版本 使用java -version查看Java版本号\n3 功能说明 3.1 配置样例 这里使用一份从内存产生到ODPS导入的数据。 { \"job\": { \"setting\": { \"speed\": { \"byte\": 1048576 } }, \"content\": [ { \"reader\": { \"name\": \"streamreader\", \"parameter\": { \"column\": [ { \"value\": \"DataX\", \"type\": \"string\" }, { \"value\": \"test\", \"type\": \"bytes\" } ], \"sliceRecordCount\": 100000 } }, \"writer\": { \"name\": \"odpswriter\", \"parameter\": { \"project\": \"chinan_test\", \"table\": \"odps_write_test00_partitioned\", \"partition\": \"school=SiChuan-School,class=1\", \"column\": [ \"id\", \"name\" ], \"accessId\": \"xxx\", \"accessKey\": \"xxxx\", \"truncate\": true, \"odpsServer\": \"http://sxxx/api\", \"tunnelServer\": \"http://xxx\", \"accountType\": \"aliyun\" } } } ] } } 3.2 参数说明 accessId\n描述：ODPS系统登录ID 必选：是 默认值：无 accessKey\n描述：ODPS系统登录Key 必选：是 默认值：无 project\n描述：ODPS表所属的project，注意:Project只能是字母+数字组合，请填写英文名称。在云端等用户看到的ODPS项目中文名只是显示名，请务必填写底层真实地Project英文标识名。 必选：是 默认值：无 table\n描述：写入数据的表名，不能填写多张表，因为DataX不支持同时导入多张表。 必选：是 默认值：无 partition\n描述：需要写入数据表的分区信息，必须指定到最后一级分区。把数据写入一个三级分区表，必须配置到最后一级分区，例如pt=20150101/type＝1/biz=2。 必选：如果是分区表，该选项必填，如果非分区表，该选项不可填写。 默认值：空 column\n描述：需要导入的字段列表，当导入全部字段时，可以配置为\"column\": [\"*\"], 当需要插入部分odps列填写部分列，例如\"column\": [“id”, “name”]。ODPSWriter支持列筛选、列换序，例如表有a,b,c三个字段，用户只同步c,b两个字段。可以配置成[“c”,“b”], 在导入过程中，字段a自动补空，设置为null。 必选：否 默认值：无 truncate\n描述：ODPSWriter通过配置\"truncate\": true，保证写入的幂等性，即当出现写入失败再次运行时，ODPSWriter将清理前述数据，并导入新数据，这样可以保证每次重跑之后的数据都保持一致。 **truncate选项不是原子操作！ODPS SQL无法做到原子性。因此当多个任务同时向一个Table/Partition清理分区时候，可能出现并发时序问题，请务必注意！**针对这类问题，我们建议尽量不要多个作业DDL同时操作同一份分区，或者在多个并发作业启动前，提前创建分区。\n必选：是 默认值：无 odpsServer\n描述：ODPS的server地址，线上地址为 http://service.odps.aliyun.com/api 必选：是 默认值：无 tunnelServer\n描述：ODPS的tunnelserver地址，线上地址为 http://dt.odps.aliyun.com 必选：是， 默认值：无 3.3 类型转换 类似ODPSReader，目前ODPSWriter支持大部分ODPS类型，但也存在部分个别类型没有支持的情况，请注意检查你的类型。\n下面列出ODPSWriter针对ODPS类型转换列表:\nDataX 内部类型 ODPS 数据类型 Long bigint Double double String string Date datetime Boolean bool 4 插件特点 4.1 关于列筛选的问题 ODPS本身不支持列筛选、重排序、补空等等，但是DataX ODPSWriter完成了上述需求，支持列筛选、重排序、补空。例如需要导入的字段列表，当导入全部字段时，可以配置为\"column\": [\"*\"]，odps表有a,b,c三个字段，用户只同步c,b两个字段，在列配置中可以写成\"column\": [“c”,“b”]，表示会把reader的第一列和第二列导入odps的c字段和b字段，而odps表中新插入记录的a字段会被置为null. 4.2 列配置错误的处理 为了保证写入数据的可靠性，避免多余列数据丢失造成数据质量故障。对于写入多余的列，ODPSWriter将报错。例如ODPS表字段为a,b,c，但是ODPSWriter写入的字段为多于3列的话ODPSWriter将报错。 4.3 分区配置注意事项 ODPSWriter只提供 写入到最后一级分区 功能，不支持写入按照某个字段进行分区路由等功能。假设表一共有3级分区，那么在分区配置中就必须指明写入到某个三级分区，例如把数据写入一个表的第三级分区，可以配置为 pt=20150101/type＝1/biz=2，但是不能配置为pt=20150101/type＝1或者pt=20150101。 4.4 任务重跑和failover ODPSWriter通过配置\"truncate\": true，保证写入的幂等性，即当出现写入失败再次运行时，ODPSWriter将清理前述数据，并导入新数据，这样可以保证每次重跑之后的数据都保持一致。如果在运行过程中因为其他的异常导致了任务中断，是不能保证数据的原子性的，数据不会回滚也不会自动重跑，需要用户利用幂等性这一特点重跑去确保保证数据的完整性。truncate为true的情况下，会将指定分区\\表的数据全部清理，请谨慎使用！ 5 性能报告（线上环境实测） 5.1 环境准备 5.1.1 数据特征 建表语句：\nuse cdo_datasync; create table datax3_odpswriter_perf_10column_1kb_00( s_0 string, bool_1 boolean, bi_2 bigint, dt_3 datetime, db_4 double, s_5 string, s_6 string, s_7 string, s_8 string, s_9 string )PARTITIONED by (pt string,year string); 单行记录类似于：\ns_0 : 485924f6ab7f272af361cd3f7f2d23e0d764942351#$%^\u0026fdafdasfdas%%^(*\u0026^^\u0026* bool_1 : true bi_2 : 1696248667889 dt_3 : 2013-07-0600: 00: 00 db_4 : 3.141592653578 s_5 : 100dafdsafdsahofjdpsawifdishaf;dsadsafdsahfdsajf;dsfdsa;fjdsal;11209 s_6 : 100dafdsafdsahofjdpsawifdishaf;dsadsafdsahfdsajf;dsfdsa;fjdsal;11fdsafdsfdsa209 s_7 : 100DAFDSAFDSAHOFJDPSAWIFDISHAF;dsadsafdsahfdsajf;dsfdsa;FJDSAL;11209 s_8 : 100dafdsafdsahofjdpsawifdishaf;DSADSAFDSAHFDSAJF;dsfdsa;fjdsal;11209 s_9 : 12~!2345100dafdsafdsahofjdpsawifdishaf;dsadsafdsahfdsajf;dsfdsa;fjdsal;11209 5.1.2 机器参数 执行DataX的机器参数为:\ncpu : 24 Core Intel(R) Xeon(R) CPU E5-2630 0 @ 2.30GHz cache 15.36MB mem : 50GB net : 千兆双网卡 jvm : -Xms1024m -Xmx1024m -XX:+HeapDumpOnOutOfMemoryError disc: DataX 数据不落磁盘，不统计此项 任务配置为:\n{ \"job\": { \"setting\": { \"speed\": { \"channel\": \"1,2,4,5,6,8,16,32,64\" } }, \"content\": [ { \"reader\": { \"name\": \"odpsreader\", \"parameter\": { \"accessId\": \"******************************\", \"accessKey\": \"*****************************\", \"column\": [ \"*\" ], \"partition\": [ \"pt=20141010000000,year=2014\" ], \"odpsServer\": \"http://service.odps.aliyun.com/api\", \"project\": \"cdo_datasync\", \"table\": \"datax3_odpswriter_perf_10column_1kb_00\", \"tunnelServer\": \"http://dt.odps.aliyun.com\" } }, \"writer\": { \"name\": \"streamwriter\", \"parameter\": { \"print\": false, \"column\": [ { \"value\": \"485924f6ab7f272af361cd3f7f2d23e0d764942351#$%^\u0026fdafdasfdas%%^(*\u0026^^\u0026*\" }, { \"value\": \"true\", \"type\": \"bool\" }, { \"value\": \"1696248667889\", \"type\": \"long\" }, { \"type\": \"date\", \"value\": \"2013-07-06 00:00:00\", \"dateFormat\": \"yyyy-mm-dd hh:mm:ss\" }, { \"value\": \"3.141592653578\", \"type\": \"double\" }, { \"value\": \"100dafdsafdsahofjdpsawifdishaf;dsadsafdsahfdsajf;dsfdsa;fjdsal;11209\" }, { \"value\": \"100dafdsafdsahofjdpsawifdishaf;dsadsafdsahfdsajf;dsfdsa;fjdsal;11fdsafdsfdsa209\" }, { \"value\": \"100DAFDSAFDSAHOFJDPSAWIFDISHAF;dsadsafdsahfdsajf;dsfdsa;FJDSAL;11209\" }, { \"value\": \"100dafdsafdsahofjdpsawifdishaf;DSADSAFDSAHFDSAJF;dsfdsa;fjdsal;11209\" }, { \"value\": \"12~!2345100dafdsafdsahofjdpsawifdishaf;dsadsafdsahfdsajf;dsfdsa;fjdsal;11209\" } ] } } } ] } } 5.2 测试报告 并发任务数 blockSizeInMB DataX速度(Rec/s) DataX流量(MB/S) 网卡流量(MB/S) DataX运行负载 1 32 30303 13.03 14.5 0.12 1 64 38461 16.54 16.5 0.44 1 128 46454 20.55 26.7 0.47 1 256 52631 22.64 26.7 0.47 1 512 58823 25.30 28.7 0.44 4 32 114816 49.38 55.3 0.75 4 64 147577 63.47 71.3 0.82 4 128 177744 76.45 83.2 0.97 4 256 173913 74.80 80.1 1.01 4 512 200000 86.02 95.1 1.41 8 32 204480 87.95 92.7 1.16 8 64 294224 126.55 135.3 1.65 8 128 365475 157.19 163.7 2.89 8 256 394713 169.83 176.7 2.72 8 512 241691 103.95 125.7 2.29 16 32 420838 181.01 198.0 2.56 16 64 458144 197.05 217.4 2.85 16 128 443219 190.63 210.5 3.29 16 256 315235 135.58 140.0 0.95 16 512 OOM 说明：\nOdpsWriter 影响速度的是channel 和 blockSizeInMB。blockSizeInMB 取32 和 64时，速度比较稳定,过分大的 blockSizeInMB 可能造成速度波动以及内存OOM。 channel 和 blockSizeInMB 对速度的影响都很明显，建议综合考虑配合选择。 channel 数目的选择，可以综合考虑源端数据特征进行选择，对于StreamReader，在16个channel时将网卡打满。 6 FAQ 1 导数据到 odps 的日志中有以下报错，该怎么处理呢？“ODPS-0420095: Access Denied - Authorization Failed [4002], You doesn‘t exist in project example_dev“ 解决办法 :找ODPS Prject 的 owner给用户的云账号授权，授权语句： grant Describe,Select,Alter,Update on table [tableName] to user XXX\n2 可以导入数据到odps的视图吗？ 目前不支持通过视图到数据到odps,视图是ODPS非实体化数据存储对象，技术上无法向视图导入数据。\n",
+  "wordCount" : "583",
+  "inLanguage": "en",
+  "datePublished": "2021-02-02T17:45:01Z",
+  "dateModified": "2021-02-02T17:45:01Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/ab33f89c494e47eaae02f9c21465b322/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    <h1 class="post-title">
+      DataX ODPS写入
+    </h1>
+    <div class="post-meta"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#datax-odps%e5%86%99%e5%85%a5" aria-label="DataX ODPS写入">DataX ODPS写入</a><ul>
+                        
+                <li>
+                    <a href="#1-%e5%bf%ab%e9%80%9f%e4%bb%8b%e7%bb%8d" aria-label="1 快速介绍">1 快速介绍</a></li>
+                <li>
+                    <a href="#2-%e5%ae%9e%e7%8e%b0%e5%8e%9f%e7%90%86" aria-label="2 实现原理">2 实现原理</a></li>
+                <li>
+                    <a href="#3-%e5%8a%9f%e8%83%bd%e8%af%b4%e6%98%8e" aria-label="3 功能说明">3 功能说明</a><ul>
+                        
+                <li>
+                    <a href="#31-%e9%85%8d%e7%bd%ae%e6%a0%b7%e4%be%8b" aria-label="3.1 配置样例">3.1 配置样例</a></li>
+                <li>
+                    <a href="#32-%e5%8f%82%e6%95%b0%e8%af%b4%e6%98%8e" aria-label="3.2 参数说明">3.2 参数说明</a></li>
+                <li>
+                    <a href="#33-%e7%b1%bb%e5%9e%8b%e8%bd%ac%e6%8d%a2" aria-label="3.3 类型转换">3.3 类型转换</a></li></ul>
+                </li>
+                <li>
+                    <a href="#4--%e6%8f%92%e4%bb%b6%e7%89%b9%e7%82%b9" aria-label="4  插件特点">4  插件特点</a><ul>
+                        
+                <li>
+                    <a href="#41--%e5%85%b3%e4%ba%8e%e5%88%97%e7%ad%9b%e9%80%89%e7%9a%84%e9%97%ae%e9%a2%98" aria-label="4.1  关于列筛选的问题">4.1  关于列筛选的问题</a></li>
+                <li>
+                    <a href="#42--%e5%88%97%e9%85%8d%e7%bd%ae%e9%94%99%e8%af%af%e7%9a%84%e5%a4%84%e7%90%86" aria-label="4.2  列配置错误的处理">4.2  列配置错误的处理</a></li>
+                <li>
+                    <a href="#43--%e5%88%86%e5%8c%ba%e9%85%8d%e7%bd%ae%e6%b3%a8%e6%84%8f%e4%ba%8b%e9%a1%b9" aria-label="4.3  分区配置注意事项">4.3  分区配置注意事项</a></li>
+                <li>
+                    <a href="#44--%e4%bb%bb%e5%8a%a1%e9%87%8d%e8%b7%91%e5%92%8cfailover" aria-label="4.4  任务重跑和failover">4.4  任务重跑和failover</a></li></ul>
+                </li>
+                <li>
+                    <a href="#5-%e6%80%a7%e8%83%bd%e6%8a%a5%e5%91%8a%e7%ba%bf%e4%b8%8a%e7%8e%af%e5%a2%83%e5%ae%9e%e6%b5%8b" aria-label="5 性能报告（线上环境实测）">5 性能报告（线上环境实测）</a><ul>
+                        
+                <li>
+                    <a href="#51-%e7%8e%af%e5%a2%83%e5%87%86%e5%a4%87" aria-label="5.1 环境准备">5.1 环境准备</a><ul>
+                        
+                <li>
+                    <a href="#511-%e6%95%b0%e6%8d%ae%e7%89%b9%e5%be%81" aria-label="5.1.1 数据特征">5.1.1 数据特征</a></li>
+                <li>
+                    <a href="#512-%e6%9c%ba%e5%99%a8%e5%8f%82%e6%95%b0" aria-label="5.1.2 机器参数">5.1.2 机器参数</a></li></ul>
+                </li>
+                <li>
+                    <a href="#52-%e6%b5%8b%e8%af%95%e6%8a%a5%e5%91%8a" aria-label="5.2 测试报告">5.2 测试报告</a></li></ul>
+                </li>
+                <li>
+                    <a href="#6-faq" aria-label="6 FAQ">6 FAQ</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#1--%e5%af%bc%e6%95%b0%e6%8d%ae%e5%88%b0-odps-%e7%9a%84%e6%97%a5%e5%bf%97%e4%b8%ad%e6%9c%89%e4%bb%a5%e4%b8%8b%e6%8a%a5%e9%94%99%e8%af%a5%e6%80%8e%e4%b9%88%e5%a4%84%e7%90%86%e5%91%a2odps-0420095-access-denied---authorization-failed-4002-you-doesnt-exist-in-project-example_dev" aria-label="1  导数据到 odps 的日志中有以下报错，该怎么处理呢？&amp;ldquo;ODPS-0420095: Access Denied - Authorization Failed [4002], You doesn‘t exist in project example_dev“">1  导数据到 odps 的日志中有以下报错，该怎么处理呢？&ldquo;ODPS-0420095: Access Denied - Authorization Failed [4002], You doesn‘t exist in project example_dev“</a></li>
+                <li>
+                    <a href="#2--%e5%8f%af%e4%bb%a5%e5%af%bc%e5%85%a5%e6%95%b0%e6%8d%ae%e5%88%b0odps%e7%9a%84%e8%a7%86%e5%9b%be%e5%90%97" aria-label="2  可以导入数据到odps的视图吗？">2  可以导入数据到odps的视图吗？</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="datax-odps写入">DataX ODPS写入</h1>
+<hr>
+<h2 id="1-快速介绍">1 快速介绍</h2>
+<p>ODPSWriter插件用于实现往ODPS插入或者更新数据，主要提供给etl开发同学将业务数据导入odps，适合于TB,GB数量级的数据传输，如果需要传输PB量级的数据，请选择dt task工具 ;</p>
+<h2 id="2-实现原理">2 实现原理</h2>
+<p>在底层实现上，ODPSWriter是通过DT Tunnel写入ODPS系统的，有关ODPS的更多技术细节请参看 ODPS主站 <a href="https://data.aliyun.com/product/odps">https://data.aliyun.com/product/odps</a> 和ODPS产品文档 <a href="https://help.aliyun.com/product/27797.html">https://help.aliyun.com/product/27797.html</a></p>
+<p>目前 DataX3 依赖的 SDK 版本是：</p>
+<pre><code>                &lt;dependency&gt;
+                    &lt;groupId&gt;com.aliyun.odps&lt;/groupId&gt;
+                    &lt;artifactId&gt;odps-sdk-core-internal&lt;/artifactId&gt;
+                    &lt;version&gt;0.13.2&lt;/version&gt;
+                &lt;/dependency&gt;
+</code></pre>
+<p>注意: <strong>如果你需要使用ODPSReader/Writer插件，请务必使用JDK 1.6-32及以上版本</strong>
+使用java -version查看Java版本号</p>
+<h2 id="3-功能说明">3 功能说明</h2>
+<h3 id="31-配置样例">3.1 配置样例</h3>
+<ul>
+<li>这里使用一份从内存产生到ODPS导入的数据。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;job&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;setting&#34;</span>: {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;speed&#34;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;byte&#34;</span>: <span style="color:#ae81ff">1048576</span>
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;content&#34;</span>: [
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;reader&#34;</span>: {
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;streamreader&#34;</span>,
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&#34;parameter&#34;</span>: {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;column&#34;</span>: [
+</span></span><span style="display:flex;"><span>              {
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#e6db74">&#34;DataX&#34;</span>,
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;string&#34;</span>
+</span></span><span style="display:flex;"><span>              },
+</span></span><span style="display:flex;"><span>              {
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#e6db74">&#34;test&#34;</span>,
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;bytes&#34;</span>
+</span></span><span style="display:flex;"><span>              }
+</span></span><span style="display:flex;"><span>            ],
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;sliceRecordCount&#34;</span>: <span style="color:#ae81ff">100000</span>
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;writer&#34;</span>: {
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;odpswriter&#34;</span>,
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&#34;parameter&#34;</span>: {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;project&#34;</span>: <span style="color:#e6db74">&#34;chinan_test&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;table&#34;</span>: <span style="color:#e6db74">&#34;odps_write_test00_partitioned&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;partition&#34;</span>: <span style="color:#e6db74">&#34;school=SiChuan-School,class=1&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;column&#34;</span>: [
+</span></span><span style="display:flex;"><span>              <span style="color:#e6db74">&#34;id&#34;</span>,
+</span></span><span style="display:flex;"><span>              <span style="color:#e6db74">&#34;name&#34;</span>
+</span></span><span style="display:flex;"><span>            ],
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;accessId&#34;</span>: <span style="color:#e6db74">&#34;xxx&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;accessKey&#34;</span>: <span style="color:#e6db74">&#34;xxxx&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;truncate&#34;</span>: <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;odpsServer&#34;</span>: <span style="color:#e6db74">&#34;http://sxxx/api&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;tunnelServer&#34;</span>: <span style="color:#e6db74">&#34;http://xxx&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;accountType&#34;</span>: <span style="color:#e6db74">&#34;aliyun&#34;</span>
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="32-参数说明">3.2 参数说明</h3>
+<ul>
+<li>
+<p><strong>accessId</strong></p>
+<ul>
+<li>描述：ODPS系统登录ID <!-- raw HTML omitted --></li>
+<li>必选：是 <!-- raw HTML omitted --></li>
+<li>默认值：无 <!-- raw HTML omitted --></li>
+</ul>
+</li>
+<li>
+<p><strong>accessKey</strong></p>
+<ul>
+<li>描述：ODPS系统登录Key <!-- raw HTML omitted --></li>
+<li>必选：是 <!-- raw HTML omitted --></li>
+<li>默认值：无 <!-- raw HTML omitted --></li>
+</ul>
+</li>
+<li>
+<p><strong>project</strong></p>
+<ul>
+<li>描述：ODPS表所属的project，注意:Project只能是字母+数字组合，请填写英文名称。在云端等用户看到的ODPS项目中文名只是显示名，请务必填写底层真实地Project英文标识名。<!-- raw HTML omitted --></li>
+<li>必选：是 <!-- raw HTML omitted --></li>
+<li>默认值：无 <!-- raw HTML omitted --></li>
+</ul>
+</li>
+<li>
+<p><strong>table</strong></p>
+<ul>
+<li>描述：写入数据的表名，不能填写多张表，因为DataX不支持同时导入多张表。 <!-- raw HTML omitted --></li>
+<li>必选：是 <!-- raw HTML omitted --></li>
+<li>默认值：无 <!-- raw HTML omitted --></li>
+</ul>
+</li>
+<li>
+<p><strong>partition</strong></p>
+<ul>
+<li>描述：需要写入数据表的分区信息，必须指定到最后一级分区。把数据写入一个三级分区表，必须配置到最后一级分区，例如pt=20150101/type＝1/biz=2。
+<!-- raw HTML omitted --></li>
+<li>必选：<strong>如果是分区表，该选项必填，如果非分区表，该选项不可填写。</strong></li>
+<li>默认值：空 <!-- raw HTML omitted --></li>
+</ul>
+</li>
+<li>
+<p><strong>column</strong></p>
+<ul>
+<li>描述：需要导入的字段列表，当导入全部字段时，可以配置为&quot;column&quot;: [&quot;*&quot;], 当需要插入部分odps列填写部分列，例如&quot;column&quot;: [&ldquo;id&rdquo;, &ldquo;name&rdquo;]。ODPSWriter支持列筛选、列换序，例如表有a,b,c三个字段，用户只同步c,b两个字段。可以配置成[&ldquo;c&rdquo;,&ldquo;b&rdquo;], 在导入过程中，字段a自动补空，设置为null。 <!-- raw HTML omitted --></li>
+<li>必选：否 <!-- raw HTML omitted --></li>
+<li>默认值：无 <!-- raw HTML omitted --></li>
+</ul>
+</li>
+<li>
+<p><strong>truncate</strong></p>
+<ul>
+<li>
+<p>描述：ODPSWriter通过配置&quot;truncate&quot;: true，保证写入的幂等性，即当出现写入失败再次运行时，ODPSWriter将清理前述数据，并导入新数据，这样可以保证每次重跑之后的数据都保持一致。 <!-- raw HTML omitted --></p>
+<p>**truncate选项不是原子操作！ODPS SQL无法做到原子性。因此当多个任务同时向一个Table/Partition清理分区时候，可能出现并发时序问题，请务必注意！**针对这类问题，我们建议尽量不要多个作业DDL同时操作同一份分区，或者在多个并发作业启动前，提前创建分区。</p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>odpsServer</strong></p>
+<ul>
+<li>描述：ODPS的server地址，线上地址为 <a href="http://service.odps.aliyun.com/api">http://service.odps.aliyun.com/api</a> <!-- raw HTML omitted --></li>
+<li>必选：是 <!-- raw HTML omitted --></li>
+<li>默认值：无 <!-- raw HTML omitted --></li>
+</ul>
+</li>
+<li>
+<p><strong>tunnelServer</strong></p>
+<ul>
+<li>描述：ODPS的tunnelserver地址，线上地址为 <a href="http://dt.odps.aliyun.com">http://dt.odps.aliyun.com</a>  <!-- raw HTML omitted --></li>
+<li>必选：是， <!-- raw HTML omitted --></li>
+<li>默认值：无 <!-- raw HTML omitted --></li>
+</ul>
+</li>
+</ul>
+<h3 id="33-类型转换">3.3 类型转换</h3>
+<p>类似ODPSReader，目前ODPSWriter支持大部分ODPS类型，但也存在部分个别类型没有支持的情况，请注意检查你的类型。</p>
+<p>下面列出ODPSWriter针对ODPS类型转换列表:</p>
+<table>
+<thead>
+<tr>
+<th>DataX 内部类型</th>
+<th>ODPS 数据类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Long</td>
+<td>bigint</td>
+</tr>
+<tr>
+<td>Double</td>
+<td>double</td>
+</tr>
+<tr>
+<td>String</td>
+<td>string</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>datetime</td>
+</tr>
+<tr>
+<td>Boolean</td>
+<td>bool</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4--插件特点">4  插件特点</h2>
+<h3 id="41--关于列筛选的问题">4.1  关于列筛选的问题</h3>
+<ul>
+<li>ODPS本身不支持列筛选、重排序、补空等等，但是DataX ODPSWriter完成了上述需求，支持列筛选、重排序、补空。例如需要导入的字段列表，当导入全部字段时，可以配置为&quot;column&quot;: [&quot;*&quot;]，odps表有a,b,c三个字段，用户只同步c,b两个字段，在列配置中可以写成&quot;column&quot;: [&ldquo;c&rdquo;,&ldquo;b&rdquo;]，表示会把reader的第一列和第二列导入odps的c字段和b字段，而odps表中新插入记录的a字段会被置为null.</li>
+</ul>
+<h3 id="42--列配置错误的处理">4.2  列配置错误的处理</h3>
+<ul>
+<li>为了保证写入数据的可靠性，避免多余列数据丢失造成数据质量故障。对于写入多余的列，ODPSWriter将报错。例如ODPS表字段为a,b,c，但是ODPSWriter写入的字段为多于3列的话ODPSWriter将报错。</li>
+</ul>
+<h3 id="43--分区配置注意事项">4.3  分区配置注意事项</h3>
+<ul>
+<li>ODPSWriter只提供 <strong>写入到最后一级分区</strong> 功能，不支持写入按照某个字段进行分区路由等功能。假设表一共有3级分区，那么在分区配置中就必须指明写入到某个三级分区，例如把数据写入一个表的第三级分区，可以配置为 pt=20150101/type＝1/biz=2，但是不能配置为pt=20150101/type＝1或者pt=20150101。</li>
+</ul>
+<h3 id="44--任务重跑和failover">4.4  任务重跑和failover</h3>
+<ul>
+<li>ODPSWriter通过配置&quot;truncate&quot;: true，保证写入的幂等性，即当出现写入失败再次运行时，ODPSWriter将清理前述数据，并导入新数据，这样可以保证每次重跑之后的数据都保持一致。如果在运行过程中因为其他的异常导致了任务中断，是不能保证数据的原子性的，数据不会回滚也不会自动重跑，需要用户利用幂等性这一特点重跑去确保保证数据的完整性。<strong>truncate为true的情况下，会将指定分区\表的数据全部清理，请谨慎使用！</strong></li>
+</ul>
+<h2 id="5-性能报告线上环境实测">5 性能报告（线上环境实测）</h2>
+<h3 id="51-环境准备">5.1 环境准备</h3>
+<h4 id="511-数据特征">5.1.1 数据特征</h4>
+<p>建表语句：</p>
+<pre><code>use cdo_datasync;
+create table datax3_odpswriter_perf_10column_1kb_00(
+s_0 string,
+bool_1 boolean,
+bi_2 bigint,
+dt_3 datetime,
+db_4 double,
+s_5 string,
+s_6 string,
+s_7 string,
+s_8 string,
+s_9 string
+)PARTITIONED by (pt string,year string);
+</code></pre>
+<p>单行记录类似于：</p>
+<pre><code>s_0    : 485924f6ab7f272af361cd3f7f2d23e0d764942351#$%^&amp;fdafdasfdas%%^(*&amp;^^&amp;*
+bool_1 : true
+bi_2   : 1696248667889
+dt_3   : 2013-07-0600: 00: 00
+db_4   : 3.141592653578
+s_5    : 100dafdsafdsahofjdpsawifdishaf;dsadsafdsahfdsajf;dsfdsa;fjdsal;11209
+s_6    : 100dafdsafdsahofjdpsawifdishaf;dsadsafdsahfdsajf;dsfdsa;fjdsal;11fdsafdsfdsa209
+s_7    : 100DAFDSAFDSAHOFJDPSAWIFDISHAF;dsadsafdsahfdsajf;dsfdsa;FJDSAL;11209
+s_8    : 100dafdsafdsahofjdpsawifdishaf;DSADSAFDSAHFDSAJF;dsfdsa;fjdsal;11209
+s_9    : 12~!2345100dafdsafdsahofjdpsawifdishaf;dsadsafdsahfdsajf;dsfdsa;fjdsal;11209
+</code></pre>
+<h4 id="512-机器参数">5.1.2 机器参数</h4>
+<ul>
+<li>
+<p>执行DataX的机器参数为:</p>
+<ol>
+<li>cpu : 24 Core Intel(R) Xeon(R) CPU E5-2630 0 @ 2.30GHz cache 15.36MB</li>
+<li>mem : 50GB</li>
+<li>net : 千兆双网卡</li>
+<li>jvm : -Xms1024m -Xmx1024m -XX:+HeapDumpOnOutOfMemoryError</li>
+<li>disc: DataX 数据不落磁盘，不统计此项</li>
+</ol>
+</li>
+<li>
+<p>任务配置为:</p>
+</li>
+</ul>
+<pre tabindex="0"><code>{
+    &#34;job&#34;: {
+        &#34;setting&#34;: {
+            &#34;speed&#34;: {
+                &#34;channel&#34;: &#34;1,2,4,5,6,8,16,32,64&#34;
+            }
+        },
+        &#34;content&#34;: [
+            {
+                &#34;reader&#34;: {
+                    &#34;name&#34;: &#34;odpsreader&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;accessId&#34;: &#34;******************************&#34;,
+                        &#34;accessKey&#34;: &#34;*****************************&#34;,
+                        &#34;column&#34;: [
+                            &#34;*&#34;
+                        ],
+                        &#34;partition&#34;: [
+                            &#34;pt=20141010000000,year=2014&#34;
+                        ],
+                        &#34;odpsServer&#34;: &#34;http://service.odps.aliyun.com/api&#34;,
+                        &#34;project&#34;: &#34;cdo_datasync&#34;,
+                        &#34;table&#34;: &#34;datax3_odpswriter_perf_10column_1kb_00&#34;,
+                        &#34;tunnelServer&#34;: &#34;http://dt.odps.aliyun.com&#34;
+                    }
+                },
+                &#34;writer&#34;: {
+                    &#34;name&#34;: &#34;streamwriter&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;print&#34;: false,
+                        &#34;column&#34;: [
+                            {
+                                &#34;value&#34;: &#34;485924f6ab7f272af361cd3f7f2d23e0d764942351#$%^&amp;fdafdasfdas%%^(*&amp;^^&amp;*&#34;
+                            },
+                            {
+                                &#34;value&#34;: &#34;true&#34;,
+                                &#34;type&#34;: &#34;bool&#34;
+                            },
+                            {
+                                &#34;value&#34;: &#34;1696248667889&#34;,
+                                &#34;type&#34;: &#34;long&#34;
+                            },
+                            {
+                                &#34;type&#34;: &#34;date&#34;,
+                                &#34;value&#34;: &#34;2013-07-06 00:00:00&#34;,
+                                &#34;dateFormat&#34;: &#34;yyyy-mm-dd hh:mm:ss&#34;
+                            },
+                            {
+                                &#34;value&#34;: &#34;3.141592653578&#34;,
+                                &#34;type&#34;: &#34;double&#34;
+                            },
+                            {
+                                &#34;value&#34;: &#34;100dafdsafdsahofjdpsawifdishaf;dsadsafdsahfdsajf;dsfdsa;fjdsal;11209&#34;
+                            },
+                            {
+                                &#34;value&#34;: &#34;100dafdsafdsahofjdpsawifdishaf;dsadsafdsahfdsajf;dsfdsa;fjdsal;11fdsafdsfdsa209&#34;
+                            },
+                            {
+                                &#34;value&#34;: &#34;100DAFDSAFDSAHOFJDPSAWIFDISHAF;dsadsafdsahfdsajf;dsfdsa;FJDSAL;11209&#34;
+                            },
+                            {
+                                &#34;value&#34;: &#34;100dafdsafdsahofjdpsawifdishaf;DSADSAFDSAHFDSAJF;dsfdsa;fjdsal;11209&#34;
+                            },
+                            {
+                                &#34;value&#34;: &#34;12~!2345100dafdsafdsahofjdpsawifdishaf;dsadsafdsahfdsajf;dsfdsa;fjdsal;11209&#34;
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    }
+}
+</code></pre><h3 id="52-测试报告">5.2 测试报告</h3>
+<table>
+<thead>
+<tr>
+<th>并发任务数</th>
+<th>blockSizeInMB</th>
+<th>DataX速度(Rec/s)</th>
+<th>DataX流量(MB/S)</th>
+<th>网卡流量(MB/S)</th>
+<th>DataX运行负载</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>32</td>
+<td>30303</td>
+<td>13.03</td>
+<td>14.5</td>
+<td>0.12</td>
+</tr>
+<tr>
+<td>1</td>
+<td>64</td>
+<td>38461</td>
+<td>16.54</td>
+<td>16.5</td>
+<td>0.44</td>
+</tr>
+<tr>
+<td>1</td>
+<td>128</td>
+<td>46454</td>
+<td>20.55</td>
+<td>26.7</td>
+<td>0.47</td>
+</tr>
+<tr>
+<td>1</td>
+<td>256</td>
+<td>52631</td>
+<td>22.64</td>
+<td>26.7</td>
+<td>0.47</td>
+</tr>
+<tr>
+<td>1</td>
+<td>512</td>
+<td>58823</td>
+<td>25.30</td>
+<td>28.7</td>
+<td>0.44</td>
+</tr>
+<tr>
+<td>4</td>
+<td>32</td>
+<td>114816</td>
+<td>49.38</td>
+<td>55.3</td>
+<td>0.75</td>
+</tr>
+<tr>
+<td>4</td>
+<td>64</td>
+<td>147577</td>
+<td>63.47</td>
+<td>71.3</td>
+<td>0.82</td>
+</tr>
+<tr>
+<td>4</td>
+<td>128</td>
+<td>177744</td>
+<td>76.45</td>
+<td>83.2</td>
+<td>0.97</td>
+</tr>
+<tr>
+<td>4</td>
+<td>256</td>
+<td>173913</td>
+<td>74.80</td>
+<td>80.1</td>
+<td>1.01</td>
+</tr>
+<tr>
+<td>4</td>
+<td>512</td>
+<td>200000</td>
+<td>86.02</td>
+<td>95.1</td>
+<td>1.41</td>
+</tr>
+<tr>
+<td>8</td>
+<td>32</td>
+<td>204480</td>
+<td>87.95</td>
+<td>92.7</td>
+<td>1.16</td>
+</tr>
+<tr>
+<td>8</td>
+<td>64</td>
+<td>294224</td>
+<td>126.55</td>
+<td>135.3</td>
+<td>1.65</td>
+</tr>
+<tr>
+<td>8</td>
+<td>128</td>
+<td>365475</td>
+<td>157.19</td>
+<td>163.7</td>
+<td>2.89</td>
+</tr>
+<tr>
+<td>8</td>
+<td>256</td>
+<td>394713</td>
+<td>169.83</td>
+<td>176.7</td>
+<td>2.72</td>
+</tr>
+<tr>
+<td>8</td>
+<td>512</td>
+<td>241691</td>
+<td>103.95</td>
+<td>125.7</td>
+<td>2.29</td>
+</tr>
+<tr>
+<td>16</td>
+<td>32</td>
+<td>420838</td>
+<td>181.01</td>
+<td>198.0</td>
+<td>2.56</td>
+</tr>
+<tr>
+<td>16</td>
+<td>64</td>
+<td>458144</td>
+<td>197.05</td>
+<td>217.4</td>
+<td>2.85</td>
+</tr>
+<tr>
+<td>16</td>
+<td>128</td>
+<td>443219</td>
+<td>190.63</td>
+<td>210.5</td>
+<td>3.29</td>
+</tr>
+<tr>
+<td>16</td>
+<td>256</td>
+<td>315235</td>
+<td>135.58</td>
+<td>140.0</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>16</td>
+<td>512</td>
+<td>OOM</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>说明：</p>
+<ol>
+<li>OdpsWriter 影响速度的是channel 和 blockSizeInMB。blockSizeInMB 取<code>32</code> 和 <code>64</code>时，速度比较稳定,过分大的 blockSizeInMB 可能造成速度波动以及内存OOM。</li>
+<li>channel 和 blockSizeInMB 对速度的影响都很明显，建议综合考虑配合选择。</li>
+<li>channel 数目的选择，可以综合考虑源端数据特征进行选择，对于StreamReader，在16个channel时将网卡打满。</li>
+</ol>
+<h2 id="6-faq">6 FAQ</h2>
+<h4 id="1--导数据到-odps-的日志中有以下报错该怎么处理呢odps-0420095-access-denied---authorization-failed-4002-you-doesnt-exist-in-project-example_dev">1  导数据到 odps 的日志中有以下报错，该怎么处理呢？&ldquo;ODPS-0420095: Access Denied - Authorization Failed [4002], You doesn‘t exist in project example_dev“</h4>
+<p>解决办法 :找ODPS Prject 的 owner给用户的云账号授权，授权语句：
+grant Describe,Select,Alter,Update on table [tableName] to user XXX</p>
+<h4 id="2--可以导入数据到odps的视图吗">2  可以导入数据到odps的视图吗？</h4>
+<p>目前不支持通过视图到数据到odps,视图是ODPS非实体化数据存储对象，技术上无法向视图导入数据。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

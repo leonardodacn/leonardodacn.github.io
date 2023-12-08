@@ -187,7 +187,7 @@ int sem_init(sem_t *sem, int pshared, unsigned int value); int sem_destroy(sem_t
 int pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *restrict attr); int pthread_cond_destroy(pthread_cond_t *cond); int pthread_cond_signal(pthread_cond_t *cond); int pthread_cond_broadcast(pthread_cond_t *cond); int pthread_cond_wait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex); int pthread_cond_timedwait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex, const struct timespec *restrict abstime); 读写/自旋锁...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 腾讯后台开发实习生技能要求" href="https://haokiu.com/5f118ee0e1be49a8a754072ecb9b441a/"></a>
+  <a class="entry-link" aria-label="post link to 腾讯后台开发实习生技能要求" href="https://haokiu.com/blog/5f118ee0e1be49a8a754072ecb9b441a/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -205,7 +205,7 @@ std::auto_ptr 真正让人容易误用的地方是其不常用的复制语义，
 #include &lt;iostream&gt; #include &lt;memory&gt; int main() { //测试拷贝构造 std::auto_ptr&lt;int&gt; sp1(new int(8)); std::auto_ptr&lt;int&gt; sp2(sp1); if (sp1.get() != NULL) { std::cout &lt;&lt; &#34;sp1 is not empty.&#34; &lt;&lt; std::endl; } else { std::cout &lt;&lt; &#34;sp1 is empty....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 详解 C&#43;&#43; 11 中的智能指针" href="https://haokiu.com/913fb3f31d024baf871726b2f22cdfde/"></a>
+  <a class="entry-link" aria-label="post link to 详解 C&#43;&#43; 11 中的智能指针" href="https://haokiu.com/blog/913fb3f31d024baf871726b2f22cdfde/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -224,7 +224,7 @@ ok，有读者看到这里可能美滋滋，他可能会想，今年 12 月 1 �
 除了上述两个规定外，企业对于年终奖还有一个比较常见的规定，就是年终奖绩效正态分布制。啥意思呢？举个例子，我在求职某大型旅游互联网公司时，HR 告诉我待遇是 16 薪，于是我就相信了。等到当年年底的时候发现，果然是 16 薪啊，但是每个员工都需要进行绩效考评，绩效分为 ABCD 四个等级，A 最优，D 最差，且 ABCD 四个等级的比例是 20%、30%、30%、20%，也就是说一个部门 10 个人，实际上只有 2 个人能拿到 16 薪，剩下的依次是 15 薪、14 薪和 13 薪。到此时，我也只能无奈的接受现实。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 谈一谈年终奖" href="https://haokiu.com/0f72f7a83bbb4b4fb76a05dc63f5480c/"></a>
+  <a class="entry-link" aria-label="post link to 谈一谈年终奖" href="https://haokiu.com/blog/0f72f7a83bbb4b4fb76a05dc63f5480c/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -241,7 +241,7 @@ type slice struct { array unsafe.Pointer len int cap int } slice 有三个字段
 a := [...]int{1, 2, 3, 4, 5, 6} fmt.Println(&#34;star deal array, orginal data is:&#34;) fmt.Println(a) aMaxIndex := len(a) - 1 fmt.Printf(&#34;aMaxIndex:%d\r&#34;, aMaxIndex) for i, e := range a { if i == aMaxIndex { a[0] &#43;= e fmt.Printf(&#34;index is 0, val is :%d\r&#34;, a[0]) } else { a[i&#43;1] &#43;= e fmt....</p>
   </div>
   <footer class="entry-footer"><span title='2020-11-19 17:09:23 +0000 UTC'>November 19, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to golang 数组与切片的区别" href="https://haokiu.com/gnNp9N/"></a>
+  <a class="entry-link" aria-label="post link to golang 数组与切片的区别" href="https://haokiu.com/blog/gnNp9N/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -254,7 +254,7 @@ a := [...]int{1, 2, 3, 4, 5, 6} fmt.Println(&#34;star deal array, orginal data i
 import &#34;testing&#34; func TestGetRandomString(t *testing.T) { type args struct { lens int } tests := []struct { name string args args want string }{ { name: &#34;test&#34;, args: args{ lens: 6, }, want: &#34;hi&#34;, }, { name: &#34;test&#34;, args: args{ lens: 6, }, want: &#34;hi&#34;, }, } for _, tt := range tests { t.Run(tt.name, func(t *testing.T) { if got := GetRandomString(tt.args.lens); got != tt.want { t.Logf(&#34;GetRandomString() = %v, want %v&#34;, got, tt.want) } }) } } 需要注意的是各个结构体后面有个逗号。</p>
   </div>
   <footer class="entry-footer"><span title='2020-11-09 10:54:29 +0000 UTC'>November 9, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to go 匿名结构体 数组 示例" href="https://haokiu.com/XVVOUE/"></a>
+  <a class="entry-link" aria-label="post link to go 匿名结构体 数组 示例" href="https://haokiu.com/blog/XVVOUE/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -269,7 +269,7 @@ EnableHTTPS = true HTTPSPort = 443 HTTPSCertFile = &#34;/home/blog/cert/cert.pem
 EnableHTTPS = true HTTPSPort = 443 HTTPSCertFile = &#34;/home/blog/cert/fullchain.pem&#34; HTTPSKeyFile = &#34;/home/blog/cert/key.pem&#34; </p>
   </div>
   <footer class="entry-footer"><span title='2020-10-23 15:03:17 +0000 UTC'>October 23, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to curl https 地址报异常" href="https://haokiu.com/KsbUyb/"></a>
+  <a class="entry-link" aria-label="post link to curl https 地址报异常" href="https://haokiu.com/blog/KsbUyb/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -282,7 +282,7 @@ EnableHTTPS = true HTTPSPort = 443 HTTPSCertFile = &#34;/home/blog/cert/fullchai
 //siteUrl 是网站地址，比如:https://haokiu.com if &#34;HTTP/1.1&#34; == self.Ctx.Request.Proto &amp;&amp; siteUrl != &#34;&#34; &amp;&amp; strings.HasPrefix(siteUrl, &#34;https&#34;) { //如果支持https，则所有http请求跳转到https self.redirect(siteUrl &#43; self.Ctx.Request.URL.Path) } </p>
   </div>
   <footer class="entry-footer"><span title='2020-10-13 16:33:55 +0000 UTC'>October 13, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to beego 让http请求跳转到 https" href="https://haokiu.com/ZSf4yF/"></a>
+  <a class="entry-link" aria-label="post link to beego 让http请求跳转到 https" href="https://haokiu.com/blog/ZSf4yF/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -297,7 +297,7 @@ EnableHTTPS = true HTTPSPort = 443 HTTPSCertFile = &#34;/home/blog/cert/fullchai
 [Unit] Description=The pixiublog Process Manager After=syslog.target network.target [Service] Type=forking ExecStart=sh /usr/local/pixiublog/start.sh ExecReload=/bin/kill -USR2 $MAINPID ExecStop=/bin/kill -SIGINT $MAINPID [Install] WantedBy=multi-user.target 2. 设置开机启动 systemctl enable pixiublog 安装证书 acme.sh --install-cert -d haokiu.com \ --cert-file /home/blog/cert/cert.pem \ --key-file /home/blog/cert/key.pem \ --fullchain-file /home/blog/cert/fullchain.pem \ --reloadcmd &#34;systemctl restart pixiublog&#34; beego app.conf 配置 EnableHTTPS = true HTTPSPort = 443 HTTPSCertFile = &#34;/home/blog/cert/fullchain.pem&#34; HTTPSKeyFile = &#34;/home/blog/cert/key.pem&#34; 参考 acme.sh 使用</p>
   </div>
   <footer class="entry-footer"><span title='2020-10-13 15:20:09 +0000 UTC'>October 13, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to beego 通过acme.sh 使用 https" href="https://haokiu.com/qP3u4V/"></a>
+  <a class="entry-link" aria-label="post link to beego 通过acme.sh 使用 https" href="https://haokiu.com/blog/qP3u4V/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -320,7 +320,7 @@ curl https://get.acme.sh | sh 普通用户和 root 用户都可以安装使用. 
 如果你用的 apache服务器, acme....</p>
   </div>
   <footer class="entry-footer"><span title='2020-10-12 18:01:57 +0000 UTC'>October 12, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to acme.sh 方便管理 letsencrypt " href="https://haokiu.com/6D0DBH/"></a>
+  <a class="entry-link" aria-label="post link to acme.sh 方便管理 letsencrypt " href="https://haokiu.com/blog/6D0DBH/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -335,7 +335,7 @@ qwr 234 yui cvbc 二、打散slice进行传递 var strss= []string{ &#34;qwr&#34
 [qwr 234 yui qqq aaa zzz zzz] 最后 如果没有’…’，面对上面的情况，无疑会增加代码量。</p>
   </div>
   <footer class="entry-footer"><span title='2020-10-12 17:12:09 +0000 UTC'>October 12, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to go ... 作用" href="https://haokiu.com/hiUuGO/"></a>
+  <a class="entry-link" aria-label="post link to go ... 作用" href="https://haokiu.com/blog/hiUuGO/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

@@ -171,7 +171,7 @@
 拦截器 import java.text.DateFormat; import java.util.Date; import java.util.List; import java.util.Locale; import java.util.Properties; import org.apache.ibatis.executor.Executor; import org.apache.ibatis.mapping.BoundSql; import org.apache.ibatis.mapping.MappedStatement; import org.apache.ibatis.mapping.ParameterMapping; import org.apache.ibatis.plugin.Interceptor; import org.apache.ibatis.plugin.Intercepts; import org.apache.ibatis.plugin.Invocation; import org.apache.ibatis.plugin.Plugin; import org.apache.ibatis.plugin.Signature; import org.apache.ibatis.reflection.MetaObject; import org.apache.ibatis.session.Configuration; import org.apache.ibatis.session.ResultHandler; import org.apache.ibatis.session.RowBounds; import org.apache.ibatis.type.TypeHandlerRegistry; import org.slf4j.Logger; import org.slf4j.LoggerFactory; @Intercepts({ @Signature(type = Executor.class, method = &#34;update&#34;, args = { MappedStatement.class, Object.class }), @Signature(type = Executor.class, method = &#34;query&#34;, args = { MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class }) }) public class MybatisInterceptor implements Interceptor { private static final Logger log = LoggerFactory.getLogger(MybatisInterceptor.class); @Override public Object intercept(Invocation invocation) throws Throwable { MappedStatement mappedStatement = (MappedStatement) invocation....</p>
   </div>
   <footer class="entry-footer"><span title='2020-09-27 10:59:03 +0000 UTC'>September 27, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to mybatis 增加自定义拦截器" href="https://haokiu.com/bGqNiH/"></a>
+  <a class="entry-link" aria-label="post link to mybatis 增加自定义拦截器" href="https://haokiu.com/blog/bGqNiH/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -184,7 +184,7 @@
 可以交互式的学习各种前沿技术：k8s linux docker 机器学习等</p>
   </div>
   <footer class="entry-footer"><span title='2020-09-17 13:58:36 +0000 UTC'>September 17, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to 在线交互式学习k8s/docker/linux" href="https://haokiu.com/baIB8x/"></a>
+  <a class="entry-link" aria-label="post link to 在线交互式学习k8s/docker/linux" href="https://haokiu.com/blog/baIB8x/"></a>
 </article>
     </main>
     

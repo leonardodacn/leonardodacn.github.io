@@ -171,7 +171,7 @@
 1.监控脚本 if [ -z &#34;`lsof -i:443 | grep LISTEN`&#34; ];then echo -e &#34;restart $(date &#43;&#39;%Y-%m-%d %H:%M:%S&#39;)&#34; systemctl restart pixiublog fi 2.系统定时任务 */3 * * * * /usr/local/pixiublog/monitor.sh &gt;&gt; /usr/local/pixiublog/monitor.log 2&gt;&amp;1 </p>
   </div>
   <footer class="entry-footer"><span title='2020-10-16 17:10:58 +0000 UTC'>October 16, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to 简单脚本实现服务监控" href="https://haokiu.com/5XKHkb/"></a>
+  <a class="entry-link" aria-label="post link to 简单脚本实现服务监控" href="https://haokiu.com/blog/5XKHkb/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -184,7 +184,7 @@
 #!/bin/sh siteDir=&#39;/usr/local/pixiublog&#39; appName=&#39;pixiublogMain&#39; echo &#34;kill the running program&#34; ps -ef | grep $appName | grep -v grep | awk &#39;{print $2}&#39; | xargs kill -9 echo &#34;sleep 3 secons for app to shutdown&#34; sleep 3 echo &#34;start program&#34; cd $siteDir nohup $siteDir/$appName &gt;&gt; $siteDir/console.log 2&gt;&amp;1 &amp; </p>
   </div>
   <footer class="entry-footer"><span title='2020-10-15 17:08:15 +0000 UTC'>October 15, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to haokiu网站启动脚本" href="https://haokiu.com/v3yn45/"></a>
+  <a class="entry-link" aria-label="post link to haokiu网站启动脚本" href="https://haokiu.com/blog/v3yn45/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -199,7 +199,7 @@
 [Unit] Description=The pixiublog Process Manager After=syslog.target network.target [Service] Type=forking ExecStart=sh /usr/local/pixiublog/start.sh ExecReload=/bin/kill -USR2 $MAINPID ExecStop=/bin/kill -SIGINT $MAINPID [Install] WantedBy=multi-user.target 2. 设置开机启动 systemctl enable pixiublog 安装证书 acme.sh --install-cert -d haokiu.com \ --cert-file /home/blog/cert/cert.pem \ --key-file /home/blog/cert/key.pem \ --fullchain-file /home/blog/cert/fullchain.pem \ --reloadcmd &#34;systemctl restart pixiublog&#34; beego app.conf 配置 EnableHTTPS = true HTTPSPort = 443 HTTPSCertFile = &#34;/home/blog/cert/fullchain.pem&#34; HTTPSKeyFile = &#34;/home/blog/cert/key.pem&#34; 参考 acme.sh 使用</p>
   </div>
   <footer class="entry-footer"><span title='2020-10-13 15:20:09 +0000 UTC'>October 13, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to beego 通过acme.sh 使用 https" href="https://haokiu.com/qP3u4V/"></a>
+  <a class="entry-link" aria-label="post link to beego 通过acme.sh 使用 https" href="https://haokiu.com/blog/qP3u4V/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -212,7 +212,7 @@
 #!/bin/sh #部署目录 siteDir=&#39;/usr/local/pixiublog&#39; # 源代码目录 cd /root/pixiublog echo &#34;update code&#34; git pull echo &#34;build pixiublog&#34; go build main.go echo &#34;remove old&#34; rm -rf $siteDir/views rm -rf $siteDir/static rm -rf $siteDir/pixiublog echo &#34;mv new program to $siteDir&#34; cp main $siteDir/pixiublog cp -rf views $siteDir/ cp -rf static $siteDir/ echo &#34;kill the running program&#34; ps -ef | grep &#39;pixiublog&#39; | grep -v grep | awk &#39;{print $2}&#39; | xargs kill -9 echo &#34;start program&#34; cd $siteDir nohup $siteDir/pixiublog &gt;&gt; $siteDir/console.log 2&gt;&amp;1 &amp; </p>
   </div>
   <footer class="entry-footer"><span title='2020-09-17 21:52:12 +0000 UTC'>September 17, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to 网站部署脚本" href="https://haokiu.com/1gTd1h/"></a>
+  <a class="entry-link" aria-label="post link to 网站部署脚本" href="https://haokiu.com/blog/1gTd1h/"></a>
 </article>
     </main>
     

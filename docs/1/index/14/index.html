@@ -194,7 +194,7 @@ readfds、writefds 和 exceptfds 类型都是 fd_set，这是一个结构体信�
 /* The fd_set member is required to be an array of longs....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to select 函数重难点解析" href="https://haokiu.com/2369cd70c2354e9c844815c14f31134c/"></a>
+  <a class="entry-link" aria-label="post link to select 函数重难点解析" href="https://haokiu.com/blog/2369cd70c2354e9c844815c14f31134c/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -213,7 +213,7 @@ int oldSocketFlag = fcntl(sockfd, F_GETFL, 0); int newSocketFlag = oldSocketFlag
 int socket(int domain, int type, int protocol); 给 type 参数增加一个 SOCK_NONBLOCK 标志即可，例如：...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to socket 的阻塞模式和非阻塞模式" href="https://haokiu.com/7a9421787c4a4e7482e4f3ea6234c7ac/"></a>
+  <a class="entry-link" aria-label="post link to socket 的阻塞模式和非阻塞模式" href="https://haokiu.com/blog/7a9421787c4a4e7482e4f3ea6234c7ac/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -231,7 +231,7 @@ int socket(int domain, int type, int protocol); 给 type 参数增加一个 SOCK
 //省略创建socket，建立连接等部分不相关的逻辑... char recvBuf[50] = { 0 }; int n = recv(socket, recvBuf, 50, 0); //省略出错处理逻辑....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to TCP 协议如何解决粘包、半包问题" href="https://haokiu.com/7b86f55ffdcd4434a17beb9dbf7b9527/"></a>
+  <a class="entry-link" aria-label="post link to TCP 协议如何解决粘包、半包问题" href="https://haokiu.com/blog/7b86f55ffdcd4434a17beb9dbf7b9527/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -253,7 +253,7 @@ int socket(int domain, int type, int protocol); 给 type 参数增加一个 SOCK
 11 pc客户端源码分析</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to TeamTalk源码解析" href="https://haokiu.com/0da28a69a69242919c3333dc8e970a8f/"></a>
+  <a class="entry-link" aria-label="post link to TeamTalk源码解析" href="https://haokiu.com/blog/0da28a69a69242919c3333dc8e970a8f/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -272,7 +272,7 @@ va_list va_start va_end 这几个宏是C函数库提供的，位于头文件stda
 #include &lt;stdio.h&gt; #include &lt;tchar.h&gt; #include &lt;stdarg.h&gt; #include &lt;locale.h&gt; int ShowLove(wchar_t* szFirstSentence, ...) { //用来统计可变参数数量 int num = 0; //第一步： //申明一个va_list类型对象ap，用于对参数进行遍历 va_list ap; //第二步： //使用va_start对变量进行初始化 //这里需要注意的是: //在传统C语言中，va_start把ap中内部指针设置为传递给函数参数的【第一个实参】； //而在标准的C中，va_start接受一个额外参数，也就是最后一个【固定参数】的名称， //并把ap中的内部指针设置为传递给函数的第一个【可变参数】. //所以你在VC&#43;&#43; 6.0和VS2008等高版本的编译器中使用va_start需要注意区别 //这里使用标准C va_start(ap, szFirstSentence); //第三步： //使用va_arg宏返回实参列表中的下一个参数值，并把ap的内部指针推向下一个参数（如果有的话） //必须指定下一个参数的类型。 //在调用va_start之后第一次调用va_arg将返回第一个可变参数的值 wprintf(szFirstSentence); wchar_t* p = 0; while(p = va_arg(ap, wchar_t*)) { wprintf(L&#34;%s&#34;, p); num &#43;&#43;; } //第四步： //待所有可变参数都读取完毕以后，调用va_end宏对ap和va_list做必要的清理工作 va_end(ap); return num; } int main(int argc, char* argv[]) { setlocale(LC_ALL, &#34;&#34;); int z = ShowLoveL&#34;我喜欢你！\n&#34;); int y = ShowLove(L&#34;我喜欢你！&#34;, L&#34;你喜欢谁？\n&#34;); int l = ShowLove(L&#34;我喜欢你！&#34;, L&#34;你喜欢谁？&#34;, L&#34;萧雨萌！\n&#34;); printf(&#34;可变参数个数依次是：%d\t%d\t%d\n&#34;, z, y, l); return 0; } 上述代码的运行结果是：...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 不定参数函数实现var_arg系列的宏" href="https://haokiu.com/e3f33300987a43d08044b27dbbc5e9ec/"></a>
+  <a class="entry-link" aria-label="post link to 不定参数函数实现var_arg系列的宏" href="https://haokiu.com/blog/e3f33300987a43d08044b27dbbc5e9ec/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -284,7 +284,7 @@ va_list va_start va_end 这几个宏是C函数库提供的，位于头文件stda
     <p>为什么你的简历没人看 程序员如何写简历 </p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 为什么你的简历没人看" href="https://haokiu.com/15d5370937664a8d84891f5e983b87f4/"></a>
+  <a class="entry-link" aria-label="post link to 为什么你的简历没人看" href="https://haokiu.com/blog/15d5370937664a8d84891f5e983b87f4/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -331,7 +331,7 @@ connect函数出错情况 由于connect函数是在建立tcp连接成功或失�
 对于linux系统，改变这个系统上限值也比较容易，由于需要改变系统配置参数，你需要root权限。 相关的命令是sysctl net.ipv4.tcp_syn_retries(针对于ipv4)。 在设置该值时还是要比较保守的，因为每次syn包重试的间隔都会增大(比如BSD类的系统实现中间隔会以2到3倍增加)，所有tcp_syn_retries的一个微小变化对connect超时时间的影响都非常大，不过扩大这个值也不会有什么坏处，因为你代码中设置的超时值都能够生效。但是如果代码中没有设置connect的超时值，那么connect就会阻塞很久，你发现对端机器down掉的间隔就更长。 作者建议设置这个值到6或者7，最多8。6对应的connect超时为45s，7对应90s，8对应190s。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 从抓包的角度分析connect()函数的连接过程" href="https://haokiu.com/f3b5fbeb80e645c9b5bd3d1feea7b387/"></a>
+  <a class="entry-link" aria-label="post link to 从抓包的角度分析connect()函数的连接过程" href="https://haokiu.com/blog/f3b5fbeb80e645c9b5bd3d1feea7b387/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -357,7 +357,7 @@ Visual Studio 2010
 微信搜索公众号**『高性能服务器开发』(中文名：高性能服务器开发)，关注公众号后，在公众号中回复『英雄联盟』**，即可得到下载链接。（喷子和代码贩子请远离！）</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 从零学习开源项目系列（一） 从一款多人联机实时对战游戏开始" href="https://haokiu.com/416ada8e33704bdcadd3202dd2413740/"></a>
+  <a class="entry-link" aria-label="post link to 从零学习开源项目系列（一） 从一款多人联机实时对战游戏开始" href="https://haokiu.com/blog/416ada8e33704bdcadd3202dd2413740/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -386,7 +386,7 @@ CCSKernel* GetCSKernelInstance(){ return &amp;CCSKernel::GetInstance(); } CCSKer
 INT32 CCSKernel::Initialize() { //JJIAZ加载配置的时候 不要随便调整顺序 CCSCfgMgr::getInstance().Initalize(); INT32 n32Init = LoadCfg(); if (eNormal != n32Init) { ELOG(LOG_ERROR,&#34; loadCfg()............failed!&#34;); return n32Init; } if(m_sCSKernelCfg.un32MaxSSNum &gt; 0 ) { m_psSSNetInfoList = new SSSNetInfo[m_sCSKernelCfg....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 从零学习开源项目系列（三） CSBattleMgr服务源码研究" href="https://haokiu.com/86a8b9de9c914f8ab93a3d36b455838b/"></a>
+  <a class="entry-link" aria-label="post link to 从零学习开源项目系列（三） CSBattleMgr服务源码研究" href="https://haokiu.com/blog/86a8b9de9c914f8ab93a3d36b455838b/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -404,7 +404,7 @@ cd Bin\x64\Release start.bat 这个代码进入Bin\x64\Release目录，执行另
 taskkill /f /t /im redis-server.exe taskkill /f /t /im CSBattleMgr.exe taskkill /f /t /im SSBattleMgr.exe taskkill /f /t /im GSConsole.exe taskkill /f /t /im BalanceServer.exe taskkill /f /t /im LoginServer.exe taskkill /f /t /im GSKernel.exe taskkill /f /t /im RobotConsole.exe taskkill /f /t /im LogServer.exe ping -n 1 127.0&gt;nul start /min &#34;redis-server&#34; &#34;redis-server.exe&#34; redis.conf ping -n 1 127.0&gt;nul start /min &#34;redis-Logicserver&#34; &#34;redis-server.exe&#34; redis-logic.conf ping -n 1 127.0&gt;nul echo &#34;start CSBattleMgr.exe&#34; start /min &#34;CSBattleMgr&#34; &#34;CSBattleMgr.exe&#34; ping -n 1 127.0&gt;nul echo &#34;start SSBattleMgr.exe&#34; start /min &#34;SSBattleMgr&#34; &#34;SSBattleMgr.exe&#34; ping -n 1 127....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 从零学习开源项目系列（二） 最后一战概况" href="https://haokiu.com/92d9492b21aa444d81eb4f31c1bfabb1/"></a>
+  <a class="entry-link" aria-label="post link to 从零学习开源项目系列（二） 最后一战概况" href="https://haokiu.com/blog/92d9492b21aa444d81eb4f31c1bfabb1/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

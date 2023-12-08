@@ -195,7 +195,7 @@
 如果对端没有任何回复，则本端做重试，如果重试 9 次（TCP_KEEPCNT 值）（前后重试间隔为 75 秒（TCP_KEEPINTVL 值））仍然不可达，则向应用程序返回 ETIMEOUT（无任何应答）或 EHOST 错误信息。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 心跳包机制设计详解" href="https://haokiu.com/82046162d4f74d3b9745ef1e8f8cdf57/"></a>
+  <a class="entry-link" aria-label="post link to 心跳包机制设计详解" href="https://haokiu.com/blog/82046162d4f74d3b9745ef1e8f8cdf57/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -216,7 +216,7 @@
 /** *@desc: IULog.h *@author: zhangyl *@date: 2014.12.25 */ #ifndef __LOG_H__ #define __LOG_H__ enum LOG_LEVEL { LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR }; //注意：如果打印的日志信息中有中文，则格式化字符串要用_T()宏包裹起来， #define LOG_INFO(...) CIULog::Log(LOG_LEVEL_INFO, __FUNCSIG__,__LINE__, __VA_ARGS__) #define LOG_WARNING(...) CIULog::Log(LOG_LEVEL_WARNING, __FUNCSIG__, __LINE__,__VA_ARGS__) #define LOG_ERROR(...) CIULog::Log(LOG_LEVEL_ERROR, __FUNCSIG__,__LINE__, __VA_ARGS__) class CIULog { public: static bool Init(bool bToFile, bool bTruncateLongLog, PCTSTR pszLogFileName); static void Uninit(); static void SetLevel(LOG_LEVEL nLevel); //不输出线程ID号和所在函数签名、行号 static bool Log(long nLevel, PCTSTR pszFmt, ....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 日志系统的设计" href="https://haokiu.com/1549ab1669fe40dda14c41a84df83415/"></a>
+  <a class="entry-link" aria-label="post link to 日志系统的设计" href="https://haokiu.com/blog/1549ab1669fe40dda14c41a84df83415/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -246,7 +246,7 @@ JAVA 程序员，4 年了，迷茫了，希望由前辈可以给指出一个技�
 如果你想和我聊聊职业上的困惑，可以在『高性能服务器开发』公众号后台回复关键字『职业指导』，我们可以针对性地聊一聊。</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 给工作 4 年迷茫的程序员们的一点建议" href="https://haokiu.com/049d41c798c54956b4c2b094aacec413/"></a>
+  <a class="entry-link" aria-label="post link to 给工作 4 年迷茫的程序员们的一点建议" href="https://haokiu.com/blog/049d41c798c54956b4c2b094aacec413/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -293,7 +293,7 @@ Q26 年终奖是如何发的？什么时候发？
 Q27 年终奖还没发，我跳槽是不是就没有年终奖了？...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 聊聊技术人员的常见的职业问题" href="https://haokiu.com/1908cdb9f5c747b996136e3b3e408b8d/"></a>
+  <a class="entry-link" aria-label="post link to 聊聊技术人员的常见的职业问题" href="https://haokiu.com/blog/1908cdb9f5c747b996136e3b3e408b8d/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -307,7 +307,7 @@ Q27 年终奖还没发，我跳槽是不是就没有年终奖了？...</p>
 写给那些傻傻想做服务器开发的朋友</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 职业规划" href="https://haokiu.com/01f6fc4ce7c54057a2379aab6b98843f/"></a>
+  <a class="entry-link" aria-label="post link to 职业规划" href="https://haokiu.com/blog/01f6fc4ce7c54057a2379aab6b98843f/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -319,7 +319,7 @@ Q27 年终奖还没发，我跳槽是不是就没有年终奖了？...</p>
     <p>自我提升与开源代码 2020 年好好读一读开源代码吧 </p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 自我提升与开源代码" href="https://haokiu.com/e50a72b7fb4e47a9904a05621e5b692f/"></a>
+  <a class="entry-link" aria-label="post link to 自我提升与开源代码" href="https://haokiu.com/blog/e50a72b7fb4e47a9904a05621e5b692f/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -357,7 +357,7 @@ Q27 年终奖还没发，我跳槽是不是就没有年终奖了？...</p>
 如果读者以前没接触过这种设计思想，希望可以好好的思考和体会一下。</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 错误码系统的设计" href="https://haokiu.com/32ba3bce20124dd380cdde0bba6ef5b9/"></a>
+  <a class="entry-link" aria-label="post link to 错误码系统的设计" href="https://haokiu.com/blog/32ba3bce20124dd380cdde0bba6ef5b9/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -374,7 +374,7 @@ Q27 年终奖还没发，我跳槽是不是就没有年终奖了？...</p>
 1 //推荐的方式一 2 int n = send(socket, buf, buf_length, 0)； 3 if (n == buf_length) 4 { 5 printf(&#34;send data successfully\n&#34;); 6 } 1//推荐的方式二：在一个循环里面根据偏移量发送数据 2bool SendData(const char* buf , int buf_length) 3{ 4 //已发送的字节数目 5 int sent_bytes = 0; 6 int ret = 0; 7 while (true) 8 { 9 ret = send(m_hSocket, buf &#43; sent_bytes, buf_length - sent_bytes, 0); 10 if (nRet == -1) 11 { 12 if (errno == EWOULDBLOCK) 13 { 14 //严谨的做法，这里如果发不出去，应该缓存尚未发出去的数据，后面介绍 15 break; 16 } 17 else if (errno == EINTR) 18 continue; 19 else 20 return false; 21 } 22 else if (nRet == 0) 23 { 24 return false; 25 } 26 27 sent_bytes &#43;= ret; 28 if (sent_bytes == buf_length) 29 break; 30 31 //稍稍降低 CPU 的使用率 32 usleep(1); 33 } 34 35 return true; 36} 返回值等于 0...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 非阻塞模式下 send 和 recv 函数的返回值" href="https://haokiu.com/7050b3d426bf44b29c25c3d30ae77006/"></a>
+  <a class="entry-link" aria-label="post link to 非阻塞模式下 send 和 recv 函数的返回值" href="https://haokiu.com/blog/7050b3d426bf44b29c25c3d30ae77006/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -419,7 +419,7 @@ Q27 年终奖还没发，我跳槽是不是就没有年终奖了？...</p>
 1bool CIUSocket::Recv() 2{ 3 int nRet = 0; 4 5 while(true) 6 { 7 char buff[512]; 8 nRet = ::recv(m_hSocket, buff, 512, 0); 9 //一旦出现错误就立刻关闭Socket 10 if(nRet == SOCKET_ERROR) 11 { 12 if (::WSAGetLastError() == WSAEWOULDBLOCK) 13 break; 14 else 15 return false; 16 } 17 else if(nRet &lt; 1) 18 return false; 19 20 m_strRecvBuf....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 高性能服务器架构设计总结" href="https://haokiu.com/67da065d5a2a4917804acd4875f0f0a8/"></a>
+  <a class="entry-link" aria-label="post link to 高性能服务器架构设计总结" href="https://haokiu.com/blog/67da065d5a2a4917804acd4875f0f0a8/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -439,7 +439,7 @@ Reactor模式
 C&#43;&#43; 高性能服务器网络框架设计细节</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 高性能服务器框架设计" href="https://haokiu.com/95e6ea6c39e345bf8177b77fb2d24548/"></a>
+  <a class="entry-link" aria-label="post link to 高性能服务器框架设计" href="https://haokiu.com/blog/95e6ea6c39e345bf8177b77fb2d24548/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

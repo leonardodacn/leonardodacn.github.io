@@ -198,7 +198,7 @@
 默认值：全部列 splitKey...</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to hbase20xsqlreader  插件文档" href="https://haokiu.com/d74e56a13f78424182e14164c8b4e5e4/"></a>
+  <a class="entry-link" aria-label="post link to hbase20xsqlreader  插件文档" href="https://haokiu.com/blog/d74e56a13f78424182e14164c8b4e5e4/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -213,7 +213,7 @@
 3. 配置说明 3.1 配置样例 { &#34;job&#34;: { &#34;entry&#34;: { &#34;jvm&#34;: &#34;-Xms2048m -Xmx2048m&#34; }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;txtfilereader&#34;, &#34;parameter&#34;: { &#34;path&#34;: &#34;/Users/shf/workplace/datax_test/hbase20xsqlwriter/txt/normal.txt&#34;, &#34;charset&#34;: &#34;UTF-8&#34;, &#34;column&#34;: [ { &#34;index&#34;: 0, &#34;type&#34;: &#34;String&#34; }, { &#34;index&#34;: 1, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 2, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 3, &#34;type&#34;: &#34;string&#34; } ], &#34;fieldDelimiter&#34;: &#34;,&#34; } }, &#34;writer&#34;: { &#34;name&#34;: &#34;hbase20xsqlwriter&#34;, &#34;parameter&#34;: { &#34;batchSize&#34;: &#34;100&#34;, &#34;column&#34;: [ &#34;UID&#34;, &#34;TS&#34;, &#34;EVENTID&#34;, &#34;CONTENT&#34; ], &#34;queryServerAddress&#34;: &#34;http://127.0.0.1:8765&#34;, &#34;nullMode&#34;: &#34;skip&#34;, &#34;table&#34;: &#34;目标hbase表名，大小写有关&#34; } } } ], &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 5 } } } } 3....</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to HBase20xsqlwriter插件文档" href="https://haokiu.com/28250260969448579bc8cee8c2963319/"></a>
+  <a class="entry-link" aria-label="post link to HBase20xsqlwriter插件文档" href="https://haokiu.com/blog/28250260969448579bc8cee8c2963319/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -228,7 +228,7 @@
 3 功能说明 3.1 配置样例 配置一个从KingbaseES数据库同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &#34;byte&#34;: 1048576 }, //出错限制 &#34;errorLimit&#34;: { //出错的record条数上限，当大于该值即报错。 &#34;record&#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;kingbaseesreader&#34;, &#34;parameter&#34;: { // 数据库连接用户名 &#34;username&#34;: &#34;xx&#34;, // 数据库连接密码 &#34;password&#34;: &#34;xx&#34;, &#34;column&#34;: [ &#34;id&#34;，&#34;name&#34; ], //切分主键 &#34;splitPk&#34;: &#34;id&#34;, &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;table&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:kingbase8://host:port/database&#34; ] } ] } }, &#34;writer&#34;: { //writer类型 &#34;name&#34;: &#34;streamwriter&#34;, //是否打印内容 &#34;parameter&#34;: { &#34;print&#34;:true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: 1048576 }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;kingbaseesreader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;xx&#34;, &#34;password&#34;: &#34;xx&#34;, &#34;where&#34;: &#34;&#34;, &#34;connection&#34;: [ { &#34;querySql&#34;: [ &#34;select db_id,on_line_flag from db_info where db_id &lt; 10;&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:kingbase8://host:port/database&#34;, &#34;jdbc:kingbase8://host:port/database&#34; ] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;: false, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3....</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to KingbaseesReader 插件文档" href="https://haokiu.com/cc7bd03f72154435ae9af2d67a214f6d/"></a>
+  <a class="entry-link" aria-label="post link to KingbaseesReader 插件文档" href="https://haokiu.com/blog/cc7bd03f72154435ae9af2d67a214f6d/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -244,7 +244,7 @@
 3 功能说明 3.1 配置样例 配置一个从Mysql数据库同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 3 }, &#34;errorLimit&#34;: { &#34;record&#34;: 0, &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;mysqlreader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;root&#34;, &#34;password&#34;: &#34;root&#34;, &#34;column&#34;: [ &#34;id&#34;, &#34;name&#34; ], &#34;splitPk&#34;: &#34;db_id&#34;, &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;table&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:mysql://127.0.0.1:3306/database&#34; ] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;:true } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;:1 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;mysqlreader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;root&#34;, &#34;password&#34;: &#34;root&#34;, &#34;connection&#34;: [ { &#34;querySql&#34;: [ &#34;select db_id,on_line_flag from db_info where db_id &lt; 10;&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:mysql://bad_ip:3306/database&#34;, &#34;jdbc:mysql://127....</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to MysqlReader 插件文档" href="https://haokiu.com/29875f5b780c46929670f9b8699ed462/"></a>
+  <a class="entry-link" aria-label="post link to MysqlReader 插件文档" href="https://haokiu.com/blog/29875f5b780c46929670f9b8699ed462/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -259,7 +259,7 @@
 描述：本插件的名称 必选：是 默认值：opentsdbreader parameter...</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to OpenTSDBReader 插件文档" href="https://haokiu.com/4e39a8595b6247fabfd6f625f053b0b6/"></a>
+  <a class="entry-link" aria-label="post link to OpenTSDBReader 插件文档" href="https://haokiu.com/blog/4e39a8595b6247fabfd6f625f053b0b6/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -274,7 +274,7 @@
 3 功能说明 3.1 配置样例 配置一个从Oracle数据库同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { //设置传输速度 byte/s 尽量逼近这个速度但是不高于它. // channel 表示通道数量，byte表示通道速度，如果单通道速度1MB，配置byte为1048576表示一个channel &#34;byte&#34;: 1048576 }, //出错限制 &#34;errorLimit&#34;: { //先选择record &#34;record&#34;: 0, //百分比 1表示100% &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;oraclereader&#34;, &#34;parameter&#34;: { // 数据库连接用户名 &#34;username&#34;: &#34;root&#34;, // 数据库连接密码 &#34;password&#34;: &#34;root&#34;, &#34;column&#34;: [ &#34;id&#34;,&#34;name&#34; ], //切分主键 &#34;splitPk&#34;: &#34;db_id&#34;, &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;table&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:oracle:thin:@[HOST_NAME]:PORT:[DATABASE_NAME]&#34; ] } ] } }, &#34;writer&#34;: { //writer类型 &#34;name&#34;: &#34;streamwriter&#34;, // 是否打印内容 &#34;parameter&#34;: { &#34;print&#34;: true } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 5 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;oraclereader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;root&#34;, &#34;password&#34;: &#34;root&#34;, &#34;where&#34;: &#34;&#34;, &#34;connection&#34;: [ { &#34;querySql&#34;: [ &#34;select db_id,on_line_flag from db_info where db_id &lt; 10&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:oracle:thin:@[HOST_NAME]:PORT:[DATABASE_NAME]&#34; ] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;visible&#34;: false, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3....</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to OracleReader 插件文档" href="https://haokiu.com/0ffdd59e828b4bb0a53cef538910db12/"></a>
+  <a class="entry-link" aria-label="post link to OracleReader 插件文档" href="https://haokiu.com/blog/0ffdd59e828b4bb0a53cef538910db12/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -290,7 +290,7 @@ OTSReader会根据OTS的表范围，按照Datax并发的数目N，将范围等�
 3 功能说明 3.1 配置样例 配置一个从OTS全表同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;otsreader&#34;, &#34;parameter&#34;: { /* ----------- 必填 --------------*/ &#34;endpoint&#34;:&#34;&#34;, &#34;accessId&#34;:&#34;&#34;, &#34;accessKey&#34;:&#34;&#34;, &#34;instanceName&#34;:&#34;&#34;, // 导出数据表的表名 &#34;table&#34;:&#34;&#34;, // 需要导出的列名，支持重复列和常量列，区分大小写 // 常量列：类型支持STRING，INT，DOUBLE，BOOL和BINARY // 备注：BINARY需要通过Base64转换为对应的字符串传入插件 &#34;column&#34;:[ {&#34;name&#34;:&#34;col1&#34;}, // 普通列 {&#34;name&#34;:&#34;col2&#34;}, // 普通列 {&#34;name&#34;:&#34;col3&#34;}, // 普通列 {&#34;type&#34;:&#34;STRING&#34;, &#34;value&#34; : &#34;bazhen&#34;}, // 常量列(字符串) {&#34;type&#34;:&#34;INT&#34;, &#34;value&#34; : &#34;&#34;}, // 常量列(整形) {&#34;type&#34;:&#34;DOUBLE&#34;, &#34;value&#34; : &#34;&#34;}, // 常量列(浮点) {&#34;type&#34;:&#34;BOOL&#34;, &#34;value&#34; : &#34;&#34;}, // 常量列(布尔) {&#34;type&#34;:&#34;BINARY&#34;, &#34;value&#34; : &#34;Base64(bin)&#34;} // 常量列(二进制),使用Base64编码完成 ], &#34;range&#34;:{ // 导出数据的起始范围 // 支持INF_MIN, INF_MAX, STRING, INT &#34;begin&#34;:[ {&#34;type&#34;:&#34;INF_MIN&#34;}, ], // 导出数据的结束范围 // 支持INF_MIN, INF_MAX, STRING, INT &#34;end&#34;:[ {&#34;type&#34;:&#34;INF_MAX&#34;}, ] } } }, &#34;writer&#34;: {} } ] } } 配置一个定义抽取范围的OTSReader： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;byte&#34;:10485760 }, &#34;errorLimit&#34;:0....</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to OTSReader 插件文档" href="https://haokiu.com/2dc5ba5f4d58498e8453bd2d8efde079/"></a>
+  <a class="entry-link" aria-label="post link to OTSReader 插件文档" href="https://haokiu.com/blog/2dc5ba5f4d58498e8453bd2d8efde079/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -308,7 +308,7 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
 3 功能说明 3.1 配置样例 配置一个写入OTS作业: { &#34;job&#34;: { &#34;setting&#34;: { }, &#34;content&#34;: [ { &#34;reader&#34;: {}, &#34;writer&#34;: { &#34;name&#34;: &#34;otswriter&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;:&#34;&#34;, &#34;accessId&#34;:&#34;&#34;, &#34;accessKey&#34;:&#34;&#34;, &#34;instanceName&#34;:&#34;&#34;, // 导出数据表的表名 &#34;table&#34;:&#34;&#34;, // Writer支持不同类型之间进行相互转换 // 如下类型转换不支持: // ================================ // int -&gt; binary // double -&gt; bool, binary // bool -&gt; binary // bytes -&gt; int, double, bool // ================================ // 需要导入的PK列名，区分大小写 // 类型支持：STRING，INT // 1. 支持类型转换，注意类型转换时的精度丢失 // 2. 顺序不要求和表的Meta一致 &#34;primaryKey&#34; : [ {&#34;name&#34;:&#34;pk1&#34;, &#34;type&#34;:&#34;string&#34;}, {&#34;name&#34;:&#34;pk2&#34;, &#34;type&#34;:&#34;int&#34;} ], // 需要导入的列名，区分大小写 // 类型支持STRING，INT，DOUBLE，BOOL和BINARY &#34;column&#34; : [ {&#34;name&#34;:&#34;col2&#34;, &#34;type&#34;:&#34;INT&#34;}, {&#34;name&#34;:&#34;col3&#34;, &#34;type&#34;:&#34;STRING&#34;}, {&#34;name&#34;:&#34;col4&#34;, &#34;type&#34;:&#34;STRING&#34;}, {&#34;name&#34;:&#34;col5&#34;, &#34;type&#34;:&#34;BINARY&#34;}, {&#34;name&#34;:&#34;col6&#34;, &#34;type&#34;:&#34;DOUBLE&#34;} ], // 写入OTS的方式 // PutRow : 等同于OTS API中PutRow操作，检查条件是ignore // UpdateRow : 等同于OTS API中UpdateRow操作，检查条件是ignore // DeleteRow: 等同于OTS API中DeleteRow操作，检查条件是ignore &#34;writeMode&#34; : &#34;PutRow&#34; } } } ] } } 3....</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to OTSWriter 插件文档" href="https://haokiu.com/7d2496e6853044daa824d7a78226b07d/"></a>
+  <a class="entry-link" aria-label="post link to OTSWriter 插件文档" href="https://haokiu.com/blog/7d2496e6853044daa824d7a78226b07d/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -323,7 +323,7 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
 3 功能说明 3.1 配置样例 配置一个从PostgreSQL数据库同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &#34;byte&#34;: 1048576 }, //出错限制 &#34;errorLimit&#34;: { //出错的record条数上限，当大于该值即报错。 &#34;record&#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;postgresqlreader&#34;, &#34;parameter&#34;: { // 数据库连接用户名 &#34;username&#34;: &#34;xx&#34;, // 数据库连接密码 &#34;password&#34;: &#34;xx&#34;, &#34;column&#34;: [ &#34;id&#34;，&#34;name&#34; ], //切分主键 &#34;splitPk&#34;: &#34;id&#34;, &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;table&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:postgresql://host:port/database&#34; ] } ] } }, &#34;writer&#34;: { //writer类型 &#34;name&#34;: &#34;streamwriter&#34;, //是否打印内容 &#34;parameter&#34;: { &#34;print&#34;:true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: 1048576 }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;postgresqlreader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;xx&#34;, &#34;password&#34;: &#34;xx&#34;, &#34;where&#34;: &#34;&#34;, &#34;connection&#34;: [ { &#34;querySql&#34;: [ &#34;select db_id,on_line_flag from db_info where db_id &lt; 10;&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:postgresql://host:port/database&#34;, &#34;jdbc:postgresql://host:port/database&#34; ] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;: false, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3....</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to PostgresqlReader 插件文档" href="https://haokiu.com/0adf103bd70440a1978ecbcc7dd63787/"></a>
+  <a class="entry-link" aria-label="post link to PostgresqlReader 插件文档" href="https://haokiu.com/blog/0adf103bd70440a1978ecbcc7dd63787/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -338,7 +338,7 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
 3 功能说明 3.1 配置样例 配置一个从RDBMS数据库同步抽取数据作业: {&#34;job&#34;: {&#34;setting&#34;: {&#34;speed&#34;: {&#34;byte&#34;: 1048576},&#34;errorLimit&#34;: {&#34;record&#34;: 0,&#34;percentage&#34;: 0.02}},&#34;content&#34;: [{&#34;reader&#34;: {&#34;name&#34;: &#34;rdbmsreader&#34;,&#34;parameter&#34;: {&#34;username&#34;: &#34;xxx&#34;,&#34;password&#34;: &#34;xxx&#34;,&#34;column&#34;: [&#34;id&#34;,&#34;name&#34;],&#34;splitPk&#34;: &#34;pk&#34;,&#34;connection&#34;: [{&#34;table&#34;: [&#34;table&#34;],&#34;jdbcUrl&#34;: [&#34;jdbc:dm://ip:port/database&#34;]}],&#34;fetchSize&#34;: 1024,&#34;where&#34;: &#34;1 = 1&#34;}},&#34;writer&#34;: {&#34;name&#34;: &#34;streamwriter&#34;,&#34;parameter&#34;: {&#34;print&#34;: true}}}]}} 配置一个自定义SQL的数据库同步任务到ODPS的作业： {&#34;job&#34;: {&#34;setting&#34;: {&#34;speed&#34;: {&#34;byte&#34;: 1048576},&#34;errorLimit&#34;: {&#34;record&#34;: 0,&#34;percentage&#34;: 0....</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to RDBMSReader 插件文档" href="https://haokiu.com/34c79077064f4502a247f840e8b64c46/"></a>
+  <a class="entry-link" aria-label="post link to RDBMSReader 插件文档" href="https://haokiu.com/blog/34c79077064f4502a247f840e8b64c46/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

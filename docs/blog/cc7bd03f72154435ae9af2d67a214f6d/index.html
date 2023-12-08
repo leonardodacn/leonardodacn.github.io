@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>KingbaseesReader 插件文档 | haokiu</title>
+<meta name="keywords" content="datax">
+<meta name="description" content="KingbaseesReader 插件文档 1 快速介绍 KingbaseesReader插件实现了从KingbaseES读取数据。在底层实现上，KingbaseesReader通过JDBC连接远程KingbaseES数据库，并执行相应的sql语句将数据从KingbaseES库中SELECT出来。
+2 实现原理 简而言之，KingbaseesReader通过JDBC连接器连接到远程的KingbaseES数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程KingbaseES数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+对于用户配置Table、Column、Where的信息，KingbaseesReader将其拼接为SQL语句发送到KingbaseES数据库；对于用户配置querySql信息，KingbaseesReader直接将其发送到KingbaseES数据库。
+3 功能说明 3.1 配置样例 配置一个从KingbaseES数据库同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &#34;byte&#34;: 1048576 }, //出错限制 &#34;errorLimit&#34;: { //出错的record条数上限，当大于该值即报错。 &#34;record&#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;kingbaseesreader&#34;, &#34;parameter&#34;: { // 数据库连接用户名 &#34;username&#34;: &#34;xx&#34;, // 数据库连接密码 &#34;password&#34;: &#34;xx&#34;, &#34;column&#34;: [ &#34;id&#34;，&#34;name&#34; ], //切分主键 &#34;splitPk&#34;: &#34;id&#34;, &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;table&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:kingbase8://host:port/database&#34; ] } ] } }, &#34;writer&#34;: { //writer类型 &#34;name&#34;: &#34;streamwriter&#34;, //是否打印内容 &#34;parameter&#34;: { &#34;print&#34;:true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: 1048576 }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;kingbaseesreader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;xx&#34;, &#34;password&#34;: &#34;xx&#34;, &#34;where&#34;: &#34;&#34;, &#34;connection&#34;: [ { &#34;querySql&#34;: [ &#34;select db_id,on_line_flag from db_info where db_id &lt; 10;&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:kingbase8://host:port/database&#34;, &#34;jdbc:kingbase8://host:port/database&#34; ] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;: false, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3.">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/cc7bd03f72154435ae9af2d67a214f6d/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="KingbaseesReader 插件文档" />
+<meta property="og:description" content="KingbaseesReader 插件文档 1 快速介绍 KingbaseesReader插件实现了从KingbaseES读取数据。在底层实现上，KingbaseesReader通过JDBC连接远程KingbaseES数据库，并执行相应的sql语句将数据从KingbaseES库中SELECT出来。
+2 实现原理 简而言之，KingbaseesReader通过JDBC连接器连接到远程的KingbaseES数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程KingbaseES数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+对于用户配置Table、Column、Where的信息，KingbaseesReader将其拼接为SQL语句发送到KingbaseES数据库；对于用户配置querySql信息，KingbaseesReader直接将其发送到KingbaseES数据库。
+3 功能说明 3.1 配置样例 配置一个从KingbaseES数据库同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &#34;byte&#34;: 1048576 }, //出错限制 &#34;errorLimit&#34;: { //出错的record条数上限，当大于该值即报错。 &#34;record&#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;kingbaseesreader&#34;, &#34;parameter&#34;: { // 数据库连接用户名 &#34;username&#34;: &#34;xx&#34;, // 数据库连接密码 &#34;password&#34;: &#34;xx&#34;, &#34;column&#34;: [ &#34;id&#34;，&#34;name&#34; ], //切分主键 &#34;splitPk&#34;: &#34;id&#34;, &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;table&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:kingbase8://host:port/database&#34; ] } ] } }, &#34;writer&#34;: { //writer类型 &#34;name&#34;: &#34;streamwriter&#34;, //是否打印内容 &#34;parameter&#34;: { &#34;print&#34;:true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: 1048576 }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;kingbaseesreader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;xx&#34;, &#34;password&#34;: &#34;xx&#34;, &#34;where&#34;: &#34;&#34;, &#34;connection&#34;: [ { &#34;querySql&#34;: [ &#34;select db_id,on_line_flag from db_info where db_id &lt; 10;&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:kingbase8://host:port/database&#34;, &#34;jdbc:kingbase8://host:port/database&#34; ] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;: false, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/cc7bd03f72154435ae9af2d67a214f6d/" /><meta property="article:section" content="4" />
+<meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
+<meta property="article:modified_time" content="2021-02-02T17:45:01+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="KingbaseesReader 插件文档"/>
+<meta name="twitter:description" content="KingbaseesReader 插件文档 1 快速介绍 KingbaseesReader插件实现了从KingbaseES读取数据。在底层实现上，KingbaseesReader通过JDBC连接远程KingbaseES数据库，并执行相应的sql语句将数据从KingbaseES库中SELECT出来。
+2 实现原理 简而言之，KingbaseesReader通过JDBC连接器连接到远程的KingbaseES数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程KingbaseES数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+对于用户配置Table、Column、Where的信息，KingbaseesReader将其拼接为SQL语句发送到KingbaseES数据库；对于用户配置querySql信息，KingbaseesReader直接将其发送到KingbaseES数据库。
+3 功能说明 3.1 配置样例 配置一个从KingbaseES数据库同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &#34;byte&#34;: 1048576 }, //出错限制 &#34;errorLimit&#34;: { //出错的record条数上限，当大于该值即报错。 &#34;record&#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;kingbaseesreader&#34;, &#34;parameter&#34;: { // 数据库连接用户名 &#34;username&#34;: &#34;xx&#34;, // 数据库连接密码 &#34;password&#34;: &#34;xx&#34;, &#34;column&#34;: [ &#34;id&#34;，&#34;name&#34; ], //切分主键 &#34;splitPk&#34;: &#34;id&#34;, &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;table&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:kingbase8://host:port/database&#34; ] } ] } }, &#34;writer&#34;: { //writer类型 &#34;name&#34;: &#34;streamwriter&#34;, //是否打印内容 &#34;parameter&#34;: { &#34;print&#34;:true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: 1048576 }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;kingbaseesreader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;xx&#34;, &#34;password&#34;: &#34;xx&#34;, &#34;where&#34;: &#34;&#34;, &#34;connection&#34;: [ { &#34;querySql&#34;: [ &#34;select db_id,on_line_flag from db_info where db_id &lt; 10;&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:kingbase8://host:port/database&#34;, &#34;jdbc:kingbase8://host:port/database&#34; ] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;: false, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "4s",
+      "item": "https://haokiu.com/4/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "KingbaseesReader 插件文档",
+      "item": "https://haokiu.com/blog/cc7bd03f72154435ae9af2d67a214f6d/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "KingbaseesReader 插件文档",
+  "name": "KingbaseesReader 插件文档",
+  "description": "KingbaseesReader 插件文档 1 快速介绍 KingbaseesReader插件实现了从KingbaseES读取数据。在底层实现上，KingbaseesReader通过JDBC连接远程KingbaseES数据库，并执行相应的sql语句将数据从KingbaseES库中SELECT出来。\n2 实现原理 简而言之，KingbaseesReader通过JDBC连接器连接到远程的KingbaseES数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程KingbaseES数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。\n对于用户配置Table、Column、Where的信息，KingbaseesReader将其拼接为SQL语句发送到KingbaseES数据库；对于用户配置querySql信息，KingbaseesReader直接将其发送到KingbaseES数据库。\n3 功能说明 3.1 配置样例 配置一个从KingbaseES数据库同步抽取数据到本地的作业: { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. \u0026#34;byte\u0026#34;: 1048576 }, //出错限制 \u0026#34;errorLimit\u0026#34;: { //出错的record条数上限，当大于该值即报错。 \u0026#34;record\u0026#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% \u0026#34;percentage\u0026#34;: 0.02 } }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;kingbaseesreader\u0026#34;, \u0026#34;parameter\u0026#34;: { // 数据库连接用户名 \u0026#34;username\u0026#34;: \u0026#34;xx\u0026#34;, // 数据库连接密码 \u0026#34;password\u0026#34;: \u0026#34;xx\u0026#34;, \u0026#34;column\u0026#34;: [ \u0026#34;id\u0026#34;，\u0026#34;name\u0026#34; ], //切分主键 \u0026#34;splitPk\u0026#34;: \u0026#34;id\u0026#34;, \u0026#34;connection\u0026#34;: [ { \u0026#34;table\u0026#34;: [ \u0026#34;table\u0026#34; ], \u0026#34;jdbcUrl\u0026#34;: [ \u0026#34;jdbc:kingbase8://host:port/database\u0026#34; ] } ] } }, \u0026#34;writer\u0026#34;: { //writer类型 \u0026#34;name\u0026#34;: \u0026#34;streamwriter\u0026#34;, //是否打印内容 \u0026#34;parameter\u0026#34;: { \u0026#34;print\u0026#34;:true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: 1048576 }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;kingbaseesreader\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;username\u0026#34;: \u0026#34;xx\u0026#34;, \u0026#34;password\u0026#34;: \u0026#34;xx\u0026#34;, \u0026#34;where\u0026#34;: \u0026#34;\u0026#34;, \u0026#34;connection\u0026#34;: [ { \u0026#34;querySql\u0026#34;: [ \u0026#34;select db_id,on_line_flag from db_info where db_id \u0026lt; 10;\u0026#34; ], \u0026#34;jdbcUrl\u0026#34;: [ \u0026#34;jdbc:kingbase8://host:port/database\u0026#34;, \u0026#34;jdbc:kingbase8://host:port/database\u0026#34; ] } ] } }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;streamwriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;print\u0026#34;: false, \u0026#34;encoding\u0026#34;: \u0026#34;UTF-8\u0026#34; } } } ] } } 3.",
+  "keywords": [
+    "datax"
+  ],
+  "articleBody": "KingbaseesReader 插件文档 1 快速介绍 KingbaseesReader插件实现了从KingbaseES读取数据。在底层实现上，KingbaseesReader通过JDBC连接远程KingbaseES数据库，并执行相应的sql语句将数据从KingbaseES库中SELECT出来。\n2 实现原理 简而言之，KingbaseesReader通过JDBC连接器连接到远程的KingbaseES数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程KingbaseES数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。\n对于用户配置Table、Column、Where的信息，KingbaseesReader将其拼接为SQL语句发送到KingbaseES数据库；对于用户配置querySql信息，KingbaseesReader直接将其发送到KingbaseES数据库。\n3 功能说明 3.1 配置样例 配置一个从KingbaseES数据库同步抽取数据到本地的作业: { \"job\": { \"setting\": { \"speed\": { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. \"byte\": 1048576 }, //出错限制 \"errorLimit\": { //出错的record条数上限，当大于该值即报错。 \"record\": 0, //出错的record百分比上限 1.0表示100%，0.02表示2% \"percentage\": 0.02 } }, \"content\": [ { \"reader\": { \"name\": \"kingbaseesreader\", \"parameter\": { // 数据库连接用户名 \"username\": \"xx\", // 数据库连接密码 \"password\": \"xx\", \"column\": [ \"id\"，\"name\" ], //切分主键 \"splitPk\": \"id\", \"connection\": [ { \"table\": [ \"table\" ], \"jdbcUrl\": [ \"jdbc:kingbase8://host:port/database\" ] } ] } }, \"writer\": { //writer类型 \"name\": \"streamwriter\", //是否打印内容 \"parameter\": { \"print\":true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { \"job\": { \"setting\": { \"speed\": 1048576 }, \"content\": [ { \"reader\": { \"name\": \"kingbaseesreader\", \"parameter\": { \"username\": \"xx\", \"password\": \"xx\", \"where\": \"\", \"connection\": [ { \"querySql\": [ \"select db_id,on_line_flag from db_info where db_id \u003c 10;\" ], \"jdbcUrl\": [ \"jdbc:kingbase8://host:port/database\", \"jdbc:kingbase8://host:port/database\" ] } ] } }, \"writer\": { \"name\": \"streamwriter\", \"parameter\": { \"print\": false, \"encoding\": \"UTF-8\" } } } ] } } 3.2 参数说明 jdbcUrl\n描述：描述的是到对端数据库的JDBC连接信息，使用JSON的数组描述，并支持一个库填写多个连接地址。之所以使用JSON数组描述连接信息，是因为阿里集团内部支持多个IP探测，如果配置了多个，KingbaseesReader可以依次探测ip的可连接性，直到选择一个合法的IP。如果全部连接失败，KingbaseesReader报错。 注意，jdbcUrl必须包含在connection配置单元中。对于阿里集团外部使用情况，JSON数组填写一个JDBC连接即可。\njdbcUrl按照KingbaseES官方规范，并可以填写连接附件控制信息。具体请参看KingbaseES官方文档。\n必选：是 默认值：无 username\n描述：数据源的用户名 必选：是 默认值：无 password\n描述：数据源指定用户名的密码 必选：是 默认值：无 table\n描述：所选取的需要同步的表。使用JSON的数组描述，因此支持多张表同时抽取。当配置为多张表时，用户自己需保证多张表是同一schema结构，KingbaseesReader不予检查表是否同一逻辑表。注意，table必须包含在connection配置单元中。\n必选：是 默认值：无 column\n描述：所配置的表中需要同步的列名集合，使用JSON的数组描述字段信息。用户使用*代表默认使用所有列配置，例如[’*’]。\n支持列裁剪，即列可以挑选部分列进行导出。\n支持列换序，即列可以不按照表schema信息进行导出。\n支持常量配置，用户需要按照KingbaseES语法格式: [“id”, “‘hello’::varchar”, “true”, “2.5::real”, “power(2,3)”] id为普通列名，‘hello’::varchar为字符串常量，true为布尔值，2.5为浮点数, power(2,3)为函数。\ncolumn必须用户显示指定同步的列集合，不允许为空！\n必选：是 默认值：无 splitPk\n描述：KingbaseesReader进行数据抽取时，如果指定splitPk，表示用户希望使用splitPk代表的字段进行数据分片，DataX因此会启动并发任务进行数据同步，这样可以大大提供数据同步的效能。\n推荐splitPk用户使用表主键，因为表主键通常情况下比较均匀，因此切分出来的分片也不容易出现数据热点。\n目前splitPk仅支持整形数据切分，不支持浮点、字符串型、日期等其他类型。如果用户指定其他非支持类型，KingbaseesReader将报错！\nsplitPk设置为空，底层将视作用户不允许对单表进行切分，因此使用单通道进行抽取。\n必选：否 默认值：空 where\n描述：筛选条件，KingbaseesReader根据指定的column、table、where条件拼接SQL，并根据这个SQL进行数据抽取。在实际业务场景中，往往会选择当天的数据进行同步，可以将where条件指定为gmt_create \u003e $bizdate 。注意：不可以将where条件指定为limit 10，limit不是SQL的合法where子句。\nwhere条件可以有效地进行业务增量同步。\twhere条件不配置或者为空，视作全表同步数据。 必选：否 默认值：无 querySql\n描述：在有些业务场景下，where这一配置项不足以描述所筛选的条件，用户可以通过该配置型来自定义筛选SQL。当用户配置了这一项之后，DataX系统就会忽略table，column这些配置型，直接使用这个配置项的内容对数据进行筛选，例如需要进行多表join后同步数据，使用select a,b from table_a join table_b on table_a.id = table_b.id 当用户配置querySql时，KingbaseesReader直接忽略table、column、where条件的配置。\n必选：否 默认值：无 fetchSize\n描述：该配置项定义了插件和数据库服务器端每次批量数据获取条数，该值决定了DataX和服务器端的网络交互次数，能够较大的提升数据抽取性能。 注意，该值过大(\u003e2048)可能造成DataX进程OOM。。\n必选：否 默认值：1024 3.3 类型转换 目前KingbaseesReader支持大部分KingbaseES类型，但也存在部分个别类型没有支持的情况，请注意检查你的类型。\n下面列出KingbaseesReader针对KingbaseES类型转换列表:\nDataX 内部类型 KingbaseES 数据类型 Long bigint, bigserial, integer, smallint, serial Double double precision, money, numeric, real String varchar, char, text, bit, inet Date date, time, timestamp Boolean bool Bytes bytea 请注意:\n除上述罗列字段类型外，其他类型均不支持; money,inet,bit需用户使用a_inet::varchar类似的语法转换。 ",
+  "wordCount" : "263",
+  "inLanguage": "en",
+  "datePublished": "2021-02-02T17:45:01Z",
+  "dateModified": "2021-02-02T17:45:01Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/cc7bd03f72154435ae9af2d67a214f6d/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    <h1 class="post-title">
+      KingbaseesReader 插件文档
+    </h1>
+    <div class="post-meta"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#kingbaseesreader-%e6%8f%92%e4%bb%b6%e6%96%87%e6%a1%a3" aria-label="KingbaseesReader 插件文档">KingbaseesReader 插件文档</a><ul>
+                        
+                <li>
+                    <a href="#1-%e5%bf%ab%e9%80%9f%e4%bb%8b%e7%bb%8d" aria-label="1 快速介绍">1 快速介绍</a></li>
+                <li>
+                    <a href="#2-%e5%ae%9e%e7%8e%b0%e5%8e%9f%e7%90%86" aria-label="2 实现原理">2 实现原理</a></li>
+                <li>
+                    <a href="#3-%e5%8a%9f%e8%83%bd%e8%af%b4%e6%98%8e" aria-label="3 功能说明">3 功能说明</a><ul>
+                        
+                <li>
+                    <a href="#31-%e9%85%8d%e7%bd%ae%e6%a0%b7%e4%be%8b" aria-label="3.1 配置样例">3.1 配置样例</a></li>
+                <li>
+                    <a href="#32-%e5%8f%82%e6%95%b0%e8%af%b4%e6%98%8e" aria-label="3.2 参数说明">3.2 参数说明</a></li>
+                <li>
+                    <a href="#33-%e7%b1%bb%e5%9e%8b%e8%bd%ac%e6%8d%a2" aria-label="3.3 类型转换">3.3 类型转换</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="kingbaseesreader-插件文档">KingbaseesReader 插件文档</h1>
+<hr>
+<h2 id="1-快速介绍">1 快速介绍</h2>
+<p>KingbaseesReader插件实现了从KingbaseES读取数据。在底层实现上，KingbaseesReader通过JDBC连接远程KingbaseES数据库，并执行相应的sql语句将数据从KingbaseES库中SELECT出来。</p>
+<h2 id="2-实现原理">2 实现原理</h2>
+<p>简而言之，KingbaseesReader通过JDBC连接器连接到远程的KingbaseES数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程KingbaseES数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。</p>
+<p>对于用户配置Table、Column、Where的信息，KingbaseesReader将其拼接为SQL语句发送到KingbaseES数据库；对于用户配置querySql信息，KingbaseesReader直接将其发送到KingbaseES数据库。</p>
+<h2 id="3-功能说明">3 功能说明</h2>
+<h3 id="31-配置样例">3.1 配置样例</h3>
+<ul>
+<li>配置一个从KingbaseES数据库同步抽取数据到本地的作业:</li>
+</ul>
+<pre tabindex="0"><code>{
+    &#34;job&#34;: {
+        &#34;setting&#34;: {
+            &#34;speed&#34;: {
+            //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它.
+                 &#34;byte&#34;: 1048576
+            },
+            //出错限制
+                &#34;errorLimit&#34;: {
+                //出错的record条数上限，当大于该值即报错。
+                &#34;record&#34;: 0,
+                //出错的record百分比上限 1.0表示100%，0.02表示2%
+                &#34;percentage&#34;: 0.02
+            }
+        },
+        &#34;content&#34;: [
+            {
+                &#34;reader&#34;: {
+                    &#34;name&#34;: &#34;kingbaseesreader&#34;,
+                    &#34;parameter&#34;: {
+                        // 数据库连接用户名
+                        &#34;username&#34;: &#34;xx&#34;,
+                        // 数据库连接密码
+                        &#34;password&#34;: &#34;xx&#34;,
+                        &#34;column&#34;: [
+                            &#34;id&#34;，&#34;name&#34;
+                        ],
+                        //切分主键
+                        &#34;splitPk&#34;: &#34;id&#34;,
+                        &#34;connection&#34;: [
+                            {
+                                &#34;table&#34;: [
+                                    &#34;table&#34;
+                                ],
+                                &#34;jdbcUrl&#34;: [
+     &#34;jdbc:kingbase8://host:port/database&#34;
+                                ]
+                            }
+                        ]
+                    }
+                },
+               &#34;writer&#34;: {
+                    //writer类型
+                    &#34;name&#34;: &#34;streamwriter&#34;,
+                    //是否打印内容
+                    &#34;parameter&#34;: {
+                        &#34;print&#34;:true,
+                    }
+                }
+            }
+        ]
+    }
+}
+</code></pre><ul>
+<li>配置一个自定义SQL的数据库同步任务到本地内容的作业：</li>
+</ul>
+<pre tabindex="0"><code>{
+    &#34;job&#34;: {
+        &#34;setting&#34;: {
+            &#34;speed&#34;: 1048576
+        },
+        &#34;content&#34;: [
+            {
+                &#34;reader&#34;: {
+                    &#34;name&#34;: &#34;kingbaseesreader&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;username&#34;: &#34;xx&#34;,
+                        &#34;password&#34;: &#34;xx&#34;,
+                        &#34;where&#34;: &#34;&#34;,
+                        &#34;connection&#34;: [
+                            {
+                                &#34;querySql&#34;: [
+                                    &#34;select db_id,on_line_flag from db_info where db_id &lt; 10;&#34;
+                                ],
+                                &#34;jdbcUrl&#34;: [
+                                    &#34;jdbc:kingbase8://host:port/database&#34;, &#34;jdbc:kingbase8://host:port/database&#34;
+                                ]
+                            }
+                        ]
+                    }
+                },
+                &#34;writer&#34;: {
+                    &#34;name&#34;: &#34;streamwriter&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;print&#34;: false,
+                        &#34;encoding&#34;: &#34;UTF-8&#34;
+                    }
+                }
+            }
+        ]
+    }
+}
+</code></pre><h3 id="32-参数说明">3.2 参数说明</h3>
+<ul>
+<li>
+<p><strong>jdbcUrl</strong></p>
+<ul>
+<li>
+<p>描述：描述的是到对端数据库的JDBC连接信息，使用JSON的数组描述，并支持一个库填写多个连接地址。之所以使用JSON数组描述连接信息，是因为阿里集团内部支持多个IP探测，如果配置了多个，KingbaseesReader可以依次探测ip的可连接性，直到选择一个合法的IP。如果全部连接失败，KingbaseesReader报错。 注意，jdbcUrl必须包含在connection配置单元中。对于阿里集团外部使用情况，JSON数组填写一个JDBC连接即可。</p>
+<p>jdbcUrl按照KingbaseES官方规范，并可以填写连接附件控制信息。具体请参看<a href="https://help.kingbase.com.cn/doc-view-5683.html">KingbaseES官方文档</a>。</p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>username</strong></p>
+<ul>
+<li>
+<p>描述：数据源的用户名 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>password</strong></p>
+<ul>
+<li>
+<p>描述：数据源指定用户名的密码 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>table</strong></p>
+<ul>
+<li>
+<p>描述：所选取的需要同步的表。使用JSON的数组描述，因此支持多张表同时抽取。当配置为多张表时，用户自己需保证多张表是同一schema结构，KingbaseesReader不予检查表是否同一逻辑表。注意，table必须包含在connection配置单元中。<!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>column</strong></p>
+<ul>
+<li>
+<p>描述：所配置的表中需要同步的列名集合，使用JSON的数组描述字段信息。用户使用*代表默认使用所有列配置，例如[&rsquo;*&rsquo;]。</p>
+<p>支持列裁剪，即列可以挑选部分列进行导出。</p>
+<p>支持列换序，即列可以不按照表schema信息进行导出。</p>
+<p>支持常量配置，用户需要按照KingbaseES语法格式:
+[&ldquo;id&rdquo;, &ldquo;&lsquo;hello&rsquo;::varchar&rdquo;, &ldquo;true&rdquo;, &ldquo;2.5::real&rdquo;, &ldquo;power(2,3)&rdquo;]
+id为普通列名，&lsquo;hello&rsquo;::varchar为字符串常量，true为布尔值，2.5为浮点数, power(2,3)为函数。</p>
+<p><strong>column必须用户显示指定同步的列集合，不允许为空！</strong></p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>splitPk</strong></p>
+<ul>
+<li>
+<p>描述：KingbaseesReader进行数据抽取时，如果指定splitPk，表示用户希望使用splitPk代表的字段进行数据分片，DataX因此会启动并发任务进行数据同步，这样可以大大提供数据同步的效能。</p>
+<p>推荐splitPk用户使用表主键，因为表主键通常情况下比较均匀，因此切分出来的分片也不容易出现数据热点。</p>
+<p>目前splitPk仅支持整形数据切分，<code>不支持浮点、字符串型、日期等其他类型</code>。如果用户指定其他非支持类型，KingbaseesReader将报错！</p>
+<p>splitPk设置为空，底层将视作用户不允许对单表进行切分，因此使用单通道进行抽取。</p>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：空 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>where</strong></p>
+<ul>
+<li>
+<p>描述：筛选条件，KingbaseesReader根据指定的column、table、where条件拼接SQL，并根据这个SQL进行数据抽取。在实际业务场景中，往往会选择当天的数据进行同步，可以将where条件指定为gmt_create &gt; $bizdate 。注意：不可以将where条件指定为limit 10，limit不是SQL的合法where子句。<!-- raw HTML omitted --></p>
+<pre><code>where条件可以有效地进行业务增量同步。		where条件不配置或者为空，视作全表同步数据。
+</code></pre>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>querySql</strong></p>
+<ul>
+<li>描述：在有些业务场景下，where这一配置项不足以描述所筛选的条件，用户可以通过该配置型来自定义筛选SQL。当用户配置了这一项之后，DataX系统就会忽略table，column这些配置型，直接使用这个配置项的内容对数据进行筛选，例如需要进行多表join后同步数据，使用select a,b from table_a join table_b on table_a.id = table_b.id <!-- raw HTML omitted --></li>
+</ul>
+<p><code>当用户配置querySql时，KingbaseesReader直接忽略table、column、where条件的配置</code>。</p>
+<ul>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>fetchSize</strong></p>
+<ul>
+<li>描述：该配置项定义了插件和数据库服务器端每次批量数据获取条数，该值决定了DataX和服务器端的网络交互次数，能够较大的提升数据抽取性能。<!-- raw HTML omitted --></li>
+</ul>
+<p><code>注意，该值过大(&gt;2048)可能造成DataX进程OOM。</code>。</p>
+<ul>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：1024 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="33-类型转换">3.3 类型转换</h3>
+<p>目前KingbaseesReader支持大部分KingbaseES类型，但也存在部分个别类型没有支持的情况，请注意检查你的类型。</p>
+<p>下面列出KingbaseesReader针对KingbaseES类型转换列表:</p>
+<table>
+<thead>
+<tr>
+<th>DataX 内部类型</th>
+<th>KingbaseES 数据类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Long</td>
+<td>bigint, bigserial, integer, smallint, serial</td>
+</tr>
+<tr>
+<td>Double</td>
+<td>double precision, money, numeric, real</td>
+</tr>
+<tr>
+<td>String</td>
+<td>varchar, char, text, bit, inet</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>date, time, timestamp</td>
+</tr>
+<tr>
+<td>Boolean</td>
+<td>bool</td>
+</tr>
+<tr>
+<td>Bytes</td>
+<td>bytea</td>
+</tr>
+</tbody>
+</table>
+<p>请注意:</p>
+<ul>
+<li><code>除上述罗列字段类型外，其他类型均不支持; money,inet,bit需用户使用a_inet::varchar类似的语法转换</code>。</li>
+</ul>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

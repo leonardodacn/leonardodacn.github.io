@@ -193,7 +193,7 @@ static Status Open(const Options&amp; options, RandomAccessFile* file, uint64_tf
 *1* S1 首先从文件的结尾读取Footer，并Decode到Footer对象中，如果文件长度小于Footer的长度，则报错。Footer的decode很简单，就是根据前面的Footer结构，解析并判断magic number是否正确，解析出meta index和index block的偏移和长度。 *table = NULL; if (size &lt;Footer::kEncodedLength) { // 文件太短 returnStatus::InvalidArgument(&#34;file is too short to be an sstable&#34;); } charfooter_space[Footer::kEncodedLength]; // Footer大小是固定的 Slice footer_input; Status s = file-&gt;Read(size -Footer::kEncodedLength, Footer::kEncodedLength, &amp;footer_input, footer_space); if (!s.ok()) return s; Footer footer; s =footer.DecodeFrom(&amp;footer_input); if (!s.ok()) return s; S2 解析出了Footer，我们就可以读取index block和meta index了，首先读取index block。 BlockContents contents; Block* index_block = NULL; if (s.ok()) { s = ReadBlock(file, ReadOptions(),footer.index_handle(), &amp;contents); if (s.ok()) { index_block = newBlock(contents); } } 这是通过调用ReadBlock完成的，下面会分析这个函数。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析9" href="https://haokiu.com/899ada7f72f249e6938aef7f300eaf1a/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析9" href="https://haokiu.com/blog/899ada7f72f249e6938aef7f300eaf1a/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -217,7 +217,7 @@ libevent源码深度剖析12
 libevent源码深度剖析13</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to libevent源码深度剖析" href="https://haokiu.com/5d2f8fa20fdc4018a34afe19f8c23987/"></a>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析" href="https://haokiu.com/blog/5d2f8fa20fdc4018a34afe19f8c23987/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -246,7 +246,7 @@ class Reactor{ public: int register_handler(Event_Handler *pHandler, int event);
 class Event_Handler{ public: virtual void handle_read() = 0; virtual void handle_write() = 0; virtual void handle_timeout() = 0; virtual void handle_close() = 0; virtual HANDLE get_handle() = 0; // ... }; class Event_Handler{ public: // events maybe read/write/timeout/close ....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to libevent源码深度剖析02" href="https://haokiu.com/d62a9a215b334817945e5814d92a423a/"></a>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析02" href="https://haokiu.com/blog/d62a9a215b334817945e5814d92a423a/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -270,7 +270,7 @@ event_base_dispatch(base); 3. 实例代码 上面例子的程序代码如下所�
 struct event ev; struct timeval tv; void time_cb(int fd, short event, void *argc){ printf(&#34;timer wakeup/n&#34;); event_add(&amp;ev, &amp;tv); // reschedule timer } int main(){ struct event_base *base = event_init(); tv.tv_sec = 10; // 10s period tv....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to libevent源码深度剖析03" href="https://haokiu.com/88dcf812d9464727bdfa54410657cfaa/"></a>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析03" href="https://haokiu.com/blog/88dcf812d9464727bdfa54410657cfaa/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -284,7 +284,7 @@ struct event ev; struct timeval tv; void time_cb(int fd, short event, void *argc
 3. 小结 本节介绍了libevent的组织和分类，下面将会详细介绍libevent的核心部分event结构。</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to libevent源码深度剖析04" href="https://haokiu.com/7fd5744edc6741c18b5cb6187e662e40/"></a>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析04" href="https://haokiu.com/blog/7fd5744edc6741c18b5cb6187e662e40/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -302,7 +302,7 @@ I/O事件： EV_WRITE和EV_READ 定时事件：EV_TIMEOUT 信号： EV_SIGNAL �
 #define EV_TIMEOUT 0x01 #define EV_READ 0x02 #define EV_WRITE 0x04 #define EV_SIGNAL 0x08 #define EV_PERSIST 0x10 /* Persistant event */ 可以看出事件类型可以使用“|”运算符进行组合，需要说明的是，信号和I/O事件不能同时设置；...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to libevent源码深度剖析05" href="https://haokiu.com/1f6a82cdb17742a49514907b604e44c1/"></a>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析05" href="https://haokiu.com/blog/1f6a82cdb17742a49514907b604e44c1/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -319,7 +319,7 @@ evsel和evbase这两个字段的设置可能会让人有些迷惑，这里你可
 struct eventop { const char *name; void *(*init)(struct event_base *); // 初始化 int (*add)(void *, struct event *); // 注册事件 int (*del)(void *, struct event *); // 删除事件 int (*dispatch)(struct event_base *, void *, struct timeval *); // 事件分发 void (*dealloc)(struct event_base *, void *); // 注销，释放资源 /* set if we need to reinitialize the event base */ int need_reinit; }; 也就是说，在libevent中，每种I/O demultiplex机制的实现都必须提供这五个函数接口，来完成自身的初始化、销毁释放；对事件的注册、注销和分发。 比如对于epoll，libevent实现了5个对应的接口函数，并在初始化时并将eventop的5个函数指针指向这5个函数，那么程序就可以使用epoll作为I/O demultiplex机制了，这个在后面会再次提到。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to libevent源码深度剖析06" href="https://haokiu.com/fc115cade0c049a8ab14e737a22b37fe/"></a>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析06" href="https://haokiu.com/blog/fc115cade0c049a8ab14e737a22b37fe/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -335,7 +335,7 @@ struct eventop { const char *name; void *(*init)(struct event_base *); // 初始
 int event_base_loop(struct event_base *base, int flags){ const struct eventop *evsel = base-&gt;evsel; void *evbase = base-&gt;evbase; struct timeval tv; struct timeval *tv_p; int res, done; // 清空时间缓存 base-&gt;tv_cache.tv_sec = 0; // evsignal_base是全局变量，在处理signal时，用于指名signal所属的event_base实例 if (base-&gt;sig.ev_signal_added) evsignal_base = base; done = 0; while (!done) { // 事件主循环 // 查看是否需要跳出循环，程序可以调用event_loopexit_cb()设置event_gotterm标记 // 调用event_base_loopbreak()设置event_break标记 if (base-&gt;event_gotterm) { base-&gt;event_gotterm = 0; break; } if (base-&gt;event_break) { base-&gt;event_break = 0; break; } // 校正系统时间，如果系统使用的是非MONOTONIC时间，用户可能会向后调整了系统时间 // 在timeout_correct函数里，比较last wait time和当前时间，如果当前时间&lt; last wait time // 表明时间有问题，这是需要更新timer_heap中所有定时事件的超时时间。 timeout_correct(base, &amp;tv); // 根据timer heap中事件的最小超时时间，计算系统I/O demultiplexer的最大等待时间 tv_p = &amp;tv; if (!base-&gt;event_count_active &amp;&amp; !...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to libevent源码深度剖析07" href="https://haokiu.com/1fa932a07dd84e9fbdde728e110c098f/"></a>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析07" href="https://haokiu.com/blog/1fa932a07dd84e9fbdde728e110c098f/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -356,7 +356,7 @@ res = epoll_wait(epollop-&gt;epfd, events, epollop-&gt;nevents, timeout); if (re
 struct evsignal_info { struct event ev_signal; int ev_signal_pair[2]; int ev_signal_added; volatile sig_atomic_t evsignal_caught; struct event_list evsigevents[NSIG]; sig_atomic_t evsigcaught[NSIG]; #ifdef HAVE_SIGACTION struct sigaction **sh_old; #else ev_sighandler_t **sh_old; #endif int sh_old_max; }; 下面详细介绍一下个字段的含义和作用： 1）ev_signal， 为socket pair的读socket向event_base注册读事件时使用的event结构体； 2）ev_signal_pair，socket pair对，作用见第一节的介绍； 3）ev_signal_added，记录ev_signal事件是否已经注册了； 4）evsignal_caught，是否有信号发生的标记；是volatile类型，因为它会在另外的线程中被修改； 5）evsigvents[NSIG]，数组，evsigevents[signo]表示注册到信号signo的事件链表； 6）evsigcaught[NSIG]，具体记录每个信号触发的次数，evsigcaught[signo]是记录信号signo被触发的次数； 7）sh_old记录了原来的signal处理函数指针，当信号signo注册的event被清空时，需要重新设置其处理函数； evsignal_info的初始化包括，创建socket pair，设置ev_signal事件（但并没有注册，而是等到有信号注册时才检查并注册），并将所有标记置零，初始化信号的注册事件链表指针等。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to libevent源码深度剖析08" href="https://haokiu.com/4a5e0c5a568b4187b207ec0ada2dbdfb/"></a>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析08" href="https://haokiu.com/blog/4a5e0c5a568b4187b207ec0ada2dbdfb/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -372,7 +372,7 @@ if (!base-&gt;event_count_active &amp;&amp; !(flags &amp; EVLOOP_NONBLOCK)) { //
 1static int timeout_next(struct event_base *base, struct timeval **tv_p){ 2 struct timeval now; 3 struct event *ev; 4 struct timeval *tv = *tv_p; 5 // 堆的首元素具有最小的超时值 6 if ((ev = min_heap_top(&amp;base-&gt;timeheap)) == NULL) { 7 // 如果没有定时事件，将等待时间设置为NULL,表示一直阻塞直到有I/O事件发生 8 *tv_p = NULL; 9 return (0); 10 } 11 // 取得当前时间 12 gettime(base, &amp;now); 13 // 如果超时时间&lt;=当前值，不能等待，需要立即返回 14 if (evutil_timercmp(&amp;ev-&gt;ev_timeout, &amp;now, &lt;=)) { 15 evutil_timerclear(tv); 16 return (0); 17 } 18 // 计算等待的时间=当前时间-最小的超时时间 19 evutil_timersub(&amp;ev-&gt;ev_timeout, &amp;now, tv); 20 return (0); 21} 2....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to libevent源码深度剖析09" href="https://haokiu.com/e65e0c91ca7e45ad9ad3081edbd423f8/"></a>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析09" href="https://haokiu.com/blog/e65e0c91ca7e45ad9ad3081edbd423f8/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

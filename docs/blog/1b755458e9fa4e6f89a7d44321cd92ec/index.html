@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Datax MongoDBWriter | haokiu</title>
+<meta name="keywords" content="datax">
+<meta name="description" content="Datax MongoDBWriter 1 快速介绍 MongoDBWriter 插件利用 MongoDB 的java客户端MongoClient进行MongoDB的写操作。最新版本的Mongo已经将DB锁的粒度从DB级别降低到document级别，配合上MongoDB强大的索引功能，基本可以满足数据源向MongoDB写入数据的需求，针对数据更新的需求，通过配置业务主键的方式也可以实现。
+2 实现原理 MongoDBWriter通过Datax框架获取Reader生成的数据，然后将Datax支持的类型通过逐一判断转换成MongoDB支持的类型。其中一个值得指出的点就是Datax本身不支持数组类型，但是MongoDB支持数组类型，并且数组类型的索引还是蛮强大的。为了使用MongoDB的数组类型，则可以通过参数的特殊配置，将字符串可以转换成MongoDB中的数组。类型转换之后，就可以依托于Datax框架并行的写入MongoDB。
+3 功能说明 该示例从ODPS读一份数据到MongoDB。
+{ &quot;job&quot;: { &quot;setting&quot;: { &quot;speed&quot;: { &quot;channel&quot;: 2 } }, &quot;content&quot;: [ { &quot;reader&quot;: { &quot;name&quot;: &quot;odpsreader&quot;, &quot;parameter&quot;: { &quot;accessId&quot;: &quot;********&quot;, &quot;accessKey&quot;: &quot;*********&quot;, &quot;project&quot;: &quot;tb_ai_recommendation&quot;, &quot;table&quot;: &quot;jianying_tag_datax_test&quot;, &quot;column&quot;: [ &quot;unique_id&quot;, &quot;sid&quot;, &quot;user_id&quot;, &quot;auction_id&quot;, &quot;content_type&quot;, &quot;pool_type&quot;, &quot;frontcat_id&quot;, &quot;categoryid&quot;, &quot;gmt_create&quot;, &quot;taglist&quot;, &quot;property&quot;, &quot;scorea&quot;, &quot;scoreb&quot; ], &quot;splitMode&quot;: &quot;record&quot;, &quot;odpsServer&quot;: &quot;http://xxx/api&quot; } }, &quot;writer&quot;: { &quot;name&quot;: &quot;mongodbwriter&quot;, &quot;parameter&quot;: { &quot;address&quot;: [ &quot;127.0.0.1:27017&quot; ], &quot;userName&quot;: &quot;&quot;, &quot;userPassword&quot;: &quot;&quot;, &quot;dbName&quot;: &quot;tag_per_data&quot;, &quot;collectionName&quot;: &quot;tag_data&quot;, &quot;column&quot;: [ { &quot;name&quot;: &quot;unique_id&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;sid&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;user_id&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;auction_id&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;content_type&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;pool_type&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;frontcat_id&quot;, &quot;type&quot;: &quot;Array&quot;, &quot;splitter&quot;: &quot; &quot; }, { &quot;name&quot;: &quot;categoryid&quot;, &quot;type&quot;: &quot;Array&quot;, &quot;splitter&quot;: &quot; &quot; }, { &quot;name&quot;: &quot;gmt_create&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;taglist&quot;, &quot;type&quot;: &quot;Array&quot;, &quot;splitter&quot;: &quot; &quot; }, { &quot;name&quot;: &quot;property&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;scorea&quot;, &quot;type&quot;: &quot;int&quot; }, { &quot;name&quot;: &quot;scoreb&quot;, &quot;type&quot;: &quot;int&quot; }, { &quot;name&quot;: &quot;scorec&quot;, &quot;type&quot;: &quot;int&quot; } ], &quot;upsertInfo&quot;: { &quot;isUpsert&quot;: &quot;true&quot;, &quot;upsertKey&quot;: &quot;unique_id&quot; } } } } ] } } 4 参数说明 address： MongoDB的数据地址信息，因为MonogDB可能是个集群，则ip端口信息需要以Json数组的形式给出。【必填】 userName：MongoDB的用户名。【选填】 userPassword： MongoDB的密码。【选填】 collectionName： MonogoDB的集合名。【必填】 column：MongoDB的文档列名。【必填】 name：Column的名字。【必填】 type：Column的类型。【选填】 splitter：特殊分隔符，当且仅当要处理的字符串要用分隔符分隔为字符数组时，才使用这个参数，通过这个参数指定的分隔符，将字符串分隔存储到MongoDB的数组中。【选填】 upsertInfo：指定了传输数据时更新的信息。【选填】 isUpsert：当设置为true时，表示针对相同的upsertKey做更新操作。【选填】 upsertKey：upsertKey指定了没行记录的业务主键。用来做更新时使用。【选填】 5 类型转换 DataX 内部类型 MongoDB 数据类型 Long int, Long Double double String string, array Date date Boolean boolean Bytes bytes 6 性能报告 7 测试报告 ">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/1b755458e9fa4e6f89a7d44321cd92ec/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Datax MongoDBWriter" />
+<meta property="og:description" content="Datax MongoDBWriter 1 快速介绍 MongoDBWriter 插件利用 MongoDB 的java客户端MongoClient进行MongoDB的写操作。最新版本的Mongo已经将DB锁的粒度从DB级别降低到document级别，配合上MongoDB强大的索引功能，基本可以满足数据源向MongoDB写入数据的需求，针对数据更新的需求，通过配置业务主键的方式也可以实现。
+2 实现原理 MongoDBWriter通过Datax框架获取Reader生成的数据，然后将Datax支持的类型通过逐一判断转换成MongoDB支持的类型。其中一个值得指出的点就是Datax本身不支持数组类型，但是MongoDB支持数组类型，并且数组类型的索引还是蛮强大的。为了使用MongoDB的数组类型，则可以通过参数的特殊配置，将字符串可以转换成MongoDB中的数组。类型转换之后，就可以依托于Datax框架并行的写入MongoDB。
+3 功能说明 该示例从ODPS读一份数据到MongoDB。
+{ &quot;job&quot;: { &quot;setting&quot;: { &quot;speed&quot;: { &quot;channel&quot;: 2 } }, &quot;content&quot;: [ { &quot;reader&quot;: { &quot;name&quot;: &quot;odpsreader&quot;, &quot;parameter&quot;: { &quot;accessId&quot;: &quot;********&quot;, &quot;accessKey&quot;: &quot;*********&quot;, &quot;project&quot;: &quot;tb_ai_recommendation&quot;, &quot;table&quot;: &quot;jianying_tag_datax_test&quot;, &quot;column&quot;: [ &quot;unique_id&quot;, &quot;sid&quot;, &quot;user_id&quot;, &quot;auction_id&quot;, &quot;content_type&quot;, &quot;pool_type&quot;, &quot;frontcat_id&quot;, &quot;categoryid&quot;, &quot;gmt_create&quot;, &quot;taglist&quot;, &quot;property&quot;, &quot;scorea&quot;, &quot;scoreb&quot; ], &quot;splitMode&quot;: &quot;record&quot;, &quot;odpsServer&quot;: &quot;http://xxx/api&quot; } }, &quot;writer&quot;: { &quot;name&quot;: &quot;mongodbwriter&quot;, &quot;parameter&quot;: { &quot;address&quot;: [ &quot;127.0.0.1:27017&quot; ], &quot;userName&quot;: &quot;&quot;, &quot;userPassword&quot;: &quot;&quot;, &quot;dbName&quot;: &quot;tag_per_data&quot;, &quot;collectionName&quot;: &quot;tag_data&quot;, &quot;column&quot;: [ { &quot;name&quot;: &quot;unique_id&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;sid&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;user_id&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;auction_id&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;content_type&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;pool_type&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;frontcat_id&quot;, &quot;type&quot;: &quot;Array&quot;, &quot;splitter&quot;: &quot; &quot; }, { &quot;name&quot;: &quot;categoryid&quot;, &quot;type&quot;: &quot;Array&quot;, &quot;splitter&quot;: &quot; &quot; }, { &quot;name&quot;: &quot;gmt_create&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;taglist&quot;, &quot;type&quot;: &quot;Array&quot;, &quot;splitter&quot;: &quot; &quot; }, { &quot;name&quot;: &quot;property&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;scorea&quot;, &quot;type&quot;: &quot;int&quot; }, { &quot;name&quot;: &quot;scoreb&quot;, &quot;type&quot;: &quot;int&quot; }, { &quot;name&quot;: &quot;scorec&quot;, &quot;type&quot;: &quot;int&quot; } ], &quot;upsertInfo&quot;: { &quot;isUpsert&quot;: &quot;true&quot;, &quot;upsertKey&quot;: &quot;unique_id&quot; } } } } ] } } 4 参数说明 address： MongoDB的数据地址信息，因为MonogDB可能是个集群，则ip端口信息需要以Json数组的形式给出。【必填】 userName：MongoDB的用户名。【选填】 userPassword： MongoDB的密码。【选填】 collectionName： MonogoDB的集合名。【必填】 column：MongoDB的文档列名。【必填】 name：Column的名字。【必填】 type：Column的类型。【选填】 splitter：特殊分隔符，当且仅当要处理的字符串要用分隔符分隔为字符数组时，才使用这个参数，通过这个参数指定的分隔符，将字符串分隔存储到MongoDB的数组中。【选填】 upsertInfo：指定了传输数据时更新的信息。【选填】 isUpsert：当设置为true时，表示针对相同的upsertKey做更新操作。【选填】 upsertKey：upsertKey指定了没行记录的业务主键。用来做更新时使用。【选填】 5 类型转换 DataX 内部类型 MongoDB 数据类型 Long int, Long Double double String string, array Date date Boolean boolean Bytes bytes 6 性能报告 7 测试报告 " />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/1b755458e9fa4e6f89a7d44321cd92ec/" /><meta property="article:section" content="4" />
+<meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
+<meta property="article:modified_time" content="2021-02-02T17:45:01+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Datax MongoDBWriter"/>
+<meta name="twitter:description" content="Datax MongoDBWriter 1 快速介绍 MongoDBWriter 插件利用 MongoDB 的java客户端MongoClient进行MongoDB的写操作。最新版本的Mongo已经将DB锁的粒度从DB级别降低到document级别，配合上MongoDB强大的索引功能，基本可以满足数据源向MongoDB写入数据的需求，针对数据更新的需求，通过配置业务主键的方式也可以实现。
+2 实现原理 MongoDBWriter通过Datax框架获取Reader生成的数据，然后将Datax支持的类型通过逐一判断转换成MongoDB支持的类型。其中一个值得指出的点就是Datax本身不支持数组类型，但是MongoDB支持数组类型，并且数组类型的索引还是蛮强大的。为了使用MongoDB的数组类型，则可以通过参数的特殊配置，将字符串可以转换成MongoDB中的数组。类型转换之后，就可以依托于Datax框架并行的写入MongoDB。
+3 功能说明 该示例从ODPS读一份数据到MongoDB。
+{ &quot;job&quot;: { &quot;setting&quot;: { &quot;speed&quot;: { &quot;channel&quot;: 2 } }, &quot;content&quot;: [ { &quot;reader&quot;: { &quot;name&quot;: &quot;odpsreader&quot;, &quot;parameter&quot;: { &quot;accessId&quot;: &quot;********&quot;, &quot;accessKey&quot;: &quot;*********&quot;, &quot;project&quot;: &quot;tb_ai_recommendation&quot;, &quot;table&quot;: &quot;jianying_tag_datax_test&quot;, &quot;column&quot;: [ &quot;unique_id&quot;, &quot;sid&quot;, &quot;user_id&quot;, &quot;auction_id&quot;, &quot;content_type&quot;, &quot;pool_type&quot;, &quot;frontcat_id&quot;, &quot;categoryid&quot;, &quot;gmt_create&quot;, &quot;taglist&quot;, &quot;property&quot;, &quot;scorea&quot;, &quot;scoreb&quot; ], &quot;splitMode&quot;: &quot;record&quot;, &quot;odpsServer&quot;: &quot;http://xxx/api&quot; } }, &quot;writer&quot;: { &quot;name&quot;: &quot;mongodbwriter&quot;, &quot;parameter&quot;: { &quot;address&quot;: [ &quot;127.0.0.1:27017&quot; ], &quot;userName&quot;: &quot;&quot;, &quot;userPassword&quot;: &quot;&quot;, &quot;dbName&quot;: &quot;tag_per_data&quot;, &quot;collectionName&quot;: &quot;tag_data&quot;, &quot;column&quot;: [ { &quot;name&quot;: &quot;unique_id&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;sid&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;user_id&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;auction_id&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;content_type&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;pool_type&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;frontcat_id&quot;, &quot;type&quot;: &quot;Array&quot;, &quot;splitter&quot;: &quot; &quot; }, { &quot;name&quot;: &quot;categoryid&quot;, &quot;type&quot;: &quot;Array&quot;, &quot;splitter&quot;: &quot; &quot; }, { &quot;name&quot;: &quot;gmt_create&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;taglist&quot;, &quot;type&quot;: &quot;Array&quot;, &quot;splitter&quot;: &quot; &quot; }, { &quot;name&quot;: &quot;property&quot;, &quot;type&quot;: &quot;string&quot; }, { &quot;name&quot;: &quot;scorea&quot;, &quot;type&quot;: &quot;int&quot; }, { &quot;name&quot;: &quot;scoreb&quot;, &quot;type&quot;: &quot;int&quot; }, { &quot;name&quot;: &quot;scorec&quot;, &quot;type&quot;: &quot;int&quot; } ], &quot;upsertInfo&quot;: { &quot;isUpsert&quot;: &quot;true&quot;, &quot;upsertKey&quot;: &quot;unique_id&quot; } } } } ] } } 4 参数说明 address： MongoDB的数据地址信息，因为MonogDB可能是个集群，则ip端口信息需要以Json数组的形式给出。【必填】 userName：MongoDB的用户名。【选填】 userPassword： MongoDB的密码。【选填】 collectionName： MonogoDB的集合名。【必填】 column：MongoDB的文档列名。【必填】 name：Column的名字。【必填】 type：Column的类型。【选填】 splitter：特殊分隔符，当且仅当要处理的字符串要用分隔符分隔为字符数组时，才使用这个参数，通过这个参数指定的分隔符，将字符串分隔存储到MongoDB的数组中。【选填】 upsertInfo：指定了传输数据时更新的信息。【选填】 isUpsert：当设置为true时，表示针对相同的upsertKey做更新操作。【选填】 upsertKey：upsertKey指定了没行记录的业务主键。用来做更新时使用。【选填】 5 类型转换 DataX 内部类型 MongoDB 数据类型 Long int, Long Double double String string, array Date date Boolean boolean Bytes bytes 6 性能报告 7 测试报告 "/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "4s",
+      "item": "https://haokiu.com/4/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Datax MongoDBWriter",
+      "item": "https://haokiu.com/blog/1b755458e9fa4e6f89a7d44321cd92ec/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Datax MongoDBWriter",
+  "name": "Datax MongoDBWriter",
+  "description": "Datax MongoDBWriter 1 快速介绍 MongoDBWriter 插件利用 MongoDB 的java客户端MongoClient进行MongoDB的写操作。最新版本的Mongo已经将DB锁的粒度从DB级别降低到document级别，配合上MongoDB强大的索引功能，基本可以满足数据源向MongoDB写入数据的需求，针对数据更新的需求，通过配置业务主键的方式也可以实现。\n2 实现原理 MongoDBWriter通过Datax框架获取Reader生成的数据，然后将Datax支持的类型通过逐一判断转换成MongoDB支持的类型。其中一个值得指出的点就是Datax本身不支持数组类型，但是MongoDB支持数组类型，并且数组类型的索引还是蛮强大的。为了使用MongoDB的数组类型，则可以通过参数的特殊配置，将字符串可以转换成MongoDB中的数组。类型转换之后，就可以依托于Datax框架并行的写入MongoDB。\n3 功能说明 该示例从ODPS读一份数据到MongoDB。\n{ \u0026quot;job\u0026quot;: { \u0026quot;setting\u0026quot;: { \u0026quot;speed\u0026quot;: { \u0026quot;channel\u0026quot;: 2 } }, \u0026quot;content\u0026quot;: [ { \u0026quot;reader\u0026quot;: { \u0026quot;name\u0026quot;: \u0026quot;odpsreader\u0026quot;, \u0026quot;parameter\u0026quot;: { \u0026quot;accessId\u0026quot;: \u0026quot;********\u0026quot;, \u0026quot;accessKey\u0026quot;: \u0026quot;*********\u0026quot;, \u0026quot;project\u0026quot;: \u0026quot;tb_ai_recommendation\u0026quot;, \u0026quot;table\u0026quot;: \u0026quot;jianying_tag_datax_test\u0026quot;, \u0026quot;column\u0026quot;: [ \u0026quot;unique_id\u0026quot;, \u0026quot;sid\u0026quot;, \u0026quot;user_id\u0026quot;, \u0026quot;auction_id\u0026quot;, \u0026quot;content_type\u0026quot;, \u0026quot;pool_type\u0026quot;, \u0026quot;frontcat_id\u0026quot;, \u0026quot;categoryid\u0026quot;, \u0026quot;gmt_create\u0026quot;, \u0026quot;taglist\u0026quot;, \u0026quot;property\u0026quot;, \u0026quot;scorea\u0026quot;, \u0026quot;scoreb\u0026quot; ], \u0026quot;splitMode\u0026quot;: \u0026quot;record\u0026quot;, \u0026quot;odpsServer\u0026quot;: \u0026quot;http://xxx/api\u0026quot; } }, \u0026quot;writer\u0026quot;: { \u0026quot;name\u0026quot;: \u0026quot;mongodbwriter\u0026quot;, \u0026quot;parameter\u0026quot;: { \u0026quot;address\u0026quot;: [ \u0026quot;127.0.0.1:27017\u0026quot; ], \u0026quot;userName\u0026quot;: \u0026quot;\u0026quot;, \u0026quot;userPassword\u0026quot;: \u0026quot;\u0026quot;, \u0026quot;dbName\u0026quot;: \u0026quot;tag_per_data\u0026quot;, \u0026quot;collectionName\u0026quot;: \u0026quot;tag_data\u0026quot;, \u0026quot;column\u0026quot;: [ { \u0026quot;name\u0026quot;: \u0026quot;unique_id\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;string\u0026quot; }, { \u0026quot;name\u0026quot;: \u0026quot;sid\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;string\u0026quot; }, { \u0026quot;name\u0026quot;: \u0026quot;user_id\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;string\u0026quot; }, { \u0026quot;name\u0026quot;: \u0026quot;auction_id\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;string\u0026quot; }, { \u0026quot;name\u0026quot;: \u0026quot;content_type\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;string\u0026quot; }, { \u0026quot;name\u0026quot;: \u0026quot;pool_type\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;string\u0026quot; }, { \u0026quot;name\u0026quot;: \u0026quot;frontcat_id\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;Array\u0026quot;, \u0026quot;splitter\u0026quot;: \u0026quot; \u0026quot; }, { \u0026quot;name\u0026quot;: \u0026quot;categoryid\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;Array\u0026quot;, \u0026quot;splitter\u0026quot;: \u0026quot; \u0026quot; }, { \u0026quot;name\u0026quot;: \u0026quot;gmt_create\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;string\u0026quot; }, { \u0026quot;name\u0026quot;: \u0026quot;taglist\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;Array\u0026quot;, \u0026quot;splitter\u0026quot;: \u0026quot; \u0026quot; }, { \u0026quot;name\u0026quot;: \u0026quot;property\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;string\u0026quot; }, { \u0026quot;name\u0026quot;: \u0026quot;scorea\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;int\u0026quot; }, { \u0026quot;name\u0026quot;: \u0026quot;scoreb\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;int\u0026quot; }, { \u0026quot;name\u0026quot;: \u0026quot;scorec\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;int\u0026quot; } ], \u0026quot;upsertInfo\u0026quot;: { \u0026quot;isUpsert\u0026quot;: \u0026quot;true\u0026quot;, \u0026quot;upsertKey\u0026quot;: \u0026quot;unique_id\u0026quot; } } } } ] } } 4 参数说明 address： MongoDB的数据地址信息，因为MonogDB可能是个集群，则ip端口信息需要以Json数组的形式给出。【必填】 userName：MongoDB的用户名。【选填】 userPassword： MongoDB的密码。【选填】 collectionName： MonogoDB的集合名。【必填】 column：MongoDB的文档列名。【必填】 name：Column的名字。【必填】 type：Column的类型。【选填】 splitter：特殊分隔符，当且仅当要处理的字符串要用分隔符分隔为字符数组时，才使用这个参数，通过这个参数指定的分隔符，将字符串分隔存储到MongoDB的数组中。【选填】 upsertInfo：指定了传输数据时更新的信息。【选填】 isUpsert：当设置为true时，表示针对相同的upsertKey做更新操作。【选填】 upsertKey：upsertKey指定了没行记录的业务主键。用来做更新时使用。【选填】 5 类型转换 DataX 内部类型 MongoDB 数据类型 Long int, Long Double double String string, array Date date Boolean boolean Bytes bytes 6 性能报告 7 测试报告 ",
+  "keywords": [
+    "datax"
+  ],
+  "articleBody": "Datax MongoDBWriter 1 快速介绍 MongoDBWriter 插件利用 MongoDB 的java客户端MongoClient进行MongoDB的写操作。最新版本的Mongo已经将DB锁的粒度从DB级别降低到document级别，配合上MongoDB强大的索引功能，基本可以满足数据源向MongoDB写入数据的需求，针对数据更新的需求，通过配置业务主键的方式也可以实现。\n2 实现原理 MongoDBWriter通过Datax框架获取Reader生成的数据，然后将Datax支持的类型通过逐一判断转换成MongoDB支持的类型。其中一个值得指出的点就是Datax本身不支持数组类型，但是MongoDB支持数组类型，并且数组类型的索引还是蛮强大的。为了使用MongoDB的数组类型，则可以通过参数的特殊配置，将字符串可以转换成MongoDB中的数组。类型转换之后，就可以依托于Datax框架并行的写入MongoDB。\n3 功能说明 该示例从ODPS读一份数据到MongoDB。\n{ \"job\": { \"setting\": { \"speed\": { \"channel\": 2 } }, \"content\": [ { \"reader\": { \"name\": \"odpsreader\", \"parameter\": { \"accessId\": \"********\", \"accessKey\": \"*********\", \"project\": \"tb_ai_recommendation\", \"table\": \"jianying_tag_datax_test\", \"column\": [ \"unique_id\", \"sid\", \"user_id\", \"auction_id\", \"content_type\", \"pool_type\", \"frontcat_id\", \"categoryid\", \"gmt_create\", \"taglist\", \"property\", \"scorea\", \"scoreb\" ], \"splitMode\": \"record\", \"odpsServer\": \"http://xxx/api\" } }, \"writer\": { \"name\": \"mongodbwriter\", \"parameter\": { \"address\": [ \"127.0.0.1:27017\" ], \"userName\": \"\", \"userPassword\": \"\", \"dbName\": \"tag_per_data\", \"collectionName\": \"tag_data\", \"column\": [ { \"name\": \"unique_id\", \"type\": \"string\" }, { \"name\": \"sid\", \"type\": \"string\" }, { \"name\": \"user_id\", \"type\": \"string\" }, { \"name\": \"auction_id\", \"type\": \"string\" }, { \"name\": \"content_type\", \"type\": \"string\" }, { \"name\": \"pool_type\", \"type\": \"string\" }, { \"name\": \"frontcat_id\", \"type\": \"Array\", \"splitter\": \" \" }, { \"name\": \"categoryid\", \"type\": \"Array\", \"splitter\": \" \" }, { \"name\": \"gmt_create\", \"type\": \"string\" }, { \"name\": \"taglist\", \"type\": \"Array\", \"splitter\": \" \" }, { \"name\": \"property\", \"type\": \"string\" }, { \"name\": \"scorea\", \"type\": \"int\" }, { \"name\": \"scoreb\", \"type\": \"int\" }, { \"name\": \"scorec\", \"type\": \"int\" } ], \"upsertInfo\": { \"isUpsert\": \"true\", \"upsertKey\": \"unique_id\" } } } } ] } } 4 参数说明 address： MongoDB的数据地址信息，因为MonogDB可能是个集群，则ip端口信息需要以Json数组的形式给出。【必填】 userName：MongoDB的用户名。【选填】 userPassword： MongoDB的密码。【选填】 collectionName： MonogoDB的集合名。【必填】 column：MongoDB的文档列名。【必填】 name：Column的名字。【必填】 type：Column的类型。【选填】 splitter：特殊分隔符，当且仅当要处理的字符串要用分隔符分隔为字符数组时，才使用这个参数，通过这个参数指定的分隔符，将字符串分隔存储到MongoDB的数组中。【选填】 upsertInfo：指定了传输数据时更新的信息。【选填】 isUpsert：当设置为true时，表示针对相同的upsertKey做更新操作。【选填】 upsertKey：upsertKey指定了没行记录的业务主键。用来做更新时使用。【选填】 5 类型转换 DataX 内部类型 MongoDB 数据类型 Long int, Long Double double String string, array Date date Boolean boolean Bytes bytes 6 性能报告 7 测试报告 ",
+  "wordCount" : "231",
+  "inLanguage": "en",
+  "datePublished": "2021-02-02T17:45:01Z",
+  "dateModified": "2021-02-02T17:45:01Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/1b755458e9fa4e6f89a7d44321cd92ec/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    <h1 class="post-title">
+      Datax MongoDBWriter
+    </h1>
+    <div class="post-meta"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#datax-mongodbwriter" aria-label="Datax MongoDBWriter">Datax MongoDBWriter</a><ul>
+                        
+                <li>
+                    <a href="#1-%e5%bf%ab%e9%80%9f%e4%bb%8b%e7%bb%8d" aria-label="1 快速介绍">1 快速介绍</a></li>
+                <li>
+                    <a href="#2-%e5%ae%9e%e7%8e%b0%e5%8e%9f%e7%90%86" aria-label="2 实现原理">2 实现原理</a></li>
+                <li>
+                    <a href="#3-%e5%8a%9f%e8%83%bd%e8%af%b4%e6%98%8e" aria-label="3 功能说明">3 功能说明</a></li>
+                <li>
+                    <a href="#4-%e5%8f%82%e6%95%b0%e8%af%b4%e6%98%8e" aria-label="4 参数说明">4 参数说明</a></li>
+                <li>
+                    <a href="#5-%e7%b1%bb%e5%9e%8b%e8%bd%ac%e6%8d%a2" aria-label="5 类型转换">5 类型转换</a></li>
+                <li>
+                    <a href="#6-%e6%80%a7%e8%83%bd%e6%8a%a5%e5%91%8a" aria-label="6 性能报告">6 性能报告</a></li>
+                <li>
+                    <a href="#7-%e6%b5%8b%e8%af%95%e6%8a%a5%e5%91%8a" aria-label="7 测试报告">7 测试报告</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h3 id="datax-mongodbwriter">Datax MongoDBWriter</h3>
+<h4 id="1-快速介绍">1 快速介绍</h4>
+<p>MongoDBWriter 插件利用 MongoDB 的java客户端MongoClient进行MongoDB的写操作。最新版本的Mongo已经将DB锁的粒度从DB级别降低到document级别，配合上MongoDB强大的索引功能，基本可以满足数据源向MongoDB写入数据的需求，针对数据更新的需求，通过配置业务主键的方式也可以实现。</p>
+<h4 id="2-实现原理">2 实现原理</h4>
+<p>MongoDBWriter通过Datax框架获取Reader生成的数据，然后将Datax支持的类型通过逐一判断转换成MongoDB支持的类型。其中一个值得指出的点就是Datax本身不支持数组类型，但是MongoDB支持数组类型，并且数组类型的索引还是蛮强大的。为了使用MongoDB的数组类型，则可以通过参数的特殊配置，将字符串可以转换成MongoDB中的数组。类型转换之后，就可以依托于Datax框架并行的写入MongoDB。</p>
+<h4 id="3-功能说明">3 功能说明</h4>
+<ul>
+<li>
+<p>该示例从ODPS读一份数据到MongoDB。</p>
+<pre><code>  {
+  &quot;job&quot;: {
+  &quot;setting&quot;: {
+      &quot;speed&quot;: {
+          &quot;channel&quot;: 2
+      }
+  },
+  &quot;content&quot;: [
+      {
+          &quot;reader&quot;: {
+              &quot;name&quot;: &quot;odpsreader&quot;,
+              &quot;parameter&quot;: {
+                  &quot;accessId&quot;: &quot;********&quot;,
+                  &quot;accessKey&quot;: &quot;*********&quot;,
+                  &quot;project&quot;: &quot;tb_ai_recommendation&quot;,
+                  &quot;table&quot;: &quot;jianying_tag_datax_test&quot;,
+                  &quot;column&quot;: [
+                      &quot;unique_id&quot;,
+                      &quot;sid&quot;,
+                      &quot;user_id&quot;,
+                      &quot;auction_id&quot;,
+                      &quot;content_type&quot;,
+                      &quot;pool_type&quot;,
+                      &quot;frontcat_id&quot;,
+                      &quot;categoryid&quot;,
+                      &quot;gmt_create&quot;,
+                      &quot;taglist&quot;,
+                      &quot;property&quot;,
+                      &quot;scorea&quot;,
+                      &quot;scoreb&quot;
+                  ],
+                  &quot;splitMode&quot;: &quot;record&quot;,
+                  &quot;odpsServer&quot;: &quot;http://xxx/api&quot;
+              }
+          },
+          &quot;writer&quot;: {
+              &quot;name&quot;: &quot;mongodbwriter&quot;,
+              &quot;parameter&quot;: {
+                  &quot;address&quot;: [
+                      &quot;127.0.0.1:27017&quot;
+                  ],
+                  &quot;userName&quot;: &quot;&quot;,
+                  &quot;userPassword&quot;: &quot;&quot;,
+                  &quot;dbName&quot;: &quot;tag_per_data&quot;,
+                  &quot;collectionName&quot;: &quot;tag_data&quot;,
+                  &quot;column&quot;: [
+                      {
+                          &quot;name&quot;: &quot;unique_id&quot;,
+                          &quot;type&quot;: &quot;string&quot;
+                      },
+                      {
+                          &quot;name&quot;: &quot;sid&quot;,
+                          &quot;type&quot;: &quot;string&quot;
+                      },
+                      {
+                          &quot;name&quot;: &quot;user_id&quot;,
+                          &quot;type&quot;: &quot;string&quot;
+                      },
+                      {
+                          &quot;name&quot;: &quot;auction_id&quot;,
+                          &quot;type&quot;: &quot;string&quot;
+                      },
+                      {
+                          &quot;name&quot;: &quot;content_type&quot;,
+                          &quot;type&quot;: &quot;string&quot;
+                      },
+                      {
+                          &quot;name&quot;: &quot;pool_type&quot;,
+                          &quot;type&quot;: &quot;string&quot;
+                      },
+                      {
+                          &quot;name&quot;: &quot;frontcat_id&quot;,
+                          &quot;type&quot;: &quot;Array&quot;,
+                          &quot;splitter&quot;: &quot; &quot;
+                      },
+                      {
+                          &quot;name&quot;: &quot;categoryid&quot;,
+                          &quot;type&quot;: &quot;Array&quot;,
+                          &quot;splitter&quot;: &quot; &quot;
+                      },
+                      {
+                          &quot;name&quot;: &quot;gmt_create&quot;,
+                          &quot;type&quot;: &quot;string&quot;
+                      },
+                      {
+                          &quot;name&quot;: &quot;taglist&quot;,
+                          &quot;type&quot;: &quot;Array&quot;,
+                          &quot;splitter&quot;: &quot; &quot;
+                      },
+                      {
+                          &quot;name&quot;: &quot;property&quot;,
+                          &quot;type&quot;: &quot;string&quot;
+                      },
+                      {
+                          &quot;name&quot;: &quot;scorea&quot;,
+                          &quot;type&quot;: &quot;int&quot;
+                      },
+                      {
+                          &quot;name&quot;: &quot;scoreb&quot;,
+                          &quot;type&quot;: &quot;int&quot;
+                      },
+                      {
+                          &quot;name&quot;: &quot;scorec&quot;,
+                          &quot;type&quot;: &quot;int&quot;
+                      }
+                  ],
+  				&quot;upsertInfo&quot;: {
+  					&quot;isUpsert&quot;: &quot;true&quot;,
+  					&quot;upsertKey&quot;: &quot;unique_id&quot;
+  				}
+              }
+          }
+      }
+  ]
+  }
+  }
+</code></pre>
+</li>
+</ul>
+<h4 id="4-参数说明">4 参数说明</h4>
+<ul>
+<li>address： MongoDB的数据地址信息，因为MonogDB可能是个集群，则ip端口信息需要以Json数组的形式给出。【必填】</li>
+<li>userName：MongoDB的用户名。【选填】</li>
+<li>userPassword： MongoDB的密码。【选填】</li>
+<li>collectionName： MonogoDB的集合名。【必填】</li>
+<li>column：MongoDB的文档列名。【必填】</li>
+<li>name：Column的名字。【必填】</li>
+<li>type：Column的类型。【选填】</li>
+<li>splitter：特殊分隔符，当且仅当要处理的字符串要用分隔符分隔为字符数组时，才使用这个参数，通过这个参数指定的分隔符，将字符串分隔存储到MongoDB的数组中。【选填】</li>
+<li>upsertInfo：指定了传输数据时更新的信息。【选填】</li>
+<li>isUpsert：当设置为true时，表示针对相同的upsertKey做更新操作。【选填】</li>
+<li>upsertKey：upsertKey指定了没行记录的业务主键。用来做更新时使用。【选填】</li>
+</ul>
+<h4 id="5-类型转换">5 类型转换</h4>
+<table>
+<thead>
+<tr>
+<th>DataX 内部类型</th>
+<th>MongoDB 数据类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Long</td>
+<td>int, Long</td>
+</tr>
+<tr>
+<td>Double</td>
+<td>double</td>
+</tr>
+<tr>
+<td>String</td>
+<td>string, array</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>date</td>
+</tr>
+<tr>
+<td>Boolean</td>
+<td>boolean</td>
+</tr>
+<tr>
+<td>Bytes</td>
+<td>bytes</td>
+</tr>
+</tbody>
+</table>
+<h4 id="6-性能报告">6 性能报告</h4>
+<h4 id="7-测试报告">7 测试报告</h4>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

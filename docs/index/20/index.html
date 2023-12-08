@@ -180,7 +180,7 @@
     <p>1. 获取当前时间 时间戳(秒)：time.Now().Unix 日期：time.Now().Format(&#34;2006-01-02 15:04:05&#34;) 注意：参数必须是 2006-01-02 15:04:05 而不能是自定义的年月日时间 2. 字符串与int转换 i,_ := strconv.Atoi(&#34;3&#34;) a := strconv.Itoa(32) 3.结构体json序列化 chatMsg := &amp;ChatMsg{} err := json.Unmarshal([]byte(msg), chatMsg) //json转结构体 buf, _ := json.Marshal(chatMsg) //结构体转json return string(buf) 4.删除切片元素 mySlice := make([]int, 5) //创建一个初始元素个数为5的数组切片，元素初始值为0 mySlice = append(mySlice[:i], mySlice[i&#43;1:]...) //删除下标为i的元素 mySlice = append(mySlice[:0], mySlice[1:]...) //删除第1个元素 5. url encode/decode encodeUrl:= url.QueryEscape(urltest) decodeUrl,err := url.QueryUnescape(encodeUrl) 6. base64编码 encodeString := base64.StdEncoding.EncodeToString(input) decodeBytes, err := base64.StdEncoding.DecodeString(encodeString) 7. 获取字符串长度 tips := &#34;忍者&#34; len := len(tips) //len=6 len := utf8.RuneCountInString(tips) //len=2 8. SubString func SubString(str string, start int32, end int32) string { result := []rune(str) length := int32(len(result)) if start &lt; 0 || start &gt; length { return str } if end &lt; 0 || end &gt; length { return str } return string(result[start:end]) } result = SubString(result, 0, int32(len([]rune(result)))-1)//注意end参数的取值 9....</p>
   </div>
   <footer class="entry-footer"><span title='2020-10-10 10:23:10 +0000 UTC'>October 10, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to golang 常用函数" href="https://haokiu.com/XtwuYL/"></a>
+  <a class="entry-link" aria-label="post link to golang 常用函数" href="https://haokiu.com/blog/XtwuYL/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -193,7 +193,7 @@
 拦截器 import java.text.DateFormat; import java.util.Date; import java.util.List; import java.util.Locale; import java.util.Properties; import org.apache.ibatis.executor.Executor; import org.apache.ibatis.mapping.BoundSql; import org.apache.ibatis.mapping.MappedStatement; import org.apache.ibatis.mapping.ParameterMapping; import org.apache.ibatis.plugin.Interceptor; import org.apache.ibatis.plugin.Intercepts; import org.apache.ibatis.plugin.Invocation; import org.apache.ibatis.plugin.Plugin; import org.apache.ibatis.plugin.Signature; import org.apache.ibatis.reflection.MetaObject; import org.apache.ibatis.session.Configuration; import org.apache.ibatis.session.ResultHandler; import org.apache.ibatis.session.RowBounds; import org.apache.ibatis.type.TypeHandlerRegistry; import org.slf4j.Logger; import org.slf4j.LoggerFactory; @Intercepts({ @Signature(type = Executor.class, method = &#34;update&#34;, args = { MappedStatement.class, Object.class }), @Signature(type = Executor.class, method = &#34;query&#34;, args = { MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class }) }) public class MybatisInterceptor implements Interceptor { private static final Logger log = LoggerFactory.getLogger(MybatisInterceptor.class); @Override public Object intercept(Invocation invocation) throws Throwable { MappedStatement mappedStatement = (MappedStatement) invocation....</p>
   </div>
   <footer class="entry-footer"><span title='2020-09-27 10:59:03 +0000 UTC'>September 27, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to mybatis 增加自定义拦截器" href="https://haokiu.com/bGqNiH/"></a>
+  <a class="entry-link" aria-label="post link to mybatis 增加自定义拦截器" href="https://haokiu.com/blog/bGqNiH/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -230,7 +230,7 @@ Java is the best programming language. PHP is the best programming language. Jav
 Term Doc_1 Doc_2 Doc_3 ------------------------------------- Java | X | | is | X | X | X the | X | X | X best | X | X | X programming | x | X | X language | X | X | X PHP | | X | Javascript | | | X ------------------------------------- 这种结构由文档中所有不重复词的列表构成，对于其中每个词都有一个文档列表与之关联。...</p>
   </div>
   <footer class="entry-footer"><span title='2020-09-23 14:29:39 +0000 UTC'>September 23, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to 搜索引擎 及 elastic search " href="https://haokiu.com/oaXyUa/"></a>
+  <a class="entry-link" aria-label="post link to 搜索引擎 及 elastic search " href="https://haokiu.com/blog/oaXyUa/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -250,7 +250,7 @@ Term Doc_1 Doc_2 Doc_3 ------------------------------------- Java | X | | is | X
 双方使用对称加密愉快地传输所有数据。</p>
   </div>
   <footer class="entry-footer"><span title='2020-09-23 13:48:39 +0000 UTC'>September 23, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to https 原理简介" href="https://haokiu.com/3TSsuC/"></a>
+  <a class="entry-link" aria-label="post link to https 原理简介" href="https://haokiu.com/blog/3TSsuC/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -266,7 +266,7 @@ md5 := md5.New() MD5Str := hex.EncodeToString(md5.Sum(file)) 这样是直接调�
 md5 := md5.New() md5.Write([]byte(&#34;hello,world!&#34;)) MD5Str := hex.EncodeToString(md5.Sum(nil)) </p>
   </div>
   <footer class="entry-footer"><span title='2020-09-19 11:10:59 +0000 UTC'>September 19, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to golang 计算文件和字符串的 md5 值" href="https://haokiu.com/dpoeTs/"></a>
+  <a class="entry-link" aria-label="post link to golang 计算文件和字符串的 md5 值" href="https://haokiu.com/blog/dpoeTs/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -287,7 +287,7 @@ S3的定义如下 Amazon S3 is a web service that enables you to store data in t
 3. Keys – 类比文件名 key的样式也是URL，记住亚马逊的服务都是使用Web Service或REST方式访问的。...</p>
   </div>
   <footer class="entry-footer"><span title='2020-09-18 15:17:51 +0000 UTC'>September 18, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to S3协议" href="https://haokiu.com/d0DCeH/"></a>
+  <a class="entry-link" aria-label="post link to S3协议" href="https://haokiu.com/blog/d0DCeH/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -300,7 +300,7 @@ S3的定义如下 Amazon S3 is a web service that enables you to store data in t
 func Exist(path string) bool { _, err := os.Stat(path) return err == nil || os.IsExist(err) } </p>
   </div>
   <footer class="entry-footer"><span title='2020-09-17 15:05:46 +0000 UTC'>September 17, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to golang 判断目录或文件是否存在" href="https://haokiu.com/Cd6WaZ/"></a>
+  <a class="entry-link" aria-label="post link to golang 判断目录或文件是否存在" href="https://haokiu.com/blog/Cd6WaZ/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -317,7 +317,7 @@ bee 工具命令详解 我们在命令行输入 bee，可以看到如下的信�
 Bee is a Fast and Flexible tool for managing your Beego Web Application. Usage: bee command [arguments] The commands are: version show the bee &amp; beego version migrate run database migrations api create an api application base on beego framework bale packs non-Go files to Go source files new create an application base on beego framework run run the app which can hot compile pack compress an beego project fix Fixes your application by making it compatible with newer versions of Beego dlv Start a debugging session using Delve dockerize Generates a Dockerfile for your Beego application generate Source code generator hprose Creates an RPC application based on Hprose and Beego frameworks pack Compresses a Beego application into a single file rs Run customized scripts run Run the application by starting a local development server server serving static content over HTTP on port Use bee help [command] for more information about a command....</p>
   </div>
   <footer class="entry-footer"><span title='2020-09-16 16:06:47 +0000 UTC'>September 16, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to beego bee 工具使用简介" href="https://haokiu.com/xVaucl/"></a>
+  <a class="entry-link" aria-label="post link to beego bee 工具使用简介" href="https://haokiu.com/blog/xVaucl/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -335,7 +335,7 @@ package main import ( &#34;github.com/astaxie/beego/logs&#34; ) func main() { //
 package main import ( &#34;github.com/astaxie/beego/logs&#34; ) func main() { log := logs....</p>
   </div>
   <footer class="entry-footer"><span title='2020-09-16 16:03:29 +0000 UTC'>September 16, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to beego 日志配置" href="https://haokiu.com/gq7FUH/"></a>
+  <a class="entry-link" aria-label="post link to beego 日志配置" href="https://haokiu.com/blog/gq7FUH/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -356,7 +356,7 @@ beego.SetLogFuncCall(true) 开启传入参数 true, 关闭传入参数 false, �
 完整示例 func internalCalculationFunc(x, y int) (result int, err error) { beego.Debug(&#34;calculating z. x:&#34;, x, &#34; y:&#34;, y) z := y switch { case x == 3: beego.Debug(&#34;x == 3&#34;) panic(&#34;Failure.&#34;) case y == 1: beego....</p>
   </div>
   <footer class="entry-footer"><span title='2020-09-16 10:17:20 +0000 UTC'>September 16, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to beego 日志处理" href="https://haokiu.com/YAotkP/"></a>
+  <a class="entry-link" aria-label="post link to beego 日志处理" href="https://haokiu.com/blog/YAotkP/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

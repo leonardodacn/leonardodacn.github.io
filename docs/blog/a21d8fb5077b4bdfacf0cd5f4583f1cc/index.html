@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>做 Java 或者 C&#43;&#43; 开发都应该知道的 lsof 命令 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="做 Java 或者 C&#43;&#43; 开发都应该知道的 lsof 命令 lsof 命令是 Linux 系统的扩展工具，它的含义是 list opened filedesciptor （列出已经打开的文件描述符），在 Linux 系统中，所有的与资源句柄相关的东西都可以统一抽象成文件描述符（filedescriptor，简称 fd）。一个文件句柄是一个 fd，一个 socket 对象也可以称之为 fd 等等。
+默认情况下，系统是不存在这个命令的，你需要安装一下，使用如下命令安装：
+yum install lsof 我们来看一下这个命令的使用效果：
+COMMAND PID TID USER FD TYPE DEVICE SIZE/OFF NODE NAME systemd 1 root cwd DIR 202,1 4096 2 / nscd 453 469 nscd 8u netlink 0t0 11017 ROUTE nscd 453 470 nscd cwd DIR 202,1 4096 2 / nscd 453 470 nscd rtd DIR 202,1 4096 2 / nscd 453 470 nscd txt REG 202,1 180272 146455 /usr/sbin/nscd nscd 453 470 nscd mem REG 202,1 217032 401548 /var/db/nscd/hosts nscd 453 470 nscd mem REG 202,1 90664 132818 /usr/lib64/libz.">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/a21d8fb5077b4bdfacf0cd5f4583f1cc/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="做 Java 或者 C&#43;&#43; 开发都应该知道的 lsof 命令" />
+<meta property="og:description" content="做 Java 或者 C&#43;&#43; 开发都应该知道的 lsof 命令 lsof 命令是 Linux 系统的扩展工具，它的含义是 list opened filedesciptor （列出已经打开的文件描述符），在 Linux 系统中，所有的与资源句柄相关的东西都可以统一抽象成文件描述符（filedescriptor，简称 fd）。一个文件句柄是一个 fd，一个 socket 对象也可以称之为 fd 等等。
+默认情况下，系统是不存在这个命令的，你需要安装一下，使用如下命令安装：
+yum install lsof 我们来看一下这个命令的使用效果：
+COMMAND PID TID USER FD TYPE DEVICE SIZE/OFF NODE NAME systemd 1 root cwd DIR 202,1 4096 2 / nscd 453 469 nscd 8u netlink 0t0 11017 ROUTE nscd 453 470 nscd cwd DIR 202,1 4096 2 / nscd 453 470 nscd rtd DIR 202,1 4096 2 / nscd 453 470 nscd txt REG 202,1 180272 146455 /usr/sbin/nscd nscd 453 470 nscd mem REG 202,1 217032 401548 /var/db/nscd/hosts nscd 453 470 nscd mem REG 202,1 90664 132818 /usr/lib64/libz." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/a21d8fb5077b4bdfacf0cd5f4583f1cc/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="做 Java 或者 C&#43;&#43; 开发都应该知道的 lsof 命令"/>
+<meta name="twitter:description" content="做 Java 或者 C&#43;&#43; 开发都应该知道的 lsof 命令 lsof 命令是 Linux 系统的扩展工具，它的含义是 list opened filedesciptor （列出已经打开的文件描述符），在 Linux 系统中，所有的与资源句柄相关的东西都可以统一抽象成文件描述符（filedescriptor，简称 fd）。一个文件句柄是一个 fd，一个 socket 对象也可以称之为 fd 等等。
+默认情况下，系统是不存在这个命令的，你需要安装一下，使用如下命令安装：
+yum install lsof 我们来看一下这个命令的使用效果：
+COMMAND PID TID USER FD TYPE DEVICE SIZE/OFF NODE NAME systemd 1 root cwd DIR 202,1 4096 2 / nscd 453 469 nscd 8u netlink 0t0 11017 ROUTE nscd 453 470 nscd cwd DIR 202,1 4096 2 / nscd 453 470 nscd rtd DIR 202,1 4096 2 / nscd 453 470 nscd txt REG 202,1 180272 146455 /usr/sbin/nscd nscd 453 470 nscd mem REG 202,1 217032 401548 /var/db/nscd/hosts nscd 453 470 nscd mem REG 202,1 90664 132818 /usr/lib64/libz."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "做 Java 或者 C++ 开发都应该知道的 lsof 命令",
+      "item": "https://haokiu.com/blog/a21d8fb5077b4bdfacf0cd5f4583f1cc/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "做 Java 或者 C++ 开发都应该知道的 lsof 命令",
+  "name": "做 Java 或者 C\u002b\u002b 开发都应该知道的 lsof 命令",
+  "description": "做 Java 或者 C++ 开发都应该知道的 lsof 命令 lsof 命令是 Linux 系统的扩展工具，它的含义是 list opened filedesciptor （列出已经打开的文件描述符），在 Linux 系统中，所有的与资源句柄相关的东西都可以统一抽象成文件描述符（filedescriptor，简称 fd）。一个文件句柄是一个 fd，一个 socket 对象也可以称之为 fd 等等。\n默认情况下，系统是不存在这个命令的，你需要安装一下，使用如下命令安装：\nyum install lsof 我们来看一下这个命令的使用效果：\nCOMMAND PID TID USER FD TYPE DEVICE SIZE/OFF NODE NAME systemd 1 root cwd DIR 202,1 4096 2 / nscd 453 469 nscd 8u netlink 0t0 11017 ROUTE nscd 453 470 nscd cwd DIR 202,1 4096 2 / nscd 453 470 nscd rtd DIR 202,1 4096 2 / nscd 453 470 nscd txt REG 202,1 180272 146455 /usr/sbin/nscd nscd 453 470 nscd mem REG 202,1 217032 401548 /var/db/nscd/hosts nscd 453 470 nscd mem REG 202,1 90664 132818 /usr/lib64/libz.",
+  "keywords": [
+    
+  ],
+  "articleBody": "做 Java 或者 C++ 开发都应该知道的 lsof 命令 lsof 命令是 Linux 系统的扩展工具，它的含义是 list opened filedesciptor （列出已经打开的文件描述符），在 Linux 系统中，所有的与资源句柄相关的东西都可以统一抽象成文件描述符（filedescriptor，简称 fd）。一个文件句柄是一个 fd，一个 socket 对象也可以称之为 fd 等等。\n默认情况下，系统是不存在这个命令的，你需要安装一下，使用如下命令安装：\nyum install lsof 我们来看一下这个命令的使用效果：\nCOMMAND PID TID USER FD TYPE DEVICE SIZE/OFF NODE NAME systemd 1 root cwd DIR 202,1 4096 2 / nscd 453 469 nscd 8u netlink 0t0 11017 ROUTE nscd 453 470 nscd cwd DIR 202,1 4096 2 / nscd 453 470 nscd rtd DIR 202,1 4096 2 / nscd 453 470 nscd txt REG 202,1 180272 146455 /usr/sbin/nscd nscd 453 470 nscd mem REG 202,1 217032 401548 /var/db/nscd/hosts nscd 453 470 nscd mem REG 202,1 90664 132818 /usr/lib64/libz.so.1.2.7 nscd 453 470 nscd mem REG 202,1 68192 133155 /usr/lib64/libbz2.so.1.0.6 nscd 453 470 nscd mem REG 202,1 153192 133002 /usr/lib64/liblzma.so.5.0.99 nscd 453 470 nscd mem REG 202,1 91496 133088 nscd 453 471 nscd 5u a_inode 0,9 0 4796 [eventpoll] nscd 453 471 nscd 6r REG 202,1 217032 401548 /var/db/nscd/hosts nscd 453 471 nscd 7u unix 0xffff880037497440 0t0 11015 /var/run/nscd/socket nscd 453 471 nscd 8u netlink 0t0 11017 ROUTE imgserver 611 zhangyl cwd DIR 202,1 4096 1059054 /home/zhangyl/flamingoserver imgserver 611 zhangyl rtd DIR 202,1 4096 2 / imgserver 611 zhangyl txt REG 202,1 4788917 1057044 /home/zhangyl/flamingoserver/imgserver imgserver 611 zhangyl 24u a_inode 0,9 0 4796 [eventfd] imgserver 611 zhangyl 25u IPv4 55707643 0t0 TCP *:commtact-http (LISTEN) imgserver 611 zhangyl 26r CHR 1,3 0t0 4800 /dev/null imgserver 611 613 zhangyl 32w REG 202,1 131072 2754609 /home/zhangyl/flamingoserver/imgcache/258bfb8945288a117d98d440986d7a03 结果显示中列出了各个进程打开的各种 fd 类型，对于 Uinx Socket，lsof 命令会显示出其详细的路径，打开的文件 fd 亦是如此。\n使用 lsof 命令有三点需要注意：\n默认情况下，lsof 的输出比较多，我们可以使用 grep 命令过滤我们想要查看的进程打开的 fd 信息，如：\nlsof -i | grep myapp 或者使用 lsof -p pid 也能过滤出指定的进程打开的 fd 信息：\n[root@iZ238vnojlyZ ~]# lsof -p 26621 COMMAND PID USER FD TYPE DEVICE SIZE/OFF NODE NAME chatserve 26621 zhangyl cwd DIR 202,1 4096 1059054 /home/zhangyl/flamingoserver chatserve 26621 zhangyl rtd DIR 202,1 4096 2 / chatserve 26621 zhangyl txt REG 202,1 8027035 1051942 /home/zhangyl/flamingoserver/chatserver chatserve 26621 zhangyl mem REG 202,1 61928 141417 /usr/lib64/libnss_files-2.17.so chatserve 26621 zhangyl mem REG 202,1 44096 143235 /usr/lib64/librt-2.17.so chatserve 26621 zhangyl mem REG 202,1 19520 137064 /usr/lib64/libdl-2.17.so chatserve 26621 zhangyl mem REG 202,1 2112384 132824 /usr/lib64/libc-2.17.so chatserve 26621 zhangyl mem REG 202,1 142304 132850 /usr/lib64/libpthread-2.17.so chatserve 26621 zhangyl mem REG 202,1 88720 135291 /usr/lib64/libgcc_s-4.8.5-20150702.so.1 chatserve 26621 zhangyl mem REG 202,1 1141560 137077 /usr/lib64/libm-2.17.so chatserve 26621 zhangyl mem REG 202,1 999944 140059 /usr/lib64/libstdc++.so.6.0.19 chatserve 26621 zhangyl mem REG 202,1 9879756 269001 /usr/lib64/mysql/libmysqlclient.so.20.3.4 chatserve 26621 zhangyl mem REG 202,1 164440 133622 /usr/lib64/ld-2.17.so chatserve 26621 zhangyl 0u CHR 1,3 0t0 4800 /dev/null chatserve 26621 zhangyl 1u CHR 1,3 0t0 4800 /dev/null chatserve 26621 zhangyl 2u CHR 1,3 0t0 4800 /dev/null chatserve 26621 zhangyl 3u a_inode 0,9 0 4796 [eventpoll] chatserve 26621 zhangyl 4u a_inode 0,9 0 4796 [timerfd] chatserve 26621 zhangyl 5u a_inode 0,9 0 4796 [eventfd] chatserve 26621 zhangyl 7u a_inode 0,9 0 4796 [eventpoll] lsof 命令只能查看到当前用户有权限查看到的进程 fd 信息，对于其没有权限的进程，最右边一列会显示 “Permission denied”。如下所示：\nsshd 26759 root cwd unknown /proc/26759/cwd (readlink: Permission denied) sshd 26759 root rtd unknown /proc/26759/root (readlink: Permission denied) sshd 26759 root txt unknown /proc/26759/exe (readlink: Permission denied) sshd 26759 root NOFD /proc/26759/fd (opendir: Permission denied) bash 26761 root cwd unknown /proc/26761/cwd (readlink: Permission denied) bash 26761 root rtd unknown /proc/26761/root (readlink: Permission denied) bash 26761 root txt unknown /proc/26761/exe (readlink: Permission denied) bash 26761 root NOFD /proc/26761/fd (opendir: Permission denied) lsof 命令第一栏进程名在显示的时候，默认显示前 n 个字符，这样如果我们需要显示完整的进程名以方便过滤的话，可以使用 +c 选项。用法如下：\n#最左侧的程序名最大显示 15 个字符 [zhangyl@iZ238vnojlyZ ~]$ lsof +c 15 当然，如果你设置值太大， lsof 便不会采用你设置的最大值，而是使用默认最大值。\n上文也介绍了，socket 也是一种 fd，如果需要仅显示系统的网络连接信息，使用的是 -i 选项即可，这个选项可以形象地显示出系统当前的出入连接情况：\n看到图中的连接方向了吧？\n当然，和 netstat 命令一样，lsof -i 默认也会显示 ip 地址和端口号的别名，我们只要使用 -n 和 -P 选项就能相对应地显示 ip 地址和端口号了，综合起来就是 lsof -Pni：\n",
+  "wordCount" : "576",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/a21d8fb5077b4bdfacf0cd5f4583f1cc/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      做 Java 或者 C&#43;&#43; 开发都应该知道的 lsof 命令
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#%e5%81%9a-java-%e6%88%96%e8%80%85-c-%e5%bc%80%e5%8f%91%e9%83%bd%e5%ba%94%e8%af%a5%e7%9f%a5%e9%81%93%e7%9a%84-lsof-%e5%91%bd%e4%bb%a4" aria-label="做 Java 或者 C&#43;&#43; 开发都应该知道的 lsof 命令">做 Java 或者 C++ 开发都应该知道的 lsof 命令</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h2 id="做-java-或者-c-开发都应该知道的-lsof-命令">做 Java 或者 C++ 开发都应该知道的 lsof 命令</h2>
+<p><strong>lsof</strong> 命令是 Linux 系统的扩展工具，它的含义是 <strong>l</strong>i<strong>s</strong>t <strong>o</strong>pened <strong>f</strong>iledesciptor （<strong>列出已经打开的文件描述符</strong>），在 Linux 系统中，所有的与资源句柄相关的东西都可以统一抽象成<strong>文件描述符</strong>（filedescriptor，简称 fd）。一个文件句柄是一个 fd，一个 socket 对象也可以称之为 fd 等等。</p>
+<p>默认情况下，系统是不存在这个命令的，你需要安装一下，使用如下命令安装：</p>
+<pre tabindex="0"><code>yum install lsof
+</code></pre><p>我们来看一下这个命令的使用效果：</p>
+<pre tabindex="0"><code>COMMAND     PID   TID    USER   FD      TYPE             DEVICE  SIZE/OFF       NODE NAME
+systemd       1          root  cwd       DIR              202,1      4096          2 /
+nscd        453   469    nscd    8u  netlink                          0t0      11017 ROUTE
+nscd        453   470    nscd  cwd       DIR              202,1      4096          2 /
+nscd        453   470    nscd  rtd       DIR              202,1      4096          2 /
+nscd        453   470    nscd  txt       REG              202,1    180272     146455 /usr/sbin/nscd
+nscd        453   470    nscd  mem       REG              202,1    217032     401548 /var/db/nscd/hosts
+nscd        453   470    nscd  mem       REG              202,1     90664     132818 /usr/lib64/libz.so.1.2.7
+nscd        453   470    nscd  mem       REG              202,1     68192     133155 /usr/lib64/libbz2.so.1.0.6
+nscd        453   470    nscd  mem       REG              202,1    153192     133002 /usr/lib64/liblzma.so.5.0.99
+nscd        453   470    nscd  mem       REG              202,1     91496     133088 
+nscd        453   471    nscd    5u  a_inode                0,9         0       4796 [eventpoll]
+nscd        453   471    nscd    6r      REG              202,1    217032     401548 /var/db/nscd/hosts
+nscd        453   471    nscd    7u     unix 0xffff880037497440       0t0      11015 /var/run/nscd/socket
+nscd        453   471    nscd    8u  netlink                          0t0      11017 ROUTE
+imgserver   611       zhangyl  cwd       DIR              202,1      4096    1059054 /home/zhangyl/flamingoserver
+imgserver   611       zhangyl  rtd       DIR              202,1      4096          2 /
+imgserver   611       zhangyl  txt       REG              202,1   4788917    1057044 /home/zhangyl/flamingoserver/imgserver
+imgserver   611       zhangyl   24u  a_inode                0,9         0       4796 [eventfd]
+imgserver   611       zhangyl   25u     IPv4           55707643       0t0        TCP *:commtact-http (LISTEN)
+imgserver   611       zhangyl   26r      CHR                1,3       0t0       4800 /dev/null
+imgserver   611   613 zhangyl   32w      REG              202,1    131072    2754609 /home/zhangyl/flamingoserver/imgcache/258bfb8945288a117d98d440986d7a03
+</code></pre><p>结果显示中列出了各个进程打开的各种 fd 类型，对于 Uinx Socket，<strong>lsof</strong> 命令会显示出其详细的路径，打开的文件 fd 亦是如此。</p>
+<p>使用 <strong>lsof</strong> 命令有三点需要注意：</p>
+<ul>
+<li>
+<p>默认情况下，<strong>lsof</strong> 的输出比较多，我们可以使用 grep 命令过滤我们想要查看的进程打开的 fd 信息，如：</p>
+<pre tabindex="0"><code>lsof -i | grep myapp
+</code></pre><p>或者使用 <strong>lsof -p pid</strong> 也能过滤出指定的进程打开的 fd 信息：</p>
+<pre tabindex="0"><code>[root@iZ238vnojlyZ ~]# lsof -p 26621
+COMMAND     PID    USER   FD      TYPE   DEVICE SIZE/OFF    NODE NAME
+chatserve 26621 zhangyl  cwd       DIR    202,1     4096 1059054 /home/zhangyl/flamingoserver
+chatserve 26621 zhangyl  rtd       DIR    202,1     4096       2 /
+chatserve 26621 zhangyl  txt       REG    202,1  8027035 1051942 /home/zhangyl/flamingoserver/chatserver
+chatserve 26621 zhangyl  mem       REG    202,1    61928  141417 /usr/lib64/libnss_files-2.17.so
+chatserve 26621 zhangyl  mem       REG    202,1    44096  143235 /usr/lib64/librt-2.17.so
+chatserve 26621 zhangyl  mem       REG    202,1    19520  137064 /usr/lib64/libdl-2.17.so
+chatserve 26621 zhangyl  mem       REG    202,1  2112384  132824 /usr/lib64/libc-2.17.so
+chatserve 26621 zhangyl  mem       REG    202,1   142304  132850 /usr/lib64/libpthread-2.17.so
+chatserve 26621 zhangyl  mem       REG    202,1    88720  135291 /usr/lib64/libgcc_s-4.8.5-20150702.so.1
+chatserve 26621 zhangyl  mem       REG    202,1  1141560  137077 /usr/lib64/libm-2.17.so
+chatserve 26621 zhangyl  mem       REG    202,1   999944  140059 /usr/lib64/libstdc++.so.6.0.19
+chatserve 26621 zhangyl  mem       REG    202,1  9879756  269001 /usr/lib64/mysql/libmysqlclient.so.20.3.4
+chatserve 26621 zhangyl  mem       REG    202,1   164440  133622 /usr/lib64/ld-2.17.so
+chatserve 26621 zhangyl    0u      CHR      1,3      0t0    4800 /dev/null
+chatserve 26621 zhangyl    1u      CHR      1,3      0t0    4800 /dev/null
+chatserve 26621 zhangyl    2u      CHR      1,3      0t0    4800 /dev/null
+chatserve 26621 zhangyl    3u  a_inode      0,9        0    4796 [eventpoll]
+chatserve 26621 zhangyl    4u  a_inode      0,9        0    4796 [timerfd]
+chatserve 26621 zhangyl    5u  a_inode      0,9        0    4796 [eventfd]
+chatserve 26621 zhangyl    7u  a_inode      0,9        0    4796 [eventpoll]
+</code></pre></li>
+<li>
+<p><strong>lsof</strong> 命令只能查看到当前用户有权限查看到的进程 fd 信息，对于其没有权限的进程，最右边一列会显示 “<strong>Permission denied</strong>”。如下所示：</p>
+<pre tabindex="0"><code>sshd      26759          root  cwd   unknown                              /proc/26759/cwd (readlink: Permission denied)
+sshd      26759          root  rtd   unknown                              /proc/26759/root (readlink: Permission denied)
+sshd      26759          root  txt   unknown                              /proc/26759/exe (readlink: Permission denied)
+sshd      26759          root NOFD                                        /proc/26759/fd (opendir: Permission denied)
+bash      26761          root  cwd   unknown                              /proc/26761/cwd (readlink: Permission denied)
+bash      26761          root  rtd   unknown                              /proc/26761/root (readlink: Permission denied)
+bash      26761          root  txt   unknown                              /proc/26761/exe (readlink: Permission denied)
+bash      26761          root NOFD                                        /proc/26761/fd (opendir: Permission denied)
+</code></pre></li>
+<li>
+<p><strong>lsof</strong> 命令第一栏进程名在显示的时候，默认显示前 n 个字符，这样如果我们需要显示完整的进程名以方便过滤的话，可以使用 <strong>+c</strong> 选项。用法如下：</p>
+<pre tabindex="0"><code>#最左侧的程序名最大显示 15 个字符
+[zhangyl@iZ238vnojlyZ ~]$ lsof +c 15
+</code></pre><p>当然，如果你设置值太大， <strong>lsof</strong> 便不会采用你设置的最大值，而是使用默认最大值。</p>
+</li>
+</ul>
+<p>上文也介绍了，socket 也是一种 fd，如果需要仅显示系统的网络连接信息，使用的是 <strong>-i</strong> 选项即可，这个选项可以形象地显示出系统当前的出入连接情况：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/89d795318a1cde9840bba1aaac6d5731.jpeg" alt=""  />
+</p>
+<p>看到图中的连接方向了吧？</p>
+<p>当然，和 <strong>netstat</strong> 命令一样，<strong>lsof -i</strong> 默认也会显示 ip 地址和端口号的别名，我们只要使用 <strong>-n</strong> 和 <strong>-P</strong> 选项就能相对应地显示 ip 地址和端口号了，综合起来就是 <strong>lsof -Pni</strong>：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/093adf7368b4af12517df50a61a29861.webp" alt=""  />
+</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/blog/2d2976c6ad824a1b9e2c44ffad106432/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>你一定要搞明白的C函数调用方式与栈原理</span>
+  </a>
+  <a class="next" href="https://haokiu.com/blog/cf3a65cd7c2a40d1a4dbfd708c471c01/">
+    <span class="title">Next »</span>
+    <br>
+    <span>利用 cmake 工具生成 Visual Studio 工程文件</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

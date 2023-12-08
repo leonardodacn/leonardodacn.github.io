@@ -174,7 +174,7 @@ void EncodeFixed32(char* buf, uint32_t value) { if (port::kLittleEndian) { memcp
 char* EncodeVarint32(char* dst, uint32_t v) { unsigned char* ptr =reinterpret_cast&lt;unsigned char*&gt;(dst); static const int B = 128; if (v &lt; (1&lt;&lt;7)) { *(ptr&#43;&#43;) = v; } else if (v &lt; (1&lt;&lt;14)){ *(ptr&#43;&#43;) = v | B; *(ptr&#43;&#43;) = v&gt;&gt;7; } else if (v &lt; (1&lt;&lt;21)){ *(ptr&#43;&#43;) = v | B; *(ptr&#43;&#43;) = (v&gt;&gt;7) | B; *(ptr&#43;&#43;) = v&gt;&gt;14; } else if (v &lt; (1&lt;&lt;28)){ *(ptr&#43;&#43;) = v | B; *(ptr&#43;&#43;) = (v&gt;&gt;7) | B; *(ptr&#43;&#43;) = (v&gt;&gt;14) | B; *(ptr&#43;&#43;) = v&gt;&gt;21; } else { *(ptr&#43;&#43;) = v | B; *(ptr&#43;&#43;) = (v&gt;&gt;7) | B; *(ptr&#43;&#43;) = (v&gt;&gt;14) | B; *(ptr&#43;&#43;) = (v&gt;&gt;21) | B; *(ptr&#43;&#43;) = v&gt;&gt;28; } return reinterpret_cast&lt;char*&gt;(ptr); } // 对于uint64，直接循环 char* EncodeVarint64(char* dst, uint64_t v) { static const int B = 128; unsigned char* ptr =reinterpret_cast&lt;unsigned char*&gt;(dst); while (v &gt;= B) { *(ptr&#43;&#43;) = (v &amp; (B-1)) |B; v &gt;&gt;= 7; } *(ptr&#43;&#43;) =static_cast&lt;unsigned char&gt;(v); returnreinterpret_cast&lt;char*&gt;(ptr); } 3....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析2" href="https://haokiu.com/c955baadcc824d20acb455e1078a257c/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析2" href="https://haokiu.com/blog/c955baadcc824d20acb455e1078a257c/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -192,7 +192,7 @@ Status DB::Open(const Options&amp; options, const std::string&amp;dbname, DB** d
 1if (s.ok()) { 2 impl-&gt;DeleteObsoleteFiles(); 3 impl-&gt;MaybeScheduleCompaction(); 4} 5impl-&gt;mutex_.Unlock(); 6if (s....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析20" href="https://haokiu.com/0da12c5829764cdc8a508c0a05e99a3e/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析20" href="https://haokiu.com/blog/0da12c5829764cdc8a508c0a05e99a3e/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -207,7 +207,7 @@ Status DB::Open(const Options&amp; options, const std::string&amp;dbname, DB** d
 // S1 锁mutex，防止并发，如果指定option则尝试获取snapshot；然后增加MemTable的引用值。 MutexLock l(&amp;mutex_); SequenceNumber snapshot; if (options.snapshot != NULL) snapshot = reinterpret_cast&lt;const SnapshotImpl*&gt;(options.snapshot)-&gt;number_; else snapshot = versions_-&gt;LastSequence(); // 取当前版本的最后Sequence MemTable *mem = mem_, *imm = imm_; Version* current = versions_-&gt;current(); mem-&gt;Ref(); if (imm != NULL) imm-&gt;Ref(); current-&gt;Ref(); // S2 从sstable文件和MemTable中读取时，释放锁mutex；之后再次锁mutex。 bool have_stat_update = false; Version::GetStats stats; { mutex_.Unlock(); // 先从memtable中查询，再从immutable memtable中查询 LookupKey lkey(key, snapshot); if (mem-&gt;Get(lkey, value, &amp;s)) { } else if (imm != NULL &amp;&amp; imm-&gt;Get(lkey, value, &amp;s)) { } else { // 需要从sstable文件中查询 s = current-&gt;Get(options, lkey, value, &amp;stats); have_stat_update = true; // 记录之，用于compaction } mutex_....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析21" href="https://haokiu.com/1d4ede18ded04a569baee5550226fa6f/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析21" href="https://haokiu.com/blog/1d4ede18ded04a569baee5550226fa6f/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -223,7 +223,7 @@ Status DB::Open(const Options&amp; options, const std::string&amp;dbname, DB** d
 virtual Slice key() const { //kForward直接取iter_-&gt;key()，否则取saved key assert(valid_); return (direction_ == kForward) ? ExtractUserKey(iter_-&gt;key()) : saved_key_; } // 循环直到找到合适的entry，direction必须是kForward assert(iter_-&gt;Valid()); assert(direction_ == kForward); do { ParsedInternalKey ikey; // 确保iter_-&gt;key()的sequence &lt;= 遍历指定的sequence if (ParseKey(&amp;ikey) &amp;&amp; ikey....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析22" href="https://haokiu.com/08d56462861f4df7b247921ba14a88e2/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析22" href="https://haokiu.com/blog/08d56462861f4df7b247921ba14a88e2/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -251,7 +251,7 @@ Slice user_key; SequenceNumber sequence; ValueType type; 也就是说InternalKey
 bool ParseInternalKey (const Slice&amp; internal_key, ParsedInternalKey* result); void AppendInternalKey (std::string* result, const ParsedInternalKey&amp; key); 函数实现很简单，就是字符串的拼接与把字符串按字节拆分，代码略过。根据实现，容易得到InternalKey的格式为：...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析3" href="https://haokiu.com/34fc58749a224c92be698a0d9cd27b99/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析3" href="https://haokiu.com/blog/34fc58749a224c92be698a0d9cd27b99/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -266,7 +266,7 @@ bool ParseInternalKey (const Slice&amp; internal_key, ParsedInternalKey* result)
 //Advanced functions: these are used to reduce the space requirements //for internal data structures like index blocks. // 这两个函数：用于减少像index blocks这样的内部数据结构占用的空间 // 其中的*start和*key参数都是IN OUT的。 //If *start &lt; limit, changes *start to a short string in [start,limit). //Simple comparator implementations may return with *start unchanged, //i.e., an implementation of this method that does nothing is correct. // 这个函数的作用就是：如果*start &lt; limit，就在[startlimit,)中找到一个 // 短字符串，并赋给*start返回 // 简单的comparator实现可能不改变*start，这也是正确的 virtual void FindShortestSeparator(std::string* start, const Slice&amp; limit) const = 0; //Changes *key to a short string &gt;= *key. //Simple comparator implementations may return with *key unchanged, //i.e., an implementation of this method that does nothing is correct....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析4" href="https://haokiu.com/f4dfd0e7e33240c9807a11402d34ddb3/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析4" href="https://haokiu.com/blog/f4dfd0e7e33240c9807a11402d34ddb3/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -282,7 +282,7 @@ bool ParseInternalKey (const Slice&amp; internal_key, ParsedInternalKey* result)
 The log file contents are a sequence of 32KB blocks. The only exception is that the tail of thefile may contain a partial block. Each block consists of a sequence of records: block:= record* trailer? record := checksum: uint32 // crc32c of type and data[] ; little-endian length: uint16 // little-endian type: uint8 // One of FULL,FIRST, MIDDLE, LAST data: uint8[length] A record never starts within the last six bytes of a block (since it won’tfit). Any leftover bytes here form thetrailer, which must consist entirely of zero bytes and must be skipped byreaders....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析5" href="https://haokiu.com/81982087975a4f49913e723952169670/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析5" href="https://haokiu.com/blog/81982087975a4f49913e723952169670/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -304,7 +304,7 @@ if (last_record_offset_ &lt;initial_offset_) { // 当前偏移 &lt; 指定的偏
 // 计算在block内的偏移位置，并圆整到开始读取block的起始位置 size_t offset_in_block =initial_offset_ % kBlockSize; uint64_t block_start_location =initial_offset_ - offset_in_block; // 如果偏移在最后的6byte里，肯定不是一条完整的记录，跳到下一个block if (offset_in_block &gt;kBlockSize - 6) { offset_in_block = 0; block_start_location &#43;=kBlockSize; } end_of_buffer_offset_ =block_start_location; // 设置读取偏移 if (block_start_location &gt; 0) file_-&gt;Skip(block_start_location); // 跳转 首先计算出在block内的偏移位置，然后圆整到要读取block的起始位置。开始读取日志的时候都要保证读取的是完整的block，这就是调整的目的。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析6" href="https://haokiu.com/3e005b6becda44edaa67dc81f32d5499/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析6" href="https://haokiu.com/blog/3e005b6becda44edaa67dc81f32d5499/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -347,7 +347,7 @@ Block的结尾段格式是：
 前缀压缩的key长度信息 &#43; value长度 &#43; key前缀之后的字符串&#43; value...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析7" href="https://haokiu.com/b3a81cdfb8624332bd1f184097675b32/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析7" href="https://haokiu.com/blog/b3a81cdfb8624332bd1f184097675b32/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -369,7 +369,7 @@ Options options; // data block的选项 Options index_block_options; // index bl
 6.4.2 添加k/v对 这是通过方法**Add(constSlice&amp; key, const Slice&amp; value)**完成的，没有返回值。下面分析下函数的逻辑：...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析8" href="https://haokiu.com/8554dc1843294f5fa7955b748c61710f/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析8" href="https://haokiu.com/blog/8554dc1843294f5fa7955b748c61710f/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

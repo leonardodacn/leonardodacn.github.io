@@ -190,7 +190,7 @@ struct eventop { const char *name; void *(*init)(struct event_base *); // 初始
 /* In order of preference */ static const struct eventop *eventops[] = { #ifdef HAVE_EVENT_PORTS &amp;evportops, #endif #ifdef HAVE_WORKING_KQUEUE &amp;kqops, #endif #ifdef HAVE_EPOLL &amp;epollops, #endif #ifdef HAVE_DEVPOLL &amp;devpollops, #endif #ifdef HAVE_POLL &amp;pollops, #endif #ifdef HAVE_SELECT &amp;selectops, #endif #ifdef WIN32 &amp;win32ops, #endif NULL }; 然后libevent根据系统配置和编译选项决定使用哪一种I/O demultiplex机制，这段代码在函数**event_base_new()**中：...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to libevent源码深度剖析10" href="https://haokiu.com/f567712a9375435692b3217e444f19e5/"></a>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析10" href="https://haokiu.com/blog/f567712a9375435692b3217e444f19e5/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -208,7 +208,7 @@ static int gettime(struct event_base *base, struct timeval *tp){ // 如果tv_cac
 int event_base_loop(struct event_base *base, int flags){ // 清空时间缓存 base-&gt;tv_cache.tv_sec = 0; while(!...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to libevent源码深度剖析11" href="https://haokiu.com/136973dd819b459bac605bcb1a25571c/"></a>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析11" href="https://haokiu.com/blog/136973dd819b459bac605bcb1a25571c/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -229,7 +229,7 @@ libevent本身不是多线程安全的，在多核的时代，如何能充分利
 4. 小节 本节更是libevent的使用方面的技巧，讨论了一下如何让libevent支持多线程，以及几种支持多线程的机制，和memcached使用libevent的多线程模型。</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to libevent源码深度剖析12" href="https://haokiu.com/1f455bc4e89944fe8fb0ca8f3bbcdc1b/"></a>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析12" href="https://haokiu.com/blog/1f455bc4e89944fe8fb0ca8f3bbcdc1b/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -252,7 +252,7 @@ libevent本身不是多线程安全的，在多核的时代，如何能充分利
 static void evsignal_handler(int sig){ ... evsignal_base-&gt;sig.evsigcaught[sig]&#43;&#43;; evsignal_base-&gt;sig.evsignal_caught = 1; /* Wake up our notification mechanism */ send(evsignal_base-&gt;sig.ev_signal_pair[0], &#34;a&#34;, 1, 0); ... } 于是 base2 得到通知 ALARM 信号发生了，而实际上 ALARM 是注册在 base1 上的， base2 上的 ALARM 注册 event 是空的，于是处理函数将不能得到调用；因此在 libevent 中，如果需要处理信号，只能将信号注册到一个 libevent 实例上。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to libevent源码深度剖析13" href="https://haokiu.com/b05b12b227ee4ce494fe99d9116d6a23/"></a>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析13" href="https://haokiu.com/blog/b05b12b227ee4ce494fe99d9116d6a23/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -270,7 +270,7 @@ libevent已经被广泛的应用，作为底层的网络库；比如memcached、
 参考资料： libevent官方地址: http://monkey.org/~provos/libevent/</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to libevent源码深度剖析一" href="https://haokiu.com/8aa77e3ff7e54bdb8899e32f75300864/"></a>
+  <a class="entry-link" aria-label="post link to libevent源码深度剖析一" href="https://haokiu.com/blog/8aa77e3ff7e54bdb8899e32f75300864/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -311,7 +311,7 @@ for(char i = 0; i &lt; 256; &#43;&#43;i) { printf(&#34;%d\n&#34;, i); } 下面�
 这个题目考查点在于 memmov 函数与 memcpy 函数的区别，这两者对于源地址与目标地址内存有重叠的这一情况的处理方式是不一样的。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Linux C/C&#43;&#43;后端开发面试问哪些问题" href="https://haokiu.com/8570010b5d82422da83500ab481816be/"></a>
+  <a class="entry-link" aria-label="post link to Linux C/C&#43;&#43;后端开发面试问哪些问题" href="https://haokiu.com/blog/8570010b5d82422da83500ab481816be/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -332,7 +332,7 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event* event); 参数说明
 struct epoll_event { uint32_t events; /* 需要检测的 fd 事件，取值与 poll 函数一样 */ epoll_data_t data; /* 用户自定义数据 */ }; epoll_event 结构体的 data 字段的类型是 epoll_data_t，我们可以利用这个字段设置一个自己的自定义数据，它本质上是一个 Union 对象，在 64 位操作系统中其大小是 8 字节，其定义如下：...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Linux epoll 模型（含LT 模式和 ET 模式详解）" href="https://haokiu.com/e4e0126749ad480399c46665753f03e4/"></a>
+  <a class="entry-link" aria-label="post link to Linux epoll 模型（含LT 模式和 ET 模式详解）" href="https://haokiu.com/blog/e4e0126749ad480399c46665753f03e4/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -355,7 +355,7 @@ tcpdump -i any -w filename -r 从利用 -w 选项保存的包文件中读取数�
 ## 仅显示经过端口 8888 上的数据包（包括tcp:8888和udp:8888） tcpdump -i any &#39;port 8888&#39; ## 仅显示经过端口是 tcp:8888 上的数据包 tcpdump -i any &#39;tcp port 8888&#39; ## 仅显示从源端口是 tcp:8888 的数据包 tcpdump -i any &#39;tcp src port 8888&#39; ## 仅显示源端口是 tcp:8888 或目标端口是 udp:9999 的包 tcpdump -i any &#39;tcp src port 8888 or udp dst port 9999&#39; ## 仅显示地址是127....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Linux tcpdump 使用介绍" href="https://haokiu.com/6eecf1781f7d4e1691c367ebf702d4d2/"></a>
+  <a class="entry-link" aria-label="post link to Linux tcpdump 使用介绍" href="https://haokiu.com/blog/6eecf1781f7d4e1691c367ebf702d4d2/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -376,7 +376,7 @@ yum install nc nc 命令常见的用法是模拟一个服务器程序被其他�
 我们知道客户端连接服务器一般都是操作系统随机分配一个可用的端口号连接到服务器上去，使用 nc 命令作为客户端时可以使用 -p 选项指定使用哪个端口号连接服务器，例如，我们希望通过本地 5555 端口连接百度的 Web 服务器，可以这么输入：...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Linux 网络故障排查的瑞士军刀" href="https://haokiu.com/501d5d7dacf24f4098180740dba82434/"></a>
+  <a class="entry-link" aria-label="post link to Linux 网络故障排查的瑞士军刀" href="https://haokiu.com/blog/501d5d7dacf24f4098180740dba82434/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -405,7 +405,7 @@ yum install nc nc 命令常见的用法是模拟一个服务器程序被其他�
 ​</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Memcached源码分析" href="https://haokiu.com/d10283bf526c437a9e64e40d5afa25c4/"></a>
+  <a class="entry-link" aria-label="post link to Memcached源码分析" href="https://haokiu.com/blog/d10283bf526c437a9e64e40d5afa25c4/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

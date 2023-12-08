@@ -186,7 +186,7 @@
 仅在kudu11进行过测试</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to datax-kudu-plugin" href="https://haokiu.com/3909c1ec487c48198ae49ab46ba98dcb/"></a>
+  <a class="entry-link" aria-label="post link to datax-kudu-plugin" href="https://haokiu.com/blog/3909c1ec487c48198ae49ab46ba98dcb/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -200,7 +200,7 @@ eg:
 { &#34;name&#34;: &#34;kuduwriter&#34;, &#34;parameter&#34;: { &#34;kuduConfig&#34;: { &#34;kudu.master_addresses&#34;: &#34;***&#34;, &#34;timeout&#34;: 60000, &#34;sessionTimeout&#34;: 60000 }, &#34;table&#34;: &#34;&#34;, &#34;replicaCount&#34;: 3, &#34;truncate&#34;: false, &#34;writeMode&#34;: &#34;upsert&#34;, &#34;partition&#34;: { &#34;range&#34;: { &#34;column1&#34;: [ { &#34;lower&#34;: &#34;2020-08-25&#34;, &#34;upper&#34;: &#34;2020-08-26&#34; }, { &#34;lower&#34;: &#34;2020-08-26&#34;, &#34;upper&#34;: &#34;2020-08-27&#34; }, { &#34;lower&#34;: &#34;2020-08-27&#34;, &#34;upper&#34;: &#34;2020-08-28&#34; } ] }, &#34;hash&#34;: { &#34;column&#34;: [ &#34;column1&#34; ], &#34;number&#34;: 3 } }, &#34;column&#34;: [ { &#34;index&#34;: 0, &#34;name&#34;: &#34;c1&#34;, &#34;type&#34;: &#34;string&#34;, &#34;primaryKey&#34;: true }, { &#34;index&#34;: 1, &#34;name&#34;: &#34;c2&#34;, &#34;type&#34;: &#34;string&#34;, &#34;compress&#34;: &#34;DEFAULT_COMPRESSION&#34;, &#34;encoding&#34;: &#34;AUTO_ENCODING&#34;, &#34;comment&#34;: &#34;注解xxxx&#34; } ], &#34;batchSize&#34;: 1024, &#34;bufferSize&#34;: 2048, &#34;skipFail&#34;: false, &#34;encoding&#34;: &#34;UTF-8&#34; } } 必须参数：...</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to datax-kudu-plugins" href="https://haokiu.com/23a56c95c6c4402998fb8bf16e29fc05/"></a>
+  <a class="entry-link" aria-label="post link to datax-kudu-plugins" href="https://haokiu.com/blog/23a56c95c6c4402998fb8bf16e29fc05/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -225,7 +225,7 @@ Standalone: 单进程运行，没有外部依赖。 Local: 单进程运行，统
 public class SomeReader extends Reader { public static class Job extends Reader.Job { @Override public void init() { } @Override public void prepare() { } @Override public List&lt;Configuration&gt; split(int adviceNumber) { return null; } @Override public void post() { } @Override public void destroy() { } } public static class Task extends Reader....</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to DataX插件开发宝典" href="https://haokiu.com/7c5af007072741d2a1b8a4578137e185/"></a>
+  <a class="entry-link" aria-label="post link to DataX插件开发宝典" href="https://haokiu.com/blog/7c5af007072741d2a1b8a4578137e185/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -241,7 +241,7 @@ DRDS的插件目前DataX只适配了Mysql引擎的场景，DRDS对于DataX而言
 3 功能说明 3.1 配置样例 配置一个从DRDS数据库同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &#34;byte&#34;: 1048576 } //出错限制 &#34;errorLimit&#34;: { //出错的record条数上限，当大于该值即报错。 &#34;record&#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;drdsReader&#34;, &#34;parameter&#34;: { // 数据库连接用户名 &#34;username&#34;: &#34;root&#34;, // 数据库连接密码 &#34;password&#34;: &#34;root&#34;, &#34;column&#34;: [ &#34;id&#34;，&#34;name&#34; ], &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;table&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:mysql://127.0.0.1:3306/database&#34; ] } ] } }, &#34;writer&#34;: { //writer类型 &#34;name&#34;: &#34;streamwriter&#34;, //是否打印内容 &#34;parameter&#34;: { &#34;print&#34;:true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &#34;job&#34;: { &#34;setting&#34;: { }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;drdsreader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;root&#34;, &#34;password&#34;: &#34;root&#34;, &#34;where&#34;: &#34;&#34;, &#34;connection&#34;: [ { &#34;querySql&#34;: [ &#34;select db_id,on_line_flag from db_info where db_id &lt; 10;&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:drds://localhost:3306/database&#34;] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;: false, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3....</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to DrdsReader 插件文档" href="https://haokiu.com/20f3c6090e2448838d8be1baca3a5e1c/"></a>
+  <a class="entry-link" aria-label="post link to DrdsReader 插件文档" href="https://haokiu.com/blog/20f3c6090e2448838d8be1baca3a5e1c/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -259,7 +259,7 @@ normal 模式：把HBase中的表，当成普通二维表（横表）进行读�
 hbase(main):017:0&gt; scan ‘users’ ROW COLUMN&#43;CELL lisi column=address:city, timestamp=1457101972764, value=beijing lisi column=address:contry, timestamp=1457102773908, value=china lisi column=address:province, timestamp=1457101972736, value=beijing lisi column=info:age, timestamp=1457101972548, value=27 lisi column=info:birthday, timestamp=1457101972604, value=1987-06-17 lisi column=info:company, timestamp=1457101972653, value=baidu xiaoming column=address:city, timestamp=1457082196082, value=hangzhou xiaoming column=address:contry, timestamp=1457082195729, value=china xiaoming column=address:province, timestamp=1457082195773, value=zhejiang xiaoming column=info:age, timestamp=1457082218735, value=29 xiaoming column=info:birthday, timestamp=1457082186830, value=1987-06-17 xiaoming column=info:company, timestamp=1457082189826, value=alibaba 2 row(s) in 0.0580 seconds...</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Hbase094XReader &amp; Hbase11XReader 插件文档" href="https://haokiu.com/34ec6d7caba24a86b7a5e9a2f37d8c46/"></a>
+  <a class="entry-link" aria-label="post link to Hbase094XReader &amp; Hbase11XReader 插件文档" href="https://haokiu.com/blog/34ec6d7caba24a86b7a5e9a2f37d8c46/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -277,7 +277,7 @@ normal 模式：把HBase中的表，当成普通二维表（横表）进行读�
 hbase(main):017:0&gt; scan ‘users’ ROW COLUMN&#43;CELL lisi column=address:city, timestamp=1457101972764, value=beijing lisi column=address:contry, timestamp=1457102773908, value=china lisi column=address:province, timestamp=1457101972736, value=beijing lisi column=info:age, timestamp=1457101972548, value=27 lisi column=info:birthday, timestamp=1457101972604, value=1987-06-17 lisi column=info:company, timestamp=1457101972653, value=baidu xiaoming column=address:city, timestamp=1457082196082, value=hangzhou xiaoming column=address:contry, timestamp=1457082195729, value=china xiaoming column=address:province, timestamp=1457082195773, value=zhejiang xiaoming column=info:age, timestamp=1457082218735, value=29 xiaoming column=info:birthday, timestamp=1457082186830, value=1987-06-17 xiaoming column=info:company, timestamp=1457082189826, value=alibaba 2 row(s) in 0.0580 seconds...</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Hbase094XReader &amp; Hbase11XReader 插件文档" href="https://haokiu.com/7c5fc71d1a124a5396b1a17e8293be71/"></a>
+  <a class="entry-link" aria-label="post link to Hbase094XReader &amp; Hbase11XReader 插件文档" href="https://haokiu.com/blog/7c5fc71d1a124a5396b1a17e8293be71/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -301,7 +301,7 @@ hbase(main):017:0&gt; scan ‘users’ ROW COLUMN&#43;CELL lisi column=address:c
 3 功能说明 3.1 配置样例 配置一个从本地写入hbase1.1.x的作业： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 5 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;txtfilereader&#34;, &#34;parameter&#34;: { &#34;path&#34;: &#34;/Users/shf/workplace/datax_test/hbase11xwriter/txt/normal....</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Hbase094XWriter &amp; Hbase11XWriter 插件文档" href="https://haokiu.com/0172fbcbd4674f98a8782403fc6a7ca5/"></a>
+  <a class="entry-link" aria-label="post link to Hbase094XWriter &amp; Hbase11XWriter 插件文档" href="https://haokiu.com/blog/0172fbcbd4674f98a8782403fc6a7ca5/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -322,7 +322,7 @@ hbase(main):017:0&gt; scan ‘users’ ROW COLUMN&#43;CELL lisi column=address:c
 3 功能说明 3.1 配置样例 配置一个从本地写入hbase1.1.x的作业： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 5 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;txtfilereader&#34;, &#34;parameter&#34;: { &#34;path&#34;: &#34;/Users/shf/workplace/datax_test/hbase11xwriter/txt/normal.txt&#34;, &#34;charset&#34;: &#34;UTF-8&#34;, &#34;column&#34;: [ { &#34;index&#34;: 0, &#34;type&#34;: &#34;String&#34; }, { &#34;index&#34;: 1, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 2, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 3, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 4, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 5, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 6, &#34;type&#34;: &#34;string&#34; } ], &#34;fieldDelimiter&#34;: &#34;,&#34; } }, &#34;writer&#34;: { &#34;name&#34;: &#34;hbase11xwriter&#34;, &#34;parameter&#34;: { &#34;hbaseConfig&#34;: { &#34;hbase....</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Hbase094XWriter &amp; Hbase11XWriter 插件文档" href="https://haokiu.com/745df21fdbd349ab9a9fc5c94551b336/"></a>
+  <a class="entry-link" aria-label="post link to Hbase094XWriter &amp; Hbase11XWriter 插件文档" href="https://haokiu.com/blog/745df21fdbd349ab9a9fc5c94551b336/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -342,7 +342,7 @@ hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了�
 必选：是 默认值：无 column...</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to hbase11xsqlreader  插件文档" href="https://haokiu.com/283a89fffad54e6f909c2936a1ff08ad/"></a>
+  <a class="entry-link" aria-label="post link to hbase11xsqlreader  插件文档" href="https://haokiu.com/blog/283a89fffad54e6f909c2936a1ff08ad/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -357,7 +357,7 @@ hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了�
 3. 配置说明 3.1 配置样例 { &#34;job&#34;: { &#34;entry&#34;: { &#34;jvm&#34;: &#34;-Xms2048m -Xmx2048m&#34; }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;txtfilereader&#34;, &#34;parameter&#34;: { &#34;path&#34;: &#34;/Users/shf/workplace/datax_test/hbase11xsqlwriter/txt/normal.txt&#34;, &#34;charset&#34;: &#34;UTF-8&#34;, &#34;column&#34;: [ { &#34;index&#34;: 0, &#34;type&#34;: &#34;String&#34; }, { &#34;index&#34;: 1, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 2, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 3, &#34;type&#34;: &#34;string&#34; } ], &#34;fieldDelimiter&#34;: &#34;,&#34; } }, &#34;writer&#34;: { &#34;name&#34;: &#34;hbase11xsqlwriter&#34;, &#34;parameter&#34;: { &#34;batchSize&#34;: &#34;256&#34;, &#34;column&#34;: [ &#34;UID&#34;, &#34;TS&#34;, &#34;EVENTID&#34;, &#34;CONTENT&#34; ], &#34;hbaseConfig&#34;: { &#34;hbase.zookeeper.quorum&#34;: &#34;目标hbase集群的ZK服务器地址，向PE咨询&#34;, &#34;zookeeper.znode.parent&#34;: &#34;目标hbase集群的znode，向PE咨询&#34; }, &#34;nullMode&#34;: &#34;skip&#34;, &#34;table&#34;: &#34;目标hbase表名，大小写有关&#34; } } } ], &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 5 } } } } 3....</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to HBase11xsqlwriter插件文档" href="https://haokiu.com/1c329829c22c499d8e684735252966c1/"></a>
+  <a class="entry-link" aria-label="post link to HBase11xsqlwriter插件文档" href="https://haokiu.com/blog/1c329829c22c499d8e684735252966c1/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Memcached源码阅读十三 do_item_alloc操作 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="Memcached源码阅读十三 do_item_alloc操作 前面我们分析了Memcached的set操作，其set操作在经过所有的数据有效性检查之后，如果需要存储item，则会执行item的实际存储操作，我们下面分析下其过程。
+//执行item的存储操作,该操作会将item挂载到LRU表和slabcalss中 item *do_item_alloc(char *key, const size_t nkey, const int flags, const rel_time_t exptime, const int nbytes, const uint32_t cur_hv) { uint8_t nsuffix; item *it = NULL; char suffix[40]; //计算item的总大小(空间) size_t ntotal = item_make_header(nkey &#43; 1, flags, nbytes, suffix, &amp;nsuffix); //如果使用了cas if (settings.use_cas) { //增加cas的空间 ntotal &#43;= sizeof(uint64_t); } unsigned int id = slabs_clsid(ntotal); //那大小选择合适的slab if (id == 0) return 0; //执行LRU锁 mutex_lock(&amp;cache_lock); //存储时，会尝试从LRU中选择合适的空间的空间 int tries = 5; //如果LRU中尝试5次还没合适的空间，则执行申请空间的操作 int tried_alloc = 0; item *search; void *hold_lock = NULL; //初始化时选择的过期时间 rel_time_t oldest_live = settings.oldest_live; search = tails[id];//第id个LRU表的尾部 for (; tries &gt; 0 &amp;&amp; search != NULL; tries--, search=search-&gt;prev) { uint32_t hv = hash(ITEM_key(search), search-&gt;nkey, 0);//获取分段锁 //尝试执行锁操作，这里执行的乐观锁 if (hv !">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/50d829bedab44857aaf08cfd61e6c952/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Memcached源码阅读十三 do_item_alloc操作" />
+<meta property="og:description" content="Memcached源码阅读十三 do_item_alloc操作 前面我们分析了Memcached的set操作，其set操作在经过所有的数据有效性检查之后，如果需要存储item，则会执行item的实际存储操作，我们下面分析下其过程。
+//执行item的存储操作,该操作会将item挂载到LRU表和slabcalss中 item *do_item_alloc(char *key, const size_t nkey, const int flags, const rel_time_t exptime, const int nbytes, const uint32_t cur_hv) { uint8_t nsuffix; item *it = NULL; char suffix[40]; //计算item的总大小(空间) size_t ntotal = item_make_header(nkey &#43; 1, flags, nbytes, suffix, &amp;nsuffix); //如果使用了cas if (settings.use_cas) { //增加cas的空间 ntotal &#43;= sizeof(uint64_t); } unsigned int id = slabs_clsid(ntotal); //那大小选择合适的slab if (id == 0) return 0; //执行LRU锁 mutex_lock(&amp;cache_lock); //存储时，会尝试从LRU中选择合适的空间的空间 int tries = 5; //如果LRU中尝试5次还没合适的空间，则执行申请空间的操作 int tried_alloc = 0; item *search; void *hold_lock = NULL; //初始化时选择的过期时间 rel_time_t oldest_live = settings.oldest_live; search = tails[id];//第id个LRU表的尾部 for (; tries &gt; 0 &amp;&amp; search != NULL; tries--, search=search-&gt;prev) { uint32_t hv = hash(ITEM_key(search), search-&gt;nkey, 0);//获取分段锁 //尝试执行锁操作，这里执行的乐观锁 if (hv !" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/50d829bedab44857aaf08cfd61e6c952/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Memcached源码阅读十三 do_item_alloc操作"/>
+<meta name="twitter:description" content="Memcached源码阅读十三 do_item_alloc操作 前面我们分析了Memcached的set操作，其set操作在经过所有的数据有效性检查之后，如果需要存储item，则会执行item的实际存储操作，我们下面分析下其过程。
+//执行item的存储操作,该操作会将item挂载到LRU表和slabcalss中 item *do_item_alloc(char *key, const size_t nkey, const int flags, const rel_time_t exptime, const int nbytes, const uint32_t cur_hv) { uint8_t nsuffix; item *it = NULL; char suffix[40]; //计算item的总大小(空间) size_t ntotal = item_make_header(nkey &#43; 1, flags, nbytes, suffix, &amp;nsuffix); //如果使用了cas if (settings.use_cas) { //增加cas的空间 ntotal &#43;= sizeof(uint64_t); } unsigned int id = slabs_clsid(ntotal); //那大小选择合适的slab if (id == 0) return 0; //执行LRU锁 mutex_lock(&amp;cache_lock); //存储时，会尝试从LRU中选择合适的空间的空间 int tries = 5; //如果LRU中尝试5次还没合适的空间，则执行申请空间的操作 int tried_alloc = 0; item *search; void *hold_lock = NULL; //初始化时选择的过期时间 rel_time_t oldest_live = settings.oldest_live; search = tails[id];//第id个LRU表的尾部 for (; tries &gt; 0 &amp;&amp; search != NULL; tries--, search=search-&gt;prev) { uint32_t hv = hash(ITEM_key(search), search-&gt;nkey, 0);//获取分段锁 //尝试执行锁操作，这里执行的乐观锁 if (hv !"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Memcached源码阅读十三 do_item_alloc操作",
+      "item": "https://haokiu.com/blog/50d829bedab44857aaf08cfd61e6c952/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Memcached源码阅读十三 do_item_alloc操作",
+  "name": "Memcached源码阅读十三 do_item_alloc操作",
+  "description": "Memcached源码阅读十三 do_item_alloc操作 前面我们分析了Memcached的set操作，其set操作在经过所有的数据有效性检查之后，如果需要存储item，则会执行item的实际存储操作，我们下面分析下其过程。\n//执行item的存储操作,该操作会将item挂载到LRU表和slabcalss中 item *do_item_alloc(char *key, const size_t nkey, const int flags, const rel_time_t exptime, const int nbytes, const uint32_t cur_hv) { uint8_t nsuffix; item *it = NULL; char suffix[40]; //计算item的总大小(空间) size_t ntotal = item_make_header(nkey + 1, flags, nbytes, suffix, \u0026amp;nsuffix); //如果使用了cas if (settings.use_cas) { //增加cas的空间 ntotal += sizeof(uint64_t); } unsigned int id = slabs_clsid(ntotal); //那大小选择合适的slab if (id == 0) return 0; //执行LRU锁 mutex_lock(\u0026amp;cache_lock); //存储时，会尝试从LRU中选择合适的空间的空间 int tries = 5; //如果LRU中尝试5次还没合适的空间，则执行申请空间的操作 int tried_alloc = 0; item *search; void *hold_lock = NULL; //初始化时选择的过期时间 rel_time_t oldest_live = settings.oldest_live; search = tails[id];//第id个LRU表的尾部 for (; tries \u0026gt; 0 \u0026amp;\u0026amp; search != NULL; tries--, search=search-\u0026gt;prev) { uint32_t hv = hash(ITEM_key(search), search-\u0026gt;nkey, 0);//获取分段锁 //尝试执行锁操作，这里执行的乐观锁 if (hv !",
+  "keywords": [
+    
+  ],
+  "articleBody": "Memcached源码阅读十三 do_item_alloc操作 前面我们分析了Memcached的set操作，其set操作在经过所有的数据有效性检查之后，如果需要存储item，则会执行item的实际存储操作，我们下面分析下其过程。\n//执行item的存储操作,该操作会将item挂载到LRU表和slabcalss中 item *do_item_alloc(char *key, const size_t nkey, const int flags, const rel_time_t exptime, const int nbytes, const uint32_t cur_hv) { uint8_t nsuffix; item *it = NULL; char suffix[40]; //计算item的总大小(空间) size_t ntotal = item_make_header(nkey + 1, flags, nbytes, suffix, \u0026nsuffix); //如果使用了cas if (settings.use_cas) { //增加cas的空间 ntotal += sizeof(uint64_t); } unsigned int id = slabs_clsid(ntotal); //那大小选择合适的slab if (id == 0) return 0; //执行LRU锁 mutex_lock(\u0026cache_lock); //存储时，会尝试从LRU中选择合适的空间的空间 int tries = 5; //如果LRU中尝试5次还没合适的空间，则执行申请空间的操作 int tried_alloc = 0; item *search; void *hold_lock = NULL; //初始化时选择的过期时间 rel_time_t oldest_live = settings.oldest_live; search = tails[id];//第id个LRU表的尾部 for (; tries \u003e 0 \u0026\u0026 search != NULL; tries--, search=search-\u003eprev) { uint32_t hv = hash(ITEM_key(search), search-\u003enkey, 0);//获取分段锁 //尝试执行锁操作，这里执行的乐观锁 if (hv != cur_hv \u0026\u0026 (hold_lock = item_trylock(hv)) == NULL) continue; //判断item是否被锁住，item的引用次数其实充当的也是一种锁 if (refcount_incr(\u0026search-\u003erefcount) != 2) { refcount_decr(\u0026search-\u003erefcount);//更新it的引用次数 //如果it的添加时间比当前时间小于3*3600 if (search-\u003etime + TAIL_REPAIR_TIME \u003c current_time) { itemstats[id].tailrepairs++;//更新统计信息 search-\u003erefcount = 1; do_item_unlink_nolock(search, hv);//执行分段解锁操作 } if (hold_lock) item_trylock_unlock(hold_lock);//执行分段解锁操作 continue; } //过期时间判断 if ((search-\u003eexptime != 0 \u0026\u0026 search-\u003eexptime \u003c current_time) || (search-\u003etime \u003c= oldest_live \u0026\u0026 oldest_live \u003c= current_time)) { //过期时间的判断 itemstats[id].reclaimed++; if ((search-\u003eit_flags \u0026 ITEM_FETCHED) == 0) { itemstats[id].expired_unfetched++;//更新统计信息 } it = search; //slabclass申请合适的空间 slabs_adjust_mem_requested(it-\u003eslabs_clsid, ITEM_ntotal(it), ntotal); //执行的Hash表的分段解锁操作 do_item_unlink_nolock(it, hv); it-\u003eslabs_clsid = 0; } else if ((it = slabs_alloc(ntotal, id)) == NULL) { //申请失败一次 tried_alloc = 1; //关闭了LRU的 if (settings.evict_to_free == 0) { itemstats[id].outofmemory++; //统计信息更新 } else { itemstats[id].evicted++; //更新统计信息 itemstats[id].evicted_time = current_time - search-\u003etime; if (search-\u003eexptime != 0) itemstats[id].evicted_nonzero++; if ((search-\u003eit_flags \u0026 ITEM_FETCHED) == 0) { itemstats[id].evicted_unfetched++; } it = search; slabs_adjust_mem_requested(it-\u003eslabs_clsid, ITEM_ntotal(it), ntotal);//选择合适的slabclass空间 do_item_unlink_nolock(it, hv);//执行it的分段解锁操作 it-\u003eslabs_clsid = 0; if (settings.slab_automove == 2)//如果打开了slab调整 slabs_reassign(-1, id);//唤醒调整线程 } } //更新引用次数 refcount_decr(\u0026search-\u003erefcount); if (hold_lock) item_trylock_unlock(hold_lock);//解分段锁 break; } //5次循环查找，未找到合适的空间 if (!tried_alloc \u0026\u0026 (tries == 0 || search == NULL)) //则从内存池申请新的空间 it = slabs_alloc(ntotal, id); //内存池申请失败 if (it == NULL) { itemstats[id].outofmemory++;//更新统计信息 mutex_unlock(\u0026cache_lock);//释放LRU锁 return NULL; } assert(it-\u003eslabs_clsid == 0); assert(it != heads[id]); it-\u003erefcount = 1;//更新it的引用次数 mutex_unlock(\u0026cache_lock); it-\u003enext = it-\u003eprev = it-\u003eh_next = 0;//执行初始化操作 it-\u003eslabs_clsid = id;//it所属的slabclass为第id个 DEBUG_REFCNT(it, '*'); it-\u003eit_flags = settings.use_cas ? ITEM_CAS : 0; it-\u003enkey = nkey;//it的key it-\u003enbytes = nbytes;//it的缓冲区的数据 memcpy(ITEM_key(it), key, nkey);//it的数据信息 it-\u003eexptime = exptime;//it的过期时间 memcpy(ITEM_suffix(it), suffix, (size_t)nsuffix);//it的前缀信息 it-\u003ensuffix = nsuffix;//it的一些前缀信息 return it; } //计算item的大小 static size_t item_make_header(const uint8_t nkey, const int flags, const int nbytes, char *suffix, uint8_t *nsuffix) { //suffix限定了40个字节 *nsuffix = (uint8_t) snprintf(suffix, 40, \" %d %d\\r\\n\", flags, nbytes - 2); //返回item的长度 return sizeof(item) + nkey + *nsuffix + nbytes; } //选择合适的slabclass unsigned int slabs_clsid(const size_t size) { int res = POWER_SMALLEST; if (size == 0) return 0; //按slabclass的size的选择 while (size \u003e slabclass[res].size) //如果大于最大的slab的，则直接返回错误，按默认的，大于1M的申请空间失败 if (res++ == power_largest) return 0; return res; } //从内存池申请合适的空间 void slabs_adjust_mem_requested(unsigned int id, size_t old, size_t ntotal) { //slabclass加锁，保持同步 pthread_mutex_lock(\u0026slabs_lock); slabclass_t *p; //判断数据合法性 if (id \u003c POWER_SMALLEST || id \u003e power_largest) { fprintf(stderr, \"Internal error! Invalid slab class\\n\"); abort(); } p = \u0026slabclass[id]; //调整request信息，request表示的是old所在的slab申请空间大小 p-\u003erequested = p-\u003erequested - old + ntotal; pthread_mutex_unlock(\u0026slabs_lock); } ",
+  "wordCount" : "454",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/50d829bedab44857aaf08cfd61e6c952/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      Memcached源码阅读十三 do_item_alloc操作
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#memcached%e6%ba%90%e7%a0%81%e9%98%85%e8%af%bb%e5%8d%81%e4%b8%89-do_item_alloc%e6%93%8d%e4%bd%9c" aria-label="Memcached源码阅读十三 do_item_alloc操作">Memcached源码阅读十三 do_item_alloc操作</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="memcached源码阅读十三-do_item_alloc操作">Memcached源码阅读十三 do_item_alloc操作</h1>
+<p>前面我们分析了<code>Memcached</code>的set操作，其set操作在经过所有的数据有效性检查之后，如果需要存储item，则会执行item的实际存储操作，我们下面分析下其过程。</p>
+<pre tabindex="0"><code>//执行item的存储操作,该操作会将item挂载到LRU表和slabcalss中
+item *do_item_alloc(char *key, const size_t nkey, const int flags,
+                    const rel_time_t exptime, const int nbytes,
+                    const uint32_t cur_hv) {
+    uint8_t nsuffix;
+    item *it = NULL;
+    char suffix[40];
+    //计算item的总大小(空间)
+    size_t ntotal = item_make_header(nkey + 1, flags, nbytes, suffix, &amp;nsuffix);
+    //如果使用了cas
+    if (settings.use_cas) {
+        //增加cas的空间
+        ntotal += sizeof(uint64_t);
+    }
+
+    unsigned int id = slabs_clsid(ntotal);
+    //那大小选择合适的slab
+    if (id == 0)
+        return 0;
+
+    //执行LRU锁
+    mutex_lock(&amp;cache_lock);
+    //存储时，会尝试从LRU中选择合适的空间的空间
+    int tries = 5;
+    //如果LRU中尝试5次还没合适的空间，则执行申请空间的操作
+    int tried_alloc = 0;
+    item *search;
+    void *hold_lock = NULL;
+    //初始化时选择的过期时间
+    rel_time_t oldest_live = settings.oldest_live;
+
+    search = tails[id];//第id个LRU表的尾部
+
+    for (; tries &gt; 0 &amp;&amp; search != NULL; tries--, search=search-&gt;prev) {
+        uint32_t hv = hash(ITEM_key(search), search-&gt;nkey, 0);//获取分段锁
+
+        //尝试执行锁操作，这里执行的乐观锁
+        if (hv != cur_hv &amp;&amp; (hold_lock = item_trylock(hv)) == NULL)
+            continue;
+        //判断item是否被锁住，item的引用次数其实充当的也是一种锁
+        if (refcount_incr(&amp;search-&gt;refcount) != 2) {
+            refcount_decr(&amp;search-&gt;refcount);//更新it的引用次数
+            //如果it的添加时间比当前时间小于3*3600
+            if (search-&gt;time + TAIL_REPAIR_TIME &lt; current_time) {
+                itemstats[id].tailrepairs++;//更新统计信息
+                search-&gt;refcount = 1;
+                do_item_unlink_nolock(search, hv);//执行分段解锁操作
+            }
+
+            if (hold_lock)
+                item_trylock_unlock(hold_lock);//执行分段解锁操作
+            continue;
+        }
+
+        //过期时间判断
+        if ((search-&gt;exptime != 0 &amp;&amp; search-&gt;exptime &lt; current_time)
+            || (search-&gt;time &lt;= oldest_live &amp;&amp; oldest_live &lt;= current_time)) { 
+            //过期时间的判断
+            itemstats[id].reclaimed++;
+            if ((search-&gt;it_flags &amp; ITEM_FETCHED) == 0) {
+                itemstats[id].expired_unfetched++;//更新统计信息
+            }
+
+            it = search;
+            //slabclass申请合适的空间
+            slabs_adjust_mem_requested(it-&gt;slabs_clsid, ITEM_ntotal(it), ntotal);
+            //执行的Hash表的分段解锁操作
+            do_item_unlink_nolock(it, hv);
+            it-&gt;slabs_clsid = 0;
+        } else if ((it = slabs_alloc(ntotal, id)) == NULL) {
+            //申请失败一次
+            tried_alloc = 1;
+            //关闭了LRU的
+            if (settings.evict_to_free == 0) {
+                itemstats[id].outofmemory++;
+                //统计信息更新
+            } else {
+                itemstats[id].evicted++;
+                //更新统计信息
+                itemstats[id].evicted_time = current_time - search-&gt;time;
+
+                if (search-&gt;exptime != 0)
+                    itemstats[id].evicted_nonzero++;
+                if ((search-&gt;it_flags &amp; ITEM_FETCHED) == 0) {
+                    itemstats[id].evicted_unfetched++;
+                }
+
+                it = search;
+                slabs_adjust_mem_requested(it-&gt;slabs_clsid, ITEM_ntotal(it), ntotal);//选择合适的slabclass空间
+                do_item_unlink_nolock(it, hv);//执行it的分段解锁操作
+
+                it-&gt;slabs_clsid = 0;
+
+                if (settings.slab_automove == 2)//如果打开了slab调整
+                    slabs_reassign(-1, id);//唤醒调整线程
+            }
+        }
+
+         //更新引用次数
+        refcount_decr(&amp;search-&gt;refcount);
+        if (hold_lock)
+            item_trylock_unlock(hold_lock);//解分段锁
+        break;
+    }
+
+    //5次循环查找，未找到合适的空间
+    if (!tried_alloc &amp;&amp; (tries == 0 || search == NULL))
+        //则从内存池申请新的空间
+        it = slabs_alloc(ntotal, id);
+
+    //内存池申请失败
+    if (it == NULL) {
+        itemstats[id].outofmemory++;//更新统计信息
+        mutex_unlock(&amp;cache_lock);//释放LRU锁
+        return NULL;
+    }
+
+    assert(it-&gt;slabs_clsid == 0);
+    assert(it != heads[id]);
+
+    it-&gt;refcount = 1;//更新it的引用次数
+    mutex_unlock(&amp;cache_lock);
+    it-&gt;next = it-&gt;prev = it-&gt;h_next = 0;//执行初始化操作
+    it-&gt;slabs_clsid = id;//it所属的slabclass为第id个
+
+    DEBUG_REFCNT(it, &#39;*&#39;);
+    it-&gt;it_flags = settings.use_cas ? ITEM_CAS : 0;
+    it-&gt;nkey = nkey;//it的key
+    it-&gt;nbytes = nbytes;//it的缓冲区的数据
+    memcpy(ITEM_key(it), key, nkey);//it的数据信息
+    it-&gt;exptime = exptime;//it的过期时间
+    memcpy(ITEM_suffix(it), suffix, (size_t)nsuffix);//it的前缀信息
+    it-&gt;nsuffix = nsuffix;//it的一些前缀信息
+    return it;
+}
+
+//计算item的大小
+static size_t item_make_header(const uint8_t nkey, const int flags, const int nbytes,
+                     char *suffix, uint8_t *nsuffix) {
+    //suffix限定了40个字节
+    *nsuffix = (uint8_t) snprintf(suffix, 40, &#34; %d %d\r\n&#34;, flags, nbytes - 2);
+    //返回item的长度
+    return sizeof(item) + nkey + *nsuffix + nbytes;
+}
+
+//选择合适的slabclass
+unsigned int slabs_clsid(const size_t size) {
+    int res = POWER_SMALLEST;
+
+    if (size == 0)
+        return 0;
+
+    //按slabclass的size的选择
+    while (size &gt; slabclass[res].size)
+        //如果大于最大的slab的，则直接返回错误，按默认的，大于1M的申请空间失败   
+        if (res++ == power_largest)
+            return 0;
+    return res;
+}
+
+//从内存池申请合适的空间
+void slabs_adjust_mem_requested(unsigned int id, size_t old, size_t ntotal)
+{
+    //slabclass加锁，保持同步
+    pthread_mutex_lock(&amp;slabs_lock);
+    slabclass_t *p;
+
+    //判断数据合法性
+    if (id &lt; POWER_SMALLEST || id &gt; power_largest) {
+        fprintf(stderr, &#34;Internal error! Invalid slab class\n&#34;);
+        abort();
+    }
+
+    p = &amp;slabclass[id];
+    //调整request信息，request表示的是old所在的slab申请空间大小
+    p-&gt;requested = p-&gt;requested - old + ntotal;
+    pthread_mutex_unlock(&amp;slabs_lock);
+}
+</code></pre>
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/blog/4547681a8a0d42759accab81b61267ab/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Memcached源码阅读十七 状态机</span>
+  </a>
+  <a class="next" href="https://haokiu.com/blog/a795d0b698914f3898a0896633cd92ad/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Memcached源码阅读十二 set操作</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

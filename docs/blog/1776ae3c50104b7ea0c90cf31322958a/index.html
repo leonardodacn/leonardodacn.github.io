@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>leveldb源码分析1 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="leveldb源码分析1 本系列《leveldb源码分析》共有22篇文章，这是第一篇。
+leveldb，除去测试部分，代码不超过1.5w行。这是一个单机k/v存储系统，决定看完它，并把源码分析完整的写下来，还是会很有帮助的。我比较厌烦太复杂的东西，而Leveldb的逻辑很清晰，代码不多、风格很好，功能就不用讲了，正合我的胃口。 BTW，分析Leveldb也参考了网上一些朋友写的分析blog，如【巴山独钓】。
+leveldb源码分析 2012年1月21号开始研究下leveldb的代码，Google两位大牛开发的单机KV存储系统，涉及到了skip list、内存KV table、LRU cache管理、table文件存储、operation log系统等。先从边边角角的小角色开始扫。
+不得不说，Google大牛的代码风格太好了，读起来很舒服，不像有些开源项目，很快就看不下去了。
+开始之前先来看看Leveldb的基本框架，几大关键组件，如图1-1所示。
+图1-1
+leveldb是一种基于operation log的文件系统，是Log-Structured-Merge Tree的典型实现。LSM源自Ousterhout和Rosenblum在1991年发表的经典论文&laquo;The Design and Implementation of a Log-Structured File System &raquo;。
+由于采用了op log，它就可以把随机的磁盘写操作，变成了对op log的append操作，因此提高了IO效率，最新的数据则存储在内存memtable中。
+当op log文件大小超过限定值时，就定时做check point。Leveldb会生成新的Log文件和Memtable，后台调度会将Immutable Memtable的数据导出到磁盘，形成一个新的SSTable文件。SSTable就是由内存中的数据不断导出并进行Compaction操作后形成的，而且SSTable的所有文件是一种层级结构，第一层为Level 0，第二层为Level 1，依次类推，层级逐渐增高，这也是为何称之为LevelDb的原因。
+1. 一些约定 先说下代码中的一些约定：
+1.1 字节序 Leveldb对于数字的存储是little-endian的，在把int32或者int64转换为char*的函数中，是按照先低位再高位的顺序存放的，也就是little-endian的。
+1.2 VarInt 把一个int32或者int64格式化到字符串中，除了上面说的little-endian字节序外，大部分还是变长存储的，也就是VarInt。对于VarInt，每byte的有效存储是7bit的，用最高的8bit位来表示是否结束，如果是1就表示后面还有一个byte的数字，否则表示结束。直接见Encode和Decode函数。
+在操作log中使用的是Fixed存储格式。
+1.3 字符比较 是基于unsigned char的，而非char。
+2. 基本数据结构 别看是基本数据结构，有些也不是那么简单的，像LRU Cache管理和Skip list那都算是leveldb的核心数据结构。
+2.1 Slice Leveldb中的基本数据结构：
+包括length和一个指向外部字节数组的指针。 和string一样，允许字符串中包含’\0’。 提供一些基本接口，可以把const char和string转换为Slice；把Slice转换为string，取得数据指针const char。
+2.2 Status Leveldb 中的返回状态，将错误号和错误信息封装成Status类，统一进行处理。并定义了几种具体的返回状态，如成功或者文件不存在等。
+为了节省空间Status并没有用std::string来存储错误信息，而是将返回码(code), 错误信息message及长度打包存储于一个字符串数组中。
+成功状态OK 是NULL state_，否则state_ 是一个包含如下信息的数组:
+state_[0..3] == 消息message长度 state_[4] == 消息code state_[5..] ==消息message 2.3 Arena Leveldb的简单的内存池，它所作的工作十分简单，申请内存时，将申请到的内存块放入std::vector blocks_中，在Arena的生命周期结束后，统一释放掉所有申请到的内存，内部结构如图2.3-1所示。
+Arena主要提供了两个申请函数：其中一个直接分配内存，另一个可以申请对齐的内存空间。
+Arena没有直接调用delete/free函数，而是由Arena的析构函数统一释放所有的内存。
+应该说这是和leveldb特定的应用场景相关的，比如一个memtable使用一个Arena，当memtable被释放时，由Arena统一释放其内存。
+2.4 Skip list **Skip list(跳跃表）是一种可以代替平衡树的数据结构。**Skip lists应用概率保证平衡，平衡树采用严格的旋转（比如平衡二叉树有左旋右旋）来保证平衡，因此Skip list比较容易实现，而且相比平衡树有着较高的运行效率。
+从概率上保持数据结构的平衡比显式的保持数据结构平衡要简单的多。对于大多数应用，用skip list要比用树更自然，算法也会相对简单。由于skip list比较简单，实现起来会比较容易，虽然和平衡树有着相同的时间复杂度(O(logn))，但是skip list的常数项相对小很多。skip list在空间上也比较节省。一个节点平均只需要1.333个指针（甚至更少），并且不需要存储保持平衡的变量。
+如图2.4-1所示。
+在Leveldb中，skip list是实现memtable的核心数据结构，memtable的KV数据都存储在skip list中。">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/1776ae3c50104b7ea0c90cf31322958a/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="leveldb源码分析1" />
+<meta property="og:description" content="leveldb源码分析1 本系列《leveldb源码分析》共有22篇文章，这是第一篇。
+leveldb，除去测试部分，代码不超过1.5w行。这是一个单机k/v存储系统，决定看完它，并把源码分析完整的写下来，还是会很有帮助的。我比较厌烦太复杂的东西，而Leveldb的逻辑很清晰，代码不多、风格很好，功能就不用讲了，正合我的胃口。 BTW，分析Leveldb也参考了网上一些朋友写的分析blog，如【巴山独钓】。
+leveldb源码分析 2012年1月21号开始研究下leveldb的代码，Google两位大牛开发的单机KV存储系统，涉及到了skip list、内存KV table、LRU cache管理、table文件存储、operation log系统等。先从边边角角的小角色开始扫。
+不得不说，Google大牛的代码风格太好了，读起来很舒服，不像有些开源项目，很快就看不下去了。
+开始之前先来看看Leveldb的基本框架，几大关键组件，如图1-1所示。
+图1-1
+leveldb是一种基于operation log的文件系统，是Log-Structured-Merge Tree的典型实现。LSM源自Ousterhout和Rosenblum在1991年发表的经典论文&laquo;The Design and Implementation of a Log-Structured File System &raquo;。
+由于采用了op log，它就可以把随机的磁盘写操作，变成了对op log的append操作，因此提高了IO效率，最新的数据则存储在内存memtable中。
+当op log文件大小超过限定值时，就定时做check point。Leveldb会生成新的Log文件和Memtable，后台调度会将Immutable Memtable的数据导出到磁盘，形成一个新的SSTable文件。SSTable就是由内存中的数据不断导出并进行Compaction操作后形成的，而且SSTable的所有文件是一种层级结构，第一层为Level 0，第二层为Level 1，依次类推，层级逐渐增高，这也是为何称之为LevelDb的原因。
+1. 一些约定 先说下代码中的一些约定：
+1.1 字节序 Leveldb对于数字的存储是little-endian的，在把int32或者int64转换为char*的函数中，是按照先低位再高位的顺序存放的，也就是little-endian的。
+1.2 VarInt 把一个int32或者int64格式化到字符串中，除了上面说的little-endian字节序外，大部分还是变长存储的，也就是VarInt。对于VarInt，每byte的有效存储是7bit的，用最高的8bit位来表示是否结束，如果是1就表示后面还有一个byte的数字，否则表示结束。直接见Encode和Decode函数。
+在操作log中使用的是Fixed存储格式。
+1.3 字符比较 是基于unsigned char的，而非char。
+2. 基本数据结构 别看是基本数据结构，有些也不是那么简单的，像LRU Cache管理和Skip list那都算是leveldb的核心数据结构。
+2.1 Slice Leveldb中的基本数据结构：
+包括length和一个指向外部字节数组的指针。 和string一样，允许字符串中包含’\0’。 提供一些基本接口，可以把const char和string转换为Slice；把Slice转换为string，取得数据指针const char。
+2.2 Status Leveldb 中的返回状态，将错误号和错误信息封装成Status类，统一进行处理。并定义了几种具体的返回状态，如成功或者文件不存在等。
+为了节省空间Status并没有用std::string来存储错误信息，而是将返回码(code), 错误信息message及长度打包存储于一个字符串数组中。
+成功状态OK 是NULL state_，否则state_ 是一个包含如下信息的数组:
+state_[0..3] == 消息message长度 state_[4] == 消息code state_[5..] ==消息message 2.3 Arena Leveldb的简单的内存池，它所作的工作十分简单，申请内存时，将申请到的内存块放入std::vector blocks_中，在Arena的生命周期结束后，统一释放掉所有申请到的内存，内部结构如图2.3-1所示。
+Arena主要提供了两个申请函数：其中一个直接分配内存，另一个可以申请对齐的内存空间。
+Arena没有直接调用delete/free函数，而是由Arena的析构函数统一释放所有的内存。
+应该说这是和leveldb特定的应用场景相关的，比如一个memtable使用一个Arena，当memtable被释放时，由Arena统一释放其内存。
+2.4 Skip list **Skip list(跳跃表）是一种可以代替平衡树的数据结构。**Skip lists应用概率保证平衡，平衡树采用严格的旋转（比如平衡二叉树有左旋右旋）来保证平衡，因此Skip list比较容易实现，而且相比平衡树有着较高的运行效率。
+从概率上保持数据结构的平衡比显式的保持数据结构平衡要简单的多。对于大多数应用，用skip list要比用树更自然，算法也会相对简单。由于skip list比较简单，实现起来会比较容易，虽然和平衡树有着相同的时间复杂度(O(logn))，但是skip list的常数项相对小很多。skip list在空间上也比较节省。一个节点平均只需要1.333个指针（甚至更少），并且不需要存储保持平衡的变量。
+如图2.4-1所示。
+在Leveldb中，skip list是实现memtable的核心数据结构，memtable的KV数据都存储在skip list中。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/1776ae3c50104b7ea0c90cf31322958a/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="leveldb源码分析1"/>
+<meta name="twitter:description" content="leveldb源码分析1 本系列《leveldb源码分析》共有22篇文章，这是第一篇。
+leveldb，除去测试部分，代码不超过1.5w行。这是一个单机k/v存储系统，决定看完它，并把源码分析完整的写下来，还是会很有帮助的。我比较厌烦太复杂的东西，而Leveldb的逻辑很清晰，代码不多、风格很好，功能就不用讲了，正合我的胃口。 BTW，分析Leveldb也参考了网上一些朋友写的分析blog，如【巴山独钓】。
+leveldb源码分析 2012年1月21号开始研究下leveldb的代码，Google两位大牛开发的单机KV存储系统，涉及到了skip list、内存KV table、LRU cache管理、table文件存储、operation log系统等。先从边边角角的小角色开始扫。
+不得不说，Google大牛的代码风格太好了，读起来很舒服，不像有些开源项目，很快就看不下去了。
+开始之前先来看看Leveldb的基本框架，几大关键组件，如图1-1所示。
+图1-1
+leveldb是一种基于operation log的文件系统，是Log-Structured-Merge Tree的典型实现。LSM源自Ousterhout和Rosenblum在1991年发表的经典论文&laquo;The Design and Implementation of a Log-Structured File System &raquo;。
+由于采用了op log，它就可以把随机的磁盘写操作，变成了对op log的append操作，因此提高了IO效率，最新的数据则存储在内存memtable中。
+当op log文件大小超过限定值时，就定时做check point。Leveldb会生成新的Log文件和Memtable，后台调度会将Immutable Memtable的数据导出到磁盘，形成一个新的SSTable文件。SSTable就是由内存中的数据不断导出并进行Compaction操作后形成的，而且SSTable的所有文件是一种层级结构，第一层为Level 0，第二层为Level 1，依次类推，层级逐渐增高，这也是为何称之为LevelDb的原因。
+1. 一些约定 先说下代码中的一些约定：
+1.1 字节序 Leveldb对于数字的存储是little-endian的，在把int32或者int64转换为char*的函数中，是按照先低位再高位的顺序存放的，也就是little-endian的。
+1.2 VarInt 把一个int32或者int64格式化到字符串中，除了上面说的little-endian字节序外，大部分还是变长存储的，也就是VarInt。对于VarInt，每byte的有效存储是7bit的，用最高的8bit位来表示是否结束，如果是1就表示后面还有一个byte的数字，否则表示结束。直接见Encode和Decode函数。
+在操作log中使用的是Fixed存储格式。
+1.3 字符比较 是基于unsigned char的，而非char。
+2. 基本数据结构 别看是基本数据结构，有些也不是那么简单的，像LRU Cache管理和Skip list那都算是leveldb的核心数据结构。
+2.1 Slice Leveldb中的基本数据结构：
+包括length和一个指向外部字节数组的指针。 和string一样，允许字符串中包含’\0’。 提供一些基本接口，可以把const char和string转换为Slice；把Slice转换为string，取得数据指针const char。
+2.2 Status Leveldb 中的返回状态，将错误号和错误信息封装成Status类，统一进行处理。并定义了几种具体的返回状态，如成功或者文件不存在等。
+为了节省空间Status并没有用std::string来存储错误信息，而是将返回码(code), 错误信息message及长度打包存储于一个字符串数组中。
+成功状态OK 是NULL state_，否则state_ 是一个包含如下信息的数组:
+state_[0..3] == 消息message长度 state_[4] == 消息code state_[5..] ==消息message 2.3 Arena Leveldb的简单的内存池，它所作的工作十分简单，申请内存时，将申请到的内存块放入std::vector blocks_中，在Arena的生命周期结束后，统一释放掉所有申请到的内存，内部结构如图2.3-1所示。
+Arena主要提供了两个申请函数：其中一个直接分配内存，另一个可以申请对齐的内存空间。
+Arena没有直接调用delete/free函数，而是由Arena的析构函数统一释放所有的内存。
+应该说这是和leveldb特定的应用场景相关的，比如一个memtable使用一个Arena，当memtable被释放时，由Arena统一释放其内存。
+2.4 Skip list **Skip list(跳跃表）是一种可以代替平衡树的数据结构。**Skip lists应用概率保证平衡，平衡树采用严格的旋转（比如平衡二叉树有左旋右旋）来保证平衡，因此Skip list比较容易实现，而且相比平衡树有着较高的运行效率。
+从概率上保持数据结构的平衡比显式的保持数据结构平衡要简单的多。对于大多数应用，用skip list要比用树更自然，算法也会相对简单。由于skip list比较简单，实现起来会比较容易，虽然和平衡树有着相同的时间复杂度(O(logn))，但是skip list的常数项相对小很多。skip list在空间上也比较节省。一个节点平均只需要1.333个指针（甚至更少），并且不需要存储保持平衡的变量。
+如图2.4-1所示。
+在Leveldb中，skip list是实现memtable的核心数据结构，memtable的KV数据都存储在skip list中。"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "leveldb源码分析1",
+      "item": "https://haokiu.com/blog/1776ae3c50104b7ea0c90cf31322958a/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "leveldb源码分析1",
+  "name": "leveldb源码分析1",
+  "description": "leveldb源码分析1 本系列《leveldb源码分析》共有22篇文章，这是第一篇。\nleveldb，除去测试部分，代码不超过1.5w行。这是一个单机k/v存储系统，决定看完它，并把源码分析完整的写下来，还是会很有帮助的。我比较厌烦太复杂的东西，而Leveldb的逻辑很清晰，代码不多、风格很好，功能就不用讲了，正合我的胃口。 BTW，分析Leveldb也参考了网上一些朋友写的分析blog，如【巴山独钓】。\nleveldb源码分析 2012年1月21号开始研究下leveldb的代码，Google两位大牛开发的单机KV存储系统，涉及到了skip list、内存KV table、LRU cache管理、table文件存储、operation log系统等。先从边边角角的小角色开始扫。\n不得不说，Google大牛的代码风格太好了，读起来很舒服，不像有些开源项目，很快就看不下去了。\n开始之前先来看看Leveldb的基本框架，几大关键组件，如图1-1所示。\n图1-1\nleveldb是一种基于operation log的文件系统，是Log-Structured-Merge Tree的典型实现。LSM源自Ousterhout和Rosenblum在1991年发表的经典论文\u0026laquo;The Design and Implementation of a Log-Structured File System \u0026raquo;。\n由于采用了op log，它就可以把随机的磁盘写操作，变成了对op log的append操作，因此提高了IO效率，最新的数据则存储在内存memtable中。\n当op log文件大小超过限定值时，就定时做check point。Leveldb会生成新的Log文件和Memtable，后台调度会将Immutable Memtable的数据导出到磁盘，形成一个新的SSTable文件。SSTable就是由内存中的数据不断导出并进行Compaction操作后形成的，而且SSTable的所有文件是一种层级结构，第一层为Level 0，第二层为Level 1，依次类推，层级逐渐增高，这也是为何称之为LevelDb的原因。\n1. 一些约定 先说下代码中的一些约定：\n1.1 字节序 Leveldb对于数字的存储是little-endian的，在把int32或者int64转换为char*的函数中，是按照先低位再高位的顺序存放的，也就是little-endian的。\n1.2 VarInt 把一个int32或者int64格式化到字符串中，除了上面说的little-endian字节序外，大部分还是变长存储的，也就是VarInt。对于VarInt，每byte的有效存储是7bit的，用最高的8bit位来表示是否结束，如果是1就表示后面还有一个byte的数字，否则表示结束。直接见Encode和Decode函数。\n在操作log中使用的是Fixed存储格式。\n1.3 字符比较 是基于unsigned char的，而非char。\n2. 基本数据结构 别看是基本数据结构，有些也不是那么简单的，像LRU Cache管理和Skip list那都算是leveldb的核心数据结构。\n2.1 Slice Leveldb中的基本数据结构：\n包括length和一个指向外部字节数组的指针。 和string一样，允许字符串中包含’\\0’。 提供一些基本接口，可以把const char和string转换为Slice；把Slice转换为string，取得数据指针const char。\n2.2 Status Leveldb 中的返回状态，将错误号和错误信息封装成Status类，统一进行处理。并定义了几种具体的返回状态，如成功或者文件不存在等。\n为了节省空间Status并没有用std::string来存储错误信息，而是将返回码(code), 错误信息message及长度打包存储于一个字符串数组中。\n成功状态OK 是NULL state_，否则state_ 是一个包含如下信息的数组:\nstate_[0..3] == 消息message长度 state_[4] == 消息code state_[5..] ==消息message 2.3 Arena Leveldb的简单的内存池，它所作的工作十分简单，申请内存时，将申请到的内存块放入std::vector blocks_中，在Arena的生命周期结束后，统一释放掉所有申请到的内存，内部结构如图2.3-1所示。\nArena主要提供了两个申请函数：其中一个直接分配内存，另一个可以申请对齐的内存空间。\nArena没有直接调用delete/free函数，而是由Arena的析构函数统一释放所有的内存。\n应该说这是和leveldb特定的应用场景相关的，比如一个memtable使用一个Arena，当memtable被释放时，由Arena统一释放其内存。\n2.4 Skip list **Skip list(跳跃表）是一种可以代替平衡树的数据结构。**Skip lists应用概率保证平衡，平衡树采用严格的旋转（比如平衡二叉树有左旋右旋）来保证平衡，因此Skip list比较容易实现，而且相比平衡树有着较高的运行效率。\n从概率上保持数据结构的平衡比显式的保持数据结构平衡要简单的多。对于大多数应用，用skip list要比用树更自然，算法也会相对简单。由于skip list比较简单，实现起来会比较容易，虽然和平衡树有着相同的时间复杂度(O(logn))，但是skip list的常数项相对小很多。skip list在空间上也比较节省。一个节点平均只需要1.333个指针（甚至更少），并且不需要存储保持平衡的变量。\n如图2.4-1所示。\n在Leveldb中，skip list是实现memtable的核心数据结构，memtable的KV数据都存储在skip list中。",
+  "keywords": [
+    
+  ],
+  "articleBody": "leveldb源码分析1 本系列《leveldb源码分析》共有22篇文章，这是第一篇。\nleveldb，除去测试部分，代码不超过1.5w行。这是一个单机k/v存储系统，决定看完它，并把源码分析完整的写下来，还是会很有帮助的。我比较厌烦太复杂的东西，而Leveldb的逻辑很清晰，代码不多、风格很好，功能就不用讲了，正合我的胃口。 BTW，分析Leveldb也参考了网上一些朋友写的分析blog，如【巴山独钓】。\nleveldb源码分析 2012年1月21号开始研究下leveldb的代码，Google两位大牛开发的单机KV存储系统，涉及到了skip list、内存KV table、LRU cache管理、table文件存储、operation log系统等。先从边边角角的小角色开始扫。\n不得不说，Google大牛的代码风格太好了，读起来很舒服，不像有些开源项目，很快就看不下去了。\n开始之前先来看看Leveldb的基本框架，几大关键组件，如图1-1所示。\n图1-1\nleveldb是一种基于operation log的文件系统，是Log-Structured-Merge Tree的典型实现。LSM源自Ousterhout和Rosenblum在1991年发表的经典论文«The Design and Implementation of a Log-Structured File System »。\n由于采用了op log，它就可以把随机的磁盘写操作，变成了对op log的append操作，因此提高了IO效率，最新的数据则存储在内存memtable中。\n当op log文件大小超过限定值时，就定时做check point。Leveldb会生成新的Log文件和Memtable，后台调度会将Immutable Memtable的数据导出到磁盘，形成一个新的SSTable文件。SSTable就是由内存中的数据不断导出并进行Compaction操作后形成的，而且SSTable的所有文件是一种层级结构，第一层为Level 0，第二层为Level 1，依次类推，层级逐渐增高，这也是为何称之为LevelDb的原因。\n1. 一些约定 先说下代码中的一些约定：\n1.1 字节序 Leveldb对于数字的存储是little-endian的，在把int32或者int64转换为char*的函数中，是按照先低位再高位的顺序存放的，也就是little-endian的。\n1.2 VarInt 把一个int32或者int64格式化到字符串中，除了上面说的little-endian字节序外，大部分还是变长存储的，也就是VarInt。对于VarInt，每byte的有效存储是7bit的，用最高的8bit位来表示是否结束，如果是1就表示后面还有一个byte的数字，否则表示结束。直接见Encode和Decode函数。\n在操作log中使用的是Fixed存储格式。\n1.3 字符比较 是基于unsigned char的，而非char。\n2. 基本数据结构 别看是基本数据结构，有些也不是那么简单的，像LRU Cache管理和Skip list那都算是leveldb的核心数据结构。\n2.1 Slice Leveldb中的基本数据结构：\n包括length和一个指向外部字节数组的指针。 和string一样，允许字符串中包含’\\0’。 提供一些基本接口，可以把const char和string转换为Slice；把Slice转换为string，取得数据指针const char。\n2.2 Status Leveldb 中的返回状态，将错误号和错误信息封装成Status类，统一进行处理。并定义了几种具体的返回状态，如成功或者文件不存在等。\n为了节省空间Status并没有用std::string来存储错误信息，而是将返回码(code), 错误信息message及长度打包存储于一个字符串数组中。\n成功状态OK 是NULL state_，否则state_ 是一个包含如下信息的数组:\nstate_[0..3] == 消息message长度 state_[4] == 消息code state_[5..] ==消息message 2.3 Arena Leveldb的简单的内存池，它所作的工作十分简单，申请内存时，将申请到的内存块放入std::vector blocks_中，在Arena的生命周期结束后，统一释放掉所有申请到的内存，内部结构如图2.3-1所示。\nArena主要提供了两个申请函数：其中一个直接分配内存，另一个可以申请对齐的内存空间。\nArena没有直接调用delete/free函数，而是由Arena的析构函数统一释放所有的内存。\n应该说这是和leveldb特定的应用场景相关的，比如一个memtable使用一个Arena，当memtable被释放时，由Arena统一释放其内存。\n2.4 Skip list **Skip list(跳跃表）是一种可以代替平衡树的数据结构。**Skip lists应用概率保证平衡，平衡树采用严格的旋转（比如平衡二叉树有左旋右旋）来保证平衡，因此Skip list比较容易实现，而且相比平衡树有着较高的运行效率。\n从概率上保持数据结构的平衡比显式的保持数据结构平衡要简单的多。对于大多数应用，用skip list要比用树更自然，算法也会相对简单。由于skip list比较简单，实现起来会比较容易，虽然和平衡树有着相同的时间复杂度(O(logn))，但是skip list的常数项相对小很多。skip list在空间上也比较节省。一个节点平均只需要1.333个指针（甚至更少），并且不需要存储保持平衡的变量。\n如图2.4-1所示。\n在Leveldb中，skip list是实现memtable的核心数据结构，memtable的KV数据都存储在skip list中。\n2.5 Cache Leveldb内部通过双向链表实现了一个标准版的LRUCache，先上个示意图，看看几个数据之间的关系，如图2.5-1。\nLeveldb实现LRUCache的几个步骤 接下来说说Leveldb实现LRUCache的几个步骤，很直观明了。\nS1 定义一个LRUHandle结构体，代表cache中的元素。它包含了几个主要的成员：\nvoid* value; 这个存储的是cache的数据；\nvoid (*deleter)(const Slice\u0026, void* value); 这个是数据从Cache中清除时执行的清理函数；\n后面的三个成员事关LRUCache的数据的组织结构：\n\u003e LRUHandle *next_hash; 指向节点在hash table链表中的下一个hash(key)相同的元素，在有碰撞时Leveldb采用的是链表法。最后一个节点的next_hash为NULL。\n\u003e LRUHandle *next, *prev; 节点在双向链表中的前驱后继节点指针，所有的cache数据都是存储在一个双向list中，最前面的是最新加入的，每次新加入的位置都是head-\u003enext。所以每次剔除的规则就是剔除list tail。\nS2 Leveldb自己实现了一个hash table：HandleTable，而不是使用系统提供的hash table。这个类就是基本的hash操作**：Lookup、Insert和Delete**。\nHash table的作用是根据key快速查找元素是否在cache中，并返回LRUHandle节点指针，由此就能快速定位节点在hash表和双向链表中的位置。\n它是通过LRUHandle的成员next_hash组织起来的。\nHandleTable使用LRUHandle **list_存储所有的hash节点，**其实就是一个二维数组，**一维是不同的hash(key)，另一维则是相同hash(key)的碰撞list。\n每次当hash节点数超过当前一维数组的长度后，都会做Resize操作：\nLRUHandle** new_list = new LRUHandle*[new_length]; 然后复制list_到new_list中，并删除旧的list_。\nS3 基于HandleTable和LRUHandle，实现了一个标准的LRUcache，并内置了mutex保护锁，是线程安全的。\n其中存储所有数据的双向链表是LRUHandle lru_，这是一个list head；\nHash表则是HandleTable table_；\nS4 ShardedLRUCache类，实际上到S3，一个标准的LRU Cache已经实现了，为何还要更近一步呢？答案就是速度！\n为了多线程访问，尽可能快速，减少锁开销，ShardedLRUCache内部有16个LRUCache，查找Key时首先计算key属于哪一个分片，分片的计算方法是取32位hash值的高4位，然后在相应的LRUCache中进行查找，这样就大大减少了多线程的访问锁的开销。\nLRUCache shard_[kNumShards] 它就是一个包装类，实现都在LRUCache类中。\n2.6 其它 此外还有其它几个Random、Hash、CRC32、Histogram等，都在util文件夹下，不仔细分析了。\n",
+  "wordCount" : "163",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/1776ae3c50104b7ea0c90cf31322958a/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      leveldb源码分析1
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#leveldb%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%901" aria-label="leveldb源码分析1">leveldb源码分析1</a></li>
+                <li>
+                    <a href="#leveldb%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%90" aria-label="leveldb源码分析">leveldb源码分析</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#1-%e4%b8%80%e4%ba%9b%e7%ba%a6%e5%ae%9a" aria-label="1. 一些约定">1. 一些约定</a><ul>
+                        
+                <li>
+                    <a href="#11-%e5%ad%97%e8%8a%82%e5%ba%8f" aria-label="1.1 字节序">1.1 字节序</a></li>
+                <li>
+                    <a href="#12-varint" aria-label="1.2 VarInt">1.2 VarInt</a></li>
+                <li>
+                    <a href="#13-%e5%ad%97%e7%ac%a6%e6%af%94%e8%be%83" aria-label="1.3 字符比较">1.3 字符比较</a></li></ul>
+                </li>
+                <li>
+                    <a href="#2-%e5%9f%ba%e6%9c%ac%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84" aria-label="2. 基本数据结构">2. 基本数据结构</a><ul>
+                        
+                <li>
+                    <a href="#21-slice" aria-label="2.1 Slice">2.1 Slice</a></li>
+                <li>
+                    <a href="#22-status" aria-label="2.2 Status">2.2 Status</a></li>
+                <li>
+                    <a href="#23-arena" aria-label="2.3 Arena">2.3 Arena</a></li>
+                <li>
+                    <a href="#24-skip-list" aria-label="2.4 Skip list">2.4 Skip list</a></li>
+                <li>
+                    <a href="#25-cache" aria-label="2.5 Cache">2.5 Cache</a><ul>
+                        
+                <li>
+                    <a href="#leveldb%e5%ae%9e%e7%8e%b0lrucache%e7%9a%84%e5%87%a0%e4%b8%aa%e6%ad%a5%e9%aa%a4" aria-label="Leveldb实现LRUCache的几个步骤">Leveldb实现LRUCache的几个步骤</a></li>
+                <li>
+                    <a href="#s1" aria-label="S1">S1</a></li>
+                <li>
+                    <a href="#s2" aria-label="S2">S2</a></li>
+                <li>
+                    <a href="#s3" aria-label="S3">S3</a></li>
+                <li>
+                    <a href="#s4" aria-label="S4">S4</a></li></ul>
+                </li>
+                <li>
+                    <a href="#26-%e5%85%b6%e5%ae%83" aria-label="2.6 其它">2.6 其它</a>
+                </li>
+            </ul>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="leveldb源码分析1">leveldb源码分析1</h1>
+<p>本系列《leveldb源码分析》共有22篇文章，这是第一篇。</p>
+<p><strong>leveldb</strong>，除去测试部分，代码不超过1.5w行。这是一个单机k/v存储系统，决定看完它，并把源码分析完整的写下来，还是会很有帮助的。我比较厌烦太复杂的东西，而Leveldb的逻辑很清晰，代码不多、风格很好，功能就不用讲了，正合我的胃口。 BTW，分析Leveldb也参考了网上一些朋友写的分析blog，如【巴山独钓】。</p>
+<h1 id="leveldb源码分析">leveldb源码分析</h1>
+<p>2012年1月21号开始研究下leveldb的代码，Google两位大牛开发的单机KV存储系统，涉及到了skip list、内存KV table、LRU cache管理、table文件存储、operation log系统等。先从边边角角的小角色开始扫。</p>
+<p>不得不说，Google大牛的代码风格太好了，读起来很舒服，不像有些开源项目，很快就看不下去了。</p>
+<p>开始之前先来看看<strong>Leveldb的基本框架，几大关键组件</strong>，如图1-1所示。</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/7d918e42904c498073f3840bdef4fcc6.png" alt=""  />
+</p>
+<p>图1-1</p>
+<p>leveldb是一种<strong>基于operation log的文件系统，是Log-Structured-Merge Tree的典型实现</strong>。LSM源自Ousterhout和Rosenblum在1991年发表的经典论文&laquo;<em>The Design and Implementation of a Log-Structured File System</em> &raquo;。</p>
+<p>由于<strong>采用了op log</strong>，它就可以把随机的磁盘写操作，变成了对op log的append操作，因此提高了IO效率，最新的数据则存储在内存memtable中。</p>
+<p>当<strong>op log文件</strong>大小超过限定值时，就定时做<strong>check point</strong>。Leveldb会生成新的Log文件和<strong>Memtable</strong>，后台调度会将<strong>Immutable Memtable</strong>的数据导出到磁盘，形成一个新的<strong>SSTable</strong>文件。SSTable就是由内存中的数据不断导出并进行<strong>Compaction操作</strong>后形成的，而且SSTable的所有文件是一种层级结构，第一层为Level 0，第二层为Level 1，依次类推，层级逐渐增高，这也是为何称之为LevelDb的原因。</p>
+<h3 id="1-一些约定">1. 一些约定</h3>
+<p>先说下代码中的一些约定：</p>
+<h4 id="11-字节序">1.1 字节序</h4>
+<p>Leveldb<strong>对于数字的存储是little-endian的</strong>，在把int32或者int64转换为char*的函数中，是按照先低位再高位的顺序存放的，也就是little-endian的。</p>
+<h4 id="12-varint">1.2 VarInt</h4>
+<p>把一个int32或者int64格式化到字符串中，除了上面说的little-endian字节序外，大部分还是变长存储的，也就是VarInt。对于VarInt，每byte的有效存储是7bit的，用最高的8bit位来表示是否结束，如果是1就表示后面还有一个byte的数字，否则表示结束。直接见Encode和Decode函数。</p>
+<p><strong>在操作log中使用的是Fixed存储格式。</strong></p>
+<h4 id="13-字符比较">1.3 字符比较</h4>
+<p>是基于<strong>unsigned</strong> char的，而非char。</p>
+<h3 id="2-基本数据结构">2. 基本数据结构</h3>
+<p>别看是基本数据结构，有些也不是那么简单的，像<strong>LRU Cache管理和Skip list那都算是leveldb的核心数据结构。</strong></p>
+<h4 id="21-slice">2.1 Slice</h4>
+<p>Leveldb中的基本数据结构：</p>
+<ol>
+<li>包括length和一个指向外部字节数组的指针。</li>
+<li>和string一样，允许字符串中包含’\0’。</li>
+</ol>
+<p>提供一些基本接口，可以把const char和string转换为Slice；把Slice转换为string，取得数据指针const char。</p>
+<h4 id="22-status">2.2 Status</h4>
+<p>Leveldb 中的<strong>返回状态</strong>，将错误号和错误信息封装成Status类，统一进行处理。并定义了几种具体的返回状态，如成功或者文件不存在等。</p>
+<p>为了节省空间Status并没有用std::string来<strong>存储错误信息</strong>，而是将返回码(code), 错误信息message及长度打包存储于一个字符串数组中。</p>
+<p>成功状态OK 是NULL state_，否则state_ 是一个包含如下信息的数组:</p>
+<pre tabindex="0"><code>state_[0..3] == 消息message长度 
+
+state_[4]    == 消息code
+
+state_[5..]  ==消息message 
+</code></pre><h4 id="23-arena">2.3 Arena</h4>
+<p>Leveldb的简单的内存池，它所作的工作十分简单，申请内存时，将申请到的内存块放入std::vector blocks_中，在Arena的生命周期结束后，统一释放掉所有申请到的内存，内部结构如图2.3-1所示。</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/b0af3b4884113679e1ec74c48bc30d7b.webp" alt=""  />
+</p>
+<p><strong>Arena主要提供了两个申请函数</strong>：其中一个直接分配内存，另一个可以申请对齐的内存空间。</p>
+<p>Arena没有直接调用delete/free函数，而是由Arena的析构函数统一释放所有的内存。</p>
+<p>应该说这是和leveldb特定的应用场景相关的，比如一个memtable使用一个Arena，当memtable被释放时，由Arena统一释放其内存。</p>
+<h4 id="24-skip-list">2.4 Skip list</h4>
+<p>**Skip list(跳跃表）是一种可以代替平衡树的数据结构。**Skip lists应用概率保证平衡，平衡树采用严格的旋转（比如平衡二叉树有左旋右旋）来保证平衡，因此Skip list比较容易实现，而且相比平衡树有着较高的运行效率。</p>
+<p>从概率上保持数据结构的平衡比显式的保持数据结构平衡要简单的多。<strong>对于大多数应用，用skip list要比用树更自然，算法也会相对简单</strong>。由于skip list比较简单，实现起来会比较容易，虽然和平衡树有着相同的时间复杂度(O(logn))，但是skip list的常数项相对小很多。skip list在空间上也比较节省。一个节点平均只需要1.333个指针（甚至更少），并且不需要存储保持平衡的变量。</p>
+<p>如图2.4-1所示。</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/da30eb17ac52eb023d73af04f88775b5.webp" alt=""  />
+</p>
+<p>在Leveldb中，<strong>skip list是实现memtable的核心数据结构，memtable的KV数据都存储在skip list中。</strong></p>
+<h4 id="25-cache">2.5 Cache</h4>
+<p><strong>Leveldb内部通过双向链表实现了一个标准版的LRUCache</strong>，先上个示意图，看看几个数据之间的关系，如图2.5-1。</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/6354ec3669c237b505d3dba87acf8d55.webp" alt=""  />
+</p>
+<h5 id="leveldb实现lrucache的几个步骤">Leveldb实现LRUCache的几个步骤</h5>
+<p>接下来说说Leveldb实现LRUCache的几个步骤，很直观明了。</p>
+<h5 id="s1">S1</h5>
+<p>定义一个LRUHandle结构体，代表cache中的元素。它包含了几个主要的成员：</p>
+<pre tabindex="0"><code>void* value; 
+</code></pre><p>这个存储的是cache的数据；</p>
+<pre tabindex="0"><code>void (*deleter)(const Slice&amp;, void* value);
+</code></pre><p>这个是数据从Cache中清除时执行的清理函数；</p>
+<p>后面的三个成员事关LRUCache的数据的组织结构：</p>
+<pre tabindex="0"><code>&gt; LRUHandle *next_hash;
+</code></pre><p>指向节点在hash table链表中的下一个hash(key)相同的元素，在有碰撞时Leveldb采用的是链表法。最后一个节点的next_hash为NULL。</p>
+<pre tabindex="0"><code>&gt; LRUHandle *next, *prev;
+</code></pre><p>节点在双向链表中的前驱后继节点指针，所有的cache数据都是存储在一个双向list中，最前面的是最新加入的，每次新加入的位置都是head-&gt;next。所以<strong>每次剔除的规则就是剔除list tail。</strong></p>
+<h5 id="s2">S2</h5>
+<p>Leveldb自己实现了一个hash table：<strong>HandleTable</strong>，而不是使用系统提供的hash table。这个类就是基本的hash操作**：Lookup、Insert和Delete**。</p>
+<p>Hash table的作用是根据key快速查找元素是否在cache中，并返回LRUHandle节点指针，由此就能快速定位节点在hash表和双向链表中的位置。</p>
+<p>它是通过LRUHandle的成员next_hash组织起来的。</p>
+<p>HandleTable使用LRUHandle **list_存储所有的hash节点，**其实就是一个二维数组，**一维是不同的hash(key)，另一维则是相同hash(key)的碰撞list。</p>
+<p>每次当hash节点数超过当前一维数组的长度后，都会做Resize操作：</p>
+<pre tabindex="0"><code>LRUHandle** new_list = new LRUHandle*[new_length];
+</code></pre><p>然后复制list_到new_list中，并删除旧的list_。</p>
+<h5 id="s3">S3</h5>
+<p>基于HandleTable和LRUHandle，<strong>实现了一个标准的LRUcache，并内置了mutex保护锁，是线程安全的。</strong></p>
+<p>其中存储所有数据的双向链表是LRUHandle lru_，这是一个list head；</p>
+<p>Hash表则是HandleTable table_；</p>
+<h5 id="s4">S4</h5>
+<p>ShardedLRUCache类，实际上到S3，一个标准的LRU Cache已经实现了，为何还要更近一步呢？答案就是速度！</p>
+<p>为了多线程访问，尽可能快速，减少锁开销，ShardedLRUCache内部有16个LRUCache，查找Key时首先计算key属于哪一个分片，<strong>分片的计算方法</strong>是取32位hash值的高4位，然后在相应的LRUCache中进行查找，这样就大大减少了多线程的访问锁的开销。</p>
+<pre tabindex="0"><code>LRUCache shard_[kNumShards]
+</code></pre><p>它就是一个包装类，实现都在LRUCache类中。</p>
+<h4 id="26-其它">2.6 其它</h4>
+<p>此外还有其它几个<strong>Random、Hash、CRC32、Histogram</strong>等，都在util文件夹下，不仔细分析了。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/blog/c898014e5b304df0bade6b12d638467a/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>leveldb源码分析</span>
+  </a>
+  <a class="next" href="https://haokiu.com/blog/603a94de7932474cbf7478a2d7b94ebf/">
+    <span class="title">Next »</span>
+    <br>
+    <span>leveldb源码分析10</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

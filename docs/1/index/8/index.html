@@ -191,7 +191,7 @@ BlockFunction block_function_; // block操作函数 void* arg_; // BlockFunction
 S1 对于其Key和Value接口都是返回的data_iter_对应的key和value： virtual bool Valid() const { return data_iter_.Valid(); } virtual Slice key() const { assert(Valid()); return data_iter_....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析10" href="https://haokiu.com/603a94de7932474cbf7478a2d7b94ebf/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析10" href="https://haokiu.com/blog/603a94de7932474cbf7478a2d7b94ebf/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -209,7 +209,7 @@ void Evict(uint64_tfile_number); // 该函数用以清除指定文件所有cache
 Cache::Handle* handle = NULL; Status s =FindTable(file_number, file_size, &amp;handle); if (s.ok()) { Table* t =reinterpret_cast&lt;TableAndFile*&gt;(cache_-&gt;Value(handle))-&gt;table; s = t-&gt;InternalGet(options,k, arg, saver); cache_-&gt;Release(handle); } return s; 首先根据file_number找到Table的cache对象，如果找到了就调用Table::InternalGet，对查找结果的处理在调用者传入的saver回调函数中。 Cache在Lookup找到cache对象后，如果不再使用需要调用Release减引用计数。这个见Cache的接口说明。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析11" href="https://haokiu.com/0159e326ba0e4917878529ee1ae3af48/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析11" href="https://haokiu.com/blog/0159e326ba0e4917878529ee1ae3af48/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -228,7 +228,7 @@ bool InternalFilterPolicy::KeyMayMatch(const Slice&amp; key, constSlice&amp; f) 
 在leveldb的实现中，Name()返回&#34;leveldb.BuiltinBloomFilter&#34;，因此metaindex block** 中的key就是”filter.leveldb.BuiltinBloomFilter”。Leveldb使用了double hashing来模拟多个hash函数，当然这里不是用来解决冲突的。 和线性再探测（linearprobing）一样，Double hashing从一个hash值开始，重复向前迭代，直到解决冲突或者搜索完hash表。不同的是，double hashing使用的是另外一个hash函数，而不是固定的步长。 给定两个独立的hash函数h1和h2，对于hash表T和值k，第i次迭代计算出的位置就是：h(i, k) = (h1(k) &#43; i*h2(k)) mod |T|。 对此，Leveldb选择的hash函数是：...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析12" href="https://haokiu.com/cd6a8ad07c9f4c479a1e88591f05cd70/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析12" href="https://haokiu.com/blog/cd6a8ad07c9f4c479a1e88591f05cd70/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -246,7 +246,7 @@ uint64_t filter_index =(block_offset / kFilterBase); assert(filter_index &gt;=fi
 //S1 如果filter中key个数为0，则直接压入result_.size()并返回 const size_t num_keys =start_.size(); if (num_keys == 0) { // there are no keys for this filter filter_offsets_.push_back(result_.size()); //result_.size()应该是0 return; } //S2 从key创建临时key list，根据key的序列字符串kyes_和各key在keys_ //中的开始位置start_依次提取出key。 start_....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析13" href="https://haokiu.com/f110bd8130344cbf801fc30d4d7a7ce9/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析13" href="https://haokiu.com/blog/f110bd8130344cbf801fc30d4d7a7ce9/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -273,7 +273,7 @@ Level 0的compaction最多从level 0读取4个1MB的文件，以及所有的leve
 解决方法1：为了降低该问题，我们可能想增加log切换的阈值，缺点就是，log文件越大，对应的memtable文件就越大，这需要更多的内存。 解决方法2：当level 0文件太多时，人工降低写入速度。 解决方法3：降低merge的开销，如把level 0文件都无压缩的存放在cache中。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析14" href="https://haokiu.com/5a5f7db3f4fc4684a0c7ddb21dd6ea40/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析14" href="https://haokiu.com/blog/5a5f7db3f4fc4684a0c7ddb21dd6ea40/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -291,7 +291,7 @@ std::vector&lt;FileMetaData*&gt;files_[config::kNumLevels]; // sstable文件列�
 //=== 第一组，直接来自于DBImple，构造函数传入 Env* const env_; // 操作系统封装 const std::string dbname_; const Options* const options_; TableCache* const table_cache_; // table cache const InternalKeyComparatoricmp_; //=== 第二组，db元信息相关 uint64_t next_file_number_; // log文件编号 uint64_t manifest_file_number_; // manifest文件编号 uint64_t last_sequence_; uint64_t log_number_; // log编号 uint64_t prev_log_number_; // 0 or backingstore for memtable being compacted //=== 第三组，menifest文件相关 WritableFile* descriptor_file_; log::Writer* descriptor_log_; //=== 第四组，版本管理 Version dummy_versions_; // versions双向链表head....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析15" href="https://haokiu.com/bd56540c7f464f2e8e9392c3903b27f5/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析15" href="https://haokiu.com/blog/bd56540c7f464f2e8e9392c3903b27f5/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -306,7 +306,7 @@ std::vector&lt;FileMetaData*&gt;files_[config::kNumLevels]; // sstable文件列�
 // 追加一系列iterator到 @*iters中， //将在merge到一起时生成该Version的内容 // 要求: Version已经保存了(见VersionSet::SaveTo) void AddIterators(constReadOptions&amp;, std::vector&lt;Iterator*&gt;* iters); // 给定@key查找value，如果找到保存在@*val并返回OK。 // 否则返回non-OK，设置@ *stats. // 要求：没有hold lock struct GetStats { FileMetaData* seek_file; int seek_file_level; }; Status Get(constReadOptions&amp;, const LookupKey&amp; key, std::string* val,GetStats* stats); // 把@stats加入到当前状态中，如果需要触发新的compaction返回true // 要求：hold lock bool UpdateStats(constGetStats&amp; stats); void GetOverlappingInputs(intlevel, const InternalKey*begin, // NULL 指在所有key之前 const InternalKey* end, // NULL指在所有key之后 std::vector&lt;FileMetaData*&gt;* inputs); // 如果指定level中的某些文件和[*smallest_user_key,*largest_user_key] //有重合就返回true。 // @smallest_user_key==NULL表示比DB中所有key都小的key. // @largest_user_key==NULL表示比DB中所有key都大的key. bool OverlapInLevel(int level,const Slice*smallest_user_key, const Slice* largest_user_key); // 返回我们应该在哪个level上放置新的memtable compaction， // 该compaction覆盖了范围[smallest_user_key,largest_user_key]. int PickLevelForMemTableOutput(const Slice&amp; smallest_user_key, const Slice&amp; largest_user_key); // 指定level的sstable个数 int NumFiles(int level) const {return files_[level].size(); 10.2 Version::AddIterators() 该函数最终在DB::NewIterators()接口中被调用，调用层次为： DBImpl::NewIterator()-&gt;DBImpl::NewInternalIterator()-&gt;Version::AddIterators()。 函数功能是为该Version中的所有sstable都创建一个Two Level Iterator，以遍历sstable的内容。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Leveldb源码分析16" href="https://haokiu.com/383f27c1087943b39b255aa993d7b9ac/"></a>
+  <a class="entry-link" aria-label="post link to Leveldb源码分析16" href="https://haokiu.com/blog/383f27c1087943b39b255aa993d7b9ac/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -325,7 +325,7 @@ inputs-&gt;clear(); Slice user_begin, user_end; if (begin != NULL) user_begin =b
 for (size_t i = 0; i &lt;files_[level].size(); ) { FileMetaData* f =files_[level][i&#43;&#43;]; const Slice file_start =f-&gt;smallest....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析17" href="https://haokiu.com/0d1705067c1d403889b748a57e0b3af5/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析17" href="https://haokiu.com/blog/0d1705067c1d403889b748a57e0b3af5/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -346,7 +346,7 @@ uint64_t ApproximateOffsetOf(Version* v, const InternalKey&amp; key); 6 其它�
 //返回current version Version* current() const { return current_; } // 当前的MANIFEST文件号 uint64_t ManifestFileNumber() const { return manifest_file_number_; } // 分配并返回新的文件编号 uint64_t NewFileNumber() { return next_file_number_&#43;&#43;; } // 返回当前log文件编号 uint64_t LogNumber() const { return log_number_; } // 返回正在compact的log文件编号，如果没有返回0 uint64_t PrevLogNumber() const { return prev_log_number_; } // 获取、设置last sequence，set时不能后退 uint64_t LastSequence() const { return last_sequence_; } void SetLastSequence(uint64_t s) { assert(s &gt;=last_sequence_); last_sequence_ = s; } // 返回指定level中所有sstable文件大小的和 int64_t NumLevelBytes(int level) const; // 返回指定level的文件个数 int NumLevelFiles(int level) const; // 重用@file_number，限制很严格：@file_number必须是最后分配的那个 // 要求: @file_number是NewFileNumber()返回的....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析18" href="https://haokiu.com/9276872cee384cebb6d1c912acedf0a2/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析18" href="https://haokiu.com/blog/9276872cee384cebb6d1c912acedf0a2/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -365,7 +365,7 @@ Version* v = new Version(this); { Builder builder(this, current_); builder.Apply
 std::string new_manifest_file; Status s; if (descriptor_log_ == NULL) { // 这里不需要unlock *mu因为我们只会在第一次调用LogAndApply时 // 才走到这里(打开数据库时). assert(descriptor_file_ == NULL); // 文件指针和log::Writer都应该是NULL new_manifest_file = DescriptorFileName(dbname_, manifest_file_number_); edit-&gt;SetNextFile(next_file_number_); s = env_-&gt;NewWritableFile(new_manifest_file, &amp;descriptor_file_); if (s.ok()) { descriptor_log_ = new log::Writer(descriptor_file_); s = WriteSnapshot(descriptor_log_); // 写入快照 } } S4 向MANIFEST写入一条新的log，记录current version的信息。在文件写操作时unlock锁，写入完成后，再重新lock，以防止浪费在长时间的IO操作上。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析19" href="https://haokiu.com/2d765b7b763343038b1df047545b2017/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析19" href="https://haokiu.com/blog/2d765b7b763343038b1df047545b2017/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

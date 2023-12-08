@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>leveldb源码分析5 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="leveldb源码分析5 本系列《leveldb源码分析》共有22篇文章，这是第五篇。
+5.操作Log 1 分析完KV在内存中的存储，接下来就是操作日志。所有的写操作都必须先成功的append到操作日志中，然后再更新内存memtable。这样做有两点：
+可以将随机的写IO变成append，极大的提高写磁盘速度； 防止在节点down机导致内存数据丢失，造成数据丢失，这对系统来说是个灾难。 在各种高效的存储系统中，这已经是口水技术了。
+5.1 格式 在源码下的文档doc/log_format.txt中，作者详细描述了log格式：
+The log file contents are a sequence of 32KB blocks. The only exception is that the tail of thefile may contain a partial block. Each block consists of a sequence of records: block:= record* trailer? record := checksum: uint32 // crc32c of type and data[] ; little-endian length: uint16 // little-endian type: uint8 // One of FULL,FIRST, MIDDLE, LAST data: uint8[length] A record never starts within the last six bytes of a block (since it won&rsquo;tfit). Any leftover bytes here form thetrailer, which must consist entirely of zero bytes and must be skipped byreaders.">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/81982087975a4f49913e723952169670/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="leveldb源码分析5" />
+<meta property="og:description" content="leveldb源码分析5 本系列《leveldb源码分析》共有22篇文章，这是第五篇。
+5.操作Log 1 分析完KV在内存中的存储，接下来就是操作日志。所有的写操作都必须先成功的append到操作日志中，然后再更新内存memtable。这样做有两点：
+可以将随机的写IO变成append，极大的提高写磁盘速度； 防止在节点down机导致内存数据丢失，造成数据丢失，这对系统来说是个灾难。 在各种高效的存储系统中，这已经是口水技术了。
+5.1 格式 在源码下的文档doc/log_format.txt中，作者详细描述了log格式：
+The log file contents are a sequence of 32KB blocks. The only exception is that the tail of thefile may contain a partial block. Each block consists of a sequence of records: block:= record* trailer? record := checksum: uint32 // crc32c of type and data[] ; little-endian length: uint16 // little-endian type: uint8 // One of FULL,FIRST, MIDDLE, LAST data: uint8[length] A record never starts within the last six bytes of a block (since it won&rsquo;tfit). Any leftover bytes here form thetrailer, which must consist entirely of zero bytes and must be skipped byreaders." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/81982087975a4f49913e723952169670/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="leveldb源码分析5"/>
+<meta name="twitter:description" content="leveldb源码分析5 本系列《leveldb源码分析》共有22篇文章，这是第五篇。
+5.操作Log 1 分析完KV在内存中的存储，接下来就是操作日志。所有的写操作都必须先成功的append到操作日志中，然后再更新内存memtable。这样做有两点：
+可以将随机的写IO变成append，极大的提高写磁盘速度； 防止在节点down机导致内存数据丢失，造成数据丢失，这对系统来说是个灾难。 在各种高效的存储系统中，这已经是口水技术了。
+5.1 格式 在源码下的文档doc/log_format.txt中，作者详细描述了log格式：
+The log file contents are a sequence of 32KB blocks. The only exception is that the tail of thefile may contain a partial block. Each block consists of a sequence of records: block:= record* trailer? record := checksum: uint32 // crc32c of type and data[] ; little-endian length: uint16 // little-endian type: uint8 // One of FULL,FIRST, MIDDLE, LAST data: uint8[length] A record never starts within the last six bytes of a block (since it won&rsquo;tfit). Any leftover bytes here form thetrailer, which must consist entirely of zero bytes and must be skipped byreaders."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "leveldb源码分析5",
+      "item": "https://haokiu.com/blog/81982087975a4f49913e723952169670/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "leveldb源码分析5",
+  "name": "leveldb源码分析5",
+  "description": "leveldb源码分析5 本系列《leveldb源码分析》共有22篇文章，这是第五篇。\n5.操作Log 1 分析完KV在内存中的存储，接下来就是操作日志。所有的写操作都必须先成功的append到操作日志中，然后再更新内存memtable。这样做有两点：\n可以将随机的写IO变成append，极大的提高写磁盘速度； 防止在节点down机导致内存数据丢失，造成数据丢失，这对系统来说是个灾难。 在各种高效的存储系统中，这已经是口水技术了。\n5.1 格式 在源码下的文档doc/log_format.txt中，作者详细描述了log格式：\nThe log file contents are a sequence of 32KB blocks. The only exception is that the tail of thefile may contain a partial block. Each block consists of a sequence of records: block:= record* trailer? record := checksum: uint32 // crc32c of type and data[] ; little-endian length: uint16 // little-endian type: uint8 // One of FULL,FIRST, MIDDLE, LAST data: uint8[length] A record never starts within the last six bytes of a block (since it won\u0026rsquo;tfit). Any leftover bytes here form thetrailer, which must consist entirely of zero bytes and must be skipped byreaders.",
+  "keywords": [
+    
+  ],
+  "articleBody": "leveldb源码分析5 本系列《leveldb源码分析》共有22篇文章，这是第五篇。\n5.操作Log 1 分析完KV在内存中的存储，接下来就是操作日志。所有的写操作都必须先成功的append到操作日志中，然后再更新内存memtable。这样做有两点：\n可以将随机的写IO变成append，极大的提高写磁盘速度； 防止在节点down机导致内存数据丢失，造成数据丢失，这对系统来说是个灾难。 在各种高效的存储系统中，这已经是口水技术了。\n5.1 格式 在源码下的文档doc/log_format.txt中，作者详细描述了log格式：\nThe log file contents are a sequence of 32KB blocks. The only exception is that the tail of thefile may contain a partial block. Each block consists of a sequence of records: block:= record* trailer? record := checksum: uint32 // crc32c of type and data[] ; little-endian length: uint16 // little-endian type: uint8 // One of FULL,FIRST, MIDDLE, LAST data: uint8[length] A record never starts within the last six bytes of a block (since it won’tfit). Any leftover bytes here form thetrailer, which must consist entirely of zero bytes and must be skipped byreaders.\n翻译过来就是： Leveldb把日志文件切分成了大小为32KB的连续block块，block由连续的log record组成，log record的格式为： 注意：CRC32, Length都是little-endian的。\nLog Type有4种：FULL = 1、FIRST = 2、MIDDLE = 3、LAST = 4。FULL类型表明该log record包含了完整的user record；而user record可能内容很多，超过了block的可用大小，就需要分成几条log record，第一条类型为FIRST，中间的为MIDDLE，最后一条为LAST。也就是：\nFULL，说明该log record包含一个完整的user record； FIRST，说明是user record的第一条log record MIDDLE，说明是user record中间的log record LAST，说明是user record最后的一条log record 翻一下文档上的例子，考虑到如下序列的user records： A: length 1000 B: length 97270 C: length 8000\nA作为FULL类型的record存储在第一个block中； B将被拆分成3条log record，分别存储在第1、2、3个block中，这时block3还剩6byte，将被填充为0； C将作为FULL类型的record存储在block 4中。 由于一条logrecord长度最短为7，如果一个block的剩余空间\u003c=6byte，那么将**被填充为*空字*符串，另外长度为7的log record是不包括任何用户数据的。\n5.2 写日志 写比读简单，而且写入决定了读，所以从写开始分析。有意思的是在写文件时，Leveldb使用了内存映射文件，内存映射文件的读写效率比普通文件要高，关于内存映射文件为何更高效，这篇文章写的不错： http://blog.csdn.net/mg0832058/article/details/5890688\n其中涉及到的类层次比较简单，如图5.2-1：\n注意Write类的成员type_crc_数组，这里存放的为Record Type预先计算的CRC32值，因为Record Type是固定的几种，为了效率。Writer类只有一个接口，就是AddRecord()，传入Slice参数，下面来看函数实现。首先取出slice的字符串指针和长度，初始化begin=true，表明是第一条log record。\nconst char* ptr = slice.data(); size_t left = slice.size(); bool begin = true; 然后进入一个do{}while循环，直到写入出错，或者成功写入全部数据，如下：\n1\nS1 首先查看当前block是否\u003c7，如果\u003c7则补位，并重置block偏移 dest_-\u003eAppend(Slice(\"\\x00\\x00\\x00\\x00\\x00\\x00\",leftover)); block_offset_ = 0; S2 计算block剩余大小，以及本次log record可写入数据长度 const size_t avail =kBlockSize - block_offset_ - kHeaderSize; const size_t fragment_length = (left ",
+  "wordCount" : "327",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/81982087975a4f49913e723952169670/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      leveldb源码分析5
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#leveldb%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%905" aria-label="leveldb源码分析5">leveldb源码分析5</a><ul>
+                        
+                <li>
+                    <a href="#5%e6%93%8d%e4%bd%9clog-1" aria-label="5.操作Log 1">5.操作Log 1</a><ul>
+                        
+                <li>
+                    <a href="#51-%e6%a0%bc%e5%bc%8f" aria-label="5.1 格式">5.1 格式</a></li>
+                <li>
+                    <a href="#52-%e5%86%99%e6%97%a5%e5%bf%97" aria-label="5.2 写日志">5.2 写日志</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#s1-%e9%a6%96%e5%85%88%e6%9f%a5%e7%9c%8b%e5%bd%93%e5%89%8dblock%e6%98%af%e5%90%a67%e5%a6%82%e6%9e%9c7%e5%88%99%e8%a1%a5%e4%bd%8d%e5%b9%b6%e9%87%8d%e7%bd%aeblock%e5%81%8f%e7%a7%bb" aria-label="S1 首先查看当前block是否&amp;lt;7，如果&amp;lt;7则补位，并重置block偏移">S1 首先查看当前block是否&lt;7，如果&lt;7则补位，并重置block偏移</a></li>
+                <li>
+                    <a href="#s2-%e8%ae%a1%e7%ae%97block%e5%89%a9%e4%bd%99%e5%a4%a7%e5%b0%8f%e4%bb%a5%e5%8f%8a%e6%9c%ac%e6%ac%a1log-record%e5%8f%af%e5%86%99%e5%85%a5%e6%95%b0%e6%8d%ae%e9%95%bf%e5%ba%a6" aria-label="S2 计算block剩余大小，以及本次log record可写入数据长度">S2 计算block剩余大小，以及本次log record可写入数据长度</a></li>
+                <li>
+                    <a href="#s3-%e6%a0%b9%e6%8d%ae%e4%b8%a4%e4%b8%aa%e5%80%bc%e5%88%a4%e6%96%adlog-type" aria-label="S3 根据两个值，判断log type">S3 根据两个值，判断log type</a></li>
+                <li>
+                    <a href="#s4-%e8%b0%83%e7%94%a8emitphysicalrecord%e5%87%bd%e6%95%b0append%e6%97%a5%e5%bf%97%e5%b9%b6%e6%9b%b4%e6%96%b0%e6%8c%87%e9%92%88%e5%89%a9%e4%bd%99%e9%95%bf%e5%ba%a6%e5%92%8cbegin%e6%a0%87%e8%ae%b0" aria-label="S4 调用EmitPhysicalRecord函数，append日志；并更新指针、剩余长度和begin标记">S4 调用EmitPhysicalRecord函数，append日志；并更新指针、剩余长度和begin标记</a></li>
+                <li>
+                    <a href="#s1-%e8%ae%a1%e7%ae%97header%e5%b9%b6append%e5%88%b0log%e6%96%87%e4%bb%b6%e5%85%b17byte%e6%a0%bc%e5%bc%8f%e4%b8%ba" aria-label="S1 计算header，并Append到log文件，共7byte格式为：">S1 计算header，并Append到log文件，共7byte格式为：</a></li>
+                <li>
+                    <a href="#s2-%e5%86%99%e5%85%a5payload%e5%b9%b6flush%e6%9b%b4%e6%96%b0block%e7%9a%84%e5%bd%93%e5%89%8d%e5%81%8f%e7%a7%bb" aria-label="S2 写入payload，并Flush，更新block的当前偏移">S2 写入payload，并Flush，更新block的当前偏移</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="leveldb源码分析5">leveldb源码分析5</h1>
+<p>本系列《leveldb源码分析》共有22篇文章，这是第五篇。</p>
+<h2 id="5操作log-1">5.操作Log 1</h2>
+<p>分析完KV在内存中的存储，接下来就是<strong>操作日志</strong>。所有的写操作都必须先成功的<strong>append</strong>到操作日志中，然后再更新内存<strong>memtable</strong>。这样做有<strong>两点</strong>：</p>
+<ol>
+<li><strong>可以将随机的写IO变成append，极大的提高写磁盘速度；</strong></li>
+<li><strong>防止在节点down机导致内存数据丢失，造成数据丢失，这对系统来说是个灾难。</strong></li>
+</ol>
+<p>在各种高效的存储系统中，这已经是口水技术了。</p>
+<h3 id="51-格式">5.1 格式</h3>
+<p>在源码下的文档<strong>doc/log_format.txt</strong>中，作者详细描述了<strong>log格式</strong>：</p>
+<pre tabindex="0"><code>The log file contents are a sequence of 32KB blocks. 
+The only exception is that the tail of thefile may contain a partial block.
+Each block consists of a sequence of records:
+block:= record* trailer?
+record :=
+checksum: uint32     // crc32c of type and data[] ; little-endian
+length: uint16       // little-endian
+type: uint8          // One of FULL,FIRST, MIDDLE, LAST
+data: uint8[length]
+</code></pre><blockquote>
+<p>A record never starts within the last six bytes of a block (since it won&rsquo;tfit).  Any leftover bytes here form thetrailer, which must consist entirely of zero bytes and must be skipped byreaders.</p>
+</blockquote>
+<p>翻译过来就是：
+Leveldb把日志文件切分成了大小为32KB的连续block块，block由连续的log record组成，log record的格式为：
+<strong>注意：CRC32, Length都是little-endian的。</strong></p>
+<p><strong>Log Type</strong>有4种：FULL = 1、FIRST = 2、MIDDLE = 3、LAST = 4。FULL类型表明该log record包含了完整的user record；而user record可能内容很多，超过了block的可用大小，就需要分成几条log record，第一条类型为FIRST，中间的为MIDDLE，最后一条为LAST。也就是：</p>
+<ol>
+<li>FULL，说明该log record包含一个完整的user record；</li>
+<li>FIRST，说明是user record的第一条log record</li>
+<li>MIDDLE，说明是user record中间的log record</li>
+<li>LAST，说明是user record最后的一条log record</li>
+</ol>
+<p>翻一下文档上的例子，考虑到如下序列的<strong>user records</strong>：
+A: length 1000
+B: length 97270
+C: length 8000</p>
+<ul>
+<li>A作为FULL类型的record存储在第一个block中；</li>
+<li>B将被拆分成3条log record，分别存储在第1、2、3个block中，这时block3还剩6byte，将被填充为0；</li>
+<li>C将作为FULL类型的record存储在block 4中。</li>
+</ul>
+<p>由于<strong>一条logrecord长度最短为7</strong>，如果一个block的剩余空间&lt;=6byte，那么将**被填充为*<em>空字*<em><strong><strong>符串</strong>，另外长度为7的log record是</strong>不包括任何用户数据的</em></em>。</p>
+<h3 id="52-写日志">5.2 写日志</h3>
+<p>写比读简单，而且写入决定了读，所以从写开始分析。有意思的是在写文件时，Leveldb使用了内存映射文件，内存映射文件的读写效率比普通文件要高，关于内存映射文件为何更高效，这篇文章写的不错：
+<a href="http://blog.csdn.net/mg0832058/article/details/5890688">http://blog.csdn.net/mg0832058/article/details/5890688</a></p>
+<p>其中涉及到的类层次比较简单，如图5.2-1：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/6c5d277c5255f456304ae390a0f1f090.webp" alt=""  />
+</p>
+<p>注意Write类的成员<strong>type_crc_数组</strong>，这里存放的为Record Type预先计算的CRC32值，因为Record Type是固定的几种，为了效率。Writer类只有一个接口，就是<strong>AddRecord()</strong>，传入<strong>Slice参数</strong>，下面来看函数实现。首先取出slice的字<strong>符串指针和长度</strong>，初始化begin=true，表明是<strong>第一条log record</strong>。</p>
+<pre tabindex="0"><code>const char* ptr = slice.data();
+size_t left = slice.size();
+bool begin = true;
+</code></pre><p>然后进入一个<strong>do{}while循环</strong>，直到写入出错，或者成功写入全部数据，如下：</p>
+<p>1</p>
+<h5 id="s1-首先查看当前block是否7如果7则补位并重置block偏移">S1 首先查看当前block是否&lt;7，如果&lt;7则补位，并重置block偏移</h5>
+<pre tabindex="0"><code>dest_-&gt;Append(Slice(&#34;\x00\x00\x00\x00\x00\x00&#34;,leftover));
+block_offset_ = 0;
+</code></pre><h5 id="s2-计算block剩余大小以及本次log-record可写入数据长度">S2 计算block剩余大小，以及本次log record可写入数据长度</h5>
+<pre tabindex="0"><code>const size_t avail =kBlockSize - block_offset_ - kHeaderSize;
+const size_t fragment_length = (left &lt;avail) ? left : avail
+</code></pre><h5 id="s3-根据两个值判断log-type">S3 根据两个值，判断log type</h5>
+<pre tabindex="0"><code>RecordType type;
+const bool end = (left ==fragment_length); // 两者相等，表明写
+if (begin &amp;&amp; end)   type = kFullType;
+else if (begin)     type = kFirstType;
+else if (end)       type = kLastType;
+else                type = kMiddleType;
+</code></pre><h5 id="s4-调用emitphysicalrecord函数append日志并更新指针剩余长度和begin标记">S4 调用EmitPhysicalRecord函数，append日志；并更新指针、剩余长度和begin标记</h5>
+<pre tabindex="0"><code>s = EmitPhysicalRecord(type, ptr,fragment_length);
+ptr += fragment_length;
+left -= fragment_length;
+begin = false;
+</code></pre><p>2</p>
+<p>接下来看看<strong>EmitPhysicalRecord函数</strong>，这是实际写入的地方，涉及到log的存储格式。函数声明为：</p>
+<p>StatusWriter::EmitPhysicalRecord(RecordType t, const char* ptr, size_t n)
+参数ptr为用户record数据，参数n为record长度，不包含log header。</p>
+<h5 id="s1-计算header并append到log文件共7byte格式为">S1 计算header，并Append到log文件，共7byte格式为：</h5>
+<pre tabindex="0"><code>| CRC32 (4 byte) | payload length lower + high (2 byte) |   type (1byte)|
+char buf[kHeaderSize];
+buf[4] = static_cast&lt;char&gt;(n&amp; 0xff);
+buf[5] =static_cast&lt;char&gt;(n &gt;&gt; 8);
+buf[6] =static_cast&lt;char&gt;(t);   // 计算record type和payload的CRC校验值
+uint32_t crc = crc32c::Extend(type_crc_[t], ptr, n);
+crc = crc32c::Mask(crc);        // 空间调整
+EncodeFixed32(buf, crc);
+dest_-&gt;Append(Slice(buf,kHeaderSize));
+</code></pre><h5 id="s2-写入payload并flush更新block的当前偏移">S2 写入payload，并Flush，更新block的当前偏移</h5>
+<pre tabindex="0"><code>s =dest_-&gt;Append(Slice(ptr, n));
+s = dest_-&gt;Flush();
+block_offset_ += kHeaderSize +n;
+</code></pre><p>以上就是写日志的逻辑，很直观。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/blog/f4dfd0e7e33240c9807a11402d34ddb3/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>leveldb源码分析4</span>
+  </a>
+  <a class="next" href="https://haokiu.com/blog/3e005b6becda44edaa67dc81f32d5499/">
+    <span class="title">Next »</span>
+    <br>
+    <span>leveldb源码分析6</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

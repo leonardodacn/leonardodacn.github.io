@@ -10,10 +10,10 @@
     <lastBuildDate>Tue, 02 Feb 2021 20:57:44 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/linux/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>linux 复制文件，并创建不存在的目录</title>
-      <link>https://haokiu.com/a0lZoj/</link>
+      <link>https://haokiu.com/blog/a0lZoj/</link>
       <pubDate>Tue, 02 Feb 2021 20:57:44 +0000</pubDate>
       
-      <guid>https://haokiu.com/a0lZoj/</guid>
+      <guid>https://haokiu.com/blog/a0lZoj/</guid>
       <description>linux复制文件和目录用cp命令，--parents 参数可以确保不存在目录的创建，比如文件 cp --parents java/doc/readme.md ../doc ，如果目录 doc不存在目录：java/doc则会创建。
 高级操作：
 #查找当前目录下所有.md文件，并将它们复制到DataxDoc目录，如果目录不存在则双肩 find . -name &amp;#34;*.md&amp;#34; | xargs -I {} cp --parents {} ../DataxDoc </description>
@@ -21,10 +21,10 @@
     
     <item>
       <title>Vim 从入门到精通</title>
-      <link>https://haokiu.com/fhRygg/</link>
+      <link>https://haokiu.com/blog/fhRygg/</link>
       <pubDate>Thu, 14 Jan 2021 15:20:19 +0000</pubDate>
       
-      <guid>https://haokiu.com/fhRygg/</guid>
+      <guid>https://haokiu.com/blog/fhRygg/</guid>
       <description>什么是 Vim？ Vim 是一个历史悠久的文本编辑器，可以追溯到 qed。 Bram Moolenaar 于 1991 年发布初始版本。
 Linux、Mac 用户，可以使用包管理器安装 Vim，对于 Windows 用户，可以从 我的网盘 下载。 该版本可轻易添加 python 、python3 、lua 等支持，只需要安装 python、lua 即可。
 项目在 Github 上开发，项目讨论请订阅 vim_dev 邮件列表。
@@ -39,30 +39,30 @@ Vim 基于一个 vi 克隆，叫做 Stevie，支持两种运行模式：&amp;ldq
     
     <item>
       <title>简单脚本实现服务监控</title>
-      <link>https://haokiu.com/5XKHkb/</link>
+      <link>https://haokiu.com/blog/5XKHkb/</link>
       <pubDate>Fri, 16 Oct 2020 17:10:58 +0000</pubDate>
       
-      <guid>https://haokiu.com/5XKHkb/</guid>
+      <guid>https://haokiu.com/blog/5XKHkb/</guid>
       <description>服务经常会重启失败，写了个简单的shell叫脚本，可以发现服务端口是否起来，没有发现监听端口会重启服务
 1.监控脚本 if [ -z &amp;#34;`lsof -i:443 | grep LISTEN`&amp;#34; ];then echo -e &amp;#34;restart $(date +&amp;#39;%Y-%m-%d %H:%M:%S&amp;#39;)&amp;#34; systemctl restart pixiublog fi 2.系统定时任务 */3 * * * * /usr/local/pixiublog/monitor.sh &amp;gt;&amp;gt; /usr/local/pixiublog/monitor.log 2&amp;gt;&amp;amp;1 </description>
     </item>
     
     <item>
       <title>haokiu网站启动脚本</title>
-      <link>https://haokiu.com/v3yn45/</link>
+      <link>https://haokiu.com/blog/v3yn45/</link>
       <pubDate>Thu, 15 Oct 2020 17:08:15 +0000</pubDate>
       
-      <guid>https://haokiu.com/v3yn45/</guid>
+      <guid>https://haokiu.com/blog/v3yn45/</guid>
       <description>haokiu 的启动脚本，配置 https 可以参考beego 通过acms.sh 使用 https
 #!/bin/sh siteDir=&amp;#39;/usr/local/pixiublog&amp;#39; appName=&amp;#39;pixiublogMain&amp;#39; echo &amp;#34;kill the running program&amp;#34; ps -ef | grep $appName | grep -v grep | awk &amp;#39;{print $2}&amp;#39; | xargs kill -9 echo &amp;#34;sleep 3 secons for app to shutdown&amp;#34; sleep 3 echo &amp;#34;start program&amp;#34; cd $siteDir nohup $siteDir/$appName &amp;gt;&amp;gt; $siteDir/console.log 2&amp;gt;&amp;amp;1 &amp;amp; </description>
     </item>
     
     <item>
       <title>beego 通过acme.sh 使用 https</title>
-      <link>https://haokiu.com/qP3u4V/</link>
+      <link>https://haokiu.com/blog/qP3u4V/</link>
       <pubDate>Tue, 13 Oct 2020 15:20:09 +0000</pubDate>
       
-      <guid>https://haokiu.com/qP3u4V/</guid>
+      <guid>https://haokiu.com/blog/qP3u4V/</guid>
       <description>beego 通过 acme.sh 使用 https
 安装acms.sh curl https://get.acme.sh | sh 生成证书 如果使用的是 beego 框架，需添加可访问的静态文件目录：
 //acme.sh 自动验证网站目录，不使用https可以忽略 beego.SetStaticPath(&amp;#34;/.well-known&amp;#34;, &amp;#34;.well-known&amp;#34;) acme.sh --issue -d haokiu.com -d www.haokiu.com --webroot /usr/local/pixiublog/ 设置pixiublog开机启动 1. 编写开机启动脚本 vim /usr/lib/systemd/system/pixiublog.service
@@ -71,10 +71,10 @@ Vim 基于一个 vi 克隆，叫做 Stevie，支持两种运行模式：&amp;ldq
     
     <item>
       <title>acme.sh 方便管理 letsencrypt </title>
-      <link>https://haokiu.com/6D0DBH/</link>
+      <link>https://haokiu.com/blog/6D0DBH/</link>
       <pubDate>Mon, 12 Oct 2020 18:01:57 +0000</pubDate>
       
-      <guid>https://haokiu.com/6D0DBH/</guid>
+      <guid>https://haokiu.com/blog/6D0DBH/</guid>
       <description>acme.sh 实现了 acme 协议, 可以从 letsencrypt 生成免费的证书。这个脚本可以非常方便的管理 letsencrypt 的证书，省去很多繁琐操作。有了这个脚本就可以方便地给网站使用 https 了
 主要步骤:
 安装 acme.sh 生成证书 copy 证书到 nginx/apache 或者其他服务 更新证书 更新 acme.sh 出错怎么办, 如何调试 下面详细介绍.
@@ -91,10 +91,10 @@ curl https://get.acme.sh | sh 普通用户和 root 用户都可以安装使用. 
     
     <item>
       <title>网站部署脚本</title>
-      <link>https://haokiu.com/1gTd1h/</link>
+      <link>https://haokiu.com/blog/1gTd1h/</link>
       <pubDate>Thu, 17 Sep 2020 21:52:12 +0000</pubDate>
       
-      <guid>https://haokiu.com/1gTd1h/</guid>
+      <guid>https://haokiu.com/blog/1gTd1h/</guid>
       <description>网站的部署脚本
 #!/bin/sh #部署目录 siteDir=&amp;#39;/usr/local/pixiublog&amp;#39; # 源代码目录 cd /root/pixiublog echo &amp;#34;update code&amp;#34; git pull echo &amp;#34;build pixiublog&amp;#34; go build main.go echo &amp;#34;remove old&amp;#34; rm -rf $siteDir/views rm -rf $siteDir/static rm -rf $siteDir/pixiublog echo &amp;#34;mv new program to $siteDir&amp;#34; cp main $siteDir/pixiublog cp -rf views $siteDir/ cp -rf static $siteDir/ echo &amp;#34;kill the running program&amp;#34; ps -ef | grep &amp;#39;pixiublog&amp;#39; | grep -v grep | awk &amp;#39;{print $2}&amp;#39; | xargs kill -9 echo &amp;#34;start program&amp;#34; cd $siteDir nohup $siteDir/pixiublog &amp;gt;&amp;gt; $siteDir/console.log 2&amp;gt;&amp;amp;1 &amp;amp; </description>
     </item>

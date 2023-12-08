@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>select 函数重难点解析 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="select 函数重难点解析 select 函数是网络通信编程中非常常用的一个函数，因此应该熟练掌握它。虽然它是 BSD 标准之一的 Socket 函数之一，但在 Linux 和 Windows 平台，其行为表现还是有点区别的。我们先来看一下 Linux 平台上的 select 函数。
+Linux 平台下的 select 函数 select 函数的作用是检测一组 socket 中某个或某几个是否有“事件”，这里的“**事件”**一般分为如下三类：
+可读事件，一般意味着可以调用 recv 或 read 函数从该 socket 上读取数据；如果该 socket 是侦听 socket（即调用了 bind 函数绑定过 ip 地址和端口号，并调用了 listen 启动侦听的 socket），可读意味着此时可以有新的客户端连接到来，此时可调用 accept 函数接受新连接。 可写事件，一般意味着此时调用 send 或 write 函数可以将数据“发出去”。 异常事件，某个 socket 出现异常。 函数签名如下：
+int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout); 参数说明：
+参数 nfds， Linux 下 socket 也称 fd，这个参数的值设置成所有需要使用 select 函数监听的 fd 中最大 fd 值加 1。
+参数 readfds，需要监听可读事件的 fd 集合。
+参数 writefds，需要监听可写事件的 fd 集合。
+参数 exceptfds，需要监听异常事件 fd 集合。
+readfds、writefds 和 exceptfds 类型都是 fd_set，这是一个结构体信息，其定义位于 /usr/include/sys/select.h 中：
+/* The fd_set member is required to be an array of longs.">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/2369cd70c2354e9c844815c14f31134c/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="select 函数重难点解析" />
+<meta property="og:description" content="select 函数重难点解析 select 函数是网络通信编程中非常常用的一个函数，因此应该熟练掌握它。虽然它是 BSD 标准之一的 Socket 函数之一，但在 Linux 和 Windows 平台，其行为表现还是有点区别的。我们先来看一下 Linux 平台上的 select 函数。
+Linux 平台下的 select 函数 select 函数的作用是检测一组 socket 中某个或某几个是否有“事件”，这里的“**事件”**一般分为如下三类：
+可读事件，一般意味着可以调用 recv 或 read 函数从该 socket 上读取数据；如果该 socket 是侦听 socket（即调用了 bind 函数绑定过 ip 地址和端口号，并调用了 listen 启动侦听的 socket），可读意味着此时可以有新的客户端连接到来，此时可调用 accept 函数接受新连接。 可写事件，一般意味着此时调用 send 或 write 函数可以将数据“发出去”。 异常事件，某个 socket 出现异常。 函数签名如下：
+int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout); 参数说明：
+参数 nfds， Linux 下 socket 也称 fd，这个参数的值设置成所有需要使用 select 函数监听的 fd 中最大 fd 值加 1。
+参数 readfds，需要监听可读事件的 fd 集合。
+参数 writefds，需要监听可写事件的 fd 集合。
+参数 exceptfds，需要监听异常事件 fd 集合。
+readfds、writefds 和 exceptfds 类型都是 fd_set，这是一个结构体信息，其定义位于 /usr/include/sys/select.h 中：
+/* The fd_set member is required to be an array of longs." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/2369cd70c2354e9c844815c14f31134c/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="select 函数重难点解析"/>
+<meta name="twitter:description" content="select 函数重难点解析 select 函数是网络通信编程中非常常用的一个函数，因此应该熟练掌握它。虽然它是 BSD 标准之一的 Socket 函数之一，但在 Linux 和 Windows 平台，其行为表现还是有点区别的。我们先来看一下 Linux 平台上的 select 函数。
+Linux 平台下的 select 函数 select 函数的作用是检测一组 socket 中某个或某几个是否有“事件”，这里的“**事件”**一般分为如下三类：
+可读事件，一般意味着可以调用 recv 或 read 函数从该 socket 上读取数据；如果该 socket 是侦听 socket（即调用了 bind 函数绑定过 ip 地址和端口号，并调用了 listen 启动侦听的 socket），可读意味着此时可以有新的客户端连接到来，此时可调用 accept 函数接受新连接。 可写事件，一般意味着此时调用 send 或 write 函数可以将数据“发出去”。 异常事件，某个 socket 出现异常。 函数签名如下：
+int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout); 参数说明：
+参数 nfds， Linux 下 socket 也称 fd，这个参数的值设置成所有需要使用 select 函数监听的 fd 中最大 fd 值加 1。
+参数 readfds，需要监听可读事件的 fd 集合。
+参数 writefds，需要监听可写事件的 fd 集合。
+参数 exceptfds，需要监听异常事件 fd 集合。
+readfds、writefds 和 exceptfds 类型都是 fd_set，这是一个结构体信息，其定义位于 /usr/include/sys/select.h 中：
+/* The fd_set member is required to be an array of longs."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "select 函数重难点解析",
+      "item": "https://haokiu.com/blog/2369cd70c2354e9c844815c14f31134c/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "select 函数重难点解析",
+  "name": "select 函数重难点解析",
+  "description": "select 函数重难点解析 select 函数是网络通信编程中非常常用的一个函数，因此应该熟练掌握它。虽然它是 BSD 标准之一的 Socket 函数之一，但在 Linux 和 Windows 平台，其行为表现还是有点区别的。我们先来看一下 Linux 平台上的 select 函数。\nLinux 平台下的 select 函数 select 函数的作用是检测一组 socket 中某个或某几个是否有“事件”，这里的“**事件”**一般分为如下三类：\n可读事件，一般意味着可以调用 recv 或 read 函数从该 socket 上读取数据；如果该 socket 是侦听 socket（即调用了 bind 函数绑定过 ip 地址和端口号，并调用了 listen 启动侦听的 socket），可读意味着此时可以有新的客户端连接到来，此时可调用 accept 函数接受新连接。 可写事件，一般意味着此时调用 send 或 write 函数可以将数据“发出去”。 异常事件，某个 socket 出现异常。 函数签名如下：\nint select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout); 参数说明：\n参数 nfds， Linux 下 socket 也称 fd，这个参数的值设置成所有需要使用 select 函数监听的 fd 中最大 fd 值加 1。\n参数 readfds，需要监听可读事件的 fd 集合。\n参数 writefds，需要监听可写事件的 fd 集合。\n参数 exceptfds，需要监听异常事件 fd 集合。\nreadfds、writefds 和 exceptfds 类型都是 fd_set，这是一个结构体信息，其定义位于 /usr/include/sys/select.h 中：\n/* The fd_set member is required to be an array of longs.",
+  "keywords": [
+    
+  ],
+  "articleBody": "select 函数重难点解析 select 函数是网络通信编程中非常常用的一个函数，因此应该熟练掌握它。虽然它是 BSD 标准之一的 Socket 函数之一，但在 Linux 和 Windows 平台，其行为表现还是有点区别的。我们先来看一下 Linux 平台上的 select 函数。\nLinux 平台下的 select 函数 select 函数的作用是检测一组 socket 中某个或某几个是否有“事件”，这里的“**事件”**一般分为如下三类：\n可读事件，一般意味着可以调用 recv 或 read 函数从该 socket 上读取数据；如果该 socket 是侦听 socket（即调用了 bind 函数绑定过 ip 地址和端口号，并调用了 listen 启动侦听的 socket），可读意味着此时可以有新的客户端连接到来，此时可调用 accept 函数接受新连接。 可写事件，一般意味着此时调用 send 或 write 函数可以将数据“发出去”。 异常事件，某个 socket 出现异常。 函数签名如下：\nint select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout); 参数说明：\n参数 nfds， Linux 下 socket 也称 fd，这个参数的值设置成所有需要使用 select 函数监听的 fd 中最大 fd 值加 1。\n参数 readfds，需要监听可读事件的 fd 集合。\n参数 writefds，需要监听可写事件的 fd 集合。\n参数 exceptfds，需要监听异常事件 fd 集合。\nreadfds、writefds 和 exceptfds 类型都是 fd_set，这是一个结构体信息，其定义位于 /usr/include/sys/select.h 中：\n/* The fd_set member is required to be an array of longs. */ typedef long int __fd_mask; /* Some versions of define this macros. */ #undef __NFDBITS /* It's easier to assume 8-bit bytes than to get CHAR_BIT. */ #define __NFDBITS (8 * (int) sizeof (__fd_mask)) #define __FD_ELT(d) ((d) / __NFDBITS) #define __FD_MASK(d) ((__fd_mask) 1 \u003c\u003c ((d) % __NFDBITS)) /* fd_set for select and pselect. */ typedef struct { /* XPG4.2 requires this member name. Otherwise avoid the name from the global namespace. */ #ifdef __USE_XOPEN __fd_mask fds_bits[__FD_SETSIZE / __NFDBITS]; # define __FDS_BITS(set) ((set)-\u003efds_bits) #else // 在我的centOS 7.0 系统中的值： // __FD_SETSIZE = 1024 //__NFDBITS = 64 __fd_mask __fds_bits[__FD_SETSIZE / __NFDBITS]; # define __FDS_BITS(set) ((set)-\u003e__fds_bits) #endif } fd_set; /* Maximum number of file descriptors in 'fd_set'. */ #define FD_SETSIZE __FD_SETSIZE 我们假设未定义宏 __USE_XOPEN，将上面的代码整理一下：\ntypedef struct { long int __fds_bits[16]; } fd_set; 将一个 fd 添加到 fd_set 这个集合中需要使用 FD_SET 宏，其定义如下：\nvoid FD_SET(int fd, fd_set *set); 其实现如下：\n#define FD_SET(fd,fdsetp) __FD_SET(fd,fdsetp) FD_SET 在内部又是通过宏 __FD_SET 来实现的，__FD_SET 的定义如下（位于 /usr/include/bits/select.h 中）：\n#if defined __GNUC__ \u0026\u0026 __GNUC__ \u003e= 2 # if __WORDSIZE == 64 # define __FD_ZERO_STOS \"stosq\" # else # define __FD_ZERO_STOS \"stosl\" # endif # define __FD_ZERO(fdsp) \\ do { \\ int __d0, __d1; \\ __asm__ __volatile__ (\"cld; rep; \" __FD_ZERO_STOS \\ : \"=c\" (__d0), \"=D\" (__d1) \\ : \"a\" (0), \"0\" (sizeof (fd_set) \\ / sizeof (__fd_mask)), \\ \"1\" (\u0026__FDS_BITS (fdsp)[0]) \\ : \"memory\"); \\ } while (0) #else /* ! GNU CC */ /* We don't use `memset' because this would require a prototype and the array isn't too big. */ # define __FD_ZERO(set) \\ do { \\ unsigned int __i; \\ fd_set *__arr = (set); \\ for (__i = 0; __i \u003c sizeof (fd_set) / sizeof (__fd_mask); ++__i) \\ __FDS_BITS (__arr)[__i] = 0; \\ } while (0) #endif /* GNU CC */ #define __FD_SET(d, set) \\ ((void) (__FDS_BITS (set)[__FD_ELT (d)] |= __FD_MASK (d))) #define __FD_CLR(d, set) \\ ((void) (__FDS_BITS (set)[__FD_ELT (d)] \u0026= ~__FD_MASK (d))) #define __FD_ISSET(d, set) \\ ((__FDS_BITS (set)[__FD_ELT (d)] \u0026 __FD_MASK (d)) != 0) 重点看这一行：\n((void) (__FDS_BITS (set)[__FD_ELT (d)] |= __FD_MASK (d))) __FD_MASK 和 __FD_ELT 宏在上面的代码中已经给出定义：\n#define __FD_ELT(d) ((d) / __NFDBITS) #define __FD_MASK(d) ((__fd_mask) 1 \u003c\u003c ((d) % __NFDBITS)) __NFDBITS 的值是 64 （8 * 8），也就是说 __FD_MASK (d) 先计算 fd 与 64 的余数 n，然后执行 1 « n，这一操作实际上是将 fd 的值放在 0～63 这 64 的位置上去，这个位置索引就是 fd 与 64 取模的结果；同理 __FD_ELT(d) 就是计算位置索引值了。举个例子，假设现在 fd 的 值是 57，那么在这 64 个位置的 57 位，其值在 64 个长度的二进制中置位是：\n0000 0010 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 这个值就是 1 « (57 % 64) 得到的数字。\n但是前面 fd 数组的定义是：\ntypedef struct { long int __fds_bits[16]; //可以看成是128 bit的数组 } fd_set; long int 占 8 个字节，一个 16 个 long int，如果换成二进制的位(bit)就是 8 * 16 = 128， 也就是这个数组只用了低 64 位， 高 64 位并没有使用。这说明在我的机器上，select 函数支持操作的最大 fd 数量是 64。\n同理，如果我们需要从 fd_set 上删除一个 fd，我们可以调用 FD_CLR，其定义如下：\nvoid FD_CLR(int fd, fd_set *set); 原理和 FD_SET 相同，即将对应的标志位由1变0即可。\n如果，我们需要将 fd_set 中所有的 fd 都清掉，则使用宏 FD_ZERO：\nvoid FD_ZERO(fd_set *set); 当 select 函数返回时， 我们使用 FD_ISSET 宏来判断某个 fd 是否有我们关心的事件，FD_ISSET 宏的定义如下：\nint FD_ISSET(int fd, fd_set *set); FD_ISSET 宏本质上就是检测对应的位置上是否置 1，实现如下：\n#define __FD_ISSET(d, set) \\ ((__FDS_BITS (set)[__FD_ELT (d)] \u0026 __FD_MASK (d)) != 0) 提醒一下： __FD_ELT 和 __FD_MASK 宏前文的代码已经给过具体实现了。\n参数 timeout，超时时间，即在这个参数设定的时间内检测这些 fd 的事件，超过这个时间后 select 函数将立即返回。这是一个 timeval 类型结构体，其定义如下：\nstruct timeval { long tv_sec; /* seconds */ long tv_usec; /* microseconds */ }; select 函数的总超时时间是 timeout-\u003etv_sec 和 timeout-\u003etv_usec 之和， 前者的时间单位是秒，后者的时间单位是微妙。\n说了这么多理论知识，我们先看一个具体的示例：\n/** * select函数示例，server端, select_server.cpp * zhangyl 2018.12.24 */ #include #include #include #include #include #include #include #include #include //自定义代表无效fd的值 #define INVALID_FD -1 int main(int argc, char* argv[]) { //创建一个侦听socket int listenfd = socket(AF_INET, SOCK_STREAM, 0); if (listenfd == -1) { std::cout \u003c\u003c \"create listen socket error.\" \u003c\u003c std::endl; return -1; } //初始化服务器地址 struct sockaddr_in bindaddr; bindaddr.sin_family = AF_INET; bindaddr.sin_addr.s_addr = htonl(INADDR_ANY); bindaddr.sin_port = htons(3000); if (bind(listenfd, (struct sockaddr *)\u0026bindaddr, sizeof(bindaddr)) == -1) { std::cout \u003c\u003c \"bind listen socket error.\" \u003c\u003c std::endl; close(listenfd); return -1; } //启动侦听 if (listen(listenfd, SOMAXCONN) == -1) { std::cout \u003c\u003c \"listen error.\" \u003c\u003c std::endl; close(listenfd); return -1; } //存储客户端socket的数组 std::vector clientfds; int maxfd = listenfd; while (true) { fd_set readset; FD_ZERO(\u0026readset); //将侦听socket加入到待检测的可读事件中去 FD_SET(listenfd, \u0026readset); //将客户端fd加入到待检测的可读事件中去 int clientfdslength = clientfds.size(); for (int i = 0; i \u003c clientfdslength; ++i) { if (clientfds[i] != INVALID_FD) { FD_SET(clientfds[i], \u0026readset); } } timeval tm; tm.tv_sec = 1; tm.tv_usec = 0; //暂且只检测可读事件，不检测可写和异常事件 int ret = select(maxfd + 1, \u0026readset, NULL, NULL, \u0026tm); if (ret == -1) { //出错，退出程序。 if (errno != EINTR) break; } else if (ret == 0) { //select 函数超时，下次继续 continue; } else { //检测到某个socket有事件 if (FD_ISSET(listenfd, \u0026readset)) { //侦听socket的可读事件，则表明有新的连接到来 struct sockaddr_in clientaddr; socklen_t clientaddrlen = sizeof(clientaddr); //4. 接受客户端连接 int clientfd = accept(listenfd, (struct sockaddr *)\u0026clientaddr, \u0026clientaddrlen); if (clientfd == -1) { //接受连接出错，退出程序 break; } //只接受连接，不调用recv收取任何数据 std:: cout \u003c\u003c \"accept a client connection, fd: \" \u003c\u003c clientfd \u003c\u003c std::endl; clientfds.push_back(clientfd); //记录一下最新的最大fd值，以便作为下一轮循环中select的第一个参数 if (clientfd \u003e maxfd) maxfd = clientfd; } else { //假设对端发来的数据长度不超过63个字符 char recvbuf[64]; int clientfdslength = clientfds.size(); for (int i = 0; i \u003c clientfdslength; ++i) { if (clientfds[i] != -1 \u0026\u0026 FD_ISSET(clientfds[i], \u0026readset)) { memset(recvbuf, 0, sizeof(recvbuf)); //非侦听socket，则接收数据 int length = recv(clientfds[i], recvbuf, 64, 0); if (length \u003c= 0 \u0026\u0026 errno != EINTR) { //收取数据出错了 std::cout \u003c\u003c \"recv data error, clientfd: \" \u003c\u003c clientfds[i] \u003c\u003c std::endl; close(clientfds[i]); //不直接删除该元素，将该位置的元素置位-1 clientfds[i] = INVALID_FD; continue; } std::cout \u003c\u003c \"clientfd: \" \u003c\u003c clientfds[i] \u003c\u003c \", recv data: \" \u003c\u003c recvbuf \u003c\u003c std::endl; } } } } } //关闭所有客户端socket int clientfdslength = clientfds.size(); for (int i = 0; i \u003c clientfdslength; ++i) { if (clientfds[i] != INVALID_FD) { close(clientfds[i]); } } //关闭侦听socket close(listenfd); return 0; } 我们编译并运行程序：\n[root@localhost testsocket]# g++ -g -o select_server select_server.cpp [root@localhost testsocket]# ./select_server 然后，我们再多开几个 shell 窗口，我们这里不再专门编写客户端程序了，我们使用 Linux 下的 nc 指令模拟出两个客户端。\nshell 窗口1，连接成功以后发送字符串 hello123：\n[root@localhost ~]# nc -v 127.0.0.1 3000 Ncat: Version 6.40 ( http://nmap.org/ncat ) Ncat: Connected to 127.0.0.1:3000. hello123 shell 窗口2，连接成功以后发送字符串 helloworld：\n[root@localhost ~]# nc -v 127.0.0.1 3000 Ncat: Version 6.40 ( http://nmap.org/ncat ) Ncat: Connected to 127.0.0.1:3000. helloworld 此时服务器端输出结果如下：\n注意，由于 nc 发送的数据是按换行符来区分的，每一个数据包默认的换行符以**\\n** 结束（当然，你可以 -C 选项换成\\r\\n），所以服务器收到数据后，显示出来的数据每一行下面都有一个空白行。\n当断开各个客户端连接时，服务器端 select 函数对各个客户端 fd 检测时，仍然会触发可读事件，此时对这些 fd 调用 recv 函数会返回 0（recv 函数返回0，表明对端关闭了连接，这是一个很重要的知识点，下文我们会有一章节专门介绍这些函数的返回值），服务器端也关闭这些连接就可以了。\n客户端断开连接后，服务器端的运行输出结果：\n以上代码是一个简单的服务器程序实现的基本流程，代码虽然简单，但是非常具有典型性和代表性，而且同样适用于客户端网络通信，如果用于客户端的话，只需要用 select 检测连接 socket 就可以了，如果连接 socket 有可读事件，调用 recv 函数来接收数据，剩下的逻辑都是一样的。上面的代码我们画一张流程图如下：\n关于上述代码在实际开发中有几个需要注意的事项，这里逐一来说明一下：\n1. select 函数调用前后会修改 readfds、writefds 和 exceptfds 这三个集合中的内容（如果有的话），所以如果您想下次调用 select 复用这个变量，记得在下次调用前再次调用 select 前先使用 FD_ZERO 将集合清零，然后调用 FD_SET 将需要检测事件的 fd 再次添加进去。\nselect 函数调用之后，readfds、writefds 和 exceptfds 这三个集合中存放的不是我们之前设置进去的 fd，而是有相关有读写或异常事件的 fd，也就是说 select 函数会修改这三个参数的内容，这也要求我们当一个 fd_set 被 select 函数调用后，这个 fd_set 就已经发生了改变，下次如果我们需要使用它，必须使用 FD_ZERO 宏先清零，再重新将我们关心的 fd 设置进去。这点我们从 FD_ISSET 源码也可以看出来：\n#define __FD_ISSET(d, set) \\ ((__FDS_BITS (set)[__FD_ELT (d)] \u0026 __FD_MASK (d)) != 0) 如果调用 select 函数之后没有改变 fd_set 集合，那么即使某个 socket 上没有事件，调用 select 函数之后我们用 FD_ISSET 检测，会原路得到原来设置上去的 socket。这是很多初学者在学习 select 函数容易犯的一个错误，我们通过一个示例来验证一下，这次我们把 select 函数用在客户端。\n/** * 验证调用select后必须重设fd_set，select_client.cpp * zhangyl 2018.12.24 */ #include #include #include #include #include #include #include #include #define SERVER_ADDRESS \"127.0.0.1\" #define SERVER_PORT 3000 int main(int argc, char* argv[]) { //创建一个socket int clientfd = socket(AF_INET, SOCK_STREAM, 0); if (clientfd == -1) { std::cout \u003c\u003c \"create client socket error.\" \u003c\u003c std::endl; return -1; } //连接服务器 struct sockaddr_in serveraddr; serveraddr.sin_family = AF_INET; serveraddr.sin_addr.s_addr = inet_addr(SERVER_ADDRESS); serveraddr.sin_port = htons(SERVER_PORT); if (connect(clientfd, (struct sockaddr *)\u0026serveraddr, sizeof(serveraddr)) == -1) { std::cout \u003c\u003c \"connect socket error.\" \u003c\u003c std::endl; close(clientfd); return -1; } fd_set readset; FD_ZERO(\u0026readset); //将侦听socket加入到待检测的可读事件中去 FD_SET(clientfd, \u0026readset); timeval tm; tm.tv_sec = 5; tm.tv_usec = 0; int ret; int count = 0; fd_set backup_readset; memcpy(\u0026backup_readset, \u0026readset, sizeof(fd_set)); while (true) { if (memcmp(\u0026readset, \u0026backup_readset, sizeof(fd_set)) == 0) { std::cout \u003c\u003c \"equal\" \u003c\u003c std::endl; } else { std::cout \u003c\u003c \"not equal\" \u003c\u003c std::endl; } //暂且只检测可读事件，不检测可写和异常事件 ret = select(clientfd + 1, \u0026readset, NULL, NULL, \u0026tm); std::cout \u003c\u003c \"tm.tv_sec: \" \u003c\u003c tm.tv_sec \u003c\u003c \", tm.tv_usec: \" \u003c\u003c tm.tv_usec \u003c\u003c std::endl; if (ret == -1) { //除了被信号中断的情形，其他情况都是出错 if (errno != EINTR) break; } else if (ret == 0){ //select函数超时 std::cout \u003c\u003c \"no event in specific time interval, count：\" \u003c\u003c count \u003c\u003c std::endl; ++count; continue; } else { if (FD_ISSET(clientfd, \u0026readset)) { //检测到可读事件 char recvbuf[32]; memset(recvbuf, 0, sizeof(recvbuf)); //假设对端发数据的时候不超过31个字符。 int n = recv(clientfd, recvbuf, 32, 0); if (n \u003c 0) { //除了被信号中断的情形，其他情况都是出错 if (errno != EINTR) break; } else if (n == 0) { //对端关闭了连接 break; } else { std::cout \u003c\u003c \"recv data: \" \u003c\u003c recvbuf \u003c\u003c std::endl; } } else { std::cout \u003c\u003c \"other socket event.\" \u003c\u003c std::endl; } } } //关闭socket close(clientfd); return 0; } 在 shell 窗口输入以下命令编译程序产生可执行文件 select_client：\ng++ -g -o select_client select_client.cpp 这次产生的是客户端程序，服务器程序我们这里使用 Linux nc 命令来模拟一下，由于客户端连接的是 127.0.0.1:3000 这个地址和端口号，所以我们在另外一个shell 窗口的 nc 命令的参数可以这么写：\nnc -v -l 0.0.0.0 3000 执行效果如下：接着我们启动客户端 select_client：\n[root@myaliyun testsocket]# ./select_client 需要注意的是，这里我故意将客户端代码中 select 函数的超时时间设置为5秒，以足够我们在这 5 秒内给客户端发一个数据。如果我们在 5 秒内给客户端发送 hello 字符串：\n客户端输出如下：\n[root@myaliyun testsocket]# ./select_client equal recv data: hello ...部分数据省略... not equal tm.tv_sec: 0, tm.tv_usec: 0 no event in specific time interval, count：31454 not equal tm.tv_sec: 0, tm.tv_usec: 0 no event in specific time interval, count：31455 not equal tm.tv_sec: 0, tm.tv_usec: 0 no event in specific time interval, count：31456 not equal tm.tv_sec: 0, tm.tv_usec: 0 no event in specific time interval, count：31457 ...部分输出省略... 除了第一次 select_client 会输出 equal 字样，后面再也没输出，而 select 函数以后的执行结果也是超时，即使此时服务器端再次给客户端发送数据。因此验证了：select 函数执行后，确实会对三个参数的 fd_set 进行修改 。select 函数修改某个 fd_set 集合可以使用如下两张图来说明一下：\n因此在调用 select 函数以后， 原来位置的的标志位可能已经不复存在，这也就是为什么我们的代码中调用一次 select 函数以后，即使服务器端再次发送数据过来，select 函数也不会再因为存在可读事件而返回了，因为第二次 clientfd 已经不在那个 read_set 中了。因此如果复用这些 fd_set 变量，必须按上文所说的重新清零再重新添加关心的 socket 到集合中去。\n2. select 函数也会修改 timeval 结构体的值，这也要求我们如果像复用这个变量，必须给 timeval 变量重新设置值。\n注意观察上面的例子的输出，我们在调用 select 函数一次之后，变量 tv 的值也被修改了。具体修改成多少，得看系统的表现。当然这种特性却不是跨平台的，在 Linux 系统中是这样的，而在其他操作系统上却不一定是这样（Windows 上就不会修改这个结构体的值），这点在 Linux man 手册 select 函数的说明中说的很清楚：\nOn Linux, select() modifies timeout to reflect the amount of time not slept; most other implementations do not do this. (POSIX.1-2001 permits either behavior.) This causes problems both when Linux code which reads timeout is ported to other operating systems, and when code is ported to Linux that reuses a struct timeval for multiple select()s in a loop without reinitializing it. Consider timeout to be undefined after select() returns. 由于不同系统的实现不一样，man 手册的建议将 select 函数修改 timeval 结构体的值的行为当作是未定义的，言下之意是如果你要下次使用 select 函数复用这个变量时，记得重新赋值。这是 select 函数需要注意的第二个地方。\n3. select 函数的 timeval 结构体的 tv_sec 和 tv_sec 如果两个值设置为 0，即检测事件总时间设置为0，其行为是 select 会检测一下相关集合中的 fd，如果没有需要的事件，则立即返回。\n我们将上述 select_client.cpp 修改一下，修改后的代码如下：\n/** * 验证select时间参数设置为0，select_client_tv0.cpp * zhangyl 2018.12.25 */ #include #include #include #include #include #include #include #include #define SERVER_ADDRESS \"127.0.0.1\" #define SERVER_PORT 3000 int main(int argc, char* argv[]) { //创建一个socket int clientfd = socket(AF_INET, SOCK_STREAM, 0); if (clientfd == -1) { std::cout \u003c\u003c \"create client socket error.\" \u003c\u003c std::endl; return -1; } //连接服务器 struct sockaddr_in serveraddr; serveraddr.sin_family = AF_INET; serveraddr.sin_addr.s_addr = inet_addr(SERVER_ADDRESS); serveraddr.sin_port = htons(SERVER_PORT); if (connect(clientfd, (struct sockaddr *)\u0026serveraddr, sizeof(serveraddr)) == -1) { std::cout \u003c\u003c \"connect socket error.\" \u003c\u003c std::endl; close(clientfd); return -1; } int ret; while (true) { fd_set readset; FD_ZERO(\u0026readset); //将侦听socket加入到待检测的可读事件中去 FD_SET(clientfd, \u0026readset); timeval tm; tm.tv_sec = 0; tm.tv_usec = 0; //暂且只检测可读事件，不检测可写和异常事件 ret = select(clientfd + 1, \u0026readset, NULL, NULL, \u0026tm); std::cout \u003c\u003c \"tm.tv_sec: \" \u003c\u003c tm.tv_sec \u003c\u003c \", tm.tv_usec: \" \u003c\u003c tm.tv_usec \u003c\u003c std::endl; if (ret == -1) { //除了被信号中断的情形，其他情况都是出错 if (errno != EINTR) break; } else if (ret == 0){ //select函数超时 std::cout \u003c\u003c \"no event in specific time interval.\" \u003c\u003c std::endl; continue; } else { if (FD_ISSET(clientfd, \u0026readset)) { //检测到可读事件 char recvbuf[32]; memset(recvbuf, 0, sizeof(recvbuf)); //假设对端发数据的时候不超过31个字符。 int n = recv(clientfd, recvbuf, 32, 0); if (n \u003c 0) { //除了被信号中断的情形，其他情况都是出错 if (errno != EINTR) break; } else if (n == 0) { //对端关闭了连接 break; } else { std::cout \u003c\u003c \"recv data: \" \u003c\u003c recvbuf \u003c\u003c std::endl; } } else { std::cout \u003c\u003c \"other socket event.\" \u003c\u003c std::endl; } } } //关闭socket close(clientfd); return 0; } 执行结果确实如我们预期的，这里 select 函数只是简单地检测一下 clientfd，并不会等待固定的时间，然后立即返回。\n4. 如果将 select 函数的 timeval 参数设置为 NULL，则 select 函数会一直阻塞下去，直到我们需要的事件触发。\n我们将上述代码再修改一下：\n/** * 验证select时间参数设置为NULL，select_client_tvnull.cpp * zhangyl 2018.12.25 */ #include #include #include #include #include #include #include #include #define SERVER_ADDRESS \"127.0.0.1\" #define SERVER_PORT 3000 int main(int argc, char* argv[]) { //创建一个socket int clientfd = socket(AF_INET, SOCK_STREAM, 0); if (clientfd == -1) { std::cout \u003c\u003c \"create client socket error.\" \u003c\u003c std::endl; return -1; } //连接服务器 struct sockaddr_in serveraddr; serveraddr.sin_family = AF_INET; serveraddr.sin_addr.s_addr = inet_addr(SERVER_ADDRESS); serveraddr.sin_port = htons(SERVER_PORT); if (connect(clientfd, (struct sockaddr *)\u0026serveraddr, sizeof(serveraddr)) == -1) { std::cout \u003c\u003c \"connect socket error.\" \u003c\u003c std::endl; close(clientfd); return -1; } int ret; while (true) { fd_set readset; FD_ZERO(\u0026readset); //将侦听socket加入到待检测的可读事件中去 FD_SET(clientfd, \u0026readset); //timeval tm; //tm.tv_sec = 0; //tm.tv_usec = 0; //暂且只检测可读事件，不检测可写和异常事件 ret = select(clientfd + 1, \u0026readset, NULL, NULL, NULL); if (ret == -1) { //除了被信号中断的情形，其他情况都是出错 if (errno != EINTR) break; } else if (ret == 0){ //select函数超时 std::cout \u003c\u003c \"no event in specific time interval.\" \u003c\u003c std::endl; continue; } else { if (FD_ISSET(clientfd, \u0026readset)) { //检测到可读事件 char recvbuf[32]; memset(recvbuf, 0, sizeof(recvbuf)); //假设对端发数据的时候不超过31个字符。 int n = recv(clientfd, recvbuf, 32, 0); if (n \u003c 0) { //除了被信号中断的情形，其他情况都是出错 if (errno != EINTR) break; } else if (n == 0) { //对端关闭了连接 break; } else { std::cout \u003c\u003c \"recv data: \" \u003c\u003c recvbuf \u003c\u003c std::endl; } } else { std::cout \u003c\u003c \"other socket event.\" \u003c\u003c std::endl; } } } //关闭socket close(clientfd); return 0; } 我们先在另外一个 shell 窗口用 nc 命令模拟一个服务器，监听的 ip 地址和端口号是 0.0.0.0:3000：\n[root@myaliyun ~]# nc -v -l 0.0.0.0 3000 Ncat: Version 6.40 ( http://nmap.org/ncat ) Ncat: Listening on 0.0.0.0:3000 然后回到原来的 shell 窗口，编译上述 select_client_tvnull.cpp，并使用 gdb 运行程序，这次使用 gdb 运行程序的目的是为了当程序“卡”在某个位置时，我们可以使用 Ctrl + C 把程序中断下来看看程序阻塞在哪个函数调用处：\n[root@myaliyun testsocket]# g++ -g -o select_client_tvnull select_client_tvnull.cpp [root@myaliyun testsocket]# gdb select_client_tvnull Reading symbols from /root/testsocket/select_client_tvnull...done. (gdb) r Starting program: /root/testsocket/select_client_tvnull ^C Program received signal SIGINT, Interrupt. 0x00007ffff72e7783 in __select_nocancel () from /lib64/libc.so.6 Missing separate debuginfos, use: debuginfo-install glibc-2.17-196.el7_4.2.x86_64 libgcc-4.8.5-16.el7_4.1.x86_64 libstdc++-4.8.5-16.el7_4.1.x86_64 (gdb) bt #0 0x00007ffff72e7783 in __select_nocancel () from /lib64/libc.so.6 #1 0x0000000000400c75 in main (argc=1, argv=0x7fffffffe5f8) at select_client_tvnull.cpp:51 (gdb) c Continuing. recv data: hello ^C Program received signal SIGINT, Interrupt. 0x00007ffff72e7783 in __select_nocancel () from /lib64/libc.so.6 (gdb) c Continuing. recv data: world 如上输出结果所示，我们使用 gdb 的 r 命令（run）将程序跑起来后，程序卡在某个地方，我们按 Ctrl + C（代码中的 ^C）中断程序后使用 bt 命令查看当前程序的调用堆栈，发现确实阻塞在 select 函数调用处；接着我们在服务器端给客户端发送一个 hello 数据：\n[root@myaliyun ~]# nc -v -l 0.0.0.0 3000 Ncat: Version 6.40 ( http://nmap.org/ncat ) Ncat: Listening on 0.0.0.0:3000 Ncat: Connection from 127.0.0.1. Ncat: Connection from 127.0.0.1:55968. hello 客户端收到数据后，select 函数满足条件，立即返回，并将数据输出来后继续进行下一轮 select 检测，我们使用 Ctrl + C 将程序中断，发现程序又阻塞在 select 调用处；输入 c 命令（continue）让程序继续运行， 此时，我们再用服务器端给客户端发送 world 字符串，select 函数再次返回，并将数据打印出来，然后继续进入下一轮 select 检测，并继续在 select 处阻塞。\n[root@myaliyun ~]# nc -v -l 0.0.0.0 3000 Ncat: Version 6.40 ( http://nmap.org/ncat ) Ncat: Listening on 0.0.0.0:3000 Ncat: Connection from 127.0.0.1. Ncat: Connection from 127.0.0.1:55968. hello world 5. 在 Linux 平台上，select 函数的第一个参数必须设置成需要检测事件的所有 fd 中的最大值加1。所以上文中 select_server.cpp 中，每新产生一个 clientfd，我都会与当前最大的 maxfd 作比较，如果大于当前的 maxfd 则将 maxfd 更新成这个新的最大值。其最终目的是为了在 select 调用时作为第一个参数（加 1）传进去。\n在 Windows 平台上，select 函数的第一个值传任意值都可以，Windows 系统本身不使用这个值，只是为了兼容性而保留了这个参数，但是在实际开发中为了兼容跨平台代码，也会按惯例，将这个值设置为最大 socket 加 1。这点请读者注意。\n以上是我总结的 Linux 下 select 使用的五个注意事项，希望读者能理解它们。\n",
+  "wordCount" : "2376",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/2369cd70c2354e9c844815c14f31134c/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      select 函数重难点解析
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#select-%e5%87%bd%e6%95%b0%e9%87%8d%e9%9a%be%e7%82%b9%e8%a7%a3%e6%9e%90" aria-label="select 函数重难点解析">select 函数重难点解析</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#linux-%e5%b9%b3%e5%8f%b0%e4%b8%8b%e7%9a%84-select-%e5%87%bd%e6%95%b0" aria-label="Linux 平台下的 select 函数">Linux 平台下的 select 函数</a>
+                </li>
+            </ul>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h2 id="select-函数重难点解析">select 函数重难点解析</h2>
+<p><strong>select</strong> 函数是网络通信编程中非常常用的一个函数，因此应该熟练掌握它。虽然它是 BSD 标准之一的 Socket 函数之一，但在 Linux 和 Windows 平台，其行为表现还是有点区别的。我们先来看一下 Linux 平台上的 select 函数。</p>
+<h4 id="linux-平台下的-select-函数">Linux 平台下的 select 函数</h4>
+<p><strong>select</strong> 函数的作用是检测一组 socket 中某个或某几个是否有“<strong>事件</strong>”，这里的“**事件”**一般分为如下三类：</p>
+<ul>
+<li>可读事件，一般意味着可以调用 <strong>recv</strong> 或 <strong>read</strong> 函数从该 socket 上读取数据；如果该 socket 是侦听 <strong>socket</strong>（即调用了 <strong>bind</strong> 函数绑定过 ip 地址和端口号，并调用了 <strong>listen</strong> 启动侦听的 socket），可读意味着此时可以有新的客户端连接到来，此时可调用 <strong>accept</strong> 函数接受新连接。</li>
+<li>可写事件，一般意味着此时调用 <strong>send</strong> 或 <strong>write</strong> 函数可以将数据“发出去”。</li>
+<li>异常事件，某个 socket 出现异常。</li>
+</ul>
+<p>函数签名如下：</p>
+<pre tabindex="0"><code>int select(int nfds, 
+           fd_set *readfds,
+           fd_set *writefds,
+           fd_set *exceptfds,
+           struct timeval *timeout);
+</code></pre><p>参数说明：</p>
+<ul>
+<li>
+<p>参数 <strong>nfds</strong>， Linux 下 socket 也称 fd，这个参数的值设置成所有需要使用 select 函数监听的 fd 中最大 fd 值加 1。</p>
+</li>
+<li>
+<p>参数 <strong>readfds</strong>，需要监听可读事件的 fd 集合。</p>
+</li>
+<li>
+<p>参数 <strong>writefds</strong>，需要监听可写事件的 fd 集合。</p>
+</li>
+<li>
+<p>参数 <strong>exceptfds</strong>，需要监听异常事件 fd 集合。</p>
+<p><strong>readfds</strong>、<strong>writefds</strong> 和 <strong>exceptfds</strong> 类型都是 <strong>fd_set</strong>，这是一个结构体信息，其定义位于 <strong>/usr/include/sys/select.h</strong> 中：</p>
+<pre tabindex="0"><code>/* The fd_set member is required to be an array of longs.  */
+typedef long int __fd_mask;
+
+/* Some versions of &lt;linux/posix_types.h&gt; define this macros.  */
+#undef  __NFDBITS
+/* It&#39;s easier to assume 8-bit bytes than to get CHAR_BIT.  */
+#define __NFDBITS       (8 * (int) sizeof (__fd_mask))
+#define __FD_ELT(d)     ((d) / __NFDBITS)
+#define __FD_MASK(d)    ((__fd_mask) 1 &lt;&lt; ((d) % __NFDBITS))
+
+/* fd_set for select and pselect.  */
+typedef struct
+{
+  /* XPG4.2 requires this member name.  Otherwise avoid the name
+     from the global namespace.  */
+#ifdef __USE_XOPEN
+  __fd_mask fds_bits[__FD_SETSIZE / __NFDBITS];
+# define __FDS_BITS(set) ((set)-&gt;fds_bits)
+#else
+  // 在我的centOS 7.0 系统中的值：
+  // __FD_SETSIZE = 1024
+  //__NFDBITS = 64
+  __fd_mask __fds_bits[__FD_SETSIZE / __NFDBITS];     
+# define __FDS_BITS(set) ((set)-&gt;__fds_bits)
+#endif
+} fd_set;
+
+/* Maximum number of file descriptors in &#39;fd_set&#39;.  */
+#define FD_SETSIZE              __FD_SETSIZE
+</code></pre><p>我们假设未定义宏 <strong>__USE_XOPEN</strong>，将上面的代码整理一下：</p>
+<pre tabindex="0"><code>typedef struct
+{ 
+  long int __fds_bits[16];     
+} fd_set;
+</code></pre><p>将一个 fd 添加到 fd_set 这个集合中需要使用 <strong>FD_SET</strong> 宏，其定义如下：</p>
+<pre tabindex="0"><code>void FD_SET(int fd, fd_set *set);
+</code></pre><p>其实现如下：</p>
+<pre tabindex="0"><code>#define FD_SET(fd,fdsetp) __FD_SET(fd,fdsetp)
+</code></pre><p><strong>FD_SET</strong> 在内部又是通过宏 <strong>__FD_SET</strong> 来实现的，<strong>__FD_SET</strong> 的定义如下（位于 <strong>/usr/include/bits/select.h</strong> 中）：</p>
+<pre tabindex="0"><code>#if defined __GNUC__ &amp;&amp; __GNUC__ &gt;= 2
+
+# if __WORDSIZE == 64
+#  define __FD_ZERO_STOS &#34;stosq&#34;
+# else
+#  define __FD_ZERO_STOS &#34;stosl&#34;
+# endif
+
+# define __FD_ZERO(fdsp) \
+do {                                                                        \
+  int __d0, __d1;                                                           \
+  __asm__ __volatile__ (&#34;cld; rep; &#34; __FD_ZERO_STOS                         \
+                        : &#34;=c&#34; (__d0), &#34;=D&#34; (__d1)                          \
+                        : &#34;a&#34; (0), &#34;0&#34; (sizeof (fd_set)                     \
+                                        / sizeof (__fd_mask)),              \
+                          &#34;1&#34; (&amp;__FDS_BITS (fdsp)[0])                       \
+                        : &#34;memory&#34;);                                        \
+} while (0)
+
+#else   /* ! GNU CC */
+
+/* We don&#39;t use `memset&#39; because this would require a prototype and
+ the array isn&#39;t too big.  */
+# define __FD_ZERO(set)  \
+do {                                                                        \
+  unsigned int __i;                                                         \
+  fd_set *__arr = (set);                                                    \
+  for (__i = 0; __i &lt; sizeof (fd_set) / sizeof (__fd_mask); ++__i)          \
+    __FDS_BITS (__arr)[__i] = 0;                                            \
+} while (0)
+
+#endif  /* GNU CC */
+
+#define __FD_SET(d, set) \
+((void) (__FDS_BITS (set)[__FD_ELT (d)] |= __FD_MASK (d)))
+#define __FD_CLR(d, set) \
+((void) (__FDS_BITS (set)[__FD_ELT (d)] &amp;= ~__FD_MASK (d)))
+#define __FD_ISSET(d, set) \
+((__FDS_BITS (set)[__FD_ELT (d)] &amp; __FD_MASK (d)) != 0)
+</code></pre><p>重点看这一行：</p>
+<pre tabindex="0"><code>((void) (__FDS_BITS (set)[__FD_ELT (d)] |= __FD_MASK (d)))
+</code></pre><p><strong>__FD_MASK</strong> 和 <strong>__FD_ELT</strong> 宏在上面的代码中已经给出定义：</p>
+<pre tabindex="0"><code>#define __FD_ELT(d)     ((d) / __NFDBITS)
+#define __FD_MASK(d)    ((__fd_mask) 1 &lt;&lt; ((d) % __NFDBITS))
+</code></pre><p><strong>__NFDBITS</strong> 的值是 <strong>64</strong> （<strong>8 * 8</strong>），也就是说 <strong>__FD_MASK (d)</strong> 先计算 fd 与 64 的余数 n，然后执行 1 &laquo; n，这一操作实际上是将 fd 的值放在 0～63 这 64 的位置上去，这个位置索引就是 fd 与 64 取模的结果；同理 <strong>__FD_ELT(d)</strong> 就是计算位置索引值了。举个例子，假设现在 fd 的 值是 57，那么在这 64 个位置的 57 位，其值在 64 个长度的二进制中置位是：</p>
+<pre tabindex="0"><code>0000 0010 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+</code></pre><p>这个值就是 <strong>1 &laquo; (57 % 64)</strong> 得到的数字。</p>
+<p>但是前面 fd 数组的定义是：</p>
+<pre tabindex="0"><code>typedef struct
+{ 
+  long int __fds_bits[16];    //可以看成是128 bit的数组 
+} fd_set;
+</code></pre><p><strong>long int</strong> 占 8 个字节，一个 16 个 <strong>long int</strong>，如果换成二进制的位(<strong>bit</strong>)就是 <strong>8 * 16</strong> = <strong>128</strong>， 也就是这个数组只用了低 64 位， 高 64 位并没有使用。这说明在我的机器上，select 函数支持操作的最大 fd 数量是 64。</p>
+<p>同理，如果我们需要从 fd_set 上删除一个 fd，我们可以调用 <strong>FD_CLR</strong>，其定义如下：</p>
+<pre tabindex="0"><code>void FD_CLR(int fd, fd_set *set);
+</code></pre><p>原理和 <strong>FD_SET</strong> 相同，即将对应的标志位由1变0即可。</p>
+<p>如果，我们需要将 fd_set 中所有的 fd 都清掉，则使用宏 <strong>FD_ZERO</strong>：</p>
+<pre tabindex="0"><code>void FD_ZERO(fd_set *set);
+</code></pre><p>当 select 函数返回时， 我们使用 <strong>FD_ISSET</strong> 宏来判断某个 fd 是否有我们关心的事件，<strong>FD_ISSET</strong> 宏的定义如下：</p>
+</li>
+</ul>
+<pre tabindex="0"><code>int  FD_ISSET(int fd, fd_set *set);
+</code></pre><p><strong>FD_ISSET</strong> 宏本质上就是检测对应的位置上是否置 1，实现如下：</p>
+<pre tabindex="0"><code>#define __FD_ISSET(d, set) \
+    ((__FDS_BITS (set)[__FD_ELT (d)] &amp; __FD_MASK (d)) != 0)
+</code></pre><blockquote>
+<p>提醒一下： __FD_ELT 和 __FD_MASK 宏前文的代码已经给过具体实现了。</p>
+</blockquote>
+<ul>
+<li>
+<p>参数 <strong>timeout</strong>，超时时间，即在这个参数设定的时间内检测这些 fd 的事件，超过这个时间后 <strong>select</strong> 函数将立即返回。这是一个 <strong>timeval</strong> 类型结构体，其定义如下：</p>
+<pre tabindex="0"><code>struct timeval 
+{
+  long    tv_sec;         /* seconds */
+  long    tv_usec;        /* microseconds */
+};
+</code></pre><p><strong>select</strong> 函数的总超时时间是 <strong>timeout-&gt;tv_sec</strong> 和 <strong>timeout-&gt;tv_usec</strong> 之和， 前者的时间单位是秒，后者的时间单位是微妙。</p>
+</li>
+</ul>
+<p>说了这么多理论知识，我们先看一个具体的示例：</p>
+<pre tabindex="0"><code>/**
+ * select函数示例，server端, select_server.cpp
+ * zhangyl 2018.12.24
+ */
+#include &lt;sys/types.h&gt; 
+#include &lt;sys/socket.h&gt;
+#include &lt;arpa/inet.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;iostream&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/time.h&gt;
+#include &lt;vector&gt;
+#include &lt;errno.h&gt;
+
+//自定义代表无效fd的值
+#define INVALID_FD -1
+
+int main(int argc, char* argv[])
+{
+    //创建一个侦听socket
+    int listenfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (listenfd == -1)
+    {
+        std::cout &lt;&lt; &#34;create listen socket error.&#34; &lt;&lt; std::endl;
+        return -1;
+    }
+
+    //初始化服务器地址
+    struct sockaddr_in bindaddr;
+    bindaddr.sin_family = AF_INET;
+    bindaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    bindaddr.sin_port = htons(3000);
+    if (bind(listenfd, (struct sockaddr *)&amp;bindaddr, sizeof(bindaddr)) == -1)
+    {
+        std::cout &lt;&lt; &#34;bind listen socket error.&#34; &lt;&lt; std::endl;
+        close(listenfd);
+        return -1;
+    }
+
+    //启动侦听
+    if (listen(listenfd, SOMAXCONN) == -1)
+    {
+        std::cout &lt;&lt; &#34;listen error.&#34; &lt;&lt; std::endl;
+        close(listenfd);
+        return -1;
+    }
+
+    //存储客户端socket的数组
+    std::vector&lt;int&gt; clientfds;
+    int maxfd = listenfd;
+
+    while (true) 
+    {   
+        fd_set readset;
+        FD_ZERO(&amp;readset);
+
+        //将侦听socket加入到待检测的可读事件中去
+        FD_SET(listenfd, &amp;readset);
+
+        //将客户端fd加入到待检测的可读事件中去
+        int clientfdslength = clientfds.size();
+        for (int i = 0; i &lt; clientfdslength; ++i)
+        {
+            if (clientfds[i] != INVALID_FD)
+            {
+                FD_SET(clientfds[i], &amp;readset);
+            }
+        }
+
+        timeval tm;
+        tm.tv_sec = 1;
+        tm.tv_usec = 0;
+        //暂且只检测可读事件，不检测可写和异常事件
+        int ret = select(maxfd + 1, &amp;readset, NULL, NULL, &amp;tm);
+        if (ret == -1)
+        {
+            //出错，退出程序。
+            if (errno != EINTR)
+                break;
+        }
+        else if (ret == 0)
+        {
+            //select 函数超时，下次继续
+            continue;
+        } else {
+            //检测到某个socket有事件
+            if (FD_ISSET(listenfd, &amp;readset))
+            {
+                //侦听socket的可读事件，则表明有新的连接到来
+                struct sockaddr_in clientaddr;
+                socklen_t clientaddrlen = sizeof(clientaddr);
+                //4. 接受客户端连接
+                int clientfd = accept(listenfd, (struct sockaddr *)&amp;clientaddr, &amp;clientaddrlen);
+                if (clientfd == -1)                 
+                {           
+                    //接受连接出错，退出程序
+                    break;
+                }
+
+                //只接受连接，不调用recv收取任何数据
+                std:: cout &lt;&lt; &#34;accept a client connection, fd: &#34; &lt;&lt; clientfd &lt;&lt; std::endl;
+                clientfds.push_back(clientfd);
+                //记录一下最新的最大fd值，以便作为下一轮循环中select的第一个参数
+                if (clientfd &gt; maxfd)
+                    maxfd = clientfd;
+            } 
+            else 
+            {
+                //假设对端发来的数据长度不超过63个字符
+                char recvbuf[64];
+                int clientfdslength = clientfds.size();
+                for (int i = 0; i &lt; clientfdslength; ++i)
+                {
+                    if (clientfds[i] != -1 &amp;&amp; FD_ISSET(clientfds[i], &amp;readset))
+                    {               
+                        memset(recvbuf, 0, sizeof(recvbuf));
+                        //非侦听socket，则接收数据
+                        int length = recv(clientfds[i], recvbuf, 64, 0);
+                        if (length &lt;= 0 &amp;&amp; errno != EINTR)
+                        {
+                            //收取数据出错了
+                            std::cout &lt;&lt; &#34;recv data error, clientfd: &#34; &lt;&lt; clientfds[i] &lt;&lt; std::endl;                            
+                            close(clientfds[i]);
+                            //不直接删除该元素，将该位置的元素置位-1
+                            clientfds[i] = INVALID_FD;
+                            continue;
+                        }
+
+                        std::cout &lt;&lt; &#34;clientfd: &#34; &lt;&lt; clientfds[i] &lt;&lt; &#34;, recv data: &#34; &lt;&lt; recvbuf &lt;&lt; std::endl;                   
+                    }
+                }
+
+            }
+        }
+    }
+
+    //关闭所有客户端socket
+    int clientfdslength = clientfds.size();
+    for (int i = 0; i &lt; clientfdslength; ++i)
+    {
+        if (clientfds[i] != INVALID_FD)
+        {
+            close(clientfds[i]);
+        }
+    }
+
+    //关闭侦听socket
+    close(listenfd);
+
+    return 0;
+}
+</code></pre><p>我们编译并运行程序：</p>
+<pre tabindex="0"><code>[root@localhost testsocket]# g++ -g -o select_server select_server.cpp 
+[root@localhost testsocket]# ./select_server 
+</code></pre><p>然后，我们再多开几个 shell 窗口，我们这里不再专门编写客户端程序了，我们使用 Linux 下的 <strong>nc</strong> 指令模拟出两个客户端。</p>
+<p>shell 窗口1，连接成功以后发送字符串 <strong>hello123</strong>：</p>
+<pre tabindex="0"><code>[root@localhost ~]# nc -v 127.0.0.1 3000
+Ncat: Version 6.40 ( http://nmap.org/ncat )
+Ncat: Connected to 127.0.0.1:3000.
+hello123
+</code></pre><p>shell 窗口2，连接成功以后发送字符串 <strong>helloworld</strong>：</p>
+<pre tabindex="0"><code>[root@localhost ~]# nc -v 127.0.0.1 3000
+Ncat: Version 6.40 ( http://nmap.org/ncat )
+Ncat: Connected to 127.0.0.1:3000.
+helloworld
+</code></pre><p>此时服务器端输出结果如下：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/f4a8708435942d930b6533cd4a862343.webp" alt=""  />
+</p>
+<p>注意，由于 <strong>nc</strong> 发送的数据是按换行符来区分的，每一个数据包默认的换行符以**\n** 结束（当然，你可以 <strong>-C</strong> 选项换成\r\n），所以服务器收到数据后，显示出来的数据每一行下面都有一个空白行。</p>
+<p>当断开各个客户端连接时，服务器端 select 函数对各个客户端 fd 检测时，仍然会触发可读事件，此时对这些 fd 调用 recv 函数会返回 <strong>0</strong>（recv 函数返回0，表明对端关闭了连接，这是一个很重要的知识点，下文我们会有一章节专门介绍这些函数的返回值），服务器端也关闭这些连接就可以了。</p>
+<p>客户端断开连接后，服务器端的运行输出结果：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/0d2513ff12013fe55eac8d724ac906fd.webp" alt=""  />
+</p>
+<p>以上代码是一个简单的服务器程序实现的基本流程，代码虽然简单，但是非常具有典型性和代表性，而且同样适用于客户端网络通信，如果用于客户端的话，只需要用 select 检测连接 socket 就可以了，如果连接 socket 有可读事件，调用 recv 函数来接收数据，剩下的逻辑都是一样的。上面的代码我们画一张流程图如下：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/0f6fde122bab69ccd49aa1fd8925dbb2.webp" alt=""  />
+</p>
+<p>关于上述代码在实际开发中有几个需要注意的事项，这里逐一来说明一下：</p>
+<p><strong>1. select 函数调用前后会修改 readfds、writefds 和 exceptfds 这三个集合中的内容（如果有的话），所以如果您想下次调用 select 复用这个变量，记得在下次调用前再次调用 select 前先使用 FD_ZERO 将集合清零，然后调用 FD_SET 将需要检测事件的 fd 再次添加进去</strong>。</p>
+<blockquote>
+<p>select 函数调用之后，<strong>readfds</strong>、<strong>writefds</strong> 和 <strong>exceptfds</strong> 这三个集合中存放的不是我们之前设置进去的 fd，而是有相关有读写或异常事件的 fd，也就是说 select 函数会修改这三个参数的内容，这也要求我们<strong>当一个 fd_set 被 select 函数调用后，这个 fd_set 就已经发生了改变，下次如果我们需要使用它，必须使用 FD_ZERO 宏先清零，再重新将我们关心的 fd 设置进去</strong>。这点我们从 <strong>FD_ISSET</strong> 源码也可以看出来：</p>
+</blockquote>
+<pre tabindex="0"><code> #define __FD_ISSET(d, set) \
+    ((__FDS_BITS (set)[__FD_ELT (d)] &amp; __FD_MASK (d)) != 0)
+</code></pre><p>如果调用 select 函数之后没有改变 fd_set 集合，那么即使某个 socket 上没有事件，调用 select 函数之后我们用 <strong>FD_ISSET</strong> 检测，会原路得到原来设置上去的 socket。这是很多初学者在学习 select 函数容易犯的一个错误，我们通过一个示例来验证一下，这次我们把 select 函数用在客户端。</p>
+<pre tabindex="0"><code>/**
+ * 验证调用select后必须重设fd_set，select_client.cpp
+ * zhangyl 2018.12.24
+ */
+#include &lt;sys/types.h&gt; 
+#include &lt;sys/socket.h&gt;
+#include &lt;arpa/inet.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;iostream&gt;
+#include &lt;string.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;string.h&gt;
+
+#define SERVER_ADDRESS &#34;127.0.0.1&#34;
+#define SERVER_PORT     3000
+
+int main(int argc, char* argv[])
+{
+    //创建一个socket
+    int clientfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (clientfd == -1)
+    {
+        std::cout &lt;&lt; &#34;create client socket error.&#34; &lt;&lt; std::endl;
+        return -1;
+    }
+
+    //连接服务器
+    struct sockaddr_in serveraddr;
+    serveraddr.sin_family = AF_INET;
+    serveraddr.sin_addr.s_addr = inet_addr(SERVER_ADDRESS);
+    serveraddr.sin_port = htons(SERVER_PORT);
+    if (connect(clientfd, (struct sockaddr *)&amp;serveraddr, sizeof(serveraddr)) == -1)
+    {
+        std::cout &lt;&lt; &#34;connect socket error.&#34; &lt;&lt; std::endl;
+        close(clientfd);
+        return -1;
+    }
+
+    fd_set readset;
+    FD_ZERO(&amp;readset);
+
+    //将侦听socket加入到待检测的可读事件中去
+    FD_SET(clientfd, &amp;readset); 
+    timeval tm;
+    tm.tv_sec = 5;
+    tm.tv_usec = 0; 
+    int ret;
+    int count = 0;
+    fd_set backup_readset;
+    memcpy(&amp;backup_readset, &amp;readset, sizeof(fd_set));
+    while (true)
+    {
+        if (memcmp(&amp;readset, &amp;backup_readset, sizeof(fd_set)) == 0)
+        {
+            std::cout &lt;&lt; &#34;equal&#34; &lt;&lt; std::endl;
+        }
+        else
+        {
+            std::cout &lt;&lt; &#34;not equal&#34; &lt;&lt; std::endl;
+        }
+
+        //暂且只检测可读事件，不检测可写和异常事件
+        ret = select(clientfd + 1, &amp;readset, NULL, NULL, &amp;tm);
+        std::cout &lt;&lt; &#34;tm.tv_sec: &#34; &lt;&lt; tm.tv_sec &lt;&lt; &#34;, tm.tv_usec: &#34; &lt;&lt; tm.tv_usec &lt;&lt; std::endl;
+        if (ret == -1)
+        {
+            //除了被信号中断的情形，其他情况都是出错
+            if (errno != EINTR)
+                break;
+        } else if (ret == 0){
+            //select函数超时
+            std::cout &lt;&lt; &#34;no event in specific time interval, count：&#34; &lt;&lt; count &lt;&lt; std::endl;
+            ++count;
+            continue;
+        } else {
+            if (FD_ISSET(clientfd, &amp;readset))
+            {
+                //检测到可读事件
+                char recvbuf[32];
+                memset(recvbuf, 0, sizeof(recvbuf));
+                //假设对端发数据的时候不超过31个字符。
+                int n = recv(clientfd, recvbuf, 32, 0);
+                if (n &lt; 0)
+                {
+                    //除了被信号中断的情形，其他情况都是出错
+                    if (errno != EINTR)
+                        break;
+                } else if (n == 0) {
+                    //对端关闭了连接
+                    break;
+                } else {
+                    std::cout &lt;&lt; &#34;recv data: &#34; &lt;&lt; recvbuf &lt;&lt; std::endl;
+                }
+            }
+            else 
+            {
+                std::cout &lt;&lt; &#34;other socket event.&#34; &lt;&lt; std::endl;
+            }
+        }
+    }       
+
+    //关闭socket
+    close(clientfd);
+
+    return 0;
+}
+</code></pre><p>在 shell 窗口输入以下命令编译程序产生可执行文件 <strong>select_client</strong>：</p>
+<pre tabindex="0"><code>g++ -g -o select_client select_client.cpp
+</code></pre><p>这次产生的是客户端程序，服务器程序我们这里使用 Linux <strong>nc</strong> 命令来模拟一下，由于客户端连接的是 <strong>127.0.0.1:3000</strong> 这个地址和端口号，所以我们在另外一个shell 窗口的 <strong>nc</strong> 命令的参数可以这么写：</p>
+<pre tabindex="0"><code>nc -v -l 0.0.0.0 3000
+</code></pre><p>执行效果如下：接着我们启动客户端 <strong>select_client</strong>：</p>
+<pre tabindex="0"><code>[root@myaliyun testsocket]# ./select_client 
+</code></pre><p>需要注意的是，这里我故意将客户端代码中 select 函数的超时时间设置为5秒，以足够我们在这 5 秒内给客户端发一个数据。如果我们在 5 秒内给客户端发送 <strong>hello</strong> 字符串：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/a150c40ceb2cfead665ebbb18c028251.webp" alt=""  />
+</p>
+<p>客户端输出如下：</p>
+<pre tabindex="0"><code>[root@myaliyun testsocket]# ./select_client 
+equal
+recv data: hello
+
+...部分数据省略...
+not equal
+tm.tv_sec: 0, tm.tv_usec: 0
+no event in specific time interval, count：31454
+not equal
+tm.tv_sec: 0, tm.tv_usec: 0
+no event in specific time interval, count：31455
+not equal
+tm.tv_sec: 0, tm.tv_usec: 0
+no event in specific time interval, count：31456
+not equal
+tm.tv_sec: 0, tm.tv_usec: 0
+no event in specific time interval, count：31457
+...部分输出省略...
+</code></pre><p>除了第一次 <strong>select_client</strong> 会输出 <strong>equal</strong> 字样，后面再也没输出，而 <strong>select</strong> 函数以后的执行结果也是超时，即使此时服务器端再次给客户端发送数据。因此验证了：<strong>select 函数执行后，确实会对三个参数的 fd_set 进行修改</strong> 。<strong>select</strong> 函数修改某个 fd_set 集合可以使用如下两张图来说明一下：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/6da2da1c5c648df2e3730eee8b6939e2.webp" alt=""  />
+</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/5e8eeeca95708c080af55e9bd86a2068.webp" alt=""  />
+</p>
+<p>因此在调用 <strong>select</strong> 函数以后， 原来位置的的标志位可能已经不复存在，这也就是为什么我们的代码中调用一次 <strong>select</strong> 函数以后，即使服务器端再次发送数据过来，<strong>select</strong> 函数也不会再因为存在可读事件而返回了，因为第二次 clientfd 已经不在那个 read_set 中了。因此如果复用这些 fd_set 变量，必须按上文所说的重新清零再重新添加关心的 socket 到集合中去。</p>
+<p><strong>2. select 函数也会修改 timeval 结构体的值，这也要求我们如果像复用这个变量，必须给 timeval 变量重新设置值。</strong></p>
+<p>注意观察上面的例子的输出，我们在调用 <strong>select</strong> 函数一次之后，变量 tv 的值也被修改了。具体修改成多少，得看系统的表现。当然这种特性却不是跨平台的，在 Linux 系统中是这样的，而在其他操作系统上却不一定是这样（Windows 上就不会修改这个结构体的值），这点在 Linux man 手册 <strong>select</strong> 函数的说明中说的很清楚：</p>
+<pre tabindex="0"><code>On  Linux,  select()  modifies timeout to reflect the amount
+of time not slept; most other implementations do not do this.
+(POSIX.1-2001 permits either behavior.)  This causes problems 
+both when Linux code which reads timeout is ported to  other 
+operating systems, and when code is ported to Linux that reuses
+a struct timeval for multiple select()s in a loop without
+reinitializing it.  Consider timeout to be undefined after
+select() returns.
+</code></pre><p>由于不同系统的实现不一样，man 手册的建议将 <strong>select</strong> 函数修改 <strong>timeval</strong> 结构体的值的行为当作是未定义的，言下之意是<strong>如果你要下次使用 select 函数复用这个变量时，记得重新赋值</strong>。这是 select 函数需要注意的第二个地方。</p>
+<p><strong>3. select 函数的 timeval 结构体的 tv_sec 和 tv_sec 如果两个值设置为 0，即检测事件总时间设置为0，其行为是 select 会检测一下相关集合中的 fd，如果没有需要的事件，则立即返回</strong>。</p>
+<p>我们将上述 <strong>select_client.cpp</strong> 修改一下，修改后的代码如下：</p>
+<pre tabindex="0"><code>   /**
+    * 验证select时间参数设置为0，select_client_tv0.cpp
+    * zhangyl 2018.12.25
+    */
+   #include &lt;sys/types.h&gt; 
+   #include &lt;sys/socket.h&gt;
+   #include &lt;arpa/inet.h&gt;
+   #include &lt;unistd.h&gt;
+   #include &lt;iostream&gt;
+   #include &lt;string.h&gt;
+   #include &lt;errno.h&gt;
+   #include &lt;string.h&gt;
+
+   #define SERVER_ADDRESS &#34;127.0.0.1&#34;
+   #define SERVER_PORT     3000
+
+   int main(int argc, char* argv[])
+   {
+       //创建一个socket
+       int clientfd = socket(AF_INET, SOCK_STREAM, 0);
+       if (clientfd == -1)
+       {
+           std::cout &lt;&lt; &#34;create client socket error.&#34; &lt;&lt; std::endl;
+           return -1;
+       }
+
+       //连接服务器
+       struct sockaddr_in serveraddr;
+       serveraddr.sin_family = AF_INET;
+       serveraddr.sin_addr.s_addr = inet_addr(SERVER_ADDRESS);
+       serveraddr.sin_port = htons(SERVER_PORT);
+       if (connect(clientfd, (struct sockaddr *)&amp;serveraddr, sizeof(serveraddr)) == -1)
+       {
+           std::cout &lt;&lt; &#34;connect socket error.&#34; &lt;&lt; std::endl;
+           close(clientfd);
+           return -1;
+       }
+
+       int ret;
+       while (true)
+       {
+           fd_set readset;
+           FD_ZERO(&amp;readset);
+           //将侦听socket加入到待检测的可读事件中去
+           FD_SET(clientfd, &amp;readset); 
+           timeval tm;
+           tm.tv_sec = 0;
+           tm.tv_usec = 0; 
+
+           //暂且只检测可读事件，不检测可写和异常事件
+           ret = select(clientfd + 1, &amp;readset, NULL, NULL, &amp;tm);
+           std::cout &lt;&lt; &#34;tm.tv_sec: &#34; &lt;&lt; tm.tv_sec &lt;&lt; &#34;, tm.tv_usec: &#34; &lt;&lt; tm.tv_usec &lt;&lt; std::endl;
+           if (ret == -1)
+           {
+               //除了被信号中断的情形，其他情况都是出错
+               if (errno != EINTR)
+                   break;
+           } else if (ret == 0){
+               //select函数超时
+               std::cout &lt;&lt; &#34;no event in specific time interval.&#34; &lt;&lt; std::endl;
+               continue;
+           } else {
+               if (FD_ISSET(clientfd, &amp;readset))
+               {
+                   //检测到可读事件
+                   char recvbuf[32];
+                   memset(recvbuf, 0, sizeof(recvbuf));
+                   //假设对端发数据的时候不超过31个字符。
+                   int n = recv(clientfd, recvbuf, 32, 0);
+                   if (n &lt; 0)
+                   {
+                       //除了被信号中断的情形，其他情况都是出错
+                       if (errno != EINTR)
+                           break;
+                   } else if (n == 0) {
+                       //对端关闭了连接
+                       break;
+                   } else {
+                       std::cout &lt;&lt; &#34;recv data: &#34; &lt;&lt; recvbuf &lt;&lt; std::endl;
+                   }
+               }
+               else 
+               {
+                   std::cout &lt;&lt; &#34;other socket event.&#34; &lt;&lt; std::endl;
+               }
+           }
+       }       
+
+
+       //关闭socket
+       close(clientfd);
+
+       return 0;
+   }
+</code></pre><p>执行结果确实如我们预期的，这里 select 函数只是简单地检测一下 clientfd，并不会等待固定的时间，然后立即返回。</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/75a358763694dfcfdf3ee24eb499e6cb.webp" alt=""  />
+</p>
+<p><strong>4. 如果将 select 函数的 timeval 参数设置为 NULL，则 select 函数会一直阻塞下去，直到我们需要的事件触发。</strong></p>
+<p>我们将上述代码再修改一下：</p>
+<pre tabindex="0"><code>   /**
+    * 验证select时间参数设置为NULL，select_client_tvnull.cpp
+    * zhangyl 2018.12.25
+    */
+   #include &lt;sys/types.h&gt; 
+   #include &lt;sys/socket.h&gt;
+   #include &lt;arpa/inet.h&gt;
+   #include &lt;unistd.h&gt;
+   #include &lt;iostream&gt;
+   #include &lt;string.h&gt;
+   #include &lt;errno.h&gt;
+   #include &lt;string.h&gt;
+
+   #define SERVER_ADDRESS &#34;127.0.0.1&#34;
+   #define SERVER_PORT     3000
+
+   int main(int argc, char* argv[])
+   {
+       //创建一个socket
+       int clientfd = socket(AF_INET, SOCK_STREAM, 0);
+       if (clientfd == -1)
+       {
+           std::cout &lt;&lt; &#34;create client socket error.&#34; &lt;&lt; std::endl;
+           return -1;
+       }
+
+       //连接服务器
+       struct sockaddr_in serveraddr;
+       serveraddr.sin_family = AF_INET;
+       serveraddr.sin_addr.s_addr = inet_addr(SERVER_ADDRESS);
+       serveraddr.sin_port = htons(SERVER_PORT);
+       if (connect(clientfd, (struct sockaddr *)&amp;serveraddr, sizeof(serveraddr)) == -1)
+       {
+           std::cout &lt;&lt; &#34;connect socket error.&#34; &lt;&lt; std::endl;
+           close(clientfd);
+           return -1;
+       }
+
+       int ret;
+       while (true)
+       {
+           fd_set readset;
+           FD_ZERO(&amp;readset);
+           //将侦听socket加入到待检测的可读事件中去
+           FD_SET(clientfd, &amp;readset); 
+           //timeval tm;
+           //tm.tv_sec = 0;
+           //tm.tv_usec = 0;   
+
+           //暂且只检测可读事件，不检测可写和异常事件
+           ret = select(clientfd + 1, &amp;readset, NULL, NULL, NULL);
+           if (ret == -1)
+           {
+               //除了被信号中断的情形，其他情况都是出错
+               if (errno != EINTR)
+                   break;
+           } else if (ret == 0){
+               //select函数超时
+               std::cout &lt;&lt; &#34;no event in specific time interval.&#34; &lt;&lt; std::endl;
+               continue;
+           } else {
+               if (FD_ISSET(clientfd, &amp;readset))
+               {
+                   //检测到可读事件
+                   char recvbuf[32];
+                   memset(recvbuf, 0, sizeof(recvbuf));
+                   //假设对端发数据的时候不超过31个字符。
+                   int n = recv(clientfd, recvbuf, 32, 0);
+                   if (n &lt; 0)
+                   {
+                       //除了被信号中断的情形，其他情况都是出错
+                       if (errno != EINTR)
+                           break;
+                   } else if (n == 0) {
+                       //对端关闭了连接
+                       break;
+                   } else {
+                       std::cout &lt;&lt; &#34;recv data: &#34; &lt;&lt; recvbuf &lt;&lt; std::endl;
+                   }
+               }
+               else 
+               {
+                   std::cout &lt;&lt; &#34;other socket event.&#34; &lt;&lt; std::endl;
+               }
+           }
+       }       
+
+
+       //关闭socket
+       close(clientfd);
+
+       return 0;
+   }
+</code></pre><p>我们先在另外一个 shell 窗口用 <strong>nc</strong> 命令模拟一个服务器，监听的 ip 地址和端口号是 <strong>0.0.0.0:3000</strong>：</p>
+<pre tabindex="0"><code>[root@myaliyun ~]# nc -v -l 0.0.0.0 3000
+Ncat: Version 6.40 ( http://nmap.org/ncat )
+Ncat: Listening on 0.0.0.0:3000
+</code></pre><p>然后回到原来的 shell 窗口，编译上述 <strong>select_client_tvnull.cpp</strong>，并使用 gdb 运行程序，这次使用 gdb 运行程序的目的是为了当程序“卡”在某个位置时，我们可以使用 Ctrl + C 把程序中断下来看看程序阻塞在哪个函数调用处：</p>
+<pre tabindex="0"><code>[root@myaliyun testsocket]# g++ -g -o select_client_tvnull select_client_tvnull.cpp 
+[root@myaliyun testsocket]# gdb select_client_tvnull
+Reading symbols from /root/testsocket/select_client_tvnull...done.
+(gdb) r
+Starting program: /root/testsocket/select_client_tvnull 
+^C
+Program received signal SIGINT, Interrupt.
+0x00007ffff72e7783 in __select_nocancel () from /lib64/libc.so.6
+Missing separate debuginfos, use: debuginfo-install glibc-2.17-196.el7_4.2.x86_64 libgcc-4.8.5-16.el7_4.1.x86_64 libstdc++-4.8.5-16.el7_4.1.x86_64
+(gdb) bt
+#0  0x00007ffff72e7783 in __select_nocancel () from /lib64/libc.so.6
+#1  0x0000000000400c75 in main (argc=1, argv=0x7fffffffe5f8) at select_client_tvnull.cpp:51
+(gdb) c
+Continuing.
+recv data: hello
+
+^C
+Program received signal SIGINT, Interrupt.
+0x00007ffff72e7783 in __select_nocancel () from /lib64/libc.so.6
+(gdb) c
+Continuing.
+recv data: world
+</code></pre><p>如上输出结果所示，我们使用 gdb 的 <strong>r</strong> 命令（run）将程序跑起来后，程序卡在某个地方，我们按 Ctrl + C（代码中的 <strong>^C</strong>）中断程序后使用 <strong>bt</strong> 命令查看当前程序的调用堆栈，发现确实阻塞在 <strong>select</strong> 函数调用处；接着我们在服务器端给客户端发送一个 <strong>hello</strong> 数据：</p>
+<pre tabindex="0"><code>[root@myaliyun ~]# nc -v -l 0.0.0.0 3000
+Ncat: Version 6.40 ( http://nmap.org/ncat )
+Ncat: Listening on 0.0.0.0:3000
+Ncat: Connection from 127.0.0.1.
+Ncat: Connection from 127.0.0.1:55968.
+hello
+</code></pre><p>客户端收到数据后，<strong>select</strong> 函数满足条件，立即返回，并将数据输出来后继续进行下一轮 <strong>select</strong> 检测，我们使用 Ctrl + C 将程序中断，发现程序又阻塞在 <strong>select</strong> 调用处；输入 <strong>c</strong> 命令（continue）让程序继续运行， 此时，我们再用服务器端给客户端发送 <strong>world</strong> 字符串，<strong>select</strong> 函数再次返回，并将数据打印出来，然后继续进入下一轮 select 检测，并继续在 select 处阻塞。</p>
+<pre tabindex="0"><code>[root@myaliyun ~]# nc -v -l 0.0.0.0 3000
+Ncat: Version 6.40 ( http://nmap.org/ncat )
+Ncat: Listening on 0.0.0.0:3000
+Ncat: Connection from 127.0.0.1.
+Ncat: Connection from 127.0.0.1:55968.
+hello
+world
+</code></pre><p><strong>5. 在 Linux 平台上，select 函数的第一个参数必须设置成需要检测事件的所有 fd 中的最大值加1</strong>。所以上文中 <strong>select_server.cpp</strong> 中，每新产生一个 clientfd，我都会与当前最大的 <strong>maxfd</strong> 作比较，如果大于当前的 <strong>maxfd</strong> 则将 <strong>maxfd</strong> 更新成这个新的最大值。其最终目的是为了在 <strong>select</strong> 调用时作为第一个参数（加 1）传进去。</p>
+<blockquote>
+<p>在 Windows 平台上，select 函数的第一个值传任意值都可以，Windows 系统本身不使用这个值，只是为了兼容性而保留了这个参数，但是在实际开发中为了兼容跨平台代码，也会按惯例，将这个值设置为最大 socket 加 1。这点请读者注意。</p>
+</blockquote>
+<p>以上是我总结的 Linux 下 select 使用的<strong>五个注意事项</strong>，希望读者能理解它们。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/blog/4a2f5d00bb404b68a468bd72dfe357f8/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>pimpl 惯用法</span>
+  </a>
+  <a class="next" href="https://haokiu.com/blog/7a9421787c4a4e7482e4f3ea6234c7ac/">
+    <span class="title">Next »</span>
+    <br>
+    <span>socket 的阻塞模式和非阻塞模式</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

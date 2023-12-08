@@ -10,19 +10,19 @@
     <lastBuildDate>Tue, 08 Jun 2021 17:51:46 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/bigdata/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Hobert读书笔记</title>
-      <link>https://haokiu.com/bk-5/</link>
+      <link>https://haokiu.com/blog/bk-5/</link>
       <pubDate>Tue, 08 Jun 2021 17:51:46 +0000</pubDate>
       
-      <guid>https://haokiu.com/bk-5/</guid>
+      <guid>https://haokiu.com/blog/bk-5/</guid>
       <description>第一章 并发编程的挑战第2章 InnoDB存储引擎第1章 Java的I/O演进之路第1章 Spring框架的由来第2章 Tomcat总体架构三、Paxos的工程实践序第1章 概述第6章 深入分析ClassLoader工作机制第8章 虚拟机字节码执行系统</description>
     </item>
     
     <item>
       <title>mysql replace </title>
-      <link>https://haokiu.com/nfvw4R/</link>
+      <link>https://haokiu.com/blog/nfvw4R/</link>
       <pubDate>Mon, 01 Feb 2021 09:48:42 +0000</pubDate>
       
-      <guid>https://haokiu.com/nfvw4R/</guid>
+      <guid>https://haokiu.com/blog/nfvw4R/</guid>
       <description>mysql replace 可以将字段的字符串内容替换，语法：
 Update `table_name` SET `field_name` = replace (`field_name`,’from_str’,&amp;#39;to_str’) Where `field_name` LIKE ‘%from_str%’ 使用样例：
 # 将 blog 表的字段 coentent 里的 &amp;#34;https://haokiu.com&amp;#34; 替换为 &amp;#34;http://haokiu.com&amp;#34; update blog set content = replace(content, &amp;#34;https://haokiu.com&amp;#34;, &amp;#34;http://haokiu.com&amp;#34;) where content like &amp;#39;%https://haokiu.com%&amp;#39; </description>
@@ -30,10 +30,10 @@ Update `table_name` SET `field_name` = replace (`field_name`,’from_str’,&amp
     
     <item>
       <title>OLAP</title>
-      <link>https://haokiu.com/OLAP/</link>
+      <link>https://haokiu.com/blog/OLAP/</link>
       <pubDate>Thu, 05 Nov 2020 10:53:39 +0000</pubDate>
       
-      <guid>https://haokiu.com/OLAP/</guid>
+      <guid>https://haokiu.com/blog/OLAP/</guid>
       <description>OLAP 在数据仓库一章中我们讨论了数据仓库及其模型的概念，而数据库与数据仓库的区别实际讲的是 OLTP 与 OLAP 的区别。操作型处理，叫联机事务处理 OLTP（On-Line Transaction Processing），也可以称面向交易的处理系统，它是针对具体业务在数据库联机的日常操作，通常对少数记录进行查询、修改。用户较为关心操作的响应时间、数据的安全性、完整性和并发的支持用户数等问题。传统的数据库系统作为数据管理的主要手段，主要用于操作型处理。分析型处理，叫联机分析处理 OLAP（On-Line Analytical Processing）一般针对某些主题历史数据进行分析，支持管理决策。
 OLAP 与 OLTP 在互联网浪潮出现之前，企业的数据量普遍不大，特别是核心的业务数据，通常一个单机的数据库就可以保存。那时候的存储并不需要复杂的架构，所有的线上请求(OLTP, Online Transactional Processing) 和后台分析 (OLAP, Online Analytical Processing) 都跑在同一个数据库实例上。后来渐渐的业务越来越复杂，数据量越来越大，DBA 们再也优化不动 SQL 了。其中一个显著问题是：单机数据库支持线上的 TP 请求已经非常吃力，没办法再跑比较重的 AP 分析型任务。跑起来要么 OOM，要么影响线上业务，要么做了主从分离、分库分表之后很难实现业务需求。
 在这样的背景下，以 Hadoop 为代表的大数据技术开始蓬勃发展，它用许多相对廉价的 x86 机器构建了一个数据分析平台，用并行的能力破解大数据集的计算问题。所以从某种程度上说，大数据技术可以算是传统关系型数据库技术发展过程的一个分支。当然在过程中大数据领域也发展出了属于自己的全新场景，诞生了许多新的技术，这个不深入提了。
@@ -45,10 +45,10 @@ HTAP 首先是复杂性问题。本身 ETL 过程就是一个很繁琐的过程�
     
     <item>
       <title>数据中台</title>
-      <link>https://haokiu.com/3OKmkr/</link>
+      <link>https://haokiu.com/blog/3OKmkr/</link>
       <pubDate>Thu, 05 Nov 2020 10:50:55 +0000</pubDate>
       
-      <guid>https://haokiu.com/3OKmkr/</guid>
+      <guid>https://haokiu.com/blog/3OKmkr/</guid>
       <description>数据中台 阿里在 2018 年提出了所谓“数据中台”的概念：即数据被统一采集，规范数据语义和业务口径形成企业基础数据模型，提供统一的分析查询和新业务的数据对接能力。数据中台并不是新的颠覆式技术，而是一种企业数据资产管理和应用方法学，涵盖了数据集成、数据质量管理、元数据与主数据管理、数仓建模、支持高并发访问的数据服务接口层开发等内容。
 在数据中台建设中，结合企业自身的业务需求特点，架构和功能可能各不相同，但其中一个最基本的需求是数据采集的实时性和完整性。数据从源端产生，到被采集到数据汇集层的时间要尽可能短，至少应做到秒级延迟，这样中台的数据模型更新才可能做到近实时，构建在中台之上依赖实时数据流驱动的应用（例如商品推荐、欺诈检测等）才能够满足业务的需求。
 以阿里双十一为例，在极高的并发情况下，订单产生到大屏统计数据更新延迟不能超过 5s，一般在 2s 内。中台对外提供的数据应该是完整的，源端数据的 Create、Update 和 Delete 都要能够被捕获，不能少也不能多，即数据需要有端到端一致性的能力（Exactly Once Semantic，EOS）。当然，EOS 并非在任何业务场景下都需要，但从平台角度必须具备这种能力，并且允许用户根据业务需求灵活开启和关闭。
@@ -63,30 +63,30 @@ HTAP 首先是复杂性问题。本身 ETL 过程就是一个很繁琐的过程�
     
     <item>
       <title>presto 官网</title>
-      <link>https://haokiu.com/FhpG3z/</link>
+      <link>https://haokiu.com/blog/FhpG3z/</link>
       <pubDate>Mon, 28 Sep 2020 14:50:12 +0000</pubDate>
       
-      <guid>https://haokiu.com/FhpG3z/</guid>
+      <guid>https://haokiu.com/blog/FhpG3z/</guid>
       <description>现在 presto 有两个官网：
 旧presto官网 新presto官网 </description>
     </item>
     
     <item>
       <title>presto 支持的数据源</title>
-      <link>https://haokiu.com/7mlwkW/</link>
+      <link>https://haokiu.com/blog/7mlwkW/</link>
       <pubDate>Mon, 28 Sep 2020 14:40:32 +0000</pubDate>
       
-      <guid>https://haokiu.com/7mlwkW/</guid>
+      <guid>https://haokiu.com/blog/7mlwkW/</guid>
       <description>presto 有很多连接器以支持不同的数据源：
 Accumulo BigQuery Black Hole Cassandra Druid Elasticsearch Google Sheets Iceberg Hive JMX Kafka Kinesis Kudu Local File Memory MemSQL MongoDB MySQL Oracle Phoenix Pinot PostgreSQL Prometheus Redis Redshift SQL Server System Thrift TPCDS TPCH </description>
     </item>
     
     <item>
       <title>sql 优化</title>
-      <link>https://haokiu.com/XEhpYv/</link>
+      <link>https://haokiu.com/blog/XEhpYv/</link>
       <pubDate>Wed, 23 Sep 2020 16:59:17 +0000</pubDate>
       
-      <guid>https://haokiu.com/XEhpYv/</guid>
+      <guid>https://haokiu.com/blog/XEhpYv/</guid>
       <description>SQL 优化已经成为衡量程序猿优秀与否的硬性指标，甚至在各大厂招聘岗位职能上都有明码标注。
 有朋友疑问到，SQL 优化真的有这么重要么？如下图所示，SQL 优化在提升系统性能中是：成本最低和优化效果最明显的途径。
 **优化成本：**硬件&amp;gt;系统配置&amp;gt;数据库表结构&amp;gt;SQL 及索引。
@@ -101,10 +101,10 @@ FROM &amp;lt;表名&amp;gt; # 选取表，将多个表数据通过笛卡尔积�
     
     <item>
       <title>elasticsearch</title>
-      <link>https://haokiu.com/3XTrh1/</link>
+      <link>https://haokiu.com/blog/3XTrh1/</link>
       <pubDate>Wed, 23 Sep 2020 16:53:39 +0000</pubDate>
       
-      <guid>https://haokiu.com/3XTrh1/</guid>
+      <guid>https://haokiu.com/blog/3XTrh1/</guid>
       <description>基本概念 Node 与 Cluster Elastic 本质上是一个分布式数据库，允许多台服务器协同工作，每台服务器可以运行多个 Elastic 实例。
 单个 Elastic 实例称为一个节点（node）。一组节点构成一个集群（cluster）。
 Index Elastic 会索引所有字段，经过处理后写入一个反向索引（Inverted Index）。查找数据的时候，直接查找该索引。
@@ -120,10 +120,10 @@ shard 当数据量较大时，索引的存储空间需求超出单个节点磁�
     
     <item>
       <title>搜索引擎 及 elastic search </title>
-      <link>https://haokiu.com/oaXyUa/</link>
+      <link>https://haokiu.com/blog/oaXyUa/</link>
       <pubDate>Wed, 23 Sep 2020 14:29:39 +0000</pubDate>
       
-      <guid>https://haokiu.com/oaXyUa/</guid>
+      <guid>https://haokiu.com/blog/oaXyUa/</guid>
       <description>搜索引擎是对数据的检索，所以我们先从生活中的数据说起。我们生活中的数据总体分为两种：
 结构化数据 非结构化数据 **结构化数据：**也称作行数据，是由二维表结构来逻辑表达和实现的数据，严格地遵循数据格式与长度规范，主要通过关系型数据库进行存储和管理。指具有固定格式或有限长度的数据，如数据库，元数据等。
 **非结构化数据：**又可称为全文数据，不定长或无固定格式，不适于由数据库二维表来表现，包括所有格式的办公文档、XML、HTML、Word 文档，邮件，各类报表、图片和咅频、视频信息等。

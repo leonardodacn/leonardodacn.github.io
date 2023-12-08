@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>leveldb源码分析14 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="leveldb源码分析14 本系列《leveldb源码分析》共有22篇文章，这是第十四篇
+9 LevelDB框架之1
+到此为止，基本上Leveldb的主要功能组件都已经分析完了，下面就是把它们组合在一起，形成一个高性能的k/v存储系统。这就是leveldb::DB类。 这里先看一下LevelDB的导出接口和涉及的类，后面将依次以接口分析的方式展开。 而实际上leveldb::DB只是一个接口类，真正的实现和框架类是DBImpl这个类，正是它集合了上面的各种组件。 此外，还有Leveldb对版本的控制，执行版本控制的是Version和VersionSet类。 在leveldb的源码中，DBImpl和VersionSet是两个庞然大物，体量基本算是最大的。对于这两个类的分析，也会分散在打开、销毁和快照等等这些功能中，很难在一个地方集中分析。 作者在文档impl.html中描述了leveldb的实现，其中包括文件组织、compaction和recovery等等。下面的9.1和9.2基本都是翻译子impl.html文档。 在进入框架代码之前，先来了解下leveldb的文件组织和管理。
+9.1 DB文件管理 9.1.1 文件类型
+对于一个数据库Level包含如下的6种文件:
+1/[0-9]&#43;.log：db操作日志 这就是前面分析过的操作日志，log文件包含了最新的db更新，每个更新都以append的方式追加到文件结尾。当log文件达到预定大小时（缺省大约4MB），leveldb就把它转换为一个有序表（如下-2），并创建一个新的log文件。 当前的log文件在内存中的存在形式就是memtable，每次read操作都会访问memtable，以保证read读取到的是最新的数据。
+2/[0-9]&#43;.sst：db的sstable文件 这两个就是前面分析过的静态sstable文件，sstable存储了以key排序的元素。每个元素或者是key对应的value，或者是key的删除标记（删除标记可以掩盖更老sstable文件中过期的value）。 Leveldb把sstable文件通过level的方式组织起来，从log文件中生成的sstable被放在level 0。当level 0的sstable文件个数超过设置（当前为4个）时，leveldb就把所有的level 0文件，以及有重合的level 1文件merge起来，组织成一个新的level 1文件（每个level 1文件大小为2MB）。 Level 0的SSTable文件（后缀为.sst）和Level&gt;1的文件相比有特殊性：这个层级内的.sst文件，两个文件可能存在key重叠。对于Level&gt;0，同层sstable文件的key不会重叠。考虑level&gt;0，level中的文件的总大小超过10^level MB时（如level=1是10MB，level=2是100MB），那么level中的一个文件，以及所有level&#43;1中和它有重叠的文件，会被merge到level&#43;1层的一系列新文件。Merge操作的作用是将更新从低一级level迁移到最高级，只使用批量读写（最小化seek操作，提高效率）。
+3/MANIFEST-[0-9]&#43;：DB元信息文件 它记录的是leveldb的元信息，比如DB使用的Comparator名，以及各SSTable文件的管理信息：如Level层数、文件名、最小key和最大key等等。
+4/CURRENT：记录当前正在使用的Manifest文件 它的内容就是当前的manifest文件名；因为在LevleDb的运行过程中，随着Compaction的进行，新的SSTable文件被产生，老的文件被废弃。并生成新的Manifest文件来记载sstable的变动，而CURRENT则用来记录我们关心的Manifest文件。 当db被重新打开时，leveldb总是生产一个新的manifest文件。Manifest文件使用log的格式，对服务状态的改变（新加或删除的文件）都会追加到该log中。 上面的log文件、sst文件、清单文件，末尾都带着序列号，其序号都是单调递增的（随着next_file_number从1开始递增），以保证不和之前的文件名重复。
+5/log：系统的运行日志，记录系统的运行信息或者错误日志。 6/dbtmp：临时数据库文件，repair时临时生成的。 这里就涉及到几个关键的number计数器，log文件编号，下一个文件（sstable、log和manifest）编号，sequence。 所有正在使用的文件编号，包括log、sstable和manifest都应该小于下一个文件编号计数器。 9.1.2 Level 0
+当操作log超过一定大小时（缺省是1MB），执行如下操作：
+S1 创建新的memtable和log文件，并重导向新的更新到新memtable和log中； S2 在后台： S2.1 将前一个memtable的内容dump到sstable文件； S2.2 丢弃前一个memtable； S2.3 删除旧的log文件和memtable S2.4 把创建的sstable文件放到level 0
+9.2 Compaction 当level L的总文件大小查过限制时，我们就在后台执行compaction操作。Compaction操作从level L中选择一个文件f，以及选择中所有和f有重叠的文件。如果某个level (L&#43;1)的文件ff只是和f部分重合，compaction依然选择ff的完整内容作为输入，在compaction后f和ff都会被丢弃。 另外：因为level 0有些特殊（同层文件可能有重合），从level 0到level 1的compaction就需要特殊对待：level 0的compaction可能会选择多个level 0文件，如果它们之间有重叠。 Compaction将选择的文件内容merge起来，并生成到一系列的level (L&#43;1)文件中，如果输出文件超过设置（2MB），就切换到新的。当输出文件的key范围太大以至于和超过10个level (L&#43;2)文件有重合时，也会切换。后一个规则确保了level (L&#43;1)的文件不会和过多的level (L&#43;2)文件有重合，其后的level (L&#43;1) compaction不会选择过多的level (L&#43;2)文件。 老的文件会被丢弃，新创建的文件将加入到server状态中。 Compaction操作在key空间中循环执行，详细讲一点就是，对于每个level，我们记录上次compaction的ending key。Level的下一次compaction将选择ending key之后的第一个文件（如果这样的文件不存在，将会跳到key空间的开始）。 Compaction会忽略被写覆盖的值，如果更高一层的level没有文件的范围包含了这个key，key的删除标记也会被忽略。
+9.2.1 时间
+Level 0的compaction最多从level 0读取4个1MB的文件，以及所有的level 1文件（10MB），也就是我们将读取14MB，并写入14BM。 Level &gt; 0的compaction，从level L选择一个2MB的文件，最坏情况下，将会和levelL&#43;1的12个文件有重合（10：level L&#43;1的总文件大小是level L的10倍；边界的2：level L的文件范围通常不会和level L&#43;1的文件对齐）。因此Compaction将会读26MB，写26MB。对于100MB/s的磁盘IO来讲，compaction将最坏需要0.5秒。 如果磁盘IO更低，比如10MB/s，那么compaction就需要更长的时间5秒。如果user以10MB/s的速度写入，我们可能生成很多level 0文件（50个来装载5*10MB的数据）。这将会严重影响读取效率，因为需要merge更多的文件。
+解决方法1：为了降低该问题，我们可能想增加log切换的阈值，缺点就是，log文件越大，对应的memtable文件就越大，这需要更多的内存。 解决方法2：当level 0文件太多时，人工降低写入速度。 解决方法3：降低merge的开销，如把level 0文件都无压缩的存放在cache中。">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/5a5f7db3f4fc4684a0c7ddb21dd6ea40/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="leveldb源码分析14" />
+<meta property="og:description" content="leveldb源码分析14 本系列《leveldb源码分析》共有22篇文章，这是第十四篇
+9 LevelDB框架之1
+到此为止，基本上Leveldb的主要功能组件都已经分析完了，下面就是把它们组合在一起，形成一个高性能的k/v存储系统。这就是leveldb::DB类。 这里先看一下LevelDB的导出接口和涉及的类，后面将依次以接口分析的方式展开。 而实际上leveldb::DB只是一个接口类，真正的实现和框架类是DBImpl这个类，正是它集合了上面的各种组件。 此外，还有Leveldb对版本的控制，执行版本控制的是Version和VersionSet类。 在leveldb的源码中，DBImpl和VersionSet是两个庞然大物，体量基本算是最大的。对于这两个类的分析，也会分散在打开、销毁和快照等等这些功能中，很难在一个地方集中分析。 作者在文档impl.html中描述了leveldb的实现，其中包括文件组织、compaction和recovery等等。下面的9.1和9.2基本都是翻译子impl.html文档。 在进入框架代码之前，先来了解下leveldb的文件组织和管理。
+9.1 DB文件管理 9.1.1 文件类型
+对于一个数据库Level包含如下的6种文件:
+1/[0-9]&#43;.log：db操作日志 这就是前面分析过的操作日志，log文件包含了最新的db更新，每个更新都以append的方式追加到文件结尾。当log文件达到预定大小时（缺省大约4MB），leveldb就把它转换为一个有序表（如下-2），并创建一个新的log文件。 当前的log文件在内存中的存在形式就是memtable，每次read操作都会访问memtable，以保证read读取到的是最新的数据。
+2/[0-9]&#43;.sst：db的sstable文件 这两个就是前面分析过的静态sstable文件，sstable存储了以key排序的元素。每个元素或者是key对应的value，或者是key的删除标记（删除标记可以掩盖更老sstable文件中过期的value）。 Leveldb把sstable文件通过level的方式组织起来，从log文件中生成的sstable被放在level 0。当level 0的sstable文件个数超过设置（当前为4个）时，leveldb就把所有的level 0文件，以及有重合的level 1文件merge起来，组织成一个新的level 1文件（每个level 1文件大小为2MB）。 Level 0的SSTable文件（后缀为.sst）和Level&gt;1的文件相比有特殊性：这个层级内的.sst文件，两个文件可能存在key重叠。对于Level&gt;0，同层sstable文件的key不会重叠。考虑level&gt;0，level中的文件的总大小超过10^level MB时（如level=1是10MB，level=2是100MB），那么level中的一个文件，以及所有level&#43;1中和它有重叠的文件，会被merge到level&#43;1层的一系列新文件。Merge操作的作用是将更新从低一级level迁移到最高级，只使用批量读写（最小化seek操作，提高效率）。
+3/MANIFEST-[0-9]&#43;：DB元信息文件 它记录的是leveldb的元信息，比如DB使用的Comparator名，以及各SSTable文件的管理信息：如Level层数、文件名、最小key和最大key等等。
+4/CURRENT：记录当前正在使用的Manifest文件 它的内容就是当前的manifest文件名；因为在LevleDb的运行过程中，随着Compaction的进行，新的SSTable文件被产生，老的文件被废弃。并生成新的Manifest文件来记载sstable的变动，而CURRENT则用来记录我们关心的Manifest文件。 当db被重新打开时，leveldb总是生产一个新的manifest文件。Manifest文件使用log的格式，对服务状态的改变（新加或删除的文件）都会追加到该log中。 上面的log文件、sst文件、清单文件，末尾都带着序列号，其序号都是单调递增的（随着next_file_number从1开始递增），以保证不和之前的文件名重复。
+5/log：系统的运行日志，记录系统的运行信息或者错误日志。 6/dbtmp：临时数据库文件，repair时临时生成的。 这里就涉及到几个关键的number计数器，log文件编号，下一个文件（sstable、log和manifest）编号，sequence。 所有正在使用的文件编号，包括log、sstable和manifest都应该小于下一个文件编号计数器。 9.1.2 Level 0
+当操作log超过一定大小时（缺省是1MB），执行如下操作：
+S1 创建新的memtable和log文件，并重导向新的更新到新memtable和log中； S2 在后台： S2.1 将前一个memtable的内容dump到sstable文件； S2.2 丢弃前一个memtable； S2.3 删除旧的log文件和memtable S2.4 把创建的sstable文件放到level 0
+9.2 Compaction 当level L的总文件大小查过限制时，我们就在后台执行compaction操作。Compaction操作从level L中选择一个文件f，以及选择中所有和f有重叠的文件。如果某个level (L&#43;1)的文件ff只是和f部分重合，compaction依然选择ff的完整内容作为输入，在compaction后f和ff都会被丢弃。 另外：因为level 0有些特殊（同层文件可能有重合），从level 0到level 1的compaction就需要特殊对待：level 0的compaction可能会选择多个level 0文件，如果它们之间有重叠。 Compaction将选择的文件内容merge起来，并生成到一系列的level (L&#43;1)文件中，如果输出文件超过设置（2MB），就切换到新的。当输出文件的key范围太大以至于和超过10个level (L&#43;2)文件有重合时，也会切换。后一个规则确保了level (L&#43;1)的文件不会和过多的level (L&#43;2)文件有重合，其后的level (L&#43;1) compaction不会选择过多的level (L&#43;2)文件。 老的文件会被丢弃，新创建的文件将加入到server状态中。 Compaction操作在key空间中循环执行，详细讲一点就是，对于每个level，我们记录上次compaction的ending key。Level的下一次compaction将选择ending key之后的第一个文件（如果这样的文件不存在，将会跳到key空间的开始）。 Compaction会忽略被写覆盖的值，如果更高一层的level没有文件的范围包含了这个key，key的删除标记也会被忽略。
+9.2.1 时间
+Level 0的compaction最多从level 0读取4个1MB的文件，以及所有的level 1文件（10MB），也就是我们将读取14MB，并写入14BM。 Level &gt; 0的compaction，从level L选择一个2MB的文件，最坏情况下，将会和levelL&#43;1的12个文件有重合（10：level L&#43;1的总文件大小是level L的10倍；边界的2：level L的文件范围通常不会和level L&#43;1的文件对齐）。因此Compaction将会读26MB，写26MB。对于100MB/s的磁盘IO来讲，compaction将最坏需要0.5秒。 如果磁盘IO更低，比如10MB/s，那么compaction就需要更长的时间5秒。如果user以10MB/s的速度写入，我们可能生成很多level 0文件（50个来装载5*10MB的数据）。这将会严重影响读取效率，因为需要merge更多的文件。
+解决方法1：为了降低该问题，我们可能想增加log切换的阈值，缺点就是，log文件越大，对应的memtable文件就越大，这需要更多的内存。 解决方法2：当level 0文件太多时，人工降低写入速度。 解决方法3：降低merge的开销，如把level 0文件都无压缩的存放在cache中。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/5a5f7db3f4fc4684a0c7ddb21dd6ea40/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="leveldb源码分析14"/>
+<meta name="twitter:description" content="leveldb源码分析14 本系列《leveldb源码分析》共有22篇文章，这是第十四篇
+9 LevelDB框架之1
+到此为止，基本上Leveldb的主要功能组件都已经分析完了，下面就是把它们组合在一起，形成一个高性能的k/v存储系统。这就是leveldb::DB类。 这里先看一下LevelDB的导出接口和涉及的类，后面将依次以接口分析的方式展开。 而实际上leveldb::DB只是一个接口类，真正的实现和框架类是DBImpl这个类，正是它集合了上面的各种组件。 此外，还有Leveldb对版本的控制，执行版本控制的是Version和VersionSet类。 在leveldb的源码中，DBImpl和VersionSet是两个庞然大物，体量基本算是最大的。对于这两个类的分析，也会分散在打开、销毁和快照等等这些功能中，很难在一个地方集中分析。 作者在文档impl.html中描述了leveldb的实现，其中包括文件组织、compaction和recovery等等。下面的9.1和9.2基本都是翻译子impl.html文档。 在进入框架代码之前，先来了解下leveldb的文件组织和管理。
+9.1 DB文件管理 9.1.1 文件类型
+对于一个数据库Level包含如下的6种文件:
+1/[0-9]&#43;.log：db操作日志 这就是前面分析过的操作日志，log文件包含了最新的db更新，每个更新都以append的方式追加到文件结尾。当log文件达到预定大小时（缺省大约4MB），leveldb就把它转换为一个有序表（如下-2），并创建一个新的log文件。 当前的log文件在内存中的存在形式就是memtable，每次read操作都会访问memtable，以保证read读取到的是最新的数据。
+2/[0-9]&#43;.sst：db的sstable文件 这两个就是前面分析过的静态sstable文件，sstable存储了以key排序的元素。每个元素或者是key对应的value，或者是key的删除标记（删除标记可以掩盖更老sstable文件中过期的value）。 Leveldb把sstable文件通过level的方式组织起来，从log文件中生成的sstable被放在level 0。当level 0的sstable文件个数超过设置（当前为4个）时，leveldb就把所有的level 0文件，以及有重合的level 1文件merge起来，组织成一个新的level 1文件（每个level 1文件大小为2MB）。 Level 0的SSTable文件（后缀为.sst）和Level&gt;1的文件相比有特殊性：这个层级内的.sst文件，两个文件可能存在key重叠。对于Level&gt;0，同层sstable文件的key不会重叠。考虑level&gt;0，level中的文件的总大小超过10^level MB时（如level=1是10MB，level=2是100MB），那么level中的一个文件，以及所有level&#43;1中和它有重叠的文件，会被merge到level&#43;1层的一系列新文件。Merge操作的作用是将更新从低一级level迁移到最高级，只使用批量读写（最小化seek操作，提高效率）。
+3/MANIFEST-[0-9]&#43;：DB元信息文件 它记录的是leveldb的元信息，比如DB使用的Comparator名，以及各SSTable文件的管理信息：如Level层数、文件名、最小key和最大key等等。
+4/CURRENT：记录当前正在使用的Manifest文件 它的内容就是当前的manifest文件名；因为在LevleDb的运行过程中，随着Compaction的进行，新的SSTable文件被产生，老的文件被废弃。并生成新的Manifest文件来记载sstable的变动，而CURRENT则用来记录我们关心的Manifest文件。 当db被重新打开时，leveldb总是生产一个新的manifest文件。Manifest文件使用log的格式，对服务状态的改变（新加或删除的文件）都会追加到该log中。 上面的log文件、sst文件、清单文件，末尾都带着序列号，其序号都是单调递增的（随着next_file_number从1开始递增），以保证不和之前的文件名重复。
+5/log：系统的运行日志，记录系统的运行信息或者错误日志。 6/dbtmp：临时数据库文件，repair时临时生成的。 这里就涉及到几个关键的number计数器，log文件编号，下一个文件（sstable、log和manifest）编号，sequence。 所有正在使用的文件编号，包括log、sstable和manifest都应该小于下一个文件编号计数器。 9.1.2 Level 0
+当操作log超过一定大小时（缺省是1MB），执行如下操作：
+S1 创建新的memtable和log文件，并重导向新的更新到新memtable和log中； S2 在后台： S2.1 将前一个memtable的内容dump到sstable文件； S2.2 丢弃前一个memtable； S2.3 删除旧的log文件和memtable S2.4 把创建的sstable文件放到level 0
+9.2 Compaction 当level L的总文件大小查过限制时，我们就在后台执行compaction操作。Compaction操作从level L中选择一个文件f，以及选择中所有和f有重叠的文件。如果某个level (L&#43;1)的文件ff只是和f部分重合，compaction依然选择ff的完整内容作为输入，在compaction后f和ff都会被丢弃。 另外：因为level 0有些特殊（同层文件可能有重合），从level 0到level 1的compaction就需要特殊对待：level 0的compaction可能会选择多个level 0文件，如果它们之间有重叠。 Compaction将选择的文件内容merge起来，并生成到一系列的level (L&#43;1)文件中，如果输出文件超过设置（2MB），就切换到新的。当输出文件的key范围太大以至于和超过10个level (L&#43;2)文件有重合时，也会切换。后一个规则确保了level (L&#43;1)的文件不会和过多的level (L&#43;2)文件有重合，其后的level (L&#43;1) compaction不会选择过多的level (L&#43;2)文件。 老的文件会被丢弃，新创建的文件将加入到server状态中。 Compaction操作在key空间中循环执行，详细讲一点就是，对于每个level，我们记录上次compaction的ending key。Level的下一次compaction将选择ending key之后的第一个文件（如果这样的文件不存在，将会跳到key空间的开始）。 Compaction会忽略被写覆盖的值，如果更高一层的level没有文件的范围包含了这个key，key的删除标记也会被忽略。
+9.2.1 时间
+Level 0的compaction最多从level 0读取4个1MB的文件，以及所有的level 1文件（10MB），也就是我们将读取14MB，并写入14BM。 Level &gt; 0的compaction，从level L选择一个2MB的文件，最坏情况下，将会和levelL&#43;1的12个文件有重合（10：level L&#43;1的总文件大小是level L的10倍；边界的2：level L的文件范围通常不会和level L&#43;1的文件对齐）。因此Compaction将会读26MB，写26MB。对于100MB/s的磁盘IO来讲，compaction将最坏需要0.5秒。 如果磁盘IO更低，比如10MB/s，那么compaction就需要更长的时间5秒。如果user以10MB/s的速度写入，我们可能生成很多level 0文件（50个来装载5*10MB的数据）。这将会严重影响读取效率，因为需要merge更多的文件。
+解决方法1：为了降低该问题，我们可能想增加log切换的阈值，缺点就是，log文件越大，对应的memtable文件就越大，这需要更多的内存。 解决方法2：当level 0文件太多时，人工降低写入速度。 解决方法3：降低merge的开销，如把level 0文件都无压缩的存放在cache中。"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "leveldb源码分析14",
+      "item": "https://haokiu.com/blog/5a5f7db3f4fc4684a0c7ddb21dd6ea40/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "leveldb源码分析14",
+  "name": "leveldb源码分析14",
+  "description": "leveldb源码分析14 本系列《leveldb源码分析》共有22篇文章，这是第十四篇\n9 LevelDB框架之1\n到此为止，基本上Leveldb的主要功能组件都已经分析完了，下面就是把它们组合在一起，形成一个高性能的k/v存储系统。这就是leveldb::DB类。 这里先看一下LevelDB的导出接口和涉及的类，后面将依次以接口分析的方式展开。 而实际上leveldb::DB只是一个接口类，真正的实现和框架类是DBImpl这个类，正是它集合了上面的各种组件。 此外，还有Leveldb对版本的控制，执行版本控制的是Version和VersionSet类。 在leveldb的源码中，DBImpl和VersionSet是两个庞然大物，体量基本算是最大的。对于这两个类的分析，也会分散在打开、销毁和快照等等这些功能中，很难在一个地方集中分析。 作者在文档impl.html中描述了leveldb的实现，其中包括文件组织、compaction和recovery等等。下面的9.1和9.2基本都是翻译子impl.html文档。 在进入框架代码之前，先来了解下leveldb的文件组织和管理。\n9.1 DB文件管理 9.1.1 文件类型\n对于一个数据库Level包含如下的6种文件:\n1/[0-9]+.log：db操作日志 这就是前面分析过的操作日志，log文件包含了最新的db更新，每个更新都以append的方式追加到文件结尾。当log文件达到预定大小时（缺省大约4MB），leveldb就把它转换为一个有序表（如下-2），并创建一个新的log文件。 当前的log文件在内存中的存在形式就是memtable，每次read操作都会访问memtable，以保证read读取到的是最新的数据。\n2/[0-9]+.sst：db的sstable文件 这两个就是前面分析过的静态sstable文件，sstable存储了以key排序的元素。每个元素或者是key对应的value，或者是key的删除标记（删除标记可以掩盖更老sstable文件中过期的value）。 Leveldb把sstable文件通过level的方式组织起来，从log文件中生成的sstable被放在level 0。当level 0的sstable文件个数超过设置（当前为4个）时，leveldb就把所有的level 0文件，以及有重合的level 1文件merge起来，组织成一个新的level 1文件（每个level 1文件大小为2MB）。 Level 0的SSTable文件（后缀为.sst）和Level\u0026gt;1的文件相比有特殊性：这个层级内的.sst文件，两个文件可能存在key重叠。对于Level\u0026gt;0，同层sstable文件的key不会重叠。考虑level\u0026gt;0，level中的文件的总大小超过10^level MB时（如level=1是10MB，level=2是100MB），那么level中的一个文件，以及所有level+1中和它有重叠的文件，会被merge到level+1层的一系列新文件。Merge操作的作用是将更新从低一级level迁移到最高级，只使用批量读写（最小化seek操作，提高效率）。\n3/MANIFEST-[0-9]+：DB元信息文件 它记录的是leveldb的元信息，比如DB使用的Comparator名，以及各SSTable文件的管理信息：如Level层数、文件名、最小key和最大key等等。\n4/CURRENT：记录当前正在使用的Manifest文件 它的内容就是当前的manifest文件名；因为在LevleDb的运行过程中，随着Compaction的进行，新的SSTable文件被产生，老的文件被废弃。并生成新的Manifest文件来记载sstable的变动，而CURRENT则用来记录我们关心的Manifest文件。 当db被重新打开时，leveldb总是生产一个新的manifest文件。Manifest文件使用log的格式，对服务状态的改变（新加或删除的文件）都会追加到该log中。 上面的log文件、sst文件、清单文件，末尾都带着序列号，其序号都是单调递增的（随着next_file_number从1开始递增），以保证不和之前的文件名重复。\n5/log：系统的运行日志，记录系统的运行信息或者错误日志。 6/dbtmp：临时数据库文件，repair时临时生成的。 这里就涉及到几个关键的number计数器，log文件编号，下一个文件（sstable、log和manifest）编号，sequence。 所有正在使用的文件编号，包括log、sstable和manifest都应该小于下一个文件编号计数器。 9.1.2 Level 0\n当操作log超过一定大小时（缺省是1MB），执行如下操作：\nS1 创建新的memtable和log文件，并重导向新的更新到新memtable和log中； S2 在后台： S2.1 将前一个memtable的内容dump到sstable文件； S2.2 丢弃前一个memtable； S2.3 删除旧的log文件和memtable S2.4 把创建的sstable文件放到level 0\n9.2 Compaction 当level L的总文件大小查过限制时，我们就在后台执行compaction操作。Compaction操作从level L中选择一个文件f，以及选择中所有和f有重叠的文件。如果某个level (L+1)的文件ff只是和f部分重合，compaction依然选择ff的完整内容作为输入，在compaction后f和ff都会被丢弃。 另外：因为level 0有些特殊（同层文件可能有重合），从level 0到level 1的compaction就需要特殊对待：level 0的compaction可能会选择多个level 0文件，如果它们之间有重叠。 Compaction将选择的文件内容merge起来，并生成到一系列的level (L+1)文件中，如果输出文件超过设置（2MB），就切换到新的。当输出文件的key范围太大以至于和超过10个level (L+2)文件有重合时，也会切换。后一个规则确保了level (L+1)的文件不会和过多的level (L+2)文件有重合，其后的level (L+1) compaction不会选择过多的level (L+2)文件。 老的文件会被丢弃，新创建的文件将加入到server状态中。 Compaction操作在key空间中循环执行，详细讲一点就是，对于每个level，我们记录上次compaction的ending key。Level的下一次compaction将选择ending key之后的第一个文件（如果这样的文件不存在，将会跳到key空间的开始）。 Compaction会忽略被写覆盖的值，如果更高一层的level没有文件的范围包含了这个key，key的删除标记也会被忽略。\n9.2.1 时间\nLevel 0的compaction最多从level 0读取4个1MB的文件，以及所有的level 1文件（10MB），也就是我们将读取14MB，并写入14BM。 Level \u0026gt; 0的compaction，从level L选择一个2MB的文件，最坏情况下，将会和levelL+1的12个文件有重合（10：level L+1的总文件大小是level L的10倍；边界的2：level L的文件范围通常不会和level L+1的文件对齐）。因此Compaction将会读26MB，写26MB。对于100MB/s的磁盘IO来讲，compaction将最坏需要0.5秒。 如果磁盘IO更低，比如10MB/s，那么compaction就需要更长的时间5秒。如果user以10MB/s的速度写入，我们可能生成很多level 0文件（50个来装载5*10MB的数据）。这将会严重影响读取效率，因为需要merge更多的文件。\n解决方法1：为了降低该问题，我们可能想增加log切换的阈值，缺点就是，log文件越大，对应的memtable文件就越大，这需要更多的内存。 解决方法2：当level 0文件太多时，人工降低写入速度。 解决方法3：降低merge的开销，如把level 0文件都无压缩的存放在cache中。",
+  "keywords": [
+    
+  ],
+  "articleBody": "leveldb源码分析14 本系列《leveldb源码分析》共有22篇文章，这是第十四篇\n9 LevelDB框架之1\n到此为止，基本上Leveldb的主要功能组件都已经分析完了，下面就是把它们组合在一起，形成一个高性能的k/v存储系统。这就是leveldb::DB类。 这里先看一下LevelDB的导出接口和涉及的类，后面将依次以接口分析的方式展开。 而实际上leveldb::DB只是一个接口类，真正的实现和框架类是DBImpl这个类，正是它集合了上面的各种组件。 此外，还有Leveldb对版本的控制，执行版本控制的是Version和VersionSet类。 在leveldb的源码中，DBImpl和VersionSet是两个庞然大物，体量基本算是最大的。对于这两个类的分析，也会分散在打开、销毁和快照等等这些功能中，很难在一个地方集中分析。 作者在文档impl.html中描述了leveldb的实现，其中包括文件组织、compaction和recovery等等。下面的9.1和9.2基本都是翻译子impl.html文档。 在进入框架代码之前，先来了解下leveldb的文件组织和管理。\n9.1 DB文件管理 9.1.1 文件类型\n对于一个数据库Level包含如下的6种文件:\n1/[0-9]+.log：db操作日志 这就是前面分析过的操作日志，log文件包含了最新的db更新，每个更新都以append的方式追加到文件结尾。当log文件达到预定大小时（缺省大约4MB），leveldb就把它转换为一个有序表（如下-2），并创建一个新的log文件。 当前的log文件在内存中的存在形式就是memtable，每次read操作都会访问memtable，以保证read读取到的是最新的数据。\n2/[0-9]+.sst：db的sstable文件 这两个就是前面分析过的静态sstable文件，sstable存储了以key排序的元素。每个元素或者是key对应的value，或者是key的删除标记（删除标记可以掩盖更老sstable文件中过期的value）。 Leveldb把sstable文件通过level的方式组织起来，从log文件中生成的sstable被放在level 0。当level 0的sstable文件个数超过设置（当前为4个）时，leveldb就把所有的level 0文件，以及有重合的level 1文件merge起来，组织成一个新的level 1文件（每个level 1文件大小为2MB）。 Level 0的SSTable文件（后缀为.sst）和Level\u003e1的文件相比有特殊性：这个层级内的.sst文件，两个文件可能存在key重叠。对于Level\u003e0，同层sstable文件的key不会重叠。考虑level\u003e0，level中的文件的总大小超过10^level MB时（如level=1是10MB，level=2是100MB），那么level中的一个文件，以及所有level+1中和它有重叠的文件，会被merge到level+1层的一系列新文件。Merge操作的作用是将更新从低一级level迁移到最高级，只使用批量读写（最小化seek操作，提高效率）。\n3/MANIFEST-[0-9]+：DB元信息文件 它记录的是leveldb的元信息，比如DB使用的Comparator名，以及各SSTable文件的管理信息：如Level层数、文件名、最小key和最大key等等。\n4/CURRENT：记录当前正在使用的Manifest文件 它的内容就是当前的manifest文件名；因为在LevleDb的运行过程中，随着Compaction的进行，新的SSTable文件被产生，老的文件被废弃。并生成新的Manifest文件来记载sstable的变动，而CURRENT则用来记录我们关心的Manifest文件。 当db被重新打开时，leveldb总是生产一个新的manifest文件。Manifest文件使用log的格式，对服务状态的改变（新加或删除的文件）都会追加到该log中。 上面的log文件、sst文件、清单文件，末尾都带着序列号，其序号都是单调递增的（随着next_file_number从1开始递增），以保证不和之前的文件名重复。\n5/log：系统的运行日志，记录系统的运行信息或者错误日志。 6/dbtmp：临时数据库文件，repair时临时生成的。 这里就涉及到几个关键的number计数器，log文件编号，下一个文件（sstable、log和manifest）编号，sequence。 所有正在使用的文件编号，包括log、sstable和manifest都应该小于下一个文件编号计数器。 9.1.2 Level 0\n当操作log超过一定大小时（缺省是1MB），执行如下操作：\nS1 创建新的memtable和log文件，并重导向新的更新到新memtable和log中； S2 在后台： S2.1 将前一个memtable的内容dump到sstable文件； S2.2 丢弃前一个memtable； S2.3 删除旧的log文件和memtable S2.4 把创建的sstable文件放到level 0\n9.2 Compaction 当level L的总文件大小查过限制时，我们就在后台执行compaction操作。Compaction操作从level L中选择一个文件f，以及选择中所有和f有重叠的文件。如果某个level (L+1)的文件ff只是和f部分重合，compaction依然选择ff的完整内容作为输入，在compaction后f和ff都会被丢弃。 另外：因为level 0有些特殊（同层文件可能有重合），从level 0到level 1的compaction就需要特殊对待：level 0的compaction可能会选择多个level 0文件，如果它们之间有重叠。 Compaction将选择的文件内容merge起来，并生成到一系列的level (L+1)文件中，如果输出文件超过设置（2MB），就切换到新的。当输出文件的key范围太大以至于和超过10个level (L+2)文件有重合时，也会切换。后一个规则确保了level (L+1)的文件不会和过多的level (L+2)文件有重合，其后的level (L+1) compaction不会选择过多的level (L+2)文件。 老的文件会被丢弃，新创建的文件将加入到server状态中。 Compaction操作在key空间中循环执行，详细讲一点就是，对于每个level，我们记录上次compaction的ending key。Level的下一次compaction将选择ending key之后的第一个文件（如果这样的文件不存在，将会跳到key空间的开始）。 Compaction会忽略被写覆盖的值，如果更高一层的level没有文件的范围包含了这个key，key的删除标记也会被忽略。\n9.2.1 时间\nLevel 0的compaction最多从level 0读取4个1MB的文件，以及所有的level 1文件（10MB），也就是我们将读取14MB，并写入14BM。 Level \u003e 0的compaction，从level L选择一个2MB的文件，最坏情况下，将会和levelL+1的12个文件有重合（10：level L+1的总文件大小是level L的10倍；边界的2：level L的文件范围通常不会和level L+1的文件对齐）。因此Compaction将会读26MB，写26MB。对于100MB/s的磁盘IO来讲，compaction将最坏需要0.5秒。 如果磁盘IO更低，比如10MB/s，那么compaction就需要更长的时间5秒。如果user以10MB/s的速度写入，我们可能生成很多level 0文件（50个来装载5*10MB的数据）。这将会严重影响读取效率，因为需要merge更多的文件。\n解决方法1：为了降低该问题，我们可能想增加log切换的阈值，缺点就是，log文件越大，对应的memtable文件就越大，这需要更多的内存。 解决方法2：当level 0文件太多时，人工降低写入速度。 解决方法3：降低merge的开销，如把level 0文件都无压缩的存放在cache中。\n9.2.2 文件数\n对于更高的level我们可以创建更大的文件，而不是2MB，代价就是更多突发性的compaction。或者，我们可以考虑分区，把文件放存放多目录中。 在2011年2月4号，作者做了一个实验，在ext3文件系统中打开100KB的文件，结果表明可以不需要分区。\n文件数 文件打开ms 1000 9 10000 10 100000 16\n9.3 Recovery \u0026 GC 9.3.1 Recovery\nDb恢复的步骤：\nS1 首先从CURRENT读取最后提交的MANIFEST S2 读取MANIFEST内容 S3 清除过期文件 S4 这里可以打开所有的sstable文件，但是更好的方案是lazy open S5 把log转换为新的level 0sstable S6 将新写操作导向到新的log文件，从恢复的序号开始 9.3.2 GC\n垃圾回收，每次compaction和recovery之后都会有文件被废弃，成为垃圾文件。GC就是删除这些文件的，它在每次compaction和recovery完成之后被调用。\n",
+  "wordCount" : "140",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/5a5f7db3f4fc4684a0c7ddb21dd6ea40/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      leveldb源码分析14
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#leveldb%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%9014" aria-label="leveldb源码分析14">leveldb源码分析14</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#91-db%e6%96%87%e4%bb%b6%e7%ae%a1%e7%90%86" aria-label="9.1 DB文件管理">9.1 DB文件管理</a></li>
+                <li>
+                    <a href="#92-compaction" aria-label="9.2 Compaction">9.2 Compaction</a></li>
+                <li>
+                    <a href="#93-recovery--gc" aria-label="9.3 Recovery &amp;amp; GC">9.3 Recovery &amp; GC</a>
+                </li>
+            </ul>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="leveldb源码分析14">leveldb源码分析14</h1>
+<p>本系列《leveldb源码分析》共有22篇文章，这是第十四篇</p>
+<p><strong>9 LevelDB框架之1</strong></p>
+<p>到此为止，基本上<code>Leveldb</code>的主要功能组件都已经分析完了，下面就是把它们组合在一起，形成一个高性能的k/v存储系统。这就是<code>leveldb::DB</code>类。
+这里先看一下LevelDB的导出接口和涉及的类，后面将依次以接口分析的方式展开。
+而实际上leveldb::DB只是一个接口类，真正的实现和框架类是DBImpl这个类，正是它集合了上面的各种组件。
+此外，还有Leveldb对版本的控制，执行版本控制的是<code>Version</code>和<code>VersionSet</code>类。
+在leveldb的源码中，DBImpl和VersionSet是两个庞然大物，体量基本算是最大的。对于这两个类的分析，也会分散在打开、销毁和快照等等这些功能中，很难在一个地方集中分析。
+作者在文档impl.html中描述了leveldb的实现，其中包括<strong>文件组织</strong>、<strong>compaction</strong>和<strong>recovery</strong>等等。下面的9.1和9.2基本都是翻译子impl.html文档。
+在进入框架代码之前，先来了解下leveldb的文件组织和管理。</p>
+<h3 id="91-db文件管理">9.1 DB文件管理</h3>
+<p><strong>9.1.1 文件类型</strong></p>
+<p>对于一个数据库Level包含如下的6种文件:</p>
+<p><strong>1/[0-9]+.log：db操作日志</strong>
+这就是前面分析过的操作日志，log文件包含了最新的db更新，每个更新都以<code>append</code>的方式追加到文件结尾。当log文件达到预定大小时（缺省大约4MB），<code>leveldb</code>就把它转换为一个有序表（如下-2），并创建一个新的log文件。
+当前的log文件在内存中的存在形式就是<code>memtable</code>，每次read操作都会访问memtable，以保证read读取到的是最新的数据。</p>
+<p><strong>2/[0-9]+.sst：db的sstable文件</strong>
+这两个就是前面分析过的<strong>静态sstable文件</strong>，sstable存储了以key排序的元素。每个元素或者是key对应的value，或者是key的删除标记（删除标记可以掩盖更老sstable文件中过期的value）。
+<code>Leveldb</code>把<code>sstable</code>文件通过level的方式组织起来，从log文件中生成的sstable被放在level 0。当level 0的sstable文件个数超过设置（当前为4个）时，leveldb就把所有的level 0文件，以及有重合的level 1文件merge起来，组织成一个新的level 1文件（每个level 1文件大小为2MB）。
+Level 0的SSTable文件（后缀为.sst）和Level&gt;1的文件相比有特殊性：这个层级内的.sst文件，两个文件可能存在key重叠。对于Level&gt;0，同层sstable文件的key不会重叠。考虑level&gt;0，level中的文件的总大小超过10^level MB时（如level=1是10MB，level=2是100MB），那么level中的一个文件，以及所有level+1中和它有重叠的文件，会被merge到level+1层的一系列新文件。<strong>Merge操作</strong>的作用是将更新从低一级level迁移到最高级，只使用批量读写（最小化seek操作，提高效率）。</p>
+<p><strong>3/MANIFEST-[0-9]+：DB元信息文件</strong>
+它记录的是leveldb的元信息，比如DB使用的Comparator名，以及各SSTable文件的管理信息：如Level层数、文件名、最小key和最大key等等。</p>
+<p><strong>4/CURRENT：记录当前正在使用的Manifest文件</strong>
+它的内容就是当前的<code>manifest</code>文件名；因为在LevleDb的运行过程中，随着<code>Compaction</code>的进行，新的<code>SSTable</code>文件被产生，老的文件被废弃。并生成新的Manifest文件来记载<code>sstable</code>的变动，而<code>CURRENT</code>则用来记录我们关心的Manifest文件。
+当db被重新打开时，leveldb总是生产一个新的manifest文件。Manifest文件使用log的格式，对服务状态的改变（新加或删除的文件）都会追加到该log中。
+上面的log文件、sst文件、清单文件，末尾都带着序列号，其序号都是单调递增的（随着<code>next_file_number</code>从1开始递增），以保证不和之前的文件名重复。</p>
+<p><strong>5/log：系统的运行日志，记录系统的运行信息或者错误日志。</strong>
+<strong>6/dbtmp：临时数据库文件，repair时临时生成的。</strong>
+这里就涉及到几个关键的number计数器，log文件编号，下一个文件（sstable、log和manifest）编号，sequence。
+所有正在使用的文件编号，包括log、sstable和manifest都应该小于下一个文件编号计数器。
+<strong>9.1.2 Level 0</strong></p>
+<p>当操作log超过一定大小时（缺省是1MB），执行如下操作：</p>
+<blockquote>
+<p>S1 创建新的memtable和log文件，并重导向新的更新到新memtable和log中；
+S2 在后台：
+S2.1 将前一个memtable的内容dump到sstable文件；
+S2.2 丢弃前一个memtable；
+S2.3 删除旧的log文件和memtable
+S2.4 把创建的sstable文件放到level 0</p>
+</blockquote>
+<h3 id="92-compaction">9.2 Compaction</h3>
+<p>当<code>level L</code>的总文件大小查过限制时，我们就在后台执行<strong>compaction操作</strong>。Compaction操作从level L中选择一个文件f，以及选择中所有和f有重叠的文件。如果某个level (L+1)的文件ff只是和f部分重合，compaction依然选择ff的完整内容作为输入，在compaction后f和ff都会被丢弃。
+另外：因为<code>level 0</code>有些特殊（同层文件可能有重合），从level 0到level 1的<code>compaction</code>就需要特殊对待：level 0的compaction可能会选择多个level 0文件，如果它们之间有重叠。
+Compaction将选择的文件内容<code>merge</code>起来，并生成到一系列的level (L+1)文件中，如果输出文件超过设置（2MB），就切换到新的。当输出文件的key范围太大以至于和超过10个level (L+2)文件有重合时，也会切换。后一个规则确保了level (L+1)的文件不会和过多的level (L+2)文件有重合，其后的level (L+1) compaction不会选择过多的level (L+2)文件。
+老的文件会被丢弃，新创建的文件将加入到server状态中。
+Compaction操作在key空间中循环执行，详细讲一点就是，对于每个level，我们记录上次compaction的<code>ending key</code>。Level的下一次compaction将选择ending key之后的第一个文件（如果这样的文件不存在，将会跳到key空间的开始）。
+Compaction会忽略被写覆盖的值，如果更高一层的level没有文件的范围包含了这个key，key的删除标记也会被忽略。</p>
+<p><strong>9.2.1 时间</strong></p>
+<p>Level 0的compaction最多从level 0读取4个1MB的文件，以及所有的level 1文件（10MB），也就是我们将读取14MB，并写入14BM。
+Level &gt; 0的compaction，从level L选择一个2MB的文件，最坏情况下，将会和levelL+1的12个文件有重合（10：level L+1的总文件大小是level L的10倍；边界的2：level L的文件范围通常不会和level L+1的文件对齐）。因此Compaction将会读26MB，写26MB。对于100MB/s的磁盘IO来讲，compaction将最坏需要0.5秒。
+如果磁盘IO更低，比如10MB/s，那么compaction就需要更长的时间5秒。如果user以10MB/s的速度写入，我们可能生成很多level 0文件（50个来装载5*10MB的数据）。这将会严重影响读取效率，因为需要merge更多的文件。</p>
+<blockquote>
+<p>解决方法1：为了降低该问题，我们可能想增加log切换的阈值，缺点就是，log文件越大，对应的memtable文件就越大，这需要更多的内存。
+解决方法2：当level 0文件太多时，人工降低写入速度。
+解决方法3：降低merge的开销，如把level 0文件都无压缩的存放在cache中。</p>
+</blockquote>
+<p><strong>9.2.2 文件数</strong></p>
+<p>对于更高的<code>level</code>我们可以创建更大的文件，而不是2MB，代价就是更多突发性的<code>compaction</code>。或者，我们可以考虑分区，把文件放存放多目录中。
+在2011年2月4号，作者做了一个实验，在ext3文件系统中打开100KB的文件，结果表明可以不需要分区。</p>
+<blockquote>
+<p>文件数    文件打开ms
+1000      9
+10000    10
+100000   16</p>
+</blockquote>
+<h3 id="93-recovery--gc">9.3 Recovery &amp; GC</h3>
+<p><strong>9.3.1 Recovery</strong></p>
+<p>Db恢复的步骤：</p>
+<blockquote>
+<p>S1 首先从CURRENT读取最后提交的MANIFEST
+S2 读取MANIFEST内容
+S3 清除过期文件
+S4 这里可以打开所有的sstable文件，但是更好的方案是lazy open
+S5 把log转换为新的level 0sstable
+S6 将新写操作导向到新的log文件，从恢复的序号开始
+9.3.2 GC</p>
+</blockquote>
+<p>垃圾回收，每次compaction和recovery之后都会有文件被废弃，成为垃圾文件。<code>GC</code>就是删除这些文件的，它在每次compaction和recovery完成之后被调用。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/blog/f110bd8130344cbf801fc30d4d7a7ce9/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>leveldb源码分析13</span>
+  </a>
+  <a class="next" href="https://haokiu.com/blog/bd56540c7f464f2e8e9392c3903b27f5/">
+    <span class="title">Next »</span>
+    <br>
+    <span>leveldb源码分析15</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

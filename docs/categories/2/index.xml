@@ -10,10 +10,10 @@
     <lastBuildDate>Mon, 21 Sep 2020 09:30:35 +0000</lastBuildDate><atom:link href="https://haokiu.com/categories/2/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>es6 简介</title>
-      <link>https://haokiu.com/Cqhoxc/</link>
+      <link>https://haokiu.com/blog/Cqhoxc/</link>
       <pubDate>Mon, 21 Sep 2020 09:30:35 +0000</pubDate>
       
-      <guid>https://haokiu.com/Cqhoxc/</guid>
+      <guid>https://haokiu.com/blog/Cqhoxc/</guid>
       <description>ECMAScript 6.0（以下简称 ES6）是 JavaScript 语言的下一代标准，已经在 2015 年 6 月正式发布了。它的目标，是使得 JavaScript 语言可以用来编写复杂的大型应用程序，成为企业级开发语言。
 ECMAScript 和 JavaScript 的关系 一个常见的问题是，ECMAScript 和 JavaScript 到底是什么关系？
 要讲清楚这个问题，需要回顾历史。1996 年 11 月，JavaScript 的创造者 Netscape 公司，决定将 JavaScript 提交给标准化组织 ECMA，希望这种语言能够成为国际标准。次年，ECMA 发布 262 号标准文件（ECMA-262）的第一版，规定了浏览器脚本语言的标准，并将这种语言称为 ECMAScript，这个版本就是 1.0 版。

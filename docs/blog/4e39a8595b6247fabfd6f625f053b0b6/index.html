@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>OpenTSDBReader 插件文档 | haokiu</title>
+<meta name="keywords" content="datax">
+<meta name="description" content="OpenTSDBReader 插件文档 1 快速介绍 OpenTSDBReader 插件实现了从 OpenTSDB 读取数据。OpenTSDB 是主要由 Yahoo 维护的、可扩展的、分布式时序数据库，与阿里巴巴自研 TSDB 的关系与区别详见阿里云官网：《相比 OpenTSDB 优势》
+2 实现原理 在底层实现上，OpenTSDBReader 通过 HTTP 请求链接到 OpenTSDB 实例，利用 /api/config 接口获取到其底层存储 HBase 的连接信息，再利用 AsyncHBase 框架连接 HBase，通过 Scan 的方式将数据点扫描出来。整个同步的过程通过 metric 和时间段进行切分，即某个 metric 在某一个小时内的数据迁移，组合成一个迁移 Task。
+3 功能说明 3.1 配置样例 配置一个从 OpenTSDB 数据库同步抽取数据到本地的作业： { &#34;job&#34;: { &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;opentsdbreader&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;: &#34;http://localhost:4242&#34;, &#34;column&#34;: [ &#34;m&#34; ], &#34;beginDateTime&#34;: &#34;2019-01-01 00:00:00&#34;, &#34;endDateTime&#34;: &#34;2019-01-01 03:00:00&#34; } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;encoding&#34;: &#34;UTF-8&#34;, &#34;print&#34;: true } } } ], &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 1 } } } } 3.2 参数说明 name
+描述：本插件的名称 必选：是 默认值：opentsdbreader parameter">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/4e39a8595b6247fabfd6f625f053b0b6/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="OpenTSDBReader 插件文档" />
+<meta property="og:description" content="OpenTSDBReader 插件文档 1 快速介绍 OpenTSDBReader 插件实现了从 OpenTSDB 读取数据。OpenTSDB 是主要由 Yahoo 维护的、可扩展的、分布式时序数据库，与阿里巴巴自研 TSDB 的关系与区别详见阿里云官网：《相比 OpenTSDB 优势》
+2 实现原理 在底层实现上，OpenTSDBReader 通过 HTTP 请求链接到 OpenTSDB 实例，利用 /api/config 接口获取到其底层存储 HBase 的连接信息，再利用 AsyncHBase 框架连接 HBase，通过 Scan 的方式将数据点扫描出来。整个同步的过程通过 metric 和时间段进行切分，即某个 metric 在某一个小时内的数据迁移，组合成一个迁移 Task。
+3 功能说明 3.1 配置样例 配置一个从 OpenTSDB 数据库同步抽取数据到本地的作业： { &#34;job&#34;: { &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;opentsdbreader&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;: &#34;http://localhost:4242&#34;, &#34;column&#34;: [ &#34;m&#34; ], &#34;beginDateTime&#34;: &#34;2019-01-01 00:00:00&#34;, &#34;endDateTime&#34;: &#34;2019-01-01 03:00:00&#34; } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;encoding&#34;: &#34;UTF-8&#34;, &#34;print&#34;: true } } } ], &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 1 } } } } 3.2 参数说明 name
+描述：本插件的名称 必选：是 默认值：opentsdbreader parameter" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/4e39a8595b6247fabfd6f625f053b0b6/" /><meta property="article:section" content="4" />
+<meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
+<meta property="article:modified_time" content="2021-02-02T17:45:01+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="OpenTSDBReader 插件文档"/>
+<meta name="twitter:description" content="OpenTSDBReader 插件文档 1 快速介绍 OpenTSDBReader 插件实现了从 OpenTSDB 读取数据。OpenTSDB 是主要由 Yahoo 维护的、可扩展的、分布式时序数据库，与阿里巴巴自研 TSDB 的关系与区别详见阿里云官网：《相比 OpenTSDB 优势》
+2 实现原理 在底层实现上，OpenTSDBReader 通过 HTTP 请求链接到 OpenTSDB 实例，利用 /api/config 接口获取到其底层存储 HBase 的连接信息，再利用 AsyncHBase 框架连接 HBase，通过 Scan 的方式将数据点扫描出来。整个同步的过程通过 metric 和时间段进行切分，即某个 metric 在某一个小时内的数据迁移，组合成一个迁移 Task。
+3 功能说明 3.1 配置样例 配置一个从 OpenTSDB 数据库同步抽取数据到本地的作业： { &#34;job&#34;: { &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;opentsdbreader&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;: &#34;http://localhost:4242&#34;, &#34;column&#34;: [ &#34;m&#34; ], &#34;beginDateTime&#34;: &#34;2019-01-01 00:00:00&#34;, &#34;endDateTime&#34;: &#34;2019-01-01 03:00:00&#34; } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;encoding&#34;: &#34;UTF-8&#34;, &#34;print&#34;: true } } } ], &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 1 } } } } 3.2 参数说明 name
+描述：本插件的名称 必选：是 默认值：opentsdbreader parameter"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "4s",
+      "item": "https://haokiu.com/4/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "OpenTSDBReader 插件文档",
+      "item": "https://haokiu.com/blog/4e39a8595b6247fabfd6f625f053b0b6/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "OpenTSDBReader 插件文档",
+  "name": "OpenTSDBReader 插件文档",
+  "description": "OpenTSDBReader 插件文档 1 快速介绍 OpenTSDBReader 插件实现了从 OpenTSDB 读取数据。OpenTSDB 是主要由 Yahoo 维护的、可扩展的、分布式时序数据库，与阿里巴巴自研 TSDB 的关系与区别详见阿里云官网：《相比 OpenTSDB 优势》\n2 实现原理 在底层实现上，OpenTSDBReader 通过 HTTP 请求链接到 OpenTSDB 实例，利用 /api/config 接口获取到其底层存储 HBase 的连接信息，再利用 AsyncHBase 框架连接 HBase，通过 Scan 的方式将数据点扫描出来。整个同步的过程通过 metric 和时间段进行切分，即某个 metric 在某一个小时内的数据迁移，组合成一个迁移 Task。\n3 功能说明 3.1 配置样例 配置一个从 OpenTSDB 数据库同步抽取数据到本地的作业： { \u0026#34;job\u0026#34;: { \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;opentsdbreader\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;endpoint\u0026#34;: \u0026#34;http://localhost:4242\u0026#34;, \u0026#34;column\u0026#34;: [ \u0026#34;m\u0026#34; ], \u0026#34;beginDateTime\u0026#34;: \u0026#34;2019-01-01 00:00:00\u0026#34;, \u0026#34;endDateTime\u0026#34;: \u0026#34;2019-01-01 03:00:00\u0026#34; } }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;streamwriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;encoding\u0026#34;: \u0026#34;UTF-8\u0026#34;, \u0026#34;print\u0026#34;: true } } } ], \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { \u0026#34;channel\u0026#34;: 1 } } } } 3.2 参数说明 name\n描述：本插件的名称 必选：是 默认值：opentsdbreader parameter",
+  "keywords": [
+    "datax"
+  ],
+  "articleBody": "OpenTSDBReader 插件文档 1 快速介绍 OpenTSDBReader 插件实现了从 OpenTSDB 读取数据。OpenTSDB 是主要由 Yahoo 维护的、可扩展的、分布式时序数据库，与阿里巴巴自研 TSDB 的关系与区别详见阿里云官网：《相比 OpenTSDB 优势》\n2 实现原理 在底层实现上，OpenTSDBReader 通过 HTTP 请求链接到 OpenTSDB 实例，利用 /api/config 接口获取到其底层存储 HBase 的连接信息，再利用 AsyncHBase 框架连接 HBase，通过 Scan 的方式将数据点扫描出来。整个同步的过程通过 metric 和时间段进行切分，即某个 metric 在某一个小时内的数据迁移，组合成一个迁移 Task。\n3 功能说明 3.1 配置样例 配置一个从 OpenTSDB 数据库同步抽取数据到本地的作业： { \"job\": { \"content\": [ { \"reader\": { \"name\": \"opentsdbreader\", \"parameter\": { \"endpoint\": \"http://localhost:4242\", \"column\": [ \"m\" ], \"beginDateTime\": \"2019-01-01 00:00:00\", \"endDateTime\": \"2019-01-01 03:00:00\" } }, \"writer\": { \"name\": \"streamwriter\", \"parameter\": { \"encoding\": \"UTF-8\", \"print\": true } } } ], \"setting\": { \"speed\": { \"channel\": 1 } } } } 3.2 参数说明 name\n描述：本插件的名称 必选：是 默认值：opentsdbreader parameter\nendpoint 描述：OpenTSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Port 默认值：无\ncolumn 描述：数据迁移任务需要迁移的 Metric 列表 必选：是 默认值：无 beginDateTime\n描述：和 endDateTime 配合使用，用于指定哪个时间段内的数据点，需要被迁移 必选：是 格式：yyyy-MM-dd HH:mm:ss 默认值：无 注意：指定起止时间会自动忽略分钟和秒，转为整点时刻，例如 2019-4-18 的 [3:35, 4:55) 会被转为 [3:00, 4:00) endDateTime\n描述：和 beginDateTime 配合使用，用于指定哪个时间段内的数据点，需要被迁移 必选：是 格式：yyyy-MM-dd HH:mm:ss 默认值：无 注意：指定起止时间会自动忽略分钟和秒，转为整点时刻，例如 2019-4-18 的 [3:35, 4:55) 会被转为 [3:00, 4:00) 3.3 类型转换 DataX 内部类型 TSDB 数据类型 String TSDB 数据点序列化字符串，包括 timestamp、metric、tags 和 value 4 性能报告 4.1 环境准备 4.1.1 数据特征 从 Metric、时间线、Value 和 采集周期 四个方面来描述：\nmetric 固定指定一个 metric 为 m。\ntagkv 前四个 tagkv 全排列，形成 10 * 20 * 100 * 100 = 2000000 条时间线，最后 IP 对应 2000000 条时间线从 1 开始自增。\ntag_k tag_v zone z1~z10 cluster c1~c20 group g1~100 app a1~a100 ip ip1~ip2000000 value 度量值为 [1, 100] 区间内的随机值\ninterval 采集周期为 10 秒，持续摄入 3 小时，总数据量为 3 * 60 * 60 / 10 * 2000000 = 2,160,000,000 个数据点。\n4.1.2 机器参数 OpenTSDB Reader 机型: 64C256G\nHBase 机型： 8C16G * 5\n4.1.3 DataX jvm 参数 “-Xms4096m -Xmx4096m”\n4.2 测试报告 通道数 DataX 速度 (Rec/s) DataX 流量 (MB/s) 1 215428 25.65 2 424994 50.60 3 603132 71.81 5 约束限制 5.1 需要确保与 OpenTSDB 底层存储的网络是连通的 具体缘由详见 6.1\n5.2 如果存在某一个 Metric 下在一个小时范围内的数据量过大，可能需要通过 -j 参数调整 JVM 内存大小 考虑到下游 Writer 如果写入速度不及 OpenTSDB reader 的查询数据，可能会存在积压的情况，因此需要适当地调整 JVM 参数。以\"从 OpenTSDB 数据库同步抽取数据到本地的作业\"为例，启动命令如下：\npython datax/bin/datax.py opentsdb2stream.json -j \"-Xms4096m -Xmx4096m\" 5.3 指定起止时间会自动被转为整点时刻 指定起止时间会自动被转为整点时刻，例如 2019-4-18 的 [3:35, 3:55) 会被转为 [3:00, 4:00)\n5.4 目前只支持兼容 OpenTSDB 2.3.x 其他版本暂不保证兼容\n6 FAQ Q：为什么需要连接 OpenTSDB 的底层存储，为什么不直接使用 /api/query 查询获取数据点？\nA：因为通过 OpenTSDB 的 HTTP 接口（/api/query）来读取数据的话，经内部压测发现，在大数据量的情况下，会导致 OpenTSDB 的异步框架会报 CallBack 过多的问题；所以，采用了直连底层 HBase 存储，通过 Scan 的方式来扫描数据点，来避免这个问题。另外，还考虑到，可以通过指定 metric 和时间范围，可以顺序地 Scan HBase 表，提高查询效率。\n",
+  "wordCount" : "337",
+  "inLanguage": "en",
+  "datePublished": "2021-02-02T17:45:01Z",
+  "dateModified": "2021-02-02T17:45:01Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/4e39a8595b6247fabfd6f625f053b0b6/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    <h1 class="post-title">
+      OpenTSDBReader 插件文档
+    </h1>
+    <div class="post-meta"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#opentsdbreader-%e6%8f%92%e4%bb%b6%e6%96%87%e6%a1%a3" aria-label="OpenTSDBReader 插件文档">OpenTSDBReader 插件文档</a><ul>
+                        
+                <li>
+                    <a href="#1-%e5%bf%ab%e9%80%9f%e4%bb%8b%e7%bb%8d" aria-label="1 快速介绍">1 快速介绍</a></li>
+                <li>
+                    <a href="#2-%e5%ae%9e%e7%8e%b0%e5%8e%9f%e7%90%86" aria-label="2 实现原理">2 实现原理</a></li>
+                <li>
+                    <a href="#3-%e5%8a%9f%e8%83%bd%e8%af%b4%e6%98%8e" aria-label="3 功能说明">3 功能说明</a><ul>
+                        
+                <li>
+                    <a href="#31-%e9%85%8d%e7%bd%ae%e6%a0%b7%e4%be%8b" aria-label="3.1 配置样例">3.1 配置样例</a></li>
+                <li>
+                    <a href="#32-%e5%8f%82%e6%95%b0%e8%af%b4%e6%98%8e" aria-label="3.2 参数说明">3.2 参数说明</a></li>
+                <li>
+                    <a href="#33-%e7%b1%bb%e5%9e%8b%e8%bd%ac%e6%8d%a2" aria-label="3.3 类型转换">3.3 类型转换</a></li></ul>
+                </li>
+                <li>
+                    <a href="#4-%e6%80%a7%e8%83%bd%e6%8a%a5%e5%91%8a" aria-label="4 性能报告">4 性能报告</a><ul>
+                        
+                <li>
+                    <a href="#41-%e7%8e%af%e5%a2%83%e5%87%86%e5%a4%87" aria-label="4.1 环境准备">4.1 环境准备</a><ul>
+                        
+                <li>
+                    <a href="#411-%e6%95%b0%e6%8d%ae%e7%89%b9%e5%be%81" aria-label="4.1.1 数据特征">4.1.1 数据特征</a><ul>
+                        
+                <li>
+                    <a href="#metric" aria-label="metric">metric</a></li>
+                <li>
+                    <a href="#tagkv" aria-label="tagkv">tagkv</a></li>
+                <li>
+                    <a href="#value" aria-label="value">value</a></li>
+                <li>
+                    <a href="#interval" aria-label="interval">interval</a></li></ul>
+                </li>
+                <li>
+                    <a href="#412-%e6%9c%ba%e5%99%a8%e5%8f%82%e6%95%b0" aria-label="4.1.2 机器参数">4.1.2 机器参数</a></li>
+                <li>
+                    <a href="#413-datax-jvm-%e5%8f%82%e6%95%b0" aria-label="4.1.3 DataX jvm 参数">4.1.3 DataX jvm 参数</a></li></ul>
+                </li>
+                <li>
+                    <a href="#42-%e6%b5%8b%e8%af%95%e6%8a%a5%e5%91%8a" aria-label="4.2 测试报告">4.2 测试报告</a></li></ul>
+                </li>
+                <li>
+                    <a href="#5-%e7%ba%a6%e6%9d%9f%e9%99%90%e5%88%b6" aria-label="5 约束限制">5 约束限制</a><ul>
+                        
+                <li>
+                    <a href="#51-%e9%9c%80%e8%a6%81%e7%a1%ae%e4%bf%9d%e4%b8%8e-opentsdb-%e5%ba%95%e5%b1%82%e5%ad%98%e5%82%a8%e7%9a%84%e7%bd%91%e7%bb%9c%e6%98%af%e8%bf%9e%e9%80%9a%e7%9a%84" aria-label="5.1 需要确保与 OpenTSDB 底层存储的网络是连通的">5.1 需要确保与 OpenTSDB 底层存储的网络是连通的</a></li>
+                <li>
+                    <a href="#52-%e5%a6%82%e6%9e%9c%e5%ad%98%e5%9c%a8%e6%9f%90%e4%b8%80%e4%b8%aa-metric-%e4%b8%8b%e5%9c%a8%e4%b8%80%e4%b8%aa%e5%b0%8f%e6%97%b6%e8%8c%83%e5%9b%b4%e5%86%85%e7%9a%84%e6%95%b0%e6%8d%ae%e9%87%8f%e8%bf%87%e5%a4%a7%e5%8f%af%e8%83%bd%e9%9c%80%e8%a6%81%e9%80%9a%e8%bf%87--j-%e5%8f%82%e6%95%b0%e8%b0%83%e6%95%b4-jvm-%e5%86%85%e5%ad%98%e5%a4%a7%e5%b0%8f" aria-label="5.2 如果存在某一个 Metric 下在一个小时范围内的数据量过大，可能需要通过 -j 参数调整 JVM 内存大小">5.2 如果存在某一个 Metric 下在一个小时范围内的数据量过大，可能需要通过 <code>-j</code> 参数调整 JVM 内存大小</a></li>
+                <li>
+                    <a href="#53-%e6%8c%87%e5%ae%9a%e8%b5%b7%e6%ad%a2%e6%97%b6%e9%97%b4%e4%bc%9a%e8%87%aa%e5%8a%a8%e8%a2%ab%e8%bd%ac%e4%b8%ba%e6%95%b4%e7%82%b9%e6%97%b6%e5%88%bb" aria-label="5.3 指定起止时间会自动被转为整点时刻">5.3 指定起止时间会自动被转为整点时刻</a></li>
+                <li>
+                    <a href="#54-%e7%9b%ae%e5%89%8d%e5%8f%aa%e6%94%af%e6%8c%81%e5%85%bc%e5%ae%b9-opentsdb-23x" aria-label="5.4 目前只支持兼容 OpenTSDB 2.3.x">5.4 目前只支持兼容 OpenTSDB 2.3.x</a></li></ul>
+                </li>
+                <li>
+                    <a href="#6-faq" aria-label="6 FAQ">6 FAQ</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="opentsdbreader-插件文档">OpenTSDBReader 插件文档</h1>
+<hr>
+<h2 id="1-快速介绍">1 快速介绍</h2>
+<p>OpenTSDBReader 插件实现了从 OpenTSDB 读取数据。OpenTSDB 是主要由 Yahoo 维护的、可扩展的、分布式时序数据库，与阿里巴巴自研 TSDB 的关系与区别详见阿里云官网：《<a href="https://help.aliyun.com/document_detail/113368.html">相比 OpenTSDB 优势</a>》</p>
+<h2 id="2-实现原理">2 实现原理</h2>
+<p>在底层实现上，OpenTSDBReader 通过 HTTP 请求链接到 OpenTSDB 实例，利用 <code>/api/config</code> 接口获取到其底层存储 HBase 的连接信息，再利用 AsyncHBase 框架连接 HBase，通过 Scan 的方式将数据点扫描出来。整个同步的过程通过 metric 和时间段进行切分，即某个 metric 在某一个小时内的数据迁移，组合成一个迁移 Task。</p>
+<h2 id="3-功能说明">3 功能说明</h2>
+<h3 id="31-配置样例">3.1 配置样例</h3>
+<ul>
+<li>配置一个从 OpenTSDB 数据库同步抽取数据到本地的作业：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;job&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;content&#34;</span>: [
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;reader&#34;</span>: {
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;opentsdbreader&#34;</span>,
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&#34;parameter&#34;</span>: {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;endpoint&#34;</span>: <span style="color:#e6db74">&#34;http://localhost:4242&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;column&#34;</span>: [
+</span></span><span style="display:flex;"><span>              <span style="color:#e6db74">&#34;m&#34;</span>
+</span></span><span style="display:flex;"><span>            ],
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;beginDateTime&#34;</span>: <span style="color:#e6db74">&#34;2019-01-01 00:00:00&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;endDateTime&#34;</span>: <span style="color:#e6db74">&#34;2019-01-01 03:00:00&#34;</span>
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;writer&#34;</span>: {
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;streamwriter&#34;</span>,
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">&#34;parameter&#34;</span>: {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;encoding&#34;</span>: <span style="color:#e6db74">&#34;UTF-8&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;print&#34;</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    ],
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;setting&#34;</span>: {
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;speed&#34;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&#34;channel&#34;</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="32-参数说明">3.2 参数说明</h3>
+<ul>
+<li>
+<p><strong>name</strong></p>
+<ul>
+<li>描述：本插件的名称</li>
+<li>必选：是</li>
+<li>默认值：opentsdbreader</li>
+</ul>
+</li>
+<li>
+<p><strong>parameter</strong></p>
+<ul>
+<li><strong>endpoint</strong>
+<ul>
+<li>描述：OpenTSDB 的 HTTP 连接地址</li>
+<li>必选：是</li>
+<li>格式：http://IP:Port</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>默认值：无</p>
+<ul>
+<li><strong>column</strong>
+<ul>
+<li>描述：数据迁移任务需要迁移的 Metric 列表</li>
+<li>必选：是</li>
+</ul>
+</li>
+<li>默认值：无</li>
+</ul>
+</li>
+<li>
+<p><strong>beginDateTime</strong></p>
+<ul>
+<li>描述：和 endDateTime 配合使用，用于指定哪个时间段内的数据点，需要被迁移</li>
+<li>必选：是</li>
+<li>格式：<code>yyyy-MM-dd HH:mm:ss</code></li>
+<li>默认值：无</li>
+<li>注意：指定起止时间会自动忽略分钟和秒，转为整点时刻，例如 2019-4-18 的 [3:35, 4:55) 会被转为 [3:00, 4:00)</li>
+</ul>
+</li>
+<li>
+<p><strong>endDateTime</strong></p>
+<ul>
+<li>描述：和 beginDateTime 配合使用，用于指定哪个时间段内的数据点，需要被迁移</li>
+<li>必选：是</li>
+<li>格式：<code>yyyy-MM-dd HH:mm:ss</code></li>
+<li>默认值：无</li>
+<li>注意：指定起止时间会自动忽略分钟和秒，转为整点时刻，例如 2019-4-18 的 [3:35, 4:55) 会被转为 [3:00, 4:00)</li>
+</ul>
+</li>
+</ul>
+<h3 id="33-类型转换">3.3 类型转换</h3>
+<table>
+<thead>
+<tr>
+<th>DataX 内部类型</th>
+<th>TSDB 数据类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>String</td>
+<td>TSDB 数据点序列化字符串，包括 timestamp、metric、tags 和 value</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-性能报告">4 性能报告</h2>
+<h3 id="41-环境准备">4.1 环境准备</h3>
+<h4 id="411-数据特征">4.1.1 数据特征</h4>
+<p>从 Metric、时间线、Value 和 采集周期 四个方面来描述：</p>
+<h5 id="metric">metric</h5>
+<p>固定指定一个 metric 为 <code>m</code>。</p>
+<h5 id="tagkv">tagkv</h5>
+<p>前四个 tagkv 全排列，形成 <code>10 * 20 * 100 * 100 = 2000000</code> 条时间线，最后 IP 对应 2000000 条时间线从 1 开始自增。</p>
+<table>
+<thead>
+<tr>
+<th><strong>tag_k</strong></th>
+<th><strong>tag_v</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>zone</td>
+<td>z1~z10</td>
+</tr>
+<tr>
+<td>cluster</td>
+<td>c1~c20</td>
+</tr>
+<tr>
+<td>group</td>
+<td>g1~100</td>
+</tr>
+<tr>
+<td>app</td>
+<td>a1~a100</td>
+</tr>
+<tr>
+<td>ip</td>
+<td>ip1~ip2000000</td>
+</tr>
+</tbody>
+</table>
+<h5 id="value">value</h5>
+<p>度量值为 [1, 100] 区间内的随机值</p>
+<h5 id="interval">interval</h5>
+<p>采集周期为 10 秒，持续摄入 3 小时，总数据量为 <code>3 * 60 * 60 / 10 * 2000000 = 2,160,000,000</code> 个数据点。</p>
+<h4 id="412-机器参数">4.1.2 机器参数</h4>
+<p>OpenTSDB Reader 机型:  64C256G</p>
+<p>HBase 机型： 8C16G * 5</p>
+<h4 id="413-datax-jvm-参数">4.1.3 DataX jvm 参数</h4>
+<p>&ldquo;-Xms4096m -Xmx4096m&rdquo;</p>
+<h3 id="42-测试报告">4.2 测试报告</h3>
+<table>
+<thead>
+<tr>
+<th>通道数</th>
+<th>DataX 速度 (Rec/s)</th>
+<th>DataX 流量 (MB/s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>215428</td>
+<td>25.65</td>
+</tr>
+<tr>
+<td>2</td>
+<td>424994</td>
+<td>50.60</td>
+</tr>
+<tr>
+<td>3</td>
+<td>603132</td>
+<td>71.81</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5-约束限制">5 约束限制</h2>
+<h3 id="51-需要确保与-opentsdb-底层存储的网络是连通的">5.1 需要确保与 OpenTSDB 底层存储的网络是连通的</h3>
+<p>具体缘由详见 6.1</p>
+<h3 id="52-如果存在某一个-metric-下在一个小时范围内的数据量过大可能需要通过--j-参数调整-jvm-内存大小">5.2 如果存在某一个 Metric 下在一个小时范围内的数据量过大，可能需要通过 <code>-j</code> 参数调整 JVM 内存大小</h3>
+<p>考虑到下游 Writer 如果写入速度不及 OpenTSDB reader 的查询数据，可能会存在积压的情况，因此需要适当地调整 JVM 参数。以&quot;从 OpenTSDB 数据库同步抽取数据到本地的作业&quot;为例，启动命令如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span> python datax/bin/datax.py opentsdb2stream.json -j <span style="color:#e6db74">&#34;-Xms4096m -Xmx4096m&#34;</span>
+</span></span></code></pre></div><h3 id="53-指定起止时间会自动被转为整点时刻">5.3 指定起止时间会自动被转为整点时刻</h3>
+<p>指定起止时间会自动被转为整点时刻，例如 2019-4-18 的 <code>[3:35, 3:55)</code> 会被转为 <code>[3:00, 4:00)</code></p>
+<h3 id="54-目前只支持兼容-opentsdb-23x">5.4 目前只支持兼容 OpenTSDB 2.3.x</h3>
+<p>其他版本暂不保证兼容</p>
+<h2 id="6-faq">6 FAQ</h2>
+<hr>
+<p><strong>Q：为什么需要连接 OpenTSDB 的底层存储，为什么不直接使用 <code>/api/query</code> 查询获取数据点？</strong></p>
+<p>A：因为通过 OpenTSDB 的 HTTP 接口（<code>/api/query</code>）来读取数据的话，经内部压测发现，在大数据量的情况下，会导致 OpenTSDB 的异步框架会报 CallBack 过多的问题；所以，采用了直连底层 HBase 存储，通过 Scan 的方式来扫描数据点，来避免这个问题。另外，还考虑到，可以通过指定 metric 和时间范围，可以顺序地 Scan HBase 表，提高查询效率。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

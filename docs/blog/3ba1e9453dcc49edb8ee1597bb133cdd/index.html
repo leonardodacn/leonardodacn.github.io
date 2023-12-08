@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Memcached阅读十五 Hash表扩容 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="Memcached阅读十五 Hash表扩容 Hash表是Memcached里面最重要的结构之一，其采用链接法来处理Hash冲突，当Hash表中的项太多时，也就是Hash冲突比较高的时候，Hash表的遍历就脱变成单链表，此时为了提供Hash的性能，Hash表需要扩容，Memcached的扩容条件是当表中元素个数超过Hash容量的1.5倍时就进行扩容，扩容过程由独立的线程来完成，扩容过程中会采用2个Hash表，将老表中的数据通过Hash算法映射到新表中，每次移动的桶的数目可以配置，默认是每次移动老表中的1个桶。
+//hash表中增加元素 int assoc_insert(item *it, const uint32_t hv) { unsigned int oldbucket; //如果已经进行扩容且目前进行扩容还没到需要插入元素的桶，则将元素添加到旧桶中 if (expanding &amp;&amp;(oldbucket = (hv &amp; hashmask(hashpower - 1))) &gt;= expand_bucket) { //添加元素 it-&gt;h_next = old_hashtable[oldbucket]; old_hashtable[oldbucket] = it; } else { //如果没扩容，或者扩容已经到了新的桶中，则添加元素到新表中 it-&gt;h_next = primary_hashtable[hv &amp; hashmask(hashpower)];//添加元素 primary_hashtable[hv &amp; hashmask(hashpower)] = it; } hash_items&#43;&#43;;//元素数目&#43;1 //还没开始扩容，且表中元素个数已经超过Hash表容量的1.5倍 if (! expanding &amp;&amp; hash_items &gt; (hashsize(hashpower) * 3) / 2) { //唤醒扩容线程 assoc_start_expand(); } MEMCACHED_ASSOC_INSERT(ITEM_key(it), it-&gt;nkey, hash_items); return 1; } //唤醒扩容线程 static void assoc_start_expand(void) { if (started_expanding) return; started_expanding = true; //唤醒信号量 pthread_cond_signal(&amp;maintenance_cond); } //启动扩容线程，扩容线程在main函数中会启动，启动运行一遍之后会阻塞在条件变量maintenance_cond上面，插入元素超过规定，唤醒条件变量 static void *assoc_maintenance_thread(void *arg) { //do_run_maintenance_thread的值为1，即该线程持续运行 while (do_run_maintenance_thread) { int ii = 0; item_lock_global();//加Hash表的全局锁 mutex_lock(&amp;cache_lock);//加cache_lock锁 //执行扩容时，每次按hash_bulk_move个桶来扩容 for (ii = 0; ii &lt; hash_bulk_move &amp;&amp; expanding; &#43;&#43;ii) { item *it, *next; int bucket; //老表每次移动一个桶中的一个元素 for (it = old_hashtable[expand_bucket]; NULL !">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/3ba1e9453dcc49edb8ee1597bb133cdd/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Memcached阅读十五 Hash表扩容" />
+<meta property="og:description" content="Memcached阅读十五 Hash表扩容 Hash表是Memcached里面最重要的结构之一，其采用链接法来处理Hash冲突，当Hash表中的项太多时，也就是Hash冲突比较高的时候，Hash表的遍历就脱变成单链表，此时为了提供Hash的性能，Hash表需要扩容，Memcached的扩容条件是当表中元素个数超过Hash容量的1.5倍时就进行扩容，扩容过程由独立的线程来完成，扩容过程中会采用2个Hash表，将老表中的数据通过Hash算法映射到新表中，每次移动的桶的数目可以配置，默认是每次移动老表中的1个桶。
+//hash表中增加元素 int assoc_insert(item *it, const uint32_t hv) { unsigned int oldbucket; //如果已经进行扩容且目前进行扩容还没到需要插入元素的桶，则将元素添加到旧桶中 if (expanding &amp;&amp;(oldbucket = (hv &amp; hashmask(hashpower - 1))) &gt;= expand_bucket) { //添加元素 it-&gt;h_next = old_hashtable[oldbucket]; old_hashtable[oldbucket] = it; } else { //如果没扩容，或者扩容已经到了新的桶中，则添加元素到新表中 it-&gt;h_next = primary_hashtable[hv &amp; hashmask(hashpower)];//添加元素 primary_hashtable[hv &amp; hashmask(hashpower)] = it; } hash_items&#43;&#43;;//元素数目&#43;1 //还没开始扩容，且表中元素个数已经超过Hash表容量的1.5倍 if (! expanding &amp;&amp; hash_items &gt; (hashsize(hashpower) * 3) / 2) { //唤醒扩容线程 assoc_start_expand(); } MEMCACHED_ASSOC_INSERT(ITEM_key(it), it-&gt;nkey, hash_items); return 1; } //唤醒扩容线程 static void assoc_start_expand(void) { if (started_expanding) return; started_expanding = true; //唤醒信号量 pthread_cond_signal(&amp;maintenance_cond); } //启动扩容线程，扩容线程在main函数中会启动，启动运行一遍之后会阻塞在条件变量maintenance_cond上面，插入元素超过规定，唤醒条件变量 static void *assoc_maintenance_thread(void *arg) { //do_run_maintenance_thread的值为1，即该线程持续运行 while (do_run_maintenance_thread) { int ii = 0; item_lock_global();//加Hash表的全局锁 mutex_lock(&amp;cache_lock);//加cache_lock锁 //执行扩容时，每次按hash_bulk_move个桶来扩容 for (ii = 0; ii &lt; hash_bulk_move &amp;&amp; expanding; &#43;&#43;ii) { item *it, *next; int bucket; //老表每次移动一个桶中的一个元素 for (it = old_hashtable[expand_bucket]; NULL !" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/3ba1e9453dcc49edb8ee1597bb133cdd/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Memcached阅读十五 Hash表扩容"/>
+<meta name="twitter:description" content="Memcached阅读十五 Hash表扩容 Hash表是Memcached里面最重要的结构之一，其采用链接法来处理Hash冲突，当Hash表中的项太多时，也就是Hash冲突比较高的时候，Hash表的遍历就脱变成单链表，此时为了提供Hash的性能，Hash表需要扩容，Memcached的扩容条件是当表中元素个数超过Hash容量的1.5倍时就进行扩容，扩容过程由独立的线程来完成，扩容过程中会采用2个Hash表，将老表中的数据通过Hash算法映射到新表中，每次移动的桶的数目可以配置，默认是每次移动老表中的1个桶。
+//hash表中增加元素 int assoc_insert(item *it, const uint32_t hv) { unsigned int oldbucket; //如果已经进行扩容且目前进行扩容还没到需要插入元素的桶，则将元素添加到旧桶中 if (expanding &amp;&amp;(oldbucket = (hv &amp; hashmask(hashpower - 1))) &gt;= expand_bucket) { //添加元素 it-&gt;h_next = old_hashtable[oldbucket]; old_hashtable[oldbucket] = it; } else { //如果没扩容，或者扩容已经到了新的桶中，则添加元素到新表中 it-&gt;h_next = primary_hashtable[hv &amp; hashmask(hashpower)];//添加元素 primary_hashtable[hv &amp; hashmask(hashpower)] = it; } hash_items&#43;&#43;;//元素数目&#43;1 //还没开始扩容，且表中元素个数已经超过Hash表容量的1.5倍 if (! expanding &amp;&amp; hash_items &gt; (hashsize(hashpower) * 3) / 2) { //唤醒扩容线程 assoc_start_expand(); } MEMCACHED_ASSOC_INSERT(ITEM_key(it), it-&gt;nkey, hash_items); return 1; } //唤醒扩容线程 static void assoc_start_expand(void) { if (started_expanding) return; started_expanding = true; //唤醒信号量 pthread_cond_signal(&amp;maintenance_cond); } //启动扩容线程，扩容线程在main函数中会启动，启动运行一遍之后会阻塞在条件变量maintenance_cond上面，插入元素超过规定，唤醒条件变量 static void *assoc_maintenance_thread(void *arg) { //do_run_maintenance_thread的值为1，即该线程持续运行 while (do_run_maintenance_thread) { int ii = 0; item_lock_global();//加Hash表的全局锁 mutex_lock(&amp;cache_lock);//加cache_lock锁 //执行扩容时，每次按hash_bulk_move个桶来扩容 for (ii = 0; ii &lt; hash_bulk_move &amp;&amp; expanding; &#43;&#43;ii) { item *it, *next; int bucket; //老表每次移动一个桶中的一个元素 for (it = old_hashtable[expand_bucket]; NULL !"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Memcached阅读十五 Hash表扩容",
+      "item": "https://haokiu.com/blog/3ba1e9453dcc49edb8ee1597bb133cdd/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Memcached阅读十五 Hash表扩容",
+  "name": "Memcached阅读十五 Hash表扩容",
+  "description": "Memcached阅读十五 Hash表扩容 Hash表是Memcached里面最重要的结构之一，其采用链接法来处理Hash冲突，当Hash表中的项太多时，也就是Hash冲突比较高的时候，Hash表的遍历就脱变成单链表，此时为了提供Hash的性能，Hash表需要扩容，Memcached的扩容条件是当表中元素个数超过Hash容量的1.5倍时就进行扩容，扩容过程由独立的线程来完成，扩容过程中会采用2个Hash表，将老表中的数据通过Hash算法映射到新表中，每次移动的桶的数目可以配置，默认是每次移动老表中的1个桶。\n//hash表中增加元素 int assoc_insert(item *it, const uint32_t hv) { unsigned int oldbucket; //如果已经进行扩容且目前进行扩容还没到需要插入元素的桶，则将元素添加到旧桶中 if (expanding \u0026amp;\u0026amp;(oldbucket = (hv \u0026amp; hashmask(hashpower - 1))) \u0026gt;= expand_bucket) { //添加元素 it-\u0026gt;h_next = old_hashtable[oldbucket]; old_hashtable[oldbucket] = it; } else { //如果没扩容，或者扩容已经到了新的桶中，则添加元素到新表中 it-\u0026gt;h_next = primary_hashtable[hv \u0026amp; hashmask(hashpower)];//添加元素 primary_hashtable[hv \u0026amp; hashmask(hashpower)] = it; } hash_items++;//元素数目+1 //还没开始扩容，且表中元素个数已经超过Hash表容量的1.5倍 if (! expanding \u0026amp;\u0026amp; hash_items \u0026gt; (hashsize(hashpower) * 3) / 2) { //唤醒扩容线程 assoc_start_expand(); } MEMCACHED_ASSOC_INSERT(ITEM_key(it), it-\u0026gt;nkey, hash_items); return 1; } //唤醒扩容线程 static void assoc_start_expand(void) { if (started_expanding) return; started_expanding = true; //唤醒信号量 pthread_cond_signal(\u0026amp;maintenance_cond); } //启动扩容线程，扩容线程在main函数中会启动，启动运行一遍之后会阻塞在条件变量maintenance_cond上面，插入元素超过规定，唤醒条件变量 static void *assoc_maintenance_thread(void *arg) { //do_run_maintenance_thread的值为1，即该线程持续运行 while (do_run_maintenance_thread) { int ii = 0; item_lock_global();//加Hash表的全局锁 mutex_lock(\u0026amp;cache_lock);//加cache_lock锁 //执行扩容时，每次按hash_bulk_move个桶来扩容 for (ii = 0; ii \u0026lt; hash_bulk_move \u0026amp;\u0026amp; expanding; ++ii) { item *it, *next; int bucket; //老表每次移动一个桶中的一个元素 for (it = old_hashtable[expand_bucket]; NULL !",
+  "keywords": [
+    
+  ],
+  "articleBody": "Memcached阅读十五 Hash表扩容 Hash表是Memcached里面最重要的结构之一，其采用链接法来处理Hash冲突，当Hash表中的项太多时，也就是Hash冲突比较高的时候，Hash表的遍历就脱变成单链表，此时为了提供Hash的性能，Hash表需要扩容，Memcached的扩容条件是当表中元素个数超过Hash容量的1.5倍时就进行扩容，扩容过程由独立的线程来完成，扩容过程中会采用2个Hash表，将老表中的数据通过Hash算法映射到新表中，每次移动的桶的数目可以配置，默认是每次移动老表中的1个桶。\n//hash表中增加元素 int assoc_insert(item *it, const uint32_t hv) { unsigned int oldbucket; //如果已经进行扩容且目前进行扩容还没到需要插入元素的桶，则将元素添加到旧桶中 if (expanding \u0026\u0026(oldbucket = (hv \u0026 hashmask(hashpower - 1))) \u003e= expand_bucket) { //添加元素 it-\u003eh_next = old_hashtable[oldbucket]; old_hashtable[oldbucket] = it; } else { //如果没扩容，或者扩容已经到了新的桶中，则添加元素到新表中 it-\u003eh_next = primary_hashtable[hv \u0026 hashmask(hashpower)];//添加元素 primary_hashtable[hv \u0026 hashmask(hashpower)] = it; } hash_items++;//元素数目+1 //还没开始扩容，且表中元素个数已经超过Hash表容量的1.5倍 if (! expanding \u0026\u0026 hash_items \u003e (hashsize(hashpower) * 3) / 2) { //唤醒扩容线程 assoc_start_expand(); } MEMCACHED_ASSOC_INSERT(ITEM_key(it), it-\u003enkey, hash_items); return 1; } //唤醒扩容线程 static void assoc_start_expand(void) { if (started_expanding) return; started_expanding = true; //唤醒信号量 pthread_cond_signal(\u0026maintenance_cond); } //启动扩容线程，扩容线程在main函数中会启动，启动运行一遍之后会阻塞在条件变量maintenance_cond上面，插入元素超过规定，唤醒条件变量 static void *assoc_maintenance_thread(void *arg) { //do_run_maintenance_thread的值为1，即该线程持续运行 while (do_run_maintenance_thread) { int ii = 0; item_lock_global();//加Hash表的全局锁 mutex_lock(\u0026cache_lock);//加cache_lock锁 //执行扩容时，每次按hash_bulk_move个桶来扩容 for (ii = 0; ii \u003c hash_bulk_move \u0026\u0026 expanding; ++ii) { item *it, *next; int bucket; //老表每次移动一个桶中的一个元素 for (it = old_hashtable[expand_bucket]; NULL != it; it = next) { //要移动的下一个元素 next = it-\u003eh_next; //按新的Hash规则进行定位 bucket = hash(ITEM_key(it), it-\u003enkey, 0) \u0026 hashmask(hashpower); it-\u003eh_next = primary_hashtable[bucket];//挂载到新的Hash表中 primary_hashtable[bucket] = it; } //旧表中的这个Hash桶已经按新规则完成了扩容 old_hashtable[expand_bucket] = NULL; //老表中的桶计数+1 expand_bucket++; //hash表扩容结束,expand_bucket从0开始,一直递增 if (expand_bucket == hashsize(hashpower - 1)) { //修改扩容标志 expanding = false; //释放老的表结构 free(old_hashtable); //更新一些统计信息 STATS_LOCK(); stats.hash_bytes -= hashsize(hashpower - 1) * sizeof(void *); stats.hash_is_expanding = 0; STATS_UNLOCK(); if (settings.verbose \u003e 1) fprintf(stderr, \"Hash table expansion done\\n\"); } } mutex_unlock(\u0026cache_lock);//释放cache_lock锁 item_unlock_global();//释放Hash表的全局锁 //完成扩容 if (!expanding) { //修改Hash表的锁类型，此时锁类型更新为分段锁，默认是分段锁，在进行扩容时，改为全局锁 switch_item_lock_type(ITEM_LOCK_GRANULAR); //释放用于扩容的锁 slabs_rebalancer_resume(); /* We are done expanding.. just wait for next invocation */ mutex_lock(\u0026cache_lock); //加cache_lock锁，保护条件变量 started_expanding = false; //修改扩容标识 pthread_cond_wait(\u0026maintenance_cond, \u0026cache_lock); //阻塞扩容线程 mutex_unlock(\u0026cache_lock); slabs_rebalancer_pause(); //加用于扩容的锁 switch_item_lock_type(ITEM_LOCK_GLOBAL); //修改锁类型为全局锁 mutex_lock(\u0026cache_lock); //临时用来实现临界区 assoc_expand();//执行扩容 mutex_unlock(\u0026cache_lock); } } return NULL; } //按2倍容量扩容Hash表 static void assoc_expand(void) { //old_hashtable指向主Hash表 old_hashtable = primary_hashtable; //申请新的空间 primary_hashtable = calloc(hashsize(hashpower + 1), sizeof(void *)); //空间申请成功 if (primary_hashtable) { if (settings.verbose \u003e 1) fprintf(stderr, \"Hash table expansion starting\\n\"); hashpower++; //hash等级+1 expanding = true; //扩容标识打开 expand_bucket = 0; STATS_LOCK(); //更新全局统计信息 stats.hash_power_level = hashpower; stats.hash_bytes += hashsize(hashpower) * sizeof(void *); stats.hash_is_expanding = 1; STATS_UNLOCK(); } else { primary_hashtable = old_hashtable; } } ",
+  "wordCount" : "301",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/3ba1e9453dcc49edb8ee1597bb133cdd/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      Memcached阅读十五 Hash表扩容
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#memcached%e9%98%85%e8%af%bb%e5%8d%81%e4%ba%94-hash%e8%a1%a8%e6%89%a9%e5%ae%b9" aria-label="Memcached阅读十五 Hash表扩容">Memcached阅读十五 Hash表扩容</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="memcached阅读十五-hash表扩容">Memcached阅读十五 Hash表扩容</h1>
+<p><code>Hash表</code>是<code>Memcached</code>里面最重要的结构之一，其采用链接法来<strong>处理Hash冲突</strong>，当Hash表中的项太多时，也就是Hash冲突比较高的时候，Hash表的遍历就脱变成单链表，此时为了提供Hash的性能，Hash表需要扩容，Memcached的扩容条件是当表中元素个数超过Hash容量的1.5倍时就进行扩容，扩容过程由独立的线程来完成，扩容过程中会采用2个Hash表，将老表中的数据通过Hash算法映射到新表中，每次移动的桶的数目可以配置，默认是每次移动老表中的1个桶。</p>
+<pre tabindex="0"><code>//hash表中增加元素
+int assoc_insert(item *it, const uint32_t hv) {
+    unsigned int oldbucket;
+
+    //如果已经进行扩容且目前进行扩容还没到需要插入元素的桶，则将元素添加到旧桶中
+    if (expanding &amp;&amp;(oldbucket = (hv &amp; hashmask(hashpower - 1))) &gt;= expand_bucket)
+    {
+        //添加元素
+        it-&gt;h_next = old_hashtable[oldbucket];
+        old_hashtable[oldbucket] = it;
+    } else {
+        //如果没扩容，或者扩容已经到了新的桶中，则添加元素到新表中
+        it-&gt;h_next = primary_hashtable[hv &amp; hashmask(hashpower)];//添加元素
+        primary_hashtable[hv &amp; hashmask(hashpower)] = it;
+    }
+
+    hash_items++;//元素数目+1
+
+    //还没开始扩容，且表中元素个数已经超过Hash表容量的1.5倍
+    if (! expanding &amp;&amp; hash_items &gt; (hashsize(hashpower) * 3) / 2) {
+        //唤醒扩容线程
+        assoc_start_expand();
+    }
+
+    MEMCACHED_ASSOC_INSERT(ITEM_key(it), it-&gt;nkey, hash_items);
+    return 1;
+}
+
+//唤醒扩容线程
+static void assoc_start_expand(void) {
+    if (started_expanding)
+        return;
+    started_expanding = true;
+    //唤醒信号量
+    pthread_cond_signal(&amp;maintenance_cond);
+}
+
+//启动扩容线程，扩容线程在main函数中会启动，启动运行一遍之后会阻塞在条件变量maintenance_cond上面，插入元素超过规定，唤醒条件变量
+static void *assoc_maintenance_thread(void *arg) {
+    //do_run_maintenance_thread的值为1，即该线程持续运行
+    while (do_run_maintenance_thread) {
+        int ii = 0;
+
+        item_lock_global();//加Hash表的全局锁
+        mutex_lock(&amp;cache_lock);//加cache_lock锁
+
+        //执行扩容时，每次按hash_bulk_move个桶来扩容
+        for (ii = 0; ii &lt; hash_bulk_move &amp;&amp; expanding; ++ii) {
+            item *it, *next;
+            int bucket;
+
+            //老表每次移动一个桶中的一个元素
+            for (it = old_hashtable[expand_bucket]; NULL != it; it = next) {
+                //要移动的下一个元素
+                next = it-&gt;h_next;
+
+                //按新的Hash规则进行定位
+                bucket = hash(ITEM_key(it), it-&gt;nkey, 0) &amp; hashmask(hashpower);
+                it-&gt;h_next = primary_hashtable[bucket];//挂载到新的Hash表中
+                primary_hashtable[bucket] = it;
+            }
+
+            //旧表中的这个Hash桶已经按新规则完成了扩容
+            old_hashtable[expand_bucket] = NULL;
+            //老表中的桶计数+1
+            expand_bucket++;
+
+            //hash表扩容结束,expand_bucket从0开始,一直递增
+            if (expand_bucket == hashsize(hashpower - 1)) {
+                //修改扩容标志
+                expanding = false;
+                //释放老的表结构
+                free(old_hashtable);
+                //更新一些统计信息
+                STATS_LOCK();
+                stats.hash_bytes -= hashsize(hashpower - 1) * sizeof(void *);
+                stats.hash_is_expanding = 0;
+                STATS_UNLOCK();
+                if (settings.verbose &gt; 1)
+                    fprintf(stderr, &#34;Hash table expansion done\n&#34;);
+            }
+        }
+
+        mutex_unlock(&amp;cache_lock);//释放cache_lock锁
+        item_unlock_global();//释放Hash表的全局锁
+
+        //完成扩容
+        if (!expanding) {
+            //修改Hash表的锁类型，此时锁类型更新为分段锁，默认是分段锁，在进行扩容时，改为全局锁
+            switch_item_lock_type(ITEM_LOCK_GRANULAR);
+            //释放用于扩容的锁
+            slabs_rebalancer_resume();
+            /* We are done expanding.. just wait for next invocation */
+            mutex_lock(&amp;cache_lock);
+            //加cache_lock锁，保护条件变量
+            started_expanding = false;
+            //修改扩容标识
+            pthread_cond_wait(&amp;maintenance_cond, &amp;cache_lock);
+            //阻塞扩容线程
+            mutex_unlock(&amp;cache_lock);
+            slabs_rebalancer_pause();
+            //加用于扩容的锁
+            switch_item_lock_type(ITEM_LOCK_GLOBAL);
+            //修改锁类型为全局锁
+            mutex_lock(&amp;cache_lock);
+            //临时用来实现临界区
+            assoc_expand();//执行扩容
+            mutex_unlock(&amp;cache_lock);
+        }
+    }
+    return NULL;
+}
+
+//按2倍容量扩容Hash表
+static void assoc_expand(void) {
+    //old_hashtable指向主Hash表
+    old_hashtable = primary_hashtable;
+
+    //申请新的空间
+    primary_hashtable = calloc(hashsize(hashpower + 1), sizeof(void *));
+    //空间申请成功
+    if (primary_hashtable) {
+        if (settings.verbose &gt; 1)
+            fprintf(stderr, &#34;Hash table expansion starting\n&#34;);
+
+        hashpower++;
+        //hash等级+1
+        expanding = true;
+        //扩容标识打开
+        expand_bucket = 0;
+        STATS_LOCK();
+        //更新全局统计信息
+        stats.hash_power_level = hashpower;
+        stats.hash_bytes += hashsize(hashpower) * sizeof(void *);
+        stats.hash_is_expanding = 1;
+        STATS_UNLOCK();
+    } else {
+        primary_hashtable = old_hashtable;
+    }
+}
+</code></pre>
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/blog/8f65d01cc42d4c8782d95eed02dd4eb5/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Memcached源码阅读序 服务器资源调整</span>
+  </a>
+  <a class="next" href="https://haokiu.com/blog/184a1ba071384d75b2da68fa7be54511/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Part I</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

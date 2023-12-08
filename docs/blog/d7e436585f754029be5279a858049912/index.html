@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>业务数据处理一定要单独开线程吗 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="业务数据处理一定要单独开线程吗 在 《one thread one loop 思想》一文我们介绍了一个 loop 的主要结构一般如下所示：
+while (!m_bQuitFlag) { epoll_or_select_func(); handle_io_events(); handle_other_things(); } 对于一些业务逻辑处理比较简单、不会太耗时的应用来说，handle_io_events() 方法除了收发数据也可以直接用来直接做业务的处理，即其结构如下：
+void handle_io_events() { //收发数据 recv_or_send_data(); //解包并处理数据 decode_packages_and_process(); } 其中 recv_or_send_data() 方法中调用 send/recv API 进行实际的网络数据收发。以收数据为例，收完数据存入接收缓冲区后，接下来进行解包处理，然后进行业务处理，例如一个登陆数据包，其业务就是验证登陆的账户密码是否正确、记录其登陆行为等等。从程序函数调用堆栈来看，这些业务处理逻辑其实是直接在网络收发数据线程中处理的。我的意思是：网络线程调用 handle_io_events() 方法，handle_io_events() 方法调用 decode_packages_and_process() 方法，decode_packages_and_process() 方法做具体的业务逻辑处理。
+需要注意的是，为了让网络层与业务层脱耦，网络层中通常会提供一些回调函数的接口，这些回调函数我们将其指向具体的业务处理函数。以 libevent 网络库的用法为例：
+int main(int argc, char **argv) { struct event_base *base; struct evconnlistener *listener; struct event *signal_event; struct sockaddr_in sin; base = event_base_new(); memset(&amp;sin, 0, sizeof(sin)); sin.sin_family = AF_INET; sin.sin_port = htons(PORT); //listener_cb是我们自定义回调函数 listener = evconnlistener_new_bind(base, listener_cb, (void *)base, LEV_OPT_REUSEABLE|LEV_OPT_CLOSE_ON_FREE, -1, (struct sockaddr*)&amp;sin, sizeof(sin)); if (!listener) { fprintf(stderr, &#34;Could not create a listener!\n&#34;); return 1; } //signal_cb是我们自定义回调函数 signal_event = evsignal_new(base, SIGINT, signal_cb, (void *)base); if (!">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/d7e436585f754029be5279a858049912/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="业务数据处理一定要单独开线程吗" />
+<meta property="og:description" content="业务数据处理一定要单独开线程吗 在 《one thread one loop 思想》一文我们介绍了一个 loop 的主要结构一般如下所示：
+while (!m_bQuitFlag) { epoll_or_select_func(); handle_io_events(); handle_other_things(); } 对于一些业务逻辑处理比较简单、不会太耗时的应用来说，handle_io_events() 方法除了收发数据也可以直接用来直接做业务的处理，即其结构如下：
+void handle_io_events() { //收发数据 recv_or_send_data(); //解包并处理数据 decode_packages_and_process(); } 其中 recv_or_send_data() 方法中调用 send/recv API 进行实际的网络数据收发。以收数据为例，收完数据存入接收缓冲区后，接下来进行解包处理，然后进行业务处理，例如一个登陆数据包，其业务就是验证登陆的账户密码是否正确、记录其登陆行为等等。从程序函数调用堆栈来看，这些业务处理逻辑其实是直接在网络收发数据线程中处理的。我的意思是：网络线程调用 handle_io_events() 方法，handle_io_events() 方法调用 decode_packages_and_process() 方法，decode_packages_and_process() 方法做具体的业务逻辑处理。
+需要注意的是，为了让网络层与业务层脱耦，网络层中通常会提供一些回调函数的接口，这些回调函数我们将其指向具体的业务处理函数。以 libevent 网络库的用法为例：
+int main(int argc, char **argv) { struct event_base *base; struct evconnlistener *listener; struct event *signal_event; struct sockaddr_in sin; base = event_base_new(); memset(&amp;sin, 0, sizeof(sin)); sin.sin_family = AF_INET; sin.sin_port = htons(PORT); //listener_cb是我们自定义回调函数 listener = evconnlistener_new_bind(base, listener_cb, (void *)base, LEV_OPT_REUSEABLE|LEV_OPT_CLOSE_ON_FREE, -1, (struct sockaddr*)&amp;sin, sizeof(sin)); if (!listener) { fprintf(stderr, &#34;Could not create a listener!\n&#34;); return 1; } //signal_cb是我们自定义回调函数 signal_event = evsignal_new(base, SIGINT, signal_cb, (void *)base); if (!" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/d7e436585f754029be5279a858049912/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:43+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:43+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="业务数据处理一定要单独开线程吗"/>
+<meta name="twitter:description" content="业务数据处理一定要单独开线程吗 在 《one thread one loop 思想》一文我们介绍了一个 loop 的主要结构一般如下所示：
+while (!m_bQuitFlag) { epoll_or_select_func(); handle_io_events(); handle_other_things(); } 对于一些业务逻辑处理比较简单、不会太耗时的应用来说，handle_io_events() 方法除了收发数据也可以直接用来直接做业务的处理，即其结构如下：
+void handle_io_events() { //收发数据 recv_or_send_data(); //解包并处理数据 decode_packages_and_process(); } 其中 recv_or_send_data() 方法中调用 send/recv API 进行实际的网络数据收发。以收数据为例，收完数据存入接收缓冲区后，接下来进行解包处理，然后进行业务处理，例如一个登陆数据包，其业务就是验证登陆的账户密码是否正确、记录其登陆行为等等。从程序函数调用堆栈来看，这些业务处理逻辑其实是直接在网络收发数据线程中处理的。我的意思是：网络线程调用 handle_io_events() 方法，handle_io_events() 方法调用 decode_packages_and_process() 方法，decode_packages_and_process() 方法做具体的业务逻辑处理。
+需要注意的是，为了让网络层与业务层脱耦，网络层中通常会提供一些回调函数的接口，这些回调函数我们将其指向具体的业务处理函数。以 libevent 网络库的用法为例：
+int main(int argc, char **argv) { struct event_base *base; struct evconnlistener *listener; struct event *signal_event; struct sockaddr_in sin; base = event_base_new(); memset(&amp;sin, 0, sizeof(sin)); sin.sin_family = AF_INET; sin.sin_port = htons(PORT); //listener_cb是我们自定义回调函数 listener = evconnlistener_new_bind(base, listener_cb, (void *)base, LEV_OPT_REUSEABLE|LEV_OPT_CLOSE_ON_FREE, -1, (struct sockaddr*)&amp;sin, sizeof(sin)); if (!listener) { fprintf(stderr, &#34;Could not create a listener!\n&#34;); return 1; } //signal_cb是我们自定义回调函数 signal_event = evsignal_new(base, SIGINT, signal_cb, (void *)base); if (!"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "业务数据处理一定要单独开线程吗",
+      "item": "https://haokiu.com/blog/d7e436585f754029be5279a858049912/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "业务数据处理一定要单独开线程吗",
+  "name": "业务数据处理一定要单独开线程吗",
+  "description": "业务数据处理一定要单独开线程吗 在 《one thread one loop 思想》一文我们介绍了一个 loop 的主要结构一般如下所示：\nwhile (!m_bQuitFlag) { epoll_or_select_func(); handle_io_events(); handle_other_things(); } 对于一些业务逻辑处理比较简单、不会太耗时的应用来说，handle_io_events() 方法除了收发数据也可以直接用来直接做业务的处理，即其结构如下：\nvoid handle_io_events() { //收发数据 recv_or_send_data(); //解包并处理数据 decode_packages_and_process(); } 其中 recv_or_send_data() 方法中调用 send/recv API 进行实际的网络数据收发。以收数据为例，收完数据存入接收缓冲区后，接下来进行解包处理，然后进行业务处理，例如一个登陆数据包，其业务就是验证登陆的账户密码是否正确、记录其登陆行为等等。从程序函数调用堆栈来看，这些业务处理逻辑其实是直接在网络收发数据线程中处理的。我的意思是：网络线程调用 handle_io_events() 方法，handle_io_events() 方法调用 decode_packages_and_process() 方法，decode_packages_and_process() 方法做具体的业务逻辑处理。\n需要注意的是，为了让网络层与业务层脱耦，网络层中通常会提供一些回调函数的接口，这些回调函数我们将其指向具体的业务处理函数。以 libevent 网络库的用法为例：\nint main(int argc, char **argv) { struct event_base *base; struct evconnlistener *listener; struct event *signal_event; struct sockaddr_in sin; base = event_base_new(); memset(\u0026amp;sin, 0, sizeof(sin)); sin.sin_family = AF_INET; sin.sin_port = htons(PORT); //listener_cb是我们自定义回调函数 listener = evconnlistener_new_bind(base, listener_cb, (void *)base, LEV_OPT_REUSEABLE|LEV_OPT_CLOSE_ON_FREE, -1, (struct sockaddr*)\u0026amp;sin, sizeof(sin)); if (!listener) { fprintf(stderr, \u0026#34;Could not create a listener!\\n\u0026#34;); return 1; } //signal_cb是我们自定义回调函数 signal_event = evsignal_new(base, SIGINT, signal_cb, (void *)base); if (!",
+  "keywords": [
+    
+  ],
+  "articleBody": "业务数据处理一定要单独开线程吗 在 《one thread one loop 思想》一文我们介绍了一个 loop 的主要结构一般如下所示：\nwhile (!m_bQuitFlag) { epoll_or_select_func(); handle_io_events(); handle_other_things(); } 对于一些业务逻辑处理比较简单、不会太耗时的应用来说，handle_io_events() 方法除了收发数据也可以直接用来直接做业务的处理，即其结构如下：\nvoid handle_io_events() { //收发数据 recv_or_send_data(); //解包并处理数据 decode_packages_and_process(); } 其中 recv_or_send_data() 方法中调用 send/recv API 进行实际的网络数据收发。以收数据为例，收完数据存入接收缓冲区后，接下来进行解包处理，然后进行业务处理，例如一个登陆数据包，其业务就是验证登陆的账户密码是否正确、记录其登陆行为等等。从程序函数调用堆栈来看，这些业务处理逻辑其实是直接在网络收发数据线程中处理的。我的意思是：网络线程调用 handle_io_events() 方法，handle_io_events() 方法调用 decode_packages_and_process() 方法，decode_packages_and_process() 方法做具体的业务逻辑处理。\n需要注意的是，为了让网络层与业务层脱耦，网络层中通常会提供一些回调函数的接口，这些回调函数我们将其指向具体的业务处理函数。以 libevent 网络库的用法为例：\nint main(int argc, char **argv) { struct event_base *base; struct evconnlistener *listener; struct event *signal_event; struct sockaddr_in sin; base = event_base_new(); memset(\u0026sin, 0, sizeof(sin)); sin.sin_family = AF_INET; sin.sin_port = htons(PORT); //listener_cb是我们自定义回调函数 listener = evconnlistener_new_bind(base, listener_cb, (void *)base, LEV_OPT_REUSEABLE|LEV_OPT_CLOSE_ON_FREE, -1, (struct sockaddr*)\u0026sin, sizeof(sin)); if (!listener) { fprintf(stderr, \"Could not create a listener!\\n\"); return 1; } //signal_cb是我们自定义回调函数 signal_event = evsignal_new(base, SIGINT, signal_cb, (void *)base); if (!signal_event || event_add(signal_event, NULL)\u003c0) { fprintf(stderr, \"Could not create/add a signal event!\\n\"); return 1; } //启动loop event_base_dispatch(base); evconnlistener_free(listener); event_free(signal_event); event_base_free(base); printf(\"done\\n\"); return 0; } 上述代码根据 libevent 自带的 helloworld 示例修改而来，其中 listener_cb 和 signal_cb 是自定义的回调函数，有相应的事件触发后，libevent 的事件循环会调用我们设置的回调，在这些回调函数中，我们可以编写自己的业务逻辑代码。\n这种基本的服务器结构，我们可以绘制成如下流程图：\n这是这个结构的最基本逻辑，在这基础上可以延伸出很多变体。不知道读者有没有发现，上述流程图中第三步解包和业务逻辑处理这一步中（位于 handle_io_events() 中的 decode_packages_and_process() 方法中），如果业务逻辑处理过程比较耗时（例如，从数据库取大量数据、写文件），那么会导致 网络线程在这个步骤停留时间很长，导致很久以后才能执行下一次循环，影响网络数据的检测和收发，最终导致整个程序的效率低下。\n因此，对于这种情形，我们需要将业务处理逻辑单独拆出来交给另外的业务工作线程处理，业务工作线程可以是一个线程池，这个过程业务数据从网络线程组流向业务线程组。\n这样的程序结构图如下图所示：\n上图中，对于网络线程将业务数据包交给业务线程，可以使用一个共享的业务数据队列来实现，此时网络线程是生产者，业务线程从业务数据队列中取出任务去处理，业务线程是消费者。业务线程处理完成后如果需要将结果数据发出去，则再将数据交给网络线程。这里处理后的数据从业务线程再次流向网络线程，那么如何将数据从业务线程交给网络线程呢？这里以发数据为例，一般有三种方法：\n方法一\n直接调用相应的的发数据的方法，如果你的网络线程本身也会调用这些发数据的方法，那么此时就可能会出现网络线程和业务线程同时对发方法进行调用，相当于多个线程同时调用 socket send 函数，这样可能会导致同一个连接上的数据顺序有问题，此时的做法时，利用锁机制，同一时刻只有一个线程可以调用 socket send 方法。这里给出一段伪代码，假设 TcpConnection 对象表示某路连接，无论网络线程还是业务线程处理完数据后需要发送数据，则使用：\nvoid TcpConnection::sendData(const std::string\u0026 data) { //加上锁 std::lock_guard scoped_lock(m_mutexForConnection); //在这里调用 send } 方法一的做法在设计上来说，存在让人不满意的地方，即数据发送应该属于网络层自己的事情，而不是其他模块（这里指的是业务线程）强行抢夺过来越俎代庖。\n方法二\n前面章节介绍了存在定时器结构的情况，网络线程结构变成如下流程：\nwhile (!m_bQuitFlag) { check_and_handle_timers(); epoll_or_select_func(); handle_io_events(); } 业务线程可以将需要发送的数据放入另外一个共享区域中（例如相应的 TcpConnection 对象的一个成员变量中），定时器定时从这个共享区域取出来，再发送出去，这种方案的优点是网络线程做了它该做的事情，缺点是需要添加定时器，让程序逻辑变得复杂，且定时器是每隔一段时间才会触发，发送的数据可能会有一定的延迟。\n方法三\n利用线程执行流中的 handle_other_things() 方法，再来看下前面章节中介绍的基本结构：\nwhile (!m_bQuitFlag) { epoll_or_select_func(); handle_io_events(); handle_other_things(); } 我们在《one thread one loop 思想》章节介绍了 handle_other_things() 函数可以做一些“其他事情”，这个函数可以在需要执行时通过前面章节介绍的唤醒机制立即被唤醒执行。业务线程将数据放入某个共享区域中（这一步和方法二介绍的一样），然后添加 “other_things” ，在 handle_other_things() 中执行数据的发送。\n如果读者能清晰明白地看到这里，说明您大致明白了一个不错的服务器框架是怎么回事了。上面介绍的服务器结构是目前主流的基于 Reactor 模式的服务程序的通用结构，例如 libevent、libuv。\n如果读者有兴趣，咱们可以再进一步深入讨论一下。\n实际应用中，很多程序的业务逻辑处理其实是不耗时的，也就是说这些业务逻辑处理速度很快。由于 CPU 核数有限，当线程数量超过 CPU 数量时，各个线程（网络线程和业务线程）也不是真正地并行执行，那么即使开了一组业务线程也不一定能真正地并发执行，而业务逻辑处理并不耗时，不会影响网络线程的执行效率，那么我们不如就在网络线程里面直接处理。\n上文介绍了在 handle_io_events() 方法中直接处理，如果处理的业务逻辑会产生新的其他任务，那么我们可以投递 “other_things”，最终交给 handle_other_things() 方法来处理。此时的服务器程序结构如下：\n特别说明一下：这种方式仅限于 handle_io_events() 或 handle_other_things() 里面不会有耗时的逻辑，才可以替代专门开业务线程，如果有耗时操作还得老老实实单独开业务线程。虽然线程数量超过 CPU 数量时，各个线程不会得到真正的并行，但那是操作系统线程调度的事情了，应用层开发不必关心这点。\n",
+  "wordCount" : "227",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:43Z",
+  "dateModified": "2021-01-11T09:20:43Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/d7e436585f754029be5279a858049912/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      业务数据处理一定要单独开线程吗
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:43 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#%e4%b8%9a%e5%8a%a1%e6%95%b0%e6%8d%ae%e5%a4%84%e7%90%86%e4%b8%80%e5%ae%9a%e8%a6%81%e5%8d%95%e7%8b%ac%e5%bc%80%e7%ba%bf%e7%a8%8b%e5%90%97" aria-label="业务数据处理一定要单独开线程吗">业务数据处理一定要单独开线程吗</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h2 id="业务数据处理一定要单独开线程吗">业务数据处理一定要单独开线程吗</h2>
+<p>在 《<a href="http://mp.weixin.qq.com/s?__biz=MzU2MTkwMTE4Nw==&amp;mid=2247487973&amp;idx=2&amp;sn=140004b0dfde45745091ab5c6522dcba&amp;chksm=fc70ea09cb07631f2a06d5be464c3b3c88dc309a16f797f548ec49971ef60b946d2b6e46fcf1&amp;scene=21#wechat_redirect">one thread one loop 思想</a>》一文我们介绍了一个 loop 的主要结构一般如下所示：</p>
+<pre tabindex="0"><code>while (!m_bQuitFlag)
+{
+	epoll_or_select_func();
+
+	handle_io_events();
+
+	handle_other_things();
+}
+</code></pre><p>对于一些业务逻辑处理比较简单、不会太耗时的应用来说，<strong>handle_io_events()</strong> 方法除了收发数据也可以直接用来直接做业务的处理，即其结构如下：</p>
+<pre tabindex="0"><code>void handle_io_events()
+{
+	//收发数据
+	recv_or_send_data();
+	
+	//解包并处理数据
+	decode_packages_and_process();
+}
+</code></pre><p>其中 <strong>recv_or_send_data()</strong> 方法中调用 send/recv API 进行实际的网络数据收发。以收数据为例，收完数据存入接收缓冲区后，接下来进行解包处理，然后进行业务处理，例如一个登陆数据包，其业务就是验证登陆的账户密码是否正确、记录其登陆行为等等。从程序函数调用堆栈来看，这些业务处理逻辑其实是直接在网络收发数据线程中处理的。我的意思是：网络线程调用 handle_io_events() 方法，handle_io_events() 方法调用 decode_packages_and_process() 方法，decode_packages_and_process() 方法做具体的业务逻辑处理。</p>
+<p>需要注意的是，为了让网络层与业务层脱耦，网络层中通常会提供一些回调函数的接口，这些回调函数我们将其指向具体的业务处理函数。以 libevent 网络库的用法为例：</p>
+<pre tabindex="0"><code>int main(int argc, char **argv)
+{
+	struct event_base *base;
+	struct evconnlistener *listener;
+	struct event *signal_event;
+
+	struct sockaddr_in sin;
+
+	base = event_base_new();
+
+	memset(&amp;sin, 0, sizeof(sin));
+	sin.sin_family = AF_INET;
+	sin.sin_port = htons(PORT);
+
+	//listener_cb是我们自定义回调函数
+	listener = evconnlistener_new_bind(base, listener_cb, (void *)base,
+	    LEV_OPT_REUSEABLE|LEV_OPT_CLOSE_ON_FREE, -1,
+	    (struct sockaddr*)&amp;sin,
+	    sizeof(sin));
+
+	if (!listener) {
+		fprintf(stderr, &#34;Could not create a listener!\n&#34;);
+		return 1;
+	}
+
+	//signal_cb是我们自定义回调函数
+	signal_event = evsignal_new(base, SIGINT, signal_cb, (void *)base);
+
+	if (!signal_event || event_add(signal_event, NULL)&lt;0) {
+		fprintf(stderr, &#34;Could not create/add a signal event!\n&#34;);
+		return 1;
+	}
+
+	//启动loop
+	event_base_dispatch(base);
+
+	evconnlistener_free(listener);
+	event_free(signal_event);
+	event_base_free(base);
+
+	printf(&#34;done\n&#34;);
+	return 0;
+}
+</code></pre><p>上述代码根据 libevent 自带的 helloworld 示例修改而来，其中 <strong>listener_cb</strong> 和 <strong>signal_cb</strong> 是自定义的回调函数，有相应的事件触发后，libevent 的事件循环会调用我们设置的回调，在这些回调函数中，我们可以编写自己的业务逻辑代码。</p>
+<p>这种基本的服务器结构，我们可以绘制成如下流程图：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/e3d5227fb2a5de1f253e5fc3ccd61061.png" alt=""  />
+</p>
+<p>这是这个结构的最基本逻辑，在这基础上可以延伸出很多变体。不知道读者有没有发现，上述流程图中第三步解包和业务逻辑处理这一步中（位于 <strong>handle_io_events()</strong> 中的 <strong>decode_packages_and_process()</strong> 方法中），如果业务逻辑处理过程比较耗时（例如，从数据库取大量数据、写文件），那么会导致 网络线程在这个步骤停留时间很长，导致很久以后才能执行下一次循环，影响网络数据的检测和收发，最终导致整个程序的效率低下。</p>
+<p>因此，对于这种情形，我们需要将业务处理逻辑单独拆出来交给另外的业务工作线程处理，业务工作线程可以是一个线程池，这个过程业务数据从网络线程组流向业务线程组。</p>
+<p>这样的程序结构图如下图所示：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/967679d2671c973428ba3d81ac224af3.webp" alt=""  />
+</p>
+<p>上图中，对于网络线程将业务数据包交给业务线程，可以使用一个共享的业务数据队列来实现，此时网络线程是生产者，业务线程从业务数据队列中取出任务去处理，业务线程是消费者。业务线程处理完成后如果需要将结果数据发出去，则再将数据交给网络线程。这里处理后的数据从业务线程再次流向网络线程，那么如何将数据从业务线程交给网络线程呢？这里以发数据为例，一般有三种方法：</p>
+<p><strong>方法一</strong></p>
+<p>直接调用相应的的发数据的方法，如果你的网络线程本身也会调用这些发数据的方法，那么此时就可能会出现网络线程和业务线程同时对发方法进行调用，相当于多个线程同时调用 socket send 函数，这样可能会导致同一个连接上的数据顺序有问题，此时的做法时，利用锁机制，同一时刻只有一个线程可以调用 socket send 方法。这里给出一段伪代码，假设 TcpConnection 对象表示某路连接，无论网络线程还是业务线程处理完数据后需要发送数据，则使用：</p>
+<pre tabindex="0"><code>void TcpConnection::sendData(const std::string&amp; data)
+{
+	//加上锁
+	std::lock_guard&lt;std::mutex&gt; scoped_lock(m_mutexForConnection);
+	//在这里调用 send
+}
+</code></pre><p>方法一的做法在设计上来说，存在让人不满意的地方，即数据发送应该属于网络层自己的事情，而不是其他模块（这里指的是业务线程）强行抢夺过来越俎代庖。</p>
+<p><strong>方法二</strong></p>
+<p>前面章节介绍了存在定时器结构的情况，网络线程结构变成如下流程：</p>
+<pre tabindex="0"><code>while (!m_bQuitFlag)
+{
+	check_and_handle_timers();
+	
+	epoll_or_select_func();
+
+	handle_io_events();
+}
+</code></pre><p>业务线程可以将需要发送的数据放入另外一个共享区域中（例如相应的 TcpConnection 对象的一个成员变量中），定时器定时从这个共享区域取出来，再发送出去，这种方案的优点是网络线程做了它该做的事情，缺点是需要添加定时器，让程序逻辑变得复杂，且定时器是每隔一段时间才会触发，发送的数据可能会有一定的延迟。</p>
+<p><strong>方法三</strong></p>
+<p>利用线程执行流中的 <strong>handle_other_things()</strong> 方法，再来看下前面章节中介绍的基本结构：</p>
+<pre tabindex="0"><code>while (!m_bQuitFlag)
+{
+	epoll_or_select_func();
+
+	handle_io_events();
+
+	handle_other_things();
+}
+</code></pre><p>我们在《one thread one loop 思想》章节介绍了 <strong>handle_other_things()</strong> 函数可以做一些“其他事情”，这个函数可以在需要执行时通过前面章节介绍的唤醒机制立即被唤醒执行。业务线程将数据放入某个共享区域中（这一步和<strong>方法二</strong>介绍的一样），然后添加 &ldquo;other_things&rdquo; ，在 <strong>handle_other_things()</strong> 中执行数据的发送。</p>
+<p>如果读者能清晰明白地看到这里，说明您大致明白了一个不错的服务器框架是怎么回事了。上面介绍的服务器结构是目前主流的基于 Reactor 模式的服务程序的通用结构，例如 libevent、libuv。</p>
+<p>如果读者有兴趣，咱们可以再进一步深入讨论一下。</p>
+<p>实际应用中，很多程序的业务逻辑处理其实是不耗时的，也就是说这些业务逻辑处理速度很快。由于 CPU 核数有限，当线程数量超过 CPU 数量时，各个线程（网络线程和业务线程）也不是真正地并行执行，那么即使开了一组业务线程也不一定能真正地并发执行，而业务逻辑处理并不耗时，不会影响网络线程的执行效率，那么我们不如就在网络线程里面直接处理。</p>
+<p>上文介绍了在 handle_io_events() 方法中直接处理，如果处理的业务逻辑会产生新的其他任务，那么我们可以投递 &ldquo;other_things&rdquo;，最终交给 <strong>handle_other_things()</strong> 方法来处理。此时的服务器程序结构如下：</p>
+<p>特别说明一下：这种方式仅限于 handle_io_events() 或 handle_other_things() 里面不会有耗时的逻辑，才可以替代专门开业务线程，如果有耗时操作还得老老实实单独开业务线程。虽然线程数量超过 CPU 数量时，各个线程不会得到真正的并行，但那是操作系统线程调度的事情了，应用层开发不必关心这点。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/blog/23cb111095cb47f3b6115efccd11086d/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Reactor模式</span>
+  </a>
+  <a class="next" href="https://haokiu.com/blog/450c6c7995774bec88a383c0ce41cfdc/">
+    <span class="title">Next »</span>
+    <br>
+    <span>主线程与工作线程的分工</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

@@ -10,10 +10,10 @@
     <lastBuildDate>Wed, 24 Feb 2021 10:24:56 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/java/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>java 到底要不要收费</title>
-      <link>https://haokiu.com/AWAwA5/</link>
+      <link>https://haokiu.com/blog/AWAwA5/</link>
       <pubDate>Wed, 24 Feb 2021 10:24:56 +0000</pubDate>
       
-      <guid>https://haokiu.com/AWAwA5/</guid>
+      <guid>https://haokiu.com/blog/AWAwA5/</guid>
       <description>随着JDK 11发布, Oracle同时调整了JDK的授权许可证,里面包含了好几个动作。
 首先, Oracle从JDK 11起把以前的商业特性全部开源给OpenJDK,这样OpenJDK 11和OracleJDK 11的代码和功能,在本质上就是完全相同的(官方原文是Essentially Identical)。
 然后, Oracle宣布以后将会同时发行两个JDK:一个是以GPLV2+CE协议下由Oracle发行的OpenJDK (本书后面章节称其为Oracle OpenJDK) ,另一个是在新的OTN协议下发行的传统的OracleJDK。

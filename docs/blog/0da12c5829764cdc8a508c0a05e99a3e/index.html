@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>leveldb源码分析20 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="leveldb源码分析20 本系列《leveldb源码分析》共有22篇文章，这是第二十篇 12 DB的打开 先分析LevelDB是如何打开db的，万物始于创建。在打开流程中有几个辅助函数：DBImpl()，DBImpl::Recover, DBImpl::DeleteObsoleteFiles, DBImpl::RecoverLogFile, DBImpl::MaybeScheduleCompaction。
+12.1 DB::Open() 打开一个db，进行PUT、GET操作，就是前面的静态函数DB::Open的工作。如果操作成功，它就返回一个db指针。前面说过DB就是一个接口类，其具体实现在DBImp类中，这是一个DB的子类。 函数声明为：
+Status DB::Open(const Options&amp; options, const std::string&amp;dbname, DB** dbptr); 分解来看，Open()函数主要有以下5个执行步骤。 S1 创建DBImpl对象，其后进入**DBImpl::Recover()函数执行S2和S3。 S2 从已存在的db文件恢复db数据，根据CURRENT记录的MANIFEST文件读取db元信息；这通过调用VersionSet::Recover()完成。 S3 然后过滤出那些最近的更新log，前一个版本可能新加了这些log，但并没有记录在MANIFEST中。然后依次根据时间顺序，调用DBImpl::RecoverLogFile()从旧到新回放这些操作log。回放log时可能会修改db元信息，比如dump了新的level 0文件，因此它将返回一个VersionEdit对象，记录db元信息的变动。 S4 如果DBImpl::Recover()返回成功，就执行VersionSet::LogAndApply()**应用VersionEdit，并保存当前的DB信息到新的MANIFEST文件中。 S5 最后删除一些过期文件，并检查是否需要执行compaction，如果需要，就启动后台线程执行。 下面就来具体分析Open函数的代码，在Open函数中涉及到上面的3个流程。 S1 首先创建DBImpl对象，锁定并试图做Recover操作。Recover操作用来处理创建flag，比如存在就返回失败等等，尝试从已存在的sstable文件恢复db。并返回db元信息的变动信息，一个VersionEdit对象。
+1DBImpl* impl = newDBImpl(options, dbname); 2impl-&gt;mutex_.Lock(); // 锁db 3VersionEdit edit; 4Status s =impl-&gt;Recover(&amp;edit); // 处理flag&amp;恢复：create_if_missing,error_if_exists S2 如果Recover返回成功，则调用VersionSet取得新的log文件编号——实际上是在当前基础上&#43;1，准备新的log文件。如果log文件创建成功，则根据log文件创建log::Writer。然后执行VersionSet::LogAndApply，根据edit记录的增量变动生成新的current version，并写入MANIFEST文件。
+函数NewFileNumber(){returnnext_file_number_&#43;&#43;;}，直接返回next_file_number_。
+1uint64_t new_log_number = impl-&gt;versions_-&gt;NewFileNumber(); 2WritableFile* lfile; 3s = options.env-&gt;NewWritableFile(LogFileName(dbname, new_log_number), &amp;lfile); 4if (s.ok()) { 5 edit.SetLogNumber(new_log_number); 6 impl-&gt;logfile_ = lfile; 7 impl-&gt;logfile_number_ = new_log_number; 8 impl-&gt;log_ = newlog::Writer(lfile); 9 s = impl-&gt;versions_-&gt;LogAndApply(&amp;edit, &amp;impl-&gt;mutex_); 10} S3 如果VersionSet::LogAndApply返回成功，则删除过期文件，检查是否需要执行compaction，最终返回创建的DBImpl对象。
+1if (s.ok()) { 2 impl-&gt;DeleteObsoleteFiles(); 3 impl-&gt;MaybeScheduleCompaction(); 4} 5impl-&gt;mutex_.Unlock(); 6if (s.">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/0da12c5829764cdc8a508c0a05e99a3e/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="leveldb源码分析20" />
+<meta property="og:description" content="leveldb源码分析20 本系列《leveldb源码分析》共有22篇文章，这是第二十篇 12 DB的打开 先分析LevelDB是如何打开db的，万物始于创建。在打开流程中有几个辅助函数：DBImpl()，DBImpl::Recover, DBImpl::DeleteObsoleteFiles, DBImpl::RecoverLogFile, DBImpl::MaybeScheduleCompaction。
+12.1 DB::Open() 打开一个db，进行PUT、GET操作，就是前面的静态函数DB::Open的工作。如果操作成功，它就返回一个db指针。前面说过DB就是一个接口类，其具体实现在DBImp类中，这是一个DB的子类。 函数声明为：
+Status DB::Open(const Options&amp; options, const std::string&amp;dbname, DB** dbptr); 分解来看，Open()函数主要有以下5个执行步骤。 S1 创建DBImpl对象，其后进入**DBImpl::Recover()函数执行S2和S3。 S2 从已存在的db文件恢复db数据，根据CURRENT记录的MANIFEST文件读取db元信息；这通过调用VersionSet::Recover()完成。 S3 然后过滤出那些最近的更新log，前一个版本可能新加了这些log，但并没有记录在MANIFEST中。然后依次根据时间顺序，调用DBImpl::RecoverLogFile()从旧到新回放这些操作log。回放log时可能会修改db元信息，比如dump了新的level 0文件，因此它将返回一个VersionEdit对象，记录db元信息的变动。 S4 如果DBImpl::Recover()返回成功，就执行VersionSet::LogAndApply()**应用VersionEdit，并保存当前的DB信息到新的MANIFEST文件中。 S5 最后删除一些过期文件，并检查是否需要执行compaction，如果需要，就启动后台线程执行。 下面就来具体分析Open函数的代码，在Open函数中涉及到上面的3个流程。 S1 首先创建DBImpl对象，锁定并试图做Recover操作。Recover操作用来处理创建flag，比如存在就返回失败等等，尝试从已存在的sstable文件恢复db。并返回db元信息的变动信息，一个VersionEdit对象。
+1DBImpl* impl = newDBImpl(options, dbname); 2impl-&gt;mutex_.Lock(); // 锁db 3VersionEdit edit; 4Status s =impl-&gt;Recover(&amp;edit); // 处理flag&amp;恢复：create_if_missing,error_if_exists S2 如果Recover返回成功，则调用VersionSet取得新的log文件编号——实际上是在当前基础上&#43;1，准备新的log文件。如果log文件创建成功，则根据log文件创建log::Writer。然后执行VersionSet::LogAndApply，根据edit记录的增量变动生成新的current version，并写入MANIFEST文件。
+函数NewFileNumber(){returnnext_file_number_&#43;&#43;;}，直接返回next_file_number_。
+1uint64_t new_log_number = impl-&gt;versions_-&gt;NewFileNumber(); 2WritableFile* lfile; 3s = options.env-&gt;NewWritableFile(LogFileName(dbname, new_log_number), &amp;lfile); 4if (s.ok()) { 5 edit.SetLogNumber(new_log_number); 6 impl-&gt;logfile_ = lfile; 7 impl-&gt;logfile_number_ = new_log_number; 8 impl-&gt;log_ = newlog::Writer(lfile); 9 s = impl-&gt;versions_-&gt;LogAndApply(&amp;edit, &amp;impl-&gt;mutex_); 10} S3 如果VersionSet::LogAndApply返回成功，则删除过期文件，检查是否需要执行compaction，最终返回创建的DBImpl对象。
+1if (s.ok()) { 2 impl-&gt;DeleteObsoleteFiles(); 3 impl-&gt;MaybeScheduleCompaction(); 4} 5impl-&gt;mutex_.Unlock(); 6if (s." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/0da12c5829764cdc8a508c0a05e99a3e/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="leveldb源码分析20"/>
+<meta name="twitter:description" content="leveldb源码分析20 本系列《leveldb源码分析》共有22篇文章，这是第二十篇 12 DB的打开 先分析LevelDB是如何打开db的，万物始于创建。在打开流程中有几个辅助函数：DBImpl()，DBImpl::Recover, DBImpl::DeleteObsoleteFiles, DBImpl::RecoverLogFile, DBImpl::MaybeScheduleCompaction。
+12.1 DB::Open() 打开一个db，进行PUT、GET操作，就是前面的静态函数DB::Open的工作。如果操作成功，它就返回一个db指针。前面说过DB就是一个接口类，其具体实现在DBImp类中，这是一个DB的子类。 函数声明为：
+Status DB::Open(const Options&amp; options, const std::string&amp;dbname, DB** dbptr); 分解来看，Open()函数主要有以下5个执行步骤。 S1 创建DBImpl对象，其后进入**DBImpl::Recover()函数执行S2和S3。 S2 从已存在的db文件恢复db数据，根据CURRENT记录的MANIFEST文件读取db元信息；这通过调用VersionSet::Recover()完成。 S3 然后过滤出那些最近的更新log，前一个版本可能新加了这些log，但并没有记录在MANIFEST中。然后依次根据时间顺序，调用DBImpl::RecoverLogFile()从旧到新回放这些操作log。回放log时可能会修改db元信息，比如dump了新的level 0文件，因此它将返回一个VersionEdit对象，记录db元信息的变动。 S4 如果DBImpl::Recover()返回成功，就执行VersionSet::LogAndApply()**应用VersionEdit，并保存当前的DB信息到新的MANIFEST文件中。 S5 最后删除一些过期文件，并检查是否需要执行compaction，如果需要，就启动后台线程执行。 下面就来具体分析Open函数的代码，在Open函数中涉及到上面的3个流程。 S1 首先创建DBImpl对象，锁定并试图做Recover操作。Recover操作用来处理创建flag，比如存在就返回失败等等，尝试从已存在的sstable文件恢复db。并返回db元信息的变动信息，一个VersionEdit对象。
+1DBImpl* impl = newDBImpl(options, dbname); 2impl-&gt;mutex_.Lock(); // 锁db 3VersionEdit edit; 4Status s =impl-&gt;Recover(&amp;edit); // 处理flag&amp;恢复：create_if_missing,error_if_exists S2 如果Recover返回成功，则调用VersionSet取得新的log文件编号——实际上是在当前基础上&#43;1，准备新的log文件。如果log文件创建成功，则根据log文件创建log::Writer。然后执行VersionSet::LogAndApply，根据edit记录的增量变动生成新的current version，并写入MANIFEST文件。
+函数NewFileNumber(){returnnext_file_number_&#43;&#43;;}，直接返回next_file_number_。
+1uint64_t new_log_number = impl-&gt;versions_-&gt;NewFileNumber(); 2WritableFile* lfile; 3s = options.env-&gt;NewWritableFile(LogFileName(dbname, new_log_number), &amp;lfile); 4if (s.ok()) { 5 edit.SetLogNumber(new_log_number); 6 impl-&gt;logfile_ = lfile; 7 impl-&gt;logfile_number_ = new_log_number; 8 impl-&gt;log_ = newlog::Writer(lfile); 9 s = impl-&gt;versions_-&gt;LogAndApply(&amp;edit, &amp;impl-&gt;mutex_); 10} S3 如果VersionSet::LogAndApply返回成功，则删除过期文件，检查是否需要执行compaction，最终返回创建的DBImpl对象。
+1if (s.ok()) { 2 impl-&gt;DeleteObsoleteFiles(); 3 impl-&gt;MaybeScheduleCompaction(); 4} 5impl-&gt;mutex_.Unlock(); 6if (s."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "leveldb源码分析20",
+      "item": "https://haokiu.com/blog/0da12c5829764cdc8a508c0a05e99a3e/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "leveldb源码分析20",
+  "name": "leveldb源码分析20",
+  "description": "leveldb源码分析20 本系列《leveldb源码分析》共有22篇文章，这是第二十篇 12 DB的打开 先分析LevelDB是如何打开db的，万物始于创建。在打开流程中有几个辅助函数：DBImpl()，DBImpl::Recover, DBImpl::DeleteObsoleteFiles, DBImpl::RecoverLogFile, DBImpl::MaybeScheduleCompaction。\n12.1 DB::Open() 打开一个db，进行PUT、GET操作，就是前面的静态函数DB::Open的工作。如果操作成功，它就返回一个db指针。前面说过DB就是一个接口类，其具体实现在DBImp类中，这是一个DB的子类。 函数声明为：\nStatus DB::Open(const Options\u0026amp; options, const std::string\u0026amp;dbname, DB** dbptr); 分解来看，Open()函数主要有以下5个执行步骤。 S1 创建DBImpl对象，其后进入**DBImpl::Recover()函数执行S2和S3。 S2 从已存在的db文件恢复db数据，根据CURRENT记录的MANIFEST文件读取db元信息；这通过调用VersionSet::Recover()完成。 S3 然后过滤出那些最近的更新log，前一个版本可能新加了这些log，但并没有记录在MANIFEST中。然后依次根据时间顺序，调用DBImpl::RecoverLogFile()从旧到新回放这些操作log。回放log时可能会修改db元信息，比如dump了新的level 0文件，因此它将返回一个VersionEdit对象，记录db元信息的变动。 S4 如果DBImpl::Recover()返回成功，就执行VersionSet::LogAndApply()**应用VersionEdit，并保存当前的DB信息到新的MANIFEST文件中。 S5 最后删除一些过期文件，并检查是否需要执行compaction，如果需要，就启动后台线程执行。 下面就来具体分析Open函数的代码，在Open函数中涉及到上面的3个流程。 S1 首先创建DBImpl对象，锁定并试图做Recover操作。Recover操作用来处理创建flag，比如存在就返回失败等等，尝试从已存在的sstable文件恢复db。并返回db元信息的变动信息，一个VersionEdit对象。\n1DBImpl* impl = newDBImpl(options, dbname); 2impl-\u0026gt;mutex_.Lock(); // 锁db 3VersionEdit edit; 4Status s =impl-\u0026gt;Recover(\u0026amp;edit); // 处理flag\u0026amp;恢复：create_if_missing,error_if_exists S2 如果Recover返回成功，则调用VersionSet取得新的log文件编号——实际上是在当前基础上+1，准备新的log文件。如果log文件创建成功，则根据log文件创建log::Writer。然后执行VersionSet::LogAndApply，根据edit记录的增量变动生成新的current version，并写入MANIFEST文件。\n函数NewFileNumber(){returnnext_file_number_++;}，直接返回next_file_number_。\n1uint64_t new_log_number = impl-\u0026gt;versions_-\u0026gt;NewFileNumber(); 2WritableFile* lfile; 3s = options.env-\u0026gt;NewWritableFile(LogFileName(dbname, new_log_number), \u0026amp;lfile); 4if (s.ok()) { 5 edit.SetLogNumber(new_log_number); 6 impl-\u0026gt;logfile_ = lfile; 7 impl-\u0026gt;logfile_number_ = new_log_number; 8 impl-\u0026gt;log_ = newlog::Writer(lfile); 9 s = impl-\u0026gt;versions_-\u0026gt;LogAndApply(\u0026amp;edit, \u0026amp;impl-\u0026gt;mutex_); 10} S3 如果VersionSet::LogAndApply返回成功，则删除过期文件，检查是否需要执行compaction，最终返回创建的DBImpl对象。\n1if (s.ok()) { 2 impl-\u0026gt;DeleteObsoleteFiles(); 3 impl-\u0026gt;MaybeScheduleCompaction(); 4} 5impl-\u0026gt;mutex_.Unlock(); 6if (s.",
+  "keywords": [
+    
+  ],
+  "articleBody": "leveldb源码分析20 本系列《leveldb源码分析》共有22篇文章，这是第二十篇 12 DB的打开 先分析LevelDB是如何打开db的，万物始于创建。在打开流程中有几个辅助函数：DBImpl()，DBImpl::Recover, DBImpl::DeleteObsoleteFiles, DBImpl::RecoverLogFile, DBImpl::MaybeScheduleCompaction。\n12.1 DB::Open() 打开一个db，进行PUT、GET操作，就是前面的静态函数DB::Open的工作。如果操作成功，它就返回一个db指针。前面说过DB就是一个接口类，其具体实现在DBImp类中，这是一个DB的子类。 函数声明为：\nStatus DB::Open(const Options\u0026 options, const std::string\u0026dbname, DB** dbptr); 分解来看，Open()函数主要有以下5个执行步骤。 S1 创建DBImpl对象，其后进入**DBImpl::Recover()函数执行S2和S3。 S2 从已存在的db文件恢复db数据，根据CURRENT记录的MANIFEST文件读取db元信息；这通过调用VersionSet::Recover()完成。 S3 然后过滤出那些最近的更新log，前一个版本可能新加了这些log，但并没有记录在MANIFEST中。然后依次根据时间顺序，调用DBImpl::RecoverLogFile()从旧到新回放这些操作log。回放log时可能会修改db元信息，比如dump了新的level 0文件，因此它将返回一个VersionEdit对象，记录db元信息的变动。 S4 如果DBImpl::Recover()返回成功，就执行VersionSet::LogAndApply()**应用VersionEdit，并保存当前的DB信息到新的MANIFEST文件中。 S5 最后删除一些过期文件，并检查是否需要执行compaction，如果需要，就启动后台线程执行。 下面就来具体分析Open函数的代码，在Open函数中涉及到上面的3个流程。 S1 首先创建DBImpl对象，锁定并试图做Recover操作。Recover操作用来处理创建flag，比如存在就返回失败等等，尝试从已存在的sstable文件恢复db。并返回db元信息的变动信息，一个VersionEdit对象。\n1DBImpl* impl = newDBImpl(options, dbname); 2impl-\u003emutex_.Lock(); // 锁db 3VersionEdit edit; 4Status s =impl-\u003eRecover(\u0026edit); // 处理flag\u0026恢复：create_if_missing,error_if_exists S2 如果Recover返回成功，则调用VersionSet取得新的log文件编号——实际上是在当前基础上+1，准备新的log文件。如果log文件创建成功，则根据log文件创建log::Writer。然后执行VersionSet::LogAndApply，根据edit记录的增量变动生成新的current version，并写入MANIFEST文件。\n函数NewFileNumber(){returnnext_file_number_++;}，直接返回next_file_number_。\n1uint64_t new_log_number = impl-\u003eversions_-\u003eNewFileNumber(); 2WritableFile* lfile; 3s = options.env-\u003eNewWritableFile(LogFileName(dbname, new_log_number), \u0026lfile); 4if (s.ok()) { 5 edit.SetLogNumber(new_log_number); 6 impl-\u003elogfile_ = lfile; 7 impl-\u003elogfile_number_ = new_log_number; 8 impl-\u003elog_ = newlog::Writer(lfile); 9 s = impl-\u003eversions_-\u003eLogAndApply(\u0026edit, \u0026impl-\u003emutex_); 10} S3 如果VersionSet::LogAndApply返回成功，则删除过期文件，检查是否需要执行compaction，最终返回创建的DBImpl对象。\n1if (s.ok()) { 2 impl-\u003eDeleteObsoleteFiles(); 3 impl-\u003eMaybeScheduleCompaction(); 4} 5impl-\u003emutex_.Unlock(); 6if (s.ok()) *dbptr = impl; 7return s; 以上就是DB::Open的主题逻辑。\n12.2 DBImpl::DBImpl()\n构造函数做的都是初始化操作，\nDBImpl::DBImpl(const Options\u0026 options, const std::string\u0026dbname) 首先是初始化列表中，直接根据参数赋值，或者直接初始化。Comparator和filter policy都是参数传入的。在传递option时会首先将option中的参数合法化，**logfile_number_**初始化为0，指针初始化为NULL。 创建MemTable，并增加引用计数，创建WriteBatch。\n1mem_(newMemTable(internal_comparator_)), 2tmp_batch_(new WriteBatch), 3mem_-\u003eRef(); 4// 然后在函数体中，创建TableCache和VersionSet。 5// 为其他预留10个文件，其余的都给TableCache. 6const int table_cache_size = options.max_open_files - 10; 7table_cache_ = newTableCache(dbname_, \u0026options_, table_cache_size); 8versions_ = newVersionSet(dbname_, \u0026options_, table_cache_, \u0026internal_comparator_); 12.3 DBImp::NewDB() 当外部在调用DB::Open()时设置了option指定如果db不存在就创建，如果db不存在leveldb就会调用函数创建新的db。判断db是否存在的依据是**/CURRENT**文件是否存在。其逻辑很简单。\n1// S1首先生产DB元信息，设置comparator名，以及log文件编号、文件编号，以及seq no。 2VersionEdit new_db; 3new_db.SetComparatorName(user_comparator()-\u003eName()); 4new_db.SetLogNumber(0); 5new_db.SetNextFile(2); 6new_db.SetLastSequence(0); 7// S2 生产MANIFEST文件，将db元信息写入MANIFEST文件。 8const std::string manifest = DescriptorFileName(dbname_, 1); 9WritableFile* file; 10Status s = env_-\u003eNewWritableFile(manifest, \u0026file); 11if (!s.ok()) return s; 12{ 13 log::Writer log(file); 14 std::string record; 15 new_db.EncodeTo(\u0026record); 16 s = log.AddRecord(record); 17 if (s.ok()) s = file-\u003eClose(); 18} 19delete file; 20// S3 如果成功，就把MANIFEST文件名写入到CURRENT文件中 21if (s.ok()) s = SetCurrentFile(env_, dbname_, 1); 22elseenv_-\u003eDeleteFile(manifest); 23return s; 这就是创建新DB的逻辑，很简单。\n12.4 DBImpl::Recover()\n函数声明为：\nStatusDBImpl::Recover(VersionEdit* edit) 如果调用成功则设置VersionEdit。Recover的基本功能是：首先是处理创建flag，比如存在就返回失败等等；然后是尝试从已存在的sstable文件恢复db；最后如果发现有大于原信息记录的log编号的log文件，则需要回放log，更新db数据。回放期间db可能会dump新的level 0文件，因此需要把db元信息的变动记录到edit中返回。函数逻辑如下：\nS1 创建目录，目录以db name命名，忽略任何创建错误，然后尝试获取db name/LOCK文件锁，失败则返回。\n1env_-\u003eCreateDir(dbname_); 2Status s = env_-\u003eLockFile(LockFileName(dbname_), \u0026db_lock_); 3if (!s.ok()) return s; S2 根据CURRENT文件是否存在，以及option参数执行检查。 如果文件不存在**\u0026create_is_missing=true**，则调用函数NewDB()创建；否则报错。 如果文件存在\u0026 error_if_exists=true，则报错。 S3 调用VersionSet的**Recover()**函数，就是从文件中恢复数据。如果出错则打开失败，成功则向下执行S4。\ns = versions_-\u003eRecover(); S4尝试从所有比manifest文件中记录的log要新的log文件中恢复（前一个版本可能会添加新的log文件，却没有记录在manifest中）。另外，函数PrevLogNumber()已经不再用了，仅为了兼容老版本。\n1// S4.1 这里先找出所有满足条件的log文件：比manifest文件记录的log编号更新。 2SequenceNumber max_sequence(0); 3const uint64_t min_log = versions_-\u003eLogNumber(); 4const uint64_t prev_log = versions_-\u003ePrevLogNumber(); 5std::vectorfilenames; 6s = env_-\u003eGetChildren(dbname_, \u0026filenames); // 列出目录内的所有文件 7uint64_t number; 8FileType type; 9std::vectorlogs; 10for (size_t i = 0; i \u003c filenames.size(); i++) { // 检查log文件是否比min log更新 11 if (ParseFileName(filenames[i], \u0026number, \u0026type) \u0026\u0026 type == kLogFile 12 \u0026\u0026 ((number \u003e= min_log) || (number == prev_log))) { 13 logs.push_back(number); 14 } 15} 16// S4.2 找到log文件后，首先排序，保证按照生成顺序，依次回放log。并把DB元信息的变动（sstable文件的变动）追加到edit中返回。 17std::sort(logs.begin(), logs.end()); 18for (size_t i = 0; i \u003c logs.size(); i++) { 19 s = RecoverLogFile(logs[i], edit, \u0026max_sequence); 20 // 前一版可能在生成该log编号后没有记录在MANIFEST中， 21 //所以这里我们手动更新VersionSet中的文件编号计数器 22 versions_-\u003eMarkFileNumberUsed(logs[i]); 23} 24// S4.3 更新VersionSet的sequence 25if (s.ok()) { 26 if (versions_-\u003eLastSequence() \u003c max_sequence) 27 versions_-\u003eSetLastSequence(max_sequence); 28} 上面就是Recover的执行流程。\n12.5 DBImpl::DeleteObsoleteFiles() 这个是垃圾回收函数，如前所述，每次compaction和recovery之后都会有文件被废弃。DeleteObsoleteFiles就是删除这些垃圾文件的，它在每次compaction和recovery完成之后被调用。 其调用点包括：DBImpl::CompactMemTable,DBImpl::BackgroundCompaction, 以及DB::Open的recovery步骤之后。 它会删除所有过期的log文件，没有被任何level引用到、或不是正在执行的compaction的output的sstable文件。 该函数没有参数，其代码逻辑也很直观，就是列出db的所有文件，对不同类型的文件分别判断，如果是过期文件，就删除之，如下：\n1// S1 首先，确保不会删除pending文件，将versionset正在使用的所有文件加入到live中。 2std::set live = pending_outputs_; 3versions_-\u003eAddLiveFiles(\u0026live); //该函数其后分析 4 // S2 列举db的所有文件 5std::vectorfilenames; 6env_-\u003eGetChildren(dbname_, \u0026filenames); 7// S3 遍历所有列举的文件，根据文件类型，分别处理； 8uint64_t number; 9FileType type; 10for (size_t i = 0; i \u003c filenames.size(); i++) { 11 if (ParseFileName(filenames[i], \u0026number, \u0026type)) { 12 bool keep = true; //false表明是过期文件 13 // S3.1 kLogFile，log文件，根据log编号判断是否过期 14 keep = ((number \u003e= versions_-\u003eLogNumber()) || 15 (number == versions_-\u003ePrevLogNumber())); 16 // S3.2 kDescriptorFile，MANIFEST文件，根据versionset记录的编号判断 17 keep = (number \u003e= versions_-\u003eManifestFileNumber()); 18 // S3.3 kTableFile，sstable文件，只要在live中就不能删除 19 // S3.4 kTempFile，如果是正在写的文件，只要在live中就不能删除 20 keep = (live.find(number) != live.end()); 21 // S3.5 kCurrentFile,kDBLockFile, kInfoLogFile，不能删除 22 keep = true; 23 // S3.6 如果keep为false，表明需要删除文件，如果是table还要从cache中删除 24 if (!keep) { 25 if (type == kTableFile) table_cache_-\u003eEvict(number); 26 Log(options_.info_log, \"Delete type=%d #%lld\\n\", type, number); 27 env_-\u003eDeleteFile(dbname_ + \"/\" + filenames[i]); 28 } 29 } 30} 这就是删除过期文件的逻辑，其中调用到了VersionSet::AddLiveFiles函数，保证不会删除active的文件。\n函数DbImpl::MaybeScheduleCompaction()放在Compaction一节分析，基本逻辑就是如果需要compaction，就启动后台线程执行compaction操作。\n12.6 DBImpl::RecoverLogFile() 函数声明：\nStatusRecoverLogFile(uint64_t log_number, VersionEdit* edit,SequenceNumber* max_sequence) 参数说明： @log_number是指定的log文件编号 @edit记录db元信息的变化——sstable文件变动 @max_sequence 返回max{log记录的最大序号, *max_sequence} 该函数打开指定的log文件，回放日志。期间可能会执行compaction，生产新的level 0sstable文件，记录文件变动到edit中。 它声明了一个局部类LogReporter以打印错误日志，没什么好说的，下面来看代码逻辑。\n1// S1 打开log文件返回SequentialFile*file，出错就返回，否则向下执行S2。 2// S2 根据log文件句柄file创建log::Reader，准备读取log。 3log::Reader reader(file, \u0026reporter, true/*checksum*/, 0/*initial_offset*/); 4// S3 依次读取所有的log记录，并插入到新生成的memtable中。这里使用到了批量更新接口WriteBatch，具体后面再分析。 5std::string scratch; 6Slice record; 7WriteBatch batch; 8MemTable* mem = NULL; 9while (reader.ReadRecord(\u0026record, \u0026scratch) \u0026\u0026 status.ok()) { // 读取全部log 10 if (record.size() \u003c 12) { // log数据错误，不满足最小长度12 11 reporter.Corruption(record.size(), Status::Corruption(\"log recordtoo small\")); 12 continue; 13 } 14 WriteBatchInternal::SetContents(\u0026batch, record); // log内容设置到WriteBatch中 15 if (mem == NULL) { // 创建memtable 16 mem = new MemTable(internal_comparator_); 17 mem-\u003eRef(); 18 } 19 status = WriteBatchInternal::InsertInto(\u0026batch, mem); // 插入到memtable中 20 MaybeIgnoreError(\u0026status); 21 if (!status.ok()) break; 22 const SequenceNumber last_seq = 23 WriteBatchInternal::Sequence(\u0026batch) + WriteBatchInternal::Count(\u0026batch) - 1; 24 if (last_seq \u003e *max_sequence) *max_sequence = last_seq; // 更新max sequence 25 // 如果mem的内存超过设置值，则执行compaction，如果compaction出错， 26 // 立刻返回错误，DB::Open失败 27 if (mem-\u003eApproximateMemoryUsage() \u003e options_.write_buffer_size) { 28 status = WriteLevel0Table(mem, edit, NULL); 29 if (!status.ok()) break; 30 mem-\u003eUnref(); // 释放当前memtable 31 mem = NULL; 32 } 33} 34// S4 扫尾工作，如果mem != NULL，说明还需要dump到新的sstable文件中。 35if (status.ok() \u0026\u0026 mem != NULL) {// 如果compaction出错，立刻返回错误 36 status = WriteLevel0Table(mem, edit, NULL); 37} 38if (mem != NULL)mem-\u003eUnref(); 39delete file; 40return status; 把MemTabledump到sstable是函数WriteLevel0Table的工作，其实这是compaction的一部分，准备放在compaction一节来分析。\n12.7 小结\n如上DB打开的逻辑就已经分析完了，打开逻辑参见DB::Open()中描述的5个步骤。此外还有两个东东：把Memtable dump到sstable的WriteLevel0Table()函数，以及批量修改WriteBatch。第一个放在后面的compaction一节，第二个放在DB更新操作中。接下来就是db的关闭。\n13 DB的关闭\u0026销毁 13.1 DB关闭 外部调用者通过DB::Open()获取一个DB对象，如果要关闭打开的DBdb对象，则直接delete db即可，这会调用到DBImpl的析构函数。 析构依次执行如下的5个逻辑： S1 等待后台compaction任务结束 S2 释放db文件锁，/lock文件 S3 删除VersionSet对象，并释放MemTable对象 S4 删除log相关以及TableCache对象 S5 删除options的block_cache以及info_log对象\n13.2 DB销毁 函数声明：\nStatusDestroyDB(const std::string\u0026 dbname, const Options\u0026 options) 该函数会删除掉db的数据内容，要谨慎使用。函数逻辑为： S1 获取dbname目录的文件列表到filenames中，如果为空则直接返回，否则进入S2。 S2 锁文件/lock，如果锁成功就执行S3 S3 遍历filenames文件列表，过滤掉lock文件，依次调用DeleteFile删除。 S4 释放lock文件，并删除之，然后删除文件夹。 Destory就执行完了，如果删除文件出现错误，记录之，依然继续删除下一个。最后返回错误代码。 看来这一章很短小。DB的打开关闭分析完毕。\n",
+  "wordCount" : "712",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/0da12c5829764cdc8a508c0a05e99a3e/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      leveldb源码分析20
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#leveldb%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%9020" aria-label="leveldb源码分析20">leveldb源码分析20</a><ul>
+                        
+                <li>
+                    <a href="#%e6%9c%ac%e7%b3%bb%e5%88%97leveldb%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%90%e5%85%b1%e6%9c%8922%e7%af%87%e6%96%87%e7%ab%a0%e8%bf%99%e6%98%af%e7%ac%ac%e4%ba%8c%e5%8d%81%e7%af%87" aria-label="本系列《leveldb源码分析》共有22篇文章，这是第二十篇">本系列《leveldb源码分析》共有22篇文章，这是第二十篇</a><ul>
+                        
+                <li>
+                    <a href="#12-db%e7%9a%84%e6%89%93%e5%bc%80" aria-label="12 DB的打开">12 DB的打开</a></li>
+                <li>
+                    <a href="#121-dbopen" aria-label="12.1 DB::Open()">12.1 DB::Open()</a></li>
+                <li>
+                    <a href="#123-dbimpnewdb" aria-label="12.3 DBImp::NewDB()">12.3 DBImp::NewDB()</a></li>
+                <li>
+                    <a href="#125-dbimpldeleteobsoletefiles" aria-label="12.5 DBImpl::DeleteObsoleteFiles()">12.5 DBImpl::DeleteObsoleteFiles()</a></li>
+                <li>
+                    <a href="#126-dbimplrecoverlogfile" aria-label="12.6 DBImpl::RecoverLogFile()">12.6 DBImpl::RecoverLogFile()</a></li>
+                <li>
+                    <a href="#13-db%e7%9a%84%e5%85%b3%e9%97%ad%e9%94%80%e6%af%81" aria-label="13 DB的关闭&amp;amp;销毁">13 DB的关闭&amp;销毁</a></li>
+                <li>
+                    <a href="#131-db%e5%85%b3%e9%97%ad" aria-label="13.1 DB关闭">13.1 DB关闭</a></li>
+                <li>
+                    <a href="#132-db%e9%94%80%e6%af%81" aria-label="13.2 DB销毁">13.2 DB销毁</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="leveldb源码分析20">leveldb源码分析20</h1>
+<h2 id="本系列leveldb源码分析共有22篇文章这是第二十篇">本系列《leveldb源码分析》共有22篇文章，这是第二十篇</h2>
+<h3 id="12-db的打开">12 DB的打开</h3>
+<p>先分析LevelDB是如何打开db的，万物始于创建。在打开流程中有几个辅助函数：<strong>DBImpl()，DBImpl::Recover, DBImpl::DeleteObsoleteFiles, DBImpl::RecoverLogFile, DBImpl::MaybeScheduleCompaction</strong>。</p>
+<h3 id="121-dbopen">12.1 DB::Open()</h3>
+<p>打开一个db，进行PUT、GET操作，就是前面的静态函数<strong>DB::Open</strong>的工作。如果操作成功，它就返回一个db指针。前面说过DB就是一个接口类，其具体实现在DBImp类中，这是一个DB的子类。
+函数声明为：</p>
+<pre tabindex="0"><code>Status DB::Open(const Options&amp; options, const std::string&amp;dbname, DB** dbptr);
+</code></pre><p>分解来看，Open()函数主要有以下5个执行步骤。
+S1 创建DBImpl对象，其后进入**DBImpl::Recover()<strong>函数执行S2和S3。
+S2 从已存在的db文件恢复db数据，根据CURRENT记录的MANIFEST文件读取db元信息；这通过调用</strong>VersionSet::Recover()<strong>完成。
+S3 然后过滤出那些最近的更新log，前一个版本可能新加了这些log，但并没有记录在MANIFEST中。然后依次根据时间顺序，调用</strong>DBImpl::RecoverLogFile()<strong>从旧到新回放这些操作log。回放log时可能会修改db元信息，比如dump了新的level 0文件，因此它将返回一个VersionEdit对象，记录db元信息的变动。
+S4 如果</strong>DBImpl::Recover()<strong>返回成功，就执行</strong>VersionSet::LogAndApply()**应用VersionEdit，并保存当前的DB信息到新的MANIFEST文件中。
+S5 最后删除一些过期文件，并检查是否需要执行compaction，如果需要，就启动后台线程执行。
+下面就来具体分析Open函数的代码，在Open函数中涉及到上面的3个流程。
+S1 首先创建DBImpl对象，锁定并试图做Recover操作。Recover操作用来处理创建flag，比如存在就返回失败等等，尝试从已存在的sstable文件恢复db。并返回db元信息的变动信息，一个VersionEdit对象。</p>
+<pre tabindex="0"><code>1DBImpl* impl = newDBImpl(options, dbname);  
+2impl-&gt;mutex_.Lock(); // 锁db  
+3VersionEdit edit;  
+4Status s =impl-&gt;Recover(&amp;edit); // 处理flag&amp;恢复：create_if_missing,error_if_exists 
+</code></pre><p>S2 如果Recover返回成功，则调用VersionSet取得新的log文件编号——实际上是在当前基础上+1，准备新的log文件。如果log文件创建成功，则根据log文件创建log::Writer。然后执行VersionSet::LogAndApply，根据edit记录的增量变动生成新的current version，并写入MANIFEST文件。</p>
+<p>函数<strong>NewFileNumber(){returnnext_file_number_++;}</strong>，直接返回<strong>next_file_number_</strong>。</p>
+<pre tabindex="0"><code> 1uint64_t new_log_number = impl-&gt;versions_-&gt;NewFileNumber();
+ 2WritableFile* lfile;
+ 3s = options.env-&gt;NewWritableFile(LogFileName(dbname, new_log_number), &amp;lfile);
+ 4if (s.ok()) {
+ 5    edit.SetLogNumber(new_log_number);
+ 6    impl-&gt;logfile_ = lfile;
+ 7    impl-&gt;logfile_number_ = new_log_number;
+ 8    impl-&gt;log_ = newlog::Writer(lfile);
+ 9    s = impl-&gt;versions_-&gt;LogAndApply(&amp;edit, &amp;impl-&gt;mutex_);
+10}
+</code></pre><p>S3 如果VersionSet::LogAndApply返回成功，则删除过期文件，检查是否需要执行compaction，最终返回创建的DBImpl对象。</p>
+<pre tabindex="0"><code>1if (s.ok()) {
+2    impl-&gt;DeleteObsoleteFiles();
+3    impl-&gt;MaybeScheduleCompaction();
+4}
+5impl-&gt;mutex_.Unlock();
+6if (s.ok()) *dbptr = impl;
+7return s;
+</code></pre><p>以上就是DB::Open的主题逻辑。</p>
+<p><strong>12.2 DBImpl::DBImpl()</strong></p>
+<p>构造函数做的都是初始化操作，</p>
+<pre tabindex="0"><code>DBImpl::DBImpl(const Options&amp; options, const std::string&amp;dbname)
+</code></pre><p>首先是初始化列表中，直接根据参数赋值，或者直接初始化。Comparator和filter policy都是参数传入的。在传递option时会首先将option中的参数合法化，**logfile_number_**初始化为0，指针初始化为NULL。
+创建MemTable，并增加引用计数，创建WriteBatch。</p>
+<pre tabindex="0"><code>1mem_(newMemTable(internal_comparator_)),
+2tmp_batch_(new WriteBatch),
+3mem_-&gt;Ref();
+4// 然后在函数体中，创建TableCache和VersionSet。  
+5// 为其他预留10个文件，其余的都给TableCache.  
+6const int table_cache_size = options.max_open_files - 10;
+7table_cache_ = newTableCache(dbname_, &amp;options_, table_cache_size);
+8versions_ = newVersionSet(dbname_, &amp;options_, table_cache_, &amp;internal_comparator_);
+</code></pre><h3 id="heading"></h3>
+<h3 id="123-dbimpnewdb">12.3 DBImp::NewDB()</h3>
+<p>当外部在调用DB::Open()时设置了option指定如果db不存在就创建，如果db不存在leveldb就会调用函数创建新的db。判断db是否存在的依据是**<!-- raw HTML omitted -->/CURRENT**文件是否存在。其逻辑很简单。</p>
+<pre tabindex="0"><code> 1// S1首先生产DB元信息，设置comparator名，以及log文件编号、文件编号，以及seq no。  
+ 2VersionEdit new_db;
+ 3new_db.SetComparatorName(user_comparator()-&gt;Name());
+ 4new_db.SetLogNumber(0);
+ 5new_db.SetNextFile(2);
+ 6new_db.SetLastSequence(0);
+ 7// S2 生产MANIFEST文件，将db元信息写入MANIFEST文件。  
+ 8const std::string manifest = DescriptorFileName(dbname_, 1);
+ 9WritableFile* file;
+10Status s = env_-&gt;NewWritableFile(manifest, &amp;file);
+11if (!s.ok()) return s;
+12{
+13    log::Writer log(file);
+14    std::string record;
+15    new_db.EncodeTo(&amp;record);
+16    s = log.AddRecord(record);
+17    if (s.ok()) s = file-&gt;Close();
+18}
+19delete file;
+20// S3 如果成功，就把MANIFEST文件名写入到CURRENT文件中  
+21if (s.ok()) s = SetCurrentFile(env_, dbname_, 1);
+22elseenv_-&gt;DeleteFile(manifest);
+23return s;
+</code></pre><p>这就是创建新DB的逻辑，很简单。</p>
+<p><strong>12.4 DBImpl::Recover()</strong></p>
+<p>函数声明为：</p>
+<pre tabindex="0"><code>StatusDBImpl::Recover(VersionEdit* edit)
+</code></pre><p>如果调用成功则设置VersionEdit。Recover的基本功能是：首先是处理创建flag，比如存在就返回失败等等；然后是尝试从已存在的sstable文件恢复db；最后如果发现有大于原信息记录的log编号的log文件，则需要回放log，更新db数据。回放期间db可能会dump新的level 0文件，因此需要把db元信息的变动记录到edit中返回。函数逻辑如下：</p>
+<p>S1 创建目录，目录以db name命名，忽略任何创建错误，然后尝试获取d<strong>b name/LOCK</strong>文件锁，失败则返回。</p>
+<pre tabindex="0"><code>1env_-&gt;CreateDir(dbname_);
+2Status s = env_-&gt;LockFile(LockFileName(dbname_), &amp;db_lock_);
+3if (!s.ok()) return s;
+</code></pre><p>S2 根据CURRENT文件是否存在，以及option参数执行检查。
+如果文件不存在**&amp;create_is_missing=true**，则调用函数NewDB()创建；否则报错。
+如果文件存在&amp; error_if_exists=true，则报错。
+S3 调用VersionSet的**Recover()**函数，就是从文件中恢复数据。如果出错则打开失败，成功则向下执行S4。</p>
+<pre tabindex="0"><code>s = versions_-&gt;Recover();
+</code></pre><p>S4尝试从所有比manifest文件中记录的log要新的log文件中恢复（前一个版本可能会添加新的log文件，却没有记录在manifest中）。另外，函数PrevLogNumber()已经不再用了，仅为了兼容老版本。</p>
+<pre tabindex="0"><code> 1//  S4.1 这里先找出所有满足条件的log文件：比manifest文件记录的log编号更新。  
+ 2SequenceNumber max_sequence(0);
+ 3const uint64_t min_log = versions_-&gt;LogNumber();
+ 4const uint64_t prev_log = versions_-&gt;PrevLogNumber();
+ 5std::vector&lt;std::string&gt;filenames;
+ 6s = env_-&gt;GetChildren(dbname_, &amp;filenames); // 列出目录内的所有文件  
+ 7uint64_t number;
+ 8FileType type;
+ 9std::vector&lt;uint64_t&gt;logs;
+10for (size_t i = 0; i &lt; filenames.size(); i++) { // 检查log文件是否比min log更新  
+11    if (ParseFileName(filenames[i], &amp;number, &amp;type) &amp;&amp; type == kLogFile
+12        &amp;&amp; ((number &gt;= min_log) || (number == prev_log))) {
+13        logs.push_back(number);
+14    }
+15}
+16//  S4.2 找到log文件后，首先排序，保证按照生成顺序，依次回放log。并把DB元信息的变动（sstable文件的变动）追加到edit中返回。  
+17std::sort(logs.begin(), logs.end());
+18for (size_t i = 0; i &lt; logs.size(); i++) {
+19    s = RecoverLogFile(logs[i], edit, &amp;max_sequence);
+20    // 前一版可能在生成该log编号后没有记录在MANIFEST中，  
+21    //所以这里我们手动更新VersionSet中的文件编号计数器  
+22    versions_-&gt;MarkFileNumberUsed(logs[i]);
+23}
+24//  S4.3 更新VersionSet的sequence  
+25if (s.ok()) {
+26    if (versions_-&gt;LastSequence() &lt; max_sequence)
+27        versions_-&gt;SetLastSequence(max_sequence);
+28}
+</code></pre><p>上面就是Recover的执行流程。</p>
+<h3 id="125-dbimpldeleteobsoletefiles">12.5 DBImpl::DeleteObsoleteFiles()</h3>
+<p>这个是垃圾回收函数，如前所述，每次compaction和recovery之后都会有文件被废弃。DeleteObsoleteFiles就是删除这些垃圾文件的，它在每次compaction和recovery完成之后被调用。
+其调用点包括：<strong>DBImpl::CompactMemTable,DBImpl::BackgroundCompaction,</strong> 以及DB::Open的<strong>recovery</strong>步骤之后。
+它会删除所有过期的log文件，没有被任何level引用到、或不是正在执行的compaction的output的sstable文件。
+该函数没有参数，其代码逻辑也很直观，就是列出db的所有文件，对不同类型的文件分别判断，如果是过期文件，就删除之，如下：</p>
+<pre tabindex="0"><code> 1// S1 首先，确保不会删除pending文件，将versionset正在使用的所有文件加入到live中。  
+ 2std::set&lt;uint64_t&gt; live = pending_outputs_;
+ 3versions_-&gt;AddLiveFiles(&amp;live); //该函数其后分析  
+ 4                                // S2 列举db的所有文件  
+ 5std::vector&lt;std::string&gt;filenames;
+ 6env_-&gt;GetChildren(dbname_, &amp;filenames);
+ 7// S3 遍历所有列举的文件，根据文件类型，分别处理；  
+ 8uint64_t number;
+ 9FileType type;
+10for (size_t i = 0; i &lt; filenames.size(); i++) {
+11    if (ParseFileName(filenames[i], &amp;number, &amp;type)) {
+12        bool keep = true; //false表明是过期文件  
+13                          // S3.1 kLogFile，log文件，根据log编号判断是否过期  
+14        keep = ((number &gt;= versions_-&gt;LogNumber()) ||
+15            (number == versions_-&gt;PrevLogNumber()));
+16        // S3.2 kDescriptorFile，MANIFEST文件，根据versionset记录的编号判断  
+17        keep = (number &gt;= versions_-&gt;ManifestFileNumber());
+18        // S3.3 kTableFile，sstable文件，只要在live中就不能删除  
+19        // S3.4 kTempFile，如果是正在写的文件，只要在live中就不能删除  
+20        keep = (live.find(number) != live.end());
+21        // S3.5 kCurrentFile,kDBLockFile, kInfoLogFile，不能删除  
+22        keep = true;
+23        // S3.6 如果keep为false，表明需要删除文件，如果是table还要从cache中删除  
+24        if (!keep) {
+25            if (type == kTableFile) table_cache_-&gt;Evict(number);
+26            Log(options_.info_log, &#34;Delete type=%d #%lld\n&#34;, type, number);
+27            env_-&gt;DeleteFile(dbname_ + &#34;/&#34; + filenames[i]);
+28        }
+29    }
+30}
+</code></pre><p>这就是删除过期文件的逻辑，其中调用到了<strong>VersionSet::AddLiveFiles</strong>函数，保证不会删除active的文件。</p>
+<p>函数DbImpl::MaybeScheduleCompaction()放在Compaction一节分析，基本逻辑就是如果需要compaction，就启动后台线程执行compaction操作。</p>
+<h3 id="126-dbimplrecoverlogfile">12.6 DBImpl::RecoverLogFile()</h3>
+<p>函数声明：</p>
+<pre tabindex="0"><code>StatusRecoverLogFile(uint64_t log_number, VersionEdit* edit,SequenceNumber* max_sequence)
+</code></pre><p>参数说明：
+@log_number是指定的log文件编号
+@edit记录db元信息的变化——sstable文件变动
+@max_sequence 返回max{log记录的最大序号, *max_sequence}
+该函数打开指定的log文件，回放日志。期间可能会执行compaction，生产新的level 0sstable文件，记录文件变动到edit中。
+它声明了一个局部类LogReporter以打印错误日志，没什么好说的，下面来看代码逻辑。</p>
+<pre tabindex="0"><code> 1// S1 打开log文件返回SequentialFile*file，出错就返回，否则向下执行S2。  
+ 2// S2 根据log文件句柄file创建log::Reader，准备读取log。  
+ 3log::Reader reader(file, &amp;reporter, true/*checksum*/, 0/*initial_offset*/);
+ 4// S3 依次读取所有的log记录，并插入到新生成的memtable中。这里使用到了批量更新接口WriteBatch，具体后面再分析。  
+ 5std::string scratch;
+ 6Slice record;
+ 7WriteBatch batch;
+ 8MemTable* mem = NULL;
+ 9while (reader.ReadRecord(&amp;record, &amp;scratch) &amp;&amp; status.ok()) { // 读取全部log  
+10    if (record.size() &lt; 12) { // log数据错误，不满足最小长度12  
+11        reporter.Corruption(record.size(), Status::Corruption(&#34;log recordtoo small&#34;));
+12        continue;
+13    }
+14    WriteBatchInternal::SetContents(&amp;batch, record); // log内容设置到WriteBatch中  
+15    if (mem == NULL) { // 创建memtable  
+16        mem = new MemTable(internal_comparator_);
+17        mem-&gt;Ref();
+18    }
+19    status = WriteBatchInternal::InsertInto(&amp;batch, mem); // 插入到memtable中  
+20    MaybeIgnoreError(&amp;status);
+21    if (!status.ok()) break;
+22    const SequenceNumber last_seq =
+23        WriteBatchInternal::Sequence(&amp;batch) + WriteBatchInternal::Count(&amp;batch) - 1;
+24    if (last_seq &gt; *max_sequence) *max_sequence = last_seq; // 更新max sequence  
+25                                                           // 如果mem的内存超过设置值，则执行compaction，如果compaction出错，  
+26                                                           // 立刻返回错误，DB::Open失败  
+27    if (mem-&gt;ApproximateMemoryUsage() &gt; options_.write_buffer_size) {
+28        status = WriteLevel0Table(mem, edit, NULL);
+29        if (!status.ok()) break;
+30        mem-&gt;Unref(); // 释放当前memtable  
+31        mem = NULL;
+32    }
+33}
+34// S4 扫尾工作，如果mem != NULL，说明还需要dump到新的sstable文件中。  
+35if (status.ok() &amp;&amp; mem != NULL) {// 如果compaction出错，立刻返回错误  
+36    status = WriteLevel0Table(mem, edit, NULL);
+37}
+38if (mem != NULL)mem-&gt;Unref();
+39delete file;
+40return status;
+</code></pre><p>把MemTabledump到sstable是函数WriteLevel0Table的工作，其实这是compaction的一部分，准备放在compaction一节来分析。</p>
+<p><strong>12.7 小结</strong></p>
+<p>如上DB打开的逻辑就已经分析完了，打开逻辑参见DB::Open()中描述的5个步骤。此外还有两个东东：把Memtable dump到sstable的WriteLevel0Table()函数，以及批量修改WriteBatch。第一个放在后面的compaction一节，第二个放在DB更新操作中。接下来就是db的关闭。</p>
+<h2 id="heading-1"></h2>
+<h3 id="13-db的关闭销毁">13 DB的关闭&amp;销毁</h3>
+<h3 id="131-db关闭">13.1 DB关闭</h3>
+<p>外部调用者通过DB::Open()获取一个DB<em>对象，如果要关闭打开的DB</em>db对象，则直接delete db即可，这会调用到DBImpl的析构函数。
+析构依次执行如下的5个逻辑：
+S1 等待后台compaction任务结束
+S2 释放db文件锁，<!-- raw HTML omitted -->/lock文件
+S3 删除VersionSet对象，并释放MemTable对象
+S4 删除log相关以及TableCache对象
+S5 删除options的block_cache以及info_log对象</p>
+<h3 id="132-db销毁">13.2 DB销毁</h3>
+<p>函数声明：</p>
+<pre tabindex="0"><code>StatusDestroyDB(const std::string&amp; dbname, const Options&amp; options)
+</code></pre><p>该函数会删除掉db的数据内容，要谨慎使用。函数逻辑为：
+S1 获取dbname目录的文件列表到filenames中，如果为空则直接返回，否则进入S2。
+S2 锁文件<!-- raw HTML omitted -->/lock，如果锁成功就执行S3
+S3 遍历filenames文件列表，过滤掉lock文件，依次调用DeleteFile删除。
+S4 释放lock文件，并删除之，然后删除文件夹。
+Destory就执行完了，如果删除文件出现错误，记录之，依然继续删除下一个。最后返回错误代码。
+看来这一章很短小。DB的打开关闭分析完毕。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/blog/c955baadcc824d20acb455e1078a257c/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>leveldb源码分析2</span>
+  </a>
+  <a class="next" href="https://haokiu.com/blog/1d4ede18ded04a569baee5550226fa6f/">
+    <span class="title">Next »</span>
+    <br>
+    <span>leveldb源码分析21</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

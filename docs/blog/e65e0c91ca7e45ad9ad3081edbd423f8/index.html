@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>libevent源码深度剖析09 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="libevent源码深度剖析09 集成定时器事件
+现在再来详细分析libevent中I/O事件和Timer事件的集成，与Signal相比，Timer事件的集成会直观和简单很多。Libevent对堆的调整操作做了一些优化，本节还会描述这些优化方法。
+1. 集成到事件主循环 因为系统的I/O机制像select()和epoll_wait()都允许程序制定一个最大等待时间（也称为最大超时时间）timeout，即使没有I/O事件发生，它们也保证能在timeout时间内返回。 那么根据所有Timer事件的最小超时时间来设置系统I/O的timeout时间；当系统I/O返回时，再激活所有就绪的Timer事件就可以了，这样就能将Timer事件完美的融合到系统的I/O机制中了。 具体的代码在源文件event.c的**event_base_loop()**中，现在就对比代码来看看这一处理方法：
+if (!base-&gt;event_count_active &amp;&amp; !(flags &amp; EVLOOP_NONBLOCK)) { // 根据Timer事件计算evsel-&gt;dispatch的最大等待时间 timeout_next(base, &amp;tv_p); } else { // 如果还有活动事件，就不要等待，让evsel-&gt;dispatch立即返回 evutil_timerclear(&amp;tv); } // ... // 调用select() or epoll_wait() 等待就绪I/O事件 res = evsel-&gt;dispatch(base, evbase, tv_p); // ... // 处理超时事件，将超时事件插入到激活链表中 timeout_process(base); **timeout_next()**函数根据堆中具有最小超时值的事件和当前时间来计算等待时间，下面看看代码：
+1static int timeout_next(struct event_base *base, struct timeval **tv_p){ 2 struct timeval now; 3 struct event *ev; 4 struct timeval *tv = *tv_p; 5 // 堆的首元素具有最小的超时值 6 if ((ev = min_heap_top(&amp;base-&gt;timeheap)) == NULL) { 7 // 如果没有定时事件，将等待时间设置为NULL,表示一直阻塞直到有I/O事件发生 8 *tv_p = NULL; 9 return (0); 10 } 11 // 取得当前时间 12 gettime(base, &amp;now); 13 // 如果超时时间&lt;=当前值，不能等待，需要立即返回 14 if (evutil_timercmp(&amp;ev-&gt;ev_timeout, &amp;now, &lt;=)) { 15 evutil_timerclear(tv); 16 return (0); 17 } 18 // 计算等待的时间=当前时间-最小的超时时间 19 evutil_timersub(&amp;ev-&gt;ev_timeout, &amp;now, tv); 20 return (0); 21} 2.">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/e65e0c91ca7e45ad9ad3081edbd423f8/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="libevent源码深度剖析09" />
+<meta property="og:description" content="libevent源码深度剖析09 集成定时器事件
+现在再来详细分析libevent中I/O事件和Timer事件的集成，与Signal相比，Timer事件的集成会直观和简单很多。Libevent对堆的调整操作做了一些优化，本节还会描述这些优化方法。
+1. 集成到事件主循环 因为系统的I/O机制像select()和epoll_wait()都允许程序制定一个最大等待时间（也称为最大超时时间）timeout，即使没有I/O事件发生，它们也保证能在timeout时间内返回。 那么根据所有Timer事件的最小超时时间来设置系统I/O的timeout时间；当系统I/O返回时，再激活所有就绪的Timer事件就可以了，这样就能将Timer事件完美的融合到系统的I/O机制中了。 具体的代码在源文件event.c的**event_base_loop()**中，现在就对比代码来看看这一处理方法：
+if (!base-&gt;event_count_active &amp;&amp; !(flags &amp; EVLOOP_NONBLOCK)) { // 根据Timer事件计算evsel-&gt;dispatch的最大等待时间 timeout_next(base, &amp;tv_p); } else { // 如果还有活动事件，就不要等待，让evsel-&gt;dispatch立即返回 evutil_timerclear(&amp;tv); } // ... // 调用select() or epoll_wait() 等待就绪I/O事件 res = evsel-&gt;dispatch(base, evbase, tv_p); // ... // 处理超时事件，将超时事件插入到激活链表中 timeout_process(base); **timeout_next()**函数根据堆中具有最小超时值的事件和当前时间来计算等待时间，下面看看代码：
+1static int timeout_next(struct event_base *base, struct timeval **tv_p){ 2 struct timeval now; 3 struct event *ev; 4 struct timeval *tv = *tv_p; 5 // 堆的首元素具有最小的超时值 6 if ((ev = min_heap_top(&amp;base-&gt;timeheap)) == NULL) { 7 // 如果没有定时事件，将等待时间设置为NULL,表示一直阻塞直到有I/O事件发生 8 *tv_p = NULL; 9 return (0); 10 } 11 // 取得当前时间 12 gettime(base, &amp;now); 13 // 如果超时时间&lt;=当前值，不能等待，需要立即返回 14 if (evutil_timercmp(&amp;ev-&gt;ev_timeout, &amp;now, &lt;=)) { 15 evutil_timerclear(tv); 16 return (0); 17 } 18 // 计算等待的时间=当前时间-最小的超时时间 19 evutil_timersub(&amp;ev-&gt;ev_timeout, &amp;now, tv); 20 return (0); 21} 2." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/e65e0c91ca7e45ad9ad3081edbd423f8/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="libevent源码深度剖析09"/>
+<meta name="twitter:description" content="libevent源码深度剖析09 集成定时器事件
+现在再来详细分析libevent中I/O事件和Timer事件的集成，与Signal相比，Timer事件的集成会直观和简单很多。Libevent对堆的调整操作做了一些优化，本节还会描述这些优化方法。
+1. 集成到事件主循环 因为系统的I/O机制像select()和epoll_wait()都允许程序制定一个最大等待时间（也称为最大超时时间）timeout，即使没有I/O事件发生，它们也保证能在timeout时间内返回。 那么根据所有Timer事件的最小超时时间来设置系统I/O的timeout时间；当系统I/O返回时，再激活所有就绪的Timer事件就可以了，这样就能将Timer事件完美的融合到系统的I/O机制中了。 具体的代码在源文件event.c的**event_base_loop()**中，现在就对比代码来看看这一处理方法：
+if (!base-&gt;event_count_active &amp;&amp; !(flags &amp; EVLOOP_NONBLOCK)) { // 根据Timer事件计算evsel-&gt;dispatch的最大等待时间 timeout_next(base, &amp;tv_p); } else { // 如果还有活动事件，就不要等待，让evsel-&gt;dispatch立即返回 evutil_timerclear(&amp;tv); } // ... // 调用select() or epoll_wait() 等待就绪I/O事件 res = evsel-&gt;dispatch(base, evbase, tv_p); // ... // 处理超时事件，将超时事件插入到激活链表中 timeout_process(base); **timeout_next()**函数根据堆中具有最小超时值的事件和当前时间来计算等待时间，下面看看代码：
+1static int timeout_next(struct event_base *base, struct timeval **tv_p){ 2 struct timeval now; 3 struct event *ev; 4 struct timeval *tv = *tv_p; 5 // 堆的首元素具有最小的超时值 6 if ((ev = min_heap_top(&amp;base-&gt;timeheap)) == NULL) { 7 // 如果没有定时事件，将等待时间设置为NULL,表示一直阻塞直到有I/O事件发生 8 *tv_p = NULL; 9 return (0); 10 } 11 // 取得当前时间 12 gettime(base, &amp;now); 13 // 如果超时时间&lt;=当前值，不能等待，需要立即返回 14 if (evutil_timercmp(&amp;ev-&gt;ev_timeout, &amp;now, &lt;=)) { 15 evutil_timerclear(tv); 16 return (0); 17 } 18 // 计算等待的时间=当前时间-最小的超时时间 19 evutil_timersub(&amp;ev-&gt;ev_timeout, &amp;now, tv); 20 return (0); 21} 2."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "libevent源码深度剖析09",
+      "item": "https://haokiu.com/blog/e65e0c91ca7e45ad9ad3081edbd423f8/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "libevent源码深度剖析09",
+  "name": "libevent源码深度剖析09",
+  "description": "libevent源码深度剖析09 集成定时器事件\n现在再来详细分析libevent中I/O事件和Timer事件的集成，与Signal相比，Timer事件的集成会直观和简单很多。Libevent对堆的调整操作做了一些优化，本节还会描述这些优化方法。\n1. 集成到事件主循环 因为系统的I/O机制像select()和epoll_wait()都允许程序制定一个最大等待时间（也称为最大超时时间）timeout，即使没有I/O事件发生，它们也保证能在timeout时间内返回。 那么根据所有Timer事件的最小超时时间来设置系统I/O的timeout时间；当系统I/O返回时，再激活所有就绪的Timer事件就可以了，这样就能将Timer事件完美的融合到系统的I/O机制中了。 具体的代码在源文件event.c的**event_base_loop()**中，现在就对比代码来看看这一处理方法：\nif (!base-\u0026gt;event_count_active \u0026amp;\u0026amp; !(flags \u0026amp; EVLOOP_NONBLOCK)) { // 根据Timer事件计算evsel-\u0026gt;dispatch的最大等待时间 timeout_next(base, \u0026amp;tv_p); } else { // 如果还有活动事件，就不要等待，让evsel-\u0026gt;dispatch立即返回 evutil_timerclear(\u0026amp;tv); } // ... // 调用select() or epoll_wait() 等待就绪I/O事件 res = evsel-\u0026gt;dispatch(base, evbase, tv_p); // ... // 处理超时事件，将超时事件插入到激活链表中 timeout_process(base); **timeout_next()**函数根据堆中具有最小超时值的事件和当前时间来计算等待时间，下面看看代码：\n1static int timeout_next(struct event_base *base, struct timeval **tv_p){ 2 struct timeval now; 3 struct event *ev; 4 struct timeval *tv = *tv_p; 5 // 堆的首元素具有最小的超时值 6 if ((ev = min_heap_top(\u0026amp;base-\u0026gt;timeheap)) == NULL) { 7 // 如果没有定时事件，将等待时间设置为NULL,表示一直阻塞直到有I/O事件发生 8 *tv_p = NULL; 9 return (0); 10 } 11 // 取得当前时间 12 gettime(base, \u0026amp;now); 13 // 如果超时时间\u0026lt;=当前值，不能等待，需要立即返回 14 if (evutil_timercmp(\u0026amp;ev-\u0026gt;ev_timeout, \u0026amp;now, \u0026lt;=)) { 15 evutil_timerclear(tv); 16 return (0); 17 } 18 // 计算等待的时间=当前时间-最小的超时时间 19 evutil_timersub(\u0026amp;ev-\u0026gt;ev_timeout, \u0026amp;now, tv); 20 return (0); 21} 2.",
+  "keywords": [
+    
+  ],
+  "articleBody": "libevent源码深度剖析09 集成定时器事件\n现在再来详细分析libevent中I/O事件和Timer事件的集成，与Signal相比，Timer事件的集成会直观和简单很多。Libevent对堆的调整操作做了一些优化，本节还会描述这些优化方法。\n1. 集成到事件主循环 因为系统的I/O机制像select()和epoll_wait()都允许程序制定一个最大等待时间（也称为最大超时时间）timeout，即使没有I/O事件发生，它们也保证能在timeout时间内返回。 那么根据所有Timer事件的最小超时时间来设置系统I/O的timeout时间；当系统I/O返回时，再激活所有就绪的Timer事件就可以了，这样就能将Timer事件完美的融合到系统的I/O机制中了。 具体的代码在源文件event.c的**event_base_loop()**中，现在就对比代码来看看这一处理方法：\nif (!base-\u003eevent_count_active \u0026\u0026 !(flags \u0026 EVLOOP_NONBLOCK)) { // 根据Timer事件计算evsel-\u003edispatch的最大等待时间 timeout_next(base, \u0026tv_p); } else { // 如果还有活动事件，就不要等待，让evsel-\u003edispatch立即返回 evutil_timerclear(\u0026tv); } // ... // 调用select() or epoll_wait() 等待就绪I/O事件 res = evsel-\u003edispatch(base, evbase, tv_p); // ... // 处理超时事件，将超时事件插入到激活链表中 timeout_process(base); **timeout_next()**函数根据堆中具有最小超时值的事件和当前时间来计算等待时间，下面看看代码：\n1static int timeout_next(struct event_base *base, struct timeval **tv_p){ 2 struct timeval now; 3 struct event *ev; 4 struct timeval *tv = *tv_p; 5 // 堆的首元素具有最小的超时值 6 if ((ev = min_heap_top(\u0026base-\u003etimeheap)) == NULL) { 7 // 如果没有定时事件，将等待时间设置为NULL,表示一直阻塞直到有I/O事件发生 8 *tv_p = NULL; 9 return (0); 10 } 11 // 取得当前时间 12 gettime(base, \u0026now); 13 // 如果超时时间\u003c=当前值，不能等待，需要立即返回 14 if (evutil_timercmp(\u0026ev-\u003eev_timeout, \u0026now, \u003c=)) { 15 evutil_timerclear(tv); 16 return (0); 17 } 18 // 计算等待的时间=当前时间-最小的超时时间 19 evutil_timersub(\u0026ev-\u003eev_timeout, \u0026now, tv); 20 return (0); 21} 2. Timer小根堆 libevent使用堆来管理Timer事件，其key值就是事件的超时时间，源代码位于文件min_heap.h中。 所有的数据结构书中都有关于堆的详细介绍，向堆中插入、删除元素时间复杂度都是O(lgN)，N为堆中元素的个数，而获取最小key值（小根堆）的复杂度为O(1)。堆是一个完全二叉树，基本存储方式是一个数组。 libevent实现的堆还是比较轻巧的，虽然我不喜欢这种编码方式（搞一些复杂的表达式）。轻巧到什么地方呢，就以插入元素为例，来对比说明，下面伪代码中的size表示当前堆的元素个数：\n典型的代码逻辑如下：\nHeap[size++] = new; // 先放到数组末尾，元素个数+1 // 下面就是shift_up()的代码逻辑，不断的将new向上调整 _child = size; while(_child\u003e0) // 循环 { _parent = (_child-1)/2; // 计算parent if(Heap[_parent].key \u003c Heap[_child].key) break; // 调整结束，跳出循环 swap(_parent, _child); // 交换parent和child } 而libevent的heap代码对这一过程做了优化，在插入新元素时，只是为新元素预留了一个位置hole（初始时hole位于数组尾部），但并不立刻将新元素插入到hole上，而是不断向上调整hole的值，将父节点向下调整，最后确认hole就是新元素的所在位置时，才会真正的将新元素插入到hole上，因此在调整过程中就比上面的代码少了一次赋值的操作，代码逻辑是：\n// 下面就是shift_up()的代码逻辑，不断的将new的“预留位置”向上调整 _hole = size; // _hole就是为new预留的位置，但并不立刻将new放上 while(_hole\u003e0) // 循环 { _parent = (_hole-1)/2; // 计算parent if(Heap[_parent].key \u003c new.key) break; // 调整结束，跳出循环 Heap[_hole] = Heap[_parent]; // 将parent向下调整 _hole = _parent; // 将_hole调整到_parent } Heap[_hole] = new; // 调整结束，将new插入到_hole指示的位置 size++; // 元素个数+1 由于每次调整都少做一次赋值操作，在调整路径比较长时，调整效率会比第一种有所提高。libevent中的min_heap_shift_up_()函数就是上面逻辑的具体实现，对应的向下调整函数是min_heap_shift_down_()。\n举个例子，向一个小根堆3, 5, 8, 7, 12中插入新元素2，使用第一中典型的代码逻辑，其调整过程如下图所示：\n使用libevent中的堆调整逻辑，调整过程如下图所示：\n对于删除和元素修改操作，也遵从相同的逻辑，就不再罗嗦了。\n3. 小节 通过设置系统I/O机制的wait时间，从而简洁的集成Timer事件；主要分析了libevent对堆调整操作的优化。\n",
+  "wordCount" : "211",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/e65e0c91ca7e45ad9ad3081edbd423f8/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      libevent源码深度剖析09
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#libevent%e6%ba%90%e7%a0%81%e6%b7%b1%e5%ba%a6%e5%89%96%e6%9e%9009" aria-label="libevent源码深度剖析09">libevent源码深度剖析09</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#1-%e9%9b%86%e6%88%90%e5%88%b0%e4%ba%8b%e4%bb%b6%e4%b8%bb%e5%be%aa%e7%8e%af" aria-label="1. 集成到事件主循环">1. 集成到事件主循环</a></li>
+                <li>
+                    <a href="#2-timer%e5%b0%8f%e6%a0%b9%e5%a0%86" aria-label="2. Timer小根堆">2. Timer小根堆</a></li>
+                <li>
+                    <a href="#3-%e5%b0%8f%e8%8a%82" aria-label="3. 小节">3. 小节</a>
+                </li>
+            </ul>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="libevent源码深度剖析09">libevent源码深度剖析09</h1>
+<p><strong>集成定时器事件</strong></p>
+<p>现在再来详细分析libevent中I/O事件和Timer事件的集成，与Signal相比，Timer事件的集成会直观和简单很多。Libevent对堆的调整操作做了一些优化，本节还会描述这些优化方法。</p>
+<h3 id="1-集成到事件主循环">1. 集成到事件主循环</h3>
+<p>因为系统的I/O机制像select()和epoll_wait()都允许程序制定一个最大等待时间（也称为最大超时时间）<strong>timeout</strong>，即使没有I/O事件发生，它们也保证能在timeout时间内返回。
+那么根据所有Timer事件的最小超时时间来设置系统I/O的timeout时间；当系统I/O返回时，再激活所有就绪的Timer事件就可以了，这样就能将Timer事件完美的融合到系统的I/O机制中了。
+具体的代码在源文件event.c的**event_base_loop()**中，现在就对比代码来看看这一处理方法：</p>
+<pre tabindex="0"><code>if (!base-&gt;event_count_active &amp;&amp; !(flags &amp; EVLOOP_NONBLOCK)) {
+          // 根据Timer事件计算evsel-&gt;dispatch的最大等待时间
+          timeout_next(base, &amp;tv_p);
+      } else { 
+          // 如果还有活动事件，就不要等待，让evsel-&gt;dispatch立即返回
+          evutil_timerclear(&amp;tv);
+      }
+      // ...
+      // 调用select() or epoll_wait() 等待就绪I/O事件
+      res = evsel-&gt;dispatch(base, evbase, tv_p);
+      // ...
+      // 处理超时事件，将超时事件插入到激活链表中
+      timeout_process(base);
+</code></pre><p>**timeout_next()**函数根据堆中具有最小超时值的事件和当前时间来计算等待时间，下面看看代码：</p>
+<pre tabindex="0"><code> 1static int timeout_next(struct event_base *base, struct timeval **tv_p){
+ 2    struct timeval now;
+ 3    struct event *ev;
+ 4    struct timeval *tv = *tv_p;
+ 5    // 堆的首元素具有最小的超时值
+ 6    if ((ev = min_heap_top(&amp;base-&gt;timeheap)) == NULL) {
+ 7        // 如果没有定时事件，将等待时间设置为NULL,表示一直阻塞直到有I/O事件发生
+ 8        *tv_p = NULL;
+ 9        return (0);
+10    }
+11    // 取得当前时间
+12    gettime(base, &amp;now);
+13    // 如果超时时间&lt;=当前值，不能等待，需要立即返回
+14    if (evutil_timercmp(&amp;ev-&gt;ev_timeout, &amp;now, &lt;=)) {
+15        evutil_timerclear(tv);
+16        return (0);
+17    }
+18    // 计算等待的时间=当前时间-最小的超时时间
+19    evutil_timersub(&amp;ev-&gt;ev_timeout, &amp;now, tv);
+20    return (0);
+21}
+</code></pre><h3 id="2-timer小根堆">2. Timer小根堆</h3>
+<p>libevent使用堆来管理Timer事件，其key值就是事件的超时时间，源代码位于文件<strong>min_heap.h</strong>中。
+所有的数据结构书中都有关于堆的详细介绍，向堆中插入、删除元素时间复杂度都是O(lgN)，N为堆中元素的个数，而获取最小key值（小根堆）的复杂度为O(1)。堆是一个完全二叉树，基本存储方式是一个数组。
+libevent实现的堆还是比较轻巧的，虽然我不喜欢这种编码方式（搞一些复杂的表达式）。轻巧到什么地方呢，就以插入元素为例，来对比说明，下面伪代码中的size表示当前堆的元素个数：</p>
+<p>典型的代码逻辑如下：</p>
+<pre tabindex="0"><code>Heap[size++] = new; // 先放到数组末尾，元素个数+1
+// 下面就是shift_up()的代码逻辑，不断的将new向上调整
+_child = size;
+while(_child&gt;0) // 循环
+{
+    _parent = (_child-1)/2; // 计算parent
+    if(Heap[_parent].key &lt; Heap[_child].key)
+    	break; // 调整结束，跳出循环
+    swap(_parent, _child); // 交换parent和child
+}
+</code></pre><p>而libevent的<strong>heap</strong>代码对这一过程做了优化，在插入新元素时，只是为新元素预留了一个位置<strong>hole</strong>（初始时hole位于数组尾部），但并不立刻将新元素插入到hole上，而是不断向上调整hole的值，将父节点向下调整，最后确认hole就是新元素的所在位置时，才会真正的将新元素插入到hole上，因此在调整过程中就比上面的代码少了一次赋值的操作，代码逻辑是：</p>
+<pre tabindex="0"><code>// 下面就是shift_up()的代码逻辑，不断的将new的“预留位置”向上调整
+_hole = size; // _hole就是为new预留的位置，但并不立刻将new放上
+while(_hole&gt;0) // 循环
+{
+    _parent = (_hole-1)/2; // 计算parent
+    if(Heap[_parent].key &lt; new.key)
+        break; // 调整结束，跳出循环
+    Heap[_hole] = Heap[_parent]; // 将parent向下调整
+    _hole = _parent; // 将_hole调整到_parent
+}
+Heap[_hole] = new; // 调整结束，将new插入到_hole指示的位置
+size++; // 元素个数+1
+</code></pre><p>由于每次调整都少做一次赋值操作，在调整路径比较长时，调整效率会比第一种有所提高。libevent中的<strong>min_heap_shift_up_()<strong>函数就是上面逻辑的具体实现，对应的向下调整函数是</strong>min_heap_shift_down_()</strong>。</p>
+<p>举个例子，向一个小根堆3, 5, 8, 7, 12中插入新元素2，使用第一中典型的代码逻辑，其调整过程如下图所示：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/6642ce4fe932c673b0198cdf6c98f3b8.webp" alt=""  />
+</p>
+<p>使用libevent中的堆调整逻辑，调整过程如下图所示：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/f41874b35c49f4550d23b3f6952f4f4e.webp" alt=""  />
+</p>
+<p>对于删除和元素修改操作，也遵从相同的逻辑，就不再罗嗦了。</p>
+<h3 id="3-小节">3. 小节</h3>
+<p>通过设置系统I/O机制的wait时间，从而简洁的集成Timer事件；主要分析了libevent对堆调整操作的优化。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/blog/4a5e0c5a568b4187b207ec0ada2dbdfb/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>libevent源码深度剖析08</span>
+  </a>
+  <a class="next" href="https://haokiu.com/blog/f567712a9375435692b3217e444f19e5/">
+    <span class="title">Next »</span>
+    <br>
+    <span>libevent源码深度剖析10</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

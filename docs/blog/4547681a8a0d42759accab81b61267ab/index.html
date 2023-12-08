@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Memcached源码阅读十七 状态机 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="Memcached源码阅读十七 状态机 按我们之前的描述，Master线程建立连接之后，分发给Worker线程，而Worker线程处理业务逻辑时，会进入状态机，状态机按不同的状态处理业务逻辑，我们在分析连接分发时，已经看到了Master线程进入状态机时在有新连接建立的时候，后续的状态都是业务逻辑的状态，其处理流程如下图所示：
+共有10个状态（代码中的状态不止这些，有些没什么用，此处就没展现），状态listenning状态是Master建立连接的过程，我们已经分析过了，我们接下来分不同的文章分析其余的9中状态。
+enum conn_states { conn_listening, //监听状态 conn_new_cmd, //为新连接做一些准备 conn_waiting, //等待读取一个数据包 conn_read, //读取网络数据 conn_parse_cmd, //解析缓冲区的数据 conn_write, //简单的回复数据 conn_nread, //读取固定数据的网络数据 conn_swallow, //处理不需要的写缓冲区的数据 conn_closing, //关闭连接 conn_mwrite, //顺序的写多个item数据 conn_max_state //最大状态，做断言使用 }; 这篇文件先分析conn_new_cmd和conn_wating状态，子线程最初进入的状态就是conn_new_cmd状态，这个状态主要是做一些清理。
+case conn_new_cmd: //全局变量，记录每个libevent实例处理的事件，通过初始启动参数配置 --nreqs; //还可以处理请求 if (nreqs &gt;= 0) { //整理缓冲区 reset_cmd_handler(c); } //拒绝请求 else { pthread_mutex_lock(&amp;c-&gt;thread-&gt;stats.mutex); c-&gt;thread-&gt;stats.conn_yields&#43;&#43;;//更新统计数据 pthread_mutex_unlock(&amp;c-&gt;thread-&gt;stats.mutex); //如果缓冲区有数据，则需要处理 if (c-&gt;rbytes &gt; 0) { //更新libevent状态 if (!update_event(c, EV_WRITE | EV_PERSIST)) { if (settings.verbose &gt; 0) fprintf(stderr, &#34;Couldn&#39;t update event\n&#34;); conn_set_state(c, conn_closing);//关闭连接 } } stop = true; } break; //整理缓冲区 static void reset_cmd_handler(conn *c) { c-&gt;cmd = -1; c-&gt;substate = bin_no_state; //还有item if (c-&gt;item != NULL) { //删除item，本篇不分析其实现，后续分析 item_remove(c-&gt;item); c-&gt;item = NULL; } //整理缓冲区 conn_shrink(c); //缓冲区还有数据 if (c-&gt;rbytes &gt; 0) { //更新状态 conn_set_state(c, conn_parse_cmd); } //如果没有数据 else { //进入等待状态，状态机没有数据要处理，就进入这个状态 conn_set_state(c, conn_waiting); } } //缩小缓冲区 static void conn_shrink(conn *c) { assert(c !">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/4547681a8a0d42759accab81b61267ab/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Memcached源码阅读十七 状态机" />
+<meta property="og:description" content="Memcached源码阅读十七 状态机 按我们之前的描述，Master线程建立连接之后，分发给Worker线程，而Worker线程处理业务逻辑时，会进入状态机，状态机按不同的状态处理业务逻辑，我们在分析连接分发时，已经看到了Master线程进入状态机时在有新连接建立的时候，后续的状态都是业务逻辑的状态，其处理流程如下图所示：
+共有10个状态（代码中的状态不止这些，有些没什么用，此处就没展现），状态listenning状态是Master建立连接的过程，我们已经分析过了，我们接下来分不同的文章分析其余的9中状态。
+enum conn_states { conn_listening, //监听状态 conn_new_cmd, //为新连接做一些准备 conn_waiting, //等待读取一个数据包 conn_read, //读取网络数据 conn_parse_cmd, //解析缓冲区的数据 conn_write, //简单的回复数据 conn_nread, //读取固定数据的网络数据 conn_swallow, //处理不需要的写缓冲区的数据 conn_closing, //关闭连接 conn_mwrite, //顺序的写多个item数据 conn_max_state //最大状态，做断言使用 }; 这篇文件先分析conn_new_cmd和conn_wating状态，子线程最初进入的状态就是conn_new_cmd状态，这个状态主要是做一些清理。
+case conn_new_cmd: //全局变量，记录每个libevent实例处理的事件，通过初始启动参数配置 --nreqs; //还可以处理请求 if (nreqs &gt;= 0) { //整理缓冲区 reset_cmd_handler(c); } //拒绝请求 else { pthread_mutex_lock(&amp;c-&gt;thread-&gt;stats.mutex); c-&gt;thread-&gt;stats.conn_yields&#43;&#43;;//更新统计数据 pthread_mutex_unlock(&amp;c-&gt;thread-&gt;stats.mutex); //如果缓冲区有数据，则需要处理 if (c-&gt;rbytes &gt; 0) { //更新libevent状态 if (!update_event(c, EV_WRITE | EV_PERSIST)) { if (settings.verbose &gt; 0) fprintf(stderr, &#34;Couldn&#39;t update event\n&#34;); conn_set_state(c, conn_closing);//关闭连接 } } stop = true; } break; //整理缓冲区 static void reset_cmd_handler(conn *c) { c-&gt;cmd = -1; c-&gt;substate = bin_no_state; //还有item if (c-&gt;item != NULL) { //删除item，本篇不分析其实现，后续分析 item_remove(c-&gt;item); c-&gt;item = NULL; } //整理缓冲区 conn_shrink(c); //缓冲区还有数据 if (c-&gt;rbytes &gt; 0) { //更新状态 conn_set_state(c, conn_parse_cmd); } //如果没有数据 else { //进入等待状态，状态机没有数据要处理，就进入这个状态 conn_set_state(c, conn_waiting); } } //缩小缓冲区 static void conn_shrink(conn *c) { assert(c !" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/4547681a8a0d42759accab81b61267ab/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Memcached源码阅读十七 状态机"/>
+<meta name="twitter:description" content="Memcached源码阅读十七 状态机 按我们之前的描述，Master线程建立连接之后，分发给Worker线程，而Worker线程处理业务逻辑时，会进入状态机，状态机按不同的状态处理业务逻辑，我们在分析连接分发时，已经看到了Master线程进入状态机时在有新连接建立的时候，后续的状态都是业务逻辑的状态，其处理流程如下图所示：
+共有10个状态（代码中的状态不止这些，有些没什么用，此处就没展现），状态listenning状态是Master建立连接的过程，我们已经分析过了，我们接下来分不同的文章分析其余的9中状态。
+enum conn_states { conn_listening, //监听状态 conn_new_cmd, //为新连接做一些准备 conn_waiting, //等待读取一个数据包 conn_read, //读取网络数据 conn_parse_cmd, //解析缓冲区的数据 conn_write, //简单的回复数据 conn_nread, //读取固定数据的网络数据 conn_swallow, //处理不需要的写缓冲区的数据 conn_closing, //关闭连接 conn_mwrite, //顺序的写多个item数据 conn_max_state //最大状态，做断言使用 }; 这篇文件先分析conn_new_cmd和conn_wating状态，子线程最初进入的状态就是conn_new_cmd状态，这个状态主要是做一些清理。
+case conn_new_cmd: //全局变量，记录每个libevent实例处理的事件，通过初始启动参数配置 --nreqs; //还可以处理请求 if (nreqs &gt;= 0) { //整理缓冲区 reset_cmd_handler(c); } //拒绝请求 else { pthread_mutex_lock(&amp;c-&gt;thread-&gt;stats.mutex); c-&gt;thread-&gt;stats.conn_yields&#43;&#43;;//更新统计数据 pthread_mutex_unlock(&amp;c-&gt;thread-&gt;stats.mutex); //如果缓冲区有数据，则需要处理 if (c-&gt;rbytes &gt; 0) { //更新libevent状态 if (!update_event(c, EV_WRITE | EV_PERSIST)) { if (settings.verbose &gt; 0) fprintf(stderr, &#34;Couldn&#39;t update event\n&#34;); conn_set_state(c, conn_closing);//关闭连接 } } stop = true; } break; //整理缓冲区 static void reset_cmd_handler(conn *c) { c-&gt;cmd = -1; c-&gt;substate = bin_no_state; //还有item if (c-&gt;item != NULL) { //删除item，本篇不分析其实现，后续分析 item_remove(c-&gt;item); c-&gt;item = NULL; } //整理缓冲区 conn_shrink(c); //缓冲区还有数据 if (c-&gt;rbytes &gt; 0) { //更新状态 conn_set_state(c, conn_parse_cmd); } //如果没有数据 else { //进入等待状态，状态机没有数据要处理，就进入这个状态 conn_set_state(c, conn_waiting); } } //缩小缓冲区 static void conn_shrink(conn *c) { assert(c !"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Memcached源码阅读十七 状态机",
+      "item": "https://haokiu.com/blog/4547681a8a0d42759accab81b61267ab/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Memcached源码阅读十七 状态机",
+  "name": "Memcached源码阅读十七 状态机",
+  "description": "Memcached源码阅读十七 状态机 按我们之前的描述，Master线程建立连接之后，分发给Worker线程，而Worker线程处理业务逻辑时，会进入状态机，状态机按不同的状态处理业务逻辑，我们在分析连接分发时，已经看到了Master线程进入状态机时在有新连接建立的时候，后续的状态都是业务逻辑的状态，其处理流程如下图所示：\n共有10个状态（代码中的状态不止这些，有些没什么用，此处就没展现），状态listenning状态是Master建立连接的过程，我们已经分析过了，我们接下来分不同的文章分析其余的9中状态。\nenum conn_states { conn_listening, //监听状态 conn_new_cmd, //为新连接做一些准备 conn_waiting, //等待读取一个数据包 conn_read, //读取网络数据 conn_parse_cmd, //解析缓冲区的数据 conn_write, //简单的回复数据 conn_nread, //读取固定数据的网络数据 conn_swallow, //处理不需要的写缓冲区的数据 conn_closing, //关闭连接 conn_mwrite, //顺序的写多个item数据 conn_max_state //最大状态，做断言使用 }; 这篇文件先分析conn_new_cmd和conn_wating状态，子线程最初进入的状态就是conn_new_cmd状态，这个状态主要是做一些清理。\ncase conn_new_cmd: //全局变量，记录每个libevent实例处理的事件，通过初始启动参数配置 --nreqs; //还可以处理请求 if (nreqs \u0026gt;= 0) { //整理缓冲区 reset_cmd_handler(c); } //拒绝请求 else { pthread_mutex_lock(\u0026amp;c-\u0026gt;thread-\u0026gt;stats.mutex); c-\u0026gt;thread-\u0026gt;stats.conn_yields++;//更新统计数据 pthread_mutex_unlock(\u0026amp;c-\u0026gt;thread-\u0026gt;stats.mutex); //如果缓冲区有数据，则需要处理 if (c-\u0026gt;rbytes \u0026gt; 0) { //更新libevent状态 if (!update_event(c, EV_WRITE | EV_PERSIST)) { if (settings.verbose \u0026gt; 0) fprintf(stderr, \u0026#34;Couldn\u0026#39;t update event\\n\u0026#34;); conn_set_state(c, conn_closing);//关闭连接 } } stop = true; } break; //整理缓冲区 static void reset_cmd_handler(conn *c) { c-\u0026gt;cmd = -1; c-\u0026gt;substate = bin_no_state; //还有item if (c-\u0026gt;item != NULL) { //删除item，本篇不分析其实现，后续分析 item_remove(c-\u0026gt;item); c-\u0026gt;item = NULL; } //整理缓冲区 conn_shrink(c); //缓冲区还有数据 if (c-\u0026gt;rbytes \u0026gt; 0) { //更新状态 conn_set_state(c, conn_parse_cmd); } //如果没有数据 else { //进入等待状态，状态机没有数据要处理，就进入这个状态 conn_set_state(c, conn_waiting); } } //缩小缓冲区 static void conn_shrink(conn *c) { assert(c !",
+  "keywords": [
+    
+  ],
+  "articleBody": "Memcached源码阅读十七 状态机 按我们之前的描述，Master线程建立连接之后，分发给Worker线程，而Worker线程处理业务逻辑时，会进入状态机，状态机按不同的状态处理业务逻辑，我们在分析连接分发时，已经看到了Master线程进入状态机时在有新连接建立的时候，后续的状态都是业务逻辑的状态，其处理流程如下图所示：\n共有10个状态（代码中的状态不止这些，有些没什么用，此处就没展现），状态listenning状态是Master建立连接的过程，我们已经分析过了，我们接下来分不同的文章分析其余的9中状态。\nenum conn_states { conn_listening, //监听状态 conn_new_cmd, //为新连接做一些准备 conn_waiting, //等待读取一个数据包 conn_read, //读取网络数据 conn_parse_cmd, //解析缓冲区的数据 conn_write, //简单的回复数据 conn_nread, //读取固定数据的网络数据 conn_swallow, //处理不需要的写缓冲区的数据 conn_closing, //关闭连接 conn_mwrite, //顺序的写多个item数据 conn_max_state //最大状态，做断言使用 }; 这篇文件先分析conn_new_cmd和conn_wating状态，子线程最初进入的状态就是conn_new_cmd状态，这个状态主要是做一些清理。\ncase conn_new_cmd: //全局变量，记录每个libevent实例处理的事件，通过初始启动参数配置 --nreqs; //还可以处理请求 if (nreqs \u003e= 0) { //整理缓冲区 reset_cmd_handler(c); } //拒绝请求 else { pthread_mutex_lock(\u0026c-\u003ethread-\u003estats.mutex); c-\u003ethread-\u003estats.conn_yields++;//更新统计数据 pthread_mutex_unlock(\u0026c-\u003ethread-\u003estats.mutex); //如果缓冲区有数据，则需要处理 if (c-\u003erbytes \u003e 0) { //更新libevent状态 if (!update_event(c, EV_WRITE | EV_PERSIST)) { if (settings.verbose \u003e 0) fprintf(stderr, \"Couldn't update event\\n\"); conn_set_state(c, conn_closing);//关闭连接 } } stop = true; } break; //整理缓冲区 static void reset_cmd_handler(conn *c) { c-\u003ecmd = -1; c-\u003esubstate = bin_no_state; //还有item if (c-\u003eitem != NULL) { //删除item，本篇不分析其实现，后续分析 item_remove(c-\u003eitem); c-\u003eitem = NULL; } //整理缓冲区 conn_shrink(c); //缓冲区还有数据 if (c-\u003erbytes \u003e 0) { //更新状态 conn_set_state(c, conn_parse_cmd); } //如果没有数据 else { //进入等待状态，状态机没有数据要处理，就进入这个状态 conn_set_state(c, conn_waiting); } } //缩小缓冲区 static void conn_shrink(conn *c) { assert(c != NULL); //如果是UDP协议，不牵涉缓冲区管理 if (IS_UDP(c-\u003etransport)) return; //读缓冲区空间大小\u003eREAD_BUFFER_HIGHWAT \u0026\u0026 已经读到的数据还没解析的数据小于 DATA_BUFFER_SIZE if (c-\u003ersize \u003e READ_BUFFER_HIGHWAT \u0026\u0026 c-\u003erbytes \u003c DATA_BUFFER_SIZE) { char *newbuf; if (c-\u003ercurr != c-\u003erbuf) //目前数据是从rcurr开始的，移动数据到rbuf中 memmove(c-\u003erbuf, c-\u003ercurr, (size_t) c-\u003erbytes); //按DATA_BUFFER_SIZE扩大缓冲区 newbuf = (char *) realloc((void *) c-\u003erbuf, DATA_BUFFER_SIZE); if (newbuf) { //更新读缓冲区 c-\u003erbuf = newbuf; //更新读缓冲区大小 c-\u003ersize = DATA_BUFFER_SIZE; } c-\u003ercurr = c-\u003erbuf; } //需要写出的item的个数，也就是要发送给客户端的item的个数 if (c-\u003eisize \u003e ITEM_LIST_HIGHWAT) { //增大存放item的空间 item **newbuf = (item**) realloc((void *) c-\u003eilist,ITEM_LIST_INITIAL * sizeof(c-\u003eilist[0])); if (newbuf) { //更新信息 c-\u003eilist = newbuf; //更新信息 c-\u003eisize = ITEM_LIST_INITIAL; } } //msghdr的个数，memcached发送消息是通过sendmsg批量发送的 if (c-\u003emsgsize \u003e MSG_LIST_HIGHWAT) { struct msghdr *newbuf = (struct msghdr *) realloc((void *) c-\u003emsglist,MSG_LIST_INITIAL * sizeof(c-\u003emsglist[0]));//增大空间 if (newbuf) { //更新信息 c-\u003emsglist = newbuf; //更新信息 c-\u003emsgsize = MSG_LIST_INITIAL; } } //msghdr里面iov的数量 if (c-\u003eiovsize \u003e IOV_LIST_HIGHWAT) { //增大空间 struct iovec *newbuf = (struct iovec *) realloc((void *) c-\u003eiov,IOV_LIST_INITIAL * sizeof(c-\u003eiov[0])); if (newbuf) { //更新信息 c-\u003eiov = newbuf; //更新信息 c-\u003eiovsize = IOV_LIST_INITIAL; } } } 从conn_new_cmd状态会进入conn_parse_cmd状态（如果有数据）或者conn_waiting（如果没有数据）状态，下面看看conn_waiting状态。\ncase conn_waiting: //修改libevent状态，读取数据 if (!update_event(c, EV_READ | EV_PERSIST)) { if (settings.verbose \u003e 0) fprintf(stderr, \"Couldn't update event\\n\"); conn_set_state(c, conn_closing); break; } //进入读数据状态 conn_set_state(c, conn_read); stop = true; break; //更新libevent状态，也就是删除libevent事件后，重新注册libevent事件 static bool update_event(conn *c, const int new_flags) { assert(c != NULL); struct event_base *base = c-\u003eevent.ev_base; if (c-\u003eev_flags == new_flags) return true; //删除旧的事件 if (event_del(\u0026c-\u003eevent) == -1) return false; //注册新事件 event_set(\u0026c-\u003eevent, c-\u003esfd, new_flags, event_handler, (void *) c); event_base_set(base, \u0026c-\u003eevent); c-\u003eev_flags = new_flags; if (event_add(\u0026c-\u003eevent, 0) == -1) return false; return true; } conn_wating状态是在等待读取数据，conn_wating通过修改libevent事件（修改为读事件）之后就进入了conn_read状态，该状态就是从网络中读取数据，下面我们详细分析conn_read状态。\ncase conn_read: res = IS_UDP(c-\u003etransport) ? try_read_udp(c) : try_read_network(c);//判断采用UDP协议还是TCP协议 switch (res) { case READ_NO_DATA_RECEIVED://未读取到数据 conn_set_state(c, conn_waiting);//继续等待 break; case READ_DATA_RECEIVED://读取数据 conn_set_state(c, conn_parse_cmd);//开始解析数据 break; case READ_ERROR://读取发生错误 conn_set_state(c, conn_closing);//关闭连接 break; case READ_MEMORY_ERROR: //申请内存空间错误，继续尝试 break; } break; //采用TCP协议，从网络读取数据 static enum try_read_result try_read_network(conn *c) { enum try_read_result gotdata = READ_NO_DATA_RECEIVED; int res; int num_allocs = 0; assert(c != NULL); //rcurr标记读缓冲区的开始位置，如果不在，通过memmove调整 if (c-\u003ercurr != c-\u003erbuf) { if (c-\u003erbytes != 0) memmove(c-\u003erbuf, c-\u003ercurr, c-\u003erbytes); //rcurr指向读缓冲区起始位置 c-\u003ercurr = c-\u003erbuf; } //循环读取 while (1) { //已经读取到的数据大于读缓冲区的大小 if (c-\u003erbytes \u003e= c-\u003ersize) { if (num_allocs == 4) { return gotdata; } ++num_allocs; //按2倍扩容空间 char *new_rbuf = realloc(c-\u003erbuf, c-\u003ersize * 2); //realloc发生错误，也就是申请内存失败 if (!new_rbuf) { if (settings.verbose \u003e 0) fprintf(stderr, \"Couldn't realloc input buffer\\n\"); //忽略已经读取到的数据 c-\u003erbytes = 0; out_string(c, \"SERVER_ERROR out of memory reading request\"); //下一个状态就是conn_closing状态 c-\u003ewrite_and_go = conn_closing; return READ_MEMORY_ERROR; } //读缓冲区指向新的缓冲区 c-\u003ercurr = c-\u003erbuf = new_rbuf; //读缓冲区的大小扩大2倍 c-\u003ersize *= 2; } //读缓冲区剩余空间 int avail = c-\u003ersize - c-\u003erbytes; //执行网络读取，这个是非阻塞的读 res = read(c-\u003esfd, c-\u003erbuf + c-\u003erbytes, avail); //如果读取到了数据 if (res \u003e 0) { pthread_mutex_lock(\u0026c-\u003ethread-\u003estats.mutex); //更新线程的统计数据 c-\u003ethread-\u003estats.bytes_read += res; pthread_mutex_unlock(\u0026c-\u003ethread-\u003estats.mutex); //返回读取到数据的状态 gotdata = READ_DATA_RECEIVED; //读取到的数据个数增加res c-\u003erbytes += res; //最多读取到avail个，如果已经读到了，则可以尝试继续读取 if (res == avail) { continue; } //否则，小于avail,表示已经没数据了，退出循环。 else { break; } } //表示已经断开网络连接了 if (res == 0) { return READ_ERROR; } //因为是非阻塞的，所以会返回下面的两个错误码 if (res == -1) { if (errno == EAGAIN || errno == EWOULDBLOCK) { break; } return READ_ERROR; } } return gotdata; } 上面描述的是TCP的数据读取，下面我们分析下UDP的数据读取，UDP是数据报的形式，读取到一个，就是一个完整的数据报，所以其处理过程简单。\n//UDP读取网络数据 static enum try_read_result try_read_udp(conn *c) { int res; assert(c != NULL); c-\u003erequest_addr_size = sizeof(c-\u003erequest_addr); //执行UDP的网络读取 res = recvfrom(c-\u003esfd, c-\u003erbuf, c-\u003ersize, 0, \u0026c-\u003erequest_addr, \u0026c-\u003erequest_addr_size); //UDP数据包大小大于8，已经有可能是业务数据包 if (res \u003e 8) { unsigned char *buf = (unsigned char *)c-\u003erbuf; pthread_mutex_lock(\u0026c-\u003ethread-\u003estats.mutex); //更新每个线程的统计数据 c-\u003ethread-\u003estats.bytes_read += res; pthread_mutex_unlock(\u0026c-\u003ethread-\u003estats.mutex); /* Beginning of UDP packet is the request ID; save it. */ c-\u003erequest_id = buf[0] * 256 + buf[1]; //一些业务的特征信息判断 if (buf[4] != 0 || buf[5] != 1) { out_string(c, \"SERVER_ERROR multi-packet request not supported\"); return READ_NO_DATA_RECEIVED; } /* Don't care about any of the rest of the header. */ res -= 8; //调整缓冲区 memmove(c-\u003erbuf, c-\u003erbuf + 8, res); c-\u003erbytes = res;//更新信息 c-\u003ercurr = c-\u003erbuf; return READ_DATA_RECEIVED; } return READ_NO_DATA_RECEIVED; } 从网络读取了数据之后，将会进入conn_parse_cmd状态，该状态是按协议来解析读取到的网络数据。\ncase conn_parse_cmd: //解析数据 if (try_read_command(c) == 0) { //如果读取到的数据不够，我们继续等待，等读取到的数据够了，再进行解 conn_set_state(c, conn_waiting); } break; //memcached支持二进制协议和文本协议 static int try_read_command(conn *c) { assert(c != NULL); assert(c-\u003ercurr \u003c= (c-\u003erbuf + c-\u003ersize)); assert(c-\u003erbytes \u003e 0); if (c-\u003eprotocol == negotiating_prot || c-\u003etransport == udp_transport) { //二进制协议有标志，按标志进行区分 if ((unsigned char)c-\u003erbuf[0] == (unsigned char)PROTOCOL_BINARY_REQ) { c-\u003eprotocol = binary_prot;//二进制协议 } else { c-\u003eprotocol = ascii_prot;//文本协议 } if (settings.verbose \u003e 1) { fprintf(stderr, \"%d: Client using the %s protocol\\n\", c-\u003esfd, prot_text(c-\u003eprotocol)); } } //如果是二进制协议 if (c-\u003eprotocol == binary_prot) { //二进制协议读取到的数据小于二进制协议的头部长度 if (c-\u003erbytes \u003c sizeof(c-\u003ebinary_header)) { //返回继续读数据 return 0; } else { #ifdef NEED_ALIGN //如果需要对齐，则按8字节对齐，对齐能提高CPU读取的效率 if (((long)(c-\u003ercurr)) % 8 != 0) { //调整缓冲区 memmove(c-\u003erbuf, c-\u003ercurr, c-\u003erbytes); c-\u003ercurr = c-\u003erbuf; if (settings.verbose \u003e 1) { fprintf(stderr, \"%d: Realign input buffer\\n\", c-\u003esfd); } } #endif protocol_binary_request_header* req;//二进制协议头 req = (protocol_binary_request_header*)c-\u003ercurr; //调试信息 if (settings.verbose \u003e 1) { /* Dump the packet before we convert it to host order */ int ii; fprintf(stderr, \"\u003c%d Read binary protocol data:\", c-\u003esfd); for (ii = 0; ii \u003c sizeof(req-\u003ebytes); ++ii) { if (ii % 4 == 0) { fprintf(stderr, \"\\n\u003c%d \", c-\u003esfd); } fprintf(stderr, \" 0x%02x\", req-\u003ebytes[ii]); } fprintf(stderr, \"\\n\"); } c-\u003ebinary_header = *req; c-\u003ebinary_header.request.keylen = ntohs(req-\u003erequest.keylen); c-\u003ebinary_header.request.bodylen = ntohl(req-\u003erequest.bodylen); c-\u003ebinary_header.request.cas = ntohll(req-\u003erequest.cas); //判断魔数是否合法，魔数用来防止TCP粘包 if (c-\u003ebinary_header.request.magic != PROTOCOL_BINARY_REQ) { if (settings.verbose) { fprintf(stderr, \"Invalid magic: %x\\n\", c-\u003ebinary_header.request.magic); } conn_set_state(c, conn_closing); return -1; } c-\u003emsgcurr = 0; c-\u003emsgused = 0; c-\u003eiovused = 0; if (add_msghdr(c) != 0) { out_string(c, \"SERVER_ERROR out of memory\"); return 0; } c-\u003ecmd = c-\u003ebinary_header.request.opcode; c-\u003ekeylen = c-\u003ebinary_header.request.keylen; c-\u003eopaque = c-\u003ebinary_header.request.opaque; //清除客户端传递的cas值 c-\u003ecas = 0; dispatch_bin_command(c);//协议数据处理 //更新已经读取到的字节数据 c-\u003erbytes -= sizeof(c-\u003ebinary_header); //更新缓冲区的路标信息 c-\u003ercurr += sizeof(c-\u003ebinary_header); } } } 文本协议的过程和二进制协议的过程类似，此处不分析，另外dispatch_bin_command是处理具体的（比如get,set等）操作的，和是二进制协议具体相关的，解析完一些数据之后，会进入到conn_nread的流程，也就是读取指定数目数据的过程，这个过程主要是做具体的操作了，比如get，add，set操作。\ncase bin_read_set_value: complete_update_bin(c);//执行Update操作 break; case bin_reading_get_key: process_bin_get(c);//执行get操作 break; 状态机的整个处理过程就介绍到这里，其他的状态我们就不介绍了，了解了这些之后，其实其他状态就相对容易很多。\n",
+  "wordCount" : "973",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/4547681a8a0d42759accab81b61267ab/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      Memcached源码阅读十七 状态机
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#memcached%e6%ba%90%e7%a0%81%e9%98%85%e8%af%bb%e5%8d%81%e4%b8%83-%e7%8a%b6%e6%80%81%e6%9c%ba" aria-label="Memcached源码阅读十七 状态机">Memcached源码阅读十七 状态机</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="memcached源码阅读十七-状态机">Memcached源码阅读十七 状态机</h1>
+<p>按我们之前的描述，<strong>Master线程</strong>建立连接之后，分发给<strong>Worker线程</strong>，而Worker线程处理业务逻辑时，会进入状态机，状态机按不同的状态处理业务逻辑，我们在分析连接分发时，已经看到了Master线程进入状态机时在有新连接建立的时候，后续的状态都是业务逻辑的状态，其处理流程如下图所示：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/b47dbcead3418b7e5447e6068b080029.webp" alt=""  />
+</p>
+<p>共有10个状态（代码中的状态不止这些，有些没什么用，此处就没展现），状态<code>listenning</code>状态是Master建立连接的过程，我们已经分析过了，我们接下来分不同的文章分析其余的9中状态。</p>
+<pre tabindex="0"><code>enum conn_states {
+    conn_listening,  //监听状态
+    conn_new_cmd,    //为新连接做一些准备
+    conn_waiting,    //等待读取一个数据包
+    conn_read,       //读取网络数据
+    conn_parse_cmd,  //解析缓冲区的数据
+    conn_write,      //简单的回复数据
+    conn_nread,      //读取固定数据的网络数据
+    conn_swallow,    //处理不需要的写缓冲区的数据
+    conn_closing,    //关闭连接
+    conn_mwrite,     //顺序的写多个item数据
+    conn_max_state   //最大状态，做断言使用
+};
+</code></pre><p>这篇文件先分析<code>conn_new_cmd</code>和<code>conn_wating</code>状态，子线程最初进入的状态就是conn_new_cmd状态，这个状态主要是做一些清理。</p>
+<pre tabindex="0"><code>case conn_new_cmd:
+  //全局变量，记录每个libevent实例处理的事件，通过初始启动参数配置
+     --nreqs;
+
+     //还可以处理请求
+     if (nreqs &gt;= 0)
+     {
+         //整理缓冲区
+         reset_cmd_handler(c);
+     }
+     //拒绝请求
+     else
+     {
+         pthread_mutex_lock(&amp;c-&gt;thread-&gt;stats.mutex);
+         c-&gt;thread-&gt;stats.conn_yields++;//更新统计数据
+         pthread_mutex_unlock(&amp;c-&gt;thread-&gt;stats.mutex);
+         //如果缓冲区有数据，则需要处理
+         if (c-&gt;rbytes &gt; 0)
+         {
+             //更新libevent状态
+             if (!update_event(c, EV_WRITE | EV_PERSIST))
+             {
+                 if (settings.verbose &gt; 0)
+                      fprintf(stderr, &#34;Couldn&#39;t update event\n&#34;);
+                   conn_set_state(c, conn_closing);//关闭连接
+             }
+         }
+         stop = true;
+     }
+     break;
+</code></pre><pre tabindex="0"><code>//整理缓冲区
+static void reset_cmd_handler(conn *c)
+{
+    c-&gt;cmd = -1;
+    c-&gt;substate = bin_no_state;
+    //还有item
+    if (c-&gt;item != NULL)
+    {
+        //删除item，本篇不分析其实现，后续分析
+        item_remove(c-&gt;item);
+        c-&gt;item = NULL;
+    }
+    //整理缓冲区
+    conn_shrink(c);
+    //缓冲区还有数据
+    if (c-&gt;rbytes &gt; 0)
+    {
+        //更新状态
+        conn_set_state(c, conn_parse_cmd);
+    }
+    //如果没有数据
+    else
+    {
+        //进入等待状态，状态机没有数据要处理，就进入这个状态
+        conn_set_state(c, conn_waiting);
+    }
+}
+
+//缩小缓冲区
+static void conn_shrink(conn *c)
+{
+    assert(c != NULL);
+
+    //如果是UDP协议，不牵涉缓冲区管理
+    if (IS_UDP(c-&gt;transport))
+        return;
+    //读缓冲区空间大小&gt;READ_BUFFER_HIGHWAT &amp;&amp; 已经读到的数据还没解析的数据小于 DATA_BUFFER_SIZE
+    if (c-&gt;rsize &gt; READ_BUFFER_HIGHWAT &amp;&amp; c-&gt;rbytes &lt; DATA_BUFFER_SIZE)
+    {
+        char *newbuf;
+
+        if (c-&gt;rcurr != c-&gt;rbuf)
+            //目前数据是从rcurr开始的，移动数据到rbuf中
+            memmove(c-&gt;rbuf, c-&gt;rcurr, (size_t) c-&gt;rbytes);
+
+        //按DATA_BUFFER_SIZE扩大缓冲区
+        newbuf = (char *) realloc((void *) c-&gt;rbuf, DATA_BUFFER_SIZE);
+        if (newbuf)
+        {
+            //更新读缓冲区
+            c-&gt;rbuf = newbuf;
+            //更新读缓冲区大小
+            c-&gt;rsize = DATA_BUFFER_SIZE;
+        }
+        c-&gt;rcurr = c-&gt;rbuf;
+    }
+
+    //需要写出的item的个数，也就是要发送给客户端的item的个数
+    if (c-&gt;isize &gt; ITEM_LIST_HIGHWAT)
+    {
+        //增大存放item的空间
+        item **newbuf = (item**) realloc((void *) c-&gt;ilist,ITEM_LIST_INITIAL * sizeof(c-&gt;ilist[0]));
+        if (newbuf)
+        {
+            //更新信息
+            c-&gt;ilist = newbuf;
+            //更新信息
+            c-&gt;isize = ITEM_LIST_INITIAL;
+        }
+    }
+
+    //msghdr的个数，memcached发送消息是通过sendmsg批量发送的
+    if (c-&gt;msgsize &gt; MSG_LIST_HIGHWAT)
+    {
+        struct msghdr *newbuf = (struct msghdr *) realloc((void *) c-&gt;msglist,MSG_LIST_INITIAL * sizeof(c-&gt;msglist[0]));//增大空间
+        if (newbuf)
+        {
+            //更新信息
+            c-&gt;msglist = newbuf;
+            //更新信息
+            c-&gt;msgsize = MSG_LIST_INITIAL;
+        }
+    }
+
+    //msghdr里面iov的数量
+    if (c-&gt;iovsize &gt; IOV_LIST_HIGHWAT)
+    {
+        //增大空间
+        struct iovec *newbuf = (struct iovec *) realloc((void *) c-&gt;iov,IOV_LIST_INITIAL * sizeof(c-&gt;iov[0]));
+        if (newbuf)
+        {
+            //更新信息
+            c-&gt;iov = newbuf;
+            //更新信息
+            c-&gt;iovsize = IOV_LIST_INITIAL;
+        }
+    }
+}
+</code></pre><p>从<code>conn_new_cmd</code>状态会进入<code>conn_parse_cmd</code>状态（如果有数据）或者conn_waiting（如果没有数据）状态，下面看看conn_waiting状态。</p>
+<pre tabindex="0"><code>case conn_waiting:
+  //修改libevent状态，读取数据
+  if (!update_event(c, EV_READ | EV_PERSIST))
+     {
+         if (settings.verbose &gt; 0)
+             fprintf(stderr, &#34;Couldn&#39;t update event\n&#34;);
+         conn_set_state(c, conn_closing);
+         break;
+     }
+     //进入读数据状态
+     conn_set_state(c, conn_read);
+     stop = true;
+     break;
+//更新libevent状态，也就是删除libevent事件后，重新注册libevent事件
+static bool update_event(conn *c, const int new_flags)
+{
+     assert(c != NULL);
+     struct event_base *base = c-&gt;event.ev_base;
+
+     if (c-&gt;ev_flags == new_flags)
+        return true;
+     //删除旧的事件
+     if (event_del(&amp;c-&gt;event) == -1)
+        return false;
+
+     //注册新事件
+     event_set(&amp;c-&gt;event, c-&gt;sfd, new_flags, event_handler, (void *) c);
+     event_base_set(base, &amp;c-&gt;event); 
+     c-&gt;ev_flags = new_flags;
+
+     if (event_add(&amp;c-&gt;event, 0) == -1)
+       return false;
+     return true;
+}
+</code></pre><p><code>conn_wating</code>状态是在等待读取数据，conn_wating通过修改libevent事件（修改为读事件）之后就进入了<code>conn_read</code>状态，该状态就是从<strong>网络中读取数据</strong>，下面我们详细分析<code>conn_read</code>状态。</p>
+<pre tabindex="0"><code>case conn_read:
+     res = IS_UDP(c-&gt;transport) ? try_read_udp(c) : try_read_network(c);//判断采用UDP协议还是TCP协议
+
+     switch (res)
+     {
+     case READ_NO_DATA_RECEIVED://未读取到数据
+         conn_set_state(c, conn_waiting);//继续等待
+         break;
+     case READ_DATA_RECEIVED://读取数据
+         conn_set_state(c, conn_parse_cmd);//开始解析数据
+         break;
+     case READ_ERROR://读取发生错误
+         conn_set_state(c, conn_closing);//关闭连接
+         break;
+     case READ_MEMORY_ERROR: //申请内存空间错误，继续尝试
+         break;
+     }
+     break;
+//采用TCP协议，从网络读取数据
+static enum try_read_result try_read_network(conn *c)
+{
+    enum try_read_result gotdata = READ_NO_DATA_RECEIVED;
+    int res;
+    int num_allocs = 0;
+    assert(c != NULL);
+
+    //rcurr标记读缓冲区的开始位置，如果不在，通过memmove调整
+    if (c-&gt;rcurr != c-&gt;rbuf)
+    {
+        if (c-&gt;rbytes != 0)
+            memmove(c-&gt;rbuf, c-&gt;rcurr, c-&gt;rbytes);
+        //rcurr指向读缓冲区起始位置
+        c-&gt;rcurr = c-&gt;rbuf;
+    }
+
+    //循环读取
+    while (1)
+    {
+        //已经读取到的数据大于读缓冲区的大小
+        if (c-&gt;rbytes &gt;= c-&gt;rsize)
+        {
+            if (num_allocs == 4)
+            {
+                return gotdata;
+            }
+            ++num_allocs;
+            //按2倍扩容空间
+            char *new_rbuf = realloc(c-&gt;rbuf, c-&gt;rsize * 2);
+
+            //realloc发生错误，也就是申请内存失败
+            if (!new_rbuf)
+            {
+                if (settings.verbose &gt; 0)
+                    fprintf(stderr, &#34;Couldn&#39;t realloc input buffer\n&#34;);
+                //忽略已经读取到的数据
+                c-&gt;rbytes = 0;
+                out_string(c, &#34;SERVER_ERROR out of memory reading request&#34;);
+                //下一个状态就是conn_closing状态
+                c-&gt;write_and_go = conn_closing;
+                return READ_MEMORY_ERROR;
+            }
+            //读缓冲区指向新的缓冲区
+            c-&gt;rcurr = c-&gt;rbuf = new_rbuf;
+            //读缓冲区的大小扩大2倍
+            c-&gt;rsize *= 2;
+        }
+
+        //读缓冲区剩余空间
+        int avail = c-&gt;rsize - c-&gt;rbytes;
+        //执行网络读取，这个是非阻塞的读
+        res = read(c-&gt;sfd, c-&gt;rbuf + c-&gt;rbytes, avail);
+        //如果读取到了数据
+        if (res &gt; 0)
+        {
+            pthread_mutex_lock(&amp;c-&gt;thread-&gt;stats.mutex);
+            //更新线程的统计数据
+            c-&gt;thread-&gt;stats.bytes_read += res;
+            pthread_mutex_unlock(&amp;c-&gt;thread-&gt;stats.mutex);
+            //返回读取到数据的状态
+            gotdata = READ_DATA_RECEIVED;
+            //读取到的数据个数增加res
+            c-&gt;rbytes += res;
+
+            //最多读取到avail个，如果已经读到了，则可以尝试继续读取
+            if (res == avail)
+            {
+                continue;
+            }
+            //否则，小于avail,表示已经没数据了，退出循环。
+            else
+            {
+                break;
+            }
+        }
+        //表示已经断开网络连接了
+        if (res == 0)
+        {
+            return READ_ERROR;
+        }
+        //因为是非阻塞的，所以会返回下面的两个错误码
+        if (res == -1)
+        {
+            if (errno == EAGAIN || errno == EWOULDBLOCK)
+            {
+                break;
+            }
+            return READ_ERROR;
+        }
+    }
+    return gotdata;
+}
+</code></pre><p>上面描述的是TCP的数据读取，下面我们分析下UDP的数据读取，UDP是数据报的形式，读取到一个，就是一个完整的数据报，所以其处理过程简单。</p>
+<pre tabindex="0"><code>//UDP读取网络数据
+static enum try_read_result try_read_udp(conn *c)
+{
+    int res;
+
+    assert(c != NULL);
+
+    c-&gt;request_addr_size = sizeof(c-&gt;request_addr);
+    //执行UDP的网络读取
+    res = recvfrom(c-&gt;sfd, c-&gt;rbuf, c-&gt;rsize, 0, &amp;c-&gt;request_addr,
+        &amp;c-&gt;request_addr_size);
+
+    //UDP数据包大小大于8，已经有可能是业务数据包
+    if (res &gt; 8)
+    {
+        unsigned char *buf = (unsigned char *)c-&gt;rbuf;
+        pthread_mutex_lock(&amp;c-&gt;thread-&gt;stats.mutex);
+        //更新每个线程的统计数据
+        c-&gt;thread-&gt;stats.bytes_read += res;
+        pthread_mutex_unlock(&amp;c-&gt;thread-&gt;stats.mutex);
+
+        /* Beginning of UDP packet is the request ID; save it. */
+        c-&gt;request_id = buf[0] * 256 + buf[1];
+
+        //一些业务的特征信息判断                   
+        if (buf[4] != 0 || buf[5] != 1)
+        {
+            out_string(c, &#34;SERVER_ERROR multi-packet request not supported&#34;);
+            return READ_NO_DATA_RECEIVED;
+        }
+
+        /* Don&#39;t care about any of the rest of the header. */
+        res -= 8;
+        //调整缓冲区
+        memmove(c-&gt;rbuf, c-&gt;rbuf + 8, res);
+
+        c-&gt;rbytes = res;//更新信息
+        c-&gt;rcurr = c-&gt;rbuf;
+        return READ_DATA_RECEIVED;
+    }
+    return READ_NO_DATA_RECEIVED;
+}
+</code></pre><p>从网络读取了数据之后，将会进入<code>conn_parse_cmd</code>状态，该状态是按协议来解析读取到的网络数据。</p>
+<pre tabindex="0"><code>case conn_parse_cmd:
+    //解析数据
+    if (try_read_command(c) == 0)
+    {
+         //如果读取到的数据不够，我们继续等待，等读取到的数据够了，再进行解
+         conn_set_state(c, conn_waiting);
+    }
+
+    break;
+</code></pre><pre tabindex="0"><code>//memcached支持二进制协议和文本协议
+static int try_read_command(conn *c)
+{
+    assert(c != NULL);
+    assert(c-&gt;rcurr &lt;= (c-&gt;rbuf + c-&gt;rsize));
+    assert(c-&gt;rbytes &gt; 0);
+
+    if (c-&gt;protocol == negotiating_prot || c-&gt;transport == udp_transport)
+    {
+        //二进制协议有标志，按标志进行区分
+        if ((unsigned char)c-&gt;rbuf[0] == (unsigned char)PROTOCOL_BINARY_REQ)
+        {
+            c-&gt;protocol = binary_prot;//二进制协议
+        }
+        else
+        {
+            c-&gt;protocol = ascii_prot;//文本协议
+        }
+
+        if (settings.verbose &gt; 1)
+        {
+            fprintf(stderr, &#34;%d: Client using the %s protocol\n&#34;, c-&gt;sfd,
+                prot_text(c-&gt;protocol));
+        }
+    }
+
+    //如果是二进制协议
+    if (c-&gt;protocol == binary_prot)
+    {
+        //二进制协议读取到的数据小于二进制协议的头部长度
+        if (c-&gt;rbytes &lt; sizeof(c-&gt;binary_header))
+        {
+            //返回继续读数据
+            return 0;
+        }
+        else
+        {
+#ifdef NEED_ALIGN
+            //如果需要对齐，则按8字节对齐，对齐能提高CPU读取的效率
+            if (((long)(c-&gt;rcurr)) % 8 != 0)
+            {
+                //调整缓冲区
+                memmove(c-&gt;rbuf, c-&gt;rcurr, c-&gt;rbytes);
+                c-&gt;rcurr = c-&gt;rbuf;
+                if (settings.verbose &gt; 1)
+                {
+                    fprintf(stderr, &#34;%d: Realign input buffer\n&#34;, c-&gt;sfd);
+                }
+            }
+#endif
+            protocol_binary_request_header* req;//二进制协议头
+            req = (protocol_binary_request_header*)c-&gt;rcurr;
+            //调试信息
+            if (settings.verbose &gt; 1)
+            {
+                /* Dump the packet before we convert it to host order */
+                int ii;
+                fprintf(stderr, &#34;&lt;%d Read binary protocol data:&#34;, c-&gt;sfd);
+                for (ii = 0; ii &lt; sizeof(req-&gt;bytes); ++ii)
+                {
+                    if (ii % 4 == 0)
+                    {
+                        fprintf(stderr, &#34;\n&lt;%d   &#34;, c-&gt;sfd);
+                    }
+                    fprintf(stderr, &#34; 0x%02x&#34;, req-&gt;bytes[ii]);
+                }
+                fprintf(stderr, &#34;\n&#34;);
+            }
+
+            c-&gt;binary_header = *req;
+            c-&gt;binary_header.request.keylen = ntohs(req-&gt;request.keylen);
+            c-&gt;binary_header.request.bodylen = ntohl(req-&gt;request.bodylen);
+            c-&gt;binary_header.request.cas = ntohll(req-&gt;request.cas);
+            //判断魔数是否合法，魔数用来防止TCP粘包
+            if (c-&gt;binary_header.request.magic != PROTOCOL_BINARY_REQ)
+            {
+                if (settings.verbose)
+                {
+                    fprintf(stderr, &#34;Invalid magic:  %x\n&#34;,
+                        c-&gt;binary_header.request.magic);
+                }
+                conn_set_state(c, conn_closing);
+                return -1;
+            }
+
+            c-&gt;msgcurr = 0;
+            c-&gt;msgused = 0;
+            c-&gt;iovused = 0;
+            if (add_msghdr(c) != 0)
+            {
+                out_string(c, &#34;SERVER_ERROR out of memory&#34;);
+                return 0;
+            }
+
+            c-&gt;cmd = c-&gt;binary_header.request.opcode;
+            c-&gt;keylen = c-&gt;binary_header.request.keylen;
+            c-&gt;opaque = c-&gt;binary_header.request.opaque;
+            //清除客户端传递的cas值
+            c-&gt;cas = 0;
+
+            dispatch_bin_command(c);//协议数据处理
+
+            //更新已经读取到的字节数据
+            c-&gt;rbytes -= sizeof(c-&gt;binary_header);
+            //更新缓冲区的路标信息
+            c-&gt;rcurr += sizeof(c-&gt;binary_header);
+        }
+    }
+}
+</code></pre><p>文本协议的过程和二进制协议的过程类似，此处不分析，另外<code>dispatch_bin_command</code>是处理具体的（比如get,set等）操作的，和是二进制协议具体相关的，解析完一些数据之后，会进入到conn_nread的流程，也就是读取指定数目数据的过程，这个过程主要是做具体的操作了，比如get，add，set操作。</p>
+<pre tabindex="0"><code>case bin_read_set_value:
+     complete_update_bin(c);//执行Update操作
+     break;
+case bin_reading_get_key:
+     process_bin_get(c);//执行get操作
+     break;
+</code></pre><p>状态机的整个处理过程就介绍到这里，其他的状态我们就不介绍了，了解了这些之后，其实其他状态就相对容易很多。</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/blog/1e01253c10f9435e84a4106aa149ab68/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Memcached源码阅读十一 LRU操作</span>
+  </a>
+  <a class="next" href="https://haokiu.com/blog/50d829bedab44857aaf08cfd61e6c952/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Memcached源码阅读十三 do_item_alloc操作</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

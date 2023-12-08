@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>阿里云开源离线同步工具DataX3.0介绍 | haokiu</title>
+<meta name="keywords" content="datax">
+<meta name="description" content="阿里云开源离线同步工具DataX3.0介绍 一. DataX3.0概览 ​	DataX 是一个异构数据源离线同步工具，致力于实现包括关系型数据库(MySQL、Oracle等)、HDFS、Hive、ODPS、HBase、FTP等各种异构数据源之间稳定高效的数据同步功能。
+设计理念 为了解决异构数据源同步问题，DataX将复杂的网状的同步链路变成了星型数据链路，DataX作为中间传输载体负责连接各种数据源。当需要接入一个新的数据源的时候，只需要将此数据源对接到DataX，便能跟已有的数据源做到无缝数据同步。
+当前使用现状 DataX在阿里巴巴集团内被广泛使用，承担了所有大数据的离线同步业务，并已持续稳定运行了6年之久。目前每天完成同步8w多道作业，每日传输数据量超过300TB。
+此前已经开源DataX1.0版本，此次介绍为阿里云开源全新版本DataX3.0，有了更多更强大的功能和更好的使用体验。Github主页地址：https://github.com/alibaba/DataX
+二、DataX3.0框架设计 DataX本身作为离线数据同步框架，采用Framework &#43; plugin架构构建。将数据源读取和写入抽象成为Reader/Writer插件，纳入到整个同步框架中。
+Reader：Reader为数据采集模块，负责采集数据源的数据，将数据发送给Framework。 Writer： Writer为数据写入模块，负责不断向Framework取数据，并将数据写入到目的端。 Framework：Framework用于连接reader和writer，作为两者的数据传输通道，并处理缓冲，流控，并发，数据转换等核心技术问题。 三. DataX3.0插件体系 ​	经过几年积累，DataX目前已经有了比较全面的插件体系，主流的RDBMS数据库、NOSQL、大数据计算系统都已经接入。DataX目前支持数据如下：
+类型 数据源 Reader(读) Writer(写) 文档 RDBMS 关系型数据库 MySQL √ √ 读 、写 Oracle √ √ 读 、写 SQLServer √ √ 读 、写 PostgreSQL √ √ 读 、写 DRDS √ √ 读 、写 达梦 √ √ 读 、写 通用RDBMS(支持所有关系型数据库) √ √ 读 、写 阿里云数仓数据存储 ODPS √ √ 读 、写 ADS √ 写 OSS √ √ 读 、写 OCS √ √ 读 、写 NoSQL数据存储 OTS √ √ 读 、写 Hbase0.94 √ √ 读 、写 Hbase1.1 √ √ 读 、写 MongoDB √ √ 读 、写 Hive √ √ 读 、写 无结构化数据存储 TxtFile √ √ 读 、写 FTP √ √ 读 、写 HDFS √ √ 读 、写 Elasticsearch √ 写 DataX Framework提供了简单的接口与插件交互，提供简单的插件接入机制，只需要任意加上一种插件，就能无缝对接其他数据源。详情请看：DataX数据源指南">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/408be8b90df543789f79c7b43375e5a3/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="阿里云开源离线同步工具DataX3.0介绍" />
+<meta property="og:description" content="阿里云开源离线同步工具DataX3.0介绍 一. DataX3.0概览 ​	DataX 是一个异构数据源离线同步工具，致力于实现包括关系型数据库(MySQL、Oracle等)、HDFS、Hive、ODPS、HBase、FTP等各种异构数据源之间稳定高效的数据同步功能。
+设计理念 为了解决异构数据源同步问题，DataX将复杂的网状的同步链路变成了星型数据链路，DataX作为中间传输载体负责连接各种数据源。当需要接入一个新的数据源的时候，只需要将此数据源对接到DataX，便能跟已有的数据源做到无缝数据同步。
+当前使用现状 DataX在阿里巴巴集团内被广泛使用，承担了所有大数据的离线同步业务，并已持续稳定运行了6年之久。目前每天完成同步8w多道作业，每日传输数据量超过300TB。
+此前已经开源DataX1.0版本，此次介绍为阿里云开源全新版本DataX3.0，有了更多更强大的功能和更好的使用体验。Github主页地址：https://github.com/alibaba/DataX
+二、DataX3.0框架设计 DataX本身作为离线数据同步框架，采用Framework &#43; plugin架构构建。将数据源读取和写入抽象成为Reader/Writer插件，纳入到整个同步框架中。
+Reader：Reader为数据采集模块，负责采集数据源的数据，将数据发送给Framework。 Writer： Writer为数据写入模块，负责不断向Framework取数据，并将数据写入到目的端。 Framework：Framework用于连接reader和writer，作为两者的数据传输通道，并处理缓冲，流控，并发，数据转换等核心技术问题。 三. DataX3.0插件体系 ​	经过几年积累，DataX目前已经有了比较全面的插件体系，主流的RDBMS数据库、NOSQL、大数据计算系统都已经接入。DataX目前支持数据如下：
+类型 数据源 Reader(读) Writer(写) 文档 RDBMS 关系型数据库 MySQL √ √ 读 、写 Oracle √ √ 读 、写 SQLServer √ √ 读 、写 PostgreSQL √ √ 读 、写 DRDS √ √ 读 、写 达梦 √ √ 读 、写 通用RDBMS(支持所有关系型数据库) √ √ 读 、写 阿里云数仓数据存储 ODPS √ √ 读 、写 ADS √ 写 OSS √ √ 读 、写 OCS √ √ 读 、写 NoSQL数据存储 OTS √ √ 读 、写 Hbase0.94 √ √ 读 、写 Hbase1.1 √ √ 读 、写 MongoDB √ √ 读 、写 Hive √ √ 读 、写 无结构化数据存储 TxtFile √ √ 读 、写 FTP √ √ 读 、写 HDFS √ √ 读 、写 Elasticsearch √ 写 DataX Framework提供了简单的接口与插件交互，提供简单的插件接入机制，只需要任意加上一种插件，就能无缝对接其他数据源。详情请看：DataX数据源指南" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/408be8b90df543789f79c7b43375e5a3/" /><meta property="article:section" content="4" />
+<meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
+<meta property="article:modified_time" content="2021-02-02T17:45:01+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="阿里云开源离线同步工具DataX3.0介绍"/>
+<meta name="twitter:description" content="阿里云开源离线同步工具DataX3.0介绍 一. DataX3.0概览 ​	DataX 是一个异构数据源离线同步工具，致力于实现包括关系型数据库(MySQL、Oracle等)、HDFS、Hive、ODPS、HBase、FTP等各种异构数据源之间稳定高效的数据同步功能。
+设计理念 为了解决异构数据源同步问题，DataX将复杂的网状的同步链路变成了星型数据链路，DataX作为中间传输载体负责连接各种数据源。当需要接入一个新的数据源的时候，只需要将此数据源对接到DataX，便能跟已有的数据源做到无缝数据同步。
+当前使用现状 DataX在阿里巴巴集团内被广泛使用，承担了所有大数据的离线同步业务，并已持续稳定运行了6年之久。目前每天完成同步8w多道作业，每日传输数据量超过300TB。
+此前已经开源DataX1.0版本，此次介绍为阿里云开源全新版本DataX3.0，有了更多更强大的功能和更好的使用体验。Github主页地址：https://github.com/alibaba/DataX
+二、DataX3.0框架设计 DataX本身作为离线数据同步框架，采用Framework &#43; plugin架构构建。将数据源读取和写入抽象成为Reader/Writer插件，纳入到整个同步框架中。
+Reader：Reader为数据采集模块，负责采集数据源的数据，将数据发送给Framework。 Writer： Writer为数据写入模块，负责不断向Framework取数据，并将数据写入到目的端。 Framework：Framework用于连接reader和writer，作为两者的数据传输通道，并处理缓冲，流控，并发，数据转换等核心技术问题。 三. DataX3.0插件体系 ​	经过几年积累，DataX目前已经有了比较全面的插件体系，主流的RDBMS数据库、NOSQL、大数据计算系统都已经接入。DataX目前支持数据如下：
+类型 数据源 Reader(读) Writer(写) 文档 RDBMS 关系型数据库 MySQL √ √ 读 、写 Oracle √ √ 读 、写 SQLServer √ √ 读 、写 PostgreSQL √ √ 读 、写 DRDS √ √ 读 、写 达梦 √ √ 读 、写 通用RDBMS(支持所有关系型数据库) √ √ 读 、写 阿里云数仓数据存储 ODPS √ √ 读 、写 ADS √ 写 OSS √ √ 读 、写 OCS √ √ 读 、写 NoSQL数据存储 OTS √ √ 读 、写 Hbase0.94 √ √ 读 、写 Hbase1.1 √ √ 读 、写 MongoDB √ √ 读 、写 Hive √ √ 读 、写 无结构化数据存储 TxtFile √ √ 读 、写 FTP √ √ 读 、写 HDFS √ √ 读 、写 Elasticsearch √ 写 DataX Framework提供了简单的接口与插件交互，提供简单的插件接入机制，只需要任意加上一种插件，就能无缝对接其他数据源。详情请看：DataX数据源指南"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "4s",
+      "item": "https://haokiu.com/4/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "阿里云开源离线同步工具DataX3.0介绍",
+      "item": "https://haokiu.com/blog/408be8b90df543789f79c7b43375e5a3/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "阿里云开源离线同步工具DataX3.0介绍",
+  "name": "阿里云开源离线同步工具DataX3.0介绍",
+  "description": "阿里云开源离线同步工具DataX3.0介绍 一. DataX\u00083.0概览 ​\tDataX 是一个异构数据源离线同步工具，致力于实现包括关系型数据库(MySQL、Oracle等)、HDFS、Hive、ODPS、HBase、FTP等各种异构数据源之间稳定高效的数据同步功能。\n设计理念 为了解决异构数据源同步问题，DataX将复杂的网状的同步链路变成了星型数据链路，DataX作为中间传输载体负责连接各种数据源。当需要接入一个新的数据源的时候，只需要将此数据源对接到DataX，便能跟已有的数据源做到无缝数据同步。\n当前使用现状 DataX在阿里巴巴集团内被广泛使用，承担了所有大数据的离线同步业务，并已持续稳定运行了6年之久。目前每天完成同步8w多道作业，每日传输数据量超过300TB。\n此前已经开源DataX1.0版本，此次介绍为阿里云开源全新版本DataX3.0，有了更多更强大的功能和更好的使用体验。Github主页地址：https://github.com/alibaba/DataX\n二、DataX3.0框架设计 DataX本身作为离线数据同步框架，采用Framework + plugin架构构建。将数据源读取和写入抽象成为Reader/Writer插件，纳入到整个同步框架中。\nReader：Reader\u0008为数据采集模块，负责采集数据源的数据，将数据发送给Framework。 Writer： Writer为数据写入模块，负责不断向Framework取数据，并将数据写入到目的端。 Framework：Framework用于连接reader和writer，作为两者的数据传输通道，并处理缓冲，流控，并发，数据转换等核心技术问题。 三. DataX3.0插件体系 ​\t经过几年积累，DataX目前已经有了比较全面的插件体系，主流的RDBMS数据库、NOSQL、大数据计算系统都已经接入。DataX目前支持数据如下：\n类型 数据源 Reader(读) Writer(写) 文档 RDBMS 关系型数据库 MySQL √ √ 读 、写 Oracle √ √ 读 、写 SQLServer √ √ 读 、写 PostgreSQL √ √ 读 、写 DRDS √ √ 读 、写 达梦 √ √ 读 、写 通用RDBMS(支持所有关系型数据库) √ √ 读 、写 阿里云数仓数据存储 ODPS √ √ 读 、写 ADS √ 写 OSS √ √ 读 、写 OCS √ √ 读 、写 NoSQL数据存储 OTS √ √ 读 、写 Hbase0.94 √ √ 读 、写 Hbase1.1 √ √ 读 、写 MongoDB √ √ 读 、写 Hive √ √ 读 、写 无结构化数据存储 TxtFile √ √ 读 、写 FTP √ √ 读 、写 HDFS √ √ 读 、写 Elasticsearch √ 写 DataX Framework提供了简单的接口与插件交互，提供简单的插件接入机制，只需要任意加上一种插件，就能无缝对接其他数据源。详情请看：DataX数据源指南",
+  "keywords": [
+    "datax"
+  ],
+  "articleBody": "阿里云开源离线同步工具DataX3.0介绍 一. DataX\u00083.0概览 ​\tDataX 是一个异构数据源离线同步工具，致力于实现包括关系型数据库(MySQL、Oracle等)、HDFS、Hive、ODPS、HBase、FTP等各种异构数据源之间稳定高效的数据同步功能。\n设计理念 为了解决异构数据源同步问题，DataX将复杂的网状的同步链路变成了星型数据链路，DataX作为中间传输载体负责连接各种数据源。当需要接入一个新的数据源的时候，只需要将此数据源对接到DataX，便能跟已有的数据源做到无缝数据同步。\n当前使用现状 DataX在阿里巴巴集团内被广泛使用，承担了所有大数据的离线同步业务，并已持续稳定运行了6年之久。目前每天完成同步8w多道作业，每日传输数据量超过300TB。\n此前已经开源DataX1.0版本，此次介绍为阿里云开源全新版本DataX3.0，有了更多更强大的功能和更好的使用体验。Github主页地址：https://github.com/alibaba/DataX\n二、DataX3.0框架设计 DataX本身作为离线数据同步框架，采用Framework + plugin架构构建。将数据源读取和写入抽象成为Reader/Writer插件，纳入到整个同步框架中。\nReader：Reader\u0008为数据采集模块，负责采集数据源的数据，将数据发送给Framework。 Writer： Writer为数据写入模块，负责不断向Framework取数据，并将数据写入到目的端。 Framework：Framework用于连接reader和writer，作为两者的数据传输通道，并处理缓冲，流控，并发，数据转换等核心技术问题。 三. DataX3.0插件体系 ​\t经过几年积累，DataX目前已经有了比较全面的插件体系，主流的RDBMS数据库、NOSQL、大数据计算系统都已经接入。DataX目前支持数据如下：\n类型 数据源 Reader(读) Writer(写) 文档 RDBMS 关系型数据库 MySQL √ √ 读 、写 Oracle √ √ 读 、写 SQLServer √ √ 读 、写 PostgreSQL √ √ 读 、写 DRDS √ √ 读 、写 达梦 √ √ 读 、写 通用RDBMS(支持所有关系型数据库) √ √ 读 、写 阿里云数仓数据存储 ODPS √ √ 读 、写 ADS √ 写 OSS √ √ 读 、写 OCS √ √ 读 、写 NoSQL数据存储 OTS √ √ 读 、写 Hbase0.94 √ √ 读 、写 Hbase1.1 √ √ 读 、写 MongoDB √ √ 读 、写 Hive √ √ 读 、写 无结构化数据存储 TxtFile √ √ 读 、写 FTP √ √ 读 、写 HDFS √ √ 读 、写 Elasticsearch √ 写 DataX Framework提供了简单的接口与插件交互，提供简单的插件接入机制，只需要任意加上一种插件，就能无缝对接其他数据源。详情请看：DataX数据源指南\n\u0008四、DataX3.0核心架构 DataX 3.0 开源版本支持单机多线程模式完成同步作业运行，本小节按一个DataX作业生命周期的时序图，从整体架构设计非常简要说明DataX各个模块相互关系。\n核心模块介绍： DataX完成单个数据同步的作业，我们称之为Job，DataX接受到一个Job之后，将启动一个进程来完成整个作业同步过程。DataX Job模块是单个作业的中枢管理节点，承担了数据清理、子任务切分(将单一作业计算转化为多个子Task)、TaskGroup管理等功能。 DataXJob启动后，会根据不同的源端切分策略，将Job切分成多个小的Task(子任务)，以便于并发执行。Task便是DataX作业的最小单元，每一个Task都会负责一部分数据的同步工作。 切分多个Task之后，DataX Job会调用Scheduler模块，根据配置的并发数据量，将拆分成的Task重新组合，组装成TaskGroup(任务组)。每一个TaskGroup负责以一定的并发运行完毕分配好的所有Task，默认单个任务组的并发数量为5。 每一个Task都由TaskGroup负责启动，Task启动后，会固定启动Reader—\u003eChannel—\u003eWriter的线程来完成任务同步工作。 DataX作业运行起来之后， Job监控并等待多个TaskGroup模块任务完成，等待所有TaskGroup任务完成后Job成功退出。否则，异常退出，进程退出值非0 DataX调度流程： 举例来说，用户提交了一个DataX作业，并且配置了20个并发，目的是将一个100张分表的mysql数据同步到odps里面。\tDataX的调度决策思路是：\nDataXJob根据分库分表切分成了100个Task。 根据20个并发，DataX计算共需要分配4个TaskGroup。 4个TaskGroup平分切分好的100个Task，每一个TaskGroup负责以5个并发共计运行25个Task。 五、DataX 3.0六大核心优势 可靠的数据质量监控 完美解决数据传输个别类型失真问题\nDataX旧版对于部分数据类型(比如时间戳)传输一直存在毫秒阶段等数据失真情况，新版本DataX3.0已经做到支持所有的强数据类型，每一种插件都有自己的数据类型转换策略，让数据可以完整无损的传输到目的端。\n提供作业全链路的流量、数据量\u0008运行时监控\nDataX3.0运行过程中可以将作业本身状态、数据流量、数据速度、执行进度等信息进行全面的展示，让用户可以实时了解作业状态。并可在作业执行过程中智能判断源端和目的端的速度对比情况，给予用户更多性能排查信息。\n提供脏数据探测\n在大量数据的传输过程中，必定会由于各种原因导致很多数据传输报错(比如类型转换错误)，这种数据DataX认为就是脏数据。DataX目前可以实现脏数据精确过滤、识别、采集、展示，为用户提供多种的脏数据处理模式，让用户准确把控数据质量大关！\n丰富的数据转换功能 DataX作为一个服务于大数据的ETL工具，除了提供数据快照搬迁功能之外，还提供了丰富数据转换的功能，让数据在传输过程中可以轻松完成数据脱敏，补全，过滤等数据转换功能，另外还提供了自动groovy函数，让用户自定义转换函数。详情请看DataX3的transformer详细介绍。\n精准的速度控制 还在为同步过程对在线存储压力影响而担心吗？新版本DataX3.0提供了包括通道(并发)、记录流、字节流三种流控模式，可以随意控制你的作业速度，让你的作业在库可以承受的范围内达到最佳的同步速度。\n\"speed\": { \"channel\": 5, \"byte\": 1048576, \"record\": 10000 } 强劲的同步性能 DataX3.0每一种读插件都有一种或多种切分策略，都能将作业合理切分成多个Task并行执行，单机多线程执行模型可以让DataX速度随并发成线性增长。在源端和目的端性能都足够的情况下，单个作业一定可以打满网卡。另外，DataX团队对所有的已经接入的插件都做了极致的性能优化，并且做了完整的性能测试。性能测试相关详情可以参照每单个数据源的详细介绍：DataX数据源指南\n健壮的容错机制 DataX作业是极易受外部因素的干扰，网络闪断、数据源不稳定等因素很容易让同步到一半的作业报错停止。因此稳定性是DataX的基本要求，在DataX 3.0的设计中，重点完善了框架和插件的稳定性。目前DataX3.0可以做到线程级别、进程级别(暂时未开放)、作业级别多层次局部/全局的重试，保证用户的作业稳定运行。\n线程内部重试\nDataX的核心插件都经过团队的全盘review，不同的网络交互方式都有不同的重试策略。\n线程级别重试\n目前DataX已经可以实现TaskFailover，针对于中间失败的Task，DataX框架可以做到整个Task级别的重新调度。\n极简的使用体验 易用\n下载即可用，支持linux和windows，只需要短短几步骤就可以完成数据的传输。请点击：Quick Start\n详细\nDataX在运行日志中打印了大量信息，其中包括传输速度，Reader、Writer性能，进程CPU，JVM和GC情况等等。\n传输过程中打印传输速度、进度等\n传输过程中会打印进程相关的CPU、JVM等\n在任务结束之后，打印总体运行情况\n",
+  "wordCount" : "190",
+  "inLanguage": "en",
+  "datePublished": "2021-02-02T17:45:01Z",
+  "dateModified": "2021-02-02T17:45:01Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/408be8b90df543789f79c7b43375e5a3/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    <h1 class="post-title">
+      阿里云开源离线同步工具DataX3.0介绍
+    </h1>
+    <div class="post-meta"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#%e9%98%bf%e9%87%8c%e4%ba%91%e5%bc%80%e6%ba%90%e7%a6%bb%e7%ba%bf%e5%90%8c%e6%ad%a5%e5%b7%a5%e5%85%b7datax30%e4%bb%8b%e7%bb%8d" aria-label="阿里云开源离线同步工具DataX3.0介绍">阿里云开源离线同步工具DataX3.0介绍</a><ul>
+                        
+                <li>
+                    <a href="#%e4%b8%80-datax30%e6%a6%82%e8%a7%88" aria-label="一. DataX3.0概览">一. DataX3.0概览</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#%e8%ae%be%e8%ae%a1%e7%90%86%e5%bf%b5" aria-label="设计理念">设计理念</a></li>
+                <li>
+                    <a href="#%e5%bd%93%e5%89%8d%e4%bd%bf%e7%94%a8%e7%8e%b0%e7%8a%b6" aria-label="当前使用现状">当前使用现状</a></li></ul>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#%e4%ba%8cdatax30%e6%a1%86%e6%9e%b6%e8%ae%be%e8%ae%a1" aria-label="二、DataX3.0框架设计">二、DataX3.0框架设计</a></li>
+                <li>
+                    <a href="#%e4%b8%89-datax30%e6%8f%92%e4%bb%b6%e4%bd%93%e7%b3%bb" aria-label="三. DataX3.0插件体系">三. DataX3.0插件体系</a></li>
+                <li>
+                    <a href="#%e5%9b%9bdatax30%e6%a0%b8%e5%bf%83%e6%9e%b6%e6%9e%84" aria-label="四、DataX3.0核心架构">四、DataX3.0核心架构</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#%e6%a0%b8%e5%bf%83%e6%a8%a1%e5%9d%97%e4%bb%8b%e7%bb%8d" aria-label="核心模块介绍：">核心模块介绍：</a></li>
+                <li>
+                    <a href="#datax%e8%b0%83%e5%ba%a6%e6%b5%81%e7%a8%8b" aria-label="DataX调度流程：">DataX调度流程：</a></li></ul>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#%e4%ba%94datax-30%e5%85%ad%e5%a4%a7%e6%a0%b8%e5%bf%83%e4%bc%98%e5%8a%bf" aria-label="五、DataX 3.0六大核心优势">五、DataX 3.0六大核心优势</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#%e5%8f%af%e9%9d%a0%e7%9a%84%e6%95%b0%e6%8d%ae%e8%b4%a8%e9%87%8f%e7%9b%91%e6%8e%a7" aria-label="可靠的数据质量监控">可靠的数据质量监控</a></li>
+                <li>
+                    <a href="#%e4%b8%b0%e5%af%8c%e7%9a%84%e6%95%b0%e6%8d%ae%e8%bd%ac%e6%8d%a2%e5%8a%9f%e8%83%bd" aria-label="丰富的数据转换功能">丰富的数据转换功能</a></li>
+                <li>
+                    <a href="#%e7%b2%be%e5%87%86%e7%9a%84%e9%80%9f%e5%ba%a6%e6%8e%a7%e5%88%b6" aria-label="精准的速度控制">精准的速度控制</a></li>
+                <li>
+                    <a href="#%e5%bc%ba%e5%8a%b2%e7%9a%84%e5%90%8c%e6%ad%a5%e6%80%a7%e8%83%bd" aria-label="强劲的同步性能">强劲的同步性能</a></li>
+                <li>
+                    <a href="#%e5%81%a5%e5%a3%ae%e7%9a%84%e5%ae%b9%e9%94%99%e6%9c%ba%e5%88%b6" aria-label="健壮的容错机制">健壮的容错机制</a></li>
+                <li>
+                    <a href="#%e6%9e%81%e7%ae%80%e7%9a%84%e4%bd%bf%e7%94%a8%e4%bd%93%e9%aa%8c" aria-label="极简的使用体验">极简的使用体验</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="阿里云开源离线同步工具datax30介绍">阿里云开源离线同步工具DataX3.0介绍</h1>
+<h2 id="一-datax30概览">一. DataX3.0概览</h2>
+<p>​	DataX 是一个异构数据源离线同步工具，致力于实现包括关系型数据库(MySQL、Oracle等)、HDFS、Hive、ODPS、HBase、FTP等各种异构数据源之间稳定高效的数据同步功能。</p>
+<p><img loading="lazy" src="https://cloud.githubusercontent.com/assets/1067175/17879841/93b7fc1c-6927-11e6-8cda-7cf8420fc65f.png" alt="datax_why_new"  />
+</p>
+<ul>
+<li>
+<h4 id="设计理念">设计理念</h4>
+<p>为了解决异构数据源同步问题，DataX将复杂的网状的同步链路变成了星型数据链路，DataX作为中间传输载体负责连接各种数据源。当需要接入一个新的数据源的时候，只需要将此数据源对接到DataX，便能跟已有的数据源做到无缝数据同步。</p>
+</li>
+<li>
+<h4 id="当前使用现状">当前使用现状</h4>
+<p>DataX在阿里巴巴集团内被广泛使用，承担了所有大数据的离线同步业务，并已持续稳定运行了6年之久。目前每天完成同步8w多道作业，每日传输数据量超过300TB。</p>
+</li>
+</ul>
+<p>此前已经开源DataX1.0版本，此次介绍为阿里云开源全新版本DataX3.0，有了更多更强大的功能和更好的使用体验。Github主页地址：https://github.com/alibaba/DataX</p>
+<h2 id="二datax30框架设计">二、DataX3.0框架设计</h2>
+<p><img loading="lazy" src="https://cloud.githubusercontent.com/assets/1067175/17879884/ec7e36f4-6927-11e6-8f5f-ffc43d6a468b.png" alt="datax_framework_new"  />
+</p>
+<p>DataX本身作为离线数据同步框架，采用Framework + plugin架构构建。将数据源读取和写入抽象成为Reader/Writer插件，纳入到整个同步框架中。</p>
+<ul>
+<li>Reader：Reader为数据采集模块，负责采集数据源的数据，将数据发送给Framework。</li>
+<li>Writer： Writer为数据写入模块，负责不断向Framework取数据，并将数据写入到目的端。</li>
+<li>Framework：Framework用于连接reader和writer，作为两者的数据传输通道，并处理缓冲，流控，并发，数据转换等核心技术问题。</li>
+</ul>
+<h2 id="三-datax30插件体系">三. DataX3.0插件体系</h2>
+<p>​	经过几年积累，DataX目前已经有了比较全面的插件体系，主流的RDBMS数据库、NOSQL、大数据计算系统都已经接入。DataX目前支持数据如下：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>数据源</th>
+<th style="text-align:center">Reader(读)</th>
+<th style="text-align:center">Writer(写)</th>
+<th style="text-align:center">文档</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RDBMS 关系型数据库</td>
+<td>MySQL</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"><a href="https://github.com/alibaba/DataX/blob/master/mysqlreader/doc/mysqlreader.md">读</a> 、<a href="https://github.com/alibaba/DataX/blob/master/mysqlwriter/doc/mysqlwriter.md">写</a></td>
+</tr>
+<tr>
+<td>           </td>
+<td>Oracle    </td>
+<td style="text-align:center">    √    </td>
+<td style="text-align:center">    √    </td>
+<td style="text-align:center"><a href="https://github.com/alibaba/DataX/blob/master/oraclereader/doc/oraclereader.md">读</a> 、<a href="https://github.com/alibaba/DataX/blob/master/oraclewriter/doc/oraclewriter.md">写</a></td>
+</tr>
+<tr>
+<td></td>
+<td>SQLServer</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"><a href="https://github.com/alibaba/DataX/blob/master/sqlserverreader/doc/sqlserverreader.md">读</a> 、<a href="https://github.com/alibaba/DataX/blob/master/sqlserverwriter/doc/sqlserverwriter.md">写</a></td>
+</tr>
+<tr>
+<td></td>
+<td>PostgreSQL</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"><a href="https://github.com/alibaba/DataX/blob/master/postgresqlreader/doc/postgresqlreader.md">读</a> 、<a href="https://github.com/alibaba/DataX/blob/master/postgresqlwriter/doc/postgresqlwriter.md">写</a></td>
+</tr>
+<tr>
+<td></td>
+<td>DRDS</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"><a href="https://github.com/alibaba/DataX/blob/master/drdsreader/doc/drdsreader.md">读</a> 、<a href="https://github.com/alibaba/DataX/blob/master/drdswriter/doc/drdswriter.md">写</a></td>
+</tr>
+<tr>
+<td></td>
+<td>达梦</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"><a href="">读</a> 、<a href="">写</a></td>
+</tr>
+<tr>
+<td></td>
+<td>通用RDBMS(支持所有关系型数据库)</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"><a href="">读</a> 、<a href="">写</a></td>
+</tr>
+<tr>
+<td>阿里云数仓数据存储</td>
+<td>ODPS</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"><a href="https://github.com/alibaba/DataX/blob/master/odpsreader/doc/odpsreader.md">读</a> 、<a href="https://github.com/alibaba/DataX/blob/master/odpsswriter/doc/odpswriter.md">写</a></td>
+</tr>
+<tr>
+<td></td>
+<td>ADS</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"><a href="https://github.com/alibaba/DataX/blob/master/adswriter/doc/adswriter.md">写</a></td>
+</tr>
+<tr>
+<td></td>
+<td>OSS</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"><a href="https://github.com/alibaba/DataX/blob/master/ossreader/doc/ossreader.md">读</a> 、<a href="https://github.com/alibaba/DataX/blob/master/osswriter/doc/osswriter.md">写</a></td>
+</tr>
+<tr>
+<td></td>
+<td>OCS</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"><a href="https://github.com/alibaba/DataX/blob/master/ocsreader/doc/ocsreader.md">读</a> 、<a href="https://github.com/alibaba/DataX/blob/master/ocswriter/doc/ocswriter.md">写</a></td>
+</tr>
+<tr>
+<td>NoSQL数据存储</td>
+<td>OTS</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"><a href="https://github.com/alibaba/DataX/blob/master/otsreader/doc/otsreader.md">读</a> 、<a href="https://github.com/alibaba/DataX/blob/master/otswriter/doc/otswriter.md">写</a></td>
+</tr>
+<tr>
+<td></td>
+<td>Hbase0.94</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"><a href="https://github.com/alibaba/DataX/blob/master/hbase094xreader/doc/hbase094xreader.md">读</a> 、<a href="https://github.com/alibaba/DataX/blob/master/hbase094xwriter/doc/hbase094xwriter.md">写</a></td>
+</tr>
+<tr>
+<td></td>
+<td>Hbase1.1</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"><a href="https://github.com/alibaba/DataX/blob/master/hbase11xreader/doc/hbase11xreader.md">读</a> 、<a href="https://github.com/alibaba/DataX/blob/master/hbase11xwriter/doc/hbase11xwriter.md">写</a></td>
+</tr>
+<tr>
+<td></td>
+<td>MongoDB</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"><a href="https://github.com/alibaba/DataX/blob/master/mongoreader/doc/mongoreader.md">读</a> 、<a href="https://github.com/alibaba/DataX/blob/master/mongowriter/doc/mongowriter.md">写</a></td>
+</tr>
+<tr>
+<td></td>
+<td>Hive</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"><a href="https://github.com/alibaba/DataX/blob/master/hdfsreader/doc/hdfsreader.md">读</a> 、<a href="https://github.com/alibaba/DataX/blob/master/hdfswriter/doc/hdfswriter.md">写</a></td>
+</tr>
+<tr>
+<td>无结构化数据存储</td>
+<td>TxtFile</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"><a href="https://github.com/alibaba/DataX/blob/master/txtfilereader/doc/txtfilereader.md">读</a> 、<a href="https://github.com/alibaba/DataX/blob/master/txtfilewriter/doc/txtfilewriter.md">写</a></td>
+</tr>
+<tr>
+<td></td>
+<td>FTP</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"><a href="https://github.com/alibaba/DataX/blob/master/ftpreader/doc/ftpreader.md">读</a> 、<a href="https://github.com/alibaba/DataX/blob/master/ftpwriter/doc/ftpwriter.md">写</a></td>
+</tr>
+<tr>
+<td></td>
+<td>HDFS</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"><a href="https://github.com/alibaba/DataX/blob/master/hdfsreader/doc/hdfsreader.md">读</a> 、<a href="https://github.com/alibaba/DataX/blob/master/hdfswriter/doc/hdfswriter.md">写</a></td>
+</tr>
+<tr>
+<td></td>
+<td>Elasticsearch</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"><a href="https://github.com/alibaba/DataX/blob/master/elasticsearchwriter/doc/elasticsearchwriter.md">写</a></td>
+</tr>
+</tbody>
+</table>
+<p>DataX Framework提供了简单的接口与插件交互，提供简单的插件接入机制，只需要任意加上一种插件，就能无缝对接其他数据源。详情请看：<a href="https://github.com/alibaba/DataX/wiki/DataX-all-data-channels">DataX数据源指南</a></p>
+<h2 id="四datax30核心架构">四、DataX3.0核心架构</h2>
+<p>DataX 3.0 开源版本支持单机多线程模式完成同步作业运行，本小节按一个DataX作业生命周期的时序图，从整体架构设计非常简要说明DataX各个模块相互关系。</p>
+<p><img loading="lazy" src="https://cloud.githubusercontent.com/assets/1067175/17850849/aa6c95a8-6891-11e6-94b7-39f0ab5af3b4.png" alt="datax_arch"  />
+</p>
+<h4 id="核心模块介绍">核心模块介绍：</h4>
+<ol>
+<li>DataX完成单个数据同步的作业，我们称之为Job，DataX接受到一个Job之后，将启动一个进程来完成整个作业同步过程。DataX Job模块是单个作业的中枢管理节点，承担了数据清理、子任务切分(将单一作业计算转化为多个子Task)、TaskGroup管理等功能。</li>
+<li>DataXJob启动后，会根据不同的源端切分策略，将Job切分成多个小的Task(子任务)，以便于并发执行。Task便是DataX作业的最小单元，每一个Task都会负责一部分数据的同步工作。</li>
+<li>切分多个Task之后，DataX Job会调用Scheduler模块，根据配置的并发数据量，将拆分成的Task重新组合，组装成TaskGroup(任务组)。每一个TaskGroup负责以一定的并发运行完毕分配好的所有Task，默认单个任务组的并发数量为5。</li>
+<li>每一个Task都由TaskGroup负责启动，Task启动后，会固定启动Reader—&gt;Channel—&gt;Writer的线程来完成任务同步工作。</li>
+<li>DataX作业运行起来之后， Job监控并等待多个TaskGroup模块任务完成，等待所有TaskGroup任务完成后Job成功退出。否则，异常退出，进程退出值非0</li>
+</ol>
+<h4 id="datax调度流程">DataX调度流程：</h4>
+<p>举例来说，用户提交了一个DataX作业，并且配置了20个并发，目的是将一个100张分表的mysql数据同步到odps里面。	DataX的调度决策思路是：</p>
+<ol>
+<li>DataXJob根据分库分表切分成了100个Task。</li>
+<li>根据20个并发，DataX计算共需要分配4个TaskGroup。</li>
+<li>4个TaskGroup平分切分好的100个Task，每一个TaskGroup负责以5个并发共计运行25个Task。</li>
+</ol>
+<h2 id="五datax-30六大核心优势">五、DataX 3.0六大核心优势</h2>
+<ul>
+<li>
+<h4 id="可靠的数据质量监控">可靠的数据质量监控</h4>
+<ul>
+<li>
+<p>完美解决数据传输个别类型失真问题</p>
+<p>DataX旧版对于部分数据类型(比如时间戳)传输一直存在毫秒阶段等数据失真情况，新版本DataX3.0已经做到支持所有的强数据类型，每一种插件都有自己的数据类型转换策略，让数据可以完整无损的传输到目的端。</p>
+</li>
+<li>
+<p>提供作业全链路的流量、数据量运行时监控</p>
+<p>DataX3.0运行过程中可以将作业本身状态、数据流量、数据速度、执行进度等信息进行全面的展示，让用户可以实时了解作业状态。并可在作业执行过程中智能判断源端和目的端的速度对比情况，给予用户更多性能排查信息。</p>
+</li>
+<li>
+<p>提供脏数据探测</p>
+<p>在大量数据的传输过程中，必定会由于各种原因导致很多数据传输报错(比如类型转换错误)，这种数据DataX认为就是脏数据。DataX目前可以实现脏数据精确过滤、识别、采集、展示，为用户提供多种的脏数据处理模式，让用户准确把控数据质量大关！</p>
+</li>
+</ul>
+</li>
+<li>
+<h4 id="丰富的数据转换功能">丰富的数据转换功能</h4>
+<p>DataX作为一个服务于大数据的ETL工具，除了提供数据快照搬迁功能之外，还提供了丰富数据转换的功能，让数据在传输过程中可以轻松完成数据脱敏，补全，过滤等数据转换功能，另外还提供了自动groovy函数，让用户自定义转换函数。详情请看DataX3的transformer详细介绍。</p>
+</li>
+<li>
+<h4 id="精准的速度控制">精准的速度控制</h4>
+<p>还在为同步过程对在线存储压力影响而担心吗？新版本DataX3.0提供了包括通道(并发)、记录流、字节流三种流控模式，可以随意控制你的作业速度，让你的作业在库可以承受的范围内达到最佳的同步速度。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#e6db74">&#34;speed&#34;</span><span style="color:#960050;background-color:#1e0010">:</span> {
+</span></span><span style="display:flex;"><span>   <span style="color:#f92672">&#34;channel&#34;</span>: <span style="color:#ae81ff">5</span>,
+</span></span><span style="display:flex;"><span>   <span style="color:#f92672">&#34;byte&#34;</span>: <span style="color:#ae81ff">1048576</span>,
+</span></span><span style="display:flex;"><span>   <span style="color:#f92672">&#34;record&#34;</span>: <span style="color:#ae81ff">10000</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div></li>
+<li>
+<h4 id="强劲的同步性能">强劲的同步性能</h4>
+<p>DataX3.0每一种读插件都有一种或多种切分策略，都能将作业合理切分成多个Task并行执行，单机多线程执行模型可以让DataX速度随并发成线性增长。在源端和目的端性能都足够的情况下，单个作业一定可以打满网卡。另外，DataX团队对所有的已经接入的插件都做了极致的性能优化，并且做了完整的性能测试。性能测试相关详情可以参照每单个数据源的详细介绍：<a href="https://github.com/alibaba/DataX/wiki/DataX-all-data-channels">DataX数据源指南</a></p>
+</li>
+<li>
+<h4 id="健壮的容错机制">健壮的容错机制</h4>
+<p>DataX作业是极易受外部因素的干扰，网络闪断、数据源不稳定等因素很容易让同步到一半的作业报错停止。因此稳定性是DataX的基本要求，在DataX 3.0的设计中，重点完善了框架和插件的稳定性。目前DataX3.0可以做到线程级别、进程级别(暂时未开放)、作业级别多层次局部/全局的重试，保证用户的作业稳定运行。</p>
+<ul>
+<li>
+<p>线程内部重试</p>
+<p>DataX的核心插件都经过团队的全盘review，不同的网络交互方式都有不同的重试策略。</p>
+</li>
+<li>
+<p>线程级别重试</p>
+<p>目前DataX已经可以实现TaskFailover，针对于中间失败的Task，DataX框架可以做到整个Task级别的重新调度。</p>
+</li>
+</ul>
+</li>
+<li>
+<h4 id="极简的使用体验">极简的使用体验</h4>
+<ul>
+<li>
+<p>易用</p>
+<p>下载即可用，支持linux和windows，只需要短短几步骤就可以完成数据的传输。请点击：<a href="https://github.com/alibaba/DataX/wiki/Quick-Start">Quick Start</a></p>
+</li>
+<li>
+<p>详细</p>
+<p>DataX在运行日志中打印了大量信息，其中包括传输速度，Reader、Writer性能，进程CPU，JVM和GC情况等等。</p>
+<ul>
+<li>
+<p>传输过程中打印传输速度、进度等</p>
+<p><img loading="lazy" src="https://cloud.githubusercontent.com/assets/1067175/17850877/d1612c0a-6891-11e6-9970-d6693c15ef24.png" alt="datax_run_speed"  />
+</p>
+</li>
+<li>
+<p>传输过程中会打印进程相关的CPU、JVM等</p>
+<p><img loading="lazy" src="https://cloud.githubusercontent.com/assets/1067175/17850903/ee63c2fe-6891-11e6-9056-97d7e3d13d8d.png" alt="datax_run_cpu"  />
+</p>
+</li>
+<li>
+<p>在任务结束之后，打印总体运行情况</p>
+<p><img loading="lazy" src="https://cloud.githubusercontent.com/assets/1067175/17850930/0484d3ac-6892-11e6-9c1d-b102ad210a32.png" alt="datax_end_info"  />
+</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

@@ -173,7 +173,7 @@ enum conn_states { conn_listening, //监听状态 conn_new_cmd, //为新连接�
 case conn_new_cmd: //全局变量，记录每个libevent实例处理的事件，通过初始启动参数配置 --nreqs; //还可以处理请求 if (nreqs &gt;= 0) { //整理缓冲区 reset_cmd_handler(c); } //拒绝请求 else { pthread_mutex_lock(&amp;c-&gt;thread-&gt;stats.mutex); c-&gt;thread-&gt;stats.conn_yields&#43;&#43;;//更新统计数据 pthread_mutex_unlock(&amp;c-&gt;thread-&gt;stats.mutex); //如果缓冲区有数据，则需要处理 if (c-&gt;rbytes &gt; 0) { //更新libevent状态 if (!update_event(c, EV_WRITE | EV_PERSIST)) { if (settings.verbose &gt; 0) fprintf(stderr, &#34;Couldn&#39;t update event\n&#34;); conn_set_state(c, conn_closing);//关闭连接 } } stop = true; } break; //整理缓冲区 static void reset_cmd_handler(conn *c) { c-&gt;cmd = -1; c-&gt;substate = bin_no_state; //还有item if (c-&gt;item != NULL) { //删除item，本篇不分析其实现，后续分析 item_remove(c-&gt;item); c-&gt;item = NULL; } //整理缓冲区 conn_shrink(c); //缓冲区还有数据 if (c-&gt;rbytes &gt; 0) { //更新状态 conn_set_state(c, conn_parse_cmd); } //如果没有数据 else { //进入等待状态，状态机没有数据要处理，就进入这个状态 conn_set_state(c, conn_waiting); } } //缩小缓冲区 static void conn_shrink(conn *c) { assert(c !...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Memcached源码阅读十七 状态机" href="https://haokiu.com/4547681a8a0d42759accab81b61267ab/"></a>
+  <a class="entry-link" aria-label="post link to Memcached源码阅读十七 状态机" href="https://haokiu.com/blog/4547681a8a0d42759accab81b61267ab/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -186,7 +186,7 @@ case conn_new_cmd: //全局变量，记录每个libevent实例处理的事件，
 //执行item的存储操作,该操作会将item挂载到LRU表和slabcalss中 item *do_item_alloc(char *key, const size_t nkey, const int flags, const rel_time_t exptime, const int nbytes, const uint32_t cur_hv) { uint8_t nsuffix; item *it = NULL; char suffix[40]; //计算item的总大小(空间) size_t ntotal = item_make_header(nkey &#43; 1, flags, nbytes, suffix, &amp;nsuffix); //如果使用了cas if (settings.use_cas) { //增加cas的空间 ntotal &#43;= sizeof(uint64_t); } unsigned int id = slabs_clsid(ntotal); //那大小选择合适的slab if (id == 0) return 0; //执行LRU锁 mutex_lock(&amp;cache_lock); //存储时，会尝试从LRU中选择合适的空间的空间 int tries = 5; //如果LRU中尝试5次还没合适的空间，则执行申请空间的操作 int tried_alloc = 0; item *search; void *hold_lock = NULL; //初始化时选择的过期时间 rel_time_t oldest_live = settings.oldest_live; search = tails[id];//第id个LRU表的尾部 for (; tries &gt; 0 &amp;&amp; search != NULL; tries--, search=search-&gt;prev) { uint32_t hv = hash(ITEM_key(search), search-&gt;nkey, 0);//获取分段锁 //尝试执行锁操作，这里执行的乐观锁 if (hv !...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Memcached源码阅读十三 do_item_alloc操作" href="https://haokiu.com/50d829bedab44857aaf08cfd61e6c952/"></a>
+  <a class="entry-link" aria-label="post link to Memcached源码阅读十三 do_item_alloc操作" href="https://haokiu.com/blog/50d829bedab44857aaf08cfd61e6c952/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -199,7 +199,7 @@ case conn_new_cmd: //全局变量，记录每个libevent实例处理的事件，
 //存储item enum store_item_type store_item(item *item, int comm, conn* c) { enum store_item_type ret; uint32_t hv; hv = hash(ITEM_key(item), item-&gt;nkey, 0);//获取Hash表的分段锁 item_lock(hv);//执行数据同步 ret = do_store_item(item, comm, c, hv);//存储item item_unlock(hv); return ret; } //存储item enum store_item_type do_store_item(item *it, int comm, conn *c,const uint32_t hv) { char *key = ITEM_key(it);//读取item对应的key item *old_it = do_item_get(key, it-&gt;nkey, hv); //读取相应的item,如果没有相关的数据,old_it为NULL enum store_item_type stored = NOT_STORED;//item状态标记 item *new_it = NULL; int flags; //如果old_it不为NULL,且操作为add操作 if (old_it != NULL &amp;&amp; comm == NREAD_ADD) { do_item_update(old_it);//更新数据 } //old_it为空，且操作为REPLACE，则什么都不做 else if (!old_it &amp;&amp; (comm == NREAD_REPLACE || comm == NREAD_APPEND || comm == NREAD_PREPEND)) { //memcached的Replace操作是替换已有的数据，如果没有相关数据，则不做任何操作 } //以cas方式读取 else if (comm == NREAD_CAS) { if (old_it == NULL) //为空 { // LRU expired stored = NOT_FOUND;//修改状态 pthread_mutex_lock(&amp;c-&gt;thread-&gt;stats....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Memcached源码阅读十二 set操作" href="https://haokiu.com/a795d0b698914f3898a0896633cd92ad/"></a>
+  <a class="entry-link" aria-label="post link to Memcached源码阅读十二 set操作" href="https://haokiu.com/blog/a795d0b698914f3898a0896633cd92ad/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -212,7 +212,7 @@ case conn_new_cmd: //全局变量，记录每个libevent实例处理的事件，
 case conn_listening: addrlen = sizeof(addr); //Master线程(main)进入状态机之后执行accept操作，这个操作也是非阻塞的。 if ((sfd = accept(c-&gt;sfd, (struct sockaddr *) &amp;addr, &amp;addrlen)) == -1) { //非阻塞模型，这个错误码继续等待 if (errno == EAGAIN || errno == EWOULDBLOCK) { stop = true; } //连接超载 else if (errno == EMFILE) { if (settings.verbose &gt; 0) fprintf(stderr, &#34;Too many open connections\n&#34;); accept_new_conns(false); stop = true; } else { perror(&#34;accept()&#34;); stop = true; } break; } //已经accept成功，将accept之后的描述符设置为非阻塞的 if ((flags = fcntl(sfd, F_GETFL, 0)) &lt; 0 || fcntl(sfd, F_SETFL, flags | O_NONBLOCK) &lt; 0) { perror(&#34;setting O_NONBLOCK&#34;); close(sfd); break; } //判断是否超过最大连接数 if (settings.maxconns_fast &amp;&amp; stats.curr_conns &#43; stats.reserved_fd &gt;= settings.maxconns - 1) { str = &#34;ERROR Too many open connections\r\n&#34;; res = write(sfd, str, strlen(str)); close(sfd); STATS_LOCK(); stats....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Memcached源码阅读十六 线程交互" href="https://haokiu.com/314f7e41e35f43db9facbca467726a7a/"></a>
+  <a class="entry-link" aria-label="post link to Memcached源码阅读十六 线程交互" href="https://haokiu.com/blog/314f7e41e35f43db9facbca467726a7a/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -228,7 +228,7 @@ Item由两部分组成，item的属性信息和item的数据部分，属性信�
 这里大概介绍了item的一些信息，后面我们会分析item插入Hash表等信息。</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Memcached源码阅读十四 item结构" href="https://haokiu.com/3fee4e4314af42ee9fa58cda4aa0b839/"></a>
+  <a class="entry-link" aria-label="post link to Memcached源码阅读十四 item结构" href="https://haokiu.com/blog/3fee4e4314af42ee9fa58cda4aa0b839/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -242,7 +242,7 @@ Memcached首次默认分配64M的内存，之后所有的数据都是在这64M�
 //内存初始化，settings.maxbytes是Memcached初始启动参数指定的内存值大小,settings.factor是内存增长因子 slabs_init(settings.maxbytes, settings.factor, preallocate); #define POWER_SMALLEST 1 //最小slab编号 #define POWER_LARGEST 200 //首次初始化200个slab //实现内存池管理相关的静态全局变量 static size_t mem_limit = 0;//总的内存大小 static size_t mem_malloced = 0;//初始化内存的大小，这个貌似没什么用 static void *mem_base = NULL;//指向总的内存的首地址 static void *mem_current = NULL;//当前分配到的内存地址 static size_t mem_avail = 0;//当前可用的内存大小 static slabclass_t slabclass[MAX_NUMBER_OF_SLAB_CLASSES];//定义slab结合，总共200个 void slabs_init(const size_t limit, const double factor, const bool prealloc) { int i = POWER_SMALLEST - 1; //size表示申请空间的大小，其值由配置的chunk_size和单个item的大小来指定 unsigned int size = sizeof(item) &#43; settings.chunk_size; mem_limit = limit;//mem_limit是全局变量 if (prealloc) { //支持预分配 mem_base = malloc(mem_limit);//申请地址，mem_base指向申请的地址 if (mem_base != NULL) { //mem_current指向当前地址 mem_current = mem_base; //可用内存大小为mem_limit mem_avail = mem_limit; } else { //支持预分配失败 fprintf(stderr, &#34;Warning: Failed to allocate requested memory in&#34; &#34; one large chunk....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Memcached源码阅读四 内存初始化" href="https://haokiu.com/c82fe349df914fb8943e4aa3231c9cad/"></a>
+  <a class="entry-link" aria-label="post link to Memcached源码阅读四 内存初始化" href="https://haokiu.com/blog/c82fe349df914fb8943e4aa3231c9cad/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -257,7 +257,7 @@ memcached的main函数位于memcached.c文件中，从main函数启动之后，�
 if (maxcore != 0) { struct rlimit rlim_new; //获取当前Core文件大小的配置值 if (getrlimit(RLIMIT_CORE, &amp;rlim) == 0) { //变量初始化为无限制 rlim_new.rlim_cur = rlim_new.rlim_max = RLIM_INFINITY; if (setrlimit(RLIMIT_CORE, &amp;rlim_new) != 0)//如果设置失败 { //变量初始化为当前值的最大值 rlim_new.rlim_cur = rlim_new.rlim_max = rlim.rlim_max; (void) setrlimit(RLIMIT_CORE, &amp;rlim_new);//重新进行设置 } } //再次确认Core文件允许的大小，如果当前的Core文件的大小为0，则不允许Core文件产生，和maxcore!=0不符，程序结束 if ((getrlimit(RLIMIT_CORE, &amp;rlim) != 0) || rlim.rlim_cur == 0) { fprintf(stderr, &#34;failed to ensure corefile creation\n&#34;); exit(EX_OSERR); } } //读取进程允许打开的文件数信息，读取失败，程序退出 if (getrlimit(RLIMIT_NOFILE, &amp;rlim) != 0) { fprintf(stderr, &#34;failed to getrlimit number of files\n&#34;); exit(EX_OSERR); } else { //按memcached启动时的指定的最大连接数进行设置 rlim.rlim_cur = settings.maxconns; rlim.rlim_max = settings.maxconns; if (setrlimit(RLIMIT_NOFILE, &amp;rlim) != 0) { fprintf(stderr, &#34;failed to set rlimit for open files....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Memcached源码阅读序 服务器资源调整" href="https://haokiu.com/8f65d01cc42d4c8782d95eed02dd4eb5/"></a>
+  <a class="entry-link" aria-label="post link to Memcached源码阅读序 服务器资源调整" href="https://haokiu.com/blog/8f65d01cc42d4c8782d95eed02dd4eb5/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -270,7 +270,7 @@ if (maxcore != 0) { struct rlimit rlim_new; //获取当前Core文件大小的配
 //hash表中增加元素 int assoc_insert(item *it, const uint32_t hv) { unsigned int oldbucket; //如果已经进行扩容且目前进行扩容还没到需要插入元素的桶，则将元素添加到旧桶中 if (expanding &amp;&amp;(oldbucket = (hv &amp; hashmask(hashpower - 1))) &gt;= expand_bucket) { //添加元素 it-&gt;h_next = old_hashtable[oldbucket]; old_hashtable[oldbucket] = it; } else { //如果没扩容，或者扩容已经到了新的桶中，则添加元素到新表中 it-&gt;h_next = primary_hashtable[hv &amp; hashmask(hashpower)];//添加元素 primary_hashtable[hv &amp; hashmask(hashpower)] = it; } hash_items&#43;&#43;;//元素数目&#43;1 //还没开始扩容，且表中元素个数已经超过Hash表容量的1.5倍 if (! expanding &amp;&amp; hash_items &gt; (hashsize(hashpower) * 3) / 2) { //唤醒扩容线程 assoc_start_expand(); } MEMCACHED_ASSOC_INSERT(ITEM_key(it), it-&gt;nkey, hash_items); return 1; } //唤醒扩容线程 static void assoc_start_expand(void) { if (started_expanding) return; started_expanding = true; //唤醒信号量 pthread_cond_signal(&amp;maintenance_cond); } //启动扩容线程，扩容线程在main函数中会启动，启动运行一遍之后会阻塞在条件变量maintenance_cond上面，插入元素超过规定，唤醒条件变量 static void *assoc_maintenance_thread(void *arg) { //do_run_maintenance_thread的值为1，即该线程持续运行 while (do_run_maintenance_thread) { int ii = 0; item_lock_global();//加Hash表的全局锁 mutex_lock(&amp;cache_lock);//加cache_lock锁 //执行扩容时，每次按hash_bulk_move个桶来扩容 for (ii = 0; ii &lt; hash_bulk_move &amp;&amp; expanding; &#43;&#43;ii) { item *it, *next; int bucket; //老表每次移动一个桶中的一个元素 for (it = old_hashtable[expand_bucket]; NULL !...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Memcached阅读十五 Hash表扩容" href="https://haokiu.com/3ba1e9453dcc49edb8ee1597bb133cdd/"></a>
+  <a class="entry-link" aria-label="post link to Memcached阅读十五 Hash表扩容" href="https://haokiu.com/blog/3ba1e9453dcc49edb8ee1597bb133cdd/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -295,7 +295,7 @@ bind 函数重难点解析 connect 函数在阻塞和非阻塞模式下的行为
 01 TeamTalk介绍 02 服务器端的程序的编译与部署 03 服务器端的程序架构介绍 04 服务器端db_proxy_server源码分析 05 服务器端msg_server源码分析 06 服务器端login_server源码分析 07 服务器端msfs源码分析 08 服务器端file_server源码分析 09 服务器端route_server源码分析 10 开放一个TeamTalk测试服务器地址和几个测试账号 11 pc客户端源码分析 libevent源码深度剖析...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Part I" href="https://haokiu.com/184a1ba071384d75b2da68fa7be54511/"></a>
+  <a class="entry-link" aria-label="post link to Part I" href="https://haokiu.com/blog/184a1ba071384d75b2da68fa7be54511/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -308,7 +308,7 @@ bind 函数重难点解析 connect 函数在阻塞和非阻塞模式下的行为
 /** * 网络通信的基础类, SocketClient.h * zhangyl 2017.07.11 */ class CSocketClient { public: CSocketClient(); ~CSocketClient(); public: void SetProxyWnd(HWND hProxyWnd); bool Init(CNetProxy* pNetProxy); bool Uninit(); int Register(const char* pszUser, const char* pszPassword); void GuestLogin(); BOOL IsClosed(); BOOL	Connect(int timeout = 3); void AddData(int cmd, const std::string&amp; strBuffer); void AddData(int cmd, const char* pszBuff, int nBuffLen); void Close(); BOOL ConnectServer(int timeout = 3); BOOL SendLoginMsg(); BOOL RecvLoginMsg(int&amp; nRet); BOOL Login(int&amp; nRet); private: void LoadConfig(); static UINT CALLBACK SendDataThreadProc(LPVOID lpParam); static UINT CALLBACK RecvDataThreadProc(LPVOID lpParam); bool Send(); bool Recv(); bool CheckReceivedData(); void SendHeartbeatPackage(); private: SOCKET m_hSocket; short m_nPort; char m_szServer[64]; long m_nLastDataTime; //最近一次收发数据的时间 long m_nHeartbeatInterval; //心跳包时间间隔，单位秒 CRITICAL_SECTION m_csLastDataTime; //保护m_nLastDataTime的互斥体 HANDLE m_hSendDataThread; //发送数据线程 HANDLE m_hRecvDataThread; //接收数据线程 std::string m_strSendBuf; std::string m_strRecvBuf; HANDLE m_hExitEvent; bool m_bConnected; CRITICAL_SECTION m_csSendBuf; HANDLE m_hSemaphoreSendBuf; HWND m_hProxyWnd; CNetProxy* m_pNetProxy; int m_nReconnectTimeInterval; //重连时间间隔 time_t m_nLastReconnectTime; //上次重连时刻 CFlowStatistics* m_pFlowStatistics; }; 这段代码来源于笔者实际项目中开发的一个股票客户端的软件。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to pimpl 惯用法" href="https://haokiu.com/4a2f5d00bb404b68a468bd72dfe357f8/"></a>
+  <a class="entry-link" aria-label="post link to pimpl 惯用法" href="https://haokiu.com/blog/4a2f5d00bb404b68a468bd72dfe357f8/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

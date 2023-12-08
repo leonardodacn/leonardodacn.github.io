@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>leveldb源码分析22 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="leveldb源码分析22 本系列《leveldb源码分析》共有22篇文章，这是第二十二篇
+14 DB的查询与遍历之2 14.4 DBIter Leveldb数据库的MemTable和sstable文件的存储格式都是**(user key, seq, type) =&gt; uservalue**。DBIter把同一个userkey在DB中的多条记录合并为一条，综合考虑了userkey的序号、删除标记、和写覆盖等等因素。 从前面函数NewIterator的代码还能看到，DBIter内部使用了MergingIterator，在调用MergingItertor的系列seek函数后，DBIter还要处理key的删除标记。否则，遍历时会把已删除的key列举出来。 DBIter还定义了两个移动方向，默认是kForward： 1） kForward，向前移动，代码保证此时DBIter的内部迭代器刚好定位在this-&gt;key(),this-&gt;value()这条记录上； 2） kReverse，向后移动，代码保证此时DBIter的内部迭代器刚好定位在所有key=this-&gt;key()的entry之前。 其成员变量savedkey和saved value保存的是KReverse方向移动时的k/v对，每次seek系调用之后，其值都会跟随iter_而改变。 DBIter的代码开始读来感觉有些绕，主要就是它要处理删除标记，而且其底层的MergingIterator，对于同一个key会有多个不同sequence的entry。导致其Next/Prev操作比较复杂，要考虑到上一次移动的影响，跳过删除标记和重复的key。 DBIter必须导出Iterator定义的几个接口，下面就拖出来挨个分析。
+14.4.1 Get系接口 首先是几个简单接口，获取key、value和status的：
+//kForward直接取iter_-&gt;value()，否则取saved value virtual Slice value() const { assert(valid_); return (direction_ == kForward) ? iter_-&gt;value() : saved_value_; } virtual Status status() const { if (status_.ok()) returniter_-&gt;status(); return status_; } 14.4.2 辅助函数 在分析seek系函数之前，先来理解两个重要的辅助函数：FindNextUserEntry和FindPrevUserEntry的功能和逻辑。其功能就是循环跳过下一个/前一个delete的记录，直到遇到kValueType的记录。 先来看看，函数声明为： void DBIter::FindNextUserEntry(bool skipping, std::string* skip) 参数@skipping表明是否要跳过sequence更小的entry； 参数@skip临时存储空间，保存seek时要跳过的key； 在进入FindNextUserEntry时，iter_刚好定位在this-&gt;key(), this-&gt;value()这条记录上。下面来看函数实现：
+virtual Slice key() const { //kForward直接取iter_-&gt;key()，否则取saved key assert(valid_); return (direction_ == kForward) ? ExtractUserKey(iter_-&gt;key()) : saved_key_; } // 循环直到找到合适的entry，direction必须是kForward assert(iter_-&gt;Valid()); assert(direction_ == kForward); do { ParsedInternalKey ikey; // 确保iter_-&gt;key()的sequence &lt;= 遍历指定的sequence if (ParseKey(&amp;ikey) &amp;&amp; ikey.">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/08d56462861f4df7b247921ba14a88e2/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="leveldb源码分析22" />
+<meta property="og:description" content="leveldb源码分析22 本系列《leveldb源码分析》共有22篇文章，这是第二十二篇
+14 DB的查询与遍历之2 14.4 DBIter Leveldb数据库的MemTable和sstable文件的存储格式都是**(user key, seq, type) =&gt; uservalue**。DBIter把同一个userkey在DB中的多条记录合并为一条，综合考虑了userkey的序号、删除标记、和写覆盖等等因素。 从前面函数NewIterator的代码还能看到，DBIter内部使用了MergingIterator，在调用MergingItertor的系列seek函数后，DBIter还要处理key的删除标记。否则，遍历时会把已删除的key列举出来。 DBIter还定义了两个移动方向，默认是kForward： 1） kForward，向前移动，代码保证此时DBIter的内部迭代器刚好定位在this-&gt;key(),this-&gt;value()这条记录上； 2） kReverse，向后移动，代码保证此时DBIter的内部迭代器刚好定位在所有key=this-&gt;key()的entry之前。 其成员变量savedkey和saved value保存的是KReverse方向移动时的k/v对，每次seek系调用之后，其值都会跟随iter_而改变。 DBIter的代码开始读来感觉有些绕，主要就是它要处理删除标记，而且其底层的MergingIterator，对于同一个key会有多个不同sequence的entry。导致其Next/Prev操作比较复杂，要考虑到上一次移动的影响，跳过删除标记和重复的key。 DBIter必须导出Iterator定义的几个接口，下面就拖出来挨个分析。
+14.4.1 Get系接口 首先是几个简单接口，获取key、value和status的：
+//kForward直接取iter_-&gt;value()，否则取saved value virtual Slice value() const { assert(valid_); return (direction_ == kForward) ? iter_-&gt;value() : saved_value_; } virtual Status status() const { if (status_.ok()) returniter_-&gt;status(); return status_; } 14.4.2 辅助函数 在分析seek系函数之前，先来理解两个重要的辅助函数：FindNextUserEntry和FindPrevUserEntry的功能和逻辑。其功能就是循环跳过下一个/前一个delete的记录，直到遇到kValueType的记录。 先来看看，函数声明为： void DBIter::FindNextUserEntry(bool skipping, std::string* skip) 参数@skipping表明是否要跳过sequence更小的entry； 参数@skip临时存储空间，保存seek时要跳过的key； 在进入FindNextUserEntry时，iter_刚好定位在this-&gt;key(), this-&gt;value()这条记录上。下面来看函数实现：
+virtual Slice key() const { //kForward直接取iter_-&gt;key()，否则取saved key assert(valid_); return (direction_ == kForward) ? ExtractUserKey(iter_-&gt;key()) : saved_key_; } // 循环直到找到合适的entry，direction必须是kForward assert(iter_-&gt;Valid()); assert(direction_ == kForward); do { ParsedInternalKey ikey; // 确保iter_-&gt;key()的sequence &lt;= 遍历指定的sequence if (ParseKey(&amp;ikey) &amp;&amp; ikey." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/08d56462861f4df7b247921ba14a88e2/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
+<meta property="article:modified_time" content="2021-01-11T09:20:42+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="leveldb源码分析22"/>
+<meta name="twitter:description" content="leveldb源码分析22 本系列《leveldb源码分析》共有22篇文章，这是第二十二篇
+14 DB的查询与遍历之2 14.4 DBIter Leveldb数据库的MemTable和sstable文件的存储格式都是**(user key, seq, type) =&gt; uservalue**。DBIter把同一个userkey在DB中的多条记录合并为一条，综合考虑了userkey的序号、删除标记、和写覆盖等等因素。 从前面函数NewIterator的代码还能看到，DBIter内部使用了MergingIterator，在调用MergingItertor的系列seek函数后，DBIter还要处理key的删除标记。否则，遍历时会把已删除的key列举出来。 DBIter还定义了两个移动方向，默认是kForward： 1） kForward，向前移动，代码保证此时DBIter的内部迭代器刚好定位在this-&gt;key(),this-&gt;value()这条记录上； 2） kReverse，向后移动，代码保证此时DBIter的内部迭代器刚好定位在所有key=this-&gt;key()的entry之前。 其成员变量savedkey和saved value保存的是KReverse方向移动时的k/v对，每次seek系调用之后，其值都会跟随iter_而改变。 DBIter的代码开始读来感觉有些绕，主要就是它要处理删除标记，而且其底层的MergingIterator，对于同一个key会有多个不同sequence的entry。导致其Next/Prev操作比较复杂，要考虑到上一次移动的影响，跳过删除标记和重复的key。 DBIter必须导出Iterator定义的几个接口，下面就拖出来挨个分析。
+14.4.1 Get系接口 首先是几个简单接口，获取key、value和status的：
+//kForward直接取iter_-&gt;value()，否则取saved value virtual Slice value() const { assert(valid_); return (direction_ == kForward) ? iter_-&gt;value() : saved_value_; } virtual Status status() const { if (status_.ok()) returniter_-&gt;status(); return status_; } 14.4.2 辅助函数 在分析seek系函数之前，先来理解两个重要的辅助函数：FindNextUserEntry和FindPrevUserEntry的功能和逻辑。其功能就是循环跳过下一个/前一个delete的记录，直到遇到kValueType的记录。 先来看看，函数声明为： void DBIter::FindNextUserEntry(bool skipping, std::string* skip) 参数@skipping表明是否要跳过sequence更小的entry； 参数@skip临时存储空间，保存seek时要跳过的key； 在进入FindNextUserEntry时，iter_刚好定位在this-&gt;key(), this-&gt;value()这条记录上。下面来看函数实现：
+virtual Slice key() const { //kForward直接取iter_-&gt;key()，否则取saved key assert(valid_); return (direction_ == kForward) ? ExtractUserKey(iter_-&gt;key()) : saved_key_; } // 循环直到找到合适的entry，direction必须是kForward assert(iter_-&gt;Valid()); assert(direction_ == kForward); do { ParsedInternalKey ikey; // 确保iter_-&gt;key()的sequence &lt;= 遍历指定的sequence if (ParseKey(&amp;ikey) &amp;&amp; ikey."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "leveldb源码分析22",
+      "item": "https://haokiu.com/blog/08d56462861f4df7b247921ba14a88e2/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "leveldb源码分析22",
+  "name": "leveldb源码分析22",
+  "description": "leveldb源码分析22 本系列《leveldb源码分析》共有22篇文章，这是第二十二篇\n14 DB的查询与遍历之2 14.4 DBIter Leveldb数据库的MemTable和sstable文件的存储格式都是**(user key, seq, type) =\u0026gt; uservalue**。DBIter把同一个userkey在DB中的多条记录合并为一条，综合考虑了userkey的序号、删除标记、和写覆盖等等因素。 从前面函数NewIterator的代码还能看到，DBIter内部使用了MergingIterator，在调用MergingItertor的系列seek函数后，DBIter还要处理key的删除标记。否则，遍历时会把已删除的key列举出来。 DBIter还定义了两个移动方向，默认是kForward： 1） kForward，向前移动，代码保证此时DBIter的内部迭代器刚好定位在this-\u0026gt;key(),this-\u0026gt;value()这条记录上； 2） kReverse，向后移动，代码保证此时DBIter的内部迭代器刚好定位在所有key=this-\u0026gt;key()的entry之前。 其成员变量savedkey和saved value保存的是KReverse方向移动时的k/v对，每次seek系调用之后，其值都会跟随iter_而改变。 DBIter的代码开始读来感觉有些绕，主要就是它要处理删除标记，而且其底层的MergingIterator，对于同一个key会有多个不同sequence的entry。导致其Next/Prev操作比较复杂，要考虑到上一次移动的影响，跳过删除标记和重复的key。 DBIter必须导出Iterator定义的几个接口，下面就拖出来挨个分析。\n14.4.1 Get系接口 首先是几个简单接口，获取key、value和status的：\n//kForward直接取iter_-\u0026gt;value()，否则取saved value virtual Slice value() const { assert(valid_); return (direction_ == kForward) ? iter_-\u0026gt;value() : saved_value_; } virtual Status status() const { if (status_.ok()) returniter_-\u0026gt;status(); return status_; } 14.4.2 辅助函数 在分析seek系函数之前，先来理解两个重要的辅助函数：FindNextUserEntry和FindPrevUserEntry的功能和逻辑。其功能就是循环跳过下一个/前一个delete的记录，直到遇到kValueType的记录。 先来看看，函数声明为： void DBIter::FindNextUserEntry(bool skipping, std::string* skip) 参数@skipping表明是否要跳过sequence更小的entry； 参数@skip临时存储空间，保存seek时要跳过的key； 在进入FindNextUserEntry时，iter_刚好定位在this-\u0026gt;key(), this-\u0026gt;value()这条记录上。下面来看函数实现：\nvirtual Slice key() const { //kForward直接取iter_-\u0026gt;key()，否则取saved key assert(valid_); return (direction_ == kForward) ? ExtractUserKey(iter_-\u0026gt;key()) : saved_key_; } // 循环直到找到合适的entry，direction必须是kForward assert(iter_-\u0026gt;Valid()); assert(direction_ == kForward); do { ParsedInternalKey ikey; // 确保iter_-\u0026gt;key()的sequence \u0026lt;= 遍历指定的sequence if (ParseKey(\u0026amp;ikey) \u0026amp;\u0026amp; ikey.",
+  "keywords": [
+    
+  ],
+  "articleBody": "leveldb源码分析22 本系列《leveldb源码分析》共有22篇文章，这是第二十二篇\n14 DB的查询与遍历之2 14.4 DBIter Leveldb数据库的MemTable和sstable文件的存储格式都是**(user key, seq, type) =\u003e uservalue**。DBIter把同一个userkey在DB中的多条记录合并为一条，综合考虑了userkey的序号、删除标记、和写覆盖等等因素。 从前面函数NewIterator的代码还能看到，DBIter内部使用了MergingIterator，在调用MergingItertor的系列seek函数后，DBIter还要处理key的删除标记。否则，遍历时会把已删除的key列举出来。 DBIter还定义了两个移动方向，默认是kForward： 1） kForward，向前移动，代码保证此时DBIter的内部迭代器刚好定位在this-\u003ekey(),this-\u003evalue()这条记录上； 2） kReverse，向后移动，代码保证此时DBIter的内部迭代器刚好定位在所有key=this-\u003ekey()的entry之前。 其成员变量savedkey和saved value保存的是KReverse方向移动时的k/v对，每次seek系调用之后，其值都会跟随iter_而改变。 DBIter的代码开始读来感觉有些绕，主要就是它要处理删除标记，而且其底层的MergingIterator，对于同一个key会有多个不同sequence的entry。导致其Next/Prev操作比较复杂，要考虑到上一次移动的影响，跳过删除标记和重复的key。 DBIter必须导出Iterator定义的几个接口，下面就拖出来挨个分析。\n14.4.1 Get系接口 首先是几个简单接口，获取key、value和status的：\n//kForward直接取iter_-\u003evalue()，否则取saved value virtual Slice value() const { assert(valid_); return (direction_ == kForward) ? iter_-\u003evalue() : saved_value_; } virtual Status status() const { if (status_.ok()) returniter_-\u003estatus(); return status_; } 14.4.2 辅助函数 在分析seek系函数之前，先来理解两个重要的辅助函数：FindNextUserEntry和FindPrevUserEntry的功能和逻辑。其功能就是循环跳过下一个/前一个delete的记录，直到遇到kValueType的记录。 先来看看，函数声明为： void DBIter::FindNextUserEntry(bool skipping, std::string* skip) 参数@skipping表明是否要跳过sequence更小的entry； 参数@skip临时存储空间，保存seek时要跳过的key； 在进入FindNextUserEntry时，iter_刚好定位在this-\u003ekey(), this-\u003evalue()这条记录上。下面来看函数实现：\nvirtual Slice key() const { //kForward直接取iter_-\u003ekey()，否则取saved key assert(valid_); return (direction_ == kForward) ? ExtractUserKey(iter_-\u003ekey()) : saved_key_; } // 循环直到找到合适的entry，direction必须是kForward assert(iter_-\u003eValid()); assert(direction_ == kForward); do { ParsedInternalKey ikey; // 确保iter_-\u003ekey()的sequence \u003c= 遍历指定的sequence if (ParseKey(\u0026ikey) \u0026\u0026 ikey.sequence \u003c= sequence_) { switch (ikey.type) { case kTypeDeletion: //对于该key，跳过后面遇到的所有entry，它们被这次删除覆盖了 //保存key到skip中，并设置skipping=true SaveKey(ikey.user_key, skip); skipping = true; break; case kTypeValue: if (skipping \u0026\u0026 user_comparator_-\u003eCompare(ikey.user_key, *skip) \u003c= 0) { // 这是一个被删除覆盖的entry，或者user key比指定的key小，跳过 } else { // 找到，清空saved key并返回，iter_已定位到正确的entry valid_ = true; saved_key_.clear(); return; } break; } } iter_-\u003eNext(); // 继续检查下一个entry } while (iter_-\u003eValid()); // 到这里表明已经找到最后了，没有符合的entry saved_key_.clear(); valid_ = false; FindNextUserKey移动方向是kForward，DBIter在向kForward移动时，借用了saved key作为临时缓存。FindNextUserKey确保定位到的entry的sequence不会大于指定的sequence，并跳过被删除标记覆盖的旧记录。 接下来是FindPrevUserKey，函数声明为：void DBIter::FindPrevUserEntry()，在进入FindPrevUserEntry时，iter_刚好位于saved key对应的所有记录之前。源代码如下：\nassert(direction_ == kReverse); // 确保是kReverse方向 ValueType value_type =kTypeDeletion; //后面的循环至少执行一次Prev操作 if (iter_-\u003eValid()) { do { // 循环 // 确保iter_-\u003ekey()的sequence \u003c= 遍历指定的sequence ParsedInternalKey ikey; if (ParseKey(\u0026ikey)\u0026\u0026 ikey.sequence \u003c= sequence_) { if ((value_type !=kTypeDeletion) \u0026\u0026 user_comparator_-\u003eCompare(ikey.user_key, saved_key_) \u003c 0) { break; // 我们遇到了前一个key的一个未被删除的entry，跳出循环 // 此时Key()将返回saved_key，saved key非空； } //根据类型，如果是Deletion则清空saved key和saved value //否则，把iter_的user key和value赋给saved key和saved value value_type = ikey.type; if (value_type ==kTypeDeletion) { saved_key_.clear(); ClearSavedValue(); } else { Slice raw_value =iter_-\u003evalue(); if(saved_value_.capacity() \u003e raw_value.size() + 1048576) { std::string empty; swap(empty,saved_value_); } SaveKey(ExtractUserKey(iter_-\u003ekey()), \u0026saved_key_); saved_value_.assign(raw_value.data(), raw_value.size()); } } iter_-\u003ePrev(); // 前一个 } while (iter_-\u003eValid()); } if (value_type == kTypeDeletion){ // 表明遍历结束了，将direction设置为kForward valid_ = false; saved_key_.clear(); ClearSavedValue(); direction_ = kForward; } else { valid_ = true; } 函数FindPrevUserKey根据指定的sequence，依次检查前一个entry，直到遇到user key小于saved key，并且类型不是Delete的entry。如果entry的类型是Delete，就清空saved key和saved value，这样在依次遍历前一个entry的循环中，只要类型不是Delete，就是要找的entry。这就是Prev的语义。\n14.4.3 Seek系函数 了解了这两个重要的辅助函数，可以分析几个Seek接口了，它们需要借助于上面的这两个函数来跳过被delete的记录。\nvoid DBIter::Seek(const Slice\u0026 target) { direction_ = kForward; // 向前seek // 清空saved value和saved key，并根据target设置saved key ClearSavedValue(); saved_key_.clear(); AppendInternalKey( // kValueTypeForSeek(1) \u003e kDeleteType(0) \u0026saved_key_,ParsedInternalKey(target, sequence_, kValueTypeForSeek)); iter_-\u003eSeek(saved_key_); // iter seek到saved key //可以定位到合法的iter，还需要跳过Delete的entry if (iter_-\u003eValid()) FindNextUserEntry(false,\u0026saved_key_); else valid_ = false; } void DBIter::SeekToFirst() { direction_ = kForward; // 向前seek // 清空saved value，首先iter_-\u003eSeekToFirst，然后跳过Delete的entry ClearSavedValue(); iter_-\u003eSeekToFirst(); if (iter_-\u003eValid()) FindNextUserEntry(false,\u0026saved_key_ /*临时存储*/); else valid_ = false; } void DBIter::SeekToLast() { // 更简单 direction_ = kReverse; ClearSavedValue(); iter_-\u003eSeekToLast(); FindPrevUserEntry(); } 14.4.4 Prev()和Next() Next和Prev接口，相对复杂一些。和底层的merging iterator不同，DBIter的Prev和Next步进是以key为单位的，而mergingiterator是以一个record为单位的。所以在调用merging Iterator做Prev和Next迭代时，必须循环直到key发生改变。 这次让我们以Prev为例，以14.4-1图解一下，还真是一图胜千言啊。 假设指定读取的sequence为2，当前iter在key4:2:1上，direction为kForward。此时调用Prev()，此图显示了Prev操作执行的5个步骤：\nS1 首先因为direction为kForward，先调整iter到key3:1:1上。此图也说明了调整的理由，key4:2:1前面还有key4:3:1。然后进入FindPrevUserEntry函数，执行S2到S4。 S2 跳到key3:2:0上时，这是一个删除标记，清空saved key（其中保存的是key3:1:1）。 S3 循环继续，跳到key2:1:1上，此时key2:1:1 \u003e saved key，设置saved key为key2:1:1，并继续循环。 S4 循环继续，跳到key2:2:1上，此时key2:2:1 \u003e saved key，设置saved key为key2:2:1，并继续循环。 S5 跳到Key1:1:1上，因为key1:1:1 \u003c saved key，跳出循环。 最终状态iter_位置在key1:1:1上，而saved key保存的则是key2:2:1上，这也就是Prev应该定位到的值。也就是说在Prev操作下，iter_的位置并不是真正的key位置。这就是前面Get系函数中，在direction为kReverse时，返回saved key/value的原因。 同理，在Next时，如果direction是kReverse，根据上面的Prev可以发现，此时iter刚好是saved key的前一个entry。执行**iter-\u003eNext()**就跳到了saved key的dentry范围的sequence最大的那个entry。在前面的例子中，在Prev后执行Next，那么iter首先跳转到key2:3:1上，然后再调用FindNextUserEntry循环，使iter定位在key2:2:1上。 下面首先来分析Next的实现。如果direction是kReverse，表明上一次做的是kReverse跳转，这种情况下，iter_位于key是this-\u003ekey()的所有entry之前，我们需要先把iter_跳转到this-\u003ekey()对应的entries范围内。\nvoid DBIter::Next() { assert(valid_); if (direction_ == kReverse) { //需要预处理，并更改direction=kForward direction_ = kForward; // iter_刚好在this-\u003ekey()的所有entry之前，所以先跳转到this-\u003ekey() // 的entries范围之内，然后再做常规的skip if (!iter_-\u003eValid()) iter_-\u003eSeekToFirst(); else iter_-\u003eNext(); if (!iter_-\u003eValid()) { valid_ = false; saved_key_.clear(); return; } } // 把saved_key_ 用作skip的临时存储空间 std::string* skip =\u0026saved_key_; SaveKey(ExtractUserKey(iter_-\u003ekey()), skip);// 设置skip为iter_-\u003ekey()的user key FindNextUserEntry(true, skip); } 接下来是Prev()，其实和Next()逻辑相似，但方向相反。\n如果direction是kForward，表明上一次是做的是kForward跳转，这种情况下，iter_指向当前的entry，我们需要调整iter，使其指向到前一个key，iter的位置是这个key所有record序列的最后一个，也就是sequence最小的那个record。\nvoid DBIter::Prev() { assert(valid_); if (direction_ == kForward) { //需要预处理，并更改direction // iter_指向当前的entry，向后扫描直到key发生改变，然后我们可以做 //常规的reverse扫描 assert(iter_-\u003eValid()); // iter_必须合法，并把saved key设置为iter_-\u003ekey() SaveKey(ExtractUserKey(iter_-\u003ekey()), \u0026saved_key_); while (true) { iter_-\u003ePrev(); if (!iter_-\u003eValid()) { // 到头了，直接返回 valid_ = false; saved_key_.clear(); ClearSavedValue(); return; } if (user_comparator_-\u003eCompare(ExtractUserKey(iter_-\u003ekey()), saved_key_) \u003c 0) { break; // key变化就跳出循环，此时iter_刚好位于saved key对应的所有entry之前 } } direction_ = kReverse; } FindPrevUserEntry(); } 接下来要分析的是插入和删除操作。\n14.5 小结 查询操作并不复杂，只需要根据seq找到最新的记录即可。知道leveldb的遍历会比较复杂，不过也没想到会这么复杂。这主要是得益于sstable 0的重合性，以及memtable和sstable文件的重合性。\nleveldb源码分析全系列完。\n",
+  "wordCount" : "495",
+  "inLanguage": "en",
+  "datePublished": "2021-01-11T09:20:42Z",
+  "dateModified": "2021-01-11T09:20:42Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/08d56462861f4df7b247921ba14a88e2/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      leveldb源码分析22
+    </h1>
+    <div class="post-meta"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#leveldb%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%9022" aria-label="leveldb源码分析22">leveldb源码分析22</a><ul>
+                        
+                <li>
+                    <a href="#14-db%e7%9a%84%e6%9f%a5%e8%af%a2%e4%b8%8e%e9%81%8d%e5%8e%86%e4%b9%8b2" aria-label="14 DB的查询与遍历之2">14 DB的查询与遍历之2</a><ul>
+                        
+                <li>
+                    <a href="#144-dbiter" aria-label="14.4 DBIter"><strong>14.4 DBIter</strong></a><ul>
+                        
+                <li>
+                    <a href="#1441-get%e7%b3%bb%e6%8e%a5%e5%8f%a3" aria-label="14.4.1 Get系接口"><strong>14.4.1 Get系接口</strong></a></li>
+                <li>
+                    <a href="#1442-%e8%be%85%e5%8a%a9%e5%87%bd%e6%95%b0" aria-label="14.4.2 辅助函数"><strong>14.4.2 辅助函数</strong></a></li>
+                <li>
+                    <a href="#1443-seek%e7%b3%bb%e5%87%bd%e6%95%b0" aria-label="14.4.3 Seek系函数"><strong>14.4.3 Seek系函数</strong></a></li>
+                <li>
+                    <a href="#1444-prev%e5%92%8cnext" aria-label="14.4.4 Prev()和Next()"><strong>14.4.4 Prev()和Next()</strong></a></li></ul>
+                </li>
+                <li>
+                    <a href="#145-%e5%b0%8f%e7%bb%93" aria-label="14.5 小结">14.5 小结</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="leveldb源码分析22">leveldb源码分析22</h1>
+<p>本系列《leveldb源码分析》共有22篇文章，这是第二十二篇</p>
+<h2 id="14-db的查询与遍历之2">14 DB的查询与遍历之2</h2>
+<h3 id="144-dbiter"><strong>14.4 DBIter</strong></h3>
+<p>Leveldb数据库的<strong>MemTable</strong>和<strong>sstable</strong>文件的存储格式都是**(user key, seq, type) =&gt; uservalue**。DBIter把同一个userkey在DB中的多条记录合并为一条，综合考虑了userkey的序号、删除标记、和写覆盖等等因素。
+从前面函数<strong>NewIterator</strong>的代码还能看到，DBIter内部使用了<strong>MergingIterator</strong>，在调用MergingItertor的系列seek函数后，DBIter还要处理key的删除标记。否则，遍历时会把已删除的key列举出来。
+DBIter还定义了两个移动方向，默认是kForward：
+1） <strong>kForward</strong>，向前移动，代码保证此时DBIter的内部迭代器刚好定位在this-&gt;key(),this-&gt;value()这条记录上；
+2） <strong>kReverse</strong>，向后移动，代码保证此时DBIter的内部迭代器刚好定位在所有key=this-&gt;key()的entry之前。
+其成员变量savedkey和saved value保存的是KReverse方向移动时的k/v对，每次seek系调用之后，其值都会跟随iter_而改变。
+DBIter的代码开始读来感觉有些绕，主要就是它要处理删除标记，而且其底层的MergingIterator，对于同一个key会有多个不同sequence的entry。导致其Next/Prev操作比较复杂，要考虑到上一次移动的影响，跳过删除标记和重复的key。
+DBIter必须导出Iterator定义的几个接口，下面就拖出来挨个分析。</p>
+<h4 id="1441-get系接口"><strong>14.4.1 Get系接口</strong></h4>
+<p>首先是几个简单接口，获取key、value和status的：</p>
+<pre tabindex="0"><code>//kForward直接取iter_-&gt;value()，否则取saved value
+virtual Slice value() const {  
+    assert(valid_);
+    return (direction_ == kForward) ? iter_-&gt;value() : saved_value_;
+}
+
+virtual Status status() const {
+    if (status_.ok()) 
+        returniter_-&gt;status();
+    return status_;
+}
+</code></pre><h4 id="1442-辅助函数"><strong>14.4.2 辅助函数</strong></h4>
+<p>在分析seek系函数之前，先来理解两个重要的辅助函数：<strong>FindNextUserEntry</strong>和<strong>FindPrevUserEntry</strong>的功能和逻辑。其功能就是循环跳过下一个/前一个delete的记录，直到遇到<strong>kValueType</strong>的记录。
+先来看看，函数声明为：
+<strong>void DBIter::FindNextUserEntry(bool skipping, std::string* skip)</strong>
+参数@skipping表明是否要跳过sequence更小的entry；
+参数@skip临时存储空间，保存seek时要跳过的key；
+在进入FindNextUserEntry时，iter_刚好定位在this-&gt;key(), this-&gt;value()这条记录上。下面来看函数实现：</p>
+<pre tabindex="0"><code>virtual Slice key() const { //kForward直接取iter_-&gt;key()，否则取saved key  
+    assert(valid_);
+    return (direction_ == kForward) ? ExtractUserKey(iter_-&gt;key()) : saved_key_;
+}
+
+// 循环直到找到合适的entry，direction必须是kForward  
+assert(iter_-&gt;Valid());
+assert(direction_ == kForward);
+do {
+    ParsedInternalKey ikey;
+    // 确保iter_-&gt;key()的sequence &lt;= 遍历指定的sequence  
+    if (ParseKey(&amp;ikey) &amp;&amp; ikey.sequence &lt;= sequence_) {
+        switch (ikey.type) {
+        case kTypeDeletion:
+            //对于该key，跳过后面遇到的所有entry，它们被这次删除覆盖了  
+            //保存key到skip中，并设置skipping=true  
+            SaveKey(ikey.user_key, skip);
+            skipping = true;
+            break;
+        case kTypeValue:
+            if (skipping &amp;&amp;
+                user_comparator_-&gt;Compare(ikey.user_key, *skip) &lt;= 0) {
+                // 这是一个被删除覆盖的entry，或者user key比指定的key小，跳过  
+            }
+            else { // 找到，清空saved key并返回，iter_已定位到正确的entry  
+                valid_ = true;
+                saved_key_.clear();
+                return;
+            }
+            break;
+        }
+    }
+    iter_-&gt;Next(); // 继续检查下一个entry  
+} while (iter_-&gt;Valid());
+// 到这里表明已经找到最后了，没有符合的entry  
+saved_key_.clear();
+valid_ = false;
+</code></pre><p>FindNextUserKey移动方向是<strong>kForward</strong>，DBIter在向kForward移动时，借用了saved key作为临时缓存。FindNextUserKey确保定位到的entry的sequence不会大于指定的sequence，并跳过被删除标记覆盖的旧记录。
+接下来是FindPrevUserKey，函数声明为：<strong>void DBIter::FindPrevUserEntry()</strong>，在进入FindPrevUserEntry时，iter_刚好位于saved key对应的所有记录之前。源代码如下：</p>
+<pre tabindex="0"><code>assert(direction_ == kReverse); // 确保是kReverse方向  
+ValueType value_type =kTypeDeletion; //后面的循环至少执行一次Prev操作  
+if (iter_-&gt;Valid()) {  
+    do { // 循环  
+        // 确保iter_-&gt;key()的sequence &lt;= 遍历指定的sequence  
+        ParsedInternalKey ikey;  
+        if (ParseKey(&amp;ikey)&amp;&amp; ikey.sequence &lt;= sequence_) {  
+            if ((value_type !=kTypeDeletion) &amp;&amp;  
+                user_comparator_-&gt;Compare(ikey.user_key, saved_key_) &lt; 0) {  
+            break; // 我们遇到了前一个key的一个未被删除的entry，跳出循环  
+             // 此时Key()将返回saved_key，saved key非空；  
+        }  
+        //根据类型，如果是Deletion则清空saved key和saved value  
+        //否则，把iter_的user key和value赋给saved key和saved value  
+        value_type = ikey.type;  
+        if (value_type ==kTypeDeletion) {  
+            saved_key_.clear();  
+            ClearSavedValue();  
+        } else {  
+            Slice raw_value =iter_-&gt;value();  
+            if(saved_value_.capacity() &gt; raw_value.size() + 1048576) {  
+                std::string empty;  
+                swap(empty,saved_value_);  
+            }  
+         SaveKey(ExtractUserKey(iter_-&gt;key()), &amp;saved_key_);  
+         saved_value_.assign(raw_value.data(), raw_value.size());  
+        }  
+      }  
+      iter_-&gt;Prev(); // 前一个  
+    } while (iter_-&gt;Valid());  
+  }  
+  if (value_type == kTypeDeletion){ // 表明遍历结束了，将direction设置为kForward  
+      valid_ = false;  
+      saved_key_.clear();  
+      ClearSavedValue();  
+      direction_ = kForward;  
+  } else {  
+  valid_ = true;  
+}  
+</code></pre><p>函数FindPrevUserKey根据指定的<strong>sequence</strong>，依次检查前一个entry，直到遇到user key小于saved key，并且类型不是Delete的entry。如果entry的类型是Delete，就清空saved key和saved value，这样在依次遍历前一个entry的循环中，只要类型不是Delete，就是要找的entry。这就是Prev的语义。</p>
+<h4 id="1443-seek系函数"><strong>14.4.3 Seek系函数</strong></h4>
+<p>了解了这两个重要的辅助函数，可以分析几个Seek接口了，它们需要借助于上面的这两个函数来跳过被delete的记录。</p>
+<pre tabindex="0"><code>void DBIter::Seek(const Slice&amp; target) {  
+    direction_ = kForward; // 向前seek  
+    // 清空saved value和saved key，并根据target设置saved key  
+    ClearSavedValue();  
+    saved_key_.clear();  
+    AppendInternalKey( // kValueTypeForSeek(1) &gt; kDeleteType(0)  
+        &amp;saved_key_,ParsedInternalKey(target, sequence_, kValueTypeForSeek));  
+    iter_-&gt;Seek(saved_key_); // iter seek到saved key  
+    //可以定位到合法的iter，还需要跳过Delete的entry  
+    if (iter_-&gt;Valid()) FindNextUserEntry(false,&amp;saved_key_);  
+    else valid_ = false;  
+}                                                                                                                                         
+
+void DBIter::SeekToFirst() {  
+    direction_ = kForward; // 向前seek  
+    // 清空saved value，首先iter_-&gt;SeekToFirst，然后跳过Delete的entry  
+    ClearSavedValue();  
+    iter_-&gt;SeekToFirst();  
+    if (iter_-&gt;Valid()) FindNextUserEntry(false,&amp;saved_key_ /*临时存储*/);  
+    else valid_ = false;  
+}  
+
+void DBIter::SeekToLast() { // 更简单  
+    direction_ = kReverse;  
+    ClearSavedValue();  
+    iter_-&gt;SeekToLast();  
+    FindPrevUserEntry();  
+}  
+</code></pre><h4 id="1444-prev和next"><strong>14.4.4 Prev()和Next()</strong></h4>
+<p>Next和Prev接口，相对复杂一些。和底层的merging iterator不同，DBIter的Prev和Next步进是<strong>以key为单位的</strong>，而mergingiterator是以一个record为单位的。所以在调用merging Iterator做Prev和Next迭代时，必须循环直到key发生改变。
+这次让我们以Prev为例，以14.4-1图解一下，还真是一图胜千言啊。
+假设指定读取的sequence为2，当前iter在key4:2:1上，direction为kForward。此时调用Prev()，此图显示了Prev操作执行的5个步骤：</p>
+<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/f5ea958530ad6488ec577ecaf76d7fc8.webp" alt=""  />
+</p>
+<p>S1 首先因为direction为kForward，先调整iter到key3:1:1上。此图也说明了调整的理由，key4:2:1前面还有key4:3:1。然后进入FindPrevUserEntry函数，执行S2到S4。
+S2 跳到key3:2:0上时，这是一个删除标记，清空saved key（其中保存的是key3:1:1）。
+S3 循环继续，跳到key2:1:1上，此时key2:1:1 &gt; saved key，设置saved key为key2:1:1，并继续循环。
+S4 循环继续，跳到key2:2:1上，此时key2:2:1 &gt; saved key，设置saved key为key2:2:1，并继续循环。
+S5 跳到Key1:1:1上，因为key1:1:1 &lt; saved key，跳出循环。
+最终状态iter_位置在key1:1:1上，而saved key保存的则是key2:2:1上，这也就是Prev应该定位到的值。也就是说在Prev操作下，iter_的位置并不是真正的key位置。这就是前面Get系函数中，在direction为kReverse时，返回saved key/value的原因。
+同理，在Next时，如果direction是kReverse，根据上面的Prev可以发现，此时iter刚好是saved key的前一个entry。执行**iter-&gt;Next()**就跳到了saved key的dentry范围的sequence最大的那个entry。在前面的例子中，在Prev后执行Next，那么iter首先跳转到key2:3:1上，然后再调用FindNextUserEntry循环，使iter定位在key2:2:1上。
+下面首先来分析Next的实现。如果direction是kReverse，表明上一次做的是kReverse跳转，这种情况下，iter_位于key是this-&gt;key()的所有entry之前，我们需要先把iter_跳转到this-&gt;key()对应的entries范围内。</p>
+<pre tabindex="0"><code>void DBIter::Next() {  
+    assert(valid_);  
+    if (direction_ == kReverse) { //需要预处理，并更改direction=kForward  
+      direction_ = kForward;  
+      // iter_刚好在this-&gt;key()的所有entry之前，所以先跳转到this-&gt;key()  
+      // 的entries范围之内，然后再做常规的skip  
+        if (!iter_-&gt;Valid()) iter_-&gt;SeekToFirst();  
+        else iter_-&gt;Next();  
+        if (!iter_-&gt;Valid()) {  
+          valid_ = false;  
+          saved_key_.clear();  
+          return;  
+        }  
+      }  
+      // 把saved_key_ 用作skip的临时存储空间  
+      std::string* skip =&amp;saved_key_;  
+      SaveKey(ExtractUserKey(iter_-&gt;key()), skip);// 设置skip为iter_-&gt;key()的user key  
+      FindNextUserEntry(true, skip);  
+}  
+</code></pre><p>接下来是Prev()，其实和Next()逻辑相似，但方向相反。</p>
+<p>如果direction是kForward，表明上一次是做的是kForward跳转，这种情况下，iter_指向当前的entry，我们需要调整iter，使其指向到前一个key，iter的位置是这个key所有record序列的最后一个，也就是sequence最小的那个record。</p>
+<pre tabindex="0"><code>void DBIter::Prev() {  
+    assert(valid_);  
+    if (direction_ == kForward) { //需要预处理，并更改direction  
+      // iter_指向当前的entry，向后扫描直到key发生改变，然后我们可以做  
+      //常规的reverse扫描  
+        assert(iter_-&gt;Valid());  // iter_必须合法，并把saved key设置为iter_-&gt;key()  
+        SaveKey(ExtractUserKey(iter_-&gt;key()), &amp;saved_key_);  
+        while (true) {  
+            iter_-&gt;Prev();  
+        if (!iter_-&gt;Valid()) { // 到头了，直接返回  
+            valid_ = false;  
+            saved_key_.clear();  
+            ClearSavedValue();  
+            return;  
+          }  
+          if (user_comparator_-&gt;Compare(ExtractUserKey(iter_-&gt;key()),  
+                                   saved_key_) &lt; 0) {  
+            break; // key变化就跳出循环，此时iter_刚好位于saved key对应的所有entry之前  
+          }  
+        }     
+        direction_ = kReverse;  
+      }  
+      FindPrevUserEntry();  
+}  
+</code></pre><p>接下来要分析的是插入和删除操作。</p>
+<h3 id="145-小结">14.5 小结</h3>
+<p>查询操作并不复杂，只需要根据seq找到最新的记录即可。知道leveldb的遍历会比较复杂，不过也没想到会这么复杂。这主要是得益于sstable 0的重合性，以及memtable和sstable文件的重合性。</p>
+<p><strong>leveldb源码分析全系列完。</strong></p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/blog/1d4ede18ded04a569baee5550226fa6f/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>leveldb源码分析21</span>
+  </a>
+  <a class="next" href="https://haokiu.com/blog/34fc58749a224c92be698a0d9cd27b99/">
+    <span class="title">Next »</span>
+    <br>
+    <span>leveldb源码分析3</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

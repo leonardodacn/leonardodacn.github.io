@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>DataX OCSWriter 适用memcached客户端写入ocs | haokiu</title>
+<meta name="keywords" content="datax">
+<meta name="description" content="DataX OCSWriter 适用memcached客户端写入ocs 1 快速介绍 1.1 OCS简介 开放缓存服务( Open Cache Service，简称OCS）是基于内存的缓存服务，支持海量小数据的高速访问。OCS可以极大缓解对后端存储的压力，提高网站或应用的响应速度。OCS支持Key-Value的数据结构，兼容Memcached协议的客户端都可与OCS通信。
+OCS 支持即开即用的方式快速部署；对于动态Web、APP应用，可通过缓存服务减轻对数据库的压力，从而提高网站整体的响应速度。
+与本地MemCache相同之处在于OCS兼容Memcached协议，与用户环境兼容，可直接用于OCS服务 不同之处在于硬件和数据部署在云端，有完善的基础设施、网络安全保障、系统维护服务。所有的这些服务，都不需要投资，只需根据使用量进行付费即可。
+1.2 OCSWriter简介 OCSWriter是DataX实现的，基于Memcached协议的数据写入OCS通道。
+2 功能说明 2.1 配置样例 这里使用一份从内存产生的数据导入到OCS。 { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 1 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;streamreader&#34;, &#34;parameter&#34;: { &#34;column&#34;: [ { &#34;value&#34;: &#34;DataX&#34;, &#34;type&#34;: &#34;string&#34; }, { &#34;value&#34;: 19880808, &#34;type&#34;: &#34;long&#34; }, { &#34;value&#34;: &#34;1988-08-08 08:08:08&#34;, &#34;type&#34;: &#34;date&#34; }, { &#34;value&#34;: true, &#34;type&#34;: &#34;bool&#34; }, { &#34;value&#34;: &#34;test&#34;, &#34;type&#34;: &#34;bytes&#34; } ], &#34;sliceRecordCount&#34;: 1000 } }, &#34;writer&#34;: { &#34;name&#34;: &#34;ocswriter&#34;, &#34;parameter&#34;: { &#34;proxy&#34;: &#34;xxxx&#34;, &#34;port&#34;: &#34;11211&#34;, &#34;userName&#34;: &#34;user&#34;, &#34;password&#34;: &#34;******&#34;, &#34;writeMode&#34;: &#34;set|add|replace|append|prepend&#34;, &#34;writeFormat&#34;: &#34;text|binary&#34;, &#34;fieldDelimiter&#34;: &#34;\u0001&#34;, &#34;expireTime&#34;: 1000, &#34;indexes&#34;: &#34;0,2&#34;, &#34;batchSize&#34;: 1000 } } } ] } } 2.">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/d4b1e453f8274dda834a305a5e6a38bf/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="DataX OCSWriter 适用memcached客户端写入ocs" />
+<meta property="og:description" content="DataX OCSWriter 适用memcached客户端写入ocs 1 快速介绍 1.1 OCS简介 开放缓存服务( Open Cache Service，简称OCS）是基于内存的缓存服务，支持海量小数据的高速访问。OCS可以极大缓解对后端存储的压力，提高网站或应用的响应速度。OCS支持Key-Value的数据结构，兼容Memcached协议的客户端都可与OCS通信。
+OCS 支持即开即用的方式快速部署；对于动态Web、APP应用，可通过缓存服务减轻对数据库的压力，从而提高网站整体的响应速度。
+与本地MemCache相同之处在于OCS兼容Memcached协议，与用户环境兼容，可直接用于OCS服务 不同之处在于硬件和数据部署在云端，有完善的基础设施、网络安全保障、系统维护服务。所有的这些服务，都不需要投资，只需根据使用量进行付费即可。
+1.2 OCSWriter简介 OCSWriter是DataX实现的，基于Memcached协议的数据写入OCS通道。
+2 功能说明 2.1 配置样例 这里使用一份从内存产生的数据导入到OCS。 { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 1 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;streamreader&#34;, &#34;parameter&#34;: { &#34;column&#34;: [ { &#34;value&#34;: &#34;DataX&#34;, &#34;type&#34;: &#34;string&#34; }, { &#34;value&#34;: 19880808, &#34;type&#34;: &#34;long&#34; }, { &#34;value&#34;: &#34;1988-08-08 08:08:08&#34;, &#34;type&#34;: &#34;date&#34; }, { &#34;value&#34;: true, &#34;type&#34;: &#34;bool&#34; }, { &#34;value&#34;: &#34;test&#34;, &#34;type&#34;: &#34;bytes&#34; } ], &#34;sliceRecordCount&#34;: 1000 } }, &#34;writer&#34;: { &#34;name&#34;: &#34;ocswriter&#34;, &#34;parameter&#34;: { &#34;proxy&#34;: &#34;xxxx&#34;, &#34;port&#34;: &#34;11211&#34;, &#34;userName&#34;: &#34;user&#34;, &#34;password&#34;: &#34;******&#34;, &#34;writeMode&#34;: &#34;set|add|replace|append|prepend&#34;, &#34;writeFormat&#34;: &#34;text|binary&#34;, &#34;fieldDelimiter&#34;: &#34;\u0001&#34;, &#34;expireTime&#34;: 1000, &#34;indexes&#34;: &#34;0,2&#34;, &#34;batchSize&#34;: 1000 } } } ] } } 2." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/d4b1e453f8274dda834a305a5e6a38bf/" /><meta property="article:section" content="4" />
+<meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
+<meta property="article:modified_time" content="2021-02-02T17:45:01+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="DataX OCSWriter 适用memcached客户端写入ocs"/>
+<meta name="twitter:description" content="DataX OCSWriter 适用memcached客户端写入ocs 1 快速介绍 1.1 OCS简介 开放缓存服务( Open Cache Service，简称OCS）是基于内存的缓存服务，支持海量小数据的高速访问。OCS可以极大缓解对后端存储的压力，提高网站或应用的响应速度。OCS支持Key-Value的数据结构，兼容Memcached协议的客户端都可与OCS通信。
+OCS 支持即开即用的方式快速部署；对于动态Web、APP应用，可通过缓存服务减轻对数据库的压力，从而提高网站整体的响应速度。
+与本地MemCache相同之处在于OCS兼容Memcached协议，与用户环境兼容，可直接用于OCS服务 不同之处在于硬件和数据部署在云端，有完善的基础设施、网络安全保障、系统维护服务。所有的这些服务，都不需要投资，只需根据使用量进行付费即可。
+1.2 OCSWriter简介 OCSWriter是DataX实现的，基于Memcached协议的数据写入OCS通道。
+2 功能说明 2.1 配置样例 这里使用一份从内存产生的数据导入到OCS。 { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 1 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;streamreader&#34;, &#34;parameter&#34;: { &#34;column&#34;: [ { &#34;value&#34;: &#34;DataX&#34;, &#34;type&#34;: &#34;string&#34; }, { &#34;value&#34;: 19880808, &#34;type&#34;: &#34;long&#34; }, { &#34;value&#34;: &#34;1988-08-08 08:08:08&#34;, &#34;type&#34;: &#34;date&#34; }, { &#34;value&#34;: true, &#34;type&#34;: &#34;bool&#34; }, { &#34;value&#34;: &#34;test&#34;, &#34;type&#34;: &#34;bytes&#34; } ], &#34;sliceRecordCount&#34;: 1000 } }, &#34;writer&#34;: { &#34;name&#34;: &#34;ocswriter&#34;, &#34;parameter&#34;: { &#34;proxy&#34;: &#34;xxxx&#34;, &#34;port&#34;: &#34;11211&#34;, &#34;userName&#34;: &#34;user&#34;, &#34;password&#34;: &#34;******&#34;, &#34;writeMode&#34;: &#34;set|add|replace|append|prepend&#34;, &#34;writeFormat&#34;: &#34;text|binary&#34;, &#34;fieldDelimiter&#34;: &#34;\u0001&#34;, &#34;expireTime&#34;: 1000, &#34;indexes&#34;: &#34;0,2&#34;, &#34;batchSize&#34;: 1000 } } } ] } } 2."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "4s",
+      "item": "https://haokiu.com/4/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "DataX OCSWriter 适用memcached客户端写入ocs",
+      "item": "https://haokiu.com/blog/d4b1e453f8274dda834a305a5e6a38bf/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "DataX OCSWriter 适用memcached客户端写入ocs",
+  "name": "DataX OCSWriter 适用memcached客户端写入ocs",
+  "description": "DataX OCSWriter 适用memcached客户端写入ocs 1 快速介绍 1.1 OCS简介 开放缓存服务( Open Cache Service，简称OCS）是基于内存的缓存服务，支持海量小数据的高速访问。OCS可以极大缓解对后端存储的压力，提高网站或应用的响应速度。OCS支持Key-Value的数据结构，兼容Memcached协议的客户端都可与OCS通信。\nOCS 支持即开即用的方式快速部署；对于动态Web、APP应用，可通过缓存服务减轻对数据库的压力，从而提高网站整体的响应速度。\n与本地MemCache相同之处在于OCS兼容Memcached协议，与用户环境兼容，可直接用于OCS服务 不同之处在于硬件和数据部署在云端，有完善的基础设施、网络安全保障、系统维护服务。所有的这些服务，都不需要投资，只需根据使用量进行付费即可。\n1.2 OCSWriter简介 OCSWriter是DataX实现的，基于Memcached协议的数据写入OCS通道。\n2 功能说明 2.1 配置样例 这里使用一份从内存产生的数据导入到OCS。 { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { \u0026#34;channel\u0026#34;: 1 } }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;streamreader\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;column\u0026#34;: [ { \u0026#34;value\u0026#34;: \u0026#34;DataX\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34; }, { \u0026#34;value\u0026#34;: 19880808, \u0026#34;type\u0026#34;: \u0026#34;long\u0026#34; }, { \u0026#34;value\u0026#34;: \u0026#34;1988-08-08 08:08:08\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;date\u0026#34; }, { \u0026#34;value\u0026#34;: true, \u0026#34;type\u0026#34;: \u0026#34;bool\u0026#34; }, { \u0026#34;value\u0026#34;: \u0026#34;test\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;bytes\u0026#34; } ], \u0026#34;sliceRecordCount\u0026#34;: 1000 } }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;ocswriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;proxy\u0026#34;: \u0026#34;xxxx\u0026#34;, \u0026#34;port\u0026#34;: \u0026#34;11211\u0026#34;, \u0026#34;userName\u0026#34;: \u0026#34;user\u0026#34;, \u0026#34;password\u0026#34;: \u0026#34;******\u0026#34;, \u0026#34;writeMode\u0026#34;: \u0026#34;set|add|replace|append|prepend\u0026#34;, \u0026#34;writeFormat\u0026#34;: \u0026#34;text|binary\u0026#34;, \u0026#34;fieldDelimiter\u0026#34;: \u0026#34;\\u0001\u0026#34;, \u0026#34;expireTime\u0026#34;: 1000, \u0026#34;indexes\u0026#34;: \u0026#34;0,2\u0026#34;, \u0026#34;batchSize\u0026#34;: 1000 } } } ] } } 2.",
+  "keywords": [
+    "datax"
+  ],
+  "articleBody": "DataX OCSWriter 适用memcached客户端写入ocs 1 快速介绍 1.1 OCS简介 开放缓存服务( Open Cache Service，简称OCS）是基于内存的缓存服务，支持海量小数据的高速访问。OCS可以极大缓解对后端存储的压力，提高网站或应用的响应速度。OCS支持Key-Value的数据结构，兼容Memcached协议的客户端都可与OCS通信。\nOCS 支持即开即用的方式快速部署；对于动态Web、APP应用，可通过缓存服务减轻对数据库的压力，从而提高网站整体的响应速度。\n与本地MemCache相同之处在于OCS兼容Memcached协议，与用户环境兼容，可直接用于OCS服务 不同之处在于硬件和数据部署在云端，有完善的基础设施、网络安全保障、系统维护服务。所有的这些服务，都不需要投资，只需根据使用量进行付费即可。\n1.2 OCSWriter简介 OCSWriter是DataX实现的，基于Memcached协议的数据写入OCS通道。\n2 功能说明 2.1 配置样例 这里使用一份从内存产生的数据导入到OCS。 { \"job\": { \"setting\": { \"speed\": { \"channel\": 1 } }, \"content\": [ { \"reader\": { \"name\": \"streamreader\", \"parameter\": { \"column\": [ { \"value\": \"DataX\", \"type\": \"string\" }, { \"value\": 19880808, \"type\": \"long\" }, { \"value\": \"1988-08-08 08:08:08\", \"type\": \"date\" }, { \"value\": true, \"type\": \"bool\" }, { \"value\": \"test\", \"type\": \"bytes\" } ], \"sliceRecordCount\": 1000 } }, \"writer\": { \"name\": \"ocswriter\", \"parameter\": { \"proxy\": \"xxxx\", \"port\": \"11211\", \"userName\": \"user\", \"password\": \"******\", \"writeMode\": \"set|add|replace|append|prepend\", \"writeFormat\": \"text|binary\", \"fieldDelimiter\": \"\\u0001\", \"expireTime\": 1000, \"indexes\": \"0,2\", \"batchSize\": 1000 } } } ] } } 2.2 参数说明 proxy\n描述：OCS机器的ip或host。 必选：是 port\n描述：OCS的连接域名，默认为11211 必选：否 默认值：11211 username\n描述：OCS连接的访问账号。 必选：是 password\n描述：OCS连接的访问密码 必选：是 writeMode\n描述: OCSWriter写入方式，具体为： set: 存储这个数据，如果已经存在则覆盖 add: 存储这个数据，当且仅当这个key不存在的时候 replace: 存储这个数据，当且仅当这个key存在 append: 将数据存放在已存在的key对应的内容的后面，忽略exptime prepend: 将数据存放在已存在的key对应的内容的前面，忽略exptime 必选：是 writeFormat\n描述: OCSWriter写出数据格式，目前支持两类数据写入方式: text: 将源端数据序列化为文本格式，其中第一个字段作为OCS写入的KEY，后续所有字段序列化为STRING类型，使用用户指定的fieldDelimiter作为间隔符，将文本拼接为完整的字符串再写入OCS。 binary: 将源端数据作为二进制直接写入，这类场景为未来做扩展使用，目前不支持。如果填写binary将会报错！ 必选：否 默认值：text expireTime\n描述: OCS值缓存失效时间，目前MemCache支持两类过期时间，\nUnix时间(自1970.1.1开始到现在的秒数)，该时间指定了到未来某个时刻数据失效。 相对当前时间的秒数，该时间指定了从现在开始多长时间后数据失效。 注意：如果过期时间的秒数大于606024*30(即30天)，则服务端认为是Unix时间。 单位：秒 必选：否\n默认值：0【0表示永久有效】\nindexes\n描述: 用数据的第几列当做ocs的key 必选：否 默认值：0 batchSize\n描述：一次性批量提交的记录数大小，该值可以极大减少DataX与OCS的网络交互次数，并提升整体吞吐量。但是该值设置过大可能会造成DataX运行进程OOM情况[memcached版本暂不支持批量写]。 必选：否 默认值：256 fieldDelimiter\n描述：写入ocs的key和value分隔符。比如：key=tom\\u0001boston, value=28\\u0001lawer\\u0001male\\u0001married 必选：否 默认值：\\u0001 3 性能报告 3.1 datax机器配置 CPU:16核、内存:24GB、网卡:单网卡1000mbps 3.2 任务资源配置 -Xms8g -Xmx8g -XX:+HeapDumpOnOutOfMemoryError 3.3 测试报告 单条数据大小 通道并发数 TPS 通道流量 出口流量 备注 1KB 1 579 tps 583.31KB/s 648.63KB/s 无 1KB 10 6006 tps 5.87MB/s 6.73MB/s 无 1KB 100 49916 tps 48.56MB/s 55.55MB/s 无 10KB 1 438 tps 4.62MB/s 5.07MB/s 无 10KB 10 4313 tps 45.57MB/s 49.51MB/s 无 10KB 100 10713 tps 112.80MB/s 123.01MB/s 无 100KB 1 275 tps 26.09MB/s 144.90KB/s 无。数据冗余大，压缩比高。 100KB 10 2492 tps 236.33MB/s 1.30MB/s 无 100KB 100 3187 tps 302.17MB/s 1.77MB/s 无 3.4 性能测试小结 单条数据小于10KB时建议开启100并发。 不建议10KB以上的数据写入ocs。 ",
+  "wordCount" : "259",
+  "inLanguage": "en",
+  "datePublished": "2021-02-02T17:45:01Z",
+  "dateModified": "2021-02-02T17:45:01Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/d4b1e453f8274dda834a305a5e6a38bf/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    <h1 class="post-title">
+      DataX OCSWriter 适用memcached客户端写入ocs
+    </h1>
+    <div class="post-meta"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#datax-ocswriter-%e9%80%82%e7%94%a8memcached%e5%ae%a2%e6%88%b7%e7%ab%af%e5%86%99%e5%85%a5ocs" aria-label="DataX OCSWriter 适用memcached客户端写入ocs">DataX OCSWriter 适用memcached客户端写入ocs</a><ul>
+                        
+                <li>
+                    <a href="#1-%e5%bf%ab%e9%80%9f%e4%bb%8b%e7%bb%8d" aria-label="1 快速介绍">1 快速介绍</a><ul>
+                        
+                <li>
+                    <a href="#11-ocs%e7%ae%80%e4%bb%8b" aria-label="1.1 OCS简介">1.1 OCS简介</a></li>
+                <li>
+                    <a href="#12-ocswriter%e7%ae%80%e4%bb%8b" aria-label="1.2 OCSWriter简介">1.2 OCSWriter简介</a></li></ul>
+                </li>
+                <li>
+                    <a href="#2-%e5%8a%9f%e8%83%bd%e8%af%b4%e6%98%8e" aria-label="2 功能说明">2 功能说明</a><ul>
+                        
+                <li>
+                    <a href="#21-%e9%85%8d%e7%bd%ae%e6%a0%b7%e4%be%8b" aria-label="2.1 配置样例">2.1 配置样例</a></li>
+                <li>
+                    <a href="#22-%e5%8f%82%e6%95%b0%e8%af%b4%e6%98%8e" aria-label="2.2 参数说明">2.2 参数说明</a></li></ul>
+                </li>
+                <li>
+                    <a href="#3-%e6%80%a7%e8%83%bd%e6%8a%a5%e5%91%8a" aria-label="3 性能报告">3 性能报告</a><ul>
+                        
+                <li>
+                    <a href="#31-datax%e6%9c%ba%e5%99%a8%e9%85%8d%e7%bd%ae" aria-label="3.1 datax机器配置">3.1 datax机器配置</a></li>
+                <li>
+                    <a href="#32-%e4%bb%bb%e5%8a%a1%e8%b5%84%e6%ba%90%e9%85%8d%e7%bd%ae" aria-label="3.2 任务资源配置">3.2 任务资源配置</a></li>
+                <li>
+                    <a href="#33-%e6%b5%8b%e8%af%95%e6%8a%a5%e5%91%8a" aria-label="3.3 测试报告">3.3 测试报告</a></li>
+                <li>
+                    <a href="#34-%e6%80%a7%e8%83%bd%e6%b5%8b%e8%af%95%e5%b0%8f%e7%bb%93" aria-label="3.4 性能测试小结">3.4 性能测试小结</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="datax-ocswriter-适用memcached客户端写入ocs">DataX OCSWriter 适用memcached客户端写入ocs</h1>
+<hr>
+<h2 id="1-快速介绍">1 快速介绍</h2>
+<h3 id="11-ocs简介">1.1 OCS简介</h3>
+<p>开放缓存服务( Open Cache Service，简称OCS）是基于内存的缓存服务，支持海量小数据的高速访问。OCS可以极大缓解对后端存储的压力，提高网站或应用的响应速度。OCS支持Key-Value的数据结构，兼容Memcached协议的客户端都可与OCS通信。<!-- raw HTML omitted --></p>
+<p>OCS 支持即开即用的方式快速部署；对于动态Web、APP应用，可通过缓存服务减轻对数据库的压力，从而提高网站整体的响应速度。<!-- raw HTML omitted --></p>
+<p>与本地MemCache相同之处在于OCS兼容Memcached协议，与用户环境兼容，可直接用于OCS服务 不同之处在于硬件和数据部署在云端，有完善的基础设施、网络安全保障、系统维护服务。所有的这些服务，都不需要投资，只需根据使用量进行付费即可。</p>
+<h3 id="12-ocswriter简介">1.2 OCSWriter简介</h3>
+<p>OCSWriter是DataX实现的，基于Memcached协议的数据写入OCS通道。</p>
+<h2 id="2-功能说明">2 功能说明</h2>
+<h3 id="21-配置样例">2.1 配置样例</h3>
+<ul>
+<li>这里使用一份从内存产生的数据导入到OCS。</li>
+</ul>
+<pre tabindex="0"><code>{
+    &#34;job&#34;: {
+        &#34;setting&#34;: {
+            &#34;speed&#34;: {
+                &#34;channel&#34;: 1
+            }
+        },
+        &#34;content&#34;: [
+            {
+                &#34;reader&#34;: {
+                    &#34;name&#34;: &#34;streamreader&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;column&#34;: [
+                            {
+                                &#34;value&#34;: &#34;DataX&#34;,
+                                &#34;type&#34;: &#34;string&#34;
+                            },
+                            {
+                                &#34;value&#34;: 19880808,
+                                &#34;type&#34;: &#34;long&#34;
+                            },
+                            {
+                                &#34;value&#34;: &#34;1988-08-08 08:08:08&#34;,
+                                &#34;type&#34;: &#34;date&#34;
+                            },
+                            {
+                                &#34;value&#34;: true,
+                                &#34;type&#34;: &#34;bool&#34;
+                            },
+                            {
+                                &#34;value&#34;: &#34;test&#34;,
+                                &#34;type&#34;: &#34;bytes&#34;
+                            }
+                        ],
+                        &#34;sliceRecordCount&#34;: 1000
+                    }
+                },
+                &#34;writer&#34;: {
+                    &#34;name&#34;: &#34;ocswriter&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;proxy&#34;: &#34;xxxx&#34;,
+                        &#34;port&#34;: &#34;11211&#34;,
+                        &#34;userName&#34;: &#34;user&#34;,
+                        &#34;password&#34;: &#34;******&#34;,
+                        &#34;writeMode&#34;: &#34;set|add|replace|append|prepend&#34;,
+                        &#34;writeFormat&#34;: &#34;text|binary&#34;,
+                        &#34;fieldDelimiter&#34;: &#34;\u0001&#34;,
+                        &#34;expireTime&#34;: 1000,
+                        &#34;indexes&#34;: &#34;0,2&#34;,
+                        &#34;batchSize&#34;: 1000
+                    }
+                }
+            }
+        ]
+    }
+}
+</code></pre><h3 id="22-参数说明">2.2 参数说明</h3>
+<ul>
+<li>
+<p><strong>proxy</strong></p>
+<ul>
+<li>描述：OCS机器的ip或host。</li>
+<li>必选：是</li>
+</ul>
+</li>
+<li>
+<p><strong>port</strong></p>
+<ul>
+<li>描述：OCS的连接域名，默认为11211</li>
+<li>必选：否</li>
+<li>默认值：11211</li>
+</ul>
+</li>
+<li>
+<p><strong>username</strong></p>
+<ul>
+<li>描述：OCS连接的访问账号。</li>
+<li>必选：是</li>
+</ul>
+</li>
+<li>
+<p><strong>password</strong></p>
+<ul>
+<li>描述：OCS连接的访问密码</li>
+<li>必选：是</li>
+</ul>
+</li>
+<li>
+<p><strong>writeMode</strong></p>
+<ul>
+<li>描述: OCSWriter写入方式，具体为：
+<ul>
+<li>set: 存储这个数据，如果已经存在则覆盖</li>
+<li>add: 存储这个数据，当且仅当这个key不存在的时候</li>
+<li>replace: 存储这个数据，当且仅当这个key存在</li>
+<li>append: 将数据存放在已存在的key对应的内容的后面，忽略exptime</li>
+<li>prepend: 将数据存放在已存在的key对应的内容的前面，忽略exptime</li>
+</ul>
+</li>
+<li>必选：是</li>
+</ul>
+</li>
+<li>
+<p><strong>writeFormat</strong></p>
+<ul>
+<li>描述: OCSWriter写出数据格式，目前支持两类数据写入方式:
+<ul>
+<li>text: 将源端数据序列化为文本格式，其中第一个字段作为OCS写入的KEY，后续所有字段序列化为STRING类型，使用用户指定的fieldDelimiter作为间隔符，将文本拼接为完整的字符串再写入OCS。</li>
+<li>binary: 将源端数据作为二进制直接写入，这类场景为未来做扩展使用，目前不支持。如果填写binary将会报错！</li>
+</ul>
+</li>
+<li>必选：否</li>
+<li>默认值：text</li>
+</ul>
+</li>
+<li>
+<p><strong>expireTime</strong></p>
+<ul>
+<li>
+<p>描述: OCS值缓存失效时间，目前MemCache支持两类过期时间，</p>
+<ul>
+<li>Unix时间(自1970.1.1开始到现在的秒数)，该时间指定了到未来某个时刻数据失效。</li>
+<li>相对当前时间的秒数，该时间指定了从现在开始多长时间后数据失效。
+<strong>注意：如果过期时间的秒数大于60<em>60</em>24*30(即30天)，则服务端认为是Unix时间。</strong></li>
+<li>单位：秒</li>
+</ul>
+</li>
+<li>
+<p>必选：否</p>
+</li>
+<li>
+<p>默认值：0【0表示永久有效】</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>indexes</strong></p>
+<ul>
+<li>描述: 用数据的第几列当做ocs的key</li>
+<li>必选：否</li>
+<li>默认值：0</li>
+</ul>
+</li>
+<li>
+<p><strong>batchSize</strong></p>
+<ul>
+<li>描述：一次性批量提交的记录数大小，该值可以极大减少DataX与OCS的网络交互次数，并提升整体吞吐量。但是该值设置过大可能会造成DataX运行进程OOM情况[memcached版本暂不支持批量写]。</li>
+<li>必选：否</li>
+<li>默认值：256</li>
+</ul>
+</li>
+<li>
+<p><strong>fieldDelimiter</strong></p>
+<ul>
+<li>描述：写入ocs的key和value分隔符。比如：key=tom\u0001boston, value=28\u0001lawer\u0001male\u0001married</li>
+<li>必选：否</li>
+<li>默认值：\u0001</li>
+</ul>
+</li>
+</ul>
+<h2 id="3-性能报告">3 性能报告</h2>
+<h3 id="31-datax机器配置">3.1 datax机器配置</h3>
+<pre tabindex="0"><code>CPU:16核、内存:24GB、网卡:单网卡1000mbps
+</code></pre><h3 id="32-任务资源配置">3.2 任务资源配置</h3>
+<pre tabindex="0"><code>-Xms8g -Xmx8g -XX:+HeapDumpOnOutOfMemoryError
+</code></pre><h3 id="33-测试报告">3.3 测试报告</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">单条数据大小</th>
+<th style="text-align:center">通道并发数</th>
+<th style="text-align:center">TPS</th>
+<th style="text-align:center">通道流量</th>
+<th style="text-align:center">出口流量</th>
+<th style="text-align:center">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">1KB</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">579 tps</td>
+<td style="text-align:center">583.31KB/s</td>
+<td style="text-align:center">648.63KB/s</td>
+<td style="text-align:center">无</td>
+</tr>
+<tr>
+<td style="text-align:center">1KB</td>
+<td style="text-align:center">10</td>
+<td style="text-align:center">6006 tps</td>
+<td style="text-align:center">5.87MB/s</td>
+<td style="text-align:center">6.73MB/s</td>
+<td style="text-align:center">无</td>
+</tr>
+<tr>
+<td style="text-align:center">1KB</td>
+<td style="text-align:center">100</td>
+<td style="text-align:center">49916 tps</td>
+<td style="text-align:center">48.56MB/s</td>
+<td style="text-align:center">55.55MB/s</td>
+<td style="text-align:center">无</td>
+</tr>
+<tr>
+<td style="text-align:center">10KB</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">438 tps</td>
+<td style="text-align:center">4.62MB/s</td>
+<td style="text-align:center">5.07MB/s</td>
+<td style="text-align:center">无</td>
+</tr>
+<tr>
+<td style="text-align:center">10KB</td>
+<td style="text-align:center">10</td>
+<td style="text-align:center">4313 tps</td>
+<td style="text-align:center">45.57MB/s</td>
+<td style="text-align:center">49.51MB/s</td>
+<td style="text-align:center">无</td>
+</tr>
+<tr>
+<td style="text-align:center">10KB</td>
+<td style="text-align:center">100</td>
+<td style="text-align:center">10713 tps</td>
+<td style="text-align:center">112.80MB/s</td>
+<td style="text-align:center">123.01MB/s</td>
+<td style="text-align:center">无</td>
+</tr>
+<tr>
+<td style="text-align:center">100KB</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">275 tps</td>
+<td style="text-align:center">26.09MB/s</td>
+<td style="text-align:center">144.90KB/s</td>
+<td style="text-align:center">无。数据冗余大，压缩比高。</td>
+</tr>
+<tr>
+<td style="text-align:center">100KB</td>
+<td style="text-align:center">10</td>
+<td style="text-align:center">2492 tps</td>
+<td style="text-align:center">236.33MB/s</td>
+<td style="text-align:center">1.30MB/s</td>
+<td style="text-align:center">无</td>
+</tr>
+<tr>
+<td style="text-align:center">100KB</td>
+<td style="text-align:center">100</td>
+<td style="text-align:center">3187 tps</td>
+<td style="text-align:center">302.17MB/s</td>
+<td style="text-align:center">1.77MB/s</td>
+<td style="text-align:center">无</td>
+</tr>
+</tbody>
+</table>
+<h3 id="34-性能测试小结">3.4 性能测试小结</h3>
+<ol>
+<li>单条数据小于10KB时建议开启100并发。</li>
+<li>不建议10KB以上的数据写入ocs。</li>
+</ol>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

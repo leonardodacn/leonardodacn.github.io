@@ -172,7 +172,7 @@
 或者使用这个邀请码：lbVOQjeS</p>
   </div>
   <footer class="entry-footer"><span title='2023-03-18 14:42:36 +0000 UTC'>March 18, 2023</span></footer>
-  <a class="entry-link" aria-label="post link to googo 邀请码 lbVOQjeS" href="https://haokiu.com/googo/"></a>
+  <a class="entry-link" aria-label="post link to googo 邀请码 lbVOQjeS" href="https://haokiu.com/blog/googo/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -184,7 +184,7 @@
     <p>第一章 并发编程的挑战第2章 InnoDB存储引擎第1章 Java的I/O演进之路第1章 Spring框架的由来第2章 Tomcat总体架构三、Paxos的工程实践序第1章 概述第6章 深入分析ClassLoader工作机制第8章 虚拟机字节码执行系统</p>
   </div>
   <footer class="entry-footer"><span title='2021-06-08 17:51:46 +0000 UTC'>June 8, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Hobert读书笔记" href="https://haokiu.com/bk-5/"></a>
+  <a class="entry-link" aria-label="post link to Hobert读书笔记" href="https://haokiu.com/blog/bk-5/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -225,7 +225,7 @@ Proposer发送提案编号Mn； Acceptor根据约束接收提案，如果接收�
 3.1.1 概述 </p>
   </div>
   <footer class="entry-footer"><span title='2021-06-08 17:51:46 +0000 UTC'>June 8, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 三、Paxos的工程实践" href="https://haokiu.com/3426588a7834499f8a9a1b7e46817c0c/"></a>
+  <a class="entry-link" aria-label="post link to 三、Paxos的工程实践" href="https://haokiu.com/blog/3426588a7834499f8a9a1b7e46817c0c/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -269,7 +269,7 @@ OneService（数据服务平台）一数据仓库整合计算好的数据作为�
 选择需要进行分析决策的业务过程。业务过程可以是单个业务事件，比如交易的支付、退款等；也可以时某个时间的状态，比如当前的账户余额等；还可以是一系列相关业务时间组成的业务流程，具体需要看我们分析的是某些事件发生情况，还是当前状态，或是事件流转效率； 选择粒度。在事件分析中，我们要预判所有分析需要细分的程度，从而决定选择的粒度。粒度是维度的一个组合； 识别维表。选择好粒度之后，就需要细雨此粒度设计维表，包括维度属性，用于分析时进行分组和筛选； 选择事实。确定分析需要衡量的指标。 8.4.3 Data Vault模型 ER模型的衍生。其设计的出发点也是为了实现数据的整合，但不能直接用于数据分析决策。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-06-08 17:51:46 +0000 UTC'>June 8, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 序" href="https://haokiu.com/cffcc67d768246fd8624b3e5b98854f5/"></a>
+  <a class="entry-link" aria-label="post link to 序" href="https://haokiu.com/blog/cffcc67d768246fd8624b3e5b98854f5/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -294,7 +294,7 @@ epoll的优点：
 2.1.2 同步阻塞式I/O创建的TimeServer源码分析 import java.io.IOException; import java.net.ServerSocket; import java.net.Socket; /** * &lt;p&gt;Description: 同步阻塞式I/O创建的TimeServer&lt;/p&gt; * * @author 李宏博 * @version xxx * @create 2019/8/14 17:58 */ public class TimeServer { /** * * @param args */ public static void main(String[] args) throws IOException { int port = 8080; if (args != null &amp;&amp; args.length &gt; 0) { try { port = Integer.valueOf(args[0]); } catch (NumberFormatException e) { e.printStackTrace(); } } ServerSocket server = null; try { server = new ServerSocket(port); System....</p>
   </div>
   <footer class="entry-footer"><span title='2021-06-08 17:51:46 +0000 UTC'>June 8, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 第1章 Java的I/O演进之路" href="https://haokiu.com/e15796699f1a419ba85731d159eba322/"></a>
+  <a class="entry-link" aria-label="post link to 第1章 Java的I/O演进之路" href="https://haokiu.com/blog/e15796699f1a419ba85731d159eba322/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -312,7 +312,7 @@ Spring总体架构：
 2.2.4 三种注入方式的比较 接口注入。不提倡，带有侵入性 构造方法注入。这种注入方式的优点就是，对象在构造完成之后，即已进入就绪状态，可以马上使用。缺点就是，当依赖对象比较多的时候，构造方法的参数列表会比较长。而通过反射构造对象的时候，对相同类型的参数的处理会比较困难，维护和使用上也比较麻烦。而且在Java中，构造方法无法被继承，无法设置默认值。对于非必须的依赖处理，可能需要引入多个构造方法，而参数数量的变动可能造成维护上的不便。 setter方法注入。因为方法可以命名， 所以setter方法注入在描述性上要比构造方法注入好一些。另外， setter方法可以被继承，允许设置默认值，而且有良好的IDE支持。缺点当然就是对象无法在构造完成后马上进入就绪状态。 2.3 IOC的附加值 </p>
   </div>
   <footer class="entry-footer"><span title='2021-06-08 17:51:46 +0000 UTC'>June 8, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 第1章 Spring框架的由来" href="https://haokiu.com/567c6d054f1d4d53a29e9d24f213165a/"></a>
+  <a class="entry-link" aria-label="post link to 第1章 Spring框架的由来" href="https://haokiu.com/blog/567c6d054f1d4d53a29e9d24f213165a/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -354,7 +354,7 @@ B&#43;树的根节点是常驻内存的。修改操作首先需要记录提交�
 2.2.3 LSM树存储引擎 将对数据的修改增量保持在内存中，达到指定的大小先之后将这些修改操作批量写入磁盘，读取时需要合并磁盘中的历史数据和内存中最近的修改操作。</p>
   </div>
   <footer class="entry-footer"><span title='2021-06-08 17:51:46 +0000 UTC'>June 8, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 第1章 概述" href="https://haokiu.com/b221a7f05b774f7ab4305cff0f244d52/"></a>
+  <a class="entry-link" aria-label="post link to 第1章 概述" href="https://haokiu.com/blog/b221a7f05b774f7ab4305cff0f244d52/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -397,7 +397,7 @@ IO Thread 大量使用AIO（Async IO），极大提高性能。IO Thread主要�
 首先判断表中是否含有唯一非空索引（Unique NOT NULL），如果有，则该列即为主键。（按定义索引的顺序选择） 如果不符合上述条件，InnoDB存储引擎自动创建一个6字节大小的指针。 _rowid仅适用于单个列为主键的情况。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-06-08 17:51:46 +0000 UTC'>June 8, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 第2章 InnoDB存储引擎" href="https://haokiu.com/232f08ac38d0478dab889420f809c20e/"></a>
+  <a class="entry-link" aria-label="post link to 第2章 InnoDB存储引擎" href="https://haokiu.com/blog/232f08ac38d0478dab889420f809c20e/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -454,7 +454,7 @@ Tomcat组件说明：
 组件名称 说明 Server 表示整个Servlet容器，因此Tomcat运行环境中只有唯一一个Server实例 Service Service表示一个或者多个Connector的集合，这些Connector共享同一个Container来处理其请求。在同一个Tomcat实例内可以包含任意多个Service实例，它们彼此独立 Connector 即Tomcat链接器，用于监听并转化Socket请求，同时将读取的Socket请求交由Container处理，支持不同协议以及不同的I/O方式 Container Container表示能够执行客户端请求并返回响应的一类对象。在Tomcat中存在不同级别的容器：Engine、Host、Context、Warpper Engine Engine表示整个Servlet引擎。在Tomcat中，Engine为最高层级的容器对象。尽管Engine不是直接处理请求的容器，确实获取目标容器的入口 Host Hostz作为一类容器，表示Servlet容器中的虚拟机，与一个服务器的网络名有关，如域名等。客户端可以使用这个网络名连接服务器，这个名称必须在DNS服务器上注册。 Context Context作为一类容器，用于表示ServletContext，在Servlet规范中，一个ServletContext即表示一个独立的Web应用 Wrapper Wrapper作为一类容器，用于表示Web应用中动议的Servlet Executor 表示Tomcat组件可以共享的线程池 2.2 Tomcat启动 Tomcat默认实现在相关概念的基础上结合生命周期管理监听器完成了大量的启动工作。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-06-08 17:51:46 +0000 UTC'>June 8, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 第2章 Tomcat总体架构" href="https://haokiu.com/a9dcb2a7a21d49dea965eedc7e169c79/"></a>
+  <a class="entry-link" aria-label="post link to 第2章 Tomcat总体架构" href="https://haokiu.com/blog/a9dcb2a7a21d49dea965eedc7e169c79/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -512,7 +512,7 @@ Ioc容器如何为我所用 扩展点。通过扩展点来改变Spring的通用�
 13.5 设计模式解析之策略模式 CGLIB与JDK动态代理的选择，就是策略模式的一种实现。</p>
   </div>
   <footer class="entry-footer"><span title='2021-06-08 17:51:46 +0000 UTC'>June 8, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 第6章 深入分析ClassLoader工作机制" href="https://haokiu.com/eec901917e884002a43f917c02f47dd9/"></a>
+  <a class="entry-link" aria-label="post link to 第6章 深入分析ClassLoader工作机制" href="https://haokiu.com/blog/eec901917e884002a43f917c02f47dd9/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

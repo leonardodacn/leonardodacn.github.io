@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>DataX SqlServerWriter | haokiu</title>
+<meta name="keywords" content="datax">
+<meta name="description" content="DataX SqlServerWriter 1 快速介绍 SqlServerWriter 插件实现了写入数据到 SqlServer 库的目的表的功能。在底层实现上， SqlServerWriter 通过 JDBC 连接远程 SqlServer 数据库，并执行相应的 insert into &hellip; sql 语句将数据写入 SqlServer，内部会分批次提交入库。
+SqlServerWriter 面向ETL开发工程师，他们使用 SqlServerWriter 从数仓导入数据到 SqlServer。同时 SqlServerWriter 亦可以作为数据迁移工具为DBA等用户提供服务。
+2 实现原理 SqlServerWriter 通过 DataX 框架获取 Reader 生成的协议数据，根据你配置生成相应的SQL语句
+insert into...(当主键/唯一性索引冲突时会写不进去冲突的行) 注意： 1. 目的表所在数据库必须是主库才能写入数据；整个任务至少需具备 insert into...的权限，是否需要其他权限，取决于你任务配置中在 preSql 和 postSql 中指定的语句。 2.SqlServerWriter和MysqlWriter不同，不支持配置writeMode参数。 3 功能说明 3.1 配置样例 这里使用一份从内存产生到 SqlServer 导入的数据。 { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 5 } }, &#34;content&#34;: [ { &#34;reader&#34;: {}, &#34;writer&#34;: { &#34;name&#34;: &#34;sqlserverwriter&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;root&#34;, &#34;password&#34;: &#34;root&#34;, &#34;column&#34;: [ &#34;db_id&#34;, &#34;db_type&#34;, &#34;db_ip&#34;, &#34;db_port&#34;, &#34;db_role&#34;, &#34;db_name&#34;, &#34;db_username&#34;, &#34;db_password&#34;, &#34;db_modify_time&#34;, &#34;db_modify_user&#34;, &#34;db_description&#34;, &#34;db_tddl_info&#34; ], &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;db_info_for_writer&#34; ], &#34;jdbcUrl&#34;: &#34;jdbc:sqlserver://[HOST_NAME]:PORT;DatabaseName=[DATABASE_NAME]&#34; } ], &#34;preSql&#34;: [ &#34;delete from @table where db_id = -1;&#34; ], &#34;postSql&#34;: [ &#34;update @table set db_modify_time = now() where db_id = 1;&#34; ] } } } ] } } 3.">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/f23fb4346cfa45459b6eaa8537ff5d17/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="DataX SqlServerWriter" />
+<meta property="og:description" content="DataX SqlServerWriter 1 快速介绍 SqlServerWriter 插件实现了写入数据到 SqlServer 库的目的表的功能。在底层实现上， SqlServerWriter 通过 JDBC 连接远程 SqlServer 数据库，并执行相应的 insert into &hellip; sql 语句将数据写入 SqlServer，内部会分批次提交入库。
+SqlServerWriter 面向ETL开发工程师，他们使用 SqlServerWriter 从数仓导入数据到 SqlServer。同时 SqlServerWriter 亦可以作为数据迁移工具为DBA等用户提供服务。
+2 实现原理 SqlServerWriter 通过 DataX 框架获取 Reader 生成的协议数据，根据你配置生成相应的SQL语句
+insert into...(当主键/唯一性索引冲突时会写不进去冲突的行) 注意： 1. 目的表所在数据库必须是主库才能写入数据；整个任务至少需具备 insert into...的权限，是否需要其他权限，取决于你任务配置中在 preSql 和 postSql 中指定的语句。 2.SqlServerWriter和MysqlWriter不同，不支持配置writeMode参数。 3 功能说明 3.1 配置样例 这里使用一份从内存产生到 SqlServer 导入的数据。 { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 5 } }, &#34;content&#34;: [ { &#34;reader&#34;: {}, &#34;writer&#34;: { &#34;name&#34;: &#34;sqlserverwriter&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;root&#34;, &#34;password&#34;: &#34;root&#34;, &#34;column&#34;: [ &#34;db_id&#34;, &#34;db_type&#34;, &#34;db_ip&#34;, &#34;db_port&#34;, &#34;db_role&#34;, &#34;db_name&#34;, &#34;db_username&#34;, &#34;db_password&#34;, &#34;db_modify_time&#34;, &#34;db_modify_user&#34;, &#34;db_description&#34;, &#34;db_tddl_info&#34; ], &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;db_info_for_writer&#34; ], &#34;jdbcUrl&#34;: &#34;jdbc:sqlserver://[HOST_NAME]:PORT;DatabaseName=[DATABASE_NAME]&#34; } ], &#34;preSql&#34;: [ &#34;delete from @table where db_id = -1;&#34; ], &#34;postSql&#34;: [ &#34;update @table set db_modify_time = now() where db_id = 1;&#34; ] } } } ] } } 3." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/f23fb4346cfa45459b6eaa8537ff5d17/" /><meta property="article:section" content="4" />
+<meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
+<meta property="article:modified_time" content="2021-02-02T17:45:01+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="DataX SqlServerWriter"/>
+<meta name="twitter:description" content="DataX SqlServerWriter 1 快速介绍 SqlServerWriter 插件实现了写入数据到 SqlServer 库的目的表的功能。在底层实现上， SqlServerWriter 通过 JDBC 连接远程 SqlServer 数据库，并执行相应的 insert into &hellip; sql 语句将数据写入 SqlServer，内部会分批次提交入库。
+SqlServerWriter 面向ETL开发工程师，他们使用 SqlServerWriter 从数仓导入数据到 SqlServer。同时 SqlServerWriter 亦可以作为数据迁移工具为DBA等用户提供服务。
+2 实现原理 SqlServerWriter 通过 DataX 框架获取 Reader 生成的协议数据，根据你配置生成相应的SQL语句
+insert into...(当主键/唯一性索引冲突时会写不进去冲突的行) 注意： 1. 目的表所在数据库必须是主库才能写入数据；整个任务至少需具备 insert into...的权限，是否需要其他权限，取决于你任务配置中在 preSql 和 postSql 中指定的语句。 2.SqlServerWriter和MysqlWriter不同，不支持配置writeMode参数。 3 功能说明 3.1 配置样例 这里使用一份从内存产生到 SqlServer 导入的数据。 { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 5 } }, &#34;content&#34;: [ { &#34;reader&#34;: {}, &#34;writer&#34;: { &#34;name&#34;: &#34;sqlserverwriter&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;root&#34;, &#34;password&#34;: &#34;root&#34;, &#34;column&#34;: [ &#34;db_id&#34;, &#34;db_type&#34;, &#34;db_ip&#34;, &#34;db_port&#34;, &#34;db_role&#34;, &#34;db_name&#34;, &#34;db_username&#34;, &#34;db_password&#34;, &#34;db_modify_time&#34;, &#34;db_modify_user&#34;, &#34;db_description&#34;, &#34;db_tddl_info&#34; ], &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;db_info_for_writer&#34; ], &#34;jdbcUrl&#34;: &#34;jdbc:sqlserver://[HOST_NAME]:PORT;DatabaseName=[DATABASE_NAME]&#34; } ], &#34;preSql&#34;: [ &#34;delete from @table where db_id = -1;&#34; ], &#34;postSql&#34;: [ &#34;update @table set db_modify_time = now() where db_id = 1;&#34; ] } } } ] } } 3."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "4s",
+      "item": "https://haokiu.com/4/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "DataX SqlServerWriter",
+      "item": "https://haokiu.com/blog/f23fb4346cfa45459b6eaa8537ff5d17/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "DataX SqlServerWriter",
+  "name": "DataX SqlServerWriter",
+  "description": "DataX SqlServerWriter 1 快速介绍 SqlServerWriter 插件实现了写入数据到 SqlServer 库的目的表的功能。在底层实现上， SqlServerWriter 通过 JDBC 连接远程 SqlServer 数据库，并执行相应的 insert into \u0026hellip; sql 语句将数据写入 SqlServer，内部会分批次提交入库。\nSqlServerWriter 面向ETL开发工程师，他们使用 SqlServerWriter 从数仓导入数据到 SqlServer。同时 SqlServerWriter 亦可以作为数据迁移工具为DBA等用户提供服务。\n2 实现原理 SqlServerWriter 通过 DataX 框架获取 Reader 生成的协议数据，根据你配置生成相应的SQL语句\ninsert into...(当主键/唯一性索引冲突时会写不进去冲突的行) 注意： 1. 目的表所在数据库必须是主库才能写入数据；整个任务至少需具备 insert into...的权限，是否需要其他权限，取决于你任务配置中在 preSql 和 postSql 中指定的语句。 2.SqlServerWriter和MysqlWriter不同，不支持配置writeMode参数。 3 功能说明 3.1 配置样例 这里使用一份从内存产生到 SqlServer 导入的数据。 { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { \u0026#34;channel\u0026#34;: 5 } }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: {}, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;sqlserverwriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;username\u0026#34;: \u0026#34;root\u0026#34;, \u0026#34;password\u0026#34;: \u0026#34;root\u0026#34;, \u0026#34;column\u0026#34;: [ \u0026#34;db_id\u0026#34;, \u0026#34;db_type\u0026#34;, \u0026#34;db_ip\u0026#34;, \u0026#34;db_port\u0026#34;, \u0026#34;db_role\u0026#34;, \u0026#34;db_name\u0026#34;, \u0026#34;db_username\u0026#34;, \u0026#34;db_password\u0026#34;, \u0026#34;db_modify_time\u0026#34;, \u0026#34;db_modify_user\u0026#34;, \u0026#34;db_description\u0026#34;, \u0026#34;db_tddl_info\u0026#34; ], \u0026#34;connection\u0026#34;: [ { \u0026#34;table\u0026#34;: [ \u0026#34;db_info_for_writer\u0026#34; ], \u0026#34;jdbcUrl\u0026#34;: \u0026#34;jdbc:sqlserver://[HOST_NAME]:PORT;DatabaseName=[DATABASE_NAME]\u0026#34; } ], \u0026#34;preSql\u0026#34;: [ \u0026#34;delete from @table where db_id = -1;\u0026#34; ], \u0026#34;postSql\u0026#34;: [ \u0026#34;update @table set db_modify_time = now() where db_id = 1;\u0026#34; ] } } } ] } } 3.",
+  "keywords": [
+    "datax"
+  ],
+  "articleBody": "DataX SqlServerWriter 1 快速介绍 SqlServerWriter 插件实现了写入数据到 SqlServer 库的目的表的功能。在底层实现上， SqlServerWriter 通过 JDBC 连接远程 SqlServer 数据库，并执行相应的 insert into … sql 语句将数据写入 SqlServer，内部会分批次提交入库。\nSqlServerWriter 面向ETL开发工程师，他们使用 SqlServerWriter 从数仓导入数据到 SqlServer。同时 SqlServerWriter 亦可以作为数据迁移工具为DBA等用户提供服务。\n2 实现原理 SqlServerWriter 通过 DataX 框架获取 Reader 生成的协议数据，根据你配置生成相应的SQL语句\ninsert into...(当主键/唯一性索引冲突时会写不进去冲突的行) 注意： 1. 目的表所在数据库必须是主库才能写入数据；整个任务至少需具备 insert into...的权限，是否需要其他权限，取决于你任务配置中在 preSql 和 postSql 中指定的语句。 2.SqlServerWriter和MysqlWriter不同，不支持配置writeMode参数。 3 功能说明 3.1 配置样例 这里使用一份从内存产生到 SqlServer 导入的数据。 { \"job\": { \"setting\": { \"speed\": { \"channel\": 5 } }, \"content\": [ { \"reader\": {}, \"writer\": { \"name\": \"sqlserverwriter\", \"parameter\": { \"username\": \"root\", \"password\": \"root\", \"column\": [ \"db_id\", \"db_type\", \"db_ip\", \"db_port\", \"db_role\", \"db_name\", \"db_username\", \"db_password\", \"db_modify_time\", \"db_modify_user\", \"db_description\", \"db_tddl_info\" ], \"connection\": [ { \"table\": [ \"db_info_for_writer\" ], \"jdbcUrl\": \"jdbc:sqlserver://[HOST_NAME]:PORT;DatabaseName=[DATABASE_NAME]\" } ], \"preSql\": [ \"delete from @table where db_id = -1;\" ], \"postSql\": [ \"update @table set db_modify_time = now() where db_id = 1;\" ] } } } ] } } 3.2 参数说明 jdbcUrl\n描述：目的数据库的 JDBC 连接信息 ,jdbcUrl必须包含在connection配置单元中。\n注意：1、在一个数据库上只能配置一个值。这与 SqlServerReader 支持多个备库探测不同，因为此处不支持同一个数据库存在多个主库的情况(双主导入数据情况) 2、jdbcUrl按照SqlServer官方规范，并可以填写连接附加参数信息。具体请参看 SqlServer官方文档或者咨询对应 DBA。 必选：是 默认值：无 username\n描述：目的数据库的用户名 必选：是 默认值：无 password\n描述：目的数据库的密码 必选：是 默认值：无 table\n描述：目的表的表名称。支持写入一个或者多个表。当配置为多张表时，必须确保所有表结构保持一致。\n注意：table 和 jdbcUrl 必须包含在 connection 配置单元中 必选：是 默认值：无 column\n描述：目的表需要写入数据的字段,字段之间用英文逗号分隔。例如: “column”: [“id”,“name”,“age”]。如果要依次写入全部列，使用表示, 例如: “column”: [\"\"]\n**column配置项必须指定，不能留空！** 注意：1、我们强烈不推荐你这样配置，因为当你目的表字段个数、类型等有改动时，你的任务可能运行不正确或者失败 2、此处 column 不能配置任何常量值 必选：是 默认值：否 preSql\n描述：写入数据到目的表前，会先执行这里的标准语句。如果 Sql 中有你需要操作到的表名称，请使用 @table 表示，这样在实际执行 Sql 语句时，会对变量按照实际表名称进行替换。\n必选：否 默认值：无 postSql\n描述：写入数据到目的表后，会执行这里的标准语句。（原理同 preSql ） 必选：否 默认值：无 batchSize\n描述：一次性批量提交的记录数大小，该值可以极大减少DataX与SqlServer的网络交互次数，并提升整体吞吐量。但是该值设置过大可能会造成DataX运行进程OOM情况。\n必选：否 默认值：1024 3.3 类型转换 类似 SqlServerReader ，目前 SqlServerWriter 支持大部分 SqlServer 类型，但也存在部分个别类型没有支持的情况，请注意检查你的类型。\n下面列出 SqlServerWriter 针对 SqlServer 类型转换列表:\nDataX 内部类型 SqlServer 数据类型 Long Double String Date Boolean Bytes 4 性能报告 4.1 环境准备 4.1.1 数据特征 建表语句：\n单行记录类似于：\n4.1.2 机器参数 执行 DataX 的机器参数为:\ncpu: 24 Core Intel(R) Xeon(R) CPU E5-2430 0 @ 2.20GHz mem: 94GB net: 千兆双网卡 disc: DataX 数据不落磁盘，不统计此项 SqlServer 数据库机器参数为:\ncpu: 4 Core Intel(R) Xeon(R) CPU E5420 @ 2.50GHz mem: 7GB 4.1.3 DataX jvm 参数 -Xms1024m -Xmx1024m -XX:+HeapDumpOnOutOfMemoryError 4.1.4 性能测试作业配置 4.2 测试报告 4.2.1 测试报告 5 约束限制 FAQ Q: SqlServerWriter 执行 postSql 语句报错，那么数据导入到目标数据库了吗?\nA: DataX 导入过程存在三块逻辑，pre 操作、导入操作、post 操作，其中任意一环报错，DataX 作业报错。由于 DataX 不能保证在同一个事务完成上述几个操作，因此有可能数据已经落入到目标端。\nQ: 按照上述说法，那么有部分脏数据导入数据库，如果影响到线上数据库怎么办?\nA: 目前有两种解法，第一种配置 pre 语句，该 sql 可以清理当天导入数据， DataX 每次导入时候可以把上次清理干净并导入完整数据。第二种，向临时表导入数据，完成后再 rename 到线上表。\nQ: 上面第二种方法可以避免对线上数据造成影响，那我具体怎样操作?\nA: 可以配置临时表导入\n",
+  "wordCount" : "314",
+  "inLanguage": "en",
+  "datePublished": "2021-02-02T17:45:01Z",
+  "dateModified": "2021-02-02T17:45:01Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/f23fb4346cfa45459b6eaa8537ff5d17/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    <h1 class="post-title">
+      DataX SqlServerWriter
+    </h1>
+    <div class="post-meta"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#datax-sqlserverwriter" aria-label="DataX SqlServerWriter">DataX SqlServerWriter</a><ul>
+                        
+                <li>
+                    <a href="#1-%e5%bf%ab%e9%80%9f%e4%bb%8b%e7%bb%8d" aria-label="1 快速介绍">1 快速介绍</a></li>
+                <li>
+                    <a href="#2-%e5%ae%9e%e7%8e%b0%e5%8e%9f%e7%90%86" aria-label="2 实现原理">2 实现原理</a></li>
+                <li>
+                    <a href="#3-%e5%8a%9f%e8%83%bd%e8%af%b4%e6%98%8e" aria-label="3 功能说明">3 功能说明</a><ul>
+                        
+                <li>
+                    <a href="#31-%e9%85%8d%e7%bd%ae%e6%a0%b7%e4%be%8b" aria-label="3.1 配置样例">3.1 配置样例</a></li>
+                <li>
+                    <a href="#32-%e5%8f%82%e6%95%b0%e8%af%b4%e6%98%8e" aria-label="3.2 参数说明">3.2 参数说明</a></li>
+                <li>
+                    <a href="#33-%e7%b1%bb%e5%9e%8b%e8%bd%ac%e6%8d%a2" aria-label="3.3 类型转换">3.3 类型转换</a></li></ul>
+                </li>
+                <li>
+                    <a href="#4-%e6%80%a7%e8%83%bd%e6%8a%a5%e5%91%8a" aria-label="4 性能报告">4 性能报告</a><ul>
+                        
+                <li>
+                    <a href="#41-%e7%8e%af%e5%a2%83%e5%87%86%e5%a4%87" aria-label="4.1 环境准备">4.1 环境准备</a><ul>
+                        
+                <li>
+                    <a href="#411-%e6%95%b0%e6%8d%ae%e7%89%b9%e5%be%81" aria-label="4.1.1 数据特征">4.1.1 数据特征</a></li>
+                <li>
+                    <a href="#412-%e6%9c%ba%e5%99%a8%e5%8f%82%e6%95%b0" aria-label="4.1.2 机器参数">4.1.2 机器参数</a></li>
+                <li>
+                    <a href="#413-datax-jvm-%e5%8f%82%e6%95%b0" aria-label="4.1.3 DataX jvm 参数">4.1.3 DataX jvm 参数</a></li>
+                <li>
+                    <a href="#414-%e6%80%a7%e8%83%bd%e6%b5%8b%e8%af%95%e4%bd%9c%e4%b8%9a%e9%85%8d%e7%bd%ae" aria-label="4.1.4 性能测试作业配置">4.1.4 性能测试作业配置</a></li></ul>
+                </li>
+                <li>
+                    <a href="#42-%e6%b5%8b%e8%af%95%e6%8a%a5%e5%91%8a" aria-label="4.2 测试报告">4.2 测试报告</a><ul>
+                        
+                <li>
+                    <a href="#421-%e6%b5%8b%e8%af%95%e6%8a%a5%e5%91%8a" aria-label="4.2.1 测试报告">4.2.1 测试报告</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#5-%e7%ba%a6%e6%9d%9f%e9%99%90%e5%88%b6" aria-label="5 约束限制">5 约束限制</a></li>
+                <li>
+                    <a href="#faq" aria-label="FAQ">FAQ</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="datax-sqlserverwriter">DataX SqlServerWriter</h1>
+<hr>
+<h2 id="1-快速介绍">1 快速介绍</h2>
+<p>SqlServerWriter 插件实现了写入数据到 SqlServer 库的目的表的功能。在底层实现上， SqlServerWriter 通过 JDBC 连接远程 SqlServer 数据库，并执行相应的 insert into &hellip;  sql 语句将数据写入 SqlServer，内部会分批次提交入库。</p>
+<p>SqlServerWriter 面向ETL开发工程师，他们使用 SqlServerWriter 从数仓导入数据到 SqlServer。同时 SqlServerWriter 亦可以作为数据迁移工具为DBA等用户提供服务。</p>
+<h2 id="2-实现原理">2 实现原理</h2>
+<p>SqlServerWriter 通过 DataX 框架获取 Reader 生成的协议数据，根据你配置生成相应的SQL语句</p>
+<ul>
+<li><code>insert into...</code>(当主键/唯一性索引冲突时会写不进去冲突的行)</li>
+</ul>
+<!-- raw HTML omitted -->
+<pre><code>注意：
+1. 目的表所在数据库必须是主库才能写入数据；整个任务至少需具备 insert into...的权限，是否需要其他权限，取决于你任务配置中在 preSql 和 postSql 中指定的语句。
+2.SqlServerWriter和MysqlWriter不同，不支持配置writeMode参数。
+</code></pre>
+<h2 id="3-功能说明">3 功能说明</h2>
+<h3 id="31-配置样例">3.1 配置样例</h3>
+<ul>
+<li>这里使用一份从内存产生到 SqlServer 导入的数据。</li>
+</ul>
+<pre tabindex="0"><code>{
+    &#34;job&#34;: {
+        &#34;setting&#34;: {
+            &#34;speed&#34;: {
+                &#34;channel&#34;: 5
+            }
+        },
+        &#34;content&#34;: [
+            {
+                &#34;reader&#34;: {},
+                &#34;writer&#34;: {
+                    &#34;name&#34;: &#34;sqlserverwriter&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;username&#34;: &#34;root&#34;,
+                        &#34;password&#34;: &#34;root&#34;,
+                        &#34;column&#34;: [
+                            &#34;db_id&#34;,
+                            &#34;db_type&#34;,
+                            &#34;db_ip&#34;,
+                            &#34;db_port&#34;,
+                            &#34;db_role&#34;,
+                            &#34;db_name&#34;,
+                            &#34;db_username&#34;,
+                            &#34;db_password&#34;,
+                            &#34;db_modify_time&#34;,
+                            &#34;db_modify_user&#34;,
+                            &#34;db_description&#34;,
+                            &#34;db_tddl_info&#34;
+                        ],
+                        &#34;connection&#34;: [
+                            {
+                                &#34;table&#34;: [
+                                    &#34;db_info_for_writer&#34;
+                                ],
+                                &#34;jdbcUrl&#34;: &#34;jdbc:sqlserver://[HOST_NAME]:PORT;DatabaseName=[DATABASE_NAME]&#34;
+                            }
+                        ],
+                        &#34;preSql&#34;: [
+                            &#34;delete from @table where db_id = -1;&#34;
+                        ],
+                        &#34;postSql&#34;: [
+                            &#34;update @table set db_modify_time = now() where db_id = 1;&#34;
+                        ]
+                    }
+                }
+            }
+        ]
+    }
+}
+</code></pre><h3 id="32-参数说明">3.2 参数说明</h3>
+<ul>
+<li>
+<p><strong>jdbcUrl</strong></p>
+<ul>
+<li>
+<p>描述：目的数据库的 JDBC 连接信息 ,jdbcUrl必须包含在connection配置单元中。</p>
+<pre><code>     注意：1、在一个数据库上只能配置一个值。这与 SqlServerReader 支持多个备库探测不同，因为此处不支持同一个数据库存在多个主库的情况(双主导入数据情况)
+          2、jdbcUrl按照SqlServer官方规范，并可以填写连接附加参数信息。具体请参看 SqlServer官方文档或者咨询对应 DBA。
+</code></pre>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>username</strong></p>
+<ul>
+<li>
+<p>描述：目的数据库的用户名 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>password</strong></p>
+<ul>
+<li>
+<p>描述：目的数据库的密码 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>table</strong></p>
+<ul>
+<li>
+<p>描述：目的表的表名称。支持写入一个或者多个表。当配置为多张表时，必须确保所有表结构保持一致。</p>
+<pre><code>       注意：table 和 jdbcUrl 必须包含在 connection 配置单元中
+</code></pre>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>column</strong></p>
+<ul>
+<li>
+<p>描述：目的表需要写入数据的字段,字段之间用英文逗号分隔。例如: &ldquo;column&rdquo;: [&ldquo;id&rdquo;,&ldquo;name&rdquo;,&ldquo;age&rdquo;]。如果要依次写入全部列，使用<em>表示, 例如: &ldquo;column&rdquo;: [&quot;</em>&quot;]</p>
+<pre><code>	**column配置项必须指定，不能留空！**
+
+
+       注意：1、我们强烈不推荐你这样配置，因为当你目的表字段个数、类型等有改动时，你的任务可能运行不正确或者失败
+            2、此处 column 不能配置任何常量值
+</code></pre>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：否 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>preSql</strong></p>
+<ul>
+<li>
+<p>描述：写入数据到目的表前，会先执行这里的标准语句。如果 Sql 中有你需要操作到的表名称，请使用 <code>@table</code> 表示，这样在实际执行 Sql 语句时，会对变量按照实际表名称进行替换。<!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>postSql</strong></p>
+<ul>
+<li>
+<p>描述：写入数据到目的表后，会执行这里的标准语句。（原理同 preSql ） <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>batchSize</strong></p>
+<ul>
+<li>
+<p>描述：一次性批量提交的记录数大小，该值可以极大减少DataX与SqlServer的网络交互次数，并提升整体吞吐量。但是该值设置过大可能会造成DataX运行进程OOM情况。<!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：1024 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="33-类型转换">3.3 类型转换</h3>
+<p>类似 SqlServerReader ，目前 SqlServerWriter 支持大部分 SqlServer 类型，但也存在部分个别类型没有支持的情况，请注意检查你的类型。</p>
+<p>下面列出 SqlServerWriter 针对 SqlServer 类型转换列表:</p>
+<table>
+<thead>
+<tr>
+<th>DataX 内部类型</th>
+<th>SqlServer 数据类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Long</td>
+<td></td>
+</tr>
+<tr>
+<td>Double</td>
+<td></td>
+</tr>
+<tr>
+<td>String</td>
+<td></td>
+</tr>
+<tr>
+<td>Date</td>
+<td></td>
+</tr>
+<tr>
+<td>Boolean</td>
+<td></td>
+</tr>
+<tr>
+<td>Bytes</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-性能报告">4 性能报告</h2>
+<h3 id="41-环境准备">4.1 环境准备</h3>
+<h4 id="411-数据特征">4.1.1 数据特征</h4>
+<p>建表语句：</p>
+<pre tabindex="0"><code></code></pre><p>单行记录类似于：</p>
+<pre tabindex="0"><code></code></pre><h4 id="412-机器参数">4.1.2 机器参数</h4>
+<ul>
+<li>
+<p>执行 DataX 的机器参数为:</p>
+<ol>
+<li>cpu: 24 Core Intel(R) Xeon(R) CPU E5-2430 0 @ 2.20GHz</li>
+<li>mem: 94GB</li>
+<li>net: 千兆双网卡</li>
+<li>disc: DataX 数据不落磁盘，不统计此项</li>
+</ol>
+</li>
+<li>
+<p>SqlServer 数据库机器参数为:</p>
+<ol>
+<li>cpu: 4 Core Intel(R) Xeon(R) CPU E5420  @ 2.50GHz</li>
+<li>mem: 7GB</li>
+</ol>
+</li>
+</ul>
+<h4 id="413-datax-jvm-参数">4.1.3 DataX jvm 参数</h4>
+<pre><code>-Xms1024m -Xmx1024m -XX:+HeapDumpOnOutOfMemoryError
+</code></pre>
+<h4 id="414-性能测试作业配置">4.1.4 性能测试作业配置</h4>
+<pre tabindex="0"><code></code></pre><h3 id="42-测试报告">4.2 测试报告</h3>
+<h4 id="421-测试报告">4.2.1 测试报告</h4>
+<h2 id="5-约束限制">5 约束限制</h2>
+<h2 id="faq">FAQ</h2>
+<hr>
+<p><strong>Q: SqlServerWriter 执行 postSql 语句报错，那么数据导入到目标数据库了吗?</strong></p>
+<p>A: DataX 导入过程存在三块逻辑，pre 操作、导入操作、post 操作，其中任意一环报错，DataX 作业报错。由于 DataX 不能保证在同一个事务完成上述几个操作，因此有可能数据已经落入到目标端。</p>
+<hr>
+<p><strong>Q: 按照上述说法，那么有部分脏数据导入数据库，如果影响到线上数据库怎么办?</strong></p>
+<p>A: 目前有两种解法，第一种配置 pre 语句，该 sql 可以清理当天导入数据， DataX 每次导入时候可以把上次清理干净并导入完整数据。第二种，向临时表导入数据，完成后再 rename 到线上表。</p>
+<hr>
+<p><strong>Q: 上面第二种方法可以避免对线上数据造成影响，那我具体怎样操作?</strong></p>
+<p>A: 可以配置临时表导入</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

@@ -10,20 +10,20 @@
     <lastBuildDate>Sun, 27 Sep 2020 10:59:03 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/spring/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>mybatis 增加自定义拦截器</title>
-      <link>https://haokiu.com/bGqNiH/</link>
+      <link>https://haokiu.com/blog/bGqNiH/</link>
       <pubDate>Sun, 27 Sep 2020 10:59:03 +0000</pubDate>
       
-      <guid>https://haokiu.com/bGqNiH/</guid>
+      <guid>https://haokiu.com/blog/bGqNiH/</guid>
       <description>MyBatis 提供的强大机制，使用插件是非常简单的，只需实现 Interceptor 接口，并指定想要拦截的方法签名即可。
 拦截器 import java.text.DateFormat; import java.util.Date; import java.util.List; import java.util.Locale; import java.util.Properties; import org.apache.ibatis.executor.Executor; import org.apache.ibatis.mapping.BoundSql; import org.apache.ibatis.mapping.MappedStatement; import org.apache.ibatis.mapping.ParameterMapping; import org.apache.ibatis.plugin.Interceptor; import org.apache.ibatis.plugin.Intercepts; import org.apache.ibatis.plugin.Invocation; import org.apache.ibatis.plugin.Plugin; import org.apache.ibatis.plugin.Signature; import org.apache.ibatis.reflection.MetaObject; import org.apache.ibatis.session.Configuration; import org.apache.ibatis.session.ResultHandler; import org.apache.ibatis.session.RowBounds; import org.apache.ibatis.type.TypeHandlerRegistry; import org.slf4j.Logger; import org.slf4j.LoggerFactory; @Intercepts({ @Signature(type = Executor.class, method = &amp;#34;update&amp;#34;, args = { MappedStatement.class, Object.class }), @Signature(type = Executor.class, method = &amp;#34;query&amp;#34;, args = { MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class }) }) public class MybatisInterceptor implements Interceptor { private static final Logger log = LoggerFactory.getLogger(MybatisInterceptor.class); @Override public Object intercept(Invocation invocation) throws Throwable { MappedStatement mappedStatement = (MappedStatement) invocation.</description>
     </item>
     
     <item>
       <title>在线交互式学习k8s/docker/linux</title>
-      <link>https://haokiu.com/baIB8x/</link>
+      <link>https://haokiu.com/blog/baIB8x/</link>
       <pubDate>Thu, 17 Sep 2020 13:58:36 +0000</pubDate>
       
-      <guid>https://haokiu.com/baIB8x/</guid>
+      <guid>https://haokiu.com/blog/baIB8x/</guid>
       <description>katacoda is Interactive Learning and Training Platform for Software Engineers Helping Developers Learn and Companies Increase Adoption
 可以交互式的学习各种前沿技术：k8s linux docker 机器学习等</description>
     </item>

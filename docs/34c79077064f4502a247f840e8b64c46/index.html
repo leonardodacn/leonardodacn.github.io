@@ -1,686 +1,0 @@
-<!DOCTYPE html>
-<html lang="en" dir="auto">
-
-<head><meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="robots" content="index, follow">
-<title>RDBMSReader 插件文档 | haokiu</title>
-<meta name="keywords" content="datax">
-<meta name="description" content="RDBMSReader 插件文档 1 快速介绍 RDBMSReader插件实现了从RDBMS读取数据。在底层实现上，RDBMSReader通过JDBC连接远程RDBMS数据库，并执行相应的sql语句将数据从RDBMS库中SELECT出来。目前支持达梦、db2、PPAS、Sybase数据库的读取。RDBMSReader是一个通用的关系数据库读插件，您可以通过注册数据库驱动等方式增加任意多样的关系数据库读支持。
-2 实现原理 简而言之，RDBMSReader通过JDBC连接器连接到远程的RDBMS数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程RDBMS数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
-对于用户配置Table、Column、Where的信息，RDBMSReader将其拼接为SQL语句发送到RDBMS数据库；对于用户配置querySql信息，RDBMS直接将其发送到RDBMS数据库。
-3 功能说明 3.1 配置样例 配置一个从RDBMS数据库同步抽取数据作业: {&#34;job&#34;: {&#34;setting&#34;: {&#34;speed&#34;: {&#34;byte&#34;: 1048576},&#34;errorLimit&#34;: {&#34;record&#34;: 0,&#34;percentage&#34;: 0.02}},&#34;content&#34;: [{&#34;reader&#34;: {&#34;name&#34;: &#34;rdbmsreader&#34;,&#34;parameter&#34;: {&#34;username&#34;: &#34;xxx&#34;,&#34;password&#34;: &#34;xxx&#34;,&#34;column&#34;: [&#34;id&#34;,&#34;name&#34;],&#34;splitPk&#34;: &#34;pk&#34;,&#34;connection&#34;: [{&#34;table&#34;: [&#34;table&#34;],&#34;jdbcUrl&#34;: [&#34;jdbc:dm://ip:port/database&#34;]}],&#34;fetchSize&#34;: 1024,&#34;where&#34;: &#34;1 = 1&#34;}},&#34;writer&#34;: {&#34;name&#34;: &#34;streamwriter&#34;,&#34;parameter&#34;: {&#34;print&#34;: true}}}]}} 配置一个自定义SQL的数据库同步任务到ODPS的作业： {&#34;job&#34;: {&#34;setting&#34;: {&#34;speed&#34;: {&#34;byte&#34;: 1048576},&#34;errorLimit&#34;: {&#34;record&#34;: 0,&#34;percentage&#34;: 0.">
-<meta name="author" content="">
-<link rel="canonical" href="https://haokiu.com/34c79077064f4502a247f840e8b64c46/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
-<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
-    onload="hljs.initHighlightingOnLoad();"></script>
-<link rel="icon" href="https://haokiu.com/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
-<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
-<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
-<meta name="theme-color" content="#2e2e33">
-<meta name="msapplication-TileColor" content="#2e2e33">
-<noscript>
-    <style>
-        #theme-toggle,
-        .top-link {
-            display: none;
-        }
-
-    </style>
-    <style>
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --theme: rgb(29, 30, 32);
-                --entry: rgb(46, 46, 51);
-                --primary: rgb(218, 218, 219);
-                --secondary: rgb(155, 156, 157);
-                --tertiary: rgb(65, 66, 68);
-                --content: rgb(196, 196, 197);
-                --hljs-bg: rgb(46, 46, 51);
-                --code-bg: rgb(55, 56, 62);
-                --border: rgb(51, 51, 51);
-            }
-
-            .list {
-                background: var(--theme);
-            }
-
-            .list:not(.dark)::-webkit-scrollbar-track {
-                background: 0 0;
-            }
-
-            .list:not(.dark)::-webkit-scrollbar-thumb {
-                border-color: var(--theme);
-            }
-        }
-
-    </style>
-</noscript><meta property="og:title" content="RDBMSReader 插件文档" />
-<meta property="og:description" content="RDBMSReader 插件文档 1 快速介绍 RDBMSReader插件实现了从RDBMS读取数据。在底层实现上，RDBMSReader通过JDBC连接远程RDBMS数据库，并执行相应的sql语句将数据从RDBMS库中SELECT出来。目前支持达梦、db2、PPAS、Sybase数据库的读取。RDBMSReader是一个通用的关系数据库读插件，您可以通过注册数据库驱动等方式增加任意多样的关系数据库读支持。
-2 实现原理 简而言之，RDBMSReader通过JDBC连接器连接到远程的RDBMS数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程RDBMS数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
-对于用户配置Table、Column、Where的信息，RDBMSReader将其拼接为SQL语句发送到RDBMS数据库；对于用户配置querySql信息，RDBMS直接将其发送到RDBMS数据库。
-3 功能说明 3.1 配置样例 配置一个从RDBMS数据库同步抽取数据作业: {&#34;job&#34;: {&#34;setting&#34;: {&#34;speed&#34;: {&#34;byte&#34;: 1048576},&#34;errorLimit&#34;: {&#34;record&#34;: 0,&#34;percentage&#34;: 0.02}},&#34;content&#34;: [{&#34;reader&#34;: {&#34;name&#34;: &#34;rdbmsreader&#34;,&#34;parameter&#34;: {&#34;username&#34;: &#34;xxx&#34;,&#34;password&#34;: &#34;xxx&#34;,&#34;column&#34;: [&#34;id&#34;,&#34;name&#34;],&#34;splitPk&#34;: &#34;pk&#34;,&#34;connection&#34;: [{&#34;table&#34;: [&#34;table&#34;],&#34;jdbcUrl&#34;: [&#34;jdbc:dm://ip:port/database&#34;]}],&#34;fetchSize&#34;: 1024,&#34;where&#34;: &#34;1 = 1&#34;}},&#34;writer&#34;: {&#34;name&#34;: &#34;streamwriter&#34;,&#34;parameter&#34;: {&#34;print&#34;: true}}}]}} 配置一个自定义SQL的数据库同步任务到ODPS的作业： {&#34;job&#34;: {&#34;setting&#34;: {&#34;speed&#34;: {&#34;byte&#34;: 1048576},&#34;errorLimit&#34;: {&#34;record&#34;: 0,&#34;percentage&#34;: 0." />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://haokiu.com/34c79077064f4502a247f840e8b64c46/" /><meta property="article:section" content="4" />
-<meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
-<meta property="article:modified_time" content="2021-02-02T17:45:01+00:00" />
-
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="RDBMSReader 插件文档"/>
-<meta name="twitter:description" content="RDBMSReader 插件文档 1 快速介绍 RDBMSReader插件实现了从RDBMS读取数据。在底层实现上，RDBMSReader通过JDBC连接远程RDBMS数据库，并执行相应的sql语句将数据从RDBMS库中SELECT出来。目前支持达梦、db2、PPAS、Sybase数据库的读取。RDBMSReader是一个通用的关系数据库读插件，您可以通过注册数据库驱动等方式增加任意多样的关系数据库读支持。
-2 实现原理 简而言之，RDBMSReader通过JDBC连接器连接到远程的RDBMS数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程RDBMS数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
-对于用户配置Table、Column、Where的信息，RDBMSReader将其拼接为SQL语句发送到RDBMS数据库；对于用户配置querySql信息，RDBMS直接将其发送到RDBMS数据库。
-3 功能说明 3.1 配置样例 配置一个从RDBMS数据库同步抽取数据作业: {&#34;job&#34;: {&#34;setting&#34;: {&#34;speed&#34;: {&#34;byte&#34;: 1048576},&#34;errorLimit&#34;: {&#34;record&#34;: 0,&#34;percentage&#34;: 0.02}},&#34;content&#34;: [{&#34;reader&#34;: {&#34;name&#34;: &#34;rdbmsreader&#34;,&#34;parameter&#34;: {&#34;username&#34;: &#34;xxx&#34;,&#34;password&#34;: &#34;xxx&#34;,&#34;column&#34;: [&#34;id&#34;,&#34;name&#34;],&#34;splitPk&#34;: &#34;pk&#34;,&#34;connection&#34;: [{&#34;table&#34;: [&#34;table&#34;],&#34;jdbcUrl&#34;: [&#34;jdbc:dm://ip:port/database&#34;]}],&#34;fetchSize&#34;: 1024,&#34;where&#34;: &#34;1 = 1&#34;}},&#34;writer&#34;: {&#34;name&#34;: &#34;streamwriter&#34;,&#34;parameter&#34;: {&#34;print&#34;: true}}}]}} 配置一个自定义SQL的数据库同步任务到ODPS的作业： {&#34;job&#34;: {&#34;setting&#34;: {&#34;speed&#34;: {&#34;byte&#34;: 1048576},&#34;errorLimit&#34;: {&#34;record&#34;: 0,&#34;percentage&#34;: 0."/>
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position":  1 ,
-      "name": "4s",
-      "item": "https://haokiu.com/4/"
-    }, 
-    {
-      "@type": "ListItem",
-      "position":  2 ,
-      "name": "RDBMSReader 插件文档",
-      "item": "https://haokiu.com/34c79077064f4502a247f840e8b64c46/"
-    }
-  ]
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  "headline": "RDBMSReader 插件文档",
-  "name": "RDBMSReader 插件文档",
-  "description": "RDBMSReader 插件文档 1 快速介绍 RDBMSReader插件实现了从RDBMS读取数据。在底层实现上，RDBMSReader通过JDBC连接远程RDBMS数据库，并执行相应的sql语句将数据从RDBMS库中SELECT出来。目前支持达梦、db2、PPAS、Sybase数据库的读取。RDBMSReader是一个通用的关系数据库读插件，您可以通过注册数据库驱动等方式增加任意多样的关系数据库读支持。\n2 实现原理 简而言之，RDBMSReader通过JDBC连接器连接到远程的RDBMS数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程RDBMS数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。\n对于用户配置Table、Column、Where的信息，RDBMSReader将其拼接为SQL语句发送到RDBMS数据库；对于用户配置querySql信息，RDBMS直接将其发送到RDBMS数据库。\n3 功能说明 3.1 配置样例 配置一个从RDBMS数据库同步抽取数据作业: {\r\u0026#34;job\u0026#34;: {\r\u0026#34;setting\u0026#34;: {\r\u0026#34;speed\u0026#34;: {\r\u0026#34;byte\u0026#34;: 1048576\r},\r\u0026#34;errorLimit\u0026#34;: {\r\u0026#34;record\u0026#34;: 0,\r\u0026#34;percentage\u0026#34;: 0.02\r}\r},\r\u0026#34;content\u0026#34;: [\r{\r\u0026#34;reader\u0026#34;: {\r\u0026#34;name\u0026#34;: \u0026#34;rdbmsreader\u0026#34;,\r\u0026#34;parameter\u0026#34;: {\r\u0026#34;username\u0026#34;: \u0026#34;xxx\u0026#34;,\r\u0026#34;password\u0026#34;: \u0026#34;xxx\u0026#34;,\r\u0026#34;column\u0026#34;: [\r\u0026#34;id\u0026#34;,\r\u0026#34;name\u0026#34;\r],\r\u0026#34;splitPk\u0026#34;: \u0026#34;pk\u0026#34;,\r\u0026#34;connection\u0026#34;: [\r{\r\u0026#34;table\u0026#34;: [\r\u0026#34;table\u0026#34;\r],\r\u0026#34;jdbcUrl\u0026#34;: [\r\u0026#34;jdbc:dm://ip:port/database\u0026#34;\r]\r}\r],\r\u0026#34;fetchSize\u0026#34;: 1024,\r\u0026#34;where\u0026#34;: \u0026#34;1 = 1\u0026#34;\r}\r},\r\u0026#34;writer\u0026#34;: {\r\u0026#34;name\u0026#34;: \u0026#34;streamwriter\u0026#34;,\r\u0026#34;parameter\u0026#34;: {\r\u0026#34;print\u0026#34;: true\r}\r}\r}\r]\r}\r} 配置一个自定义SQL的数据库同步任务到ODPS的作业： {\r\u0026#34;job\u0026#34;: {\r\u0026#34;setting\u0026#34;: {\r\u0026#34;speed\u0026#34;: {\r\u0026#34;byte\u0026#34;: 1048576\r},\r\u0026#34;errorLimit\u0026#34;: {\r\u0026#34;record\u0026#34;: 0,\r\u0026#34;percentage\u0026#34;: 0.",
-  "keywords": [
-    "datax"
-  ],
-  "articleBody": "RDBMSReader 插件文档 1 快速介绍 RDBMSReader插件实现了从RDBMS读取数据。在底层实现上，RDBMSReader通过JDBC连接远程RDBMS数据库，并执行相应的sql语句将数据从RDBMS库中SELECT出来。目前支持达梦、db2、PPAS、Sybase数据库的读取。RDBMSReader是一个通用的关系数据库读插件，您可以通过注册数据库驱动等方式增加任意多样的关系数据库读支持。\n2 实现原理 简而言之，RDBMSReader通过JDBC连接器连接到远程的RDBMS数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程RDBMS数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。\n对于用户配置Table、Column、Where的信息，RDBMSReader将其拼接为SQL语句发送到RDBMS数据库；对于用户配置querySql信息，RDBMS直接将其发送到RDBMS数据库。\n3 功能说明 3.1 配置样例 配置一个从RDBMS数据库同步抽取数据作业: {\r\"job\": {\r\"setting\": {\r\"speed\": {\r\"byte\": 1048576\r},\r\"errorLimit\": {\r\"record\": 0,\r\"percentage\": 0.02\r}\r},\r\"content\": [\r{\r\"reader\": {\r\"name\": \"rdbmsreader\",\r\"parameter\": {\r\"username\": \"xxx\",\r\"password\": \"xxx\",\r\"column\": [\r\"id\",\r\"name\"\r],\r\"splitPk\": \"pk\",\r\"connection\": [\r{\r\"table\": [\r\"table\"\r],\r\"jdbcUrl\": [\r\"jdbc:dm://ip:port/database\"\r]\r}\r],\r\"fetchSize\": 1024,\r\"where\": \"1 = 1\"\r}\r},\r\"writer\": {\r\"name\": \"streamwriter\",\r\"parameter\": {\r\"print\": true\r}\r}\r}\r]\r}\r} 配置一个自定义SQL的数据库同步任务到ODPS的作业： {\r\"job\": {\r\"setting\": {\r\"speed\": {\r\"byte\": 1048576\r},\r\"errorLimit\": {\r\"record\": 0,\r\"percentage\": 0.02\r}\r},\r\"content\": [\r{\r\"reader\": {\r\"name\": \"rdbmsreader\",\r\"parameter\": {\r\"username\": \"xxx\",\r\"password\": \"xxx\",\r\"column\": [\r\"id\",\r\"name\"\r],\r\"splitPk\": \"pk\",\r\"connection\": [\r{\r\"querySql\": [\r\"SELECT * from dual\"\r],\r\"jdbcUrl\": [\r\"jdbc:dm://ip:port/database\"\r]\r}\r],\r\"fetchSize\": 1024,\r\"where\": \"1 = 1\"\r}\r},\r\"writer\": {\r\"name\": \"streamwriter\",\r\"parameter\": {\r\"print\": true\r}\r}\r}\r]\r}\r} 3.2 参数说明 jdbcUrl\n描述：描述的是到对端数据库的JDBC连接信息，jdbcUrl按照RDBMS官方规范，并可以填写连接附件控制信息。请注意不同的数据库jdbc的格式是不同的，DataX会根据具体jdbc的格式选择合适的数据库驱动完成数据读取。\n达梦 jdbc:dm://ip:port/database db2格式 jdbc:db2://ip:port/database PPAS格式 jdbc:edb://ip:port/database rdbmswriter如何增加新的数据库支持:\n进入rdbmsreader对应目录，这里${DATAX_HOME}为DataX主目录，即: ${DATAX_HOME}/plugin/reader/rdbmswriter 在rdbmsreader插件目录下有plugin.json配置文件，在此文件中注册您具体的数据库驱动，具体放在drivers数组中。rdbmsreader插件在任务执行时会动态选择合适的数据库驱动连接数据库。 {\r\"name\": \"rdbmsreader\",\r\"class\": \"com.alibaba.datax.plugin.reader.rdbmsreader.RdbmsReader\",\r\"description\": \"useScene: prod. mechanism: Jdbc connection using the database, execute select sql, retrieve data from the ResultSet. warn: The more you know about the database, the less problems you encounter.\",\r\"developer\": \"alibaba\",\r\"drivers\": [\r\"dm.jdbc.driver.DmDriver\",\r\"com.ibm.db2.jcc.DB2Driver\",\r\"com.sybase.jdbc3.jdbc.SybDriver\",\r\"com.edb.Driver\"\r]\r} 在rdbmsreader插件目录下有libs子目录，您需要将您具体的数据库驱动放到libs目录下。 $tree\r.\r|-- libs\r| |-- Dm7JdbcDriver16.jar\r| |-- commons-collections-3.0.jar\r| |-- commons-io-2.4.jar\r| |-- commons-lang3-3.3.2.jar\r| |-- commons-math3-3.1.1.jar\r| |-- datax-common-0.0.1-SNAPSHOT.jar\r| |-- datax-service-face-1.0.23-20160120.024328-1.jar\r| |-- db2jcc4.jar\r| |-- druid-1.0.15.jar\r| |-- edb-jdbc16.jar\r| |-- fastjson-1.1.46.sec01.jar\r| |-- guava-r05.jar\r| |-- hamcrest-core-1.3.jar\r| |-- jconn3-1.0.0-SNAPSHOT.jar\r| |-- logback-classic-1.0.13.jar\r| |-- logback-core-1.0.13.jar\r| |-- plugin-rdbms-util-0.0.1-SNAPSHOT.jar\r| `-- slf4j-api-1.7.10.jar\r|-- plugin.json\r|-- plugin_job_template.json\r`-- rdbmsreader-0.0.1-SNAPSHOT.jar 必选：是 默认值：无 username\n描述：数据源的用户名。 必选：是 默认值：无 password\n描述：数据源指定用户名的密码。 必选：是 默认值：无 table\n描述：所选取的需要同步的表名。\n必选：是 默认值：无 column\n描述：所配置的表中需要同步的列名集合，使用JSON的数组描述字段信息。用户使用代表默认使用所有列配置，例如[’’]。\n支持列裁剪，即列可以挑选部分列进行导出。\n支持列换序，即列可以不按照表schema信息进行导出。\n支持常量配置，用户需要按照JSON格式: [“id”, “1”, “‘bazhen.csy’”, “null”, “to_char(a + 1)”, “2.3” , “true”] id为普通列名，1为整形数字常量，‘bazhen.csy’为字符串常量，null为空指针，to_char(a + 1)为表达式，2.3为浮点数，true为布尔值。\nColumn必须显示填写，不允许为空！\n必选：是 默认值：无 splitPk\n描述：RDBMSReader进行数据抽取时，如果指定splitPk，表示用户希望使用splitPk代表的字段进行数据分片，DataX因此会启动并发任务进行数据同步，这样可以大大提供数据同步的效能。\n推荐splitPk用户使用表主键，因为表主键通常情况下比较均匀，因此切分出来的分片也不容易出现数据热点。\n目前splitPk仅支持整形数据切分，不支持浮点、字符串型、日期等其他类型。如果用户指定其他非支持类型，RDBMSReader将报错！\nsplitPk如果不填写，将视作用户不对单表进行切分，RDBMSReader使用单通道同步全量数据。\n必选：否 默认值：空 where\n描述：筛选条件，RDBMSReader根据指定的column、table、where条件拼接SQL，并根据这个SQL进行数据抽取。例如在做测试时，可以将where条件指定为limit 10；在实际业务场景中，往往会选择当天的数据进行同步，可以将where条件指定为gmt_create \u003e $bizdate 。。\nwhere条件可以有效地进行业务增量同步。where条件不配置或者为空，视作全表同步数据。\r必选：否 默认值：无 querySql\n描述：在有些业务场景下，where这一配置项不足以描述所筛选的条件，用户可以通过该配置型来自定义筛选SQL。当用户配置了这一项之后，DataX系统就会忽略table，column这些配置型，直接使用这个配置项的内容对数据进行筛选，例如需要进行多表join后同步数据，使用select a,b from table_a join table_b on table_a.id = table_b.id 当用户配置querySql时，RDBMSReader直接忽略table、column、where条件的配置。\n必选：否 默认值：无 fetchSize\n描述：该配置项定义了插件和数据库服务器端每次批量数据获取条数，该值决定了DataX和服务器端的网络交互次数，能够较大的提升数据抽取性能。 注意，该值过大(\u003e2048)可能造成DataX进程OOM。。\n必选：否 默认值：1024 3.3 类型转换 目前RDBMSReader支持大部分通用得关系数据库类型如数字、字符等，但也存在部分个别类型没有支持的情况，请注意检查你的类型，根据具体的数据库做选择。\n",
-  "wordCount" : "362",
-  "inLanguage": "en",
-  "datePublished": "2021-02-02T17:45:01Z",
-  "dateModified": "2021-02-02T17:45:01Z",
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "https://haokiu.com/34c79077064f4502a247f840e8b64c46/"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "haokiu",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://haokiu.com/favicon.ico"
-    }
-  }
-}
-</script>
-</head>
-
-<body class="" id="top">
-<script>
-    if (localStorage.getItem("pref-theme") === "dark") {
-        document.body.classList.add('dark');
-    } else if (localStorage.getItem("pref-theme") === "light") {
-        document.body.classList.remove('dark')
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.classList.add('dark');
-    }
-
-</script>
-
-<header class="header">
-    <nav class="nav">
-        <div class="logo">
-            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
-            <div class="logo-switches">
-                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
-                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="5"></circle>
-                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                    </svg>
-                </button>
-            </div>
-        </div>
-        <ul id="menu">
-            <li>
-                <a href="https://haokiu.com/" title="haokiu">
-                    <span>Home</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/1/" title="1s">
-                    <span>后端</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/2/" title="2s">
-                    <span>前端</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/3/" title="3s">
-                    <span>区块链</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/4/" title="4s">
-                    <span>大数据</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/5/" title="5s">
-                    <span>linux</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/6/" title="6s">
-                    <span>其他</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/tags/" title="Tags">
-                    <span>tags</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/categories/" title="Categories">
-                    <span>categories</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-</header>
-<main class="main">
-
-<article class="post-single">
-  <header class="post-header">
-    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
-    <h1 class="post-title">
-      RDBMSReader 插件文档
-    </h1>
-    <div class="post-meta"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span>
-
-</div>
-  </header> <div class="toc">
-    <details  open>
-        <summary accesskey="c" title="(Alt + C)">
-            <span class="details">Table of Contents</span>
-        </summary>
-
-        <div class="inner"><ul>
-                <li>
-                    <a href="#rdbmsreader-%e6%8f%92%e4%bb%b6%e6%96%87%e6%a1%a3" aria-label="RDBMSReader 插件文档">RDBMSReader 插件文档</a><ul>
-                        
-                <li>
-                    <a href="#1-%e5%bf%ab%e9%80%9f%e4%bb%8b%e7%bb%8d" aria-label="1 快速介绍">1 快速介绍</a></li>
-                <li>
-                    <a href="#2-%e5%ae%9e%e7%8e%b0%e5%8e%9f%e7%90%86" aria-label="2 实现原理">2 实现原理</a></li>
-                <li>
-                    <a href="#3-%e5%8a%9f%e8%83%bd%e8%af%b4%e6%98%8e" aria-label="3 功能说明">3 功能说明</a><ul>
-                        
-                <li>
-                    <a href="#31-%e9%85%8d%e7%bd%ae%e6%a0%b7%e4%be%8b" aria-label="3.1 配置样例">3.1 配置样例</a></li>
-                <li>
-                    <a href="#32-%e5%8f%82%e6%95%b0%e8%af%b4%e6%98%8e" aria-label="3.2 参数说明">3.2 参数说明</a></li>
-                <li>
-                    <a href="#33-%e7%b1%bb%e5%9e%8b%e8%bd%ac%e6%8d%a2" aria-label="3.3 类型转换">3.3 类型转换</a>
-                </li>
-            </ul>
-            </li>
-            </ul>
-            </li>
-            </ul>
-        </div>
-    </details>
-</div>
-
-  <div class="post-content"><h1 id="rdbmsreader-插件文档">RDBMSReader 插件文档</h1>
-<hr>
-<h2 id="1-快速介绍">1 快速介绍</h2>
-<p>RDBMSReader插件实现了从RDBMS读取数据。在底层实现上，RDBMSReader通过JDBC连接远程RDBMS数据库，并执行相应的sql语句将数据从RDBMS库中SELECT出来。目前支持达梦、db2、PPAS、Sybase数据库的读取。RDBMSReader是一个通用的关系数据库读插件，您可以通过注册数据库驱动等方式增加任意多样的关系数据库读支持。</p>
-<h2 id="2-实现原理">2 实现原理</h2>
-<p>简而言之，RDBMSReader通过JDBC连接器连接到远程的RDBMS数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程RDBMS数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。</p>
-<p>对于用户配置Table、Column、Where的信息，RDBMSReader将其拼接为SQL语句发送到RDBMS数据库；对于用户配置querySql信息，RDBMS直接将其发送到RDBMS数据库。</p>
-<h2 id="3-功能说明">3 功能说明</h2>
-<h3 id="31-配置样例">3.1 配置样例</h3>
-<ul>
-<li>配置一个从RDBMS数据库同步抽取数据作业:</li>
-</ul>
-<pre tabindex="0"><code>{
-    &#34;job&#34;: {
-        &#34;setting&#34;: {
-            &#34;speed&#34;: {
-                &#34;byte&#34;: 1048576
-            },
-            &#34;errorLimit&#34;: {
-                &#34;record&#34;: 0,
-                &#34;percentage&#34;: 0.02
-            }
-        },
-        &#34;content&#34;: [
-            {
-                &#34;reader&#34;: {
-                    &#34;name&#34;: &#34;rdbmsreader&#34;,
-                    &#34;parameter&#34;: {
-                        &#34;username&#34;: &#34;xxx&#34;,
-                        &#34;password&#34;: &#34;xxx&#34;,
-                        &#34;column&#34;: [
-                            &#34;id&#34;,
-                            &#34;name&#34;
-                        ],
-                        &#34;splitPk&#34;: &#34;pk&#34;,
-                        &#34;connection&#34;: [
-                            {
-                                &#34;table&#34;: [
-                                    &#34;table&#34;
-                                ],
-                                &#34;jdbcUrl&#34;: [
-                                    &#34;jdbc:dm://ip:port/database&#34;
-                                ]
-                            }
-                        ],
-                        &#34;fetchSize&#34;: 1024,
-                        &#34;where&#34;: &#34;1 = 1&#34;
-                    }
-                },
-                &#34;writer&#34;: {
-                    &#34;name&#34;: &#34;streamwriter&#34;,
-                    &#34;parameter&#34;: {
-                        &#34;print&#34;: true
-                    }
-                }
-            }
-        ]
-    }
-}
-</code></pre><ul>
-<li>配置一个自定义SQL的数据库同步任务到ODPS的作业：</li>
-</ul>
-<pre tabindex="0"><code>{
-    &#34;job&#34;: {
-        &#34;setting&#34;: {
-            &#34;speed&#34;: {
-                &#34;byte&#34;: 1048576
-            },
-            &#34;errorLimit&#34;: {
-                &#34;record&#34;: 0,
-                &#34;percentage&#34;: 0.02
-            }
-        },
-        &#34;content&#34;: [
-            {
-                &#34;reader&#34;: {
-                    &#34;name&#34;: &#34;rdbmsreader&#34;,
-                    &#34;parameter&#34;: {
-                        &#34;username&#34;: &#34;xxx&#34;,
-                        &#34;password&#34;: &#34;xxx&#34;,
-                        &#34;column&#34;: [
-                            &#34;id&#34;,
-                            &#34;name&#34;
-                        ],
-                        &#34;splitPk&#34;: &#34;pk&#34;,
-                        &#34;connection&#34;: [
-                            {
-                                &#34;querySql&#34;: [
-                                    &#34;SELECT * from dual&#34;
-                                ],
-                                &#34;jdbcUrl&#34;: [
-                                    &#34;jdbc:dm://ip:port/database&#34;
-                                ]
-                            }
-                        ],
-                        &#34;fetchSize&#34;: 1024,
-                        &#34;where&#34;: &#34;1 = 1&#34;
-                    }
-                },
-                &#34;writer&#34;: {
-                    &#34;name&#34;: &#34;streamwriter&#34;,
-                    &#34;parameter&#34;: {
-                        &#34;print&#34;: true
-                    }
-                }
-            }
-        ]
-    }
-}
-</code></pre><h3 id="32-参数说明">3.2 参数说明</h3>
-<ul>
-<li>
-<p><strong>jdbcUrl</strong></p>
-<ul>
-<li>
-<p>描述：描述的是到对端数据库的JDBC连接信息，jdbcUrl按照RDBMS官方规范，并可以填写连接附件控制信息。请注意不同的数据库jdbc的格式是不同的，DataX会根据具体jdbc的格式选择合适的数据库驱动完成数据读取。</p>
-<ul>
-<li>达梦 jdbc:dm://ip:port/database</li>
-<li>db2格式 jdbc:db2://ip:port/database</li>
-<li>PPAS格式 jdbc:edb://ip:port/database</li>
-</ul>
-<p><strong>rdbmswriter如何增加新的数据库支持:</strong></p>
-<ul>
-<li>进入rdbmsreader对应目录，这里${DATAX_HOME}为DataX主目录，即: ${DATAX_HOME}/plugin/reader/rdbmswriter</li>
-<li>在rdbmsreader插件目录下有plugin.json配置文件，在此文件中注册您具体的数据库驱动，具体放在drivers数组中。rdbmsreader插件在任务执行时会动态选择合适的数据库驱动连接数据库。</li>
-</ul>
-<pre tabindex="0"><code>{
-    &#34;name&#34;: &#34;rdbmsreader&#34;,
-    &#34;class&#34;: &#34;com.alibaba.datax.plugin.reader.rdbmsreader.RdbmsReader&#34;,
-    &#34;description&#34;: &#34;useScene: prod. mechanism: Jdbc connection using the database, execute select sql, retrieve data from the ResultSet. warn: The more you know about the database, the less problems you encounter.&#34;,
-    &#34;developer&#34;: &#34;alibaba&#34;,
-    &#34;drivers&#34;: [
-        &#34;dm.jdbc.driver.DmDriver&#34;,
-        &#34;com.ibm.db2.jcc.DB2Driver&#34;,
-        &#34;com.sybase.jdbc3.jdbc.SybDriver&#34;,
-        &#34;com.edb.Driver&#34;
-    ]
-}
-</code></pre><ul>
-<li>在rdbmsreader插件目录下有libs子目录，您需要将您具体的数据库驱动放到libs目录下。</li>
-</ul>
-<pre tabindex="0"><code>$tree
-.
-|-- libs
-|   |-- Dm7JdbcDriver16.jar
-|   |-- commons-collections-3.0.jar
-|   |-- commons-io-2.4.jar
-|   |-- commons-lang3-3.3.2.jar
-|   |-- commons-math3-3.1.1.jar
-|   |-- datax-common-0.0.1-SNAPSHOT.jar
-|   |-- datax-service-face-1.0.23-20160120.024328-1.jar
-|   |-- db2jcc4.jar
-|   |-- druid-1.0.15.jar
-|   |-- edb-jdbc16.jar
-|   |-- fastjson-1.1.46.sec01.jar
-|   |-- guava-r05.jar
-|   |-- hamcrest-core-1.3.jar
-|   |-- jconn3-1.0.0-SNAPSHOT.jar
-|   |-- logback-classic-1.0.13.jar
-|   |-- logback-core-1.0.13.jar
-|   |-- plugin-rdbms-util-0.0.1-SNAPSHOT.jar
-|   `-- slf4j-api-1.7.10.jar
-|-- plugin.json
-|-- plugin_job_template.json
-`-- rdbmsreader-0.0.1-SNAPSHOT.jar
-</code></pre></li>
-<li>
-<p>必选：是 <!-- raw HTML omitted --></p>
-</li>
-<li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>username</strong></p>
-<ul>
-<li>
-<p>描述：数据源的用户名。 <!-- raw HTML omitted --></p>
-</li>
-<li>
-<p>必选：是 <!-- raw HTML omitted --></p>
-</li>
-<li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>password</strong></p>
-<ul>
-<li>
-<p>描述：数据源指定用户名的密码。 <!-- raw HTML omitted --></p>
-</li>
-<li>
-<p>必选：是 <!-- raw HTML omitted --></p>
-</li>
-<li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>table</strong></p>
-<ul>
-<li>
-<p>描述：所选取的需要同步的表名。<!-- raw HTML omitted --></p>
-</li>
-<li>
-<p>必选：是 <!-- raw HTML omitted --></p>
-</li>
-<li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>column</strong></p>
-<ul>
-<li>
-<p>描述：所配置的表中需要同步的列名集合，使用JSON的数组描述字段信息。用户使用<em>代表默认使用所有列配置，例如[&rsquo;</em>&rsquo;]。</p>
-<p>支持列裁剪，即列可以挑选部分列进行导出。</p>
-<p>支持列换序，即列可以不按照表schema信息进行导出。</p>
-<p>支持常量配置，用户需要按照JSON格式:
-[&ldquo;id&rdquo;, &ldquo;1&rdquo;, &ldquo;&lsquo;bazhen.csy&rsquo;&rdquo;, &ldquo;null&rdquo;, &ldquo;to_char(a + 1)&rdquo;, &ldquo;2.3&rdquo; , &ldquo;true&rdquo;]
-id为普通列名，1为整形数字常量，&lsquo;bazhen.csy&rsquo;为字符串常量，null为空指针，to_char(a + 1)为表达式，2.3为浮点数，true为布尔值。</p>
-<p>Column必须显示填写，不允许为空！</p>
-</li>
-<li>
-<p>必选：是 <!-- raw HTML omitted --></p>
-</li>
-<li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>splitPk</strong></p>
-<ul>
-<li>
-<p>描述：RDBMSReader进行数据抽取时，如果指定splitPk，表示用户希望使用splitPk代表的字段进行数据分片，DataX因此会启动并发任务进行数据同步，这样可以大大提供数据同步的效能。</p>
-<p>推荐splitPk用户使用表主键，因为表主键通常情况下比较均匀，因此切分出来的分片也不容易出现数据热点。</p>
-<p>目前splitPk仅支持整形数据切分，<code>不支持浮点、字符串型、日期等其他类型</code>。如果用户指定其他非支持类型，RDBMSReader将报错！</p>
-<p>splitPk如果不填写，将视作用户不对单表进行切分，RDBMSReader使用单通道同步全量数据。</p>
-</li>
-<li>
-<p>必选：否 <!-- raw HTML omitted --></p>
-</li>
-<li>
-<p>默认值：空 <!-- raw HTML omitted --></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>where</strong></p>
-<ul>
-<li>
-<p>描述：筛选条件，RDBMSReader根据指定的column、table、where条件拼接SQL，并根据这个SQL进行数据抽取。例如在做测试时，可以将where条件指定为limit 10；在实际业务场景中，往往会选择当天的数据进行同步，可以将where条件指定为gmt_create &gt; $bizdate 。<!-- raw HTML omitted -->。</p>
-<pre><code>  where条件可以有效地进行业务增量同步。where条件不配置或者为空，视作全表同步数据。
-</code></pre>
-</li>
-<li>
-<p>必选：否 <!-- raw HTML omitted --></p>
-</li>
-<li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>querySql</strong></p>
-<ul>
-<li>描述：在有些业务场景下，where这一配置项不足以描述所筛选的条件，用户可以通过该配置型来自定义筛选SQL。当用户配置了这一项之后，DataX系统就会忽略table，column这些配置型，直接使用这个配置项的内容对数据进行筛选，例如需要进行多表join后同步数据，使用select a,b from table_a join table_b on table_a.id = table_b.id <!-- raw HTML omitted --></li>
-</ul>
-<p><code>当用户配置querySql时，RDBMSReader直接忽略table、column、where条件的配置</code>。</p>
-<ul>
-<li>
-<p>必选：否 <!-- raw HTML omitted --></p>
-</li>
-<li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>fetchSize</strong></p>
-<ul>
-<li>描述：该配置项定义了插件和数据库服务器端每次批量数据获取条数，该值决定了DataX和服务器端的网络交互次数，能够较大的提升数据抽取性能。<!-- raw HTML omitted --></li>
-</ul>
-<p><code>注意，该值过大(&gt;2048)可能造成DataX进程OOM。</code>。</p>
-<ul>
-<li>
-<p>必选：否 <!-- raw HTML omitted --></p>
-</li>
-<li>
-<p>默认值：1024 <!-- raw HTML omitted --></p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="33-类型转换">3.3 类型转换</h3>
-<p>目前RDBMSReader支持大部分通用得关系数据库类型如数字、字符等，但也存在部分个别类型没有支持的情况，请注意检查你的类型，根据具体的数据库做选择。</p>
-
-  </div>
-
-  <footer class="post-footer">
-    <ul class="post-tags">
-      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
-    </ul>
-
-  </footer>
-</article>
-    </main>
-    
-<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
-        <path d="M12 6H0l6-6z" />
-    </svg>
-</a>
-
-<script>
-    let menu = document.getElementById('menu')
-    if (menu) {
-        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
-        menu.onscroll = function () {
-            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
-        }
-    }
-
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener("click", function (e) {
-            e.preventDefault();
-            var id = this.getAttribute("href").substr(1);
-            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
-                    behavior: "smooth"
-                });
-            } else {
-                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
-            }
-            if (id === "top") {
-                history.replaceState(null, null, " ");
-            } else {
-                history.pushState(null, null, `#${id}`);
-            }
-        });
-    });
-
-</script>
-<script>
-    var mybutton = document.getElementById("top-link");
-    window.onscroll = function () {
-        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
-            mybutton.style.visibility = "visible";
-            mybutton.style.opacity = "1";
-        } else {
-            mybutton.style.visibility = "hidden";
-            mybutton.style.opacity = "0";
-        }
-    };
-
-</script>
-<script>
-    document.getElementById("theme-toggle").addEventListener("click", () => {
-        if (document.body.className.includes("dark")) {
-            document.body.classList.remove('dark');
-            localStorage.setItem("pref-theme", 'light');
-        } else {
-            document.body.classList.add('dark');
-            localStorage.setItem("pref-theme", 'dark');
-        }
-    })
-
-</script>
-<script>
-    document.querySelectorAll('pre > code').forEach((codeblock) => {
-        const container = codeblock.parentNode.parentNode;
-
-        const copybutton = document.createElement('button');
-        copybutton.classList.add('copy-code');
-        copybutton.innerHTML = 'copy';
-
-        function copyingDone() {
-            copybutton.innerHTML = 'copied!';
-            setTimeout(() => {
-                copybutton.innerHTML = 'copy';
-            }, 2000);
-        }
-
-        copybutton.addEventListener('click', (cb) => {
-            if ('clipboard' in navigator) {
-                navigator.clipboard.writeText(codeblock.textContent);
-                copyingDone();
-                return;
-            }
-
-            const range = document.createRange();
-            range.selectNodeContents(codeblock);
-            const selection = window.getSelection();
-            selection.removeAllRanges();
-            selection.addRange(range);
-            try {
-                document.execCommand('copy');
-                copyingDone();
-            } catch (e) { };
-            selection.removeRange(range);
-        });
-
-        if (container.classList.contains("highlight")) {
-            container.appendChild(copybutton);
-        } else if (container.parentNode.firstChild == container) {
-            
-        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
-            
-            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
-        } else {
-            
-            codeblock.parentNode.appendChild(copybutton);
-        }
-    });
-</script>
-</body>
-
-</html>

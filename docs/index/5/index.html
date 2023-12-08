@@ -186,7 +186,7 @@
 下一篇我将介绍首先介绍服务器端的程序的编译与部署。</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 01 TeamTalk介绍" href="https://haokiu.com/8c53924ed21041948dff215384cdb81d/"></a>
+  <a class="entry-link" aria-label="post link to 01 TeamTalk介绍" href="https://haokiu.com/blog/8c53924ed21041948dff215384cdb81d/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -199,7 +199,7 @@
 --后台管理员表 --password 密码,规则md5(md5(passwd)&#43;salt) CREATE TABLE `IMAdmin` ( `id` mediumint(6) unsigned NOT NULL AUTO_INCREMENT, `uname` varchar(40) NOT NULL COMMENT &#39;用户名&#39;, `pwd` char(32) NOT NULL COMMENT &#39;经过md5加密的密码&#39;, `status` tinyint(2) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;用户状态 0 :正常 1:删除 可扩展&#39;, `created` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;创建时间&#39;, `updated` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;更新时间&#39;, PRIMARY KEY (`id`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8 --存储语音地址 CREATE TABLE `IMAudio` ( `id` int(11) NOT NULL AUTO_INCREMENT, `fromId` int(11) unsigned NOT NULL COMMENT &#39;发送者Id&#39;, `toId` int(11) unsigned NOT NULL COMMENT &#39;接收者Id&#39;, `path` varchar(255) COLLATE utf8mb4_bin DEFAULT &#39;&#39; COMMENT &#39;语音存储的地址&#39;, `size` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;文件大小&#39;, `duration` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;语音时长&#39;, `created` int(11) unsigned NOT NULL COMMENT &#39;创建时间&#39;, PRIMARY KEY (`id`), KEY `idx_fromId_toId` (`fromId`,`toId`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin --存储部门信息 CREATE TABLE `IMDepart` ( `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT &#39;部门id&#39;, `departName` varchar(64) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;部门名称&#39;, `priority` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;显示优先级,相同优先级按拼音顺序排列&#39;, `parentId` int(11) unsigned NOT NULL COMMENT &#39;上级部门id&#39;, `status` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;状态&#39;, `created` int(11) unsigned NOT NULL COMMENT &#39;创建时间&#39;, `updated` int(11) unsigned NOT NULL COMMENT &#39;更新时间&#39;, PRIMARY KEY (`id`), KEY `idx_departName` (`departName`), KEY `idx_priority_status` (`priority`,`status`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin --发现配置表 CREATE TABLE `IMDiscovery` ( `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT &#39;id&#39;, `itemName` varchar(64) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;名称&#39;, `itemUrl` varchar(64) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;URL&#39;, `itemPriority` int(11) unsigned NOT NULL COMMENT &#39;显示优先级&#39;, `status` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;状态&#39;, `created` int(11) unsigned NOT NULL COMMENT &#39;创建时间&#39;, `updated` int(11) unsigned NOT NULL COMMENT &#39;更新时间&#39;, PRIMARY KEY (`id`), KEY `idx_itemName` (`itemName`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin --群组表 CREATE TABLE `IMGroup` ( `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(256) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;群名称&#39;, `avatar` varchar(256) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;群头像&#39;, `creator` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;创建者用户id&#39;, `type` tinyint(3) unsigned NOT NULL DEFAULT &#39;1&#39; COMMENT &#39;群组类型，1-固定;2-临时群&#39;, `userCnt` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;成员人数&#39;, `status` tinyint(3) unsigned NOT NULL DEFAULT &#39;1&#39; COMMENT &#39;是否删除,0-正常，1-删除&#39;, `version` int(11) unsigned NOT NULL DEFAULT &#39;1&#39; COMMENT &#39;群版本号&#39;, `lastChated` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;最后聊天时间&#39;, `created` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;创建时间&#39;, `updated` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;更新时间&#39;, PRIMARY KEY (`id`), KEY `idx_name` (`name`(191)), KEY `idx_creator` (`creator`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT=&#39;IM群信息&#39; --群成员表 CREATE TABLE `IMGroupMember` ( `id` int(11) NOT NULL AUTO_INCREMENT, `groupId` int(11) unsigned NOT NULL COMMENT &#39;群Id&#39;, `userId` int(11) unsigned NOT NULL COMMENT &#39;用户id&#39;, `status` tinyint(4) unsigned NOT NULL DEFAULT &#39;1&#39; COMMENT &#39;是否退出群，0-正常，1-已退出&#39;, `created` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;创建时间&#39;, `updated` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;更新时间&#39;, PRIMARY KEY (`id`), KEY `idx_groupId_userId_status` (`groupId`,`userId`,`status`), KEY `idx_userId_status_updated` (`userId`,`status`,`updated`), KEY `idx_groupId_updated` (`groupId`,`updated`) ) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8 COMMENT=&#39;用户和群的关系表&#39; --群消息表,x代表第几张表，目前做了分表有8张:0-7....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 02 服务器端的程序的编译与部署" href="https://haokiu.com/23af895a60264bfe949c3636689d3f83/"></a>
+  <a class="entry-link" aria-label="post link to 02 服务器端的程序的编译与部署" href="https://haokiu.com/blog/23af895a60264bfe949c3636689d3f83/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -226,7 +226,7 @@ while (running) { //处理定时器事件 _CheckTimer(); //IO multiplexing int n
 void CEventDispatch::_CheckTimer() { uint64_t curr_tick = get_tick_count(); list&lt;TimerItem*&gt;::iterator it; for (it = m_timer_list....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 03 服务器端的程序架构介绍" href="https://haokiu.com/74f8790b79af42ab856a668b8927b38a/"></a>
+  <a class="entry-link" aria-label="post link to 03 服务器端的程序架构介绍" href="https://haokiu.com/blog/74f8790b79af42ab856a668b8927b38a/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -242,7 +242,7 @@ int main() { //1. 初始化redis连接 //2. 初始化mysql连接 //3. 启动任�
 一、初始化redis连接 CacheManager* pCacheManager = CacheManager::getInstance(); CacheManager* CacheManager::getInstance() { if (!s_cache_manager) { s_cache_manager = new CacheManager(); if (s_cache_manager-&gt;Init()) { delete s_cache_manager; s_cache_manager = NULL; } } return s_cache_manager; } int CacheManager::Init() { CConfigFileReader config_file(&#34;dbproxyserver.conf&#34;); //CacheInstances=unread,group_set,token,sync,group_member char* cache_instances = config_file.GetConfigName(&#34;CacheInstances&#34;); if (!cache_instances) { log(&#34;not configure CacheIntance&#34;); return 1; } char host[64]; char port[64]; char db[64]; char maxconncnt[64]; CStrExplode instances_name(cache_instances, &#39;,&#39;); for (uint32_t i = 0; i &lt; instances_name.GetItemCnt(); i&#43;&#43;) { char* pool_name = instances_name.GetItem(i); //printf(&#34;%s&#34;, pool_name); snprintf(host, 64, &#34;%s_host&#34;, pool_name); snprintf(port, 64, &#34;%s_port&#34;, pool_name); snprintf(db, 64, &#34;%s_db&#34;, pool_name); snprintf(maxconncnt, 64, &#34;%s_maxconncnt&#34;, pool_name); char* cache_host = config_file....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 04 服务器端db_proxy_server源码分析" href="https://haokiu.com/5481b95ce7c64f8c99c98e3c59d74314/"></a>
+  <a class="entry-link" aria-label="post link to 04 服务器端db_proxy_server源码分析" href="https://haokiu.com/blog/5481b95ce7c64f8c99c98e3c59d74314/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -262,7 +262,7 @@ route_server可以将登录在不同的msg_server上的用户的聊天消息发�
 void init_file_serv_conn(serv_info_t* server_list, uint32_t server_count) { g_file_server_list = server_list; g_file_server_count = server_count; serv_init&lt;CFileServConn&gt;(g_file_server_list, g_file_server_count); netlib_register_timer(file_server_conn_timer_callback, NULL, 1000); s_file_handler = CFileHandler::getInstance(); } template &lt;class T&gt; void serv_init(serv_info_t* server_list, uint32_t server_count) { for (uint32_t i = 0; i &lt; server_count; i&#43;&#43;) { T* pConn = new T(); pConn-&gt;Connect(server_list[i].server_ip.c_str(), server_list[i].server_port, i); server_list[i]....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 05 服务器端msg_server源码分析" href="https://haokiu.com/27deab1b64f24c839058b60bd3826f79/"></a>
+  <a class="entry-link" aria-label="post link to 05 服务器端msg_server源码分析" href="https://haokiu.com/blog/27deab1b64f24c839058b60bd3826f79/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -279,7 +279,7 @@ list&lt;user_conn_t&gt; user_conn_list; CImUserManager::GetInstance()-&gt;GetUse
 void CLoginConn::_HandleMsgServInfo(CImPdu* pPdu) { msg_serv_info_t* pMsgServInfo = new msg_serv_info_t; IM::Server::IMMsgServInfo msg; msg.ParseFromArray(pPdu-&gt;GetBodyData(), pPdu-&gt;GetBodyLength()); pMsgServInfo-&gt;ip_addr1 = msg.ip1(); pMsgServInfo-&gt;ip_addr2 = msg.ip2(); pMsgServInfo-&gt;port = msg.port(); pMsgServInfo-&gt;max_conn_cnt = msg.max_conn_cnt(); pMsgServInfo-&gt;cur_conn_cnt = msg.cur_conn_cnt(); pMsgServInfo-&gt;hostname = msg.host_name(); g_msg_serv_info....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 06 服务器端login_server源码分析" href="https://haokiu.com/1866caff3acc4baeb8666ea706d7ba7d/"></a>
+  <a class="entry-link" aria-label="post link to 06 服务器端login_server源码分析" href="https://haokiu.com/blog/1866caff3acc4baeb8666ea706d7ba7d/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -310,7 +310,7 @@ msfs在main函数里面做了如下初始化工作，伪码如下：
 //1. 建立一个两个任务队列，分别处理http get请求和post请求 //2. 创建名称为000～255的文件夹，每个文件夹里面会有000～255个子目录，这些目录用于存放聊天图片 //3. 在8700端口上监听客户端连接 //4. 启动程序消息泵 第1点，建立任务队列我们前面系列的文章已经介绍过了。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 07 服务器端msfs源码分析" href="https://haokiu.com/0055f7fa607b4b2180cd0eb3924eff5c/"></a>
+  <a class="entry-link" aria-label="post link to 07 服务器端msfs源码分析" href="https://haokiu.com/blog/0055f7fa607b4b2180cd0eb3924eff5c/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -331,7 +331,7 @@ pc客户端发送文件逻辑：
 //pc客户端代码(Modules工程SessionLayout.cpp) void SessionLayout::Notify(TNotifyUI&amp; msg) { ... //省略无关代码 else if (msg.pSender == m_pBtnsendfile) //文件传输 { module::UserInfoEntity userInfo; if (!module::getUserListModule()-&gt;getUserInfoBySId(m_sId, userInfo)) { LOG__(ERR, _T(&#34;SendFile can&#39;t find the sid&#34;)); return; } CFileDialog	fileDlg(TRUE, NULL, NULL, OFN_HIDEREADONLY | OFN_FILEMUSTEXIST , _T(&#34;文件|*....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 08 服务器端file_server源码分析" href="https://haokiu.com/c5f5c9828a6f472d9768cffc2f548784/"></a>
+  <a class="entry-link" aria-label="post link to 08 服务器端file_server源码分析" href="https://haokiu.com/blog/c5f5c9828a6f472d9768cffc2f548784/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -346,7 +346,7 @@ CID_OTHER_ONLINE_USER_INFO 这个消息是msg_server连接上route_server后告�
 void CRouteConn::_HandleOnlineUserInfo(CImPdu* pPdu) { IM::Server::IMOnlineUserInfo msg; CHECK_PB_PARSE_MSG(msg.ParseFromArray(pPdu-&gt;GetBodyData(), pPdu-&gt;GetBodyLength())); uint32_t user_count = msg.user_stat_list_size(); log(&#34;HandleOnlineUserInfo, user_cnt=%u &#34;, user_count); for (uint32_t i = 0; i &lt; user_count; i&#43;&#43;) { IM::BaseDefine::ServerUserStat server_user_stat = msg....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 09 服务器端route_server源码分析" href="https://haokiu.com/d337b00514f346dcb055e1a411da83d8/"></a>
+  <a class="entry-link" aria-label="post link to 09 服务器端route_server源码分析" href="https://haokiu.com/blog/d337b00514f346dcb055e1a411da83d8/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -385,7 +385,7 @@ void CRouteConn::_HandleOnlineUserInfo(CImPdu* pPdu) { IM::Server::IMOnlineUserI
 请解释DOS攻击与DRDOS攻击的基本原理 一个100Byte数据包，精简到50Byte, 其传输效率提高了50% TIMEWAIT状态怎么解释？ 1.1.2掌握常用的网络通信模型 Select Epoll，边缘触发与平台出发点区别与应用 Select与Epoll的区别及应用 1....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 1 游戏服务器开发的基本体系与服务器端开发的一些建议" href="https://haokiu.com/867310d7f5a74f758c1745b3083cfcc8/"></a>
+  <a class="entry-link" aria-label="post link to 1 游戏服务器开发的基本体系与服务器端开发的一些建议" href="https://haokiu.com/blog/867310d7f5a74f758c1745b3083cfcc8/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

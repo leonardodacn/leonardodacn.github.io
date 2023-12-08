@@ -196,7 +196,7 @@ Sql数 5k CPU 50% 硬盘IO 0.5M(突发3M） 网卡流量 30Mbit/s(100M网卡） 
 用户的基地可移动 用户基地只能拥有一个（武林三国、travian都能建立多个） 空间坐标由x坐标 y坐标 z坐标 组成，并且坐标的值应为小数 同一个坐标里运行多个玩家存在，玩家的航线交叉并不会造成影响（只是为了方便计算减少判断过程） 移动的数据通过后台定时刷新 a)每个短周期(1~60s)在内存里更新坐标 b)每个长周期（10~100个短周期时间）将坐标的数据更新的数据库 攻击舰队移动的时间是按照2个阶段来进行的 a)第一个阶段是从母舰移动到目标坐标的时间 b)第二个阶段，在快到达时（前60分钟），做一个判断，判断攻击舰队的雷达能否搜索到目标的母舰坐标，能则做攻击坐标的新修正，如果不能则继续按照原先的坐标点移动。以上判断将每隔1分钟做一次，直到到达目标坐标点。如果到达目标坐标点仍然无法视为攻击失败，舰队返回 舰队的移动距离和舰队所携带的能量有关，超过移动范围的坐标，舰队是无法出发的。 部队和母舰应该是可以进行空间跳跃实现长距离的移动，不过空间跳跃需要在制定地点消耗大量的能量才能实现。 默认情况下，母舰移动速度为1格（x、y、z坐标）/天。 默认舰队的雷达查询范围为1格 默认母舰的雷达查询范围为3格 玩家数据的数据库设计 数据库的划分: 在游戏里数据交互最频繁的还是玩家的数据，他的访问量是一台服务器所不能解决的，因此我们考虑将这部分数据分担到多台服务器里。分担的方法还是做水平切 割，但这次不使用数据库自身的切割功能，而是在应用逻辑层上对数据库进行切割。根据用户的ID取模后写入对应的服务器里。 服务器1 用户ID % 服务器数量 = 0 服务器2 用户ID % 服务器数量 = 1 …… 预计每台服务器能提供6k~8k的在线用户访问，预计一共需要16台服务器。考虑到服务器的进一步扩容问题，在初期规划时，建议规划为32个数据库，每台服务器可以先放3~5个数据库，等服务器用户人数上来后，再将数据库拆分到不同的服务器里。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 10 十万在线的WebGame的数据库设计思路" href="https://haokiu.com/ace809ec27124ecc987bcd4c7eec569f/"></a>
+  <a class="entry-link" aria-label="post link to 10 十万在线的WebGame的数据库设计思路" href="https://haokiu.com/blog/ace809ec27124ecc987bcd4c7eec569f/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -230,7 +230,7 @@ IDE使用Android-studio java 1.7 gradle 2.2.1
 如果测试服务器连接不上，请通过微信 easy_coder 与我联系。</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 10 开放一个TeamTalk测试服务器地址和几个测试账号" href="https://haokiu.com/601f5e2b4c0a4303a540259d9d394d0b/"></a>
+  <a class="entry-link" aria-label="post link to 10 开放一个TeamTalk测试服务器地址和几个测试账号" href="https://haokiu.com/blog/601f5e2b4c0a4303a540259d9d394d0b/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -274,7 +274,7 @@ utility包含了teamtalk中用到的一些工具类工程，比如sqlite的包�
 //位于teamtalk.h中 class CteamtalkApp : public CWinApp { public: CteamtalkApp(); public: virtual BOOL InitInstance(); virtual BOOL ExitInstance(); private: /** * 创建用户目录 * * @return BOOL * @exception there is no any exception to throw. */	BOOL _CreateUsersFolder(); /** * 创建主窗口 * * @return BOOL * @exception there is no any exception to throw....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 11 pc客户端源码分析" href="https://haokiu.com/ee4c77c4daf64f5f821d76808ec0b8b3/"></a>
+  <a class="entry-link" aria-label="post link to 11 pc客户端源码分析" href="https://haokiu.com/blog/ee4c77c4daf64f5f821d76808ec0b8b3/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -310,7 +310,7 @@ LoginServer会在玩家选组时把SessionKey发给DBServer，当玩家发送获
 2 总结 网络游戏服务器的架构设计已经成为当前网络游戏研究领域的热点，因为高性能服务器架构设计是一款网络游戏成功的关键。本文从实际应用出发，提出了一种高性能的服务器架构设计解决方案，并且详细探讨了各种服务器的功能，本文的最后给出了几个服务器之间数据通讯的关键流程，以图文并茂的方式解释各个服务器是如何协同工作的。</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 11 一种高性能网络游戏服务器架构设计" href="https://haokiu.com/8d180ec3ae3e409bac6e8a67811f54bc/"></a>
+  <a class="entry-link" aria-label="post link to 11 一种高性能网络游戏服务器架构设计" href="https://haokiu.com/blog/8d180ec3ae3e409bac6e8a67811f54bc/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -338,7 +338,7 @@ LoginServer会在玩家选组时把SessionKey发给DBServer，当玩家发送获
 ​ 在带虚拟机的语言中，最常见的是JAVA，这个问题一般会简单一些，因为有自动垃圾回收机制。但是，JAVA中的容器类型、以及static变量依然是可能造成内存泄露的原因。加上无规划的使用线程，也有可能造成内存的泄露——有些线程不会退出，而且在不断增加，最后耗尽内存。所以这些问题都要求开发者专门针对static变量以及线程结构做统一设计、严格规范。 2.预分配内存 ​ 动态分配内存在小心谨慎的程序员手上，是能发挥很好的效果的。但是游戏业务往往需要用到的数据结构非常多，变化非常大，这导致了内存管理的风险很高。为了比较彻底的解决内存漏洞的问题，很多团队采用了预先分配内存的结构。在服务器启动的时候分配所有的变量，在运行过程中不调用任何new关键字的代码。 ​ 这样做的好处除了可以有效减少内存漏洞的出现概率，也能降低动态分配内存所消耗的性能。同时由于启动时分配内存，如果硬件资源不够的话，进程就会在启动时失败，而不是像动态分配内存的程序一样，可能在任何一个分配内存的时候崩溃。然而，要获得这些好处，在编码上首先还是要遵循“动态分配架构”中对象树的原则，把一类对象构造为“根”对象，然后用一个内存池来管理这些根对象。而这个内存池能存放的根对象的数目，就是此服务进程的最大承载能力。一切都是在启动的时候决定，非常的稳妥可靠。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 12 经典游戏服务器端架构概述" href="https://haokiu.com/d7795d37211b43728424c7c4f7469b67/"></a>
+  <a class="entry-link" aria-label="post link to 12 经典游戏服务器端架构概述" href="https://haokiu.com/blog/d7795d37211b43728424c7c4f7469b67/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -361,7 +361,7 @@ LoginServer会在玩家选组时把SessionKey发给DBServer，当玩家发送获
 public LoginCrossServerAck loginCrossServer(LoginCrossServerReqreq)throws ServiceException { //从连接池中获取一个连接 RpcClient rpcClient = rpcClientPool.getResource(req.getRoleId()); try { //发起一次同步RPC请求 RpcMsg msg = rpcClient.sendWithReturn(MsgType.RPC_LoginCrossServerReq, req); return JSON.parseObject(msg.getContent(), LoginCrossServerAck....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 13 游戏跨服架构进化之路" href="https://haokiu.com/3a513d0ec4fc47e2b3830ec79beb1572/"></a>
+  <a class="entry-link" aria-label="post link to 13 游戏跨服架构进化之路" href="https://haokiu.com/blog/3a513d0ec4fc47e2b3830ec79beb1572/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -404,7 +404,7 @@ LoginServer内部运行示意图：
 由于其它服务器模块程序的内部图与这两个类似，所以就不在这个上面耽搁太多时间，下一篇将讲述具体的游戏开发，网络库使用的是开源库ACE，下载地址http://download.dre.vanderbilt.edu/previous_versions/ACE-5.8.0.zip。</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 2 网络游戏服务器开发框架设计介绍" href="https://haokiu.com/288a2c3a9e374a3ebf898cfa184e2921/"></a>
+  <a class="entry-link" aria-label="post link to 2 网络游戏服务器开发框架设计介绍" href="https://haokiu.com/blog/288a2c3a9e374a3ebf898cfa184e2921/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -435,7 +435,7 @@ Gate Server 和Game Server之间是一对一的关系，每个Game Server能容�
 用户从客户端选择游戏服务器列表 登录到Login Server,在登陆的过程中 先去平台服务器进行账号的验证 验证通过后会通知Login Server，然后Login Server会把验证的消息发送 到center Server，请求其中的Gate Server的地址和端口 Center Server会找一个可用的Gate Server信息,发送回LoginServer Login Server会把消息发送给客户端 客户端断开与Login Server的连接，然后与Game Server 连接进入游戏场景中 </p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 3 游戏后端开发需要掌握的知识" href="https://haokiu.com/16d1fbc7aa204ddba0ef394895d2c2b6/"></a>
+  <a class="entry-link" aria-label="post link to 3 游戏后端开发需要掌握的知识" href="https://haokiu.com/blog/16d1fbc7aa204ddba0ef394895d2c2b6/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -475,7 +475,7 @@ Gate Server 和Game Server之间是一对一的关系，每个Game Server能容�
 **gls：**game login server，游戏登录服务器，某种程序上，其不是核心组件，gls调用外部的接口，进行基本的用户名密码认证。此外需要实现很多附属的功能：登录排队 （对开服非常有帮助），GM超级登录通道（GM可以不排队进入游戏），封测期间激活用户控制，限制用户登录，控制客户端版本等。 **db：**实质上是后台sql的大内存缓冲，隔离了数据库操作，比较内存中的数据，只把改变的数据定时批量写入sql。系统的算法，开发稳定性都要求非常高。 **center：**所有组件都要在这里注册，在线玩家的session状态都在这里集中存放，和各组件有心跳连接。所有对外的接口也全部通过这里。 角色入口：玩家登录游戏后的选择角色 **gs：**game server，最核心组件，同一地图，所有游戏逻辑相关的功能，都在这里完成。 **gate：**建立和用户的常链接，主要作sockt转发，屏蔽恶意包，对gs进行保护。协议加密解密功能，一个gate共享多个gs，降低跳转地图连接不上的风险。 **IM，关系，寄售：**表示其它组件，负责对应的跨地图发生全局的游戏逻辑。 7.另一个架构图 1- 这是一条WebService的管道，在用户激活该区帐号，或者修改帐号密码的时候，通过这条通道来插入和更新用户的帐号信息。 2- 这也是一条WebService管道，用来获取和控制用户该该组内的角色信息，以及进行付费商城代币之类的更新操作。 3- 这是一条本地的TCP/IP连接，这条连接主要用来进行服务器组在登陆服务器的注册，以及登陆服务器验证帐户后，向用户服务器注册帐户登陆信息，以及进行对已经登陆的帐户角色信息进行操作（比如踢掉当前登陆的角色），还有服务器组的信息更新（当前在线玩家数量等）。 4- 这也是一条本地TCP/IP连接，这条连接用来对连接到GameServer的客户端进行验证，以及获取角色数据信息，还有传回GameServer上角色的数据信息改变。 5- 这条连接也是一条本地的TCP/IP连接，它用来进行公共信息服务器和数个游戏服务器间的交互，用来交换一些游戏世界级的信息（比如公会信息，跨服组队信息，跨服聊天频道等）。 6- 这里的两条连接，想表达的意思是，UserServer和GameServer的Agent是可以互换使用的，也就是玩家进入组内之后，就不需要再切换 Agent。如果不怕乱套，也可以把登陆服务器的Agent也算上，这样用户整个过程里就不需要再更换Agent，减少重复连接的次数，也提高了稳定性。 （毕竟连接次数少了，也降低了连不上服务器的出现几率） 在这个架构里面，**GameServer实际上是一个游戏逻辑的综合体，**里面可以再去扩展成几个不同的逻辑服务器，通过PublicServer进行公共数据交换。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 4 关于游戏服务端架构的整理" href="https://haokiu.com/a7ec43bdee96498694f118163763c921/"></a>
+  <a class="entry-link" aria-label="post link to 4 关于游戏服务端架构的整理" href="https://haokiu.com/blog/a7ec43bdee96498694f118163763c921/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -498,7 +498,7 @@ MUDOS使用一门称为LPC的脚本语言来描述整个世界（包括房间拓
 把网络功能单独提取出来，让用户统一去连接一个网关服务器，再有网关服务器转发数据到后端游戏服务器。而游戏服务器之间数据交换也统一连接到网管进行交换。这样类型的服务器基本能稳定的为玩家提供游戏服务，一台网关服务1-2万人，后面的游戏服务器每台服务5k-1w，依游戏类型和复杂度不同而已，图中隐藏了很多不重要的服务器，如登录和管理。这是目前应用最广的一个模型，到今天仍然很多新项目会才用这样的结构来搭建。 人都是有惯性的，按照先前的经验，似乎把 MUDOS拆分的越开性能越好。于是大家继续想，网关可以拆分呀；基础服务如聊天交易可以拆分呀；还可以提供web接口，数据库可以拆分呀，于是有了下面的模型：...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 5 各类游戏对应的服务端架构" href="https://haokiu.com/47a72212e86d4b6a8fe0516f8ff1cf65/"></a>
+  <a class="entry-link" aria-label="post link to 5 各类游戏对应的服务端架构" href="https://haokiu.com/blog/47a72212e86d4b6a8fe0516f8ff1cf65/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

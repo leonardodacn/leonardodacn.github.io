@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>datax 3.0 教程 | haokiu</title>
+<meta name="keywords" content="datax">
+<meta name="description" content="DataXDataX ADB PG WriterDataX ADS写入CassandraReader 插件文档CassandraWriter 插件文档Readme.mdDataX插件开发宝典DrdsReader 插件文档DataX DRDSWriterREADME.mdDataX ElasticSearchWriterDataX FtpReader 说明DataX FtpWriter 说明DataX GDBReaderDataX GDBWriterHbase094XReader &amp; Hbase11XReader 插件文档Hbase094XWriter &amp; Hbase11XWriter 插件文档Hbase094XReader &amp; Hbase11XReader 插件文档hbase11xsqlreader 插件文档HBase11xsqlwriter插件文档Hbase094XWriter &amp; Hbase11XWriter 插件文档hbase20xsqlreader 插件文档HBase20xsqlwriter插件文档DataX HdfsReader 插件文档DataX HdfsWriter 插件文档阿里云开源离线同步工具DataX3.0介绍KingbaseesReader 插件文档DataX KingbaseesWriterdatax-kudu-plugindatax-kudu-pluginsDatax MongoDBReaderDatax MongoDBWriterMysqlReader 插件文档DataX MysqlWriterDataX OCSWriter 适用memcached客户端写入ocsDataX ODPSReaderDataX ODPS写入OpenTSDBReader 插件文档OracleReader 插件文档DataX OracleWriterDataX OSSReader 说明DataX OSSWriter 说明OTSReader 插件文档TableStore增量数据导出通道：TableStoreStreamReaderOTSWriter 插件文档PostgresqlReader 插件文档DataX PostgresqlWriterRDBMSReader 插件文档RDBMSWriter 插件文档SqlServerReader 插件文档DataX SqlServerWriterDataX TransformerTSDBReader 插件文档TSDBWriter 插件文档DataX TxtFileReader 说明DataX TxtFileWriter 说明DataX">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/bk-4/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="datax 3.0 教程" />
+<meta property="og:description" content="DataXDataX ADB PG WriterDataX ADS写入CassandraReader 插件文档CassandraWriter 插件文档Readme.mdDataX插件开发宝典DrdsReader 插件文档DataX DRDSWriterREADME.mdDataX ElasticSearchWriterDataX FtpReader 说明DataX FtpWriter 说明DataX GDBReaderDataX GDBWriterHbase094XReader &amp; Hbase11XReader 插件文档Hbase094XWriter &amp; Hbase11XWriter 插件文档Hbase094XReader &amp; Hbase11XReader 插件文档hbase11xsqlreader 插件文档HBase11xsqlwriter插件文档Hbase094XWriter &amp; Hbase11XWriter 插件文档hbase20xsqlreader 插件文档HBase20xsqlwriter插件文档DataX HdfsReader 插件文档DataX HdfsWriter 插件文档阿里云开源离线同步工具DataX3.0介绍KingbaseesReader 插件文档DataX KingbaseesWriterdatax-kudu-plugindatax-kudu-pluginsDatax MongoDBReaderDatax MongoDBWriterMysqlReader 插件文档DataX MysqlWriterDataX OCSWriter 适用memcached客户端写入ocsDataX ODPSReaderDataX ODPS写入OpenTSDBReader 插件文档OracleReader 插件文档DataX OracleWriterDataX OSSReader 说明DataX OSSWriter 说明OTSReader 插件文档TableStore增量数据导出通道：TableStoreStreamReaderOTSWriter 插件文档PostgresqlReader 插件文档DataX PostgresqlWriterRDBMSReader 插件文档RDBMSWriter 插件文档SqlServerReader 插件文档DataX SqlServerWriterDataX TransformerTSDBReader 插件文档TSDBWriter 插件文档DataX TxtFileReader 说明DataX TxtFileWriter 说明DataX" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/bk-4/" /><meta property="article:section" content="4" />
+<meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
+<meta property="article:modified_time" content="2021-02-02T17:45:01+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="datax 3.0 教程"/>
+<meta name="twitter:description" content="DataXDataX ADB PG WriterDataX ADS写入CassandraReader 插件文档CassandraWriter 插件文档Readme.mdDataX插件开发宝典DrdsReader 插件文档DataX DRDSWriterREADME.mdDataX ElasticSearchWriterDataX FtpReader 说明DataX FtpWriter 说明DataX GDBReaderDataX GDBWriterHbase094XReader &amp; Hbase11XReader 插件文档Hbase094XWriter &amp; Hbase11XWriter 插件文档Hbase094XReader &amp; Hbase11XReader 插件文档hbase11xsqlreader 插件文档HBase11xsqlwriter插件文档Hbase094XWriter &amp; Hbase11XWriter 插件文档hbase20xsqlreader 插件文档HBase20xsqlwriter插件文档DataX HdfsReader 插件文档DataX HdfsWriter 插件文档阿里云开源离线同步工具DataX3.0介绍KingbaseesReader 插件文档DataX KingbaseesWriterdatax-kudu-plugindatax-kudu-pluginsDatax MongoDBReaderDatax MongoDBWriterMysqlReader 插件文档DataX MysqlWriterDataX OCSWriter 适用memcached客户端写入ocsDataX ODPSReaderDataX ODPS写入OpenTSDBReader 插件文档OracleReader 插件文档DataX OracleWriterDataX OSSReader 说明DataX OSSWriter 说明OTSReader 插件文档TableStore增量数据导出通道：TableStoreStreamReaderOTSWriter 插件文档PostgresqlReader 插件文档DataX PostgresqlWriterRDBMSReader 插件文档RDBMSWriter 插件文档SqlServerReader 插件文档DataX SqlServerWriterDataX TransformerTSDBReader 插件文档TSDBWriter 插件文档DataX TxtFileReader 说明DataX TxtFileWriter 说明DataX"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "4s",
+      "item": "https://haokiu.com/4/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "datax 3.0 教程",
+      "item": "https://haokiu.com/blog/bk-4/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "datax 3.0 教程",
+  "name": "datax 3.0 教程",
+  "description": "DataXDataX ADB PG WriterDataX ADS写入CassandraReader 插件文档CassandraWriter 插件文档Readme.mdDataX插件开发宝典DrdsReader 插件文档DataX DRDSWriterREADME.mdDataX ElasticSearchWriterDataX FtpReader 说明DataX FtpWriter 说明DataX GDBReaderDataX GDBWriterHbase094XReader \u0026amp; Hbase11XReader 插件文档Hbase094XWriter \u0026amp; Hbase11XWriter 插件文档Hbase094XReader \u0026amp; Hbase11XReader 插件文档hbase11xsqlreader 插件文档HBase11xsqlwriter插件文档Hbase094XWriter \u0026amp; Hbase11XWriter 插件文档hbase20xsqlreader 插件文档HBase20xsqlwriter插件文档DataX HdfsReader 插件文档DataX HdfsWriter 插件文档阿里云开源离线同步工具DataX3.0介绍KingbaseesReader 插件文档DataX KingbaseesWriterdatax-kudu-plugindatax-kudu-pluginsDatax MongoDBReaderDatax MongoDBWriterMysqlReader 插件文档DataX MysqlWriterDataX OCSWriter 适用memcached客户端写入ocsDataX ODPSReaderDataX ODPS写入OpenTSDBReader 插件文档OracleReader 插件文档DataX OracleWriterDataX OSSReader 说明DataX OSSWriter 说明OTSReader 插件文档TableStore增量数据导出通道：TableStoreStreamReaderOTSWriter 插件文档PostgresqlReader 插件文档DataX PostgresqlWriterRDBMSReader 插件文档RDBMSWriter 插件文档SqlServerReader 插件文档DataX SqlServerWriterDataX TransformerTSDBReader 插件文档TSDBWriter 插件文档DataX TxtFileReader 说明DataX TxtFileWriter 说明DataX",
+  "keywords": [
+    "datax"
+  ],
+  "articleBody": "DataXDataX ADB PG WriterDataX ADS写入CassandraReader 插件文档CassandraWriter 插件文档Readme.mdDataX插件开发宝典DrdsReader 插件文档DataX DRDSWriterREADME.mdDataX ElasticSearchWriterDataX FtpReader 说明DataX FtpWriter 说明DataX GDBReaderDataX GDBWriterHbase094XReader \u0026 Hbase11XReader 插件文档Hbase094XWriter \u0026 Hbase11XWriter 插件文档Hbase094XReader \u0026 Hbase11XReader 插件文档hbase11xsqlreader 插件文档HBase11xsqlwriter插件文档Hbase094XWriter \u0026 Hbase11XWriter 插件文档hbase20xsqlreader 插件文档HBase20xsqlwriter插件文档DataX HdfsReader 插件文档DataX HdfsWriter 插件文档阿里云开源离线同步工具DataX3.0介绍KingbaseesReader 插件文档DataX KingbaseesWriterdatax-kudu-plugindatax-kudu-pluginsDatax MongoDBReaderDatax MongoDBWriterMysqlReader 插件文档DataX MysqlWriterDataX OCSWriter 适用memcached客户端写入ocsDataX ODPSReaderDataX ODPS写入OpenTSDBReader 插件文档OracleReader 插件文档DataX OracleWriterDataX OSSReader 说明DataX OSSWriter 说明OTSReader 插件文档TableStore增量数据导出通道：TableStoreStreamReaderOTSWriter 插件文档PostgresqlReader 插件文档DataX PostgresqlWriterRDBMSReader 插件文档RDBMSWriter 插件文档SqlServerReader 插件文档DataX SqlServerWriterDataX TransformerTSDBReader 插件文档TSDBWriter 插件文档DataX TxtFileReader 说明DataX TxtFileWriter 说明DataX\n",
+  "wordCount" : "66",
+  "inLanguage": "en",
+  "datePublished": "2021-02-02T17:45:01Z",
+  "dateModified": "2021-02-02T17:45:01Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/bk-4/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    <h1 class="post-title">
+      datax 3.0 教程
+    </h1>
+    <div class="post-meta"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span>
+
+</div>
+  </header> 
+
+  <div class="post-content"><p><a href="http://haokiu.com/blog/dcdba0138c4f45f0a08968ab48edb900">DataX</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/1c4beb639bad47a79445e1bb8ccd68a5">DataX ADB PG Writer</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/5d26f13c5f3e4cda84adc613514cdd53">DataX ADS写入</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/b0b0444d45c74c8f8b1a9fc4d2af738a">CassandraReader 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/056d47f442c1471da1b62d7062dd00e2">CassandraWriter 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/b007b0bc6dca40458f17c7c1826e9da5">Readme.md</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/7c5af007072741d2a1b8a4578137e185">DataX插件开发宝典</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/20f3c6090e2448838d8be1baca3a5e1c">DrdsReader 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/d31c9e889b154a0f96e4eb4be5c50467">DataX DRDSWriter</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/9dbd1273dcb848bbaa69f53c0105d5c4">README.md</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/5e857fe9cf5743dc837f14fbc9f0a876">DataX ElasticSearchWriter</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/0b6970ee252d4875841a98382b04f30b">DataX FtpReader 说明</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/8f4c3b36705842458a8550717b87b66c">DataX FtpWriter 说明</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/ef41ae35929b479db90214d2ebe5ff8a">DataX GDBReader</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/3830a303d3e34cec88b98eab9934006d">DataX GDBWriter</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/7c5fc71d1a124a5396b1a17e8293be71">Hbase094XReader &amp; Hbase11XReader 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/0172fbcbd4674f98a8782403fc6a7ca5">Hbase094XWriter &amp; Hbase11XWriter 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/34ec6d7caba24a86b7a5e9a2f37d8c46">Hbase094XReader &amp; Hbase11XReader 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/283a89fffad54e6f909c2936a1ff08ad">hbase11xsqlreader  插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/1c329829c22c499d8e684735252966c1">HBase11xsqlwriter插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/745df21fdbd349ab9a9fc5c94551b336">Hbase094XWriter &amp; Hbase11XWriter 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/d74e56a13f78424182e14164c8b4e5e4">hbase20xsqlreader  插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/28250260969448579bc8cee8c2963319">HBase20xsqlwriter插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/e123c1afd572427f9fa4d27ba10b1e99">DataX HdfsReader 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/dd5ebd2f221f4913ae09f61f3877725e">DataX HdfsWriter 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/408be8b90df543789f79c7b43375e5a3">阿里云开源离线同步工具DataX3.0介绍</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/cc7bd03f72154435ae9af2d67a214f6d">KingbaseesReader 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/a50c2cb341e14f7d995d470380e24d34">DataX KingbaseesWriter</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/3909c1ec487c48198ae49ab46ba98dcb">datax-kudu-plugin</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/23a56c95c6c4402998fb8bf16e29fc05">datax-kudu-plugins</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/41dfc822f8ca4bca812501f2801fc78e">Datax MongoDBReader</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/1b755458e9fa4e6f89a7d44321cd92ec">Datax MongoDBWriter</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/29875f5b780c46929670f9b8699ed462">MysqlReader 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/ee3103b29d5b4fa696cb69e35fefb970">DataX MysqlWriter</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/d4b1e453f8274dda834a305a5e6a38bf">DataX OCSWriter 适用memcached客户端写入ocs</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/5b1b6009df684895ab2ef943e412ee8a">DataX ODPSReader</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/ab33f89c494e47eaae02f9c21465b322">DataX ODPS写入</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/4e39a8595b6247fabfd6f625f053b0b6">OpenTSDBReader 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/0ffdd59e828b4bb0a53cef538910db12">OracleReader 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/1eb2fdd8968d4f6e8bbc0312c6647246">DataX OracleWriter</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/bf15e9112ab546c9a6d8baab000d9601">DataX OSSReader 说明</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/516202a7c10f4658ad32aa517c141a05">DataX OSSWriter 说明</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/2dc5ba5f4d58498e8453bd2d8efde079">OTSReader 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/6851df08c78c4eb1aab41d312b920bf9">TableStore增量数据导出通道：TableStoreStreamReader</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/7d2496e6853044daa824d7a78226b07d">OTSWriter 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/0adf103bd70440a1978ecbcc7dd63787">PostgresqlReader 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/1c01500e456b4ef6b6c14eb5a072696e">DataX PostgresqlWriter</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/34c79077064f4502a247f840e8b64c46">RDBMSReader 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/5d9d57b2e00d4d8ca994dc15ece38148">RDBMSWriter 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/e30dc23cda1d465fa0872475e5c976a7">SqlServerReader 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/f23fb4346cfa45459b6eaa8537ff5d17">DataX SqlServerWriter</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/760d0498cfcd435bafba3fe96793cd01">DataX Transformer</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/66980d1599cc4aec9a2d6616d1f0c5e7">TSDBReader 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/2a52431a701d4468a150a7986b3b4752">TSDBWriter 插件文档</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/cbeab748638041dfa63c78ebe4fa91db">DataX TxtFileReader 说明</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/599f9ae387e54760ab26e177bd423e82">DataX TxtFileWriter 说明</a><!-- raw HTML omitted --><a href="http://haokiu.com/blog/f4223fe7c5a64b12ae87c43ed48cc971">DataX</a><!-- raw HTML omitted --></p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

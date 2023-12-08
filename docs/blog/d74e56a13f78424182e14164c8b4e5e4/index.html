@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>hbase20xsqlreader  插件文档 | haokiu</title>
+<meta name="keywords" content="datax">
+<meta name="description" content="hbase20xsqlreader 插件文档 1 快速介绍 hbase20xsqlreader插件实现了从Phoenix(HBase SQL)读取数据，对应版本为HBase2.X和Phoenix5.X。
+2 实现原理 简而言之，hbase20xsqlreader通过Phoenix轻客户端去连接Phoenix QueryServer，并根据用户配置信息生成查询SELECT 语句，然后发送到QueryServer读取HBase数据，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，最终传递给下游Writer处理。
+3 功能说明 3.1 配置样例 配置一个从Phoenix同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;hbase20xsqlreader&#34;, //指定插件为hbase20xsqlreader &#34;parameter&#34;: { &#34;queryServerAddress&#34;: &#34;http://127.0.0.1:8765&#34;, //填写连接Phoenix QueryServer地址 &#34;serialization&#34;: &#34;PROTOBUF&#34;, //QueryServer序列化格式 &#34;table&#34;: &#34;TEST&#34;, //读取表名 &#34;column&#34;: [&#34;ID&#34;, &#34;NAME&#34;], //所要读取列名 &#34;splitKey&#34;: &#34;ID&#34; //切分列，必须是表主键 } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;encoding&#34;: &#34;UTF-8&#34;, &#34;print&#34;: true } } } ], &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: &#34;3&#34; } } } } 3.2 参数说明 queryServerAddress
+描述：hbase20xsqlreader需要通过Phoenix轻客户端去连接Phoenix QueryServer，因此这里需要填写对应QueryServer地址。 增强版/Lindorm 用户若需透传user, password参数，可以在queryServerAddress后增加对应可选属性. 格式参考：http://127.0.0.1:8765;user=root;password=root
+必选：是 默认值：无 serialization
+描述：QueryServer使用的序列化协议
+必选：否 默认值：PROTOBUF table
+描述：所要读取表名
+必选：是 默认值：无 schema
+描述：表所在的schema
+必选：否 默认值：无 column
+描述：填写需要从phoenix表中读取的列名集合，使用JSON的数组描述字段信息，空值表示读取所有列。
+必选： 否
+默认值：全部列 splitKey">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/d74e56a13f78424182e14164c8b4e5e4/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="hbase20xsqlreader  插件文档" />
+<meta property="og:description" content="hbase20xsqlreader 插件文档 1 快速介绍 hbase20xsqlreader插件实现了从Phoenix(HBase SQL)读取数据，对应版本为HBase2.X和Phoenix5.X。
+2 实现原理 简而言之，hbase20xsqlreader通过Phoenix轻客户端去连接Phoenix QueryServer，并根据用户配置信息生成查询SELECT 语句，然后发送到QueryServer读取HBase数据，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，最终传递给下游Writer处理。
+3 功能说明 3.1 配置样例 配置一个从Phoenix同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;hbase20xsqlreader&#34;, //指定插件为hbase20xsqlreader &#34;parameter&#34;: { &#34;queryServerAddress&#34;: &#34;http://127.0.0.1:8765&#34;, //填写连接Phoenix QueryServer地址 &#34;serialization&#34;: &#34;PROTOBUF&#34;, //QueryServer序列化格式 &#34;table&#34;: &#34;TEST&#34;, //读取表名 &#34;column&#34;: [&#34;ID&#34;, &#34;NAME&#34;], //所要读取列名 &#34;splitKey&#34;: &#34;ID&#34; //切分列，必须是表主键 } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;encoding&#34;: &#34;UTF-8&#34;, &#34;print&#34;: true } } } ], &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: &#34;3&#34; } } } } 3.2 参数说明 queryServerAddress
+描述：hbase20xsqlreader需要通过Phoenix轻客户端去连接Phoenix QueryServer，因此这里需要填写对应QueryServer地址。 增强版/Lindorm 用户若需透传user, password参数，可以在queryServerAddress后增加对应可选属性. 格式参考：http://127.0.0.1:8765;user=root;password=root
+必选：是 默认值：无 serialization
+描述：QueryServer使用的序列化协议
+必选：否 默认值：PROTOBUF table
+描述：所要读取表名
+必选：是 默认值：无 schema
+描述：表所在的schema
+必选：否 默认值：无 column
+描述：填写需要从phoenix表中读取的列名集合，使用JSON的数组描述字段信息，空值表示读取所有列。
+必选： 否
+默认值：全部列 splitKey" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/d74e56a13f78424182e14164c8b4e5e4/" /><meta property="article:section" content="4" />
+<meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
+<meta property="article:modified_time" content="2021-02-02T17:45:01+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="hbase20xsqlreader  插件文档"/>
+<meta name="twitter:description" content="hbase20xsqlreader 插件文档 1 快速介绍 hbase20xsqlreader插件实现了从Phoenix(HBase SQL)读取数据，对应版本为HBase2.X和Phoenix5.X。
+2 实现原理 简而言之，hbase20xsqlreader通过Phoenix轻客户端去连接Phoenix QueryServer，并根据用户配置信息生成查询SELECT 语句，然后发送到QueryServer读取HBase数据，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，最终传递给下游Writer处理。
+3 功能说明 3.1 配置样例 配置一个从Phoenix同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;hbase20xsqlreader&#34;, //指定插件为hbase20xsqlreader &#34;parameter&#34;: { &#34;queryServerAddress&#34;: &#34;http://127.0.0.1:8765&#34;, //填写连接Phoenix QueryServer地址 &#34;serialization&#34;: &#34;PROTOBUF&#34;, //QueryServer序列化格式 &#34;table&#34;: &#34;TEST&#34;, //读取表名 &#34;column&#34;: [&#34;ID&#34;, &#34;NAME&#34;], //所要读取列名 &#34;splitKey&#34;: &#34;ID&#34; //切分列，必须是表主键 } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;encoding&#34;: &#34;UTF-8&#34;, &#34;print&#34;: true } } } ], &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: &#34;3&#34; } } } } 3.2 参数说明 queryServerAddress
+描述：hbase20xsqlreader需要通过Phoenix轻客户端去连接Phoenix QueryServer，因此这里需要填写对应QueryServer地址。 增强版/Lindorm 用户若需透传user, password参数，可以在queryServerAddress后增加对应可选属性. 格式参考：http://127.0.0.1:8765;user=root;password=root
+必选：是 默认值：无 serialization
+描述：QueryServer使用的序列化协议
+必选：否 默认值：PROTOBUF table
+描述：所要读取表名
+必选：是 默认值：无 schema
+描述：表所在的schema
+必选：否 默认值：无 column
+描述：填写需要从phoenix表中读取的列名集合，使用JSON的数组描述字段信息，空值表示读取所有列。
+必选： 否
+默认值：全部列 splitKey"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "4s",
+      "item": "https://haokiu.com/4/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "hbase20xsqlreader  插件文档",
+      "item": "https://haokiu.com/blog/d74e56a13f78424182e14164c8b4e5e4/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "hbase20xsqlreader  插件文档",
+  "name": "hbase20xsqlreader  插件文档",
+  "description": "hbase20xsqlreader 插件文档 1 快速介绍 hbase20xsqlreader插件实现了从Phoenix(HBase SQL)读取数据，对应版本为HBase2.X和Phoenix5.X。\n2 实现原理 简而言之，hbase20xsqlreader通过Phoenix轻客户端去连接Phoenix QueryServer，并根据用户配置信息生成查询SELECT 语句，然后发送到QueryServer读取HBase数据，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，最终传递给下游Writer处理。\n3 功能说明 3.1 配置样例 配置一个从Phoenix同步抽取数据到本地的作业: { \u0026#34;job\u0026#34;: { \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;hbase20xsqlreader\u0026#34;, //指定插件为hbase20xsqlreader \u0026#34;parameter\u0026#34;: { \u0026#34;queryServerAddress\u0026#34;: \u0026#34;http://127.0.0.1:8765\u0026#34;, //填写连接Phoenix QueryServer地址 \u0026#34;serialization\u0026#34;: \u0026#34;PROTOBUF\u0026#34;, //QueryServer序列化格式 \u0026#34;table\u0026#34;: \u0026#34;TEST\u0026#34;, //读取表名 \u0026#34;column\u0026#34;: [\u0026#34;ID\u0026#34;, \u0026#34;NAME\u0026#34;], //所要读取列名 \u0026#34;splitKey\u0026#34;: \u0026#34;ID\u0026#34; //切分列，必须是表主键 } }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;streamwriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;encoding\u0026#34;: \u0026#34;UTF-8\u0026#34;, \u0026#34;print\u0026#34;: true } } } ], \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { \u0026#34;channel\u0026#34;: \u0026#34;3\u0026#34; } } } } 3.2 参数说明 queryServerAddress\n描述：hbase20xsqlreader需要通过Phoenix轻客户端去连接Phoenix QueryServer，因此这里需要填写对应QueryServer地址。 增强版/Lindorm 用户若需透传user, password参数，可以在queryServerAddress后增加对应可选属性. 格式参考：http://127.0.0.1:8765;user=root;password=root\n必选：是 默认值：无 serialization\n描述：QueryServer使用的序列化协议\n必选：否 默认值：PROTOBUF table\n描述：所要读取表名\n必选：是 默认值：无 schema\n描述：表所在的schema\n必选：否 默认值：无 column\n描述：填写需要从phoenix表中读取的列名集合，使用JSON的数组描述字段信息，空值表示读取所有列。\n必选： 否\n默认值：全部列 splitKey",
+  "keywords": [
+    "datax"
+  ],
+  "articleBody": "hbase20xsqlreader 插件文档 1 快速介绍 hbase20xsqlreader插件实现了从Phoenix(HBase SQL)读取数据，对应版本为HBase2.X和Phoenix5.X。\n2 实现原理 简而言之，hbase20xsqlreader通过Phoenix轻客户端去连接Phoenix QueryServer，并根据用户配置信息生成查询SELECT 语句，然后发送到QueryServer读取HBase数据，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，最终传递给下游Writer处理。\n3 功能说明 3.1 配置样例 配置一个从Phoenix同步抽取数据到本地的作业: { \"job\": { \"content\": [ { \"reader\": { \"name\": \"hbase20xsqlreader\", //指定插件为hbase20xsqlreader \"parameter\": { \"queryServerAddress\": \"http://127.0.0.1:8765\", //填写连接Phoenix QueryServer地址 \"serialization\": \"PROTOBUF\", //QueryServer序列化格式 \"table\": \"TEST\", //读取表名 \"column\": [\"ID\", \"NAME\"], //所要读取列名 \"splitKey\": \"ID\" //切分列，必须是表主键 } }, \"writer\": { \"name\": \"streamwriter\", \"parameter\": { \"encoding\": \"UTF-8\", \"print\": true } } } ], \"setting\": { \"speed\": { \"channel\": \"3\" } } } } 3.2 参数说明 queryServerAddress\n描述：hbase20xsqlreader需要通过Phoenix轻客户端去连接Phoenix QueryServer，因此这里需要填写对应QueryServer地址。 增强版/Lindorm 用户若需透传user, password参数，可以在queryServerAddress后增加对应可选属性. 格式参考：http://127.0.0.1:8765;user=root;password=root\n必选：是 默认值：无 serialization\n描述：QueryServer使用的序列化协议\n必选：否 默认值：PROTOBUF table\n描述：所要读取表名\n必选：是 默认值：无 schema\n描述：表所在的schema\n必选：否 默认值：无 column\n描述：填写需要从phoenix表中读取的列名集合，使用JSON的数组描述字段信息，空值表示读取所有列。\n必选： 否\n默认值：全部列 splitKey\n描述：读取表时对表进行切分并行读取，切分时有两种方式：1.根据该列的最大最小值按照指定channel个数均分，这种方式仅支持整形和字符串类型切分列；2.根据设置的splitPoint进行切分\n必选：是 默认值：无 splitPoints\n描述：由于根据切分列最大最小值切分时不能保证避免数据热点，splitKey支持用户根据数据特征动态指定切分点，对表数据进行切分。建议切分点根据Region的startkey和endkey设置，保证每个查询对应单个Region\n必选： 否\n默认值：无 where\n描述：支持对表查询增加过滤条件，每个切分都会携带该过滤条件。\n必选： 否\n默认值：无\nquerySql\n描述：支持指定多个查询语句，但查询列类型和数目必须保持一致，用户可根据实际情况手动输入表查询语句或多表联合查询语句，设置该参数后，除queryserverAddress参数必须设置外，其余参数将失去作用或可不设置。\n必选： 否\n默认值：无\n3.3 类型转换 目前hbase20xsqlreader支持大部分Phoenix类型，但也存在部分个别类型没有支持的情况，请注意检查你的类型。\n下面列出MysqlReader针对Mysql类型转换列表:\nDataX 内部类型 Phoenix 数据类型 String CHAR, VARCHAR Bytes BINARY, VARBINARY Bool BOOLEAN Long INTEGER, TINYINT, SMALLINT, BIGINT Double FLOAT, DECIMAL, DOUBLE, Date DATE, TIME, TIMESTAMP 4 性能报告 略\n5 约束限制 切分表时切分列仅支持单个列，且该列必须是表主键 不设置splitPoint默认使用自动切分，此时切分列仅支持整形和字符型 表名和SCHEMA名及列名大小写敏感，请与Phoenix表实际大小写保持一致 仅支持通过Phoenix QeuryServer读取数据，因此您的Phoenix必须启动QueryServer服务才能使用本插件 6 FAQ ",
+  "wordCount" : "160",
+  "inLanguage": "en",
+  "datePublished": "2021-02-02T17:45:01Z",
+  "dateModified": "2021-02-02T17:45:01Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/d74e56a13f78424182e14164c8b4e5e4/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    <h1 class="post-title">
+      hbase20xsqlreader  插件文档
+    </h1>
+    <div class="post-meta"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#hbase20xsqlreader--%e6%8f%92%e4%bb%b6%e6%96%87%e6%a1%a3" aria-label="hbase20xsqlreader  插件文档">hbase20xsqlreader  插件文档</a><ul>
+                        
+                <li>
+                    <a href="#1-%e5%bf%ab%e9%80%9f%e4%bb%8b%e7%bb%8d" aria-label="1 快速介绍">1 快速介绍</a></li>
+                <li>
+                    <a href="#2-%e5%ae%9e%e7%8e%b0%e5%8e%9f%e7%90%86" aria-label="2 实现原理">2 实现原理</a></li>
+                <li>
+                    <a href="#3-%e5%8a%9f%e8%83%bd%e8%af%b4%e6%98%8e" aria-label="3 功能说明">3 功能说明</a><ul>
+                        
+                <li>
+                    <a href="#31-%e9%85%8d%e7%bd%ae%e6%a0%b7%e4%be%8b" aria-label="3.1 配置样例">3.1 配置样例</a></li>
+                <li>
+                    <a href="#32-%e5%8f%82%e6%95%b0%e8%af%b4%e6%98%8e" aria-label="3.2 参数说明">3.2 参数说明</a></li>
+                <li>
+                    <a href="#33-%e7%b1%bb%e5%9e%8b%e8%bd%ac%e6%8d%a2" aria-label="3.3 类型转换">3.3 类型转换</a></li></ul>
+                </li>
+                <li>
+                    <a href="#4-%e6%80%a7%e8%83%bd%e6%8a%a5%e5%91%8a" aria-label="4 性能报告">4 性能报告</a></li>
+                <li>
+                    <a href="#5-%e7%ba%a6%e6%9d%9f%e9%99%90%e5%88%b6" aria-label="5 约束限制">5 约束限制</a></li>
+                <li>
+                    <a href="#6-faq" aria-label="6 FAQ">6 FAQ</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="hbase20xsqlreader--插件文档">hbase20xsqlreader  插件文档</h1>
+<hr>
+<h2 id="1-快速介绍">1 快速介绍</h2>
+<p>hbase20xsqlreader插件实现了从Phoenix(HBase SQL)读取数据，对应版本为HBase2.X和Phoenix5.X。</p>
+<h2 id="2-实现原理">2 实现原理</h2>
+<p>简而言之，hbase20xsqlreader通过Phoenix轻客户端去连接Phoenix QueryServer，并根据用户配置信息生成查询SELECT 语句，然后发送到QueryServer读取HBase数据，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，最终传递给下游Writer处理。</p>
+<h2 id="3-功能说明">3 功能说明</h2>
+<h3 id="31-配置样例">3.1 配置样例</h3>
+<ul>
+<li>配置一个从Phoenix同步抽取数据到本地的作业:</li>
+</ul>
+<pre tabindex="0"><code>{
+    &#34;job&#34;: {
+        &#34;content&#34;: [
+            {
+                &#34;reader&#34;: {
+                    &#34;name&#34;: &#34;hbase20xsqlreader&#34;,  //指定插件为hbase20xsqlreader
+                    &#34;parameter&#34;: {
+                        &#34;queryServerAddress&#34;: &#34;http://127.0.0.1:8765&#34;,  //填写连接Phoenix QueryServer地址
+                        &#34;serialization&#34;: &#34;PROTOBUF&#34;,  //QueryServer序列化格式
+                        &#34;table&#34;: &#34;TEST&#34;,    //读取表名
+                        &#34;column&#34;: [&#34;ID&#34;, &#34;NAME&#34;],   //所要读取列名
+                        &#34;splitKey&#34;: &#34;ID&#34;    //切分列，必须是表主键
+                    }
+                },
+                &#34;writer&#34;: {
+                    &#34;name&#34;: &#34;streamwriter&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;encoding&#34;: &#34;UTF-8&#34;,
+                        &#34;print&#34;: true
+                    }
+                }
+            }
+        ],
+        &#34;setting&#34;: {
+            &#34;speed&#34;: {
+                &#34;channel&#34;: &#34;3&#34;
+            }
+        }
+    }
+}
+</code></pre><h3 id="32-参数说明">3.2 参数说明</h3>
+<ul>
+<li>
+<p><strong>queryServerAddress</strong></p>
+<ul>
+<li>
+<p>描述：hbase20xsqlreader需要通过Phoenix轻客户端去连接Phoenix QueryServer，因此这里需要填写对应QueryServer地址。
+增强版/Lindorm 用户若需透传user, password参数，可以在queryServerAddress后增加对应可选属性.
+格式参考：http://127.0.0.1:8765;user=root;password=root</p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>serialization</strong></p>
+<ul>
+<li>
+<p>描述：QueryServer使用的序列化协议</p>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：PROTOBUF <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>table</strong></p>
+<ul>
+<li>
+<p>描述：所要读取表名</p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>schema</strong></p>
+<ul>
+<li>
+<p>描述：表所在的schema</p>
+</li>
+<li>
+<p>必选：否 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>column</strong></p>
+<ul>
+<li>
+<p>描述：填写需要从phoenix表中读取的列名集合，使用JSON的数组描述字段信息，空值表示读取所有列。</p>
+</li>
+<li>
+<p>必选： 否<!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：全部列 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>splitKey</strong></p>
+<ul>
+<li>
+<p>描述：读取表时对表进行切分并行读取，切分时有两种方式：1.根据该列的最大最小值按照指定channel个数均分，这种方式仅支持整形和字符串类型切分列；2.根据设置的splitPoint进行切分</p>
+</li>
+<li>
+<p>必选：是 <!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>splitPoints</strong></p>
+<ul>
+<li>
+<p>描述：由于根据切分列最大最小值切分时不能保证避免数据热点，splitKey支持用户根据数据特征动态指定切分点，对表数据进行切分。建议切分点根据Region的startkey和endkey设置，保证每个查询对应单个Region</p>
+</li>
+<li>
+<p>必选： 否<!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无 <!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>where</strong></p>
+<ul>
+<li>
+<p>描述：支持对表查询增加过滤条件，每个切分都会携带该过滤条件。</p>
+</li>
+<li>
+<p>必选： 否<!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无<!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>querySql</strong></p>
+<ul>
+<li>
+<p>描述：支持指定多个查询语句，但查询列类型和数目必须保持一致，用户可根据实际情况手动输入表查询语句或多表联合查询语句，设置该参数后，除queryserverAddress参数必须设置外，其余参数将失去作用或可不设置。</p>
+</li>
+<li>
+<p>必选： 否<!-- raw HTML omitted --></p>
+</li>
+<li>
+<p>默认值：无<!-- raw HTML omitted --></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="33-类型转换">3.3 类型转换</h3>
+<p>目前hbase20xsqlreader支持大部分Phoenix类型，但也存在部分个别类型没有支持的情况，请注意检查你的类型。</p>
+<p>下面列出MysqlReader针对Mysql类型转换列表:</p>
+<table>
+<thead>
+<tr>
+<th>DataX 内部类型</th>
+<th>Phoenix 数据类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>String</td>
+<td>CHAR, VARCHAR</td>
+</tr>
+<tr>
+<td>Bytes</td>
+<td>BINARY, VARBINARY</td>
+</tr>
+<tr>
+<td>Bool</td>
+<td>BOOLEAN</td>
+</tr>
+<tr>
+<td>Long</td>
+<td>INTEGER, TINYINT, SMALLINT, BIGINT</td>
+</tr>
+<tr>
+<td>Double</td>
+<td>FLOAT, DECIMAL, DOUBLE,</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>DATE, TIME, TIMESTAMP</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-性能报告">4 性能报告</h2>
+<p>略</p>
+<h2 id="5-约束限制">5 约束限制</h2>
+<ul>
+<li>切分表时切分列仅支持单个列，且该列必须是表主键</li>
+<li>不设置splitPoint默认使用自动切分，此时切分列仅支持整形和字符型</li>
+<li>表名和SCHEMA名及列名大小写敏感，请与Phoenix表实际大小写保持一致</li>
+<li>仅支持通过Phoenix QeuryServer读取数据，因此您的Phoenix必须启动QueryServer服务才能使用本插件</li>
+</ul>
+<h2 id="6-faq">6 FAQ</h2>
+<hr>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

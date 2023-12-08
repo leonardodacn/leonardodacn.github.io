@@ -181,7 +181,7 @@
 /*** 线程池工具, ctrip_thread_pool.h* zhangyl 2018.03.23*/#ifndef __CTRIP_THREAD_POOL_H__#define __CTRIP_THREAD_POOL_H__#include &lt;pthread.h&gt;#ifndef NULL#define NULL 0#endif#define PUBLIC PUBLIC struct ctrip_task{struct ctrip_task* pNext;int value;};struct ctrip_thread_info{//线程退出标志int thread_running;int thread_num;int tasknum;struct ctrip_task* tasks;pthread_t* threadid;pthread_mutex_t mutex;pthread_cond_t cond;};/* 初始化线程池线程数目* @param thread_num 线程数目, 默认为8个*/PUBLIC void ctrip_init_thread_pool(int thread_num);/* 销毁线程池*/PUBLIC void ctrip_destroy_thread_pool();/**向任务池中增加一个任务* @param t 需要增加的任务*/PUBLIC void ctrip_thread_pool_add_task(struct ctrip_task* t);/**从任务池中取出一个任务* @return 返回得到的任务*/struct ctrip_task* ctrip_thread_pool_retrieve_task();/**执行任务池中的任务* @param t 需要执行的任务*/PUBLIC void ctrip_thread_pool_do_task(struct ctrip_task* t);/**线程函数* @param thread_param 线程参数*/void* ctrip_thread_routine(void* thread_param);#endif //!...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 后台C&#43;&#43;开发你一定要知道的条件变量" href="https://haokiu.com/3418f291fe18455999e74a1f1dbad72a/"></a>
+  <a class="entry-link" aria-label="post link to 后台C&#43;&#43;开发你一定要知道的条件变量" href="https://haokiu.com/blog/3418f291fe18455999e74a1f1dbad72a/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -212,7 +212,7 @@
 以上是我的经历，我也曾迷惘和无助过。也有很多朋友找到我，希望我做一些经验分享和职业规划指导，有需要的小伙伴可以加我微信 easy_coder。</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 后台开发应该读的书" href="https://haokiu.com/b46f16d0f9f8415e94eb76455deea0f0/"></a>
+  <a class="entry-link" aria-label="post link to 后台开发应该读的书" href="https://haokiu.com/blog/b46f16d0f9f8415e94eb76455deea0f0/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -224,7 +224,7 @@
     <p>后端开发相关的书籍 后台开发应该读的书 </p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 后端开发相关的书籍" href="https://haokiu.com/624d2104f4a54c50940f5de425c06ab0/"></a>
+  <a class="entry-link" aria-label="post link to 后端开发相关的书籍" href="https://haokiu.com/blog/624d2104f4a54c50940f5de425c06ab0/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -237,7 +237,7 @@
 整型变量赋值是原子操作吗？</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 多线程" href="https://haokiu.com/dd345ae60ca14a61866fcc2f232aed74/"></a>
+  <a class="entry-link" aria-label="post link to 多线程" href="https://haokiu.com/blog/dd345ae60ca14a61866fcc2f232aed74/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -256,7 +256,7 @@
 这里要提醒一下读者：C/C&#43;&#43; 开源项目中一般会使用各种宏去条件编译一些代码，实际生成的二进制文件中不一定包含这些代码，所以在 Visual Studio 中看到某段代码的行号与实际在 gdb 中调试的代码行号不一定相同，在给某一行代码设置断点时请以 gdb 中 list 命令看到的代码行号为准。</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 如何使用 Visual Studio 管理和阅读开源项目代码" href="https://haokiu.com/9a2768ae509d48689a05cf010b262b09/"></a>
+  <a class="entry-link" aria-label="post link to 如何使用 Visual Studio 管理和阅读开源项目代码" href="https://haokiu.com/blog/9a2768ae509d48689a05cf010b262b09/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -276,7 +276,7 @@ C&#43;&#43; 与操作系统平台 从上面的介绍可以看出，与 Java、Py
 举个例子，C/C&#43;&#43; 语言本身不具备网络通信功能，必须使用操作系统提供的网络通信函数（如 Socket 系列函数）；而对于 Java 来说，其 JDK 自带的 java....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 如何成为一名合格的 C/C&#43;&#43; 开发者？" href="https://haokiu.com/79cb378b756e457cbcb3a3c669a8e4c0/"></a>
+  <a class="entry-link" aria-label="post link to 如何成为一名合格的 C/C&#43;&#43; 开发者？" href="https://haokiu.com/blog/79cb378b756e457cbcb3a3c669a8e4c0/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -310,7 +310,7 @@ C&#43;&#43; 与操作系统平台 从上面的介绍可以看出，与 Java、Py
 这个月，她提出来双方父母见个面，希望我们可以定下来，可是我现在很纠结：我不想和她分手，我爱她，而且她的第一次给了我，但是我又不能满足她的彩礼要求。我不敢想这些事，现在上班也没心思。群主作为过来人和各位读者，能给我点建议吗？</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 我是一名程序员，结婚时女友要求我用两年的工资作为彩礼，我该不该答应？" href="https://haokiu.com/5b6afa35b0644098b8b4d0c853f20358/"></a>
+  <a class="entry-link" aria-label="post link to 我是一名程序员，结婚时女友要求我用两年的工资作为彩礼，我该不该答应？" href="https://haokiu.com/blog/5b6afa35b0644098b8b4d0c853f20358/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -332,7 +332,7 @@ C&#43;&#43; 与操作系统平台 从上面的介绍可以看出，与 Java、Py
 前期学习 Web 开发技术，让我对 html、javascript、CSS 等非常熟悉，而且我读了非常多的 web 方面的经典书籍，也熟悉 web 标准，那个时候讲究的是三层分离（即表现层、样式层和行为层要分离），加上后来又学习了 web 后端开发技术（主要是 php），我的水平具备开发一个商业的 web 整站的水平。这段经历，让我熟悉了很多计算机和软件开发的一些基础理论和设计原则，如 URL、相对路径等概念。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 我是如何年薪五十万的" href="https://haokiu.com/7a566da932f2481388ca678c2dc2c1ac/"></a>
+  <a class="entry-link" aria-label="post link to 我是如何年薪五十万的" href="https://haokiu.com/blog/7a566da932f2481388ca678c2dc2c1ac/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -354,7 +354,7 @@ C&#43;&#43; 与操作系统平台 从上面的介绍可以看出，与 Java、Py
 由于项目任务比较多，我们采用的是 996 模式，但是在 2018 年上半年，我基本上在晚上 12 点之前是没回去过的。当然，我并不认为工作时间与实际的产出会成正比，在团队扩大的过程中也暴露了很多的问题，有我自己的，也有 CEO 和团队其他一些负责人的。有的时候，我其实挺想和 CEO 说让大家每周多休息一天，但是看到当前的现状，我最终还是没开口。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 我的 2019" href="https://haokiu.com/fce122b624fd44a88df285c221d765b8/"></a>
+  <a class="entry-link" aria-label="post link to 我的 2019" href="https://haokiu.com/blog/fce122b624fd44a88df285c221d765b8/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -436,7 +436,7 @@ CAS机制（饿了么二面问过）。
 可能最终会因为薪资达不到不被录取...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 我面试后端开发经理的经历" href="https://haokiu.com/b9e6c063ac4a43aca14c01cc45b2f8fa/"></a>
+  <a class="entry-link" aria-label="post link to 我面试后端开发经理的经历" href="https://haokiu.com/blog/b9e6c063ac4a43aca14c01cc45b2f8fa/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

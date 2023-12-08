@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>三、Paxos的工程实践 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="2.2.3 Paxos算法详解 假设有一组可以提出提案的进程集合，那么对于一个一致性算法来说需要保证以下几点：
+在这些被提出的提案中，只有一个会被选定。
+如果没有填被提出，那么就不会有被选定的提案。
+当一个填被选定后，进程应该可以获取被选定的提案信息。
+对于一致性来说，安全性（Safety）需求如下：
+只有被提出的提案才能被选定。 只有一个值被选定。 如果某么进程认为某个提案被选定了，那么这个提案必须是真的被选定的那个。 提案的选定
+大多数。
+推导过程
+P1：一个Accptor必须批准它收到的第一个提案
+P1a：一个Acceptor只要尚未响应过任何编号大于Mn的Prepare请求，那么它就可以接收这个编号为Mn的提案。（优化：可以忽略已批准过的提案的Prepare请求）
+P2：如果编号为M0，Value值为V0的提案（即[M0,V0]）被选定了，那么所有比编号M0更高的，且被选定的提案，其Value值必须为V0。
+P2a：如果编号为M0，Value值为V0的提案（即[M0,V0]）被选定了，那么所有比编号M0更高的，且被Acceptor批准的提案，其Value值必须为V0。
+P2b：如果一个提案[M0,V0]被选定后，那么之后任何Proposer产生的编号更高的提案，其Value值都为V0。
+P2c：对于任意的Mn和Vn，如果提案[Mn,Vn]被提出，那么肯定存在一个由半数以上的Acceptor组成的集合S，满足以下两个条件中的任意一个：
+S中不存在任何批准过编号小于Mn的提案的Acceptor。 选取S中所有Acceptor批准的编号小于Mn的提案，其中编号最大的那个提案其Value值是Vn。 推导过程为第二数学归纳法。略
+Proposer生成提案
+对于Proposer，获取被通过的提案比预测可能会被通过的提案简单。
+Proposer选择一个新的提案编号Mn，然后向某个Acceptor集合的成员发送请求，要求该集合中的Acceptor做出如下回应。 像Proposer承诺，保证不再批准任何编号小于Mn的提案。 如果Acceptor已经批准过任何提案，那么其就向Proposer反馈当前该Acceptor已经批准的编号小于Mn但为最大编号的那个提案的值。 如果Proposer收到了来自半数以上的Acceptor的响应结果，那么它就可以产生编号为Mn、Value值为Vn的提案，这里的Vn是所有响应中编号最大的提案Value值。当然还存在一种情况，就是半数以上的Acceptor都没有批准过任何提案，即响应中不包含任何的提案，那么此时Vn值就可以由Proposer任意选择。 Acceptor批准提案
+一个Acceptor可能会收到来自Proposer的两种请求，分别是Prepare请求和Accept请求，分别相应如下：
+Prepare请求：Acceptor可以在任何时候响应一个Prepare请求。 Accept请求：在不违背Accept现有承诺的前提下，可以任意响应Accept请求。 算法陈述
+阶段一：
+Proposer发送提案编号Mn； Acceptor根据约束接收提案，如果接收过返回接收最大值Vn； 阶段二：
+如果Proposer收到大多数A的响应，发送[Mn,Vn]； Acceptor根据约束接收提案； 提案的获取
+通知全部Learner
+选取主Learner
+将主Learner改为Learner集合
+通过选取主Proposer保证算法的活性
+三、Paxos的工程实践 3.1 Chubby 一个分布式锁服务。解决分布式协作，元数据存储，Master选举等一系列与分布式锁服务相关的问题。
+底层为Paxos算法。
+3.1.1 概述 ">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/3426588a7834499f8a9a1b7e46817c0c/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="三、Paxos的工程实践" />
+<meta property="og:description" content="2.2.3 Paxos算法详解 假设有一组可以提出提案的进程集合，那么对于一个一致性算法来说需要保证以下几点：
+在这些被提出的提案中，只有一个会被选定。
+如果没有填被提出，那么就不会有被选定的提案。
+当一个填被选定后，进程应该可以获取被选定的提案信息。
+对于一致性来说，安全性（Safety）需求如下：
+只有被提出的提案才能被选定。 只有一个值被选定。 如果某么进程认为某个提案被选定了，那么这个提案必须是真的被选定的那个。 提案的选定
+大多数。
+推导过程
+P1：一个Accptor必须批准它收到的第一个提案
+P1a：一个Acceptor只要尚未响应过任何编号大于Mn的Prepare请求，那么它就可以接收这个编号为Mn的提案。（优化：可以忽略已批准过的提案的Prepare请求）
+P2：如果编号为M0，Value值为V0的提案（即[M0,V0]）被选定了，那么所有比编号M0更高的，且被选定的提案，其Value值必须为V0。
+P2a：如果编号为M0，Value值为V0的提案（即[M0,V0]）被选定了，那么所有比编号M0更高的，且被Acceptor批准的提案，其Value值必须为V0。
+P2b：如果一个提案[M0,V0]被选定后，那么之后任何Proposer产生的编号更高的提案，其Value值都为V0。
+P2c：对于任意的Mn和Vn，如果提案[Mn,Vn]被提出，那么肯定存在一个由半数以上的Acceptor组成的集合S，满足以下两个条件中的任意一个：
+S中不存在任何批准过编号小于Mn的提案的Acceptor。 选取S中所有Acceptor批准的编号小于Mn的提案，其中编号最大的那个提案其Value值是Vn。 推导过程为第二数学归纳法。略
+Proposer生成提案
+对于Proposer，获取被通过的提案比预测可能会被通过的提案简单。
+Proposer选择一个新的提案编号Mn，然后向某个Acceptor集合的成员发送请求，要求该集合中的Acceptor做出如下回应。 像Proposer承诺，保证不再批准任何编号小于Mn的提案。 如果Acceptor已经批准过任何提案，那么其就向Proposer反馈当前该Acceptor已经批准的编号小于Mn但为最大编号的那个提案的值。 如果Proposer收到了来自半数以上的Acceptor的响应结果，那么它就可以产生编号为Mn、Value值为Vn的提案，这里的Vn是所有响应中编号最大的提案Value值。当然还存在一种情况，就是半数以上的Acceptor都没有批准过任何提案，即响应中不包含任何的提案，那么此时Vn值就可以由Proposer任意选择。 Acceptor批准提案
+一个Acceptor可能会收到来自Proposer的两种请求，分别是Prepare请求和Accept请求，分别相应如下：
+Prepare请求：Acceptor可以在任何时候响应一个Prepare请求。 Accept请求：在不违背Accept现有承诺的前提下，可以任意响应Accept请求。 算法陈述
+阶段一：
+Proposer发送提案编号Mn； Acceptor根据约束接收提案，如果接收过返回接收最大值Vn； 阶段二：
+如果Proposer收到大多数A的响应，发送[Mn,Vn]； Acceptor根据约束接收提案； 提案的获取
+通知全部Learner
+选取主Learner
+将主Learner改为Learner集合
+通过选取主Proposer保证算法的活性
+三、Paxos的工程实践 3.1 Chubby 一个分布式锁服务。解决分布式协作，元数据存储，Master选举等一系列与分布式锁服务相关的问题。
+底层为Paxos算法。
+3.1.1 概述 " />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/3426588a7834499f8a9a1b7e46817c0c/" /><meta property="article:section" content="6" />
+<meta property="article:published_time" content="2021-06-08T17:51:46+00:00" />
+<meta property="article:modified_time" content="2021-06-08T17:51:46+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="三、Paxos的工程实践"/>
+<meta name="twitter:description" content="2.2.3 Paxos算法详解 假设有一组可以提出提案的进程集合，那么对于一个一致性算法来说需要保证以下几点：
+在这些被提出的提案中，只有一个会被选定。
+如果没有填被提出，那么就不会有被选定的提案。
+当一个填被选定后，进程应该可以获取被选定的提案信息。
+对于一致性来说，安全性（Safety）需求如下：
+只有被提出的提案才能被选定。 只有一个值被选定。 如果某么进程认为某个提案被选定了，那么这个提案必须是真的被选定的那个。 提案的选定
+大多数。
+推导过程
+P1：一个Accptor必须批准它收到的第一个提案
+P1a：一个Acceptor只要尚未响应过任何编号大于Mn的Prepare请求，那么它就可以接收这个编号为Mn的提案。（优化：可以忽略已批准过的提案的Prepare请求）
+P2：如果编号为M0，Value值为V0的提案（即[M0,V0]）被选定了，那么所有比编号M0更高的，且被选定的提案，其Value值必须为V0。
+P2a：如果编号为M0，Value值为V0的提案（即[M0,V0]）被选定了，那么所有比编号M0更高的，且被Acceptor批准的提案，其Value值必须为V0。
+P2b：如果一个提案[M0,V0]被选定后，那么之后任何Proposer产生的编号更高的提案，其Value值都为V0。
+P2c：对于任意的Mn和Vn，如果提案[Mn,Vn]被提出，那么肯定存在一个由半数以上的Acceptor组成的集合S，满足以下两个条件中的任意一个：
+S中不存在任何批准过编号小于Mn的提案的Acceptor。 选取S中所有Acceptor批准的编号小于Mn的提案，其中编号最大的那个提案其Value值是Vn。 推导过程为第二数学归纳法。略
+Proposer生成提案
+对于Proposer，获取被通过的提案比预测可能会被通过的提案简单。
+Proposer选择一个新的提案编号Mn，然后向某个Acceptor集合的成员发送请求，要求该集合中的Acceptor做出如下回应。 像Proposer承诺，保证不再批准任何编号小于Mn的提案。 如果Acceptor已经批准过任何提案，那么其就向Proposer反馈当前该Acceptor已经批准的编号小于Mn但为最大编号的那个提案的值。 如果Proposer收到了来自半数以上的Acceptor的响应结果，那么它就可以产生编号为Mn、Value值为Vn的提案，这里的Vn是所有响应中编号最大的提案Value值。当然还存在一种情况，就是半数以上的Acceptor都没有批准过任何提案，即响应中不包含任何的提案，那么此时Vn值就可以由Proposer任意选择。 Acceptor批准提案
+一个Acceptor可能会收到来自Proposer的两种请求，分别是Prepare请求和Accept请求，分别相应如下：
+Prepare请求：Acceptor可以在任何时候响应一个Prepare请求。 Accept请求：在不违背Accept现有承诺的前提下，可以任意响应Accept请求。 算法陈述
+阶段一：
+Proposer发送提案编号Mn； Acceptor根据约束接收提案，如果接收过返回接收最大值Vn； 阶段二：
+如果Proposer收到大多数A的响应，发送[Mn,Vn]； Acceptor根据约束接收提案； 提案的获取
+通知全部Learner
+选取主Learner
+将主Learner改为Learner集合
+通过选取主Proposer保证算法的活性
+三、Paxos的工程实践 3.1 Chubby 一个分布式锁服务。解决分布式协作，元数据存储，Master选举等一系列与分布式锁服务相关的问题。
+底层为Paxos算法。
+3.1.1 概述 "/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "6s",
+      "item": "https://haokiu.com/6/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "三、Paxos的工程实践",
+      "item": "https://haokiu.com/blog/3426588a7834499f8a9a1b7e46817c0c/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "三、Paxos的工程实践",
+  "name": "三、Paxos的工程实践",
+  "description": "2.2.3 Paxos算法详解 假设有一组可以提出提案的进程集合，那么对于一个一致性算法来说需要保证以下几点：\n在这些被提出的提案中，只有一个会被选定。\n如果没有填被提出，那么就不会有被选定的提案。\n当一个填被选定后，进程应该可以获取被选定的提案信息。\n对于一致性来说，安全性（Safety）需求如下：\n只有被提出的提案才能被选定。 只有一个值被选定。 如果某么进程认为某个提案被选定了，那么这个提案必须是真的被选定的那个。 提案的选定\n大多数。\n推导过程\nP1：一个Accptor必须批准它收到的第一个提案\nP1a：一个Acceptor只要尚未响应过任何编号大于Mn的Prepare请求，那么它就可以接收这个编号为Mn的提案。（优化：可以忽略已批准过的提案的Prepare请求）\nP2：如果编号为M0，Value值为V0的提案（即[M0,V0]）被选定了，那么所有比编号M0更高的，且被选定的提案，其Value值必须为V0。\nP2a：如果编号为M0，Value值为V0的提案（即[M0,V0]）被选定了，那么所有比编号M0更高的，且被Acceptor批准的提案，其Value值必须为V0。\nP2b：如果一个提案[M0,V0]被选定后，那么之后任何Proposer产生的编号更高的提案，其Value值都为V0。\nP2c：对于任意的Mn和Vn，如果提案[Mn,Vn]被提出，那么肯定存在一个由半数以上的Acceptor组成的集合S，满足以下两个条件中的任意一个：\nS中不存在任何批准过编号小于Mn的提案的Acceptor。 选取S中所有Acceptor批准的编号小于Mn的提案，其中编号最大的那个提案其Value值是Vn。 推导过程为第二数学归纳法。略\nProposer生成提案\n对于Proposer，获取被通过的提案比预测可能会被通过的提案简单。\nProposer选择一个新的提案编号Mn，然后向某个Acceptor集合的成员发送请求，要求该集合中的Acceptor做出如下回应。 像Proposer承诺，保证不再批准任何编号小于Mn的提案。 如果Acceptor已经批准过任何提案，那么其就向Proposer反馈当前该Acceptor已经批准的编号小于Mn但为最大编号的那个提案的值。 如果Proposer收到了来自半数以上的Acceptor的响应结果，那么它就可以产生编号为Mn、Value值为Vn的提案，这里的Vn是所有响应中编号最大的提案Value值。当然还存在一种情况，就是半数以上的Acceptor都没有批准过任何提案，即响应中不包含任何的提案，那么此时Vn值就可以由Proposer任意选择。 Acceptor批准提案\n一个Acceptor可能会收到来自Proposer的两种请求，分别是Prepare请求和Accept请求，分别相应如下：\nPrepare请求：Acceptor可以在任何时候响应一个Prepare请求。 Accept请求：在不违背Accept现有承诺的前提下，可以任意响应Accept请求。 算法陈述\n阶段一：\nProposer发送提案编号Mn； Acceptor根据约束接收提案，如果接收过返回接收最大值Vn； 阶段二：\n如果Proposer收到大多数A的响应，发送[Mn,Vn]； Acceptor根据约束接收提案； 提案的获取\n通知全部Learner\n选取主Learner\n将主Learner改为Learner集合\n通过选取主Proposer保证算法的活性\n三、Paxos的工程实践 3.1 Chubby 一个分布式锁服务。解决分布式协作，元数据存储，Master选举等一系列与分布式锁服务相关的问题。\n底层为Paxos算法。\n3.1.1 概述 ",
+  "keywords": [
+    
+  ],
+  "articleBody": "2.2.3 Paxos算法详解 假设有一组可以提出提案的进程集合，那么对于一个一致性算法来说需要保证以下几点：\n在这些被提出的提案中，只有一个会被选定。\n如果没有填被提出，那么就不会有被选定的提案。\n当一个填被选定后，进程应该可以获取被选定的提案信息。\n对于一致性来说，安全性（Safety）需求如下：\n只有被提出的提案才能被选定。 只有一个值被选定。 如果某么进程认为某个提案被选定了，那么这个提案必须是真的被选定的那个。 提案的选定\n大多数。\n推导过程\nP1：一个Accptor必须批准它收到的第一个提案\nP1a：一个Acceptor只要尚未响应过任何编号大于Mn的Prepare请求，那么它就可以接收这个编号为Mn的提案。（优化：可以忽略已批准过的提案的Prepare请求）\nP2：如果编号为M0，Value值为V0的提案（即[M0,V0]）被选定了，那么所有比编号M0更高的，且被选定的提案，其Value值必须为V0。\nP2a：如果编号为M0，Value值为V0的提案（即[M0,V0]）被选定了，那么所有比编号M0更高的，且被Acceptor批准的提案，其Value值必须为V0。\nP2b：如果一个提案[M0,V0]被选定后，那么之后任何Proposer产生的编号更高的提案，其Value值都为V0。\nP2c：对于任意的Mn和Vn，如果提案[Mn,Vn]被提出，那么肯定存在一个由半数以上的Acceptor组成的集合S，满足以下两个条件中的任意一个：\nS中不存在任何批准过编号小于Mn的提案的Acceptor。 选取S中所有Acceptor批准的编号小于Mn的提案，其中编号最大的那个提案其Value值是Vn。 推导过程为第二数学归纳法。略\nProposer生成提案\n对于Proposer，获取被通过的提案比预测可能会被通过的提案简单。\nProposer选择一个新的提案编号Mn，然后向某个Acceptor集合的成员发送请求，要求该集合中的Acceptor做出如下回应。 像Proposer承诺，保证不再批准任何编号小于Mn的提案。 如果Acceptor已经批准过任何提案，那么其就向Proposer反馈当前该Acceptor已经批准的编号小于Mn但为最大编号的那个提案的值。 如果Proposer收到了来自半数以上的Acceptor的响应结果，那么它就可以产生编号为Mn、Value值为Vn的提案，这里的Vn是所有响应中编号最大的提案Value值。当然还存在一种情况，就是半数以上的Acceptor都没有批准过任何提案，即响应中不包含任何的提案，那么此时Vn值就可以由Proposer任意选择。 Acceptor批准提案\n一个Acceptor可能会收到来自Proposer的两种请求，分别是Prepare请求和Accept请求，分别相应如下：\nPrepare请求：Acceptor可以在任何时候响应一个Prepare请求。 Accept请求：在不违背Accept现有承诺的前提下，可以任意响应Accept请求。 算法陈述\n阶段一：\nProposer发送提案编号Mn； Acceptor根据约束接收提案，如果接收过返回接收最大值Vn； 阶段二：\n如果Proposer收到大多数A的响应，发送[Mn,Vn]； Acceptor根据约束接收提案； 提案的获取\n通知全部Learner\n选取主Learner\n将主Learner改为Learner集合\n通过选取主Proposer保证算法的活性\n三、Paxos的工程实践 3.1 Chubby 一个分布式锁服务。解决分布式协作，元数据存储，Master选举等一系列与分布式锁服务相关的问题。\n底层为Paxos算法。\n3.1.1 概述 ",
+  "wordCount" : "51",
+  "inLanguage": "en",
+  "datePublished": "2021-06-08T17:51:46Z",
+  "dateModified": "2021-06-08T17:51:46Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/3426588a7834499f8a9a1b7e46817c0c/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/6/">6s</a></div>
+    <h1 class="post-title">
+      三、Paxos的工程实践
+    </h1>
+    <div class="post-meta"><span title='2021-06-08 17:51:46 +0000 UTC'>June 8, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul><ul><ul>
+                <li>
+                    <a href="#223-paxos%e7%ae%97%e6%b3%95%e8%af%a6%e8%a7%a3" aria-label="2.2.3 Paxos算法详解">2.2.3 Paxos算法详解</a></li></ul>
+                    </ul>
+                    
+                <li>
+                    <a href="#%e4%b8%89paxos%e7%9a%84%e5%b7%a5%e7%a8%8b%e5%ae%9e%e8%b7%b5" aria-label="三、Paxos的工程实践">三、Paxos的工程实践</a><ul>
+                        
+                <li>
+                    <a href="#31-chubby" aria-label="3.1 Chubby">3.1 Chubby</a><ul>
+                        
+                <li>
+                    <a href="#311-%e6%a6%82%e8%bf%b0" aria-label="3.1.1 概述">3.1.1 概述</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h3 id="223-paxos算法详解">2.2.3 Paxos算法详解</h3>
+<p>假设有一组可以提出提案的进程集合，那么对于一个一致性算法来说需要保证以下几点：</p>
+<ul>
+<li>
+<p>在这些被提出的提案中，只有一个会被选定。</p>
+</li>
+<li>
+<p>如果没有填被提出，那么就不会有被选定的提案。</p>
+</li>
+<li>
+<p>当一个填被选定后，进程应该可以获取被选定的提案信息。</p>
+</li>
+</ul>
+<p>对于一致性来说，安全性（Safety）需求如下：</p>
+<ul>
+<li>只有被提出的提案才能被选定。</li>
+<li>只有一个值被选定。</li>
+<li>如果某么进程认为某个提案被选定了，那么这个提案必须是真的被选定的那个。</li>
+</ul>
+<p><strong>提案的选定</strong></p>
+<p>大多数。</p>
+<p><strong>推导过程</strong></p>
+<p>P1：一个Accptor必须批准它收到的第一个提案</p>
+<p>P1a：一个Acceptor只要尚未响应过任何编号大于Mn的Prepare请求，那么它就可以接收这个编号为Mn的提案。（优化：可以忽略已批准过的提案的Prepare请求）</p>
+<p>P2：如果编号为M0，Value值为V0的提案（即[M0,V0]）被选定了，那么所有比编号M0更高的，且被选定的提案，其Value值必须为V0。</p>
+<p>P2a：如果编号为M0，Value值为V0的提案（即[M0,V0]）被选定了，那么所有比编号M0更高的，且被Acceptor批准的提案，其Value值必须为V0。</p>
+<p>P2b：如果一个提案[M0,V0]被选定后，那么之后任何Proposer产生的编号更高的提案，其Value值都为V0。</p>
+<p>P2c：对于任意的Mn和Vn，如果提案[Mn,Vn]被提出，那么肯定存在一个由半数以上的Acceptor组成的集合S，满足以下两个条件中的任意一个：</p>
+<ul>
+<li>S中不存在任何批准过编号小于Mn的提案的Acceptor。</li>
+<li>选取S中所有Acceptor批准的编号小于Mn的提案，其中编号最大的那个提案其Value值是Vn。</li>
+</ul>
+<p>推导过程为第二数学归纳法。略</p>
+<p><strong>Proposer生成提案</strong></p>
+<p>对于Proposer，获取被通过的提案比预测可能会被通过的提案简单。</p>
+<ol>
+<li>Proposer选择一个新的提案编号Mn，然后向某个Acceptor集合的成员发送请求，要求该集合中的Acceptor做出如下回应。
+<ul>
+<li>像Proposer承诺，保证不再批准任何编号小于Mn的提案。</li>
+<li>如果Acceptor已经批准过任何提案，那么其就向Proposer反馈当前该Acceptor已经批准的编号小于Mn但为最大编号的那个提案的值。</li>
+</ul>
+</li>
+<li>如果Proposer收到了来自半数以上的Acceptor的响应结果，那么它就可以产生编号为Mn、Value值为Vn的提案，这里的Vn是所有响应中编号最大的提案Value值。当然还存在一种情况，就是半数以上的Acceptor都没有批准过任何提案，即响应中不包含任何的提案，那么此时Vn值就可以由Proposer任意选择。</li>
+</ol>
+<p><strong>Acceptor批准提案</strong></p>
+<p>一个Acceptor可能会收到来自Proposer的两种请求，分别是Prepare请求和Accept请求，分别相应如下：</p>
+<ul>
+<li>Prepare请求：Acceptor可以在任何时候响应一个Prepare请求。</li>
+<li>Accept请求：在不违背Accept现有承诺的前提下，可以任意响应Accept请求。</li>
+</ul>
+<p><strong>算法陈述</strong></p>
+<p>阶段一：</p>
+<ol>
+<li>Proposer发送提案编号Mn；</li>
+<li>Acceptor根据约束接收提案，如果接收过返回接收最大值Vn；</li>
+</ol>
+<p>阶段二：</p>
+<ol>
+<li>如果Proposer收到大多数A的响应，发送[Mn,Vn]；</li>
+<li>Acceptor根据约束接收提案；</li>
+</ol>
+<p><strong>提案的获取</strong></p>
+<ol>
+<li>
+<p>通知全部Learner</p>
+</li>
+<li>
+<p>选取主Learner</p>
+</li>
+<li>
+<p>将主Learner改为Learner集合</p>
+</li>
+</ol>
+<p><strong>通过选取主Proposer保证算法的活性</strong></p>
+<h1 id="三paxos的工程实践">三、Paxos的工程实践</h1>
+<h2 id="31-chubby">3.1 Chubby</h2>
+<p>一个分布式锁服务。解决分布式协作，元数据存储，Master选举等一系列与分布式锁服务相关的问题。</p>
+<p>底层为Paxos算法。</p>
+<h3 id="311-概述">3.1.1 概述</h3>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

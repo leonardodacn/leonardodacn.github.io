@@ -192,7 +192,7 @@ void Active::Consume(){ boost::mutex::scoped_lock lock(m_IOMutex); while(m_Queue
 void Active::Start(){ bool ifHvTimer = !m_ThreadTimer.IsEmpty(); if (ifHvTimer){ m_Thread = boost::thread(&amp;Active::RunWithUpdate, this); } else{ m_Thread = boost::thread(&amp;Active::Run, this); } m_ThreadID = get_native_thread_id(m_Thread); char sThreadName[30]; sprintf(sThreadName, &#34;%s-%d&#34;, &#34;Actor-Run&#34;, GetActorID()); _SetThreadName(m_ThreadID, sThreadName); } 在上面这个函数中添加断点，重启下程序，很快会触发断点，我们看下断点触发时的调用堆栈：...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 从零学习开源项目系列（四）LogServer源码探究" href="https://haokiu.com/fea618d6d104410cb5df6bc54d9529f2/"></a>
+  <a class="entry-link" aria-label="post link to 从零学习开源项目系列（四）LogServer源码探究" href="https://haokiu.com/blog/fea618d6d104410cb5df6bc54d9529f2/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -219,7 +219,7 @@ GET /index_2013.php?param1=value1&amp;param2=value2&amp;param3=value3 HTTP/1.1\r
 POST /passport/web/login HTTP/1.1\r\nHost: kyfw....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 从零实现一个http服务器" href="https://haokiu.com/2ec66b5605c8455e833f06d2a23fff09/"></a>
+  <a class="entry-link" aria-label="post link to 从零实现一个http服务器" href="https://haokiu.com/blog/2ec66b5605c8455e833f06d2a23fff09/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -246,7 +246,7 @@ SMTP 协议的格式：
 //连接上邮件服务器之后登录服务器之前向服务器发送的问候信息 HELO 自定义问候语\r\n //请求登录邮件服务器 AUTH LOGIN\r\n base64形式的用户名\r\n base64形式的密码\r\n //设置发件人邮箱地址 MAIL FROM:发件人地址\r\n //设置收件人地址，每次发送可设置一个收件人地址，如果有多个收件地址，要分别设置对应次数 rcpt to:收件人地址\r\n //发送邮件正文开始标志 DATA\r\n //发送邮件正文，注意邮件正文以.\r\n结束 邮件正文\r\n.\r\n //登出服务器 QUIT\r\n 使用 SMTP 作为邮件服务器的一方常用的“关键字“是定义的各种应答码，应答码后面可以带上自己的信息，然后以\r\n作为结束，格式如下：...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 从零实现一个邮件收发客户端" href="https://haokiu.com/e1e38f7ff0e941c8ad6e51923070551d/"></a>
+  <a class="entry-link" aria-label="post link to 从零实现一个邮件收发客户端" href="https://haokiu.com/blog/e1e38f7ff0e941c8ad6e51923070551d/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -279,7 +279,7 @@ Chrome浏览器（其他的浏览器也可以，都有类似的界面，如Chrom
 GET /otn/leftTicket/query?leftTicketDTO.train_date=2018-05-20&amp;leftTicketDTO.from_station=SHH&amp;leftTicketDTO.to_station=BJP&amp;purpose_codes=ADULT HTTP/1.1 Host: kyfw.12306.cn Connection: keep-alive Cache-Control: no-cache Accept: */* X-Requested-With: XMLHttpRequest If-Modified-Since: 0 User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36 Referer: https://kyfw.12306.cn/otn/leftTicket/init Accept-Encoding: gzip, deflate, br Accept-Language: zh-CN,zh;q=0.9,en;q=0.8 Cookie: RAIL_EXPIRATION=1526978933395; RAIL_DEVICEID=WKxIYg-q1zjIPVu7VjulZ9PqEGvW2gUB9LvoM1Vx8fa7l3SUwnO_BVSatbTq506c6VYNOaxAiRaUcGFTMjCz9cPayEIc9vJ0pHaXdSqDlujJP8YrIoXbpAAs60l99z8bEtnHgAJzxLzKiv2nka5nmLY_BMNur8b8; _jc_save_fromStation=%u4E0A%u6D77%2CSHH; _jc_save_toStation=%u5317%u4EAC%2CBJP; _jc_save_fromDate=2018-05-20; _jc_save_toDate=2018-05-19; _jc_save_wfdc_flag=dc 应答包：...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 从零实现一款12306刷票软件" href="https://haokiu.com/42f423476e5d4262bcb032f3cf4c40d3/"></a>
+  <a class="entry-link" aria-label="post link to 从零实现一款12306刷票软件" href="https://haokiu.com/blog/42f423476e5d4262bcb032f3cf4c40d3/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -295,7 +295,7 @@ GET /realtime HTTP/1.1\r\n Host: 127.0.0.1:9989\r\n Connection: Upgrade\r\n Prag
 握手必须是一个有效的 HTTP 请求； 请求的方法必须为 GET，且 HTTP 版本必须是 1.1； 请求必须包含 Host 字段信息； 请求必须包含 Upgrade字段信息，值必须为 websocket； 请求必须包含 Connection 字段信息，值必须为 Upgrade； 请求必须包含 Sec-WebSocket-Key 字段，该字段值是客户端的标识编码成 base64 格式； 请求必须包含 Sec-WebSocket-Version 字段信息，值必须为 13； 请求必须包含 Origin 字段； 请求可能包含 Sec-WebSocket-Protocol 字段，规定子协议； 请求可能包含 Sec-WebSocket-Extensions字段规定协议扩展； 请求可能包含其他字段，如 cookie 等。 对端收到该数据包后如果支持 WebSocket 协议，会回复一个 http 格式的应答，这个应答报文的格式大致如下：...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 从零开发一个WebSocket服务器" href="https://haokiu.com/f8c9189db8404c76867e71440f136a2c/"></a>
+  <a class="entry-link" aria-label="post link to 从零开发一个WebSocket服务器" href="https://haokiu.com/blog/f8c9189db8404c76867e71440f136a2c/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -308,7 +308,7 @@ GET /realtime HTTP/1.1\r\n Host: 127.0.0.1:9989\r\n Connection: Upgrade\r\n Prag
 我是如何年薪五十万的</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 作者的故事" href="https://haokiu.com/745f468dc9234e4f95ac9d848e64fa0b/"></a>
+  <a class="entry-link" aria-label="post link to 作者的故事" href="https://haokiu.com/blog/745f468dc9234e4f95ac9d848e64fa0b/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -343,7 +343,7 @@ foo的函数体现在可以执行了。这其中也许有进栈、出栈的动�
 被调用者返回前的动作 在把程序控制权返还给调用者前，被调用者foo必须先把返回值保存在EAX寄存器中。我们前面已经讨论过，当返回值占用多于4个或8个字节时，接收返回值的变量地址会作为一个额外的指针参数被传到函数中，而函数本身就不需要返回值了。这种情况下，被调用者直接通过内存拷贝把返回值直接拷贝到接收地址，从而省去了一次通过栈的中转拷贝。 其次，foo必须恢复EBX，ESI和EDI寄存器的值。如果这些寄存器被修改，正如我们前面所说，我们会在foo执行开始时把它们的原始值压入栈中。如果ESP寄存器指向如图4所示的正确位置，寄存器的原始值就可以出栈并恢复。可见，在foo函数的执行过程中正确地跟踪ESP是多么的重要————也就是说，进栈和出栈操作的次数必须保持平衡。 这两步之后，我们不再需要foo的局部变量和临时存储了，我们可以通过下面的指令消除栈帧：...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 你一定要搞明白的C函数调用方式与栈原理" href="https://haokiu.com/2d2976c6ad824a1b9e2c44ffad106432/"></a>
+  <a class="entry-link" aria-label="post link to 你一定要搞明白的C函数调用方式与栈原理" href="https://haokiu.com/blog/2d2976c6ad824a1b9e2c44ffad106432/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -358,7 +358,7 @@ yum install lsof 我们来看一下这个命令的使用效果：
 COMMAND PID TID USER FD TYPE DEVICE SIZE/OFF NODE NAME systemd 1 root cwd DIR 202,1 4096 2 / nscd 453 469 nscd 8u netlink 0t0 11017 ROUTE nscd 453 470 nscd cwd DIR 202,1 4096 2 / nscd 453 470 nscd rtd DIR 202,1 4096 2 / nscd 453 470 nscd txt REG 202,1 180272 146455 /usr/sbin/nscd nscd 453 470 nscd mem REG 202,1 217032 401548 /var/db/nscd/hosts nscd 453 470 nscd mem REG 202,1 90664 132818 /usr/lib64/libz....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 做 Java 或者 C&#43;&#43; 开发都应该知道的 lsof 命令" href="https://haokiu.com/a21d8fb5077b4bdfacf0cd5f4583f1cc/"></a>
+  <a class="entry-link" aria-label="post link to 做 Java 或者 C&#43;&#43; 开发都应该知道的 lsof 命令" href="https://haokiu.com/blog/a21d8fb5077b4bdfacf0cd5f4583f1cc/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -378,7 +378,7 @@ COMMAND PID TID USER FD TYPE DEVICE SIZE/OFF NODE NAME systemd 1 root cwd DIR 20
 我们可以在界面上点击按钮 Open Project 按钮直接打开工程文件，也可以找到对应目录下的 libuv.sln 打开。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 利用 cmake 工具生成 Visual Studio 工程文件" href="https://haokiu.com/cf3a65cd7c2a40d1a4dbfd708c471c01/"></a>
+  <a class="entry-link" aria-label="post link to 利用 cmake 工具生成 Visual Studio 工程文件" href="https://haokiu.com/blog/cf3a65cd7c2a40d1a4dbfd708c471c01/"></a>
 </article>
 
 <article class="post-entry"> 
@@ -394,7 +394,7 @@ yum install telnet 如果一个服务程序对外开启了侦听服务，我们�
 [root@localhost ~]# ping 120.55.94.78 PING 120.55.94.78 (120.55.94.78) 56(84) bytes of data. 64 bytes from 120.55.94.78: icmp_seq=1 ttl=128 time=15.3 ms 64 bytes from 120.55.94.78: icmp_seq=2 ttl=128 time=14.3 ms 64 bytes from 120.55.94.78: icmp_seq=3 ttl=128 time=16.4 ms 64 bytes from 120.55.94.78: icmp_seq=4 ttl=128 time=16.1 ms 64 bytes from 120.55.94.78: icmp_seq=5 ttl=128 time=15.5 ms ^C --- 120.55.94.78 ping statistics --- 5 packets transmitted, 5 received, 0% packet loss, time 4007ms rtt min/avg/max/mdev = 14....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 利用 telnet 命令发电子邮件" href="https://haokiu.com/966ed73cc54b4cf5bdae1e1e5adba616/"></a>
+  <a class="entry-link" aria-label="post link to 利用 telnet 命令发电子邮件" href="https://haokiu.com/blog/966ed73cc54b4cf5bdae1e1e5adba616/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

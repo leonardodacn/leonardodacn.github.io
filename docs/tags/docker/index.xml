@@ -10,10 +10,10 @@
     <lastBuildDate>Tue, 24 Nov 2020 13:56:48 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/docker/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>docker apt-get</title>
-      <link>https://haokiu.com/d5nhvK/</link>
+      <link>https://haokiu.com/blog/d5nhvK/</link>
       <pubDate>Tue, 24 Nov 2020 13:56:48 +0000</pubDate>
       
-      <guid>https://haokiu.com/d5nhvK/</guid>
+      <guid>https://haokiu.com/blog/d5nhvK/</guid>
       <description>为了节省空间，docker 容器里面有很多命令是没有安装的，提示： Reading package lists&amp;hellip; Done Building dependency tree Reading state information&amp;hellip; Done E: Unable to locate package vim
 更新apt-get源 这时候需要敲：apt-get update
 这个命令的作用是：同步 /etc/apt/sources.list 和 /etc/apt/sources.list.d 中列出的源的索引，这样才能获取到最新的软件包。

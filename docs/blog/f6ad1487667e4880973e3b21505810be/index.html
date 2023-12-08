@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>第一章 并发编程的挑战 | haokiu</title>
+<meta name="keywords" content="">
+<meta name="description" content="本书特色 结合JDK源码介绍了Java并发框架、线程池的实现原理。
+不仅仅局限于Java层面，更深入JVM，CPU。
+结合线上应用，给出了一些并发编程实战技巧。
+第一章 并发编程的挑战 如果希望通过多线程执行任务让程序运行得更快，会面临非常多得挑战，如上下文切换的问题、死锁的问题，以及受限于硬件和软件的资源限制问题。
+1.1 上下文切换 单核处理器支持多线程执行代码，CPU通过给每个线程分配COU时间片来实现。
+时间片非常短，所以CPU通过不停的切换线程执行，让我们感觉多个线程是同时执行的，几十毫秒ms。
+CPU通过时间片分配算法来循环执行任务。任务从保存到加载的过程就是一次上下文切换。
+上下文切换回影响多线程的执行速度。
+1.1.1 多线程一定快吗 累加，并发执行的速度比串行慢是因为线程有创建和上下文切换的开销。
+1.1.2 测试上下文切换次数和时长 Lmbech3可以测量上下文切换的时长。
+cmstat可以测量上下文切换的次数。
+CS(Content Switch)表示上下文切换的次数。
+1.1.3 如何减少上下文切换 较少上下文切换的方法有无锁并发编程、CAS算法、使用最少线程和使用协程。
+无所并发编程：多线程竞争锁时，回引起上下文切换，所以多线程处理数据时，可以用一些办法来避免使用锁，如将数据的ID按照Hash算法取模分段，不同的线程处理不同段的数据。 CAS算法。Java的Atomic包使用CAS算法来更新数据，而不需要加锁。 使用最少线程。避免创建不需要的线程，比如任务很少，但是创建了很多线程来处理，这样回造成大量线程都处于等待状态。 协程：在单线程里实现多任务的调度，并在单线程里维持多个任务间的切换。 1.1.4 减少上下文切换实战 通过见扫线上大量WAITING的线程，来减少上下文切换次数。
+1.2 死锁 避免死锁的几个常见方法：
+避免一个线程同时获取多个锁。 避免一个线程在锁内同时占用多个资源，尽量保证每个锁只占用一个资源。 尝试使用定时锁，使用lock.tryLock(timeout)来替代使用内部锁机制。 对于数据库锁，加锁和解锁必须在一个数据库连接里，否则会出现解锁失败的的情况。 1.3 资源限制的挑战 （1）什么是资源限制
+资源是指在进行并发编程时，程序的执行速度受限于计算机硬件资源或软件资源。
+硬件资源限制：带宽的上传/下载速读、硬盘读写速度和CPU的处理速度。
+软件资源限制：数据库的连接数和scoket连接数。
+（2）资源限制引发的问题
+在并发编程中，将代码执行速度加快的原则是将代码中串行执行的部分变成并发执行，但是如果将某段串行的代码并发执行，因为受限于资源，仍然在串行执行，这时候程序不仅不会加快执行，反而会更慢，因为增加了上下文切换和资源调度的问题。
+（3）如何解决资源限制的问题
+对于硬件资源限制，可以考虑使用集群并行执行程序。既然单机的资源有限制，那么就让程序在多级上运行。比如使用ODPS、Hadoop或者自己搭建服务器集群，不同的机器吹不同的数据。可以通过“数据ID%机器数”，计算得到一个机器编号，然后由对应编号的机器处理这笔数据。
+对于软件资源限制，可以考虑使用资源池将资源复用。比如使用连接池将数据库和Socket连接复用，或者调用对方webservice接口获取数据时，只建立一个连接。
+（4）在资源限制情况下进行并发编程
+如何在资源限制的情况下，让程序执行得更快呢？方法就是，根据不同得资源限制调整程序得并发度。
+1.4 本章小结 本章介绍了在进行并发编程时会遇到的几个挑战，并给出了一些建议。
+第二章 Java并发机制的底层实现原理 JVM执行字节码，最终需要转化为汇编指令在CPU上执行，Java中所使用得并发机制依赖于JVM得实现和CPU的指令。
+2.1 volatile的应用 1.volatile的定义与实现原理 volatile是轻量级的synchronized，在多处理器开发中保证了共享变量的“可见性”。使用得当的话，比synchronized的使用和执行成本更低，因为它不会引起线程上下文的切换和调度。本文分析Intel处理器是如何实现volatile的。
+CPU的术语定义：
+术语 英文单词 术语描述 内存屏障 memory barriers 是一组处理器指令，用于事项对内存操作的顺序限制 缓冲行 cache line 缓存中可以分配的最小存储单位。处理器填写缓存线时会加载整个缓存线，需要使用多个主内存读周期 原子操作 atomic line 不可终端的一个或一系列操作 缓存行填充 cache line fill 当处理器试别到内存中读取操作数时可缓存的，处理器读取整个缓存行到适当的缓存（L1,L2,L3的或所有） 缓存命中 cache hit 如果进行高速缓存行填充操作的内存位置仍然是下次处理器访问的地址时，处理器从缓存中读取操作数，而不是从内存读取 写命中 write hit 当处理器将操作数写回到一个内存缓存的区域时，它首先回检查这个缓存的内存地址是否在缓存行中，如果存在一个有效的缓存行，则处理器将这个操作数写回到缓存，而不是写回到内存，这个操作被称为写命中 写缺失 write misses the cache 一个有效的缓存行被写入到不存在的内存区域 为了提高处理速度，处理器不直接个内存进行通信，二十先将系统内存的数据督导内部缓存（L1,L2或其他）后再进行操作，但操作完不知道何时会写到内存。如果对声明了volatile的变量进行写操作，JVM就会像处理器发送一条Lock前缀的指令，将这个变量所在缓存的数据写回到系统内存。但是就算写回到内存，如过其他处理器缓存的值还是旧的，再执行计算操作就会有问题。所以，再多处理器下，未了保证各个处理器缓存的值还是旧的，再执行计算操作就会有问题。所以，在多处理器下，为了保证各个处理器的换粗你一直，就会实现缓存一致性协议，每个处理器通过嗅探在总线上传播的数据来检查自己缓存的值是不是过期了，当处理器发现自己缓存行对应的内存地址被修改，就会将当前处理器的缓存行设置成无效状态，当处理器对这个数据进行修改操作的时候，回重新从系统内存中把数据读到处理器缓存里。
+Lock前缀的指令在多核处理器下会引发两件事情：
+将当前处理器缓存行的数据写回到系统内存 这个写回内存的操作会使在其他CPU里缓存了该内存地址的数据无效 volatile的两条实现原则：">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/f6ad1487667e4880973e3b21505810be/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="第一章 并发编程的挑战" />
+<meta property="og:description" content="本书特色 结合JDK源码介绍了Java并发框架、线程池的实现原理。
+不仅仅局限于Java层面，更深入JVM，CPU。
+结合线上应用，给出了一些并发编程实战技巧。
+第一章 并发编程的挑战 如果希望通过多线程执行任务让程序运行得更快，会面临非常多得挑战，如上下文切换的问题、死锁的问题，以及受限于硬件和软件的资源限制问题。
+1.1 上下文切换 单核处理器支持多线程执行代码，CPU通过给每个线程分配COU时间片来实现。
+时间片非常短，所以CPU通过不停的切换线程执行，让我们感觉多个线程是同时执行的，几十毫秒ms。
+CPU通过时间片分配算法来循环执行任务。任务从保存到加载的过程就是一次上下文切换。
+上下文切换回影响多线程的执行速度。
+1.1.1 多线程一定快吗 累加，并发执行的速度比串行慢是因为线程有创建和上下文切换的开销。
+1.1.2 测试上下文切换次数和时长 Lmbech3可以测量上下文切换的时长。
+cmstat可以测量上下文切换的次数。
+CS(Content Switch)表示上下文切换的次数。
+1.1.3 如何减少上下文切换 较少上下文切换的方法有无锁并发编程、CAS算法、使用最少线程和使用协程。
+无所并发编程：多线程竞争锁时，回引起上下文切换，所以多线程处理数据时，可以用一些办法来避免使用锁，如将数据的ID按照Hash算法取模分段，不同的线程处理不同段的数据。 CAS算法。Java的Atomic包使用CAS算法来更新数据，而不需要加锁。 使用最少线程。避免创建不需要的线程，比如任务很少，但是创建了很多线程来处理，这样回造成大量线程都处于等待状态。 协程：在单线程里实现多任务的调度，并在单线程里维持多个任务间的切换。 1.1.4 减少上下文切换实战 通过见扫线上大量WAITING的线程，来减少上下文切换次数。
+1.2 死锁 避免死锁的几个常见方法：
+避免一个线程同时获取多个锁。 避免一个线程在锁内同时占用多个资源，尽量保证每个锁只占用一个资源。 尝试使用定时锁，使用lock.tryLock(timeout)来替代使用内部锁机制。 对于数据库锁，加锁和解锁必须在一个数据库连接里，否则会出现解锁失败的的情况。 1.3 资源限制的挑战 （1）什么是资源限制
+资源是指在进行并发编程时，程序的执行速度受限于计算机硬件资源或软件资源。
+硬件资源限制：带宽的上传/下载速读、硬盘读写速度和CPU的处理速度。
+软件资源限制：数据库的连接数和scoket连接数。
+（2）资源限制引发的问题
+在并发编程中，将代码执行速度加快的原则是将代码中串行执行的部分变成并发执行，但是如果将某段串行的代码并发执行，因为受限于资源，仍然在串行执行，这时候程序不仅不会加快执行，反而会更慢，因为增加了上下文切换和资源调度的问题。
+（3）如何解决资源限制的问题
+对于硬件资源限制，可以考虑使用集群并行执行程序。既然单机的资源有限制，那么就让程序在多级上运行。比如使用ODPS、Hadoop或者自己搭建服务器集群，不同的机器吹不同的数据。可以通过“数据ID%机器数”，计算得到一个机器编号，然后由对应编号的机器处理这笔数据。
+对于软件资源限制，可以考虑使用资源池将资源复用。比如使用连接池将数据库和Socket连接复用，或者调用对方webservice接口获取数据时，只建立一个连接。
+（4）在资源限制情况下进行并发编程
+如何在资源限制的情况下，让程序执行得更快呢？方法就是，根据不同得资源限制调整程序得并发度。
+1.4 本章小结 本章介绍了在进行并发编程时会遇到的几个挑战，并给出了一些建议。
+第二章 Java并发机制的底层实现原理 JVM执行字节码，最终需要转化为汇编指令在CPU上执行，Java中所使用得并发机制依赖于JVM得实现和CPU的指令。
+2.1 volatile的应用 1.volatile的定义与实现原理 volatile是轻量级的synchronized，在多处理器开发中保证了共享变量的“可见性”。使用得当的话，比synchronized的使用和执行成本更低，因为它不会引起线程上下文的切换和调度。本文分析Intel处理器是如何实现volatile的。
+CPU的术语定义：
+术语 英文单词 术语描述 内存屏障 memory barriers 是一组处理器指令，用于事项对内存操作的顺序限制 缓冲行 cache line 缓存中可以分配的最小存储单位。处理器填写缓存线时会加载整个缓存线，需要使用多个主内存读周期 原子操作 atomic line 不可终端的一个或一系列操作 缓存行填充 cache line fill 当处理器试别到内存中读取操作数时可缓存的，处理器读取整个缓存行到适当的缓存（L1,L2,L3的或所有） 缓存命中 cache hit 如果进行高速缓存行填充操作的内存位置仍然是下次处理器访问的地址时，处理器从缓存中读取操作数，而不是从内存读取 写命中 write hit 当处理器将操作数写回到一个内存缓存的区域时，它首先回检查这个缓存的内存地址是否在缓存行中，如果存在一个有效的缓存行，则处理器将这个操作数写回到缓存，而不是写回到内存，这个操作被称为写命中 写缺失 write misses the cache 一个有效的缓存行被写入到不存在的内存区域 为了提高处理速度，处理器不直接个内存进行通信，二十先将系统内存的数据督导内部缓存（L1,L2或其他）后再进行操作，但操作完不知道何时会写到内存。如果对声明了volatile的变量进行写操作，JVM就会像处理器发送一条Lock前缀的指令，将这个变量所在缓存的数据写回到系统内存。但是就算写回到内存，如过其他处理器缓存的值还是旧的，再执行计算操作就会有问题。所以，再多处理器下，未了保证各个处理器缓存的值还是旧的，再执行计算操作就会有问题。所以，在多处理器下，为了保证各个处理器的换粗你一直，就会实现缓存一致性协议，每个处理器通过嗅探在总线上传播的数据来检查自己缓存的值是不是过期了，当处理器发现自己缓存行对应的内存地址被修改，就会将当前处理器的缓存行设置成无效状态，当处理器对这个数据进行修改操作的时候，回重新从系统内存中把数据读到处理器缓存里。
+Lock前缀的指令在多核处理器下会引发两件事情：
+将当前处理器缓存行的数据写回到系统内存 这个写回内存的操作会使在其他CPU里缓存了该内存地址的数据无效 volatile的两条实现原则：" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/f6ad1487667e4880973e3b21505810be/" /><meta property="article:section" content="6" />
+<meta property="article:published_time" content="2021-06-08T17:51:46+00:00" />
+<meta property="article:modified_time" content="2021-06-08T17:51:46+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="第一章 并发编程的挑战"/>
+<meta name="twitter:description" content="本书特色 结合JDK源码介绍了Java并发框架、线程池的实现原理。
+不仅仅局限于Java层面，更深入JVM，CPU。
+结合线上应用，给出了一些并发编程实战技巧。
+第一章 并发编程的挑战 如果希望通过多线程执行任务让程序运行得更快，会面临非常多得挑战，如上下文切换的问题、死锁的问题，以及受限于硬件和软件的资源限制问题。
+1.1 上下文切换 单核处理器支持多线程执行代码，CPU通过给每个线程分配COU时间片来实现。
+时间片非常短，所以CPU通过不停的切换线程执行，让我们感觉多个线程是同时执行的，几十毫秒ms。
+CPU通过时间片分配算法来循环执行任务。任务从保存到加载的过程就是一次上下文切换。
+上下文切换回影响多线程的执行速度。
+1.1.1 多线程一定快吗 累加，并发执行的速度比串行慢是因为线程有创建和上下文切换的开销。
+1.1.2 测试上下文切换次数和时长 Lmbech3可以测量上下文切换的时长。
+cmstat可以测量上下文切换的次数。
+CS(Content Switch)表示上下文切换的次数。
+1.1.3 如何减少上下文切换 较少上下文切换的方法有无锁并发编程、CAS算法、使用最少线程和使用协程。
+无所并发编程：多线程竞争锁时，回引起上下文切换，所以多线程处理数据时，可以用一些办法来避免使用锁，如将数据的ID按照Hash算法取模分段，不同的线程处理不同段的数据。 CAS算法。Java的Atomic包使用CAS算法来更新数据，而不需要加锁。 使用最少线程。避免创建不需要的线程，比如任务很少，但是创建了很多线程来处理，这样回造成大量线程都处于等待状态。 协程：在单线程里实现多任务的调度，并在单线程里维持多个任务间的切换。 1.1.4 减少上下文切换实战 通过见扫线上大量WAITING的线程，来减少上下文切换次数。
+1.2 死锁 避免死锁的几个常见方法：
+避免一个线程同时获取多个锁。 避免一个线程在锁内同时占用多个资源，尽量保证每个锁只占用一个资源。 尝试使用定时锁，使用lock.tryLock(timeout)来替代使用内部锁机制。 对于数据库锁，加锁和解锁必须在一个数据库连接里，否则会出现解锁失败的的情况。 1.3 资源限制的挑战 （1）什么是资源限制
+资源是指在进行并发编程时，程序的执行速度受限于计算机硬件资源或软件资源。
+硬件资源限制：带宽的上传/下载速读、硬盘读写速度和CPU的处理速度。
+软件资源限制：数据库的连接数和scoket连接数。
+（2）资源限制引发的问题
+在并发编程中，将代码执行速度加快的原则是将代码中串行执行的部分变成并发执行，但是如果将某段串行的代码并发执行，因为受限于资源，仍然在串行执行，这时候程序不仅不会加快执行，反而会更慢，因为增加了上下文切换和资源调度的问题。
+（3）如何解决资源限制的问题
+对于硬件资源限制，可以考虑使用集群并行执行程序。既然单机的资源有限制，那么就让程序在多级上运行。比如使用ODPS、Hadoop或者自己搭建服务器集群，不同的机器吹不同的数据。可以通过“数据ID%机器数”，计算得到一个机器编号，然后由对应编号的机器处理这笔数据。
+对于软件资源限制，可以考虑使用资源池将资源复用。比如使用连接池将数据库和Socket连接复用，或者调用对方webservice接口获取数据时，只建立一个连接。
+（4）在资源限制情况下进行并发编程
+如何在资源限制的情况下，让程序执行得更快呢？方法就是，根据不同得资源限制调整程序得并发度。
+1.4 本章小结 本章介绍了在进行并发编程时会遇到的几个挑战，并给出了一些建议。
+第二章 Java并发机制的底层实现原理 JVM执行字节码，最终需要转化为汇编指令在CPU上执行，Java中所使用得并发机制依赖于JVM得实现和CPU的指令。
+2.1 volatile的应用 1.volatile的定义与实现原理 volatile是轻量级的synchronized，在多处理器开发中保证了共享变量的“可见性”。使用得当的话，比synchronized的使用和执行成本更低，因为它不会引起线程上下文的切换和调度。本文分析Intel处理器是如何实现volatile的。
+CPU的术语定义：
+术语 英文单词 术语描述 内存屏障 memory barriers 是一组处理器指令，用于事项对内存操作的顺序限制 缓冲行 cache line 缓存中可以分配的最小存储单位。处理器填写缓存线时会加载整个缓存线，需要使用多个主内存读周期 原子操作 atomic line 不可终端的一个或一系列操作 缓存行填充 cache line fill 当处理器试别到内存中读取操作数时可缓存的，处理器读取整个缓存行到适当的缓存（L1,L2,L3的或所有） 缓存命中 cache hit 如果进行高速缓存行填充操作的内存位置仍然是下次处理器访问的地址时，处理器从缓存中读取操作数，而不是从内存读取 写命中 write hit 当处理器将操作数写回到一个内存缓存的区域时，它首先回检查这个缓存的内存地址是否在缓存行中，如果存在一个有效的缓存行，则处理器将这个操作数写回到缓存，而不是写回到内存，这个操作被称为写命中 写缺失 write misses the cache 一个有效的缓存行被写入到不存在的内存区域 为了提高处理速度，处理器不直接个内存进行通信，二十先将系统内存的数据督导内部缓存（L1,L2或其他）后再进行操作，但操作完不知道何时会写到内存。如果对声明了volatile的变量进行写操作，JVM就会像处理器发送一条Lock前缀的指令，将这个变量所在缓存的数据写回到系统内存。但是就算写回到内存，如过其他处理器缓存的值还是旧的，再执行计算操作就会有问题。所以，再多处理器下，未了保证各个处理器缓存的值还是旧的，再执行计算操作就会有问题。所以，在多处理器下，为了保证各个处理器的换粗你一直，就会实现缓存一致性协议，每个处理器通过嗅探在总线上传播的数据来检查自己缓存的值是不是过期了，当处理器发现自己缓存行对应的内存地址被修改，就会将当前处理器的缓存行设置成无效状态，当处理器对这个数据进行修改操作的时候，回重新从系统内存中把数据读到处理器缓存里。
+Lock前缀的指令在多核处理器下会引发两件事情：
+将当前处理器缓存行的数据写回到系统内存 这个写回内存的操作会使在其他CPU里缓存了该内存地址的数据无效 volatile的两条实现原则："/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "6s",
+      "item": "https://haokiu.com/6/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "第一章 并发编程的挑战",
+      "item": "https://haokiu.com/blog/f6ad1487667e4880973e3b21505810be/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "第一章 并发编程的挑战",
+  "name": "第一章 并发编程的挑战",
+  "description": "本书特色 结合JDK源码介绍了Java并发框架、线程池的实现原理。\n不仅仅局限于Java层面，更深入JVM，CPU。\n结合线上应用，给出了一些并发编程实战技巧。\n第一章 并发编程的挑战 如果希望通过多线程执行任务让程序运行得更快，会面临非常多得挑战，如上下文切换的问题、死锁的问题，以及受限于硬件和软件的资源限制问题。\n1.1 上下文切换 单核处理器支持多线程执行代码，CPU通过给每个线程分配COU时间片来实现。\n时间片非常短，所以CPU通过不停的切换线程执行，让我们感觉多个线程是同时执行的，几十毫秒ms。\nCPU通过时间片分配算法来循环执行任务。任务从保存到加载的过程就是一次上下文切换。\n上下文切换回影响多线程的执行速度。\n1.1.1 多线程一定快吗 累加，并发执行的速度比串行慢是因为线程有创建和上下文切换的开销。\n1.1.2 测试上下文切换次数和时长 Lmbech3可以测量上下文切换的时长。\ncmstat可以测量上下文切换的次数。\nCS(Content Switch)表示上下文切换的次数。\n1.1.3 如何减少上下文切换 较少上下文切换的方法有无锁并发编程、CAS算法、使用最少线程和使用协程。\n无所并发编程：多线程竞争锁时，回引起上下文切换，所以多线程处理数据时，可以用一些办法来避免使用锁，如将数据的ID按照Hash算法取模分段，不同的线程处理不同段的数据。 CAS算法。Java的Atomic包使用CAS算法来更新数据，而不需要加锁。 使用最少线程。避免创建不需要的线程，比如任务很少，但是创建了很多线程来处理，这样回造成大量线程都处于等待状态。 协程：在单线程里实现多任务的调度，并在单线程里维持多个任务间的切换。 1.1.4 减少上下文切换实战 通过见扫线上大量WAITING的线程，来减少上下文切换次数。\n1.2 死锁 避免死锁的几个常见方法：\n避免一个线程同时获取多个锁。 避免一个线程在锁内同时占用多个资源，尽量保证每个锁只占用一个资源。 尝试使用定时锁，使用lock.tryLock(timeout)来替代使用内部锁机制。 对于数据库锁，加锁和解锁必须在一个数据库连接里，否则会出现解锁失败的的情况。 1.3 资源限制的挑战 （1）什么是资源限制\n资源是指在进行并发编程时，程序的执行速度受限于计算机硬件资源或软件资源。\n硬件资源限制：带宽的上传/下载速读、硬盘读写速度和CPU的处理速度。\n软件资源限制：数据库的连接数和scoket连接数。\n（2）资源限制引发的问题\n在并发编程中，将代码执行速度加快的原则是将代码中串行执行的部分变成并发执行，但是如果将某段串行的代码并发执行，因为受限于资源，仍然在串行执行，这时候程序不仅不会加快执行，反而会更慢，因为增加了上下文切换和资源调度的问题。\n（3）如何解决资源限制的问题\n对于硬件资源限制，可以考虑使用集群并行执行程序。既然单机的资源有限制，那么就让程序在多级上运行。比如使用ODPS、Hadoop或者自己搭建服务器集群，不同的机器吹不同的数据。可以通过“数据ID%机器数”，计算得到一个机器编号，然后由对应编号的机器处理这笔数据。\n对于软件资源限制，可以考虑使用资源池将资源复用。比如使用连接池将数据库和Socket连接复用，或者调用对方webservice接口获取数据时，只建立一个连接。\n（4）在资源限制情况下进行并发编程\n如何在资源限制的情况下，让程序执行得更快呢？方法就是，根据不同得资源限制调整程序得并发度。\n1.4 本章小结 本章介绍了在进行并发编程时会遇到的几个挑战，并给出了一些建议。\n第二章 Java并发机制的底层实现原理 JVM执行字节码，最终需要转化为汇编指令在CPU上执行，Java中所使用得并发机制依赖于JVM得实现和CPU的指令。\n2.1 volatile的应用 1.volatile的定义与实现原理 volatile是轻量级的synchronized，在多处理器开发中保证了共享变量的“可见性”。使用得当的话，比synchronized的使用和执行成本更低，因为它不会引起线程上下文的切换和调度。本文分析Intel处理器是如何实现volatile的。\nCPU的术语定义：\n术语 英文单词 术语描述 内存屏障 memory barriers 是一组处理器指令，用于事项对内存操作的顺序限制 缓冲行 cache line 缓存中可以分配的最小存储单位。处理器填写缓存线时会加载整个缓存线，需要使用多个主内存读周期 原子操作 atomic line 不可终端的一个或一系列操作 缓存行填充 cache line fill 当处理器试别到内存中读取操作数时可缓存的，处理器读取整个缓存行到适当的缓存（L1,L2,L3的或所有） 缓存命中 cache hit 如果进行高速缓存行填充操作的内存位置仍然是下次处理器访问的地址时，处理器从缓存中读取操作数，而不是从内存读取 写命中 write hit 当处理器将操作数写回到一个内存缓存的区域时，它首先回检查这个缓存的内存地址是否在缓存行中，如果存在一个有效的缓存行，则处理器将这个操作数写回到缓存，而不是写回到内存，这个操作被称为写命中 写缺失 write misses the cache 一个有效的缓存行被写入到不存在的内存区域 为了提高处理速度，处理器不直接个内存进行通信，二十先将系统内存的数据督导内部缓存（L1,L2或其他）后再进行操作，但操作完不知道何时会写到内存。如果对声明了volatile的变量进行写操作，JVM就会像处理器发送一条Lock前缀的指令，将这个变量所在缓存的数据写回到系统内存。但是就算写回到内存，如过其他处理器缓存的值还是旧的，再执行计算操作就会有问题。所以，再多处理器下，未了保证各个处理器缓存的值还是旧的，再执行计算操作就会有问题。所以，在多处理器下，为了保证各个处理器的换粗你一直，就会实现缓存一致性协议，每个处理器通过嗅探在总线上传播的数据来检查自己缓存的值是不是过期了，当处理器发现自己缓存行对应的内存地址被修改，就会将当前处理器的缓存行设置成无效状态，当处理器对这个数据进行修改操作的时候，回重新从系统内存中把数据读到处理器缓存里。\nLock前缀的指令在多核处理器下会引发两件事情：\n将当前处理器缓存行的数据写回到系统内存 这个写回内存的操作会使在其他CPU里缓存了该内存地址的数据无效 volatile的两条实现原则：",
+  "keywords": [
+    
+  ],
+  "articleBody": "本书特色 结合JDK源码介绍了Java并发框架、线程池的实现原理。\n不仅仅局限于Java层面，更深入JVM，CPU。\n结合线上应用，给出了一些并发编程实战技巧。\n第一章 并发编程的挑战 如果希望通过多线程执行任务让程序运行得更快，会面临非常多得挑战，如上下文切换的问题、死锁的问题，以及受限于硬件和软件的资源限制问题。\n1.1 上下文切换 单核处理器支持多线程执行代码，CPU通过给每个线程分配COU时间片来实现。\n时间片非常短，所以CPU通过不停的切换线程执行，让我们感觉多个线程是同时执行的，几十毫秒ms。\nCPU通过时间片分配算法来循环执行任务。任务从保存到加载的过程就是一次上下文切换。\n上下文切换回影响多线程的执行速度。\n1.1.1 多线程一定快吗 累加，并发执行的速度比串行慢是因为线程有创建和上下文切换的开销。\n1.1.2 测试上下文切换次数和时长 Lmbech3可以测量上下文切换的时长。\ncmstat可以测量上下文切换的次数。\nCS(Content Switch)表示上下文切换的次数。\n1.1.3 如何减少上下文切换 较少上下文切换的方法有无锁并发编程、CAS算法、使用最少线程和使用协程。\n无所并发编程：多线程竞争锁时，回引起上下文切换，所以多线程处理数据时，可以用一些办法来避免使用锁，如将数据的ID按照Hash算法取模分段，不同的线程处理不同段的数据。 CAS算法。Java的Atomic包使用CAS算法来更新数据，而不需要加锁。 使用最少线程。避免创建不需要的线程，比如任务很少，但是创建了很多线程来处理，这样回造成大量线程都处于等待状态。 协程：在单线程里实现多任务的调度，并在单线程里维持多个任务间的切换。 1.1.4 减少上下文切换实战 通过见扫线上大量WAITING的线程，来减少上下文切换次数。\n1.2 死锁 避免死锁的几个常见方法：\n避免一个线程同时获取多个锁。 避免一个线程在锁内同时占用多个资源，尽量保证每个锁只占用一个资源。 尝试使用定时锁，使用lock.tryLock(timeout)来替代使用内部锁机制。 对于数据库锁，加锁和解锁必须在一个数据库连接里，否则会出现解锁失败的的情况。 1.3 资源限制的挑战 （1）什么是资源限制\n资源是指在进行并发编程时，程序的执行速度受限于计算机硬件资源或软件资源。\n硬件资源限制：带宽的上传/下载速读、硬盘读写速度和CPU的处理速度。\n软件资源限制：数据库的连接数和scoket连接数。\n（2）资源限制引发的问题\n在并发编程中，将代码执行速度加快的原则是将代码中串行执行的部分变成并发执行，但是如果将某段串行的代码并发执行，因为受限于资源，仍然在串行执行，这时候程序不仅不会加快执行，反而会更慢，因为增加了上下文切换和资源调度的问题。\n（3）如何解决资源限制的问题\n对于硬件资源限制，可以考虑使用集群并行执行程序。既然单机的资源有限制，那么就让程序在多级上运行。比如使用ODPS、Hadoop或者自己搭建服务器集群，不同的机器吹不同的数据。可以通过“数据ID%机器数”，计算得到一个机器编号，然后由对应编号的机器处理这笔数据。\n对于软件资源限制，可以考虑使用资源池将资源复用。比如使用连接池将数据库和Socket连接复用，或者调用对方webservice接口获取数据时，只建立一个连接。\n（4）在资源限制情况下进行并发编程\n如何在资源限制的情况下，让程序执行得更快呢？方法就是，根据不同得资源限制调整程序得并发度。\n1.4 本章小结 本章介绍了在进行并发编程时会遇到的几个挑战，并给出了一些建议。\n第二章 Java并发机制的底层实现原理 JVM执行字节码，最终需要转化为汇编指令在CPU上执行，Java中所使用得并发机制依赖于JVM得实现和CPU的指令。\n2.1 volatile的应用 1.volatile的定义与实现原理 volatile是轻量级的synchronized，在多处理器开发中保证了共享变量的“可见性”。使用得当的话，比synchronized的使用和执行成本更低，因为它不会引起线程上下文的切换和调度。本文分析Intel处理器是如何实现volatile的。\nCPU的术语定义：\n术语 英文单词 术语描述 内存屏障 memory barriers 是一组处理器指令，用于事项对内存操作的顺序限制 缓冲行 cache line 缓存中可以分配的最小存储单位。处理器填写缓存线时会加载整个缓存线，需要使用多个主内存读周期 原子操作 atomic line 不可终端的一个或一系列操作 缓存行填充 cache line fill 当处理器试别到内存中读取操作数时可缓存的，处理器读取整个缓存行到适当的缓存（L1,L2,L3的或所有） 缓存命中 cache hit 如果进行高速缓存行填充操作的内存位置仍然是下次处理器访问的地址时，处理器从缓存中读取操作数，而不是从内存读取 写命中 write hit 当处理器将操作数写回到一个内存缓存的区域时，它首先回检查这个缓存的内存地址是否在缓存行中，如果存在一个有效的缓存行，则处理器将这个操作数写回到缓存，而不是写回到内存，这个操作被称为写命中 写缺失 write misses the cache 一个有效的缓存行被写入到不存在的内存区域 为了提高处理速度，处理器不直接个内存进行通信，二十先将系统内存的数据督导内部缓存（L1,L2或其他）后再进行操作，但操作完不知道何时会写到内存。如果对声明了volatile的变量进行写操作，JVM就会像处理器发送一条Lock前缀的指令，将这个变量所在缓存的数据写回到系统内存。但是就算写回到内存，如过其他处理器缓存的值还是旧的，再执行计算操作就会有问题。所以，再多处理器下，未了保证各个处理器缓存的值还是旧的，再执行计算操作就会有问题。所以，在多处理器下，为了保证各个处理器的换粗你一直，就会实现缓存一致性协议，每个处理器通过嗅探在总线上传播的数据来检查自己缓存的值是不是过期了，当处理器发现自己缓存行对应的内存地址被修改，就会将当前处理器的缓存行设置成无效状态，当处理器对这个数据进行修改操作的时候，回重新从系统内存中把数据读到处理器缓存里。\nLock前缀的指令在多核处理器下会引发两件事情：\n将当前处理器缓存行的数据写回到系统内存 这个写回内存的操作会使在其他CPU里缓存了该内存地址的数据无效 volatile的两条实现原则：\nLock前缀指令会引起处理器缓存回写到内存 一个处理器的缓存回写到内存会导致其他处理器的缓存无效 2.volatile的使用优化 追加字节到64字节，因为高速缓存行普遍是64字节宽，不支持部分填充缓存行。如果队列的头节点和尾节点都不足64字节的话，处理器会将它们都读到同一个高速缓存行中，在多处理器下每个处理器都会缓存同样的头、尾节点，当一个处理器试图修改头节点时，会将整个缓存行锁定，那么在缓存一致性机制的作用下，会导致其他处理器不能访问自己告诉缓存中的尾节点，而队列的入队和出队操作则需要不停修改头节点和尾节点，所以在多处理器的情况下将会严重影响到队列的入队和出队效率。\n追加到64字节的方式来填满告诉缓冲区的缓存行，避免头节点和尾节点加载到同一个缓存行，使头，尾节点在修改时不会互相锁定。\n一下两种场景不适用：\n缓存行非64字节宽的处理器。 共享变量不会被频繁地写。 Java7之后不能生效，会淘汰或重新排列无用字段，需要采用其他追加字节的方式。\n2.2 synchronized的实现原理与应用 syschronized实现同步的基础：Java中的每一个对象都可以作为锁。具体表现以下3种形式：\n对于普通同步方法，锁是当前实例对象。 对于静态同步方法，锁是当前类的Class对象。 对于同步方法块，锁是Synchronized括号里配置的对象。 当一个线程试图访问同步代码块时，它首先必须得到锁，退出或抛出异常时必须释放锁。\nJVM基于进入和退出Monitor对象来实现方法同步和代码块同步。\nmonnitorenter指令===\u003e同步代码块开头，monitorexit===\u003e方法结束处和异常处。两者配对。任何对象都有一个monitor与之关联，当一个monitor被持有后，它将处于锁定状态。线程执行到monitorenter指令时，将会尝试获取对象所对应的monitor的所有权，即尝试获得对象的锁。\n2.2.1 Java对象头 synchronized用的锁时存在Java对象头里的。\n长度 内容 说明 32/64bit Mark Word 存储对象的hashCode或锁信息 32/64bit Class Metadata Address 存储到对象类型数据的指针 32/32bit Array leng 数组的长度（如果当前对象是数组） Mark Word的默认存储结构：\n锁状态 25bit 4bit 1bit偏向锁 2bit锁标志位 无锁状态 对象的hashCode 对象分代年龄 0 01 运行期，Mark Word里存储的数据会随着锁标志位的变化而变化。\n2.2.2 锁的升级与对比 锁从低到高四个状态：无状态所、偏向锁状态、轻量级锁状态和重量级锁状态。为了提高获得锁和释放锁的效率，锁可以升级但不能降级。\n偏向锁 目的：为了让线程获得锁的代价更低。\n当一个线程访问同步块并获取锁时，会在对象头和栈帧中的锁记录里存储锁偏向的线程ID，以后该线程在进入和退出同步块时不需要进行CAS操作来加锁和解锁，只需简单地测试一下对象头地Mar Word里是否存储着指向当前线程的偏向锁。如果测试成功，表示线程已经获得了锁。如果测试失败，则需要再测试一下Mark Word中偏向锁的标识是否设置成1（表示当前是偏向锁）：如果没有设置，则使用CAS竞争锁；如果设置了，则尝试使用CAS将对象头的偏向锁指向当前线程。\n（1）偏向锁的撤销\n",
+  "wordCount" : "162",
+  "inLanguage": "en",
+  "datePublished": "2021-06-08T17:51:46Z",
+  "dateModified": "2021-06-08T17:51:46Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/f6ad1487667e4880973e3b21505810be/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/6/">6s</a></div>
+    <h1 class="post-title">
+      第一章 并发编程的挑战
+    </h1>
+    <div class="post-meta"><span title='2021-06-08 17:51:46 +0000 UTC'>June 8, 2021</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul><ul><ul>
+                <li>
+                    <a href="#%e6%9c%ac%e4%b9%a6%e7%89%b9%e8%89%b2" aria-label="本书特色">本书特色</a></li></ul>
+                    </ul>
+                    
+                <li>
+                    <a href="#%e7%ac%ac%e4%b8%80%e7%ab%a0-%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b%e7%9a%84%e6%8c%91%e6%88%98" aria-label="第一章 并发编程的挑战">第一章 并发编程的挑战</a><ul>
+                        
+                <li>
+                    <a href="#11-%e4%b8%8a%e4%b8%8b%e6%96%87%e5%88%87%e6%8d%a2" aria-label="1.1 上下文切换">1.1 上下文切换</a><ul>
+                        
+                <li>
+                    <a href="#111-%e5%a4%9a%e7%ba%bf%e7%a8%8b%e4%b8%80%e5%ae%9a%e5%bf%ab%e5%90%97" aria-label="1.1.1 多线程一定快吗">1.1.1 多线程一定快吗</a></li>
+                <li>
+                    <a href="#112-%e6%b5%8b%e8%af%95%e4%b8%8a%e4%b8%8b%e6%96%87%e5%88%87%e6%8d%a2%e6%ac%a1%e6%95%b0%e5%92%8c%e6%97%b6%e9%95%bf" aria-label="1.1.2 测试上下文切换次数和时长">1.1.2 测试上下文切换次数和时长</a></li>
+                <li>
+                    <a href="#113-%e5%a6%82%e4%bd%95%e5%87%8f%e5%b0%91%e4%b8%8a%e4%b8%8b%e6%96%87%e5%88%87%e6%8d%a2" aria-label="1.1.3 如何减少上下文切换">1.1.3 如何减少上下文切换</a></li>
+                <li>
+                    <a href="#114-%e5%87%8f%e5%b0%91%e4%b8%8a%e4%b8%8b%e6%96%87%e5%88%87%e6%8d%a2%e5%ae%9e%e6%88%98" aria-label="1.1.4 减少上下文切换实战">1.1.4 减少上下文切换实战</a></li></ul>
+                </li>
+                <li>
+                    <a href="#12-%e6%ad%bb%e9%94%81" aria-label="1.2 死锁">1.2 死锁</a></li>
+                <li>
+                    <a href="#13-%e8%b5%84%e6%ba%90%e9%99%90%e5%88%b6%e7%9a%84%e6%8c%91%e6%88%98" aria-label="1.3 资源限制的挑战">1.3 资源限制的挑战</a></li>
+                <li>
+                    <a href="#14-%e6%9c%ac%e7%ab%a0%e5%b0%8f%e7%bb%93" aria-label="1.4 本章小结">1.4 本章小结</a></li></ul>
+                </li>
+                <li>
+                    <a href="#%e7%ac%ac%e4%ba%8c%e7%ab%a0-java%e5%b9%b6%e5%8f%91%e6%9c%ba%e5%88%b6%e7%9a%84%e5%ba%95%e5%b1%82%e5%ae%9e%e7%8e%b0%e5%8e%9f%e7%90%86" aria-label="第二章 Java并发机制的底层实现原理">第二章 Java并发机制的底层实现原理</a><ul>
+                        
+                <li>
+                    <a href="#21-volatile%e7%9a%84%e5%ba%94%e7%94%a8" aria-label="2.1 volatile的应用">2.1 volatile的应用</a><ul>
+                        
+                <li>
+                    <a href="#1volatile%e7%9a%84%e5%ae%9a%e4%b9%89%e4%b8%8e%e5%ae%9e%e7%8e%b0%e5%8e%9f%e7%90%86" aria-label="1.volatile的定义与实现原理">1.volatile的定义与实现原理</a></li>
+                <li>
+                    <a href="#2volatile%e7%9a%84%e4%bd%bf%e7%94%a8%e4%bc%98%e5%8c%96" aria-label="2.volatile的使用优化">2.volatile的使用优化</a></li></ul>
+                </li>
+                <li>
+                    <a href="#22-synchronized%e7%9a%84%e5%ae%9e%e7%8e%b0%e5%8e%9f%e7%90%86%e4%b8%8e%e5%ba%94%e7%94%a8" aria-label="2.2 synchronized的实现原理与应用">2.2 synchronized的实现原理与应用</a><ul>
+                        
+                <li>
+                    <a href="#221-java%e5%af%b9%e8%b1%a1%e5%a4%b4" aria-label="2.2.1 Java对象头">2.2.1 Java对象头</a></li>
+                <li>
+                    <a href="#222-%e9%94%81%e7%9a%84%e5%8d%87%e7%ba%a7%e4%b8%8e%e5%af%b9%e6%af%94" aria-label="2.2.2 锁的升级与对比">2.2.2 锁的升级与对比</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h3 id="本书特色">本书特色</h3>
+<ul>
+<li>
+<p>结合JDK源码介绍了Java并发框架、线程池的实现原理。</p>
+</li>
+<li>
+<p>不仅仅局限于Java层面，更深入JVM，CPU。</p>
+</li>
+<li>
+<p>结合线上应用，给出了一些并发编程实战技巧。</p>
+</li>
+</ul>
+<h1 id="第一章-并发编程的挑战">第一章 并发编程的挑战</h1>
+<p>如果希望通过多线程执行任务让程序运行得更快，会面临非常多得挑战，如<strong>上下文切换的问题、死锁的问题，以及受限于硬件和软件的资源限制问题</strong>。</p>
+<h2 id="11-上下文切换">1.1 上下文切换</h2>
+<p>单核处理器支持多线程执行代码，CPU通过给每个线程分配COU时间片来实现。</p>
+<p>时间片非常短，所以CPU通过不停的切换线程执行，让我们感觉多个线程是同时执行的，几十毫秒ms。</p>
+<p>CPU通过时间片分配算法来循环执行任务。任务从保存到加载的过程就是一次上下文切换。</p>
+<p>上下文切换回影响多线程的执行速度。</p>
+<h3 id="111-多线程一定快吗">1.1.1 多线程一定快吗</h3>
+<p>累加，并发执行的速度比串行慢是因为线程有创建和上下文切换的开销。</p>
+<h3 id="112-测试上下文切换次数和时长">1.1.2 测试上下文切换次数和时长</h3>
+<ul>
+<li>
+<p>Lmbech3可以测量上下文切换的时长。</p>
+</li>
+<li>
+<p>cmstat可以测量上下文切换的次数。</p>
+</li>
+</ul>
+<p>CS(Content Switch)表示上下文切换的次数。</p>
+<h3 id="113-如何减少上下文切换">1.1.3 如何减少上下文切换</h3>
+<p>较少上下文切换的方法有无锁并发编程、CAS算法、使用最少线程和使用协程。</p>
+<ul>
+<li>无所并发编程：多线程竞争锁时，回引起上下文切换，所以多线程处理数据时，可以用一些办法来避免使用锁，如将数据的ID按照Hash算法取模分段，不同的线程处理不同段的数据。</li>
+<li>CAS算法。Java的Atomic包使用CAS算法来更新数据，而不需要加锁。</li>
+<li>使用最少线程。避免创建不需要的线程，比如任务很少，但是创建了很多线程来处理，这样回造成大量线程都处于等待状态。</li>
+<li>协程：在单线程里实现多任务的调度，并在单线程里维持多个任务间的切换。</li>
+</ul>
+<h3 id="114-减少上下文切换实战">1.1.4 减少上下文切换实战</h3>
+<p>通过见扫线上大量WAITING的线程，来减少上下文切换次数。</p>
+<h2 id="12-死锁">1.2 死锁</h2>
+<p>避免死锁的几个常见方法：</p>
+<ul>
+<li>避免一个线程同时获取多个锁。</li>
+<li>避免一个线程在锁内同时占用多个资源，尽量保证每个锁只占用一个资源。</li>
+<li>尝试使用定时锁，使用lock.tryLock(timeout)来替代使用内部锁机制。</li>
+<li>对于数据库锁，加锁和解锁必须在一个数据库连接里，否则会出现解锁失败的的情况。</li>
+</ul>
+<h2 id="13-资源限制的挑战">1.3 资源限制的挑战</h2>
+<p>（1）什么是资源限制</p>
+<p>资源是指在进行并发编程时，程序的执行速度受限于计算机硬件资源或软件资源。</p>
+<p>硬件资源限制：带宽的上传/下载速读、硬盘读写速度和CPU的处理速度。</p>
+<p>软件资源限制：数据库的连接数和scoket连接数。</p>
+<p>（2）资源限制引发的问题</p>
+<p>在并发编程中，将代码执行速度加快的原则是将代码中串行执行的部分变成并发执行，但是如果将某段串行的代码并发执行，因为受限于资源，仍然在串行执行，这时候程序不仅不会加快执行，反而会更慢，因为增加了上下文切换和资源调度的问题。</p>
+<p>（3）如何解决资源限制的问题</p>
+<p>对于硬件资源限制，可以考虑使用集群并行执行程序。既然单机的资源有限制，那么就让程序在多级上运行。比如使用ODPS、Hadoop或者自己搭建服务器集群，不同的机器吹不同的数据。可以通过“数据ID%机器数”，计算得到一个机器编号，然后由对应编号的机器处理这笔数据。</p>
+<p>对于软件资源限制，可以考虑使用资源池将资源复用。比如使用连接池将数据库和Socket连接复用，或者调用对方webservice接口获取数据时，只建立一个连接。</p>
+<p>（4）在资源限制情况下进行并发编程</p>
+<p>如何在资源限制的情况下，让程序执行得更快呢？方法就是，根据不同得资源限制调整程序得并发度。</p>
+<h2 id="14-本章小结">1.4 本章小结</h2>
+<p>本章介绍了在进行并发编程时会遇到的几个挑战，并给出了一些建议。</p>
+<h1 id="第二章-java并发机制的底层实现原理">第二章 Java并发机制的底层实现原理</h1>
+<p>JVM执行字节码，最终需要转化为汇编指令在CPU上执行，Java中所使用得并发机制依赖于JVM得实现和CPU的指令。</p>
+<h2 id="21-volatile的应用">2.1 volatile的应用</h2>
+<h3 id="1volatile的定义与实现原理">1.volatile的定义与实现原理</h3>
+<p>volatile是轻量级的synchronized，在多处理器开发中保证了共享变量的“可见性”。使用得当的话，比synchronized的使用和执行成本更低，因为它不会引起线程上下文的切换和调度。本文分析Intel处理器是如何实现volatile的。</p>
+<p>CPU的术语定义：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">术语</th>
+<th style="text-align:left">英文单词</th>
+<th style="text-align:left">术语描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">内存屏障</td>
+<td style="text-align:left">memory barriers</td>
+<td style="text-align:left">是一组处理器指令，用于事项对内存操作的顺序限制</td>
+</tr>
+<tr>
+<td style="text-align:left">缓冲行</td>
+<td style="text-align:left">cache line</td>
+<td style="text-align:left">缓存中可以分配的最小存储单位。处理器填写缓存线时会加载整个缓存线，需要使用多个主内存读周期</td>
+</tr>
+<tr>
+<td style="text-align:left">原子操作</td>
+<td style="text-align:left">atomic line</td>
+<td style="text-align:left">不可终端的一个或一系列操作</td>
+</tr>
+<tr>
+<td style="text-align:left">缓存行填充</td>
+<td style="text-align:left">cache line fill</td>
+<td style="text-align:left">当处理器试别到内存中读取操作数时可缓存的，处理器读取整个缓存行到适当的缓存（L1,L2,L3的或所有）</td>
+</tr>
+<tr>
+<td style="text-align:left">缓存命中</td>
+<td style="text-align:left">cache hit</td>
+<td style="text-align:left">如果进行高速缓存行填充操作的内存位置仍然是下次处理器访问的地址时，处理器从缓存中读取操作数，而不是从内存读取</td>
+</tr>
+<tr>
+<td style="text-align:left">写命中</td>
+<td style="text-align:left">write hit</td>
+<td style="text-align:left">当处理器将操作数写回到一个内存缓存的区域时，它首先回检查这个缓存的内存地址是否在缓存行中，如果存在一个有效的缓存行，则处理器将这个操作数写回到缓存，而不是写回到内存，这个操作被称为写命中</td>
+</tr>
+<tr>
+<td style="text-align:left">写缺失</td>
+<td style="text-align:left">write misses the cache</td>
+<td style="text-align:left">一个有效的缓存行被写入到不存在的内存区域</td>
+</tr>
+</tbody>
+</table>
+<p>为了提高处理速度，处理器不直接个内存进行通信，二十先将系统内存的数据督导内部缓存（L1,L2或其他）后再进行操作，但操作完不知道何时会写到内存。如果对声明了volatile的变量进行写操作，JVM就会像处理器发送一条<strong>Lock前缀</strong>的指令，将这个变量所在缓存的数据写回到系统内存。但是就算写回到内存，如过其他处理器缓存的值还是旧的，再执行计算操作就会有问题。所以，再多处理器下，未了保证各个处理器缓存的值还是旧的，再执行计算操作就会有问题。所以，在多处理器下，为了保证各个处理器的换粗你一直，就会实现缓存一致性协议，每个处理器通过嗅探在总线上传播的数据来检查自己缓存的值是不是过期了，当处理器发现自己缓存行对应的内存地址被修改，就会将当前处理器的缓存行设置成无效状态，当处理器对这个数据进行修改操作的时候，回重新从系统内存中把数据读到处理器缓存里。</p>
+<p>Lock前缀的指令在多核处理器下会引发两件事情：</p>
+<ol>
+<li>将当前处理器缓存行的数据写回到系统内存</li>
+<li>这个写回内存的操作会使在其他CPU里缓存了该内存地址的数据无效</li>
+</ol>
+<p>volatile的两条实现原则：</p>
+<ol>
+<li>Lock前缀指令会引起处理器缓存回写到内存</li>
+<li>一个处理器的缓存回写到内存会导致其他处理器的缓存无效</li>
+</ol>
+<h3 id="2volatile的使用优化">2.volatile的使用优化</h3>
+<p>追加字节到64字节，因为高速缓存行普遍是64字节宽，不支持部分填充缓存行。如果队列的头节点和尾节点都不足64字节的话，处理器会将它们都读到同一个高速缓存行中，在多处理器下每个处理器都会缓存同样的头、尾节点，当一个处理器试图修改头节点时，会将整个缓存行锁定，那么在缓存一致性机制的作用下，会导致其他处理器不能访问自己告诉缓存中的尾节点，而队列的入队和出队操作则需要不停修改头节点和尾节点，所以在多处理器的情况下将会严重影响到队列的入队和出队效率。</p>
+<p>追加到64字节的方式来填满告诉缓冲区的缓存行，避免头节点和尾节点加载到同一个缓存行，使头，尾节点在修改时不会互相锁定。</p>
+<p>一下两种场景不适用：</p>
+<ol>
+<li>缓存行非64字节宽的处理器。</li>
+<li>共享变量不会被频繁地写。</li>
+</ol>
+<p>Java7之后不能生效，会淘汰或重新排列无用字段，需要采用其他追加字节的方式。</p>
+<h2 id="22-synchronized的实现原理与应用">2.2 synchronized的实现原理与应用</h2>
+<p>syschronized实现同步的基础：Java中的每一个对象都可以作为锁。具体表现以下3种形式：</p>
+<ul>
+<li>对于普通同步方法，锁是当前实例对象。</li>
+<li>对于静态同步方法，锁是当前类的Class对象。</li>
+<li>对于同步方法块，锁是Synchronized括号里配置的对象。</li>
+</ul>
+<p>当一个线程试图访问同步代码块时，它首先必须得到锁，退出或抛出异常时必须释放锁。</p>
+<p>JVM基于进入和退出Monitor对象来实现方法同步和代码块同步。</p>
+<p>monnitorenter指令===&gt;同步代码块开头，monitorexit===&gt;方法结束处和异常处。两者配对。任何对象都有一个monitor与之关联，当一个monitor被持有后，它将处于锁定状态。线程执行到monitorenter指令时，将会尝试获取对象所对应的monitor的所有权，即尝试获得对象的锁。</p>
+<h3 id="221-java对象头">2.2.1 Java对象头</h3>
+<p>synchronized用的锁时存在Java对象头里的。</p>
+<table>
+<thead>
+<tr>
+<th>长度</th>
+<th>内容</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>32/64bit</td>
+<td>Mark Word</td>
+<td>存储对象的hashCode或锁信息</td>
+</tr>
+<tr>
+<td>32/64bit</td>
+<td>Class Metadata Address</td>
+<td>存储到对象类型数据的指针</td>
+</tr>
+<tr>
+<td>32/32bit</td>
+<td>Array leng</td>
+<td>数组的长度（如果当前对象是数组）</td>
+</tr>
+</tbody>
+</table>
+<p>Mark Word的默认存储结构：</p>
+<table>
+<thead>
+<tr>
+<th>锁状态</th>
+<th>25bit</th>
+<th>4bit</th>
+<th>1bit偏向锁</th>
+<th>2bit锁标志位</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>无锁状态</td>
+<td>对象的hashCode</td>
+<td>对象分代年龄</td>
+<td>0</td>
+<td>01</td>
+</tr>
+</tbody>
+</table>
+<p>运行期，Mark Word里存储的数据会随着锁标志位的变化而变化。</p>
+<h3 id="222-锁的升级与对比">2.2.2 锁的升级与对比</h3>
+<p>锁从低到高四个状态：无状态所、偏向锁状态、轻量级锁状态和重量级锁状态。为了提高获得锁和释放锁的效率，锁可以升级但不能降级。</p>
+<ol>
+<li>偏向锁</li>
+</ol>
+<p>目的：为了让线程获得锁的代价更低。</p>
+<p>当一个线程访问同步块并获取锁时，会在对象头和栈帧中的锁记录里存储锁偏向的线程ID，以后该线程在进入和退出同步块时不需要进行CAS操作来加锁和解锁，只需简单地测试一下对象头地Mar Word里是否存储着指向当前线程的偏向锁。如果测试成功，表示线程已经获得了锁。如果测试失败，则需要再测试一下Mark Word中偏向锁的标识是否设置成1（表示当前是偏向锁）：如果没有设置，则使用CAS竞争锁；如果设置了，则尝试使用CAS将对象头的偏向锁指向当前线程。</p>
+<p>（1）偏向锁的撤销</p>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

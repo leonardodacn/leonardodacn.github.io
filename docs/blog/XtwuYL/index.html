@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>golang 常用函数 | haokiu</title>
+<meta name="keywords" content="go,函数">
+<meta name="description" content="1. 获取当前时间 时间戳(秒)：time.Now().Unix 日期：time.Now().Format(&#34;2006-01-02 15:04:05&#34;) 注意：参数必须是 2006-01-02 15:04:05 而不能是自定义的年月日时间 2. 字符串与int转换 i,_ := strconv.Atoi(&#34;3&#34;) a := strconv.Itoa(32) 3.结构体json序列化 chatMsg := &amp;ChatMsg{} err := json.Unmarshal([]byte(msg), chatMsg) //json转结构体 buf, _ := json.Marshal(chatMsg) //结构体转json return string(buf) 4.删除切片元素 mySlice := make([]int, 5) //创建一个初始元素个数为5的数组切片，元素初始值为0 mySlice = append(mySlice[:i], mySlice[i&#43;1:]...) //删除下标为i的元素 mySlice = append(mySlice[:0], mySlice[1:]...) //删除第1个元素 5. url encode/decode encodeUrl:= url.QueryEscape(urltest) decodeUrl,err := url.QueryUnescape(encodeUrl) 6. base64编码 encodeString := base64.StdEncoding.EncodeToString(input) decodeBytes, err := base64.StdEncoding.DecodeString(encodeString) 7. 获取字符串长度 tips := &#34;忍者&#34; len := len(tips) //len=6 len := utf8.RuneCountInString(tips) //len=2 8. SubString func SubString(str string, start int32, end int32) string { result := []rune(str) length := int32(len(result)) if start &lt; 0 || start &gt; length { return str } if end &lt; 0 || end &gt; length { return str } return string(result[start:end]) } result = SubString(result, 0, int32(len([]rune(result)))-1)//注意end参数的取值 9.">
+<meta name="author" content="">
+<link rel="canonical" href="https://haokiu.com/blog/XtwuYL/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://haokiu.com/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
+<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="golang 常用函数" />
+<meta property="og:description" content="1. 获取当前时间 时间戳(秒)：time.Now().Unix 日期：time.Now().Format(&#34;2006-01-02 15:04:05&#34;) 注意：参数必须是 2006-01-02 15:04:05 而不能是自定义的年月日时间 2. 字符串与int转换 i,_ := strconv.Atoi(&#34;3&#34;) a := strconv.Itoa(32) 3.结构体json序列化 chatMsg := &amp;ChatMsg{} err := json.Unmarshal([]byte(msg), chatMsg) //json转结构体 buf, _ := json.Marshal(chatMsg) //结构体转json return string(buf) 4.删除切片元素 mySlice := make([]int, 5) //创建一个初始元素个数为5的数组切片，元素初始值为0 mySlice = append(mySlice[:i], mySlice[i&#43;1:]...) //删除下标为i的元素 mySlice = append(mySlice[:0], mySlice[1:]...) //删除第1个元素 5. url encode/decode encodeUrl:= url.QueryEscape(urltest) decodeUrl,err := url.QueryUnescape(encodeUrl) 6. base64编码 encodeString := base64.StdEncoding.EncodeToString(input) decodeBytes, err := base64.StdEncoding.DecodeString(encodeString) 7. 获取字符串长度 tips := &#34;忍者&#34; len := len(tips) //len=6 len := utf8.RuneCountInString(tips) //len=2 8. SubString func SubString(str string, start int32, end int32) string { result := []rune(str) length := int32(len(result)) if start &lt; 0 || start &gt; length { return str } if end &lt; 0 || end &gt; length { return str } return string(result[start:end]) } result = SubString(result, 0, int32(len([]rune(result)))-1)//注意end参数的取值 9." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://haokiu.com/blog/XtwuYL/" /><meta property="article:section" content="1" />
+<meta property="article:published_time" content="2020-10-10T10:23:10+00:00" />
+<meta property="article:modified_time" content="2020-10-10T10:23:10+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="golang 常用函数"/>
+<meta name="twitter:description" content="1. 获取当前时间 时间戳(秒)：time.Now().Unix 日期：time.Now().Format(&#34;2006-01-02 15:04:05&#34;) 注意：参数必须是 2006-01-02 15:04:05 而不能是自定义的年月日时间 2. 字符串与int转换 i,_ := strconv.Atoi(&#34;3&#34;) a := strconv.Itoa(32) 3.结构体json序列化 chatMsg := &amp;ChatMsg{} err := json.Unmarshal([]byte(msg), chatMsg) //json转结构体 buf, _ := json.Marshal(chatMsg) //结构体转json return string(buf) 4.删除切片元素 mySlice := make([]int, 5) //创建一个初始元素个数为5的数组切片，元素初始值为0 mySlice = append(mySlice[:i], mySlice[i&#43;1:]...) //删除下标为i的元素 mySlice = append(mySlice[:0], mySlice[1:]...) //删除第1个元素 5. url encode/decode encodeUrl:= url.QueryEscape(urltest) decodeUrl,err := url.QueryUnescape(encodeUrl) 6. base64编码 encodeString := base64.StdEncoding.EncodeToString(input) decodeBytes, err := base64.StdEncoding.DecodeString(encodeString) 7. 获取字符串长度 tips := &#34;忍者&#34; len := len(tips) //len=6 len := utf8.RuneCountInString(tips) //len=2 8. SubString func SubString(str string, start int32, end int32) string { result := []rune(str) length := int32(len(result)) if start &lt; 0 || start &gt; length { return str } if end &lt; 0 || end &gt; length { return str } return string(result[start:end]) } result = SubString(result, 0, int32(len([]rune(result)))-1)//注意end参数的取值 9."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "1s",
+      "item": "https://haokiu.com/1/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "golang 常用函数",
+      "item": "https://haokiu.com/blog/XtwuYL/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "golang 常用函数",
+  "name": "golang 常用函数",
+  "description": "1. 获取当前时间 时间戳(秒)：time.Now().Unix 日期：time.Now().Format(\u0026#34;2006-01-02 15:04:05\u0026#34;) 注意：参数必须是 2006-01-02 15:04:05 而不能是自定义的年月日时间 2. 字符串与int转换 i,_ := strconv.Atoi(\u0026#34;3\u0026#34;) a := strconv.Itoa(32) 3.结构体json序列化 chatMsg := \u0026amp;ChatMsg{} err := json.Unmarshal([]byte(msg), chatMsg) //json转结构体 buf, _ := json.Marshal(chatMsg) //结构体转json return string(buf) 4.删除切片元素 mySlice := make([]int, 5) //创建一个初始元素个数为5的数组切片，元素初始值为0 mySlice = append(mySlice[:i], mySlice[i+1:]...) //删除下标为i的元素 mySlice = append(mySlice[:0], mySlice[1:]...) //删除第1个元素 5. url encode/decode encodeUrl:= url.QueryEscape(urltest) decodeUrl,err := url.QueryUnescape(encodeUrl) 6. base64编码 encodeString := base64.StdEncoding.EncodeToString(input) decodeBytes, err := base64.StdEncoding.DecodeString(encodeString) 7. 获取字符串长度 tips := \u0026#34;忍者\u0026#34; len := len(tips) //len=6 len := utf8.RuneCountInString(tips) //len=2 8. SubString func SubString(str string, start int32, end int32) string { result := []rune(str) length := int32(len(result)) if start \u0026lt; 0 || start \u0026gt; length { return str } if end \u0026lt; 0 || end \u0026gt; length { return str } return string(result[start:end]) } result = SubString(result, 0, int32(len([]rune(result)))-1)//注意end参数的取值 9.",
+  "keywords": [
+    "go,函数"
+  ],
+  "articleBody": "1. 获取当前时间 时间戳(秒)：time.Now().Unix 日期：time.Now().Format(\"2006-01-02 15:04:05\") 注意：参数必须是 2006-01-02 15:04:05 而不能是自定义的年月日时间 2. 字符串与int转换 i,_ := strconv.Atoi(\"3\") a := strconv.Itoa(32) 3.结构体json序列化 chatMsg := \u0026ChatMsg{} err := json.Unmarshal([]byte(msg), chatMsg) //json转结构体 buf, _ := json.Marshal(chatMsg) //结构体转json return string(buf) 4.删除切片元素 mySlice := make([]int, 5) //创建一个初始元素个数为5的数组切片，元素初始值为0 mySlice = append(mySlice[:i], mySlice[i+1:]...) //删除下标为i的元素 mySlice = append(mySlice[:0], mySlice[1:]...) //删除第1个元素 5. url encode/decode encodeUrl:= url.QueryEscape(urltest) decodeUrl,err := url.QueryUnescape(encodeUrl) 6. base64编码 encodeString := base64.StdEncoding.EncodeToString(input) decodeBytes, err := base64.StdEncoding.DecodeString(encodeString) 7. 获取字符串长度 tips := \"忍者\" len := len(tips) //len=6 len := utf8.RuneCountInString(tips) //len=2 8. SubString func SubString(str string, start int32, end int32) string { result := []rune(str) length := int32(len(result)) if start \u003c 0 || start \u003e length { return str } if end \u003c 0 || end \u003e length { return str } return string(result[start:end]) } result = SubString(result, 0, int32(len([]rune(result)))-1)//注意end参数的取值 9. 结构体类型断言 logger := \u0026log.Logger{} fl, ok := interface{}(logger).(*FileLogger) 类型断言变量一定要是一个接口变量，否则报错 invalid type assertion: xxx (non-interface type xxx on left);\n使用类型断言的思路，应该是接收到一个接口值，但不确定这个值具体的类型，然后通过类型断言来判断。\n10. os常用函数 import ( \"os\" \"fmt\" \"time\" \"strings\" ) //os包中的一些常用函数 func main() { //获取主机名 fmt.Println(os.Hostname()); //获取当前目录 fmt.Println(os.Getwd()); //获取用户ID fmt.Println(os.Getuid()); //获取有效用户ID fmt.Println(os.Geteuid()); //获取组ID fmt.Println(os.Getgid()); //获取有效组ID fmt.Println(os.Getegid()); //获取进程ID fmt.Println(os.Getpid()); //获取父进程ID fmt.Println(os.Getppid()); //获取环境变量的值 fmt.Println(os.Getenv(\"GOPATH\")); //设置环境变量的值 os.Setenv(\"TEST\", \"test\"); //改变当前工作目录 os.Chdir(\"C:/\"); fmt.Println(os.Getwd()); //创建文件 f1, _ := os.Create(\"./1.txt\"); defer f1.Close(); //修改文件权限 if err := os.Chmod(\"./1.txt\", 0777); err != nil { fmt.Println(err); } //修改文件所有者 if err := os.Chown(\"./1.txt\", 0, 0); err != nil { fmt.Println(err); } //修改文件的访问时间和修改时间 os.Chtimes(\"./1.txt\", time.Now().Add(time.Hour), time.Now().Add(time.Hour)); //获取所有环境变量 fmt.Println(strings.Join(os.Environ(), \"\\r\\n\")); //把字符串中带NULL或$var替换成指定指符串 fmt.Println(os.Expand(\"NULL NULL NULL\", func(k string) string { mapp := map[string]string{ \"1\": \"111\", \"2\": \"222\", \"3\": \"333\", }; return mapp[k]; })); //创建目录 os.Mkdir(\"abc\", os.ModePerm); //创建多级目录 os.MkdirAll(\"abc/d/e/f\", os.ModePerm); //删除文件或目录 os.Remove(\"abc/d/e/f\"); //删除指定目录下所有文件 os.RemoveAll(\"abc\"); //重命名文件 os.Rename(\"./2.txt\", \"./2_new.txt\"); //判断是否为同一文件 //unix下通过底层结构的设备和索引节点是否相同来判断 //其他系统可能是通过文件绝对路径来判断 fs1, _ := f1.Stat(); f2, _ := os.Open(\"./1.txt\"); fs2, _ := f2.Stat(); fmt.Println(os.SameFile(fs1, fs2)); //返回临时目录 fmt.Println(os.TempDir()); } 11. 文件常用函数 import ( \"os\" \"fmt\" \"strconv\" ) //os包中关于文件的操作函数 func main() { //创建文件，返回一个文件指针 f3, _ := os.Create(\"./3.txt\"); defer f3.Close(); //以读写方式打开文件，如果不存在则创建文件，等同于上面os.Create f4, _ := os.OpenFile(\"./4.txt\", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666); defer f4.Close(); //打开文件，返回文件指针 f1, _ := os.Open(\"./1.txt\"); defer f1.Close(); //修改文件权限，类似os.chmod f1.Chmod(0777); //修改文件所有者，类似os.chown f1.Chown(0, 0); //返回文件的句柄，通过NewFile创建文件需要文件句柄 fmt.Println(f1.Fd()); //从文件中读取数据 buf := make([]byte, 128); //read每次读取数据到buf中 for n, _ := f1.Read(buf); n != 0; n, _ = f1.Read(buf) { fmt.Println(string(buf[:n])); } //向文件中写入数据 for i := 0; i \u003c 5; i++ { f3.Write([]byte(\"写入数据\" + strconv.Itoa(i) + \"\\r\\n\")); } //返回一对关联的文件对象 //从r中可以读取到从w写入的数据 r, w, _ := os.Pipe(); //向w中写入字符串 w.WriteString(\"写入w\"); buf2 := make([]byte, 128); //从r中读取数据 n, _ := r.Read(buf); fmt.Println(string(buf2[:n])); //改变工作目录 os.Mkdir(\"a\", os.ModePerm); dir, _ := os.Open(\"a\"); //改变工作目录到dir，dir必须为一个目录 dir.Chdir(); fmt.Println(os.Getwd()); //读取目录的内容，返回一个FileInfo的slice //参数大于0，最多返回n个FileInfo //参数小于等于0，返回所有FileInfo fi, _ := dir.Readdir(-1); for _, v := range fi { fmt.Println(v.Name()); } //读取目录中文件对象的名字 names, _ := dir.Readdirnames(-1); fmt.Println(names); //获取文件的详细信息，返回FileInfo结构 fi3, _ := f3.Stat(); //文件名 fmt.Println(fi3.Name()); //文件大小 fmt.Println(fi3.Size()); //文件权限 fmt.Println(fi3.Mode()); //文件修改时间 fmt.Println(fi3.ModTime()); //是否是目录 fmt.Println(fi3.IsDir()); } 12. os中关于进程的操作 import ( \"os\" \"fmt\" \"time\" ) //os包中关于进程的操作函数 func main() { //设置新进程的属性 attr := \u0026os.ProcAttr{ //files指定新进程继承的活动文件对象 //前三个分别为，标准输入、标准输出、标准错误输出 Files: []*os.File{os.Stdin, os.Stdout, os.Stderr}, //新进程的环境变量 Env: os.Environ(), } //win下通过记事本打开1.txt //开始一个新进程 p, err := os.StartProcess(\"C:\\\\Windows\\\\System32\\\\notepad.exe\", []string{\"C:\\\\Windows\\\\System32\\\\notepad.exe\", \"D:\\\\1.txt\"}, attr); if err != nil { fmt.Println(err); } fmt.Println(p); fmt.Println(\"进程ID：\", p.Pid); //通过进程ID查找进程 p2, _ := os.FindProcess(p.Pid); fmt.Println(p2); //等待10秒，执行函数 time.AfterFunc(time.Second*10, func() { //向p进程发送退出信号 p.Signal(os.Kill); }); //等待进程p的退出，返回进程状态 ps, _ := p.Wait(); fmt.Println(ps.String()); } ",
+  "wordCount" : "489",
+  "inLanguage": "en",
+  "datePublished": "2020-10-10T10:23:10Z",
+  "dateModified": "2020-10-10T10:23:10Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://haokiu.com/blog/XtwuYL/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "haokiu",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://haokiu.com/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://haokiu.com/" title="haokiu">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/1/" title="1s">
+                    <span>后端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/2/" title="2s">
+                    <span>前端</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/3/" title="3s">
+                    <span>区块链</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/4/" title="4s">
+                    <span>大数据</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/5/" title="5s">
+                    <span>linux</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/6/" title="6s">
+                    <span>其他</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/tags/" title="Tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://haokiu.com/categories/" title="Categories">
+                    <span>categories</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    <h1 class="post-title">
+      golang 常用函数
+    </h1>
+    <div class="post-meta"><span title='2020-10-10 10:23:10 +0000 UTC'>October 10, 2020</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#1-%e8%8e%b7%e5%8f%96%e5%bd%93%e5%89%8d%e6%97%b6%e9%97%b4" aria-label="1. 获取当前时间">1. 获取当前时间</a></li>
+                <li>
+                    <a href="#2-%e5%ad%97%e7%ac%a6%e4%b8%b2%e4%b8%8eint%e8%bd%ac%e6%8d%a2" aria-label="2. 字符串与int转换">2. 字符串与int转换</a></li>
+                <li>
+                    <a href="#3%e7%bb%93%e6%9e%84%e4%bd%93json%e5%ba%8f%e5%88%97%e5%8c%96" aria-label="3.结构体json序列化">3.结构体json序列化</a></li>
+                <li>
+                    <a href="#4%e5%88%a0%e9%99%a4%e5%88%87%e7%89%87%e5%85%83%e7%b4%a0" aria-label="4.删除切片元素">4.删除切片元素</a></li>
+                <li>
+                    <a href="#5-url-encodedecode" aria-label="5. url encode/decode">5. url encode/decode</a></li>
+                <li>
+                    <a href="#6-base64%e7%bc%96%e7%a0%81" aria-label="6. base64编码">6. base64编码</a></li>
+                <li>
+                    <a href="#7-%e8%8e%b7%e5%8f%96%e5%ad%97%e7%ac%a6%e4%b8%b2%e9%95%bf%e5%ba%a6" aria-label="7. 获取字符串长度">7. 获取字符串长度</a></li>
+                <li>
+                    <a href="#8-substring" aria-label="8. SubString">8. SubString</a></li>
+                <li>
+                    <a href="#9-%e7%bb%93%e6%9e%84%e4%bd%93%e7%b1%bb%e5%9e%8b%e6%96%ad%e8%a8%80" aria-label="9. 结构体类型断言">9. 结构体类型断言</a></li>
+                <li>
+                    <a href="#10-os%e5%b8%b8%e7%94%a8%e5%87%bd%e6%95%b0" aria-label="10. os常用函数">10. os常用函数</a></li>
+                <li>
+                    <a href="#11-%e6%96%87%e4%bb%b6%e5%b8%b8%e7%94%a8%e5%87%bd%e6%95%b0" aria-label="11. 文件常用函数">11. 文件常用函数</a></li>
+                <li>
+                    <a href="#12-os%e4%b8%ad%e5%85%b3%e4%ba%8e%e8%bf%9b%e7%a8%8b%e7%9a%84%e6%93%8d%e4%bd%9c" aria-label="12. os中关于进程的操作">12. os中关于进程的操作</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h3 id="1-获取当前时间">1. 获取当前时间</h3>
+<pre tabindex="0"><code>时间戳(秒)：time.Now().Unix
+
+日期：time.Now().Format(&#34;2006-01-02 15:04:05&#34;)
+
+注意：参数必须是 2006-01-02 15:04:05 而不能是自定义的年月日时间
+</code></pre><h3 id="2-字符串与int转换">2. 字符串与int转换</h3>
+<pre tabindex="0"><code>i,_ := strconv.Atoi(&#34;3&#34;)
+
+a := strconv.Itoa(32) 
+</code></pre><h3 id="3结构体json序列化">3.结构体json序列化</h3>
+<pre tabindex="0"><code>chatMsg := &amp;ChatMsg{}
+
+err := json.Unmarshal([]byte(msg), chatMsg) //json转结构体
+
+buf, _ := json.Marshal(chatMsg) //结构体转json
+
+return string(buf)
+</code></pre><h3 id="4删除切片元素">4.删除切片元素</h3>
+<pre tabindex="0"><code>mySlice := make([]int, 5) //创建一个初始元素个数为5的数组切片，元素初始值为0
+
+mySlice = append(mySlice[:i], mySlice[i+1:]...) //删除下标为i的元素
+
+mySlice = append(mySlice[:0], mySlice[1:]...) //删除第1个元素
+</code></pre><h3 id="5-url-encodedecode">5. url encode/decode</h3>
+<pre tabindex="0"><code>encodeUrl:= url.QueryEscape(urltest)
+
+decodeUrl,err := url.QueryUnescape(encodeUrl) 
+</code></pre><h3 id="6-base64编码">6. base64编码</h3>
+<pre tabindex="0"><code>encodeString := base64.StdEncoding.EncodeToString(input)
+
+decodeBytes, err := base64.StdEncoding.DecodeString(encodeString)
+</code></pre><h3 id="7-获取字符串长度">7. 获取字符串长度</h3>
+<pre tabindex="0"><code>tips := &#34;忍者&#34;
+
+len := len(tips) //len=6
+
+len := utf8.RuneCountInString(tips) //len=2
+</code></pre><h3 id="8-substring">8. SubString</h3>
+<pre tabindex="0"><code>func SubString(str string, start int32, end int32) string {
+
+  result := []rune(str)
+
+  length := int32(len(result))
+
+  if start &lt; 0 || start &gt; length {
+    return str
+  } 
+
+  if end &lt; 0 || end &gt; length {
+    return str
+  } 
+
+  return string(result[start:end])
+
+  }
+
+result = SubString(result, 0, int32(len([]rune(result)))-1)//注意end参数的取值
+</code></pre><h3 id="9-结构体类型断言">9. 结构体类型断言</h3>
+<pre tabindex="0"><code>logger := &amp;log.Logger{}
+
+fl, ok := interface{}(logger).(*FileLogger)
+</code></pre><ol>
+<li>
+<p>类型断言变量一定要是一个接口变量，否则报错 <code>invalid type assertion: xxx (non-interface type xxx on left)</code>;</p>
+</li>
+<li>
+<p>使用类型断言的思路，应该是接收到一个接口值，但不确定这个值具体的类型，然后通过类型断言来判断。</p>
+</li>
+</ol>
+<h3 id="10-os常用函数">10. os常用函数</h3>
+<pre tabindex="0"><code>import (
+    &#34;os&#34;
+    &#34;fmt&#34;
+    &#34;time&#34;
+    &#34;strings&#34;
+)
+  
+//os包中的一些常用函数
+  
+func main() {
+  
+    //获取主机名
+    fmt.Println(os.Hostname());
+  
+    //获取当前目录
+    fmt.Println(os.Getwd());
+  
+    //获取用户ID
+    fmt.Println(os.Getuid());
+  
+    //获取有效用户ID
+    fmt.Println(os.Geteuid());
+  
+    //获取组ID
+    fmt.Println(os.Getgid());
+  
+    //获取有效组ID
+    fmt.Println(os.Getegid());
+  
+    //获取进程ID
+    fmt.Println(os.Getpid());
+  
+    //获取父进程ID
+    fmt.Println(os.Getppid());
+  
+    //获取环境变量的值
+    fmt.Println(os.Getenv(&#34;GOPATH&#34;));
+  
+    //设置环境变量的值
+    os.Setenv(&#34;TEST&#34;, &#34;test&#34;);
+  
+    //改变当前工作目录
+    os.Chdir(&#34;C:/&#34;);
+    fmt.Println(os.Getwd());
+  
+    //创建文件
+    f1, _ := os.Create(&#34;./1.txt&#34;);
+    defer f1.Close();
+  
+    //修改文件权限
+    if err := os.Chmod(&#34;./1.txt&#34;, 0777); err != nil {
+        fmt.Println(err);
+    }
+  
+    //修改文件所有者
+    if err := os.Chown(&#34;./1.txt&#34;, 0, 0); err != nil {
+        fmt.Println(err);
+    }
+  
+    //修改文件的访问时间和修改时间
+    os.Chtimes(&#34;./1.txt&#34;, time.Now().Add(time.Hour), time.Now().Add(time.Hour));
+  
+    //获取所有环境变量
+    fmt.Println(strings.Join(os.Environ(), &#34;\r\n&#34;));
+  
+    //把字符串中带NULL或$var替换成指定指符串
+    fmt.Println(os.Expand(&#34;NULL NULL NULL&#34;, func(k string) string {
+        mapp := map[string]string{
+            &#34;1&#34;: &#34;111&#34;,
+            &#34;2&#34;: &#34;222&#34;,
+            &#34;3&#34;: &#34;333&#34;,
+        };
+        return mapp[k];
+    }));
+  
+    //创建目录
+    os.Mkdir(&#34;abc&#34;, os.ModePerm);
+  
+    //创建多级目录
+    os.MkdirAll(&#34;abc/d/e/f&#34;, os.ModePerm);
+  
+    //删除文件或目录
+    os.Remove(&#34;abc/d/e/f&#34;);
+  
+    //删除指定目录下所有文件
+    os.RemoveAll(&#34;abc&#34;);
+  
+    //重命名文件
+    os.Rename(&#34;./2.txt&#34;, &#34;./2_new.txt&#34;);
+  
+    //判断是否为同一文件
+    //unix下通过底层结构的设备和索引节点是否相同来判断
+    //其他系统可能是通过文件绝对路径来判断
+    fs1, _ := f1.Stat();
+    f2, _ := os.Open(&#34;./1.txt&#34;);
+    fs2, _ := f2.Stat();
+    fmt.Println(os.SameFile(fs1, fs2));
+  
+    //返回临时目录
+    fmt.Println(os.TempDir());
+}
+</code></pre><h3 id="11-文件常用函数">11. 文件常用函数</h3>
+<pre tabindex="0"><code>import (
+    &#34;os&#34;
+    &#34;fmt&#34;
+    &#34;strconv&#34;
+)
+
+//os包中关于文件的操作函数
+  
+func main() {
+    //创建文件，返回一个文件指针
+    f3, _ := os.Create(&#34;./3.txt&#34;);
+    defer f3.Close();
+  
+    //以读写方式打开文件，如果不存在则创建文件，等同于上面os.Create
+    f4, _ := os.OpenFile(&#34;./4.txt&#34;, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666);
+    defer f4.Close();
+  
+    //打开文件，返回文件指针
+    f1, _ := os.Open(&#34;./1.txt&#34;);
+    defer f1.Close();
+  
+    //修改文件权限，类似os.chmod
+    f1.Chmod(0777);
+  
+    //修改文件所有者，类似os.chown
+    f1.Chown(0, 0);
+  
+    //返回文件的句柄，通过NewFile创建文件需要文件句柄
+    fmt.Println(f1.Fd());
+  
+    //从文件中读取数据
+    buf := make([]byte, 128);
+    //read每次读取数据到buf中
+    for n, _ := f1.Read(buf); n != 0; n, _ = f1.Read(buf) {
+        fmt.Println(string(buf[:n]));
+    }
+  
+    //向文件中写入数据
+    for i := 0; i &lt; 5; i++ {
+        f3.Write([]byte(&#34;写入数据&#34; + strconv.Itoa(i) + &#34;\r\n&#34;));
+    }
+  
+    //返回一对关联的文件对象
+    //从r中可以读取到从w写入的数据
+    r, w, _ := os.Pipe();
+    //向w中写入字符串
+    w.WriteString(&#34;写入w&#34;);
+    buf2 := make([]byte, 128);
+    //从r中读取数据
+    n, _ := r.Read(buf);
+    fmt.Println(string(buf2[:n]));
+  
+    //改变工作目录
+    os.Mkdir(&#34;a&#34;, os.ModePerm);
+    dir, _ := os.Open(&#34;a&#34;);
+    //改变工作目录到dir，dir必须为一个目录
+    dir.Chdir();
+    fmt.Println(os.Getwd());
+  
+    //读取目录的内容，返回一个FileInfo的slice
+    //参数大于0，最多返回n个FileInfo
+    //参数小于等于0，返回所有FileInfo
+    fi, _ := dir.Readdir(-1);
+    for _, v := range fi {
+        fmt.Println(v.Name());
+    }
+  
+    //读取目录中文件对象的名字
+    names, _ := dir.Readdirnames(-1);
+    fmt.Println(names);
+  
+    //获取文件的详细信息，返回FileInfo结构
+    fi3, _ := f3.Stat();
+    //文件名
+    fmt.Println(fi3.Name());
+    //文件大小
+    fmt.Println(fi3.Size());
+    //文件权限
+    fmt.Println(fi3.Mode());
+    //文件修改时间
+    fmt.Println(fi3.ModTime());
+    //是否是目录
+    fmt.Println(fi3.IsDir());
+}
+</code></pre><h3 id="12-os中关于进程的操作">12. os中关于进程的操作</h3>
+<pre tabindex="0"><code>import (
+    &#34;os&#34;
+    &#34;fmt&#34;
+    &#34;time&#34;
+)
+  
+//os包中关于进程的操作函数
+  
+func main() {
+    //设置新进程的属性
+    attr := &amp;os.ProcAttr{
+        //files指定新进程继承的活动文件对象
+        //前三个分别为，标准输入、标准输出、标准错误输出
+        Files: []*os.File{os.Stdin, os.Stdout, os.Stderr},
+        //新进程的环境变量
+        Env: os.Environ(),
+    }
+  
+    //win下通过记事本打开1.txt
+    //开始一个新进程
+    p, err := os.StartProcess(&#34;C:\\Windows\\System32\\notepad.exe&#34;, []string{&#34;C:\\Windows\\System32\\notepad.exe&#34;, &#34;D:\\1.txt&#34;}, attr);
+    if err != nil {
+        fmt.Println(err);
+    }
+    fmt.Println(p);
+    fmt.Println(&#34;进程ID：&#34;, p.Pid);
+  
+    //通过进程ID查找进程
+    p2, _ := os.FindProcess(p.Pid);
+    fmt.Println(p2);
+  
+    //等待10秒，执行函数
+    time.AfterFunc(time.Second*10, func() {
+        //向p进程发送退出信号
+        p.Signal(os.Kill);
+    });
+  
+    //等待进程p的退出，返回进程状态
+    ps, _ := p.Wait();
+    fmt.Println(ps.String());
+}
+</code></pre>
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://haokiu.com/tags/golang/">golang</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://haokiu.com/blog/hiUuGO/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>go ... 作用</span>
+  </a>
+  <a class="next" href="https://haokiu.com/blog/bGqNiH/">
+    <span class="title">Next »</span>
+    <br>
+    <span>mybatis 增加自定义拦截器</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

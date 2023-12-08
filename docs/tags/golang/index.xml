@@ -10,19 +10,19 @@
     <lastBuildDate>Fri, 22 Jan 2021 15:40:43 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/golang/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Go2编程指南</title>
-      <link>https://haokiu.com/bk-3/</link>
+      <link>https://haokiu.com/blog/bk-3/</link>
       <pubDate>Fri, 22 Jan 2021 15:40:43 +0000</pubDate>
       
-      <guid>https://haokiu.com/bk-3/</guid>
+      <guid>https://haokiu.com/blog/bk-3/</guid>
       <description>目录1.1 Go1的诺言1.2 Go1到Go1.101.3 Go1.10过渡到Go21.4 Go2诞生第1章 语法变迁2.1 Go1的包机制2.2 基于vendor的版本管理2.3 模块的设计⽬标2.4 模块快速⼊⻔2.5 子模块和多版本共存2.6 镜像和私有仓库2.7 模块化实践中的一些问题第2章 模块化第3章 错误处理Go2编程指南</description>
     </item>
     
     <item>
       <title>golang 数组与切片的区别</title>
-      <link>https://haokiu.com/gnNp9N/</link>
+      <link>https://haokiu.com/blog/gnNp9N/</link>
       <pubDate>Thu, 19 Nov 2020 17:09:23 +0000</pubDate>
       
-      <guid>https://haokiu.com/gnNp9N/</guid>
+      <guid>https://haokiu.com/blog/gnNp9N/</guid>
       <description>golang 的数组与切片有两大区别：
 初始化：数组需要明确指定大小，切片不需要 函数传递：数组是值传递，切片是地址传递 初始化 数组 a := [...]int{1,2,3} a := [3]int{1,2,3} 切片 a:= []int{1,2,3} a := make([]int, 5) a := make([]int, 5, 10) slice的数据结构： go源码slice的数据结构定义：
 type slice struct { array unsafe.Pointer len int cap int } slice 有三个字段：
@@ -33,20 +33,20 @@ a := [...]int{1, 2, 3, 4, 5, 6} fmt.Println(&amp;#34;star deal array, orginal da
     
     <item>
       <title>go 匿名结构体 数组 示例</title>
-      <link>https://haokiu.com/XVVOUE/</link>
+      <link>https://haokiu.com/blog/XVVOUE/</link>
       <pubDate>Mon, 09 Nov 2020 10:54:29 +0000</pubDate>
       
-      <guid>https://haokiu.com/XVVOUE/</guid>
+      <guid>https://haokiu.com/blog/XVVOUE/</guid>
       <description>在用 vscode 生成测试用例的时候，生成了测试的匿名数组，没怎么用过，这里展示了 go 匿名结构体数组示例
 import &amp;#34;testing&amp;#34; func TestGetRandomString(t *testing.T) { type args struct { lens int } tests := []struct { name string args args want string }{ { name: &amp;#34;test&amp;#34;, args: args{ lens: 6, }, want: &amp;#34;hi&amp;#34;, }, { name: &amp;#34;test&amp;#34;, args: args{ lens: 6, }, want: &amp;#34;hi&amp;#34;, }, } for _, tt := range tests { t.Run(tt.name, func(t *testing.T) { if got := GetRandomString(tt.args.lens); got != tt.want { t.Logf(&amp;#34;GetRandomString() = %v, want %v&amp;#34;, got, tt.want) } }) } } 需要注意的是各个结构体后面有个逗号。</description>
     </item>
     
     <item>
       <title>beego 通过acme.sh 使用 https</title>
-      <link>https://haokiu.com/qP3u4V/</link>
+      <link>https://haokiu.com/blog/qP3u4V/</link>
       <pubDate>Tue, 13 Oct 2020 15:20:09 +0000</pubDate>
       
-      <guid>https://haokiu.com/qP3u4V/</guid>
+      <guid>https://haokiu.com/blog/qP3u4V/</guid>
       <description>beego 通过 acme.sh 使用 https
 安装acms.sh curl https://get.acme.sh | sh 生成证书 如果使用的是 beego 框架，需添加可访问的静态文件目录：
 //acme.sh 自动验证网站目录，不使用https可以忽略 beego.SetStaticPath(&amp;#34;/.well-known&amp;#34;, &amp;#34;.well-known&amp;#34;) acme.sh --issue -d haokiu.com -d www.haokiu.com --webroot /usr/local/pixiublog/ 设置pixiublog开机启动 1. 编写开机启动脚本 vim /usr/lib/systemd/system/pixiublog.service
@@ -55,10 +55,10 @@ import &amp;#34;testing&amp;#34; func TestGetRandomString(t *testing.T) { type a
     
     <item>
       <title>go ... 作用</title>
-      <link>https://haokiu.com/hiUuGO/</link>
+      <link>https://haokiu.com/blog/hiUuGO/</link>
       <pubDate>Mon, 12 Oct 2020 17:12:09 +0000</pubDate>
       
-      <guid>https://haokiu.com/hiUuGO/</guid>
+      <guid>https://haokiu.com/blog/hiUuGO/</guid>
       <description>… 是go的一种语法糖。
 作用 用于函数有多个不定参数的情况，可以接受多个不确定数量的参数 打散slice进行传递 例子 一、接受多个不确定数量的参数 func println(args ...string) { //可以接受任意个string参数 for _, v:= range args{ fmt.Println(v) } } func main(){ var strss= []string{ &amp;#34;qwr&amp;#34;, &amp;#34;234&amp;#34;, &amp;#34;yui&amp;#34;, &amp;#34;cvbc&amp;#34;, } println(strss...) //切片被打散传入 } 结果：
 qwr 234 yui cvbc 二、打散slice进行传递 var strss= []string{ &amp;#34;qwr&amp;#34;, &amp;#34;234&amp;#34;, &amp;#34;yui&amp;#34;, } var strss2= []string{ &amp;#34;qqq&amp;#34;, &amp;#34;aaa&amp;#34;, &amp;#34;zzz&amp;#34;, &amp;#34;zzz&amp;#34;, } strss=append(strss,strss2...) //strss2的元素被打散一个个append进strss fmt.Println(strss) 结果：
@@ -67,19 +67,19 @@ qwr 234 yui cvbc 二、打散slice进行传递 var strss= []string{ &amp;#34;qwr
     
     <item>
       <title>golang 常用函数</title>
-      <link>https://haokiu.com/XtwuYL/</link>
+      <link>https://haokiu.com/blog/XtwuYL/</link>
       <pubDate>Sat, 10 Oct 2020 10:23:10 +0000</pubDate>
       
-      <guid>https://haokiu.com/XtwuYL/</guid>
+      <guid>https://haokiu.com/blog/XtwuYL/</guid>
       <description>1. 获取当前时间 时间戳(秒)：time.Now().Unix 日期：time.Now().Format(&amp;#34;2006-01-02 15:04:05&amp;#34;) 注意：参数必须是 2006-01-02 15:04:05 而不能是自定义的年月日时间 2. 字符串与int转换 i,_ := strconv.Atoi(&amp;#34;3&amp;#34;) a := strconv.Itoa(32) 3.结构体json序列化 chatMsg := &amp;amp;ChatMsg{} err := json.Unmarshal([]byte(msg), chatMsg) //json转结构体 buf, _ := json.Marshal(chatMsg) //结构体转json return string(buf) 4.删除切片元素 mySlice := make([]int, 5) //创建一个初始元素个数为5的数组切片，元素初始值为0 mySlice = append(mySlice[:i], mySlice[i+1:]...) //删除下标为i的元素 mySlice = append(mySlice[:0], mySlice[1:]...) //删除第1个元素 5. url encode/decode encodeUrl:= url.QueryEscape(urltest) decodeUrl,err := url.QueryUnescape(encodeUrl) 6. base64编码 encodeString := base64.StdEncoding.EncodeToString(input) decodeBytes, err := base64.StdEncoding.DecodeString(encodeString) 7. 获取字符串长度 tips := &amp;#34;忍者&amp;#34; len := len(tips) //len=6 len := utf8.RuneCountInString(tips) //len=2 8. SubString func SubString(str string, start int32, end int32) string { result := []rune(str) length := int32(len(result)) if start &amp;lt; 0 || start &amp;gt; length { return str } if end &amp;lt; 0 || end &amp;gt; length { return str } return string(result[start:end]) } result = SubString(result, 0, int32(len([]rune(result)))-1)//注意end参数的取值 9.</description>
     </item>
     
     <item>
       <title>golang 计算文件和字符串的 md5 值</title>
-      <link>https://haokiu.com/dpoeTs/</link>
+      <link>https://haokiu.com/blog/dpoeTs/</link>
       <pubDate>Sat, 19 Sep 2020 11:10:59 +0000</pubDate>
       
-      <guid>https://haokiu.com/dpoeTs/</guid>
+      <guid>https://haokiu.com/blog/dpoeTs/</guid>
       <description>go MD5 所需要的包在”crypto/md5”包中，需要先实例化一个MD5对象，然后在此基础上调用sum方法即可
 文件的MD5 md5 := md5.New() io.Copy(md5,file) MD5Str := hex.EncodeToString(md5.Sum(nil)) 上面的代码实现了计算了文件MD5，其中file是multipart.File类型的，也可以是其他的已打开的其他文件类型。 当然也可以不使用io.copy，而是直接使用sum函数来计算：
 md5 := md5.New() MD5Str := hex.EncodeToString(md5.Sum(file)) 这样是直接调用了sum函数来计算文件的值可能要比io.copy稍微慢一些。
@@ -89,20 +89,20 @@ md5 := md5.New() md5.Write([]byte(&amp;#34;hello,world!&amp;#34;)) MD5Str := hex
     
     <item>
       <title>golang 判断目录或文件是否存在</title>
-      <link>https://haokiu.com/Cd6WaZ/</link>
+      <link>https://haokiu.com/blog/Cd6WaZ/</link>
       <pubDate>Thu, 17 Sep 2020 15:05:46 +0000</pubDate>
       
-      <guid>https://haokiu.com/Cd6WaZ/</guid>
+      <guid>https://haokiu.com/blog/Cd6WaZ/</guid>
       <description>golang 判断目录或文件是否存在：
 func Exist(path string) bool { _, err := os.Stat(path) return err == nil || os.IsExist(err) } </description>
     </item>
     
     <item>
       <title>beego bee 工具使用简介</title>
-      <link>https://haokiu.com/xVaucl/</link>
+      <link>https://haokiu.com/blog/xVaucl/</link>
       <pubDate>Wed, 16 Sep 2020 16:06:47 +0000</pubDate>
       
-      <guid>https://haokiu.com/xVaucl/</guid>
+      <guid>https://haokiu.com/blog/xVaucl/</guid>
       <description>bee 工具是一个为了协助快速开发 beego 项目而创建的项目，通过 bee 您可以很容易的进行 beego 项目的创建、热编译、开发、测试、和部署。
 bee 工具的安装 您可以通过如下的方式安装 bee 工具：
 go get github.com/beego/bee 安装完之后，bee 可执行文件默认存放在 $GOPATH/bin 里面，所以您需要把 $GOPATH/bin 添加到您的环境变量中，才可以进行下一步。
@@ -113,10 +113,10 @@ Bee is a Fast and Flexible tool for managing your Beego Web Application. Usage: 
     
     <item>
       <title>beego 日志配置</title>
-      <link>https://haokiu.com/gq7FUH/</link>
+      <link>https://haokiu.com/blog/gq7FUH/</link>
       <pubDate>Wed, 16 Sep 2020 16:03:29 +0000</pubDate>
       
-      <guid>https://haokiu.com/gq7FUH/</guid>
+      <guid>https://haokiu.com/blog/gq7FUH/</guid>
       <description>beego logs 的设计思路来自于 database/sql，目前支持的引擎有 file、console、net、smtp，可以通过如下方式进行安装：
 go get github.com/astaxie/beego/logs 如何使用 通用方式 首先引入包：
 import ( &amp;#34;github.com/astaxie/beego/logs&amp;#34; ) 然后添加输出引擎（log 支持同时输出到多个引擎），这里我们以 console 为例，第一个参数是引擎名（包括：console、file、conn、smtp、es、multifile）
@@ -128,10 +128,10 @@ package main import ( &amp;#34;github.com/astaxie/beego/logs&amp;#34; ) func mai
     
     <item>
       <title>beego 日志处理</title>
-      <link>https://haokiu.com/YAotkP/</link>
+      <link>https://haokiu.com/blog/YAotkP/</link>
       <pubDate>Wed, 16 Sep 2020 10:17:20 +0000</pubDate>
       
-      <guid>https://haokiu.com/YAotkP/</guid>
+      <guid>https://haokiu.com/blog/YAotkP/</guid>
       <description>beego 的日志处理是基于 logs 模块搭建的，内置了一个变量 BeeLogger，默认已经是 logs.BeeLogger 类型，初始化了 console，也就是默认输出到 console。
 使用入门 一般在程序中我们使用如下的方式进行输出：
 beego.Emergency(&amp;#34;this is emergency&amp;#34;) beego.Alert(&amp;#34;this is alert&amp;#34;) beego.Critical(&amp;#34;this is critical&amp;#34;) beego.Error(&amp;#34;this is error&amp;#34;) beego.Warning(&amp;#34;this is warning&amp;#34;) beego.Notice(&amp;#34;this is notice&amp;#34;) beego.Informational(&amp;#34;this is informational&amp;#34;) beego.Debug(&amp;#34;this is debug&amp;#34;) 设置输出 我们的程序往往期望把信息输出到 log 中，现在设置输出到文件很方便，如下所示：
@@ -146,10 +146,10 @@ beego.SetLogFuncCall(true) 开启传入参数 true, 关闭传入参数 false, �
     
     <item>
       <title>golang interface</title>
-      <link>https://haokiu.com/BmxATZ/</link>
+      <link>https://haokiu.com/blog/BmxATZ/</link>
       <pubDate>Thu, 10 Sep 2020 09:38:43 +0000</pubDate>
       
-      <guid>https://haokiu.com/BmxATZ/</guid>
+      <guid>https://haokiu.com/blog/BmxATZ/</guid>
       <description>interface Go语言里面设计最精妙的应该算interface，它让面向对象，内容组织实现非常的方便，当你看完这一章，你就会被interface的巧妙设计所折服。
 什么是interface 简单的说，interface是一组method签名的组合，我们通过interface来定义对象的一组行为。
 我们前面一章最后一个例子中Student和Employee都能SayHi，虽然他们的内部实现不一样，但是那不重要，重要的是他们都能say hi
@@ -162,10 +162,10 @@ type Human struct { name string age int phone string } type Student struct { Hum
     
     <item>
       <title>beego 的日志级别</title>
-      <link>https://haokiu.com/RAhBfF/</link>
+      <link>https://haokiu.com/blog/RAhBfF/</link>
       <pubDate>Wed, 09 Sep 2020 11:10:43 +0000</pubDate>
       
-      <guid>https://haokiu.com/RAhBfF/</guid>
+      <guid>https://haokiu.com/blog/RAhBfF/</guid>
       <description>看 beego 的源码，beego 的日志分为7个级别：
 const ( LevelEmergency = iota LevelAlert LevelCritical LevelError LevelWarning LevelNotice LevelInformational LevelDebug ) 转换为
 LevelEmergency = 0 LevelAlert = 1 LevelCritical = 2 LevelError = 3 LevelWarning = 4 LevelNotice = 5 LevelInformational = 6 LevelDebug = 7 </description>

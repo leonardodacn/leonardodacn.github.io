@@ -202,7 +202,7 @@ QQGame还存在一个明显的不足，就是：玩家如果在游戏一段时�
 总之，初步满足QQGame之苛刻性能要求的分布式架构现在已经是初具雏形了，但仍然有很多涉及性能方面的细节问题有待解决。例如，Internet网络通讯延迟的问题、服务器之间协作产生的性能瓶颈问题等等。笔者将在下篇中继续深入探讨这些话题。</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 6 从腾讯QQgame高性能服务器集群架构看“分而治之”与“自治”等分布式架构设计原则" href="https://haokiu.com/84414d52b22b4cdaa7a7cf4beb0e1585/"></a>
+  <a class="entry-link" aria-label="post link to 6 从腾讯QQgame高性能服务器集群架构看“分而治之”与“自治”等分布式架构设计原则" href="https://haokiu.com/blog/84414d52b22b4cdaa7a7cf4beb0e1585/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -233,7 +233,7 @@ QQGame还存在一个明显的不足，就是：玩家如果在游戏一段时�
 首先是大厅，1000000/5000＝200。也就是说，至少要200台大厅服务器，但通常情况下，考虑到实际使用时服务器的处理能力和负载情况，应该至少准备250台左右的大厅服务器程序。 另外，**具体的各种类型的游戏房间服务器需要多少，**就要根据当前玩各种类型游戏的玩家数目分别计算了，比如斗地主最多是十万人同时在线，每台服务器最多允许300人同时在线，那么需要的斗地主服务器数目就应该不少于：100000/300=333，准备得充分一点，就要准备350台斗地主服务器。 除正常的玩家连接外，还要考虑到：对于登陆服务器，会有250台大厅服务器连接到每个登陆服务器上，这是始终都要保持的连接； 而对于大厅服务器而言，如果仅仅有斗地主这一类的服务器，就要有350多个连接与各个大厅服务器始终保持着。所以从这一点看，结构在某些方面还存在着需要改进的地方，但核心思想是：尽快地提供用户登陆的速度，尽可能方便地让玩家进入游戏中。</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 7 QQ游戏百万人同时在线服务器架构实现" href="https://haokiu.com/64368e0e78ea4a568fff21e1511c0f43/"></a>
+  <a class="entry-link" aria-label="post link to 7 QQ游戏百万人同时在线服务器架构实现" href="https://haokiu.com/blog/64368e0e78ea4a568fff21e1511c0f43/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -272,7 +272,7 @@ QQGame还存在一个明显的不足，就是：玩家如果在游戏一段时�
 5.4 协议完整性验证 尽管我们对消息做了加密，但也不是万无一失的，为了进一步确保消息没有被篡改，我们需要对消息的完整性进行检测，使用数字摘要的方式，首先客户端对userid及之后的协议信息进行AES加密，加密之后取它的md5值，md5值用于验证数据的完整性。这个md5值会被传送到服务器，如果协议信息被修改了，那个md5就会不同。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 8 大型多人在线游戏服务器架构设计" href="https://haokiu.com/5b23fbec804b470cb12e3c20af54d1d0/"></a>
+  <a class="entry-link" aria-label="post link to 8 大型多人在线游戏服务器架构设计" href="https://haokiu.com/blog/5b23fbec804b470cb12e3c20af54d1d0/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -352,7 +352,7 @@ QQGame还存在一个明显的不足，就是：玩家如果在游戏一段时�
 在服务器上port是监听用的，想象这样一种情况，web server在80端口上监听，当一个连接到来时，系统会为这个连接分配一个socket句柄，同时与其在80端口上进行通讯；当另一个连接到来时，服务器仍然在80端口与之通信，只是分配的socket句柄不一样。这个socket句柄才是描述每个连接的唯一标识。按windows网络编程第二版上的说法，这个上限值配置影响。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 9 百万用户级游戏服务器架构设计" href="https://haokiu.com/db5f58a948804f718159e858bf744da9/"></a>
+  <a class="entry-link" aria-label="post link to 9 百万用户级游戏服务器架构设计" href="https://haokiu.com/blog/db5f58a948804f718159e858bf744da9/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -366,7 +366,7 @@ struct sockaddr_in bindaddr; bindaddr.sin_family = AF_INET; bindaddr.sin_addr.s_
 If an application does not care what local address is assigned, specify the constant value INADDR_ANY for an IPv4 local address or the constant value in6addr_any for an IPv6 local address in the sa_data member of the name parameter. This allows the underlying service provider to use any appropriate network address, potentially simplifying application programming in the presence of multihomed hosts (that is, hosts that have more than one network interface and address)....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to bind 函数重难点解析" href="https://haokiu.com/48af9bced29e4786944b5661c4155665/"></a>
+  <a class="entry-link" aria-label="post link to bind 函数重难点解析" href="https://haokiu.com/blog/48af9bced29e4786944b5661c4155665/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -381,7 +381,7 @@ std::pair&lt;iterator,bool&gt; insert( const value_type&amp; value ); 这里我�
 #include &lt;iostream&gt; #include &lt;string&gt; #include &lt;map&gt; int main() { std::map&lt;std::string, int&gt; cities; cities[&#34;beijing&#34;] = 0; cities[&#34;shanghai&#34;] = 1; cities[&#34;shenzhen&#34;] = 2; cities[&#34;guangzhou&#34;] = 3; //for (const auto&amp; [key, value] : m) //{ // std::cout &lt;&lt; key &lt;&lt; &#34;: &#34; &lt;&lt; value &lt;&lt; std::endl; //} //这一行在 C&#43;&#43;11 之前写法实在太麻烦了， //std::pair&lt;std::map&lt;std::string, int&gt;::iterator, int&gt; insertResult = cities....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to C&#43;&#43; 17 结构化绑定" href="https://haokiu.com/b08571a528324d72b376f4ccb2a6dad3/"></a>
+  <a class="entry-link" aria-label="post link to C&#43;&#43; 17 结构化绑定" href="https://haokiu.com/blog/b08571a528324d72b376f4ccb2a6dad3/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -402,7 +402,7 @@ C&#43;&#43;必须掌握的pimpl惯用法
 利用cmake工具生成Visual Studio工程文件</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to C&#43;&#43;必知必会的知识点" href="https://haokiu.com/6176f55c32444820a0055fadcf89273c/"></a>
+  <a class="entry-link" aria-label="post link to C&#43;&#43;必知必会的知识点" href="https://haokiu.com/blog/6176f55c32444820a0055fadcf89273c/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -416,7 +416,7 @@ C&#43;&#43;必须掌握的pimpl惯用法
 /** * 异步的connect写法，nonblocking_connect.cpp * zhangyl 2018.12.17 */ #include &lt;sys/types.h&gt; #include &lt;sys/socket.h&gt; #include &lt;arpa/inet.h&gt; #include &lt;unistd.h&gt; #include &lt;iostream&gt; #include &lt;string.h&gt; #include &lt;stdio.h&gt; #include &lt;fcntl.h&gt; #include &lt;errno.h&gt; #define SERVER_ADDRESS &#34;127.0.0.1&#34; #define SERVER_PORT 3000 #define SEND_DATA &#34;helloworld&#34; int main(int argc, char* argv[]) { //1.创建一个socket int clientfd = socket(AF_INET, SOCK_STREAM, 0); if (clientfd == -1) { std::cout &lt;&lt; &#34;create client socket error.&#34; &lt;&lt; std::endl; return -1; } //连接成功以后，我们再将 clientfd 设置成非阻塞模式， //不能在创建时就设置，这样会影响到 connect 函数的行为 int oldSocketFlag = fcntl(clientfd, F_GETFL, 0); int newSocketFlag = oldSocketFlag | O_NONBLOCK; if (fcntl(clientfd, F_SETFL, newSocketFlag) == -1) { close(clientfd); std::cout &lt;&lt; &#34;set socket to nonblock error....</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to connect 函数在阻塞和非阻塞模式下的行为" href="https://haokiu.com/f82abb8bce8a4c85b9b8c665cb9fe48d/"></a>
+  <a class="entry-link" aria-label="post link to connect 函数在阻塞和非阻塞模式下的行为" href="https://haokiu.com/blog/f82abb8bce8a4c85b9b8c665cb9fe48d/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -449,7 +449,7 @@ leveldb源码分析21
 leveldb源码分析22</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析" href="https://haokiu.com/c898014e5b304df0bade6b12d638467a/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析" href="https://haokiu.com/blog/c898014e5b304df0bade6b12d638467a/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -488,7 +488,7 @@ Arena没有直接调用delete/free函数，而是由Arena的析构函数统一�
 在Leveldb中，skip list是实现memtable的核心数据结构，memtable的KV数据都存储在skip list中。...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to leveldb源码分析1" href="https://haokiu.com/1776ae3c50104b7ea0c90cf31322958a/"></a>
+  <a class="entry-link" aria-label="post link to leveldb源码分析1" href="https://haokiu.com/blog/1776ae3c50104b7ea0c90cf31322958a/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

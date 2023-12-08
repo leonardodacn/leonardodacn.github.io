@@ -170,7 +170,7 @@
     <p>目录1.1 Go1的诺言1.2 Go1到Go1.101.3 Go1.10过渡到Go21.4 Go2诞生第1章 语法变迁2.1 Go1的包机制2.2 基于vendor的版本管理2.3 模块的设计⽬标2.4 模块快速⼊⻔2.5 子模块和多版本共存2.6 镜像和私有仓库2.7 模块化实践中的一些问题第2章 模块化第3章 错误处理Go2编程指南</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-22 15:40:43 +0000 UTC'>January 22, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Go2编程指南" href="https://haokiu.com/bk-3/"></a>
+  <a class="entry-link" aria-label="post link to Go2编程指南" href="https://haokiu.com/blog/bk-3/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -187,7 +187,7 @@ type slice struct { array unsafe.Pointer len int cap int } slice 有三个字段
 a := [...]int{1, 2, 3, 4, 5, 6} fmt.Println(&#34;star deal array, orginal data is:&#34;) fmt.Println(a) aMaxIndex := len(a) - 1 fmt.Printf(&#34;aMaxIndex:%d\r&#34;, aMaxIndex) for i, e := range a { if i == aMaxIndex { a[0] &#43;= e fmt.Printf(&#34;index is 0, val is :%d\r&#34;, a[0]) } else { a[i&#43;1] &#43;= e fmt....</p>
   </div>
   <footer class="entry-footer"><span title='2020-11-19 17:09:23 +0000 UTC'>November 19, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to golang 数组与切片的区别" href="https://haokiu.com/gnNp9N/"></a>
+  <a class="entry-link" aria-label="post link to golang 数组与切片的区别" href="https://haokiu.com/blog/gnNp9N/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -200,7 +200,7 @@ a := [...]int{1, 2, 3, 4, 5, 6} fmt.Println(&#34;star deal array, orginal data i
 import &#34;testing&#34; func TestGetRandomString(t *testing.T) { type args struct { lens int } tests := []struct { name string args args want string }{ { name: &#34;test&#34;, args: args{ lens: 6, }, want: &#34;hi&#34;, }, { name: &#34;test&#34;, args: args{ lens: 6, }, want: &#34;hi&#34;, }, } for _, tt := range tests { t.Run(tt.name, func(t *testing.T) { if got := GetRandomString(tt.args.lens); got != tt.want { t.Logf(&#34;GetRandomString() = %v, want %v&#34;, got, tt.want) } }) } } 需要注意的是各个结构体后面有个逗号。</p>
   </div>
   <footer class="entry-footer"><span title='2020-11-09 10:54:29 +0000 UTC'>November 9, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to go 匿名结构体 数组 示例" href="https://haokiu.com/XVVOUE/"></a>
+  <a class="entry-link" aria-label="post link to go 匿名结构体 数组 示例" href="https://haokiu.com/blog/XVVOUE/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -215,7 +215,7 @@ import &#34;testing&#34; func TestGetRandomString(t *testing.T) { type args stru
 [Unit] Description=The pixiublog Process Manager After=syslog.target network.target [Service] Type=forking ExecStart=sh /usr/local/pixiublog/start.sh ExecReload=/bin/kill -USR2 $MAINPID ExecStop=/bin/kill -SIGINT $MAINPID [Install] WantedBy=multi-user.target 2. 设置开机启动 systemctl enable pixiublog 安装证书 acme.sh --install-cert -d haokiu.com \ --cert-file /home/blog/cert/cert.pem \ --key-file /home/blog/cert/key.pem \ --fullchain-file /home/blog/cert/fullchain.pem \ --reloadcmd &#34;systemctl restart pixiublog&#34; beego app.conf 配置 EnableHTTPS = true HTTPSPort = 443 HTTPSCertFile = &#34;/home/blog/cert/fullchain.pem&#34; HTTPSKeyFile = &#34;/home/blog/cert/key.pem&#34; 参考 acme.sh 使用</p>
   </div>
   <footer class="entry-footer"><span title='2020-10-13 15:20:09 +0000 UTC'>October 13, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to beego 通过acme.sh 使用 https" href="https://haokiu.com/qP3u4V/"></a>
+  <a class="entry-link" aria-label="post link to beego 通过acme.sh 使用 https" href="https://haokiu.com/blog/qP3u4V/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -230,7 +230,7 @@ qwr 234 yui cvbc 二、打散slice进行传递 var strss= []string{ &#34;qwr&#34
 [qwr 234 yui qqq aaa zzz zzz] 最后 如果没有’…’，面对上面的情况，无疑会增加代码量。</p>
   </div>
   <footer class="entry-footer"><span title='2020-10-12 17:12:09 +0000 UTC'>October 12, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to go ... 作用" href="https://haokiu.com/hiUuGO/"></a>
+  <a class="entry-link" aria-label="post link to go ... 作用" href="https://haokiu.com/blog/hiUuGO/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -242,7 +242,7 @@ qwr 234 yui cvbc 二、打散slice进行传递 var strss= []string{ &#34;qwr&#34
     <p>1. 获取当前时间 时间戳(秒)：time.Now().Unix 日期：time.Now().Format(&#34;2006-01-02 15:04:05&#34;) 注意：参数必须是 2006-01-02 15:04:05 而不能是自定义的年月日时间 2. 字符串与int转换 i,_ := strconv.Atoi(&#34;3&#34;) a := strconv.Itoa(32) 3.结构体json序列化 chatMsg := &amp;ChatMsg{} err := json.Unmarshal([]byte(msg), chatMsg) //json转结构体 buf, _ := json.Marshal(chatMsg) //结构体转json return string(buf) 4.删除切片元素 mySlice := make([]int, 5) //创建一个初始元素个数为5的数组切片，元素初始值为0 mySlice = append(mySlice[:i], mySlice[i&#43;1:]...) //删除下标为i的元素 mySlice = append(mySlice[:0], mySlice[1:]...) //删除第1个元素 5. url encode/decode encodeUrl:= url.QueryEscape(urltest) decodeUrl,err := url.QueryUnescape(encodeUrl) 6. base64编码 encodeString := base64.StdEncoding.EncodeToString(input) decodeBytes, err := base64.StdEncoding.DecodeString(encodeString) 7. 获取字符串长度 tips := &#34;忍者&#34; len := len(tips) //len=6 len := utf8.RuneCountInString(tips) //len=2 8. SubString func SubString(str string, start int32, end int32) string { result := []rune(str) length := int32(len(result)) if start &lt; 0 || start &gt; length { return str } if end &lt; 0 || end &gt; length { return str } return string(result[start:end]) } result = SubString(result, 0, int32(len([]rune(result)))-1)//注意end参数的取值 9....</p>
   </div>
   <footer class="entry-footer"><span title='2020-10-10 10:23:10 +0000 UTC'>October 10, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to golang 常用函数" href="https://haokiu.com/XtwuYL/"></a>
+  <a class="entry-link" aria-label="post link to golang 常用函数" href="https://haokiu.com/blog/XtwuYL/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -258,7 +258,7 @@ md5 := md5.New() MD5Str := hex.EncodeToString(md5.Sum(file)) 这样是直接调�
 md5 := md5.New() md5.Write([]byte(&#34;hello,world!&#34;)) MD5Str := hex.EncodeToString(md5.Sum(nil)) </p>
   </div>
   <footer class="entry-footer"><span title='2020-09-19 11:10:59 +0000 UTC'>September 19, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to golang 计算文件和字符串的 md5 值" href="https://haokiu.com/dpoeTs/"></a>
+  <a class="entry-link" aria-label="post link to golang 计算文件和字符串的 md5 值" href="https://haokiu.com/blog/dpoeTs/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -271,7 +271,7 @@ md5 := md5.New() md5.Write([]byte(&#34;hello,world!&#34;)) MD5Str := hex.EncodeT
 func Exist(path string) bool { _, err := os.Stat(path) return err == nil || os.IsExist(err) } </p>
   </div>
   <footer class="entry-footer"><span title='2020-09-17 15:05:46 +0000 UTC'>September 17, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to golang 判断目录或文件是否存在" href="https://haokiu.com/Cd6WaZ/"></a>
+  <a class="entry-link" aria-label="post link to golang 判断目录或文件是否存在" href="https://haokiu.com/blog/Cd6WaZ/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -288,7 +288,7 @@ bee 工具命令详解 我们在命令行输入 bee，可以看到如下的信�
 Bee is a Fast and Flexible tool for managing your Beego Web Application. Usage: bee command [arguments] The commands are: version show the bee &amp; beego version migrate run database migrations api create an api application base on beego framework bale packs non-Go files to Go source files new create an application base on beego framework run run the app which can hot compile pack compress an beego project fix Fixes your application by making it compatible with newer versions of Beego dlv Start a debugging session using Delve dockerize Generates a Dockerfile for your Beego application generate Source code generator hprose Creates an RPC application based on Hprose and Beego frameworks pack Compresses a Beego application into a single file rs Run customized scripts run Run the application by starting a local development server server serving static content over HTTP on port Use bee help [command] for more information about a command....</p>
   </div>
   <footer class="entry-footer"><span title='2020-09-16 16:06:47 +0000 UTC'>September 16, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to beego bee 工具使用简介" href="https://haokiu.com/xVaucl/"></a>
+  <a class="entry-link" aria-label="post link to beego bee 工具使用简介" href="https://haokiu.com/blog/xVaucl/"></a>
 </article>
 
 <article class="post-entry tag-entry"> 
@@ -306,7 +306,7 @@ package main import ( &#34;github.com/astaxie/beego/logs&#34; ) func main() { //
 package main import ( &#34;github.com/astaxie/beego/logs&#34; ) func main() { log := logs....</p>
   </div>
   <footer class="entry-footer"><span title='2020-09-16 16:03:29 +0000 UTC'>September 16, 2020</span></footer>
-  <a class="entry-link" aria-label="post link to beego 日志配置" href="https://haokiu.com/gq7FUH/"></a>
+  <a class="entry-link" aria-label="post link to beego 日志配置" href="https://haokiu.com/blog/gq7FUH/"></a>
 </article>
 <footer class="page-footer">
   <nav class="pagination">

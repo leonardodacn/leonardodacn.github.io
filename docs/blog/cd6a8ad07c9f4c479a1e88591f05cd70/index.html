@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="zh-cn" dir="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,17 +7,53 @@
 <meta name="robots" content="index, follow">
 <title>leveldb源码分析12 | haokiu</title>
 <meta name="keywords" content="">
-<meta name="description" content="leveldb源码分析12 本系列《leveldb源码分析》共有22篇文章，这是第十二篇
-8.FilterPolicy&amp;Bloom之1 8.1 FilterPolicy 因名知意，FilterPolicy是用于key过滤的，可以快速的排除不存在的key。前面介绍Table的时候，在Table::InternalGet函数中有过一面之缘。 FilterPolicy有3个接口：
-virtual const char* Name() const = 0; // 返回filter的名字 virtual void CreateFilter(const Slice* keys, int n, std::string* dst)const = 0; virtual bool KeyMayMatch(const Slice&amp; key, const Slice&amp; filter)const = 0; CreateFilter接口，它根据指定的参数创建过滤器，并将结果append到dst中，注意：不能修改dst的原始内容，只做append。 参数@keys[0,n-1]包含依据用户提供的comparator排序的key列表&ndash;可重复，并把根据这些key创建的filter追加到@*dst中。 KeyMayMatch，参数@filter包含了调用CreateFilter函数append的数据，如果key在传递函数CreateFilter的key列表中，则必须返回true。
-注意：它不需要精确，也就是即使key不在前面传递的key列表中，也可以返回true，但是如果key在列表中，就必须返回true。 涉及到的类如图8.1-1所示。
-8.2InternalFilterPolicy 这是一个简单的FilterPolicy的wrapper，以方便的把FilterPolicy应用在InternalKey上，InternalKey是Leveldb内部使用的key，这些前面都讲过。它所做的就是从InternalKey拆分得到user key，然后在user key上做FilterPolicy的操作。 它有一个成员：
-constFilterPolicy* const user_policy_; 其Name()返回的是user_policy_-&gt;Name()；
-bool InternalFilterPolicy::KeyMayMatch(const Slice&amp; key, constSlice&amp; f) const { returnuser_policy_-&gt;KeyMayMatch(ExtractUserKey(key), f); } void InternalFilterPolicy::CreateFilter(const Slice* keys, int n,std::string* dst) const { Slice* mkey =const_cast&lt;Slice*&gt;(keys); for (int i = 0; i &lt; n; i&#43;&#43;)mkey[i] = ExtractUserKey(keys[i]); user_policy_-&gt;CreateFilter(keys, n, dst); } 8.3 BloomFilter 8.3.1 基本理论 Bloom Filter实际上是一种hash算法，数学之美系列有专门介绍。它是由巴顿.布隆于一九七零年提出的，它实际上是一个很长的二进制向量和一系列随机映射函数。 Bloom Filter将元素映射到一个长度为m的bit向量上的一个bit，当这个bit是1时，就表示这个元素在集合内。使用hash的缺点就是元素很多时可能有冲突，为了减少误判，就使用k个hash函数计算出k个bit，只要有一个bit为0，就说明元素肯定不在集合内。下面的图8.3-1是一个示意图。
-在leveldb的实现中，Name()返回&quot;leveldb.BuiltinBloomFilter&quot;，因此metaindex block** 中的key就是”filter.leveldb.BuiltinBloomFilter”。Leveldb使用了double hashing来模拟多个hash函数，当然这里不是用来解决冲突的。 和线性再探测（linearprobing）一样，Double hashing从一个hash值开始，重复向前迭代，直到解决冲突或者搜索完hash表。不同的是，double hashing使用的是另外一个hash函数，而不是固定的步长。 给定两个独立的hash函数h1和h2，对于hash表T和值k，第i次迭代计算出的位置就是：h(i, k) = (h1(k) &#43; i*h2(k)) mod |T|。 对此，Leveldb选择的hash函数是：">
+<meta name="description" content="leveldb源码分析12
+本系列《leveldb源码分析》共有22篇文章，这是第十二篇
+8.FilterPolicy&amp;Bloom之1
+8.1 FilterPolicy
+因名知意，FilterPolicy是用于key过滤的，可以快速的排除不存在的key。前面介绍Table的时候，在Table::InternalGet函数中有过一面之缘。
+FilterPolicy有3个接口：
+virtual const char* Name() const = 0; 
+// 返回filter的名字
+virtual void CreateFilter(const Slice* keys, 
+                          int n, std::string* dst)const = 0;
+virtual bool KeyMayMatch(const Slice&amp; key, const Slice&amp; filter)const = 0;
+CreateFilter接口，它根据指定的参数创建过滤器，并将结果append到dst中，注意：不能修改dst的原始内容，只做append。
+参数@keys[0,n-1]包含依据用户提供的comparator排序的key列表&ndash;可重复，并把根据这些key创建的filter追加到@*dst中。
+KeyMayMatch，参数@filter包含了调用CreateFilter函数append的数据，如果key在传递函数CreateFilter的key列表中，则必须返回true。
+注意：它不需要精确，也就是即使key不在前面传递的key列表中，也可以返回true，但是如果key在列表中，就必须返回true。
+涉及到的类如图8.1-1所示。
+
+
+8.2InternalFilterPolicy
+这是一个简单的FilterPolicy的wrapper，以方便的把FilterPolicy应用在InternalKey上，InternalKey是Leveldb内部使用的key，这些前面都讲过。它所做的就是从InternalKey拆分得到user key，然后在user key上做FilterPolicy的操作。
+它有一个成员：
+constFilterPolicy* const user_policy_;
+其Name()返回的是user_policy_-&gt;Name()；
+bool InternalFilterPolicy::KeyMayMatch(const Slice&amp; key, constSlice&amp; f) const 
+{
+     returnuser_policy_-&gt;KeyMayMatch(ExtractUserKey(key), f);
+}
+void InternalFilterPolicy::CreateFilter(const Slice* keys,
+                                        int n,std::string* dst) const 
+{
+     Slice* mkey =const_cast&lt;Slice*&gt;(keys);
+     for (int i = 0; i &lt; n; i&#43;&#43;)mkey[i] = ExtractUserKey(keys[i]);
+     user_policy_-&gt;CreateFilter(keys, n, dst);
+}
+8.3 BloomFilter
+8.3.1 基本理论
+Bloom Filter实际上是一种hash算法，数学之美系列有专门介绍。它是由巴顿.布隆于一九七零年提出的，它实际上是一个很长的二进制向量和一系列随机映射函数。
+Bloom Filter将元素映射到一个长度为m的bit向量上的一个bit，当这个bit是1时，就表示这个元素在集合内。使用hash的缺点就是元素很多时可能有冲突，为了减少误判，就使用k个hash函数计算出k个bit，只要有一个bit为0，就说明元素肯定不在集合内。下面的图8.3-1是一个示意图。
+
+
+在leveldb的实现中，Name()返回&quot;leveldb.BuiltinBloomFilter&quot;，因此metaindex block** 中的key就是”filter.leveldb.BuiltinBloomFilter”。Leveldb使用了double hashing来模拟多个hash函数，当然这里不是用来解决冲突的。
+和线性再探测（linearprobing）一样，Double hashing从一个hash值开始，重复向前迭代，直到解决冲突或者搜索完hash表。不同的是，double hashing使用的是另外一个hash函数，而不是固定的步长。
+给定两个独立的hash函数h1和h2，对于hash表T和值k，第i次迭代计算出的位置就是：h(i, k) = (h1(k) &#43; i*h2(k)) mod |T|。
+对此，Leveldb选择的hash函数是：">
 <meta name="author" content="">
 <link rel="canonical" href="https://haokiu.com/blog/cd6a8ad07c9f4c479a1e88591f05cd70/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
 <script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="https://haokiu.com/favicon.ico">
@@ -27,6 +63,7 @@ bool InternalFilterPolicy::KeyMayMatch(const Slice&amp; key, constSlice&amp; f) 
 <link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/blog/cd6a8ad07c9f4c479a1e88591f05cd70/">
 <noscript>
     <style>
         #theme-toggle,
@@ -64,14 +101,50 @@ bool InternalFilterPolicy::KeyMayMatch(const Slice&amp; key, constSlice&amp; f) 
 
     </style>
 </noscript><meta property="og:title" content="leveldb源码分析12" />
-<meta property="og:description" content="leveldb源码分析12 本系列《leveldb源码分析》共有22篇文章，这是第十二篇
-8.FilterPolicy&amp;Bloom之1 8.1 FilterPolicy 因名知意，FilterPolicy是用于key过滤的，可以快速的排除不存在的key。前面介绍Table的时候，在Table::InternalGet函数中有过一面之缘。 FilterPolicy有3个接口：
-virtual const char* Name() const = 0; // 返回filter的名字 virtual void CreateFilter(const Slice* keys, int n, std::string* dst)const = 0; virtual bool KeyMayMatch(const Slice&amp; key, const Slice&amp; filter)const = 0; CreateFilter接口，它根据指定的参数创建过滤器，并将结果append到dst中，注意：不能修改dst的原始内容，只做append。 参数@keys[0,n-1]包含依据用户提供的comparator排序的key列表&ndash;可重复，并把根据这些key创建的filter追加到@*dst中。 KeyMayMatch，参数@filter包含了调用CreateFilter函数append的数据，如果key在传递函数CreateFilter的key列表中，则必须返回true。
-注意：它不需要精确，也就是即使key不在前面传递的key列表中，也可以返回true，但是如果key在列表中，就必须返回true。 涉及到的类如图8.1-1所示。
-8.2InternalFilterPolicy 这是一个简单的FilterPolicy的wrapper，以方便的把FilterPolicy应用在InternalKey上，InternalKey是Leveldb内部使用的key，这些前面都讲过。它所做的就是从InternalKey拆分得到user key，然后在user key上做FilterPolicy的操作。 它有一个成员：
-constFilterPolicy* const user_policy_; 其Name()返回的是user_policy_-&gt;Name()；
-bool InternalFilterPolicy::KeyMayMatch(const Slice&amp; key, constSlice&amp; f) const { returnuser_policy_-&gt;KeyMayMatch(ExtractUserKey(key), f); } void InternalFilterPolicy::CreateFilter(const Slice* keys, int n,std::string* dst) const { Slice* mkey =const_cast&lt;Slice*&gt;(keys); for (int i = 0; i &lt; n; i&#43;&#43;)mkey[i] = ExtractUserKey(keys[i]); user_policy_-&gt;CreateFilter(keys, n, dst); } 8.3 BloomFilter 8.3.1 基本理论 Bloom Filter实际上是一种hash算法，数学之美系列有专门介绍。它是由巴顿.布隆于一九七零年提出的，它实际上是一个很长的二进制向量和一系列随机映射函数。 Bloom Filter将元素映射到一个长度为m的bit向量上的一个bit，当这个bit是1时，就表示这个元素在集合内。使用hash的缺点就是元素很多时可能有冲突，为了减少误判，就使用k个hash函数计算出k个bit，只要有一个bit为0，就说明元素肯定不在集合内。下面的图8.3-1是一个示意图。
-在leveldb的实现中，Name()返回&quot;leveldb.BuiltinBloomFilter&quot;，因此metaindex block** 中的key就是”filter.leveldb.BuiltinBloomFilter”。Leveldb使用了double hashing来模拟多个hash函数，当然这里不是用来解决冲突的。 和线性再探测（linearprobing）一样，Double hashing从一个hash值开始，重复向前迭代，直到解决冲突或者搜索完hash表。不同的是，double hashing使用的是另外一个hash函数，而不是固定的步长。 给定两个独立的hash函数h1和h2，对于hash表T和值k，第i次迭代计算出的位置就是：h(i, k) = (h1(k) &#43; i*h2(k)) mod |T|。 对此，Leveldb选择的hash函数是：" />
+<meta property="og:description" content="leveldb源码分析12
+本系列《leveldb源码分析》共有22篇文章，这是第十二篇
+8.FilterPolicy&amp;Bloom之1
+8.1 FilterPolicy
+因名知意，FilterPolicy是用于key过滤的，可以快速的排除不存在的key。前面介绍Table的时候，在Table::InternalGet函数中有过一面之缘。
+FilterPolicy有3个接口：
+virtual const char* Name() const = 0; 
+// 返回filter的名字
+virtual void CreateFilter(const Slice* keys, 
+                          int n, std::string* dst)const = 0;
+virtual bool KeyMayMatch(const Slice&amp; key, const Slice&amp; filter)const = 0;
+CreateFilter接口，它根据指定的参数创建过滤器，并将结果append到dst中，注意：不能修改dst的原始内容，只做append。
+参数@keys[0,n-1]包含依据用户提供的comparator排序的key列表&ndash;可重复，并把根据这些key创建的filter追加到@*dst中。
+KeyMayMatch，参数@filter包含了调用CreateFilter函数append的数据，如果key在传递函数CreateFilter的key列表中，则必须返回true。
+注意：它不需要精确，也就是即使key不在前面传递的key列表中，也可以返回true，但是如果key在列表中，就必须返回true。
+涉及到的类如图8.1-1所示。
+
+
+8.2InternalFilterPolicy
+这是一个简单的FilterPolicy的wrapper，以方便的把FilterPolicy应用在InternalKey上，InternalKey是Leveldb内部使用的key，这些前面都讲过。它所做的就是从InternalKey拆分得到user key，然后在user key上做FilterPolicy的操作。
+它有一个成员：
+constFilterPolicy* const user_policy_;
+其Name()返回的是user_policy_-&gt;Name()；
+bool InternalFilterPolicy::KeyMayMatch(const Slice&amp; key, constSlice&amp; f) const 
+{
+     returnuser_policy_-&gt;KeyMayMatch(ExtractUserKey(key), f);
+}
+void InternalFilterPolicy::CreateFilter(const Slice* keys,
+                                        int n,std::string* dst) const 
+{
+     Slice* mkey =const_cast&lt;Slice*&gt;(keys);
+     for (int i = 0; i &lt; n; i&#43;&#43;)mkey[i] = ExtractUserKey(keys[i]);
+     user_policy_-&gt;CreateFilter(keys, n, dst);
+}
+8.3 BloomFilter
+8.3.1 基本理论
+Bloom Filter实际上是一种hash算法，数学之美系列有专门介绍。它是由巴顿.布隆于一九七零年提出的，它实际上是一个很长的二进制向量和一系列随机映射函数。
+Bloom Filter将元素映射到一个长度为m的bit向量上的一个bit，当这个bit是1时，就表示这个元素在集合内。使用hash的缺点就是元素很多时可能有冲突，为了减少误判，就使用k个hash函数计算出k个bit，只要有一个bit为0，就说明元素肯定不在集合内。下面的图8.3-1是一个示意图。
+
+
+在leveldb的实现中，Name()返回&quot;leveldb.BuiltinBloomFilter&quot;，因此metaindex block** 中的key就是”filter.leveldb.BuiltinBloomFilter”。Leveldb使用了double hashing来模拟多个hash函数，当然这里不是用来解决冲突的。
+和线性再探测（linearprobing）一样，Double hashing从一个hash值开始，重复向前迭代，直到解决冲突或者搜索完hash表。不同的是，double hashing使用的是另外一个hash函数，而不是固定的步长。
+给定两个独立的hash函数h1和h2，对于hash表T和值k，第i次迭代计算出的位置就是：h(i, k) = (h1(k) &#43; i*h2(k)) mod |T|。
+对此，Leveldb选择的hash函数是：" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://haokiu.com/blog/cd6a8ad07c9f4c479a1e88591f05cd70/" /><meta property="article:section" content="1" />
 <meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
@@ -79,14 +152,50 @@ bool InternalFilterPolicy::KeyMayMatch(const Slice&amp; key, constSlice&amp; f) 
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="leveldb源码分析12"/>
-<meta name="twitter:description" content="leveldb源码分析12 本系列《leveldb源码分析》共有22篇文章，这是第十二篇
-8.FilterPolicy&amp;Bloom之1 8.1 FilterPolicy 因名知意，FilterPolicy是用于key过滤的，可以快速的排除不存在的key。前面介绍Table的时候，在Table::InternalGet函数中有过一面之缘。 FilterPolicy有3个接口：
-virtual const char* Name() const = 0; // 返回filter的名字 virtual void CreateFilter(const Slice* keys, int n, std::string* dst)const = 0; virtual bool KeyMayMatch(const Slice&amp; key, const Slice&amp; filter)const = 0; CreateFilter接口，它根据指定的参数创建过滤器，并将结果append到dst中，注意：不能修改dst的原始内容，只做append。 参数@keys[0,n-1]包含依据用户提供的comparator排序的key列表&ndash;可重复，并把根据这些key创建的filter追加到@*dst中。 KeyMayMatch，参数@filter包含了调用CreateFilter函数append的数据，如果key在传递函数CreateFilter的key列表中，则必须返回true。
-注意：它不需要精确，也就是即使key不在前面传递的key列表中，也可以返回true，但是如果key在列表中，就必须返回true。 涉及到的类如图8.1-1所示。
-8.2InternalFilterPolicy 这是一个简单的FilterPolicy的wrapper，以方便的把FilterPolicy应用在InternalKey上，InternalKey是Leveldb内部使用的key，这些前面都讲过。它所做的就是从InternalKey拆分得到user key，然后在user key上做FilterPolicy的操作。 它有一个成员：
-constFilterPolicy* const user_policy_; 其Name()返回的是user_policy_-&gt;Name()；
-bool InternalFilterPolicy::KeyMayMatch(const Slice&amp; key, constSlice&amp; f) const { returnuser_policy_-&gt;KeyMayMatch(ExtractUserKey(key), f); } void InternalFilterPolicy::CreateFilter(const Slice* keys, int n,std::string* dst) const { Slice* mkey =const_cast&lt;Slice*&gt;(keys); for (int i = 0; i &lt; n; i&#43;&#43;)mkey[i] = ExtractUserKey(keys[i]); user_policy_-&gt;CreateFilter(keys, n, dst); } 8.3 BloomFilter 8.3.1 基本理论 Bloom Filter实际上是一种hash算法，数学之美系列有专门介绍。它是由巴顿.布隆于一九七零年提出的，它实际上是一个很长的二进制向量和一系列随机映射函数。 Bloom Filter将元素映射到一个长度为m的bit向量上的一个bit，当这个bit是1时，就表示这个元素在集合内。使用hash的缺点就是元素很多时可能有冲突，为了减少误判，就使用k个hash函数计算出k个bit，只要有一个bit为0，就说明元素肯定不在集合内。下面的图8.3-1是一个示意图。
-在leveldb的实现中，Name()返回&quot;leveldb.BuiltinBloomFilter&quot;，因此metaindex block** 中的key就是”filter.leveldb.BuiltinBloomFilter”。Leveldb使用了double hashing来模拟多个hash函数，当然这里不是用来解决冲突的。 和线性再探测（linearprobing）一样，Double hashing从一个hash值开始，重复向前迭代，直到解决冲突或者搜索完hash表。不同的是，double hashing使用的是另外一个hash函数，而不是固定的步长。 给定两个独立的hash函数h1和h2，对于hash表T和值k，第i次迭代计算出的位置就是：h(i, k) = (h1(k) &#43; i*h2(k)) mod |T|。 对此，Leveldb选择的hash函数是："/>
+<meta name="twitter:description" content="leveldb源码分析12
+本系列《leveldb源码分析》共有22篇文章，这是第十二篇
+8.FilterPolicy&amp;Bloom之1
+8.1 FilterPolicy
+因名知意，FilterPolicy是用于key过滤的，可以快速的排除不存在的key。前面介绍Table的时候，在Table::InternalGet函数中有过一面之缘。
+FilterPolicy有3个接口：
+virtual const char* Name() const = 0; 
+// 返回filter的名字
+virtual void CreateFilter(const Slice* keys, 
+                          int n, std::string* dst)const = 0;
+virtual bool KeyMayMatch(const Slice&amp; key, const Slice&amp; filter)const = 0;
+CreateFilter接口，它根据指定的参数创建过滤器，并将结果append到dst中，注意：不能修改dst的原始内容，只做append。
+参数@keys[0,n-1]包含依据用户提供的comparator排序的key列表&ndash;可重复，并把根据这些key创建的filter追加到@*dst中。
+KeyMayMatch，参数@filter包含了调用CreateFilter函数append的数据，如果key在传递函数CreateFilter的key列表中，则必须返回true。
+注意：它不需要精确，也就是即使key不在前面传递的key列表中，也可以返回true，但是如果key在列表中，就必须返回true。
+涉及到的类如图8.1-1所示。
+
+
+8.2InternalFilterPolicy
+这是一个简单的FilterPolicy的wrapper，以方便的把FilterPolicy应用在InternalKey上，InternalKey是Leveldb内部使用的key，这些前面都讲过。它所做的就是从InternalKey拆分得到user key，然后在user key上做FilterPolicy的操作。
+它有一个成员：
+constFilterPolicy* const user_policy_;
+其Name()返回的是user_policy_-&gt;Name()；
+bool InternalFilterPolicy::KeyMayMatch(const Slice&amp; key, constSlice&amp; f) const 
+{
+     returnuser_policy_-&gt;KeyMayMatch(ExtractUserKey(key), f);
+}
+void InternalFilterPolicy::CreateFilter(const Slice* keys,
+                                        int n,std::string* dst) const 
+{
+     Slice* mkey =const_cast&lt;Slice*&gt;(keys);
+     for (int i = 0; i &lt; n; i&#43;&#43;)mkey[i] = ExtractUserKey(keys[i]);
+     user_policy_-&gt;CreateFilter(keys, n, dst);
+}
+8.3 BloomFilter
+8.3.1 基本理论
+Bloom Filter实际上是一种hash算法，数学之美系列有专门介绍。它是由巴顿.布隆于一九七零年提出的，它实际上是一个很长的二进制向量和一系列随机映射函数。
+Bloom Filter将元素映射到一个长度为m的bit向量上的一个bit，当这个bit是1时，就表示这个元素在集合内。使用hash的缺点就是元素很多时可能有冲突，为了减少误判，就使用k个hash函数计算出k个bit，只要有一个bit为0，就说明元素肯定不在集合内。下面的图8.3-1是一个示意图。
+
+
+在leveldb的实现中，Name()返回&quot;leveldb.BuiltinBloomFilter&quot;，因此metaindex block** 中的key就是”filter.leveldb.BuiltinBloomFilter”。Leveldb使用了double hashing来模拟多个hash函数，当然这里不是用来解决冲突的。
+和线性再探测（linearprobing）一样，Double hashing从一个hash值开始，重复向前迭代，直到解决冲突或者搜索完hash表。不同的是，double hashing使用的是另外一个hash函数，而不是固定的步长。
+给定两个独立的hash函数h1和h2，对于hash表T和值k，第i次迭代计算出的位置就是：h(i, k) = (h1(k) &#43; i*h2(k)) mod |T|。
+对此，Leveldb选择的hash函数是："/>
 
 
 <script type="application/ld+json">
@@ -97,7 +206,7 @@ bool InternalFilterPolicy::KeyMayMatch(const Slice&amp; key, constSlice&amp; f) 
     {
       "@type": "ListItem",
       "position":  1 ,
-      "name": "1s",
+      "name": "1",
       "item": "https://haokiu.com/1/"
     }, 
     {
@@ -115,13 +224,13 @@ bool InternalFilterPolicy::KeyMayMatch(const Slice&amp; key, constSlice&amp; f) 
   "@type": "BlogPosting",
   "headline": "leveldb源码分析12",
   "name": "leveldb源码分析12",
-  "description": "leveldb源码分析12 本系列《leveldb源码分析》共有22篇文章，这是第十二篇\n8.FilterPolicy\u0026amp;Bloom之1 8.1 FilterPolicy 因名知意，FilterPolicy是用于key过滤的，可以快速的排除不存在的key。前面介绍Table的时候，在Table::InternalGet函数中有过一面之缘。 FilterPolicy有3个接口：\nvirtual const char* Name() const = 0; // 返回filter的名字 virtual void CreateFilter(const Slice* keys, int n, std::string* dst)const = 0; virtual bool KeyMayMatch(const Slice\u0026amp; key, const Slice\u0026amp; filter)const = 0; CreateFilter接口，它根据指定的参数创建过滤器，并将结果append到dst中，注意：不能修改dst的原始内容，只做append。 参数@keys[0,n-1]包含依据用户提供的comparator排序的key列表\u0026ndash;可重复，并把根据这些key创建的filter追加到@*dst中。 KeyMayMatch，参数@filter包含了调用CreateFilter函数append的数据，如果key在传递函数CreateFilter的key列表中，则必须返回true。\n注意：它不需要精确，也就是即使key不在前面传递的key列表中，也可以返回true，但是如果key在列表中，就必须返回true。 涉及到的类如图8.1-1所示。\n8.2InternalFilterPolicy 这是一个简单的FilterPolicy的wrapper，以方便的把FilterPolicy应用在InternalKey上，InternalKey是Leveldb内部使用的key，这些前面都讲过。它所做的就是从InternalKey拆分得到user key，然后在user key上做FilterPolicy的操作。 它有一个成员：\nconstFilterPolicy* const user_policy_; 其Name()返回的是user_policy_-\u0026gt;Name()；\nbool InternalFilterPolicy::KeyMayMatch(const Slice\u0026amp; key, constSlice\u0026amp; f) const { returnuser_policy_-\u0026gt;KeyMayMatch(ExtractUserKey(key), f); } void InternalFilterPolicy::CreateFilter(const Slice* keys, int n,std::string* dst) const { Slice* mkey =const_cast\u0026lt;Slice*\u0026gt;(keys); for (int i = 0; i \u0026lt; n; i++)mkey[i] = ExtractUserKey(keys[i]); user_policy_-\u0026gt;CreateFilter(keys, n, dst); } 8.3 BloomFilter 8.3.1 基本理论 Bloom Filter实际上是一种hash算法，数学之美系列有专门介绍。它是由巴顿.布隆于一九七零年提出的，它实际上是一个很长的二进制向量和一系列随机映射函数。 Bloom Filter将元素映射到一个长度为m的bit向量上的一个bit，当这个bit是1时，就表示这个元素在集合内。使用hash的缺点就是元素很多时可能有冲突，为了减少误判，就使用k个hash函数计算出k个bit，只要有一个bit为0，就说明元素肯定不在集合内。下面的图8.3-1是一个示意图。\n在leveldb的实现中，Name()返回\u0026quot;leveldb.BuiltinBloomFilter\u0026quot;，因此metaindex block** 中的key就是”filter.leveldb.BuiltinBloomFilter”。Leveldb使用了double hashing来模拟多个hash函数，当然这里不是用来解决冲突的。 和线性再探测（linearprobing）一样，Double hashing从一个hash值开始，重复向前迭代，直到解决冲突或者搜索完hash表。不同的是，double hashing使用的是另外一个hash函数，而不是固定的步长。 给定两个独立的hash函数h1和h2，对于hash表T和值k，第i次迭代计算出的位置就是：h(i, k) = (h1(k) + i*h2(k)) mod |T|。 对此，Leveldb选择的hash函数是：",
+  "description": "leveldb源码分析12 本系列《leveldb源码分析》共有22篇文章，这是第十二篇\n8.FilterPolicy\u0026amp;Bloom之1 8.1 FilterPolicy 因名知意，FilterPolicy是用于key过滤的，可以快速的排除不存在的key。前面介绍Table的时候，在Table::InternalGet函数中有过一面之缘。 FilterPolicy有3个接口：\nvirtual const char* Name() const = 0; // 返回filter的名字 virtual void CreateFilter(const Slice* keys, int n, std::string* dst)const = 0; virtual bool KeyMayMatch(const Slice\u0026amp; key, const Slice\u0026amp; filter)const = 0; CreateFilter接口，它根据指定的参数创建过滤器，并将结果append到dst中，注意：不能修改dst的原始内容，只做append。 参数@keys[0,n-1]包含依据用户提供的comparator排序的key列表\u0026ndash;可重复，并把根据这些key创建的filter追加到@*dst中。 KeyMayMatch，参数@filter包含了调用CreateFilter函数append的数据，如果key在传递函数CreateFilter的key列表中，则必须返回true。\n注意：它不需要精确，也就是即使key不在前面传递的key列表中，也可以返回true，但是如果key在列表中，就必须返回true。 涉及到的类如图8.1-1所示。\n8.2InternalFilterPolicy 这是一个简单的FilterPolicy的wrapper，以方便的把FilterPolicy应用在InternalKey上，InternalKey是Leveldb内部使用的key，这些前面都讲过。它所做的就是从InternalKey拆分得到user key，然后在user key上做FilterPolicy的操作。 它有一个成员：\nconstFilterPolicy* const user_policy_; 其Name()返回的是user_policy_-\u0026gt;Name()；\nbool InternalFilterPolicy::KeyMayMatch(const Slice\u0026amp; key, constSlice\u0026amp; f) const { returnuser_policy_-\u0026gt;KeyMayMatch(ExtractUserKey(key), f); } void InternalFilterPolicy::CreateFilter(const Slice* keys, int n,std::string* dst) const { Slice* mkey =const_cast\u0026lt;Slice*\u0026gt;(keys); for (int i = 0; i \u0026lt; n; i++)mkey[i] = ExtractUserKey(keys[i]); user_policy_-\u0026gt;CreateFilter(keys, n, dst); } 8.3 BloomFilter 8.3.1 基本理论 Bloom Filter实际上是一种hash算法，数学之美系列有专门介绍。它是由巴顿.布隆于一九七零年提出的，它实际上是一个很长的二进制向量和一系列随机映射函数。 Bloom Filter将元素映射到一个长度为m的bit向量上的一个bit，当这个bit是1时，就表示这个元素在集合内。使用hash的缺点就是元素很多时可能有冲突，为了减少误判，就使用k个hash函数计算出k个bit，只要有一个bit为0，就说明元素肯定不在集合内。下面的图8.3-1是一个示意图。\n在leveldb的实现中，Name()返回\u0026quot;leveldb.BuiltinBloomFilter\u0026quot;，因此metaindex block** 中的key就是”filter.leveldb.BuiltinBloomFilter”。Leveldb使用了double hashing来模拟多个hash函数，当然这里不是用来解决冲突的。 和线性再探测（linearprobing）一样，Double hashing从一个hash值开始，重复向前迭代，直到解决冲突或者搜索完hash表。不同的是，double hashing使用的是另外一个hash函数，而不是固定的步长。 给定两个独立的hash函数h1和h2，对于hash表T和值k，第i次迭代计算出的位置就是：h(i, k) = (h1(k) + i*h2(k)) mod |T|。 对此，Leveldb选择的hash函数是：\n",
   "keywords": [
     
   ],
   "articleBody": "leveldb源码分析12 本系列《leveldb源码分析》共有22篇文章，这是第十二篇\n8.FilterPolicy\u0026Bloom之1 8.1 FilterPolicy 因名知意，FilterPolicy是用于key过滤的，可以快速的排除不存在的key。前面介绍Table的时候，在Table::InternalGet函数中有过一面之缘。 FilterPolicy有3个接口：\nvirtual const char* Name() const = 0; // 返回filter的名字 virtual void CreateFilter(const Slice* keys, int n, std::string* dst)const = 0; virtual bool KeyMayMatch(const Slice\u0026 key, const Slice\u0026 filter)const = 0; CreateFilter接口，它根据指定的参数创建过滤器，并将结果append到dst中，注意：不能修改dst的原始内容，只做append。 参数@keys[0,n-1]包含依据用户提供的comparator排序的key列表–可重复，并把根据这些key创建的filter追加到@*dst中。 KeyMayMatch，参数@filter包含了调用CreateFilter函数append的数据，如果key在传递函数CreateFilter的key列表中，则必须返回true。\n注意：它不需要精确，也就是即使key不在前面传递的key列表中，也可以返回true，但是如果key在列表中，就必须返回true。 涉及到的类如图8.1-1所示。\n8.2InternalFilterPolicy 这是一个简单的FilterPolicy的wrapper，以方便的把FilterPolicy应用在InternalKey上，InternalKey是Leveldb内部使用的key，这些前面都讲过。它所做的就是从InternalKey拆分得到user key，然后在user key上做FilterPolicy的操作。 它有一个成员：\nconstFilterPolicy* const user_policy_; 其Name()返回的是user_policy_-\u003eName()；\nbool InternalFilterPolicy::KeyMayMatch(const Slice\u0026 key, constSlice\u0026 f) const { returnuser_policy_-\u003eKeyMayMatch(ExtractUserKey(key), f); } void InternalFilterPolicy::CreateFilter(const Slice* keys, int n,std::string* dst) const { Slice* mkey =const_cast(keys); for (int i = 0; i \u003c n; i++)mkey[i] = ExtractUserKey(keys[i]); user_policy_-\u003eCreateFilter(keys, n, dst); } 8.3 BloomFilter 8.3.1 基本理论 Bloom Filter实际上是一种hash算法，数学之美系列有专门介绍。它是由巴顿.布隆于一九七零年提出的，它实际上是一个很长的二进制向量和一系列随机映射函数。 Bloom Filter将元素映射到一个长度为m的bit向量上的一个bit，当这个bit是1时，就表示这个元素在集合内。使用hash的缺点就是元素很多时可能有冲突，为了减少误判，就使用k个hash函数计算出k个bit，只要有一个bit为0，就说明元素肯定不在集合内。下面的图8.3-1是一个示意图。\n在leveldb的实现中，Name()返回\"leveldb.BuiltinBloomFilter\"，因此metaindex block** 中的key就是”filter.leveldb.BuiltinBloomFilter”。Leveldb使用了double hashing来模拟多个hash函数，当然这里不是用来解决冲突的。 和线性再探测（linearprobing）一样，Double hashing从一个hash值开始，重复向前迭代，直到解决冲突或者搜索完hash表。不同的是，double hashing使用的是另外一个hash函数，而不是固定的步长。 给定两个独立的hash函数h1和h2，对于hash表T和值k，第i次迭代计算出的位置就是：h(i, k) = (h1(k) + i*h2(k)) mod |T|。 对此，Leveldb选择的hash函数是：\nGi(x)=H1(x)+iH2(x) H2(x)=(H1(x)\u003e\u003e17) | (H1(x)\u003c\u003c15) H1是一个基本的hash函数，H2是由H1循环右移得到的，Gi(x)就是第i次循环得到的hash值。【理论分析可参考论文Kirsch,Mitzenmacher2006】 在bloom_filter的数据的最后一个字节存放的是k_的值，k_实际上就是G(x)的个数，也就是计算时采用的hash函数个数。\n8.3.2 BloomFilter参数 这里先来说下其两个成员变量：bits_per_key_和key_；其实这就是Bloom Hashing的两个关键参数。 变量k_实际上就是模拟的hash函数的个数； 关于变量bits_per_key_，对于n个key，其hash table的大小就是bits_per_key_。它的值越大，发生冲突的概率就越低，那么bloom hashing误判的概率就越低。因此这是一个时间空间的trade-off。 对于hash(key)，在平均意义上，发生冲突的概率就是1/ bits_per_key_。 它们在构造函数中根据传入的参数bits_per_key初始化。\nbits_per_key_ = bits_per_key; k_ =static_cast(bits_per_key * 0.69); // 0.69 =~ ln(2) if (k_ \u003c 1) k_ = 1; if (k_ \u003e 30) k_ = 30; 模拟hash函数的个数k_取值为bits_per_key_*ln(2)，为何不是0.5或者0.4了，可能是什么理论推导的结果吧，不了解了。\n8.3.3 建立BloomFilter 了解了上面的理论，再来看leveldb对Bloom Fil****ter的实现就轻松多了，先来看Bloom Filter的构建。这就是FilterPolicy::CreateFilter接口的实现：\nvoid CreateFilter(const Slice* keys, int n, std::string* dst) const 下面分析其实现代码，大概有如下几个步骤：\nS1 首先根据key个数分配filter空间，并圆整到8byte。 size_t bits = n * bits_per_key_; if (bits \u003c 64) bits = 64; // 如果n太小FP会很高，限定filter的最小长度 size_t bytes = (bits + 7) / 8; // 圆整到8byte bits = bytes * 8; // bit计算的空间大小 const size_t init_size =dst-\u003esize(); dst-\u003eresize(init_size +bytes, 0); // 分配空间 S2 在filter最后的字节位压入hash函数个数 dst-\u003epush_back(static_cast(k_)); // Remember # of probes in filter S3 对于每个key，使用double-hashing生产一系列的hash值h(K_个)，设置bits array的第h位=1。 char* array =\u0026(*dst)[init_size]; for (size_t i = 0; i \u003c n;i++) { // double-hashing，分析参见[Kirsch,Mitzenmacher 2006] uint32_t h =BloomHash(keys[i]); // h1函数 const uint32_t delta = (h\u003e\u003e 17) | (h \u003c\u003c 15); // h2函数、由h1 Rotate right 17 bits for (size_t j = 0; j ",
   "wordCount" : "440",
-  "inLanguage": "en",
+  "inLanguage": "zh-cn",
   "datePublished": "2021-01-11T09:20:42Z",
   "dateModified": "2021-01-11T09:20:42Z",
   "mainEntityOfPage": {
@@ -177,6 +286,8 @@ bool InternalFilterPolicy::KeyMayMatch(const Slice&amp; key, constSlice&amp; f) 
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -186,32 +297,32 @@ bool InternalFilterPolicy::KeyMayMatch(const Slice&amp; key, constSlice&amp; f) 
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/1/" title="1s">
+                <a href="https://haokiu.com/1/" title="1">
                     <span>后端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/2/" title="2s">
+                <a href="https://haokiu.com/2/" title="2">
                     <span>前端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/3/" title="3s">
+                <a href="https://haokiu.com/3/" title="3">
                     <span>区块链</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/4/" title="4s">
+                <a href="https://haokiu.com/4/" title="4">
                     <span>大数据</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/5/" title="5s">
+                <a href="https://haokiu.com/5/" title="5">
                     <span>linux</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/6/" title="6s">
+                <a href="https://haokiu.com/6/" title="6">
                     <span>其他</span>
                 </a>
             </li>
@@ -232,7 +343,7 @@ bool InternalFilterPolicy::KeyMayMatch(const Slice&amp; key, constSlice&amp; f) 
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    
     <h1 class="post-title">
       leveldb源码分析12
     </h1>
@@ -250,7 +361,7 @@ bool InternalFilterPolicy::KeyMayMatch(const Slice&amp; key, constSlice&amp; f) 
                     <a href="#leveldb%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%9012" aria-label="leveldb源码分析12">leveldb源码分析12</a><ul>
                         
                 <li>
-                    <a href="#8filterpolicybloom%e4%b9%8b1" aria-label="8.FilterPolicy&amp;amp;Bloom之1">8.FilterPolicy&amp;Bloom之1</a><ul>
+                    <a href="#8filterpolicybloom%e4%b9%8b1" aria-label="8.FilterPolicy&amp;Bloom之1">8.FilterPolicy&amp;Bloom之1</a><ul>
                         
                 <li>
                     <a href="#81-filterpolicy" aria-label="8.1 FilterPolicy">8.1 FilterPolicy</a></li>
@@ -413,7 +524,7 @@ for (size_t j = 0; j &lt; k;j++)
 return true; // match  
 </code></pre><h3 id="84-filter-block格式">8.4 Filter Block格式</h3>
 <p>Filter Block也就是前面sstable中的<strong>meta block</strong>，位于data block之后。</p>
-<p>如果打开db时指定了FilterPolicy，那么每个创建的table都会保存一个filter block，table中的<strong>metaindex</strong>就包含一条从”filter.到filter block的BlockHandle的映射，其中”<!-- raw HTML omitted -->”是filter policy的<strong>Name()函数返回的string</strong>。</p>
+<p>如果打开db时指定了FilterPolicy，那么每个创建的table都会保存一个filter block，table中的<strong>metaindex</strong>就包含一条从”filter.到filter block的BlockHandle的映射，其中”<N>”是filter policy的<strong>Name()函数返回的string</strong>。</p>
 <p>Filter block存储了一连串的filter值，其中第i个filter保存的是block b中所有的key通过<strong>FilterPolicy::CreateFilter()<strong>计算得到的结果，block b在sstable文件中的偏移</strong>满足[ i*base … (i+1)*base-1 ]</strong>。</p>
 <p>当前base是2KB，举个例子，如果block X和Y在sstable的起始位置都在[0KB, 2KB-1]中，X和Y中的所有<strong>key调用FilterPolicy::CreateFilter()<strong>的计算结果都将生产到同一个filter中，而且该filter是filter block的第一个filter。
 Filter block也是一个block，其</strong>格式遵从block</strong>的基本格式：|block data| type | crc32|。其中block dat的格式如图8.4-1所示。</p>
@@ -429,12 +540,12 @@ Filter block也是一个block，其</strong>格式遵从block</strong>的基本�
     </ul>
 <nav class="paginav">
   <a class="prev" href="https://haokiu.com/blog/0159e326ba0e4917878529ee1ae3af48/">
-    <span class="title">« Prev</span>
+    <span class="title">« </span>
     <br>
     <span>leveldb源码分析11</span>
   </a>
   <a class="next" href="https://haokiu.com/blog/f110bd8130344cbf801fc30d4d7a7ce9/">
-    <span class="title">Next »</span>
+    <span class="title"> »</span>
     <br>
     <span>leveldb源码分析13</span>
   </a>
@@ -444,6 +555,14 @@ Filter block也是一个block，其</strong>格式遵从block</strong>的基本�
 </article>
     </main>
     
+<footer class="footer">
+    <span>haokiu.com</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />

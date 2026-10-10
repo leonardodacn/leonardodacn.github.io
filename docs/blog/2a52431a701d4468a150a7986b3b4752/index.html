@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="zh-cn" dir="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,15 +7,102 @@
 <meta name="robots" content="index, follow">
 <title>TSDBWriter 插件文档 | haokiu</title>
 <meta name="keywords" content="datax">
-<meta name="description" content="TSDBWriter 插件文档 1 快速介绍 TSDBWriter 插件实现了将数据点写入到阿里巴巴自研 TSDB 数据库中（后续简称 TSDB）。
+<meta name="description" content="TSDBWriter 插件文档
+
+1 快速介绍
+TSDBWriter 插件实现了将数据点写入到阿里巴巴自研 TSDB 数据库中（后续简称 TSDB）。
 时间序列数据库（Time Series Database , 简称 TSDB）是一种高性能，低成本，稳定可靠的在线时序数据库服务；提供高效读写，高压缩比存储、时序数据插值及聚合计算，广泛应用于物联网（IoT）设备监控系统 ，企业能源管理系统（EMS），生产安全监控系统，电力检测系统等行业场景。 TSDB 提供百万级时序数据秒级写入，高压缩比低成本存储、预降采样、插值、多维聚合计算，查询结果可视化功能；解决由于设备采集点数量巨大，数据采集频率高，造成的存储成本高，写入和查询分析效率低的问题。更多关于 TSDB 的介绍，详见阿里云 TSDB 官网。
-2 实现原理 通过 HTTP 连接 TSDB 实例，并通过 /api/put 接口将数据点写入。关于写入接口详见 TSDB 的接口说明文档。
-3 功能说明 3.1 配置样例 配置一个从 OpenTSDB 数据库同步抽取数据到 TSDB： { &#34;job&#34;: { &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;opentsdbreader&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;: &#34;http://localhost:4242&#34;, &#34;column&#34;: [ &#34;m&#34; ], &#34;startTime&#34;: &#34;2019-01-01 00:00:00&#34;, &#34;endTime&#34;: &#34;2019-01-01 03:00:00&#34; } }, &#34;writer&#34;: { &#34;name&#34;: &#34;tsdbhttpwriter&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;: &#34;http://localhost:8242&#34; } } } ], &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 1 } } } } 3.2 参数说明 name
-描述：本插件的名称 必选：是 默认值：tsdbhttpwriter parameter
-endpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Port 默认值：无 batchSize">
+2 实现原理
+通过 HTTP 连接 TSDB 实例，并通过 /api/put 接口将数据点写入。关于写入接口详见 TSDB 的接口说明文档。
+3 功能说明
+3.1 配置样例
+
+配置一个从 OpenTSDB 数据库同步抽取数据到 TSDB：
+
+{
+  &#34;job&#34;: {
+    &#34;content&#34;: [
+      {
+        &#34;reader&#34;: {
+          &#34;name&#34;: &#34;opentsdbreader&#34;,
+          &#34;parameter&#34;: {
+            &#34;endpoint&#34;: &#34;http://localhost:4242&#34;,
+            &#34;column&#34;: [
+              &#34;m&#34;
+            ],
+            &#34;startTime&#34;: &#34;2019-01-01 00:00:00&#34;,
+            &#34;endTime&#34;: &#34;2019-01-01 03:00:00&#34;
+          }
+        },
+        &#34;writer&#34;: {
+          &#34;name&#34;: &#34;tsdbhttpwriter&#34;,
+          &#34;parameter&#34;: {
+            &#34;endpoint&#34;: &#34;http://localhost:8242&#34;
+          }
+        }
+      }
+    ],
+    &#34;setting&#34;: {
+      &#34;speed&#34;: {
+        &#34;channel&#34;: 1
+      }
+    }
+  }
+}
+3.2 参数说明
+
+
+name
+
+描述：本插件的名称
+必选：是
+默认值：tsdbhttpwriter
+
+
+
+parameter
+
+endpoint
+
+描述：TSDB 的 HTTP 连接地址
+必选：是
+格式：http://IP:Port
+默认值：无
+
+
+
+
+
+batchSize
+
+描述：每次批量数据的条数
+必选：否
+格式：int，需要保证大于 0
+默认值：100
+
+
+
+maxRetryTime
+
+描述：失败后重试的次数
+必选：否
+格式：int，需要保证大于 1
+默认值：3
+
+
+
+ignoreWriteError
+
+描述：如果设置为 true，则忽略写入错误，继续写入；否则，多次重试后仍写入失败的话，则会终止写入任务
+必选：否
+格式：bool
+默认值：false
+
+
+">
 <meta name="author" content="">
 <link rel="canonical" href="https://haokiu.com/blog/2a52431a701d4468a150a7986b3b4752/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
 <script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="https://haokiu.com/favicon.ico">
@@ -25,6 +112,7 @@ endpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Por
 <link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/blog/2a52431a701d4468a150a7986b3b4752/">
 <noscript>
     <style>
         #theme-toggle,
@@ -62,12 +150,99 @@ endpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Por
 
     </style>
 </noscript><meta property="og:title" content="TSDBWriter 插件文档" />
-<meta property="og:description" content="TSDBWriter 插件文档 1 快速介绍 TSDBWriter 插件实现了将数据点写入到阿里巴巴自研 TSDB 数据库中（后续简称 TSDB）。
+<meta property="og:description" content="TSDBWriter 插件文档
+
+1 快速介绍
+TSDBWriter 插件实现了将数据点写入到阿里巴巴自研 TSDB 数据库中（后续简称 TSDB）。
 时间序列数据库（Time Series Database , 简称 TSDB）是一种高性能，低成本，稳定可靠的在线时序数据库服务；提供高效读写，高压缩比存储、时序数据插值及聚合计算，广泛应用于物联网（IoT）设备监控系统 ，企业能源管理系统（EMS），生产安全监控系统，电力检测系统等行业场景。 TSDB 提供百万级时序数据秒级写入，高压缩比低成本存储、预降采样、插值、多维聚合计算，查询结果可视化功能；解决由于设备采集点数量巨大，数据采集频率高，造成的存储成本高，写入和查询分析效率低的问题。更多关于 TSDB 的介绍，详见阿里云 TSDB 官网。
-2 实现原理 通过 HTTP 连接 TSDB 实例，并通过 /api/put 接口将数据点写入。关于写入接口详见 TSDB 的接口说明文档。
-3 功能说明 3.1 配置样例 配置一个从 OpenTSDB 数据库同步抽取数据到 TSDB： { &#34;job&#34;: { &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;opentsdbreader&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;: &#34;http://localhost:4242&#34;, &#34;column&#34;: [ &#34;m&#34; ], &#34;startTime&#34;: &#34;2019-01-01 00:00:00&#34;, &#34;endTime&#34;: &#34;2019-01-01 03:00:00&#34; } }, &#34;writer&#34;: { &#34;name&#34;: &#34;tsdbhttpwriter&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;: &#34;http://localhost:8242&#34; } } } ], &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 1 } } } } 3.2 参数说明 name
-描述：本插件的名称 必选：是 默认值：tsdbhttpwriter parameter
-endpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Port 默认值：无 batchSize" />
+2 实现原理
+通过 HTTP 连接 TSDB 实例，并通过 /api/put 接口将数据点写入。关于写入接口详见 TSDB 的接口说明文档。
+3 功能说明
+3.1 配置样例
+
+配置一个从 OpenTSDB 数据库同步抽取数据到 TSDB：
+
+{
+  &#34;job&#34;: {
+    &#34;content&#34;: [
+      {
+        &#34;reader&#34;: {
+          &#34;name&#34;: &#34;opentsdbreader&#34;,
+          &#34;parameter&#34;: {
+            &#34;endpoint&#34;: &#34;http://localhost:4242&#34;,
+            &#34;column&#34;: [
+              &#34;m&#34;
+            ],
+            &#34;startTime&#34;: &#34;2019-01-01 00:00:00&#34;,
+            &#34;endTime&#34;: &#34;2019-01-01 03:00:00&#34;
+          }
+        },
+        &#34;writer&#34;: {
+          &#34;name&#34;: &#34;tsdbhttpwriter&#34;,
+          &#34;parameter&#34;: {
+            &#34;endpoint&#34;: &#34;http://localhost:8242&#34;
+          }
+        }
+      }
+    ],
+    &#34;setting&#34;: {
+      &#34;speed&#34;: {
+        &#34;channel&#34;: 1
+      }
+    }
+  }
+}
+3.2 参数说明
+
+
+name
+
+描述：本插件的名称
+必选：是
+默认值：tsdbhttpwriter
+
+
+
+parameter
+
+endpoint
+
+描述：TSDB 的 HTTP 连接地址
+必选：是
+格式：http://IP:Port
+默认值：无
+
+
+
+
+
+batchSize
+
+描述：每次批量数据的条数
+必选：否
+格式：int，需要保证大于 0
+默认值：100
+
+
+
+maxRetryTime
+
+描述：失败后重试的次数
+必选：否
+格式：int，需要保证大于 1
+默认值：3
+
+
+
+ignoreWriteError
+
+描述：如果设置为 true，则忽略写入错误，继续写入；否则，多次重试后仍写入失败的话，则会终止写入任务
+必选：否
+格式：bool
+默认值：false
+
+
+" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://haokiu.com/blog/2a52431a701d4468a150a7986b3b4752/" /><meta property="article:section" content="4" />
 <meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
@@ -75,12 +250,99 @@ endpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Por
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="TSDBWriter 插件文档"/>
-<meta name="twitter:description" content="TSDBWriter 插件文档 1 快速介绍 TSDBWriter 插件实现了将数据点写入到阿里巴巴自研 TSDB 数据库中（后续简称 TSDB）。
+<meta name="twitter:description" content="TSDBWriter 插件文档
+
+1 快速介绍
+TSDBWriter 插件实现了将数据点写入到阿里巴巴自研 TSDB 数据库中（后续简称 TSDB）。
 时间序列数据库（Time Series Database , 简称 TSDB）是一种高性能，低成本，稳定可靠的在线时序数据库服务；提供高效读写，高压缩比存储、时序数据插值及聚合计算，广泛应用于物联网（IoT）设备监控系统 ，企业能源管理系统（EMS），生产安全监控系统，电力检测系统等行业场景。 TSDB 提供百万级时序数据秒级写入，高压缩比低成本存储、预降采样、插值、多维聚合计算，查询结果可视化功能；解决由于设备采集点数量巨大，数据采集频率高，造成的存储成本高，写入和查询分析效率低的问题。更多关于 TSDB 的介绍，详见阿里云 TSDB 官网。
-2 实现原理 通过 HTTP 连接 TSDB 实例，并通过 /api/put 接口将数据点写入。关于写入接口详见 TSDB 的接口说明文档。
-3 功能说明 3.1 配置样例 配置一个从 OpenTSDB 数据库同步抽取数据到 TSDB： { &#34;job&#34;: { &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;opentsdbreader&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;: &#34;http://localhost:4242&#34;, &#34;column&#34;: [ &#34;m&#34; ], &#34;startTime&#34;: &#34;2019-01-01 00:00:00&#34;, &#34;endTime&#34;: &#34;2019-01-01 03:00:00&#34; } }, &#34;writer&#34;: { &#34;name&#34;: &#34;tsdbhttpwriter&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;: &#34;http://localhost:8242&#34; } } } ], &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 1 } } } } 3.2 参数说明 name
-描述：本插件的名称 必选：是 默认值：tsdbhttpwriter parameter
-endpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Port 默认值：无 batchSize"/>
+2 实现原理
+通过 HTTP 连接 TSDB 实例，并通过 /api/put 接口将数据点写入。关于写入接口详见 TSDB 的接口说明文档。
+3 功能说明
+3.1 配置样例
+
+配置一个从 OpenTSDB 数据库同步抽取数据到 TSDB：
+
+{
+  &#34;job&#34;: {
+    &#34;content&#34;: [
+      {
+        &#34;reader&#34;: {
+          &#34;name&#34;: &#34;opentsdbreader&#34;,
+          &#34;parameter&#34;: {
+            &#34;endpoint&#34;: &#34;http://localhost:4242&#34;,
+            &#34;column&#34;: [
+              &#34;m&#34;
+            ],
+            &#34;startTime&#34;: &#34;2019-01-01 00:00:00&#34;,
+            &#34;endTime&#34;: &#34;2019-01-01 03:00:00&#34;
+          }
+        },
+        &#34;writer&#34;: {
+          &#34;name&#34;: &#34;tsdbhttpwriter&#34;,
+          &#34;parameter&#34;: {
+            &#34;endpoint&#34;: &#34;http://localhost:8242&#34;
+          }
+        }
+      }
+    ],
+    &#34;setting&#34;: {
+      &#34;speed&#34;: {
+        &#34;channel&#34;: 1
+      }
+    }
+  }
+}
+3.2 参数说明
+
+
+name
+
+描述：本插件的名称
+必选：是
+默认值：tsdbhttpwriter
+
+
+
+parameter
+
+endpoint
+
+描述：TSDB 的 HTTP 连接地址
+必选：是
+格式：http://IP:Port
+默认值：无
+
+
+
+
+
+batchSize
+
+描述：每次批量数据的条数
+必选：否
+格式：int，需要保证大于 0
+默认值：100
+
+
+
+maxRetryTime
+
+描述：失败后重试的次数
+必选：否
+格式：int，需要保证大于 1
+默认值：3
+
+
+
+ignoreWriteError
+
+描述：如果设置为 true，则忽略写入错误，继续写入；否则，多次重试后仍写入失败的话，则会终止写入任务
+必选：否
+格式：bool
+默认值：false
+
+
+"/>
 
 
 <script type="application/ld+json">
@@ -91,7 +353,7 @@ endpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Por
     {
       "@type": "ListItem",
       "position":  1 ,
-      "name": "4s",
+      "name": "4",
       "item": "https://haokiu.com/4/"
     }, 
     {
@@ -109,13 +371,13 @@ endpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Por
   "@type": "BlogPosting",
   "headline": "TSDBWriter 插件文档",
   "name": "TSDBWriter 插件文档",
-  "description": "TSDBWriter 插件文档 1 快速介绍 TSDBWriter 插件实现了将数据点写入到阿里巴巴自研 TSDB 数据库中（后续简称 TSDB）。\n时间序列数据库（Time Series Database , 简称 TSDB）是一种高性能，低成本，稳定可靠的在线时序数据库服务；提供高效读写，高压缩比存储、时序数据插值及聚合计算，广泛应用于物联网（IoT）设备监控系统 ，企业能源管理系统（EMS），生产安全监控系统，电力检测系统等行业场景。 TSDB 提供百万级时序数据秒级写入，高压缩比低成本存储、预降采样、插值、多维聚合计算，查询结果可视化功能；解决由于设备采集点数量巨大，数据采集频率高，造成的存储成本高，写入和查询分析效率低的问题。更多关于 TSDB 的介绍，详见阿里云 TSDB 官网。\n2 实现原理 通过 HTTP 连接 TSDB 实例，并通过 /api/put 接口将数据点写入。关于写入接口详见 TSDB 的接口说明文档。\n3 功能说明 3.1 配置样例 配置一个从 OpenTSDB 数据库同步抽取数据到 TSDB： { \u0026#34;job\u0026#34;: { \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;opentsdbreader\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;endpoint\u0026#34;: \u0026#34;http://localhost:4242\u0026#34;, \u0026#34;column\u0026#34;: [ \u0026#34;m\u0026#34; ], \u0026#34;startTime\u0026#34;: \u0026#34;2019-01-01 00:00:00\u0026#34;, \u0026#34;endTime\u0026#34;: \u0026#34;2019-01-01 03:00:00\u0026#34; } }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;tsdbhttpwriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;endpoint\u0026#34;: \u0026#34;http://localhost:8242\u0026#34; } } } ], \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { \u0026#34;channel\u0026#34;: 1 } } } } 3.2 参数说明 name\n描述：本插件的名称 必选：是 默认值：tsdbhttpwriter parameter\nendpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Port 默认值：无 batchSize",
+  "description": "TSDBWriter 插件文档 1 快速介绍 TSDBWriter 插件实现了将数据点写入到阿里巴巴自研 TSDB 数据库中（后续简称 TSDB）。\n时间序列数据库（Time Series Database , 简称 TSDB）是一种高性能，低成本，稳定可靠的在线时序数据库服务；提供高效读写，高压缩比存储、时序数据插值及聚合计算，广泛应用于物联网（IoT）设备监控系统 ，企业能源管理系统（EMS），生产安全监控系统，电力检测系统等行业场景。 TSDB 提供百万级时序数据秒级写入，高压缩比低成本存储、预降采样、插值、多维聚合计算，查询结果可视化功能；解决由于设备采集点数量巨大，数据采集频率高，造成的存储成本高，写入和查询分析效率低的问题。更多关于 TSDB 的介绍，详见阿里云 TSDB 官网。\n2 实现原理 通过 HTTP 连接 TSDB 实例，并通过 /api/put 接口将数据点写入。关于写入接口详见 TSDB 的接口说明文档。\n3 功能说明 3.1 配置样例 配置一个从 OpenTSDB 数据库同步抽取数据到 TSDB： { \u0026#34;job\u0026#34;: { \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;opentsdbreader\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;endpoint\u0026#34;: \u0026#34;http://localhost:4242\u0026#34;, \u0026#34;column\u0026#34;: [ \u0026#34;m\u0026#34; ], \u0026#34;startTime\u0026#34;: \u0026#34;2019-01-01 00:00:00\u0026#34;, \u0026#34;endTime\u0026#34;: \u0026#34;2019-01-01 03:00:00\u0026#34; } }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;tsdbhttpwriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;endpoint\u0026#34;: \u0026#34;http://localhost:8242\u0026#34; } } } ], \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { \u0026#34;channel\u0026#34;: 1 } } } } 3.2 参数说明 name\n描述：本插件的名称 必选：是 默认值：tsdbhttpwriter parameter\nendpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Port 默认值：无 batchSize\n描述：每次批量数据的条数 必选：否 格式：int，需要保证大于 0 默认值：100 maxRetryTime\n描述：失败后重试的次数 必选：否 格式：int，需要保证大于 1 默认值：3 ignoreWriteError\n描述：如果设置为 true，则忽略写入错误，继续写入；否则，多次重试后仍写入失败的话，则会终止写入任务 必选：否 格式：bool 默认值：false ",
   "keywords": [
     "datax"
   ],
   "articleBody": "TSDBWriter 插件文档 1 快速介绍 TSDBWriter 插件实现了将数据点写入到阿里巴巴自研 TSDB 数据库中（后续简称 TSDB）。\n时间序列数据库（Time Series Database , 简称 TSDB）是一种高性能，低成本，稳定可靠的在线时序数据库服务；提供高效读写，高压缩比存储、时序数据插值及聚合计算，广泛应用于物联网（IoT）设备监控系统 ，企业能源管理系统（EMS），生产安全监控系统，电力检测系统等行业场景。 TSDB 提供百万级时序数据秒级写入，高压缩比低成本存储、预降采样、插值、多维聚合计算，查询结果可视化功能；解决由于设备采集点数量巨大，数据采集频率高，造成的存储成本高，写入和查询分析效率低的问题。更多关于 TSDB 的介绍，详见阿里云 TSDB 官网。\n2 实现原理 通过 HTTP 连接 TSDB 实例，并通过 /api/put 接口将数据点写入。关于写入接口详见 TSDB 的接口说明文档。\n3 功能说明 3.1 配置样例 配置一个从 OpenTSDB 数据库同步抽取数据到 TSDB： { \"job\": { \"content\": [ { \"reader\": { \"name\": \"opentsdbreader\", \"parameter\": { \"endpoint\": \"http://localhost:4242\", \"column\": [ \"m\" ], \"startTime\": \"2019-01-01 00:00:00\", \"endTime\": \"2019-01-01 03:00:00\" } }, \"writer\": { \"name\": \"tsdbhttpwriter\", \"parameter\": { \"endpoint\": \"http://localhost:8242\" } } } ], \"setting\": { \"speed\": { \"channel\": 1 } } } } 3.2 参数说明 name\n描述：本插件的名称 必选：是 默认值：tsdbhttpwriter parameter\nendpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Port 默认值：无 batchSize\n描述：每次批量数据的条数 必选：否 格式：int，需要保证大于 0 默认值：100 maxRetryTime\n描述：失败后重试的次数 必选：否 格式：int，需要保证大于 1 默认值：3 ignoreWriteError\n描述：如果设置为 true，则忽略写入错误，继续写入；否则，多次重试后仍写入失败的话，则会终止写入任务 必选：否 格式：bool 默认值：false 3.3 类型转换 DataX 内部类型 TSDB 数据类型 String TSDB 数据点序列化字符串，包括 timestamp、metric、tags 和 value 4 性能报告 4.1 环境准备 4.1.1 数据特征 从 Metric、时间线、Value 和 采集周期 四个方面来描述：\nmetric 固定指定一个 metric 为 m。\ntagkv 前四个 tagkv 全排列，形成 10 * 20 * 100 * 100 = 2000000 条时间线，最后 IP 对应 2000000 条时间线从 1 开始自增。\ntag_k tag_v zone z1~z10 cluster c1~c20 group g1~100 app a1~a100 ip ip1~ip2000000 value 度量值为 [1, 100] 区间内的随机值\ninterval 采集周期为 10 秒，持续摄入 3 小时，总数据量为 3 * 60 * 60 / 10 * 2000000 = 2,160,000,000 个数据点。\n4.1.2 机器参数 TSDB Writer 机型: 64C256G\nHBase 机型： 8C16G * 5\n4.1.3 DataX jvm 参数 “-Xms4096m -Xmx4096m”\n4.2 测试报告 通道数 DataX 速度 (Rec/s) DataX 流量 (MB/s) 1 129753 15.45 2 284953 33.70 3 385868 45.71 5 约束限制 5.1 目前只支持兼容 TSDB 2.4.x 及以上版本 其他版本暂不保证兼容\n6 FAQ ",
   "wordCount" : "250",
-  "inLanguage": "en",
+  "inLanguage": "zh-cn",
   "datePublished": "2021-02-02T17:45:01Z",
   "dateModified": "2021-02-02T17:45:01Z",
   "mainEntityOfPage": {
@@ -171,6 +433,8 @@ endpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Por
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -180,32 +444,32 @@ endpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Por
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/1/" title="1s">
+                <a href="https://haokiu.com/1/" title="1">
                     <span>后端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/2/" title="2s">
+                <a href="https://haokiu.com/2/" title="2">
                     <span>前端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/3/" title="3s">
+                <a href="https://haokiu.com/3/" title="3">
                     <span>区块链</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/4/" title="4s">
+                <a href="https://haokiu.com/4/" title="4">
                     <span>大数据</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/5/" title="5s">
+                <a href="https://haokiu.com/5/" title="5">
                     <span>linux</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/6/" title="6s">
+                <a href="https://haokiu.com/6/" title="6">
                     <span>其他</span>
                 </a>
             </li>
@@ -226,7 +490,7 @@ endpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Por
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    
     <h1 class="post-title">
       TSDBWriter 插件文档
     </h1>
@@ -311,7 +575,7 @@ endpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Por
 <ul>
 <li>配置一个从 OpenTSDB 数据库同步抽取数据到 TSDB：</li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;job&#34;</span>: {
 </span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;content&#34;</span>: [
 </span></span><span style="display:flex;"><span>      {
@@ -394,18 +658,18 @@ endpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Por
 </ul>
 <h3 id="33-类型转换">3.3 类型转换</h3>
 <table>
-<thead>
-<tr>
-<th>DataX 内部类型</th>
-<th>TSDB 数据类型</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>String</td>
-<td>TSDB 数据点序列化字符串，包括 timestamp、metric、tags 和 value</td>
-</tr>
-</tbody>
+	<thead>
+			<tr>
+					<th>DataX 内部类型</th>
+					<th>TSDB 数据类型</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>String</td>
+					<td>TSDB 数据点序列化字符串，包括 timestamp、metric、tags 和 value</td>
+			</tr>
+	</tbody>
 </table>
 <h2 id="4-性能报告">4 性能报告</h2>
 <h3 id="41-环境准备">4.1 环境准备</h3>
@@ -416,34 +680,34 @@ endpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Por
 <h5 id="tagkv">tagkv</h5>
 <p>前四个 tagkv 全排列，形成 <code>10 * 20 * 100 * 100 = 2000000</code> 条时间线，最后 IP 对应 2000000 条时间线从 1 开始自增。</p>
 <table>
-<thead>
-<tr>
-<th><strong>tag_k</strong></th>
-<th><strong>tag_v</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>zone</td>
-<td>z1~z10</td>
-</tr>
-<tr>
-<td>cluster</td>
-<td>c1~c20</td>
-</tr>
-<tr>
-<td>group</td>
-<td>g1~100</td>
-</tr>
-<tr>
-<td>app</td>
-<td>a1~a100</td>
-</tr>
-<tr>
-<td>ip</td>
-<td>ip1~ip2000000</td>
-</tr>
-</tbody>
+	<thead>
+			<tr>
+					<th><strong>tag_k</strong></th>
+					<th><strong>tag_v</strong></th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>zone</td>
+					<td>z1~z10</td>
+			</tr>
+			<tr>
+					<td>cluster</td>
+					<td>c1~c20</td>
+			</tr>
+			<tr>
+					<td>group</td>
+					<td>g1~100</td>
+			</tr>
+			<tr>
+					<td>app</td>
+					<td>a1~a100</td>
+			</tr>
+			<tr>
+					<td>ip</td>
+					<td>ip1~ip2000000</td>
+			</tr>
+	</tbody>
 </table>
 <h5 id="value">value</h5>
 <p>度量值为 [1, 100] 区间内的随机值</p>
@@ -456,30 +720,30 @@ endpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Por
 <p>&ldquo;-Xms4096m -Xmx4096m&rdquo;</p>
 <h3 id="42-测试报告">4.2 测试报告</h3>
 <table>
-<thead>
-<tr>
-<th>通道数</th>
-<th>DataX 速度 (Rec/s)</th>
-<th>DataX 流量 (MB/s)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>129753</td>
-<td>15.45</td>
-</tr>
-<tr>
-<td>2</td>
-<td>284953</td>
-<td>33.70</td>
-</tr>
-<tr>
-<td>3</td>
-<td>385868</td>
-<td>45.71</td>
-</tr>
-</tbody>
+	<thead>
+			<tr>
+					<th>通道数</th>
+					<th>DataX 速度 (Rec/s)</th>
+					<th>DataX 流量 (MB/s)</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>1</td>
+					<td>129753</td>
+					<td>15.45</td>
+			</tr>
+			<tr>
+					<td>2</td>
+					<td>284953</td>
+					<td>33.70</td>
+			</tr>
+			<tr>
+					<td>3</td>
+					<td>385868</td>
+					<td>45.71</td>
+			</tr>
+	</tbody>
 </table>
 <h2 id="5-约束限制">5 约束限制</h2>
 <h3 id="51-目前只支持兼容-tsdb-24x-及以上版本">5.1 目前只支持兼容 TSDB 2.4.x 及以上版本</h3>
@@ -490,13 +754,21 @@ endpoint 描述：TSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Por
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+      <li><a href="https://haokiu.com/tags/datax/">Datax</a></li>
     </ul>
 
   </footer>
 </article>
     </main>
     
+<footer class="footer">
+    <span>haokiu.com</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />

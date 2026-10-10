@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="zh-cn" dir="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,14 +7,32 @@
 <meta name="robots" content="index, follow">
 <title>leveldb源码分析5 | haokiu</title>
 <meta name="keywords" content="">
-<meta name="description" content="leveldb源码分析5 本系列《leveldb源码分析》共有22篇文章，这是第五篇。
-5.操作Log 1 分析完KV在内存中的存储，接下来就是操作日志。所有的写操作都必须先成功的append到操作日志中，然后再更新内存memtable。这样做有两点：
-可以将随机的写IO变成append，极大的提高写磁盘速度； 防止在节点down机导致内存数据丢失，造成数据丢失，这对系统来说是个灾难。 在各种高效的存储系统中，这已经是口水技术了。
-5.1 格式 在源码下的文档doc/log_format.txt中，作者详细描述了log格式：
-The log file contents are a sequence of 32KB blocks. The only exception is that the tail of thefile may contain a partial block. Each block consists of a sequence of records: block:= record* trailer? record := checksum: uint32 // crc32c of type and data[] ; little-endian length: uint16 // little-endian type: uint8 // One of FULL,FIRST, MIDDLE, LAST data: uint8[length] A record never starts within the last six bytes of a block (since it won&rsquo;tfit). Any leftover bytes here form thetrailer, which must consist entirely of zero bytes and must be skipped byreaders.">
+<meta name="description" content="leveldb源码分析5
+本系列《leveldb源码分析》共有22篇文章，这是第五篇。
+5.操作Log 1
+分析完KV在内存中的存储，接下来就是操作日志。所有的写操作都必须先成功的append到操作日志中，然后再更新内存memtable。这样做有两点：
+
+可以将随机的写IO变成append，极大的提高写磁盘速度；
+防止在节点down机导致内存数据丢失，造成数据丢失，这对系统来说是个灾难。
+
+在各种高效的存储系统中，这已经是口水技术了。
+5.1 格式
+在源码下的文档doc/log_format.txt中，作者详细描述了log格式：
+The log file contents are a sequence of 32KB blocks. 
+The only exception is that the tail of thefile may contain a partial block.
+Each block consists of a sequence of records:
+block:= record* trailer?
+record :=
+checksum: uint32     // crc32c of type and data[] ; little-endian
+length: uint16       // little-endian
+type: uint8          // One of FULL,FIRST, MIDDLE, LAST
+data: uint8[length]
+
+A record never starts within the last six bytes of a block (since it won&rsquo;tfit).  Any leftover bytes here form thetrailer, which must consist entirely of zero bytes and must be skipped byreaders.
+">
 <meta name="author" content="">
 <link rel="canonical" href="https://haokiu.com/blog/81982087975a4f49913e723952169670/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
 <script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="https://haokiu.com/favicon.ico">
@@ -24,6 +42,7 @@ The log file contents are a sequence of 32KB blocks. The only exception is that 
 <link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/blog/81982087975a4f49913e723952169670/">
 <noscript>
     <style>
         #theme-toggle,
@@ -61,11 +80,29 @@ The log file contents are a sequence of 32KB blocks. The only exception is that 
 
     </style>
 </noscript><meta property="og:title" content="leveldb源码分析5" />
-<meta property="og:description" content="leveldb源码分析5 本系列《leveldb源码分析》共有22篇文章，这是第五篇。
-5.操作Log 1 分析完KV在内存中的存储，接下来就是操作日志。所有的写操作都必须先成功的append到操作日志中，然后再更新内存memtable。这样做有两点：
-可以将随机的写IO变成append，极大的提高写磁盘速度； 防止在节点down机导致内存数据丢失，造成数据丢失，这对系统来说是个灾难。 在各种高效的存储系统中，这已经是口水技术了。
-5.1 格式 在源码下的文档doc/log_format.txt中，作者详细描述了log格式：
-The log file contents are a sequence of 32KB blocks. The only exception is that the tail of thefile may contain a partial block. Each block consists of a sequence of records: block:= record* trailer? record := checksum: uint32 // crc32c of type and data[] ; little-endian length: uint16 // little-endian type: uint8 // One of FULL,FIRST, MIDDLE, LAST data: uint8[length] A record never starts within the last six bytes of a block (since it won&rsquo;tfit). Any leftover bytes here form thetrailer, which must consist entirely of zero bytes and must be skipped byreaders." />
+<meta property="og:description" content="leveldb源码分析5
+本系列《leveldb源码分析》共有22篇文章，这是第五篇。
+5.操作Log 1
+分析完KV在内存中的存储，接下来就是操作日志。所有的写操作都必须先成功的append到操作日志中，然后再更新内存memtable。这样做有两点：
+
+可以将随机的写IO变成append，极大的提高写磁盘速度；
+防止在节点down机导致内存数据丢失，造成数据丢失，这对系统来说是个灾难。
+
+在各种高效的存储系统中，这已经是口水技术了。
+5.1 格式
+在源码下的文档doc/log_format.txt中，作者详细描述了log格式：
+The log file contents are a sequence of 32KB blocks. 
+The only exception is that the tail of thefile may contain a partial block.
+Each block consists of a sequence of records:
+block:= record* trailer?
+record :=
+checksum: uint32     // crc32c of type and data[] ; little-endian
+length: uint16       // little-endian
+type: uint8          // One of FULL,FIRST, MIDDLE, LAST
+data: uint8[length]
+
+A record never starts within the last six bytes of a block (since it won&rsquo;tfit).  Any leftover bytes here form thetrailer, which must consist entirely of zero bytes and must be skipped byreaders.
+" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://haokiu.com/blog/81982087975a4f49913e723952169670/" /><meta property="article:section" content="1" />
 <meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
@@ -73,11 +110,29 @@ The log file contents are a sequence of 32KB blocks. The only exception is that 
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="leveldb源码分析5"/>
-<meta name="twitter:description" content="leveldb源码分析5 本系列《leveldb源码分析》共有22篇文章，这是第五篇。
-5.操作Log 1 分析完KV在内存中的存储，接下来就是操作日志。所有的写操作都必须先成功的append到操作日志中，然后再更新内存memtable。这样做有两点：
-可以将随机的写IO变成append，极大的提高写磁盘速度； 防止在节点down机导致内存数据丢失，造成数据丢失，这对系统来说是个灾难。 在各种高效的存储系统中，这已经是口水技术了。
-5.1 格式 在源码下的文档doc/log_format.txt中，作者详细描述了log格式：
-The log file contents are a sequence of 32KB blocks. The only exception is that the tail of thefile may contain a partial block. Each block consists of a sequence of records: block:= record* trailer? record := checksum: uint32 // crc32c of type and data[] ; little-endian length: uint16 // little-endian type: uint8 // One of FULL,FIRST, MIDDLE, LAST data: uint8[length] A record never starts within the last six bytes of a block (since it won&rsquo;tfit). Any leftover bytes here form thetrailer, which must consist entirely of zero bytes and must be skipped byreaders."/>
+<meta name="twitter:description" content="leveldb源码分析5
+本系列《leveldb源码分析》共有22篇文章，这是第五篇。
+5.操作Log 1
+分析完KV在内存中的存储，接下来就是操作日志。所有的写操作都必须先成功的append到操作日志中，然后再更新内存memtable。这样做有两点：
+
+可以将随机的写IO变成append，极大的提高写磁盘速度；
+防止在节点down机导致内存数据丢失，造成数据丢失，这对系统来说是个灾难。
+
+在各种高效的存储系统中，这已经是口水技术了。
+5.1 格式
+在源码下的文档doc/log_format.txt中，作者详细描述了log格式：
+The log file contents are a sequence of 32KB blocks. 
+The only exception is that the tail of thefile may contain a partial block.
+Each block consists of a sequence of records:
+block:= record* trailer?
+record :=
+checksum: uint32     // crc32c of type and data[] ; little-endian
+length: uint16       // little-endian
+type: uint8          // One of FULL,FIRST, MIDDLE, LAST
+data: uint8[length]
+
+A record never starts within the last six bytes of a block (since it won&rsquo;tfit).  Any leftover bytes here form thetrailer, which must consist entirely of zero bytes and must be skipped byreaders.
+"/>
 
 
 <script type="application/ld+json">
@@ -88,7 +143,7 @@ The log file contents are a sequence of 32KB blocks. The only exception is that 
     {
       "@type": "ListItem",
       "position":  1 ,
-      "name": "1s",
+      "name": "1",
       "item": "https://haokiu.com/1/"
     }, 
     {
@@ -106,13 +161,13 @@ The log file contents are a sequence of 32KB blocks. The only exception is that 
   "@type": "BlogPosting",
   "headline": "leveldb源码分析5",
   "name": "leveldb源码分析5",
-  "description": "leveldb源码分析5 本系列《leveldb源码分析》共有22篇文章，这是第五篇。\n5.操作Log 1 分析完KV在内存中的存储，接下来就是操作日志。所有的写操作都必须先成功的append到操作日志中，然后再更新内存memtable。这样做有两点：\n可以将随机的写IO变成append，极大的提高写磁盘速度； 防止在节点down机导致内存数据丢失，造成数据丢失，这对系统来说是个灾难。 在各种高效的存储系统中，这已经是口水技术了。\n5.1 格式 在源码下的文档doc/log_format.txt中，作者详细描述了log格式：\nThe log file contents are a sequence of 32KB blocks. The only exception is that the tail of thefile may contain a partial block. Each block consists of a sequence of records: block:= record* trailer? record := checksum: uint32 // crc32c of type and data[] ; little-endian length: uint16 // little-endian type: uint8 // One of FULL,FIRST, MIDDLE, LAST data: uint8[length] A record never starts within the last six bytes of a block (since it won\u0026rsquo;tfit). Any leftover bytes here form thetrailer, which must consist entirely of zero bytes and must be skipped byreaders.",
+  "description": "leveldb源码分析5 本系列《leveldb源码分析》共有22篇文章，这是第五篇。\n5.操作Log 1 分析完KV在内存中的存储，接下来就是操作日志。所有的写操作都必须先成功的append到操作日志中，然后再更新内存memtable。这样做有两点：\n可以将随机的写IO变成append，极大的提高写磁盘速度； 防止在节点down机导致内存数据丢失，造成数据丢失，这对系统来说是个灾难。 在各种高效的存储系统中，这已经是口水技术了。\n5.1 格式 在源码下的文档doc/log_format.txt中，作者详细描述了log格式：\nThe log file contents are a sequence of 32KB blocks. The only exception is that the tail of thefile may contain a partial block. Each block consists of a sequence of records: block:= record* trailer? record := checksum: uint32 // crc32c of type and data[] ; little-endian length: uint16 // little-endian type: uint8 // One of FULL,FIRST, MIDDLE, LAST data: uint8[length] A record never starts within the last six bytes of a block (since it won\u0026rsquo;tfit). Any leftover bytes here form thetrailer, which must consist entirely of zero bytes and must be skipped byreaders.\n",
   "keywords": [
     
   ],
   "articleBody": "leveldb源码分析5 本系列《leveldb源码分析》共有22篇文章，这是第五篇。\n5.操作Log 1 分析完KV在内存中的存储，接下来就是操作日志。所有的写操作都必须先成功的append到操作日志中，然后再更新内存memtable。这样做有两点：\n可以将随机的写IO变成append，极大的提高写磁盘速度； 防止在节点down机导致内存数据丢失，造成数据丢失，这对系统来说是个灾难。 在各种高效的存储系统中，这已经是口水技术了。\n5.1 格式 在源码下的文档doc/log_format.txt中，作者详细描述了log格式：\nThe log file contents are a sequence of 32KB blocks. The only exception is that the tail of thefile may contain a partial block. Each block consists of a sequence of records: block:= record* trailer? record := checksum: uint32 // crc32c of type and data[] ; little-endian length: uint16 // little-endian type: uint8 // One of FULL,FIRST, MIDDLE, LAST data: uint8[length] A record never starts within the last six bytes of a block (since it won’tfit). Any leftover bytes here form thetrailer, which must consist entirely of zero bytes and must be skipped byreaders.\n翻译过来就是： Leveldb把日志文件切分成了大小为32KB的连续block块，block由连续的log record组成，log record的格式为： 注意：CRC32, Length都是little-endian的。\nLog Type有4种：FULL = 1、FIRST = 2、MIDDLE = 3、LAST = 4。FULL类型表明该log record包含了完整的user record；而user record可能内容很多，超过了block的可用大小，就需要分成几条log record，第一条类型为FIRST，中间的为MIDDLE，最后一条为LAST。也就是：\nFULL，说明该log record包含一个完整的user record； FIRST，说明是user record的第一条log record MIDDLE，说明是user record中间的log record LAST，说明是user record最后的一条log record 翻一下文档上的例子，考虑到如下序列的user records： A: length 1000 B: length 97270 C: length 8000\nA作为FULL类型的record存储在第一个block中； B将被拆分成3条log record，分别存储在第1、2、3个block中，这时block3还剩6byte，将被填充为0； C将作为FULL类型的record存储在block 4中。 由于一条logrecord长度最短为7，如果一个block的剩余空间\u003c=6byte，那么将**被填充为*空字*符串，另外长度为7的log record是不包括任何用户数据的。\n5.2 写日志 写比读简单，而且写入决定了读，所以从写开始分析。有意思的是在写文件时，Leveldb使用了内存映射文件，内存映射文件的读写效率比普通文件要高，关于内存映射文件为何更高效，这篇文章写的不错： http://blog.csdn.net/mg0832058/article/details/5890688\n其中涉及到的类层次比较简单，如图5.2-1：\n注意Write类的成员type_crc_数组，这里存放的为Record Type预先计算的CRC32值，因为Record Type是固定的几种，为了效率。Writer类只有一个接口，就是AddRecord()，传入Slice参数，下面来看函数实现。首先取出slice的字符串指针和长度，初始化begin=true，表明是第一条log record。\nconst char* ptr = slice.data(); size_t left = slice.size(); bool begin = true; 然后进入一个do{}while循环，直到写入出错，或者成功写入全部数据，如下：\n1\nS1 首先查看当前block是否\u003c7，如果\u003c7则补位，并重置block偏移 dest_-\u003eAppend(Slice(\"\\x00\\x00\\x00\\x00\\x00\\x00\",leftover)); block_offset_ = 0; S2 计算block剩余大小，以及本次log record可写入数据长度 const size_t avail =kBlockSize - block_offset_ - kHeaderSize; const size_t fragment_length = (left ",
   "wordCount" : "327",
-  "inLanguage": "en",
+  "inLanguage": "zh-cn",
   "datePublished": "2021-01-11T09:20:42Z",
   "dateModified": "2021-01-11T09:20:42Z",
   "mainEntityOfPage": {
@@ -168,6 +223,8 @@ The log file contents are a sequence of 32KB blocks. The only exception is that 
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -177,32 +234,32 @@ The log file contents are a sequence of 32KB blocks. The only exception is that 
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/1/" title="1s">
+                <a href="https://haokiu.com/1/" title="1">
                     <span>后端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/2/" title="2s">
+                <a href="https://haokiu.com/2/" title="2">
                     <span>前端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/3/" title="3s">
+                <a href="https://haokiu.com/3/" title="3">
                     <span>区块链</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/4/" title="4s">
+                <a href="https://haokiu.com/4/" title="4">
                     <span>大数据</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/5/" title="5s">
+                <a href="https://haokiu.com/5/" title="5">
                     <span>linux</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/6/" title="6s">
+                <a href="https://haokiu.com/6/" title="6">
                     <span>其他</span>
                 </a>
             </li>
@@ -223,7 +280,7 @@ The log file contents are a sequence of 32KB blocks. The only exception is that 
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    
     <h1 class="post-title">
       leveldb源码分析5
     </h1>
@@ -250,7 +307,7 @@ The log file contents are a sequence of 32KB blocks. The only exception is that 
                         <ul>
                         
                 <li>
-                    <a href="#s1-%e9%a6%96%e5%85%88%e6%9f%a5%e7%9c%8b%e5%bd%93%e5%89%8dblock%e6%98%af%e5%90%a67%e5%a6%82%e6%9e%9c7%e5%88%99%e8%a1%a5%e4%bd%8d%e5%b9%b6%e9%87%8d%e7%bd%aeblock%e5%81%8f%e7%a7%bb" aria-label="S1 首先查看当前block是否&amp;lt;7，如果&amp;lt;7则补位，并重置block偏移">S1 首先查看当前block是否&lt;7，如果&lt;7则补位，并重置block偏移</a></li>
+                    <a href="#s1-%e9%a6%96%e5%85%88%e6%9f%a5%e7%9c%8b%e5%bd%93%e5%89%8dblock%e6%98%af%e5%90%a67%e5%a6%82%e6%9e%9c7%e5%88%99%e8%a1%a5%e4%bd%8d%e5%b9%b6%e9%87%8d%e7%bd%aeblock%e5%81%8f%e7%a7%bb" aria-label="S1 首先查看当前block是否&lt;7，如果&lt;7则补位，并重置block偏移">S1 首先查看当前block是否&lt;7，如果&lt;7则补位，并重置block偏移</a></li>
                 <li>
                     <a href="#s2-%e8%ae%a1%e7%ae%97block%e5%89%a9%e4%bd%99%e5%a4%a7%e5%b0%8f%e4%bb%a5%e5%8f%8a%e6%9c%ac%e6%ac%a1log-record%e5%8f%af%e5%86%99%e5%85%a5%e6%95%b0%e6%8d%ae%e9%95%bf%e5%ba%a6" aria-label="S2 计算block剩余大小，以及本次log record可写入数据长度">S2 计算block剩余大小，以及本次log record可写入数据长度</a></li>
                 <li>
@@ -374,12 +431,12 @@ block_offset_ += kHeaderSize +n;
     </ul>
 <nav class="paginav">
   <a class="prev" href="https://haokiu.com/blog/f4dfd0e7e33240c9807a11402d34ddb3/">
-    <span class="title">« Prev</span>
+    <span class="title">« </span>
     <br>
     <span>leveldb源码分析4</span>
   </a>
   <a class="next" href="https://haokiu.com/blog/3e005b6becda44edaa67dc81f32d5499/">
-    <span class="title">Next »</span>
+    <span class="title"> »</span>
     <br>
     <span>leveldb源码分析6</span>
   </a>
@@ -389,6 +446,14 @@ block_offset_ += kHeaderSize +n;
 </article>
     </main>
     
+<footer class="footer">
+    <span>haokiu.com</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="zh-cn" dir="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,13 +7,148 @@
 <meta name="robots" content="index, follow">
 <title>HBase11xsqlwriter插件文档 | haokiu</title>
 <meta name="keywords" content="datax">
-<meta name="description" content="HBase11xsqlwriter插件文档 1. 快速介绍 HBase11xsqlwriter实现了向hbase中的SQL表(phoenix)批量导入数据的功能。Phoenix因为对rowkey做了数据编码，所以，直接使用HBaseAPI进行写入会面临手工数据转换的问题，麻烦且易错。本插件提供了单间的SQL表的数据导入方式。
+<meta name="description" content="HBase11xsqlwriter插件文档
+1. 快速介绍
+HBase11xsqlwriter实现了向hbase中的SQL表(phoenix)批量导入数据的功能。Phoenix因为对rowkey做了数据编码，所以，直接使用HBaseAPI进行写入会面临手工数据转换的问题，麻烦且易错。本插件提供了单间的SQL表的数据导入方式。
 在底层实现上，通过Phoenix的JDBC驱动，执行UPSERT语句向hbase写入数据。
-1.1 支持的功能 支持带索引的表的数据导入，可以同步更新所有的索引表 1.2 限制 仅支持1.x系列的hbase 仅支持通过phoenix创建的表，不支持原生HBase表 不支持带时间戳的数据导入 2. 实现原理 通过Phoenix的JDBC驱动，执行UPSERT语句向表中批量写入数据。因为使用上层接口，所以，可以同步更新索引表。
-3. 配置说明 3.1 配置样例 { &#34;job&#34;: { &#34;entry&#34;: { &#34;jvm&#34;: &#34;-Xms2048m -Xmx2048m&#34; }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;txtfilereader&#34;, &#34;parameter&#34;: { &#34;path&#34;: &#34;/Users/shf/workplace/datax_test/hbase11xsqlwriter/txt/normal.txt&#34;, &#34;charset&#34;: &#34;UTF-8&#34;, &#34;column&#34;: [ { &#34;index&#34;: 0, &#34;type&#34;: &#34;String&#34; }, { &#34;index&#34;: 1, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 2, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 3, &#34;type&#34;: &#34;string&#34; } ], &#34;fieldDelimiter&#34;: &#34;,&#34; } }, &#34;writer&#34;: { &#34;name&#34;: &#34;hbase11xsqlwriter&#34;, &#34;parameter&#34;: { &#34;batchSize&#34;: &#34;256&#34;, &#34;column&#34;: [ &#34;UID&#34;, &#34;TS&#34;, &#34;EVENTID&#34;, &#34;CONTENT&#34; ], &#34;hbaseConfig&#34;: { &#34;hbase.zookeeper.quorum&#34;: &#34;目标hbase集群的ZK服务器地址，向PE咨询&#34;, &#34;zookeeper.znode.parent&#34;: &#34;目标hbase集群的znode，向PE咨询&#34; }, &#34;nullMode&#34;: &#34;skip&#34;, &#34;table&#34;: &#34;目标hbase表名，大小写有关&#34; } } } ], &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 5 } } } } 3.">
+1.1 支持的功能
+
+支持带索引的表的数据导入，可以同步更新所有的索引表
+
+1.2 限制
+
+仅支持1.x系列的hbase
+仅支持通过phoenix创建的表，不支持原生HBase表
+不支持带时间戳的数据导入
+
+2. 实现原理
+通过Phoenix的JDBC驱动，执行UPSERT语句向表中批量写入数据。因为使用上层接口，所以，可以同步更新索引表。
+3. 配置说明
+3.1 配置样例
+{
+  &#34;job&#34;: {
+    &#34;entry&#34;: {
+      &#34;jvm&#34;: &#34;-Xms2048m -Xmx2048m&#34;
+    },
+    &#34;content&#34;: [
+      {
+        &#34;reader&#34;: {
+          &#34;name&#34;: &#34;txtfilereader&#34;,
+          &#34;parameter&#34;: {
+            &#34;path&#34;: &#34;/Users/shf/workplace/datax_test/hbase11xsqlwriter/txt/normal.txt&#34;,
+            &#34;charset&#34;: &#34;UTF-8&#34;,
+            &#34;column&#34;: [
+              {
+                &#34;index&#34;: 0,
+                &#34;type&#34;: &#34;String&#34;
+              },
+              {
+                &#34;index&#34;: 1,
+                &#34;type&#34;: &#34;string&#34;
+              },
+              {
+                &#34;index&#34;: 2,
+                &#34;type&#34;: &#34;string&#34;
+              },
+              {
+                &#34;index&#34;: 3,
+                &#34;type&#34;: &#34;string&#34;
+              }
+            ],
+            &#34;fieldDelimiter&#34;: &#34;,&#34;
+          }
+        },
+        &#34;writer&#34;: {
+          &#34;name&#34;: &#34;hbase11xsqlwriter&#34;,
+          &#34;parameter&#34;: {
+            &#34;batchSize&#34;: &#34;256&#34;,
+            &#34;column&#34;: [
+              &#34;UID&#34;,
+              &#34;TS&#34;,
+              &#34;EVENTID&#34;,
+              &#34;CONTENT&#34;
+            ],
+            &#34;hbaseConfig&#34;: {
+              &#34;hbase.zookeeper.quorum&#34;: &#34;目标hbase集群的ZK服务器地址，向PE咨询&#34;,
+              &#34;zookeeper.znode.parent&#34;: &#34;目标hbase集群的znode，向PE咨询&#34;
+            },
+            &#34;nullMode&#34;: &#34;skip&#34;,
+            &#34;table&#34;: &#34;目标hbase表名，大小写有关&#34;
+          }
+        }
+      }
+    ],
+    &#34;setting&#34;: {
+      &#34;speed&#34;: {
+        &#34;channel&#34;: 5
+      }
+    }
+  }
+}
+3.2 参数说明
+
+
+name
+
+描述：插件名字，必须是hbase11xsqlwriter
+必选：是
+默认值：无
+
+
+
+table
+
+描述：要导入的表名，大小写敏感，通常phoenix表都是大写表名
+必选：是
+默认值：无
+
+
+
+column
+
+描述：列名，大小写敏感，通常phoenix的列名都是大写。
+
+需要注意列的顺序，必须与reader输出的列的顺序一一对应。
+不需要填写数据类型，会自动从phoenix获取列的元数据
+
+
+必选：是
+默认值：无
+
+
+
+hbaseConfig
+
+描述：hbase集群地址，zk为必填项，格式：ip1,ip2,ip3，注意，多个IP之间使用英文的逗号分隔。znode是可选的，默认值是/hbase
+必选：是
+默认值：无
+
+
+
+batchSize
+
+描述：批量写入的最大行数
+必选：否
+默认值：256
+
+
+
+nullMode
+
+描述：读取到的列值为null时，如何处理。目前有两种方式：
+
+skip：跳过这一列，即不插入这一列(如果该行的这一列之前已经存在，则会被删除)
+empty：插入空值，值类型的空值是0，varchar的空值是空字符串
+
+
+必选：否
+默认值：skip
+
+
+">
 <meta name="author" content="">
 <link rel="canonical" href="https://haokiu.com/blog/1c329829c22c499d8e684735252966c1/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
 <script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="https://haokiu.com/favicon.ico">
@@ -23,6 +158,7 @@
 <link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/blog/1c329829c22c499d8e684735252966c1/">
 <noscript>
     <style>
         #theme-toggle,
@@ -60,10 +196,145 @@
 
     </style>
 </noscript><meta property="og:title" content="HBase11xsqlwriter插件文档" />
-<meta property="og:description" content="HBase11xsqlwriter插件文档 1. 快速介绍 HBase11xsqlwriter实现了向hbase中的SQL表(phoenix)批量导入数据的功能。Phoenix因为对rowkey做了数据编码，所以，直接使用HBaseAPI进行写入会面临手工数据转换的问题，麻烦且易错。本插件提供了单间的SQL表的数据导入方式。
+<meta property="og:description" content="HBase11xsqlwriter插件文档
+1. 快速介绍
+HBase11xsqlwriter实现了向hbase中的SQL表(phoenix)批量导入数据的功能。Phoenix因为对rowkey做了数据编码，所以，直接使用HBaseAPI进行写入会面临手工数据转换的问题，麻烦且易错。本插件提供了单间的SQL表的数据导入方式。
 在底层实现上，通过Phoenix的JDBC驱动，执行UPSERT语句向hbase写入数据。
-1.1 支持的功能 支持带索引的表的数据导入，可以同步更新所有的索引表 1.2 限制 仅支持1.x系列的hbase 仅支持通过phoenix创建的表，不支持原生HBase表 不支持带时间戳的数据导入 2. 实现原理 通过Phoenix的JDBC驱动，执行UPSERT语句向表中批量写入数据。因为使用上层接口，所以，可以同步更新索引表。
-3. 配置说明 3.1 配置样例 { &#34;job&#34;: { &#34;entry&#34;: { &#34;jvm&#34;: &#34;-Xms2048m -Xmx2048m&#34; }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;txtfilereader&#34;, &#34;parameter&#34;: { &#34;path&#34;: &#34;/Users/shf/workplace/datax_test/hbase11xsqlwriter/txt/normal.txt&#34;, &#34;charset&#34;: &#34;UTF-8&#34;, &#34;column&#34;: [ { &#34;index&#34;: 0, &#34;type&#34;: &#34;String&#34; }, { &#34;index&#34;: 1, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 2, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 3, &#34;type&#34;: &#34;string&#34; } ], &#34;fieldDelimiter&#34;: &#34;,&#34; } }, &#34;writer&#34;: { &#34;name&#34;: &#34;hbase11xsqlwriter&#34;, &#34;parameter&#34;: { &#34;batchSize&#34;: &#34;256&#34;, &#34;column&#34;: [ &#34;UID&#34;, &#34;TS&#34;, &#34;EVENTID&#34;, &#34;CONTENT&#34; ], &#34;hbaseConfig&#34;: { &#34;hbase.zookeeper.quorum&#34;: &#34;目标hbase集群的ZK服务器地址，向PE咨询&#34;, &#34;zookeeper.znode.parent&#34;: &#34;目标hbase集群的znode，向PE咨询&#34; }, &#34;nullMode&#34;: &#34;skip&#34;, &#34;table&#34;: &#34;目标hbase表名，大小写有关&#34; } } } ], &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 5 } } } } 3." />
+1.1 支持的功能
+
+支持带索引的表的数据导入，可以同步更新所有的索引表
+
+1.2 限制
+
+仅支持1.x系列的hbase
+仅支持通过phoenix创建的表，不支持原生HBase表
+不支持带时间戳的数据导入
+
+2. 实现原理
+通过Phoenix的JDBC驱动，执行UPSERT语句向表中批量写入数据。因为使用上层接口，所以，可以同步更新索引表。
+3. 配置说明
+3.1 配置样例
+{
+  &#34;job&#34;: {
+    &#34;entry&#34;: {
+      &#34;jvm&#34;: &#34;-Xms2048m -Xmx2048m&#34;
+    },
+    &#34;content&#34;: [
+      {
+        &#34;reader&#34;: {
+          &#34;name&#34;: &#34;txtfilereader&#34;,
+          &#34;parameter&#34;: {
+            &#34;path&#34;: &#34;/Users/shf/workplace/datax_test/hbase11xsqlwriter/txt/normal.txt&#34;,
+            &#34;charset&#34;: &#34;UTF-8&#34;,
+            &#34;column&#34;: [
+              {
+                &#34;index&#34;: 0,
+                &#34;type&#34;: &#34;String&#34;
+              },
+              {
+                &#34;index&#34;: 1,
+                &#34;type&#34;: &#34;string&#34;
+              },
+              {
+                &#34;index&#34;: 2,
+                &#34;type&#34;: &#34;string&#34;
+              },
+              {
+                &#34;index&#34;: 3,
+                &#34;type&#34;: &#34;string&#34;
+              }
+            ],
+            &#34;fieldDelimiter&#34;: &#34;,&#34;
+          }
+        },
+        &#34;writer&#34;: {
+          &#34;name&#34;: &#34;hbase11xsqlwriter&#34;,
+          &#34;parameter&#34;: {
+            &#34;batchSize&#34;: &#34;256&#34;,
+            &#34;column&#34;: [
+              &#34;UID&#34;,
+              &#34;TS&#34;,
+              &#34;EVENTID&#34;,
+              &#34;CONTENT&#34;
+            ],
+            &#34;hbaseConfig&#34;: {
+              &#34;hbase.zookeeper.quorum&#34;: &#34;目标hbase集群的ZK服务器地址，向PE咨询&#34;,
+              &#34;zookeeper.znode.parent&#34;: &#34;目标hbase集群的znode，向PE咨询&#34;
+            },
+            &#34;nullMode&#34;: &#34;skip&#34;,
+            &#34;table&#34;: &#34;目标hbase表名，大小写有关&#34;
+          }
+        }
+      }
+    ],
+    &#34;setting&#34;: {
+      &#34;speed&#34;: {
+        &#34;channel&#34;: 5
+      }
+    }
+  }
+}
+3.2 参数说明
+
+
+name
+
+描述：插件名字，必须是hbase11xsqlwriter
+必选：是
+默认值：无
+
+
+
+table
+
+描述：要导入的表名，大小写敏感，通常phoenix表都是大写表名
+必选：是
+默认值：无
+
+
+
+column
+
+描述：列名，大小写敏感，通常phoenix的列名都是大写。
+
+需要注意列的顺序，必须与reader输出的列的顺序一一对应。
+不需要填写数据类型，会自动从phoenix获取列的元数据
+
+
+必选：是
+默认值：无
+
+
+
+hbaseConfig
+
+描述：hbase集群地址，zk为必填项，格式：ip1,ip2,ip3，注意，多个IP之间使用英文的逗号分隔。znode是可选的，默认值是/hbase
+必选：是
+默认值：无
+
+
+
+batchSize
+
+描述：批量写入的最大行数
+必选：否
+默认值：256
+
+
+
+nullMode
+
+描述：读取到的列值为null时，如何处理。目前有两种方式：
+
+skip：跳过这一列，即不插入这一列(如果该行的这一列之前已经存在，则会被删除)
+empty：插入空值，值类型的空值是0，varchar的空值是空字符串
+
+
+必选：否
+默认值：skip
+
+
+" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://haokiu.com/blog/1c329829c22c499d8e684735252966c1/" /><meta property="article:section" content="4" />
 <meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
@@ -71,10 +342,145 @@
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="HBase11xsqlwriter插件文档"/>
-<meta name="twitter:description" content="HBase11xsqlwriter插件文档 1. 快速介绍 HBase11xsqlwriter实现了向hbase中的SQL表(phoenix)批量导入数据的功能。Phoenix因为对rowkey做了数据编码，所以，直接使用HBaseAPI进行写入会面临手工数据转换的问题，麻烦且易错。本插件提供了单间的SQL表的数据导入方式。
+<meta name="twitter:description" content="HBase11xsqlwriter插件文档
+1. 快速介绍
+HBase11xsqlwriter实现了向hbase中的SQL表(phoenix)批量导入数据的功能。Phoenix因为对rowkey做了数据编码，所以，直接使用HBaseAPI进行写入会面临手工数据转换的问题，麻烦且易错。本插件提供了单间的SQL表的数据导入方式。
 在底层实现上，通过Phoenix的JDBC驱动，执行UPSERT语句向hbase写入数据。
-1.1 支持的功能 支持带索引的表的数据导入，可以同步更新所有的索引表 1.2 限制 仅支持1.x系列的hbase 仅支持通过phoenix创建的表，不支持原生HBase表 不支持带时间戳的数据导入 2. 实现原理 通过Phoenix的JDBC驱动，执行UPSERT语句向表中批量写入数据。因为使用上层接口，所以，可以同步更新索引表。
-3. 配置说明 3.1 配置样例 { &#34;job&#34;: { &#34;entry&#34;: { &#34;jvm&#34;: &#34;-Xms2048m -Xmx2048m&#34; }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;txtfilereader&#34;, &#34;parameter&#34;: { &#34;path&#34;: &#34;/Users/shf/workplace/datax_test/hbase11xsqlwriter/txt/normal.txt&#34;, &#34;charset&#34;: &#34;UTF-8&#34;, &#34;column&#34;: [ { &#34;index&#34;: 0, &#34;type&#34;: &#34;String&#34; }, { &#34;index&#34;: 1, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 2, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 3, &#34;type&#34;: &#34;string&#34; } ], &#34;fieldDelimiter&#34;: &#34;,&#34; } }, &#34;writer&#34;: { &#34;name&#34;: &#34;hbase11xsqlwriter&#34;, &#34;parameter&#34;: { &#34;batchSize&#34;: &#34;256&#34;, &#34;column&#34;: [ &#34;UID&#34;, &#34;TS&#34;, &#34;EVENTID&#34;, &#34;CONTENT&#34; ], &#34;hbaseConfig&#34;: { &#34;hbase.zookeeper.quorum&#34;: &#34;目标hbase集群的ZK服务器地址，向PE咨询&#34;, &#34;zookeeper.znode.parent&#34;: &#34;目标hbase集群的znode，向PE咨询&#34; }, &#34;nullMode&#34;: &#34;skip&#34;, &#34;table&#34;: &#34;目标hbase表名，大小写有关&#34; } } } ], &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 5 } } } } 3."/>
+1.1 支持的功能
+
+支持带索引的表的数据导入，可以同步更新所有的索引表
+
+1.2 限制
+
+仅支持1.x系列的hbase
+仅支持通过phoenix创建的表，不支持原生HBase表
+不支持带时间戳的数据导入
+
+2. 实现原理
+通过Phoenix的JDBC驱动，执行UPSERT语句向表中批量写入数据。因为使用上层接口，所以，可以同步更新索引表。
+3. 配置说明
+3.1 配置样例
+{
+  &#34;job&#34;: {
+    &#34;entry&#34;: {
+      &#34;jvm&#34;: &#34;-Xms2048m -Xmx2048m&#34;
+    },
+    &#34;content&#34;: [
+      {
+        &#34;reader&#34;: {
+          &#34;name&#34;: &#34;txtfilereader&#34;,
+          &#34;parameter&#34;: {
+            &#34;path&#34;: &#34;/Users/shf/workplace/datax_test/hbase11xsqlwriter/txt/normal.txt&#34;,
+            &#34;charset&#34;: &#34;UTF-8&#34;,
+            &#34;column&#34;: [
+              {
+                &#34;index&#34;: 0,
+                &#34;type&#34;: &#34;String&#34;
+              },
+              {
+                &#34;index&#34;: 1,
+                &#34;type&#34;: &#34;string&#34;
+              },
+              {
+                &#34;index&#34;: 2,
+                &#34;type&#34;: &#34;string&#34;
+              },
+              {
+                &#34;index&#34;: 3,
+                &#34;type&#34;: &#34;string&#34;
+              }
+            ],
+            &#34;fieldDelimiter&#34;: &#34;,&#34;
+          }
+        },
+        &#34;writer&#34;: {
+          &#34;name&#34;: &#34;hbase11xsqlwriter&#34;,
+          &#34;parameter&#34;: {
+            &#34;batchSize&#34;: &#34;256&#34;,
+            &#34;column&#34;: [
+              &#34;UID&#34;,
+              &#34;TS&#34;,
+              &#34;EVENTID&#34;,
+              &#34;CONTENT&#34;
+            ],
+            &#34;hbaseConfig&#34;: {
+              &#34;hbase.zookeeper.quorum&#34;: &#34;目标hbase集群的ZK服务器地址，向PE咨询&#34;,
+              &#34;zookeeper.znode.parent&#34;: &#34;目标hbase集群的znode，向PE咨询&#34;
+            },
+            &#34;nullMode&#34;: &#34;skip&#34;,
+            &#34;table&#34;: &#34;目标hbase表名，大小写有关&#34;
+          }
+        }
+      }
+    ],
+    &#34;setting&#34;: {
+      &#34;speed&#34;: {
+        &#34;channel&#34;: 5
+      }
+    }
+  }
+}
+3.2 参数说明
+
+
+name
+
+描述：插件名字，必须是hbase11xsqlwriter
+必选：是
+默认值：无
+
+
+
+table
+
+描述：要导入的表名，大小写敏感，通常phoenix表都是大写表名
+必选：是
+默认值：无
+
+
+
+column
+
+描述：列名，大小写敏感，通常phoenix的列名都是大写。
+
+需要注意列的顺序，必须与reader输出的列的顺序一一对应。
+不需要填写数据类型，会自动从phoenix获取列的元数据
+
+
+必选：是
+默认值：无
+
+
+
+hbaseConfig
+
+描述：hbase集群地址，zk为必填项，格式：ip1,ip2,ip3，注意，多个IP之间使用英文的逗号分隔。znode是可选的，默认值是/hbase
+必选：是
+默认值：无
+
+
+
+batchSize
+
+描述：批量写入的最大行数
+必选：否
+默认值：256
+
+
+
+nullMode
+
+描述：读取到的列值为null时，如何处理。目前有两种方式：
+
+skip：跳过这一列，即不插入这一列(如果该行的这一列之前已经存在，则会被删除)
+empty：插入空值，值类型的空值是0，varchar的空值是空字符串
+
+
+必选：否
+默认值：skip
+
+
+"/>
 
 
 <script type="application/ld+json">
@@ -85,7 +491,7 @@
     {
       "@type": "ListItem",
       "position":  1 ,
-      "name": "4s",
+      "name": "4",
       "item": "https://haokiu.com/4/"
     }, 
     {
@@ -103,13 +509,13 @@
   "@type": "BlogPosting",
   "headline": "HBase11xsqlwriter插件文档",
   "name": "HBase11xsqlwriter插件文档",
-  "description": "HBase11xsqlwriter插件文档 1. 快速介绍 HBase11xsqlwriter实现了向hbase中的SQL表(phoenix)批量导入数据的功能。Phoenix因为对rowkey做了数据编码，所以，直接使用HBaseAPI进行写入会面临手工数据转换的问题，麻烦且易错。本插件提供了单间的SQL表的数据导入方式。\n在底层实现上，通过Phoenix的JDBC驱动，执行UPSERT语句向hbase写入数据。\n1.1 支持的功能 支持带索引的表的数据导入，可以同步更新所有的索引表 1.2 限制 仅支持1.x系列的hbase 仅支持通过phoenix创建的表，不支持原生HBase表 不支持带时间戳的数据导入 2. 实现原理 通过Phoenix的JDBC驱动，执行UPSERT语句向表中批量写入数据。因为使用上层接口，所以，可以同步更新索引表。\n3. 配置说明 3.1 配置样例 { \u0026#34;job\u0026#34;: { \u0026#34;entry\u0026#34;: { \u0026#34;jvm\u0026#34;: \u0026#34;-Xms2048m -Xmx2048m\u0026#34; }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;txtfilereader\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;path\u0026#34;: \u0026#34;/Users/shf/workplace/datax_test/hbase11xsqlwriter/txt/normal.txt\u0026#34;, \u0026#34;charset\u0026#34;: \u0026#34;UTF-8\u0026#34;, \u0026#34;column\u0026#34;: [ { \u0026#34;index\u0026#34;: 0, \u0026#34;type\u0026#34;: \u0026#34;String\u0026#34; }, { \u0026#34;index\u0026#34;: 1, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34; }, { \u0026#34;index\u0026#34;: 2, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34; }, { \u0026#34;index\u0026#34;: 3, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34; } ], \u0026#34;fieldDelimiter\u0026#34;: \u0026#34;,\u0026#34; } }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;hbase11xsqlwriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;batchSize\u0026#34;: \u0026#34;256\u0026#34;, \u0026#34;column\u0026#34;: [ \u0026#34;UID\u0026#34;, \u0026#34;TS\u0026#34;, \u0026#34;EVENTID\u0026#34;, \u0026#34;CONTENT\u0026#34; ], \u0026#34;hbaseConfig\u0026#34;: { \u0026#34;hbase.zookeeper.quorum\u0026#34;: \u0026#34;目标hbase集群的ZK服务器地址，向PE咨询\u0026#34;, \u0026#34;zookeeper.znode.parent\u0026#34;: \u0026#34;目标hbase集群的znode，向PE咨询\u0026#34; }, \u0026#34;nullMode\u0026#34;: \u0026#34;skip\u0026#34;, \u0026#34;table\u0026#34;: \u0026#34;目标hbase表名，大小写有关\u0026#34; } } } ], \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { \u0026#34;channel\u0026#34;: 5 } } } } 3.",
+  "description": "HBase11xsqlwriter插件文档 1. 快速介绍 HBase11xsqlwriter实现了向hbase中的SQL表(phoenix)批量导入数据的功能。Phoenix因为对rowkey做了数据编码，所以，直接使用HBaseAPI进行写入会面临手工数据转换的问题，麻烦且易错。本插件提供了单间的SQL表的数据导入方式。\n在底层实现上，通过Phoenix的JDBC驱动，执行UPSERT语句向hbase写入数据。\n1.1 支持的功能 支持带索引的表的数据导入，可以同步更新所有的索引表 1.2 限制 仅支持1.x系列的hbase 仅支持通过phoenix创建的表，不支持原生HBase表 不支持带时间戳的数据导入 2. 实现原理 通过Phoenix的JDBC驱动，执行UPSERT语句向表中批量写入数据。因为使用上层接口，所以，可以同步更新索引表。\n3. 配置说明 3.1 配置样例 { \u0026#34;job\u0026#34;: { \u0026#34;entry\u0026#34;: { \u0026#34;jvm\u0026#34;: \u0026#34;-Xms2048m -Xmx2048m\u0026#34; }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;txtfilereader\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;path\u0026#34;: \u0026#34;/Users/shf/workplace/datax_test/hbase11xsqlwriter/txt/normal.txt\u0026#34;, \u0026#34;charset\u0026#34;: \u0026#34;UTF-8\u0026#34;, \u0026#34;column\u0026#34;: [ { \u0026#34;index\u0026#34;: 0, \u0026#34;type\u0026#34;: \u0026#34;String\u0026#34; }, { \u0026#34;index\u0026#34;: 1, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34; }, { \u0026#34;index\u0026#34;: 2, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34; }, { \u0026#34;index\u0026#34;: 3, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34; } ], \u0026#34;fieldDelimiter\u0026#34;: \u0026#34;,\u0026#34; } }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;hbase11xsqlwriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;batchSize\u0026#34;: \u0026#34;256\u0026#34;, \u0026#34;column\u0026#34;: [ \u0026#34;UID\u0026#34;, \u0026#34;TS\u0026#34;, \u0026#34;EVENTID\u0026#34;, \u0026#34;CONTENT\u0026#34; ], \u0026#34;hbaseConfig\u0026#34;: { \u0026#34;hbase.zookeeper.quorum\u0026#34;: \u0026#34;目标hbase集群的ZK服务器地址，向PE咨询\u0026#34;, \u0026#34;zookeeper.znode.parent\u0026#34;: \u0026#34;目标hbase集群的znode，向PE咨询\u0026#34; }, \u0026#34;nullMode\u0026#34;: \u0026#34;skip\u0026#34;, \u0026#34;table\u0026#34;: \u0026#34;目标hbase表名，大小写有关\u0026#34; } } } ], \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { \u0026#34;channel\u0026#34;: 5 } } } } 3.2 参数说明 name\n描述：插件名字，必须是hbase11xsqlwriter 必选：是 默认值：无 table\n描述：要导入的表名，大小写敏感，通常phoenix表都是大写表名 必选：是 默认值：无 column\n描述：列名，大小写敏感，通常phoenix的列名都是大写。 需要注意列的顺序，必须与reader输出的列的顺序一一对应。 不需要填写数据类型，会自动从phoenix获取列的元数据 必选：是 默认值：无 hbaseConfig\n描述：hbase集群地址，zk为必填项，格式：ip1,ip2,ip3，注意，多个IP之间使用英文的逗号分隔。znode是可选的，默认值是/hbase 必选：是 默认值：无 batchSize\n描述：批量写入的最大行数 必选：否 默认值：256 nullMode\n描述：读取到的列值为null时，如何处理。目前有两种方式： skip：跳过这一列，即不插入这一列(如果该行的这一列之前已经存在，则会被删除) empty：插入空值，值类型的空值是0，varchar的空值是空字符串 必选：否 默认值：skip ",
   "keywords": [
     "datax"
   ],
   "articleBody": "HBase11xsqlwriter插件文档 1. 快速介绍 HBase11xsqlwriter实现了向hbase中的SQL表(phoenix)批量导入数据的功能。Phoenix因为对rowkey做了数据编码，所以，直接使用HBaseAPI进行写入会面临手工数据转换的问题，麻烦且易错。本插件提供了单间的SQL表的数据导入方式。\n在底层实现上，通过Phoenix的JDBC驱动，执行UPSERT语句向hbase写入数据。\n1.1 支持的功能 支持带索引的表的数据导入，可以同步更新所有的索引表 1.2 限制 仅支持1.x系列的hbase 仅支持通过phoenix创建的表，不支持原生HBase表 不支持带时间戳的数据导入 2. 实现原理 通过Phoenix的JDBC驱动，执行UPSERT语句向表中批量写入数据。因为使用上层接口，所以，可以同步更新索引表。\n3. 配置说明 3.1 配置样例 { \"job\": { \"entry\": { \"jvm\": \"-Xms2048m -Xmx2048m\" }, \"content\": [ { \"reader\": { \"name\": \"txtfilereader\", \"parameter\": { \"path\": \"/Users/shf/workplace/datax_test/hbase11xsqlwriter/txt/normal.txt\", \"charset\": \"UTF-8\", \"column\": [ { \"index\": 0, \"type\": \"String\" }, { \"index\": 1, \"type\": \"string\" }, { \"index\": 2, \"type\": \"string\" }, { \"index\": 3, \"type\": \"string\" } ], \"fieldDelimiter\": \",\" } }, \"writer\": { \"name\": \"hbase11xsqlwriter\", \"parameter\": { \"batchSize\": \"256\", \"column\": [ \"UID\", \"TS\", \"EVENTID\", \"CONTENT\" ], \"hbaseConfig\": { \"hbase.zookeeper.quorum\": \"目标hbase集群的ZK服务器地址，向PE咨询\", \"zookeeper.znode.parent\": \"目标hbase集群的znode，向PE咨询\" }, \"nullMode\": \"skip\", \"table\": \"目标hbase表名，大小写有关\" } } } ], \"setting\": { \"speed\": { \"channel\": 5 } } } } 3.2 参数说明 name\n描述：插件名字，必须是hbase11xsqlwriter 必选：是 默认值：无 table\n描述：要导入的表名，大小写敏感，通常phoenix表都是大写表名 必选：是 默认值：无 column\n描述：列名，大小写敏感，通常phoenix的列名都是大写。 需要注意列的顺序，必须与reader输出的列的顺序一一对应。 不需要填写数据类型，会自动从phoenix获取列的元数据 必选：是 默认值：无 hbaseConfig\n描述：hbase集群地址，zk为必填项，格式：ip1,ip2,ip3，注意，多个IP之间使用英文的逗号分隔。znode是可选的，默认值是/hbase 必选：是 默认值：无 batchSize\n描述：批量写入的最大行数 必选：否 默认值：256 nullMode\n描述：读取到的列值为null时，如何处理。目前有两种方式： skip：跳过这一列，即不插入这一列(如果该行的这一列之前已经存在，则会被删除) empty：插入空值，值类型的空值是0，varchar的空值是空字符串 必选：否 默认值：skip 4. 性能报告 无\n5. 约束限制 writer中的列的定义顺序必须与reader的列顺序匹配。reader中的列顺序定义了输出的每一行中，列的组织顺序。而writer的列顺序，定义的是在收到的数据中，writer期待的列的顺序。例如：\nreader的列顺序是： c1, c2, c3, c4\nwriter的列顺序是： x1, x2, x3, x4\n则reader输出的列c1就会赋值给writer的列x1。如果writer的列顺序是x1, x2, x4, x3，则c3会赋值给x4，c4会赋值给x3.\n6. FAQ 并发开多少合适？速度慢时增加并发有用吗？ 数据导入进程默认JVM的堆大小是2GB，并发(channel数)是通过多线程实现的，开过多的线程有时并不能提高导入速度，反而可能因为过于频繁的GC导致性能下降。一般建议并发数(channel)为5-10.\nbatchSize设置多少比较合适？ 默认是256，但应根据每行的大小来计算最合适的batchSize。通常一次操作的数据量在2MB-4MB左右，用这个值除以行大小，即可得到batchSize。\n",
   "wordCount" : "169",
-  "inLanguage": "en",
+  "inLanguage": "zh-cn",
   "datePublished": "2021-02-02T17:45:01Z",
   "dateModified": "2021-02-02T17:45:01Z",
   "mainEntityOfPage": {
@@ -165,6 +571,8 @@
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -174,32 +582,32 @@
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/1/" title="1s">
+                <a href="https://haokiu.com/1/" title="1">
                     <span>后端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/2/" title="2s">
+                <a href="https://haokiu.com/2/" title="2">
                     <span>前端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/3/" title="3s">
+                <a href="https://haokiu.com/3/" title="3">
                     <span>区块链</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/4/" title="4s">
+                <a href="https://haokiu.com/4/" title="4">
                     <span>大数据</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/5/" title="5s">
+                <a href="https://haokiu.com/5/" title="5">
                     <span>linux</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/6/" title="6s">
+                <a href="https://haokiu.com/6/" title="6">
                     <span>其他</span>
                 </a>
             </li>
@@ -220,7 +628,7 @@
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    
     <h1 class="post-title">
       HBase11xsqlwriter插件文档
     </h1>
@@ -287,7 +695,7 @@
 <p>通过Phoenix的JDBC驱动，执行UPSERT语句向表中批量写入数据。因为使用上层接口，所以，可以同步更新索引表。</p>
 <h2 id="3-配置说明">3. 配置说明</h2>
 <h3 id="31-配置样例">3.1 配置样例</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
 </span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;job&#34;</span>: {
 </span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;entry&#34;</span>: {
 </span></span><span style="display:flex;"><span>      <span style="color:#f92672">&#34;jvm&#34;</span>: <span style="color:#e6db74">&#34;-Xms2048m -Xmx2048m&#34;</span>
@@ -431,13 +839,21 @@
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+      <li><a href="https://haokiu.com/tags/datax/">Datax</a></li>
     </ul>
 
   </footer>
 </article>
     </main>
     
+<footer class="footer">
+    <span>haokiu.com</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />

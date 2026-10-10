@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="zh-cn" dir="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,12 +7,231 @@
 <meta name="robots" content="index, follow">
 <title>DataX Transformer | haokiu</title>
 <meta name="keywords" content="datax">
-<meta name="description" content="DataX Transformer Transformer定义 在数据同步、传输过程中，存在用户对于数据传输进行特殊定制化的需求场景，包括裁剪列、转换列等工作，可以借助ETL的T过程实现(Transformer)。DataX包含了完整的E(Extract)、T(Transformer)、L(Load)支持。
-运行模型 UDF手册 dx_substr 参数：3个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：字段值的开始位置。 第三个参数：目标字段长度。 返回： 从字符串的指定位置（包含）截取指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer） 举例： dx_substr(1,&#34;2&#34;,&#34;5&#34;) column 1的value为“dataxTest”=&gt;&#34;taxTe&#34; dx_substr(1,&#34;5&#34;,&#34;10&#34;) column 1的value为“dataxTest”=&gt;&#34;Test&#34; dx_pad 参数：4个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：&ldquo;l&rdquo;,&ldquo;r&rdquo;, 指示是在头进行pad，还是尾进行pad。 第三个参数：目标字段长度。 第四个参数：需要pad的字符。 返回： 如果源字符串长度小于目标字段长度，按照位置添加pad字符后返回。如果长于，直接截断（都截右边）。如果字段为空值，转换为空字符串进行pad，即最后的字符串全是需要pad的字符 举例： dx_pad(1,&#34;l&#34;,&#34;4&#34;,&#34;A&#34;), 如果column 1 的值为 xyz=&gt; Axyz， 值为 xyzzzzz =&gt; xyzz dx_pad(1,&#34;r&#34;,&#34;4&#34;,&#34;A&#34;), 如果column 1 的值为 xyz=&gt; xyzA， 值为 xyzzzzz =&gt; xyzz dx_replace 参数：4个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：字段值的开始位置。 第三个参数：需要替换的字段长度。 第四个参数：需要替换的字符串。 返回： 从字符串的指定位置（包含）替换指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer） 举例： dx_replace(1,&#34;2&#34;,&#34;4&#34;,&#34;****&#34;) column 1的value为“dataxTest”=&gt;&#34;da****est&#34; dx_replace(1,&#34;5&#34;,&#34;10&#34;,&#34;****&#34;) column 1的value为“dataxTest”=&gt;&#34;data****&#34; dx_filter （关联filter暂不支持，即多个字段的联合判断，函参太过复杂，用户难以使用。） 参数： 第一个参数：字段编号，对应record中第几个字段。 第二个参数：运算符，支持一下运算符：like, not like, &gt;, =, &lt;, &gt;=, !=, &lt;= 第三个参数：正则表达式（java正则表达式）、值。 返回： 如果匹配正则表达式，返回Null，表示过滤该行。不匹配表达式时，表示保留该行。（注意是该行）。对于&gt;=&lt;都是对字段直接compare的结果. like ， not like是将字段转换成String，然后和目标正则表达式进行全匹配。 , =, &lt;, &gt;=, !=, &lt;= 对于DoubleColumn比较double值，对于LongColumn和DateColumn比较long值，其他StringColumn，BooleanColumn以及ByteColumn均比较的是StringColumn值。
-如果目标colunn为空（null），对于 = null的过滤条件，将满足条件，被过滤。！=null的过滤条件，null不满足过滤条件，不被过滤。 like，字段为null不满足条件，不被过滤，和not like，字段为null满足条件，被过滤。 举例： dx_filter(1,&#34;like&#34;,&#34;dataTest&#34;) dx_filter(1,&#34;&gt;=&#34;,&#34;10&#34;) dx_groovy 参数。 第一个参数： groovy code 第二个参数（列表或者为空）：extraPackage 备注： dx_groovy只能调用一次。不能多次调用。 groovy code中支持java.">
+<meta name="description" content="DataX Transformer
+Transformer定义
+在数据同步、传输过程中，存在用户对于数据传输进行特殊定制化的需求场景，包括裁剪列、转换列等工作，可以借助ETL的T过程实现(Transformer)。DataX包含了完整的E(Extract)、T(Transformer)、L(Load)支持。
+运行模型
+
+
+UDF手册
+
+dx_substr
+
+
+参数：3个
+
+第一个参数：字段编号，对应record中第几个字段。
+第二个参数：字段值的开始位置。
+第三个参数：目标字段长度。
+
+
+返回： 从字符串的指定位置（包含）截取指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer）
+举例：
+
+dx_substr(1,&#34;2&#34;,&#34;5&#34;)  column 1的value为“dataxTest”=&gt;&#34;taxTe&#34;
+dx_substr(1,&#34;5&#34;,&#34;10&#34;)  column 1的value为“dataxTest”=&gt;&#34;Test&#34;
+
+dx_pad
+
+
+参数：4个
+
+第一个参数：字段编号，对应record中第几个字段。
+第二个参数：&ldquo;l&rdquo;,&ldquo;r&rdquo;, 指示是在头进行pad，还是尾进行pad。
+第三个参数：目标字段长度。
+第四个参数：需要pad的字符。
+
+
+返回： 如果源字符串长度小于目标字段长度，按照位置添加pad字符后返回。如果长于，直接截断（都截右边）。如果字段为空值，转换为空字符串进行pad，即最后的字符串全是需要pad的字符
+举例：
+
+         dx_pad(1,&#34;l&#34;,&#34;4&#34;,&#34;A&#34;), 如果column 1 的值为 xyz=&gt; Axyz， 值为 xyzzzzz =&gt; xyzz
+         dx_pad(1,&#34;r&#34;,&#34;4&#34;,&#34;A&#34;), 如果column 1 的值为 xyz=&gt; xyzA， 值为 xyzzzzz =&gt; xyzz
+
+dx_replace
+
+
+参数：4个
+
+第一个参数：字段编号，对应record中第几个字段。
+第二个参数：字段值的开始位置。
+第三个参数：需要替换的字段长度。
+第四个参数：需要替换的字符串。
+
+
+返回： 从字符串的指定位置（包含）替换指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer）
+举例：
+
+dx_replace(1,&#34;2&#34;,&#34;4&#34;,&#34;****&#34;)  column 1的value为“dataxTest”=&gt;&#34;da****est&#34;
+dx_replace(1,&#34;5&#34;,&#34;10&#34;,&#34;****&#34;)  column 1的value为“dataxTest”=&gt;&#34;data****&#34;
+
+dx_filter （关联filter暂不支持，即多个字段的联合判断，函参太过复杂，用户难以使用。）
+
+
+参数：
+
+第一个参数：字段编号，对应record中第几个字段。
+第二个参数：运算符，支持一下运算符：like, not like, &gt;, =, &lt;, &gt;=, !=, &lt;=
+第三个参数：正则表达式（java正则表达式）、值。
+
+
+返回：
+
+如果匹配正则表达式，返回Null，表示过滤该行。不匹配表达式时，表示保留该行。（注意是该行）。对于&gt;=&lt;都是对字段直接compare的结果.
+like ， not like是将字段转换成String，然后和目标正则表达式进行全匹配。
+
+
+, =, &lt;, &gt;=, !=, &lt;= 对于DoubleColumn比较double值，对于LongColumn和DateColumn比较long值，其他StringColumn，BooleanColumn以及ByteColumn均比较的是StringColumn值。
+
+
+如果目标colunn为空（null），对于 = null的过滤条件，将满足条件，被过滤。！=null的过滤条件，null不满足过滤条件，不被过滤。 like，字段为null不满足条件，不被过滤，和not like，字段为null满足条件，被过滤。
+
+
+举例：
+
+dx_filter(1,&#34;like&#34;,&#34;dataTest&#34;)  
+dx_filter(1,&#34;&gt;=&#34;,&#34;10&#34;)  
+
+dx_groovy
+
+
+参数。
+
+第一个参数： groovy code
+第二个参数（列表或者为空）：extraPackage
+
+
+备注：
+
+dx_groovy只能调用一次。不能多次调用。
+groovy code中支持java.lang, java.util的包，可直接引用的对象有record，以及element下的各种column（BoolColumn.class,BytesColumn.class,DateColumn.class,DoubleColumn.class,LongColumn.class,StringColumn.class）。不支持其他包，如果用户有需要用到其他包，可设置extraPackage，注意extraPackage不支持第三方jar包。
+groovy code中，返回更新过的Record（比如record.setColumn(columnIndex, new StringColumn(newValue));），或者null。返回null表示过滤此行。
+用户可以直接调用静态的Util方式（GroovyTransformerStaticUtil），目前GroovyTransformerStaticUtil的方法列表 (按需补充)：
+
+
+举例:
+
+groovy 实现的subStr:
+        String code = &#34;Column column = record.getColumn(1);\n&#34; &#43;
+                &#34; String oriValue = column.asString();\n&#34; &#43;
+                &#34; String newValue = oriValue.substring(0, 3);\n&#34; &#43;
+                &#34; record.setColumn(1, new StringColumn(newValue));\n&#34; &#43;
+                &#34; return record;&#34;;
+        dx_groovy(record);
+groovy 实现的Replace
+String code2 = &#34;Column column = record.getColumn(1);\n&#34; &#43;
+                &#34; String oriValue = column.asString();\n&#34; &#43;
+                &#34; String newValue = \&#34;****\&#34; &#43; oriValue.substring(3, oriValue.length());\n&#34; &#43;
+                &#34; record.setColumn(1, new StringColumn(newValue));\n&#34; &#43;
+                &#34; return record;&#34;;
+groovy 实现的Pad
+String code3 = &#34;Column column = record.getColumn(1);\n&#34; &#43;
+                &#34; String oriValue = column.asString();\n&#34; &#43;
+                &#34; String padString = \&#34;12345\&#34;;\n&#34; &#43;
+                &#34; String finalPad = \&#34;\&#34;;\n&#34; &#43;
+                &#34; int NeedLength = 8 - oriValue.length();\n&#34; &#43;
+                &#34;        while (NeedLength &gt; 0) {\n&#34; &#43;
+                &#34;\n&#34; &#43;
+                &#34;            if (NeedLength &gt;= padString.length()) {\n&#34; &#43;
+                &#34;                finalPad &#43;= padString;\n&#34; &#43;
+                &#34;                NeedLength -= padString.length();\n&#34; &#43;
+                &#34;            } else {\n&#34; &#43;
+                &#34;                finalPad &#43;= padString.substring(0, NeedLength);\n&#34; &#43;
+                &#34;                NeedLength = 0;\n&#34; &#43;
+                &#34;            }\n&#34; &#43;
+                &#34;        }\n&#34; &#43;
+                &#34; String newValue= finalPad &#43; oriValue;\n&#34; &#43;
+                &#34; record.setColumn(1, new StringColumn(newValue));\n&#34; &#43;
+                &#34; return record;&#34;;
+Job定义
+
+本例中，配置3个UDF。
+
+{
+    &#34;job&#34;: {
+        &#34;setting&#34;: {
+            &#34;speed&#34;: {
+                &#34;channel&#34;: 1
+            },
+            &#34;errorLimit&#34;: {
+                &#34;record&#34;: 0
+            }
+        },
+        &#34;content&#34;: [
+            {
+                &#34;reader&#34;: {
+                    &#34;name&#34;: &#34;streamreader&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;column&#34;: [
+                            {
+                                &#34;value&#34;: &#34;DataX&#34;,
+                                &#34;type&#34;: &#34;string&#34;
+                            },
+                            {
+                                &#34;value&#34;: 19890604,
+                                &#34;type&#34;: &#34;long&#34;
+                            },
+                            {
+                                &#34;value&#34;: &#34;1989-06-04 00:00:00&#34;,
+                                &#34;type&#34;: &#34;date&#34;
+                            },
+                            {
+                                &#34;value&#34;: true,
+                                &#34;type&#34;: &#34;bool&#34;
+                            },
+                            {
+                                &#34;value&#34;: &#34;test&#34;,
+                                &#34;type&#34;: &#34;bytes&#34;
+                            }
+                        ],
+                        &#34;sliceRecordCount&#34;: 100000
+                    }
+                },
+                &#34;writer&#34;: {
+                    &#34;name&#34;: &#34;streamwriter&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;print&#34;: false,
+                        &#34;encoding&#34;: &#34;UTF-8&#34;
+                    }
+                },
+                &#34;transformer&#34;: [
+                    {
+                        &#34;name&#34;: &#34;dx_substr&#34;,
+                        &#34;parameter&#34;: 
+                            {
+                            &#34;columnIndex&#34;:5,
+                            &#34;paras&#34;:[&#34;1&#34;,&#34;3&#34;]
+                            }  
+                    },
+                    {
+                        &#34;name&#34;: &#34;dx_replace&#34;,
+                        &#34;parameter&#34;: 
+                            {
+                            &#34;columnIndex&#34;:4,
+                            &#34;paras&#34;:[&#34;3&#34;,&#34;4&#34;,&#34;****&#34;]
+                            }  
+                    },
+                    {
+                        &#34;name&#34;: &#34;dx_groovy&#34;,
+                          &#34;parameter&#34;: 
+                            {
+                               &#34;code&#34;: &#34;//groovy code//&#34;,  
+                               &#34;extraPackage&#34;:[
+                               &#34;import somePackage1;&#34;, 
+                               &#34;import somePackage2;&#34;
+                               ]                      
+                            }  
+                    }
+                ]
+            }
+        ]
+    }
+}
+计量和脏数据
+Transform过程涉及到数据的转换，可能造成数据的增加或减少，因此更加需要精确度量，包括：">
 <meta name="author" content="">
 <link rel="canonical" href="https://haokiu.com/blog/760d0498cfcd435bafba3fe96793cd01/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
 <script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="https://haokiu.com/favicon.ico">
@@ -22,6 +241,7 @@
 <link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/blog/760d0498cfcd435bafba3fe96793cd01/">
 <noscript>
     <style>
         #theme-toggle,
@@ -59,9 +279,228 @@
 
     </style>
 </noscript><meta property="og:title" content="DataX Transformer" />
-<meta property="og:description" content="DataX Transformer Transformer定义 在数据同步、传输过程中，存在用户对于数据传输进行特殊定制化的需求场景，包括裁剪列、转换列等工作，可以借助ETL的T过程实现(Transformer)。DataX包含了完整的E(Extract)、T(Transformer)、L(Load)支持。
-运行模型 UDF手册 dx_substr 参数：3个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：字段值的开始位置。 第三个参数：目标字段长度。 返回： 从字符串的指定位置（包含）截取指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer） 举例： dx_substr(1,&#34;2&#34;,&#34;5&#34;) column 1的value为“dataxTest”=&gt;&#34;taxTe&#34; dx_substr(1,&#34;5&#34;,&#34;10&#34;) column 1的value为“dataxTest”=&gt;&#34;Test&#34; dx_pad 参数：4个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：&ldquo;l&rdquo;,&ldquo;r&rdquo;, 指示是在头进行pad，还是尾进行pad。 第三个参数：目标字段长度。 第四个参数：需要pad的字符。 返回： 如果源字符串长度小于目标字段长度，按照位置添加pad字符后返回。如果长于，直接截断（都截右边）。如果字段为空值，转换为空字符串进行pad，即最后的字符串全是需要pad的字符 举例： dx_pad(1,&#34;l&#34;,&#34;4&#34;,&#34;A&#34;), 如果column 1 的值为 xyz=&gt; Axyz， 值为 xyzzzzz =&gt; xyzz dx_pad(1,&#34;r&#34;,&#34;4&#34;,&#34;A&#34;), 如果column 1 的值为 xyz=&gt; xyzA， 值为 xyzzzzz =&gt; xyzz dx_replace 参数：4个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：字段值的开始位置。 第三个参数：需要替换的字段长度。 第四个参数：需要替换的字符串。 返回： 从字符串的指定位置（包含）替换指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer） 举例： dx_replace(1,&#34;2&#34;,&#34;4&#34;,&#34;****&#34;) column 1的value为“dataxTest”=&gt;&#34;da****est&#34; dx_replace(1,&#34;5&#34;,&#34;10&#34;,&#34;****&#34;) column 1的value为“dataxTest”=&gt;&#34;data****&#34; dx_filter （关联filter暂不支持，即多个字段的联合判断，函参太过复杂，用户难以使用。） 参数： 第一个参数：字段编号，对应record中第几个字段。 第二个参数：运算符，支持一下运算符：like, not like, &gt;, =, &lt;, &gt;=, !=, &lt;= 第三个参数：正则表达式（java正则表达式）、值。 返回： 如果匹配正则表达式，返回Null，表示过滤该行。不匹配表达式时，表示保留该行。（注意是该行）。对于&gt;=&lt;都是对字段直接compare的结果. like ， not like是将字段转换成String，然后和目标正则表达式进行全匹配。 , =, &lt;, &gt;=, !=, &lt;= 对于DoubleColumn比较double值，对于LongColumn和DateColumn比较long值，其他StringColumn，BooleanColumn以及ByteColumn均比较的是StringColumn值。
-如果目标colunn为空（null），对于 = null的过滤条件，将满足条件，被过滤。！=null的过滤条件，null不满足过滤条件，不被过滤。 like，字段为null不满足条件，不被过滤，和not like，字段为null满足条件，被过滤。 举例： dx_filter(1,&#34;like&#34;,&#34;dataTest&#34;) dx_filter(1,&#34;&gt;=&#34;,&#34;10&#34;) dx_groovy 参数。 第一个参数： groovy code 第二个参数（列表或者为空）：extraPackage 备注： dx_groovy只能调用一次。不能多次调用。 groovy code中支持java." />
+<meta property="og:description" content="DataX Transformer
+Transformer定义
+在数据同步、传输过程中，存在用户对于数据传输进行特殊定制化的需求场景，包括裁剪列、转换列等工作，可以借助ETL的T过程实现(Transformer)。DataX包含了完整的E(Extract)、T(Transformer)、L(Load)支持。
+运行模型
+
+
+UDF手册
+
+dx_substr
+
+
+参数：3个
+
+第一个参数：字段编号，对应record中第几个字段。
+第二个参数：字段值的开始位置。
+第三个参数：目标字段长度。
+
+
+返回： 从字符串的指定位置（包含）截取指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer）
+举例：
+
+dx_substr(1,&#34;2&#34;,&#34;5&#34;)  column 1的value为“dataxTest”=&gt;&#34;taxTe&#34;
+dx_substr(1,&#34;5&#34;,&#34;10&#34;)  column 1的value为“dataxTest”=&gt;&#34;Test&#34;
+
+dx_pad
+
+
+参数：4个
+
+第一个参数：字段编号，对应record中第几个字段。
+第二个参数：&ldquo;l&rdquo;,&ldquo;r&rdquo;, 指示是在头进行pad，还是尾进行pad。
+第三个参数：目标字段长度。
+第四个参数：需要pad的字符。
+
+
+返回： 如果源字符串长度小于目标字段长度，按照位置添加pad字符后返回。如果长于，直接截断（都截右边）。如果字段为空值，转换为空字符串进行pad，即最后的字符串全是需要pad的字符
+举例：
+
+         dx_pad(1,&#34;l&#34;,&#34;4&#34;,&#34;A&#34;), 如果column 1 的值为 xyz=&gt; Axyz， 值为 xyzzzzz =&gt; xyzz
+         dx_pad(1,&#34;r&#34;,&#34;4&#34;,&#34;A&#34;), 如果column 1 的值为 xyz=&gt; xyzA， 值为 xyzzzzz =&gt; xyzz
+
+dx_replace
+
+
+参数：4个
+
+第一个参数：字段编号，对应record中第几个字段。
+第二个参数：字段值的开始位置。
+第三个参数：需要替换的字段长度。
+第四个参数：需要替换的字符串。
+
+
+返回： 从字符串的指定位置（包含）替换指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer）
+举例：
+
+dx_replace(1,&#34;2&#34;,&#34;4&#34;,&#34;****&#34;)  column 1的value为“dataxTest”=&gt;&#34;da****est&#34;
+dx_replace(1,&#34;5&#34;,&#34;10&#34;,&#34;****&#34;)  column 1的value为“dataxTest”=&gt;&#34;data****&#34;
+
+dx_filter （关联filter暂不支持，即多个字段的联合判断，函参太过复杂，用户难以使用。）
+
+
+参数：
+
+第一个参数：字段编号，对应record中第几个字段。
+第二个参数：运算符，支持一下运算符：like, not like, &gt;, =, &lt;, &gt;=, !=, &lt;=
+第三个参数：正则表达式（java正则表达式）、值。
+
+
+返回：
+
+如果匹配正则表达式，返回Null，表示过滤该行。不匹配表达式时，表示保留该行。（注意是该行）。对于&gt;=&lt;都是对字段直接compare的结果.
+like ， not like是将字段转换成String，然后和目标正则表达式进行全匹配。
+
+
+, =, &lt;, &gt;=, !=, &lt;= 对于DoubleColumn比较double值，对于LongColumn和DateColumn比较long值，其他StringColumn，BooleanColumn以及ByteColumn均比较的是StringColumn值。
+
+
+如果目标colunn为空（null），对于 = null的过滤条件，将满足条件，被过滤。！=null的过滤条件，null不满足过滤条件，不被过滤。 like，字段为null不满足条件，不被过滤，和not like，字段为null满足条件，被过滤。
+
+
+举例：
+
+dx_filter(1,&#34;like&#34;,&#34;dataTest&#34;)  
+dx_filter(1,&#34;&gt;=&#34;,&#34;10&#34;)  
+
+dx_groovy
+
+
+参数。
+
+第一个参数： groovy code
+第二个参数（列表或者为空）：extraPackage
+
+
+备注：
+
+dx_groovy只能调用一次。不能多次调用。
+groovy code中支持java.lang, java.util的包，可直接引用的对象有record，以及element下的各种column（BoolColumn.class,BytesColumn.class,DateColumn.class,DoubleColumn.class,LongColumn.class,StringColumn.class）。不支持其他包，如果用户有需要用到其他包，可设置extraPackage，注意extraPackage不支持第三方jar包。
+groovy code中，返回更新过的Record（比如record.setColumn(columnIndex, new StringColumn(newValue));），或者null。返回null表示过滤此行。
+用户可以直接调用静态的Util方式（GroovyTransformerStaticUtil），目前GroovyTransformerStaticUtil的方法列表 (按需补充)：
+
+
+举例:
+
+groovy 实现的subStr:
+        String code = &#34;Column column = record.getColumn(1);\n&#34; &#43;
+                &#34; String oriValue = column.asString();\n&#34; &#43;
+                &#34; String newValue = oriValue.substring(0, 3);\n&#34; &#43;
+                &#34; record.setColumn(1, new StringColumn(newValue));\n&#34; &#43;
+                &#34; return record;&#34;;
+        dx_groovy(record);
+groovy 实现的Replace
+String code2 = &#34;Column column = record.getColumn(1);\n&#34; &#43;
+                &#34; String oriValue = column.asString();\n&#34; &#43;
+                &#34; String newValue = \&#34;****\&#34; &#43; oriValue.substring(3, oriValue.length());\n&#34; &#43;
+                &#34; record.setColumn(1, new StringColumn(newValue));\n&#34; &#43;
+                &#34; return record;&#34;;
+groovy 实现的Pad
+String code3 = &#34;Column column = record.getColumn(1);\n&#34; &#43;
+                &#34; String oriValue = column.asString();\n&#34; &#43;
+                &#34; String padString = \&#34;12345\&#34;;\n&#34; &#43;
+                &#34; String finalPad = \&#34;\&#34;;\n&#34; &#43;
+                &#34; int NeedLength = 8 - oriValue.length();\n&#34; &#43;
+                &#34;        while (NeedLength &gt; 0) {\n&#34; &#43;
+                &#34;\n&#34; &#43;
+                &#34;            if (NeedLength &gt;= padString.length()) {\n&#34; &#43;
+                &#34;                finalPad &#43;= padString;\n&#34; &#43;
+                &#34;                NeedLength -= padString.length();\n&#34; &#43;
+                &#34;            } else {\n&#34; &#43;
+                &#34;                finalPad &#43;= padString.substring(0, NeedLength);\n&#34; &#43;
+                &#34;                NeedLength = 0;\n&#34; &#43;
+                &#34;            }\n&#34; &#43;
+                &#34;        }\n&#34; &#43;
+                &#34; String newValue= finalPad &#43; oriValue;\n&#34; &#43;
+                &#34; record.setColumn(1, new StringColumn(newValue));\n&#34; &#43;
+                &#34; return record;&#34;;
+Job定义
+
+本例中，配置3个UDF。
+
+{
+    &#34;job&#34;: {
+        &#34;setting&#34;: {
+            &#34;speed&#34;: {
+                &#34;channel&#34;: 1
+            },
+            &#34;errorLimit&#34;: {
+                &#34;record&#34;: 0
+            }
+        },
+        &#34;content&#34;: [
+            {
+                &#34;reader&#34;: {
+                    &#34;name&#34;: &#34;streamreader&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;column&#34;: [
+                            {
+                                &#34;value&#34;: &#34;DataX&#34;,
+                                &#34;type&#34;: &#34;string&#34;
+                            },
+                            {
+                                &#34;value&#34;: 19890604,
+                                &#34;type&#34;: &#34;long&#34;
+                            },
+                            {
+                                &#34;value&#34;: &#34;1989-06-04 00:00:00&#34;,
+                                &#34;type&#34;: &#34;date&#34;
+                            },
+                            {
+                                &#34;value&#34;: true,
+                                &#34;type&#34;: &#34;bool&#34;
+                            },
+                            {
+                                &#34;value&#34;: &#34;test&#34;,
+                                &#34;type&#34;: &#34;bytes&#34;
+                            }
+                        ],
+                        &#34;sliceRecordCount&#34;: 100000
+                    }
+                },
+                &#34;writer&#34;: {
+                    &#34;name&#34;: &#34;streamwriter&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;print&#34;: false,
+                        &#34;encoding&#34;: &#34;UTF-8&#34;
+                    }
+                },
+                &#34;transformer&#34;: [
+                    {
+                        &#34;name&#34;: &#34;dx_substr&#34;,
+                        &#34;parameter&#34;: 
+                            {
+                            &#34;columnIndex&#34;:5,
+                            &#34;paras&#34;:[&#34;1&#34;,&#34;3&#34;]
+                            }  
+                    },
+                    {
+                        &#34;name&#34;: &#34;dx_replace&#34;,
+                        &#34;parameter&#34;: 
+                            {
+                            &#34;columnIndex&#34;:4,
+                            &#34;paras&#34;:[&#34;3&#34;,&#34;4&#34;,&#34;****&#34;]
+                            }  
+                    },
+                    {
+                        &#34;name&#34;: &#34;dx_groovy&#34;,
+                          &#34;parameter&#34;: 
+                            {
+                               &#34;code&#34;: &#34;//groovy code//&#34;,  
+                               &#34;extraPackage&#34;:[
+                               &#34;import somePackage1;&#34;, 
+                               &#34;import somePackage2;&#34;
+                               ]                      
+                            }  
+                    }
+                ]
+            }
+        ]
+    }
+}
+计量和脏数据
+Transform过程涉及到数据的转换，可能造成数据的增加或减少，因此更加需要精确度量，包括：" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://haokiu.com/blog/760d0498cfcd435bafba3fe96793cd01/" /><meta property="article:section" content="4" />
 <meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
@@ -69,9 +508,228 @@
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="DataX Transformer"/>
-<meta name="twitter:description" content="DataX Transformer Transformer定义 在数据同步、传输过程中，存在用户对于数据传输进行特殊定制化的需求场景，包括裁剪列、转换列等工作，可以借助ETL的T过程实现(Transformer)。DataX包含了完整的E(Extract)、T(Transformer)、L(Load)支持。
-运行模型 UDF手册 dx_substr 参数：3个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：字段值的开始位置。 第三个参数：目标字段长度。 返回： 从字符串的指定位置（包含）截取指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer） 举例： dx_substr(1,&#34;2&#34;,&#34;5&#34;) column 1的value为“dataxTest”=&gt;&#34;taxTe&#34; dx_substr(1,&#34;5&#34;,&#34;10&#34;) column 1的value为“dataxTest”=&gt;&#34;Test&#34; dx_pad 参数：4个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：&ldquo;l&rdquo;,&ldquo;r&rdquo;, 指示是在头进行pad，还是尾进行pad。 第三个参数：目标字段长度。 第四个参数：需要pad的字符。 返回： 如果源字符串长度小于目标字段长度，按照位置添加pad字符后返回。如果长于，直接截断（都截右边）。如果字段为空值，转换为空字符串进行pad，即最后的字符串全是需要pad的字符 举例： dx_pad(1,&#34;l&#34;,&#34;4&#34;,&#34;A&#34;), 如果column 1 的值为 xyz=&gt; Axyz， 值为 xyzzzzz =&gt; xyzz dx_pad(1,&#34;r&#34;,&#34;4&#34;,&#34;A&#34;), 如果column 1 的值为 xyz=&gt; xyzA， 值为 xyzzzzz =&gt; xyzz dx_replace 参数：4个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：字段值的开始位置。 第三个参数：需要替换的字段长度。 第四个参数：需要替换的字符串。 返回： 从字符串的指定位置（包含）替换指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer） 举例： dx_replace(1,&#34;2&#34;,&#34;4&#34;,&#34;****&#34;) column 1的value为“dataxTest”=&gt;&#34;da****est&#34; dx_replace(1,&#34;5&#34;,&#34;10&#34;,&#34;****&#34;) column 1的value为“dataxTest”=&gt;&#34;data****&#34; dx_filter （关联filter暂不支持，即多个字段的联合判断，函参太过复杂，用户难以使用。） 参数： 第一个参数：字段编号，对应record中第几个字段。 第二个参数：运算符，支持一下运算符：like, not like, &gt;, =, &lt;, &gt;=, !=, &lt;= 第三个参数：正则表达式（java正则表达式）、值。 返回： 如果匹配正则表达式，返回Null，表示过滤该行。不匹配表达式时，表示保留该行。（注意是该行）。对于&gt;=&lt;都是对字段直接compare的结果. like ， not like是将字段转换成String，然后和目标正则表达式进行全匹配。 , =, &lt;, &gt;=, !=, &lt;= 对于DoubleColumn比较double值，对于LongColumn和DateColumn比较long值，其他StringColumn，BooleanColumn以及ByteColumn均比较的是StringColumn值。
-如果目标colunn为空（null），对于 = null的过滤条件，将满足条件，被过滤。！=null的过滤条件，null不满足过滤条件，不被过滤。 like，字段为null不满足条件，不被过滤，和not like，字段为null满足条件，被过滤。 举例： dx_filter(1,&#34;like&#34;,&#34;dataTest&#34;) dx_filter(1,&#34;&gt;=&#34;,&#34;10&#34;) dx_groovy 参数。 第一个参数： groovy code 第二个参数（列表或者为空）：extraPackage 备注： dx_groovy只能调用一次。不能多次调用。 groovy code中支持java."/>
+<meta name="twitter:description" content="DataX Transformer
+Transformer定义
+在数据同步、传输过程中，存在用户对于数据传输进行特殊定制化的需求场景，包括裁剪列、转换列等工作，可以借助ETL的T过程实现(Transformer)。DataX包含了完整的E(Extract)、T(Transformer)、L(Load)支持。
+运行模型
+
+
+UDF手册
+
+dx_substr
+
+
+参数：3个
+
+第一个参数：字段编号，对应record中第几个字段。
+第二个参数：字段值的开始位置。
+第三个参数：目标字段长度。
+
+
+返回： 从字符串的指定位置（包含）截取指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer）
+举例：
+
+dx_substr(1,&#34;2&#34;,&#34;5&#34;)  column 1的value为“dataxTest”=&gt;&#34;taxTe&#34;
+dx_substr(1,&#34;5&#34;,&#34;10&#34;)  column 1的value为“dataxTest”=&gt;&#34;Test&#34;
+
+dx_pad
+
+
+参数：4个
+
+第一个参数：字段编号，对应record中第几个字段。
+第二个参数：&ldquo;l&rdquo;,&ldquo;r&rdquo;, 指示是在头进行pad，还是尾进行pad。
+第三个参数：目标字段长度。
+第四个参数：需要pad的字符。
+
+
+返回： 如果源字符串长度小于目标字段长度，按照位置添加pad字符后返回。如果长于，直接截断（都截右边）。如果字段为空值，转换为空字符串进行pad，即最后的字符串全是需要pad的字符
+举例：
+
+         dx_pad(1,&#34;l&#34;,&#34;4&#34;,&#34;A&#34;), 如果column 1 的值为 xyz=&gt; Axyz， 值为 xyzzzzz =&gt; xyzz
+         dx_pad(1,&#34;r&#34;,&#34;4&#34;,&#34;A&#34;), 如果column 1 的值为 xyz=&gt; xyzA， 值为 xyzzzzz =&gt; xyzz
+
+dx_replace
+
+
+参数：4个
+
+第一个参数：字段编号，对应record中第几个字段。
+第二个参数：字段值的开始位置。
+第三个参数：需要替换的字段长度。
+第四个参数：需要替换的字符串。
+
+
+返回： 从字符串的指定位置（包含）替换指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer）
+举例：
+
+dx_replace(1,&#34;2&#34;,&#34;4&#34;,&#34;****&#34;)  column 1的value为“dataxTest”=&gt;&#34;da****est&#34;
+dx_replace(1,&#34;5&#34;,&#34;10&#34;,&#34;****&#34;)  column 1的value为“dataxTest”=&gt;&#34;data****&#34;
+
+dx_filter （关联filter暂不支持，即多个字段的联合判断，函参太过复杂，用户难以使用。）
+
+
+参数：
+
+第一个参数：字段编号，对应record中第几个字段。
+第二个参数：运算符，支持一下运算符：like, not like, &gt;, =, &lt;, &gt;=, !=, &lt;=
+第三个参数：正则表达式（java正则表达式）、值。
+
+
+返回：
+
+如果匹配正则表达式，返回Null，表示过滤该行。不匹配表达式时，表示保留该行。（注意是该行）。对于&gt;=&lt;都是对字段直接compare的结果.
+like ， not like是将字段转换成String，然后和目标正则表达式进行全匹配。
+
+
+, =, &lt;, &gt;=, !=, &lt;= 对于DoubleColumn比较double值，对于LongColumn和DateColumn比较long值，其他StringColumn，BooleanColumn以及ByteColumn均比较的是StringColumn值。
+
+
+如果目标colunn为空（null），对于 = null的过滤条件，将满足条件，被过滤。！=null的过滤条件，null不满足过滤条件，不被过滤。 like，字段为null不满足条件，不被过滤，和not like，字段为null满足条件，被过滤。
+
+
+举例：
+
+dx_filter(1,&#34;like&#34;,&#34;dataTest&#34;)  
+dx_filter(1,&#34;&gt;=&#34;,&#34;10&#34;)  
+
+dx_groovy
+
+
+参数。
+
+第一个参数： groovy code
+第二个参数（列表或者为空）：extraPackage
+
+
+备注：
+
+dx_groovy只能调用一次。不能多次调用。
+groovy code中支持java.lang, java.util的包，可直接引用的对象有record，以及element下的各种column（BoolColumn.class,BytesColumn.class,DateColumn.class,DoubleColumn.class,LongColumn.class,StringColumn.class）。不支持其他包，如果用户有需要用到其他包，可设置extraPackage，注意extraPackage不支持第三方jar包。
+groovy code中，返回更新过的Record（比如record.setColumn(columnIndex, new StringColumn(newValue));），或者null。返回null表示过滤此行。
+用户可以直接调用静态的Util方式（GroovyTransformerStaticUtil），目前GroovyTransformerStaticUtil的方法列表 (按需补充)：
+
+
+举例:
+
+groovy 实现的subStr:
+        String code = &#34;Column column = record.getColumn(1);\n&#34; &#43;
+                &#34; String oriValue = column.asString();\n&#34; &#43;
+                &#34; String newValue = oriValue.substring(0, 3);\n&#34; &#43;
+                &#34; record.setColumn(1, new StringColumn(newValue));\n&#34; &#43;
+                &#34; return record;&#34;;
+        dx_groovy(record);
+groovy 实现的Replace
+String code2 = &#34;Column column = record.getColumn(1);\n&#34; &#43;
+                &#34; String oriValue = column.asString();\n&#34; &#43;
+                &#34; String newValue = \&#34;****\&#34; &#43; oriValue.substring(3, oriValue.length());\n&#34; &#43;
+                &#34; record.setColumn(1, new StringColumn(newValue));\n&#34; &#43;
+                &#34; return record;&#34;;
+groovy 实现的Pad
+String code3 = &#34;Column column = record.getColumn(1);\n&#34; &#43;
+                &#34; String oriValue = column.asString();\n&#34; &#43;
+                &#34; String padString = \&#34;12345\&#34;;\n&#34; &#43;
+                &#34; String finalPad = \&#34;\&#34;;\n&#34; &#43;
+                &#34; int NeedLength = 8 - oriValue.length();\n&#34; &#43;
+                &#34;        while (NeedLength &gt; 0) {\n&#34; &#43;
+                &#34;\n&#34; &#43;
+                &#34;            if (NeedLength &gt;= padString.length()) {\n&#34; &#43;
+                &#34;                finalPad &#43;= padString;\n&#34; &#43;
+                &#34;                NeedLength -= padString.length();\n&#34; &#43;
+                &#34;            } else {\n&#34; &#43;
+                &#34;                finalPad &#43;= padString.substring(0, NeedLength);\n&#34; &#43;
+                &#34;                NeedLength = 0;\n&#34; &#43;
+                &#34;            }\n&#34; &#43;
+                &#34;        }\n&#34; &#43;
+                &#34; String newValue= finalPad &#43; oriValue;\n&#34; &#43;
+                &#34; record.setColumn(1, new StringColumn(newValue));\n&#34; &#43;
+                &#34; return record;&#34;;
+Job定义
+
+本例中，配置3个UDF。
+
+{
+    &#34;job&#34;: {
+        &#34;setting&#34;: {
+            &#34;speed&#34;: {
+                &#34;channel&#34;: 1
+            },
+            &#34;errorLimit&#34;: {
+                &#34;record&#34;: 0
+            }
+        },
+        &#34;content&#34;: [
+            {
+                &#34;reader&#34;: {
+                    &#34;name&#34;: &#34;streamreader&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;column&#34;: [
+                            {
+                                &#34;value&#34;: &#34;DataX&#34;,
+                                &#34;type&#34;: &#34;string&#34;
+                            },
+                            {
+                                &#34;value&#34;: 19890604,
+                                &#34;type&#34;: &#34;long&#34;
+                            },
+                            {
+                                &#34;value&#34;: &#34;1989-06-04 00:00:00&#34;,
+                                &#34;type&#34;: &#34;date&#34;
+                            },
+                            {
+                                &#34;value&#34;: true,
+                                &#34;type&#34;: &#34;bool&#34;
+                            },
+                            {
+                                &#34;value&#34;: &#34;test&#34;,
+                                &#34;type&#34;: &#34;bytes&#34;
+                            }
+                        ],
+                        &#34;sliceRecordCount&#34;: 100000
+                    }
+                },
+                &#34;writer&#34;: {
+                    &#34;name&#34;: &#34;streamwriter&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;print&#34;: false,
+                        &#34;encoding&#34;: &#34;UTF-8&#34;
+                    }
+                },
+                &#34;transformer&#34;: [
+                    {
+                        &#34;name&#34;: &#34;dx_substr&#34;,
+                        &#34;parameter&#34;: 
+                            {
+                            &#34;columnIndex&#34;:5,
+                            &#34;paras&#34;:[&#34;1&#34;,&#34;3&#34;]
+                            }  
+                    },
+                    {
+                        &#34;name&#34;: &#34;dx_replace&#34;,
+                        &#34;parameter&#34;: 
+                            {
+                            &#34;columnIndex&#34;:4,
+                            &#34;paras&#34;:[&#34;3&#34;,&#34;4&#34;,&#34;****&#34;]
+                            }  
+                    },
+                    {
+                        &#34;name&#34;: &#34;dx_groovy&#34;,
+                          &#34;parameter&#34;: 
+                            {
+                               &#34;code&#34;: &#34;//groovy code//&#34;,  
+                               &#34;extraPackage&#34;:[
+                               &#34;import somePackage1;&#34;, 
+                               &#34;import somePackage2;&#34;
+                               ]                      
+                            }  
+                    }
+                ]
+            }
+        ]
+    }
+}
+计量和脏数据
+Transform过程涉及到数据的转换，可能造成数据的增加或减少，因此更加需要精确度量，包括："/>
 
 
 <script type="application/ld+json">
@@ -82,7 +740,7 @@
     {
       "@type": "ListItem",
       "position":  1 ,
-      "name": "4s",
+      "name": "4",
       "item": "https://haokiu.com/4/"
     }, 
     {
@@ -100,13 +758,13 @@
   "@type": "BlogPosting",
   "headline": "DataX Transformer",
   "name": "DataX Transformer",
-  "description": "DataX Transformer Transformer定义 在数据同步、传输过程中，存在用户对于数据传输进行特殊定制化的需求场景，包括裁剪列、转换列等工作，可以借助ETL的T过程实现(Transformer)。DataX包含了完整的E(Extract)、T(Transformer)、L(Load)支持。\n运行模型 UDF手册 dx_substr 参数：3个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：字段值的开始位置。 第三个参数：目标字段长度。 返回： 从字符串的指定位置（包含）截取指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer） 举例： dx_substr(1,\u0026#34;2\u0026#34;,\u0026#34;5\u0026#34;) column 1的value为“dataxTest”=\u0026gt;\u0026#34;taxTe\u0026#34; dx_substr(1,\u0026#34;5\u0026#34;,\u0026#34;10\u0026#34;) column 1的value为“dataxTest”=\u0026gt;\u0026#34;Test\u0026#34; dx_pad 参数：4个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：\u0026ldquo;l\u0026rdquo;,\u0026ldquo;r\u0026rdquo;, 指示是在头进行pad，还是尾进行pad。 第三个参数：目标字段长度。 第四个参数：需要pad的字符。 返回： 如果源字符串长度小于目标字段长度，按照位置添加pad字符后返回。如果长于，直接截断（都截右边）。如果字段为空值，转换为空字符串进行pad，即最后的字符串全是需要pad的字符 举例： dx_pad(1,\u0026#34;l\u0026#34;,\u0026#34;4\u0026#34;,\u0026#34;A\u0026#34;), 如果column 1 的值为 xyz=\u0026gt; Axyz， 值为 xyzzzzz =\u0026gt; xyzz dx_pad(1,\u0026#34;r\u0026#34;,\u0026#34;4\u0026#34;,\u0026#34;A\u0026#34;), 如果column 1 的值为 xyz=\u0026gt; xyzA， 值为 xyzzzzz =\u0026gt; xyzz dx_replace 参数：4个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：字段值的开始位置。 第三个参数：需要替换的字段长度。 第四个参数：需要替换的字符串。 返回： 从字符串的指定位置（包含）替换指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer） 举例： dx_replace(1,\u0026#34;2\u0026#34;,\u0026#34;4\u0026#34;,\u0026#34;****\u0026#34;) column 1的value为“dataxTest”=\u0026gt;\u0026#34;da****est\u0026#34; dx_replace(1,\u0026#34;5\u0026#34;,\u0026#34;10\u0026#34;,\u0026#34;****\u0026#34;) column 1的value为“dataxTest”=\u0026gt;\u0026#34;data****\u0026#34; dx_filter （关联filter暂不支持，即多个字段的联合判断，函参太过复杂，用户难以使用。） 参数： 第一个参数：字段编号，对应record中第几个字段。 第二个参数：运算符，支持一下运算符：like, not like, \u0026gt;, =, \u0026lt;, \u0026gt;=, !=, \u0026lt;= 第三个参数：正则表达式（java正则表达式）、值。 返回： 如果匹配正则表达式，返回Null，表示过滤该行。不匹配表达式时，表示保留该行。（注意是该行）。对于\u0026gt;=\u0026lt;都是对字段直接compare的结果. like ， not like是将字段转换成String，然后和目标正则表达式进行全匹配。 , =, \u0026lt;, \u0026gt;=, !=, \u0026lt;= 对于DoubleColumn比较double值，对于LongColumn和DateColumn比较long值，其他StringColumn，BooleanColumn以及ByteColumn均比较的是StringColumn值。\n如果目标colunn为空（null），对于 = null的过滤条件，将满足条件，被过滤。！=null的过滤条件，null不满足过滤条件，不被过滤。 like，字段为null不满足条件，不被过滤，和not like，字段为null满足条件，被过滤。 举例： dx_filter(1,\u0026#34;like\u0026#34;,\u0026#34;dataTest\u0026#34;) dx_filter(1,\u0026#34;\u0026gt;=\u0026#34;,\u0026#34;10\u0026#34;) dx_groovy 参数。 第一个参数： groovy code 第二个参数（列表或者为空）：extraPackage 备注： dx_groovy只能调用一次。不能多次调用。 groovy code中支持java.",
+  "description": "DataX Transformer Transformer定义 在数据同步、传输过程中，存在用户对于数据传输进行特殊定制化的需求场景，包括裁剪列、转换列等工作，可以借助ETL的T过程实现(Transformer)。DataX包含了完整的E(Extract)、T(Transformer)、L(Load)支持。\n运行模型 UDF手册 dx_substr 参数：3个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：字段值的开始位置。 第三个参数：目标字段长度。 返回： 从字符串的指定位置（包含）截取指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer） 举例： dx_substr(1,\u0026#34;2\u0026#34;,\u0026#34;5\u0026#34;) column 1的value为“dataxTest”=\u0026gt;\u0026#34;taxTe\u0026#34; dx_substr(1,\u0026#34;5\u0026#34;,\u0026#34;10\u0026#34;) column 1的value为“dataxTest”=\u0026gt;\u0026#34;Test\u0026#34; dx_pad 参数：4个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：\u0026ldquo;l\u0026rdquo;,\u0026ldquo;r\u0026rdquo;, 指示是在头进行pad，还是尾进行pad。 第三个参数：目标字段长度。 第四个参数：需要pad的字符。 返回： 如果源字符串长度小于目标字段长度，按照位置添加pad字符后返回。如果长于，直接截断（都截右边）。如果字段为空值，转换为空字符串进行pad，即最后的字符串全是需要pad的字符 举例： dx_pad(1,\u0026#34;l\u0026#34;,\u0026#34;4\u0026#34;,\u0026#34;A\u0026#34;), 如果column 1 的值为 xyz=\u0026gt; Axyz， 值为 xyzzzzz =\u0026gt; xyzz dx_pad(1,\u0026#34;r\u0026#34;,\u0026#34;4\u0026#34;,\u0026#34;A\u0026#34;), 如果column 1 的值为 xyz=\u0026gt; xyzA， 值为 xyzzzzz =\u0026gt; xyzz dx_replace 参数：4个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：字段值的开始位置。 第三个参数：需要替换的字段长度。 第四个参数：需要替换的字符串。 返回： 从字符串的指定位置（包含）替换指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer） 举例： dx_replace(1,\u0026#34;2\u0026#34;,\u0026#34;4\u0026#34;,\u0026#34;****\u0026#34;) column 1的value为“dataxTest”=\u0026gt;\u0026#34;da****est\u0026#34; dx_replace(1,\u0026#34;5\u0026#34;,\u0026#34;10\u0026#34;,\u0026#34;****\u0026#34;) column 1的value为“dataxTest”=\u0026gt;\u0026#34;data****\u0026#34; dx_filter （关联filter暂不支持，即多个字段的联合判断，函参太过复杂，用户难以使用。） 参数： 第一个参数：字段编号，对应record中第几个字段。 第二个参数：运算符，支持一下运算符：like, not like, \u0026gt;, =, \u0026lt;, \u0026gt;=, !=, \u0026lt;= 第三个参数：正则表达式（java正则表达式）、值。 返回： 如果匹配正则表达式，返回Null，表示过滤该行。不匹配表达式时，表示保留该行。（注意是该行）。对于\u0026gt;=\u0026lt;都是对字段直接compare的结果. like ， not like是将字段转换成String，然后和目标正则表达式进行全匹配。 , =, \u0026lt;, \u0026gt;=, !=, \u0026lt;= 对于DoubleColumn比较double值，对于LongColumn和DateColumn比较long值，其他StringColumn，BooleanColumn以及ByteColumn均比较的是StringColumn值。\n如果目标colunn为空（null），对于 = null的过滤条件，将满足条件，被过滤。！=null的过滤条件，null不满足过滤条件，不被过滤。 like，字段为null不满足条件，不被过滤，和not like，字段为null满足条件，被过滤。 举例： dx_filter(1,\u0026#34;like\u0026#34;,\u0026#34;dataTest\u0026#34;) dx_filter(1,\u0026#34;\u0026gt;=\u0026#34;,\u0026#34;10\u0026#34;) dx_groovy 参数。 第一个参数： groovy code 第二个参数（列表或者为空）：extraPackage 备注： dx_groovy只能调用一次。不能多次调用。 groovy code中支持java.lang, java.util的包，可直接引用的对象有record，以及element下的各种column（BoolColumn.class,BytesColumn.class,DateColumn.class,DoubleColumn.class,LongColumn.class,StringColumn.class）。不支持其他包，如果用户有需要用到其他包，可设置extraPackage，注意extraPackage不支持第三方jar包。 groovy code中，返回更新过的Record（比如record.setColumn(columnIndex, new StringColumn(newValue));），或者null。返回null表示过滤此行。 用户可以直接调用静态的Util方式（GroovyTransformerStaticUtil），目前GroovyTransformerStaticUtil的方法列表 (按需补充)： 举例: groovy 实现的subStr: String code = \u0026#34;Column column = record.getColumn(1);\\n\u0026#34; + \u0026#34; String oriValue = column.asString();\\n\u0026#34; + \u0026#34; String newValue = oriValue.substring(0, 3);\\n\u0026#34; + \u0026#34; record.setColumn(1, new StringColumn(newValue));\\n\u0026#34; + \u0026#34; return record;\u0026#34;; dx_groovy(record); groovy 实现的Replace String code2 = \u0026#34;Column column = record.getColumn(1);\\n\u0026#34; + \u0026#34; String oriValue = column.asString();\\n\u0026#34; + \u0026#34; String newValue = \\\u0026#34;****\\\u0026#34; + oriValue.substring(3, oriValue.length());\\n\u0026#34; + \u0026#34; record.setColumn(1, new StringColumn(newValue));\\n\u0026#34; + \u0026#34; return record;\u0026#34;; groovy 实现的Pad String code3 = \u0026#34;Column column = record.getColumn(1);\\n\u0026#34; + \u0026#34; String oriValue = column.asString();\\n\u0026#34; + \u0026#34; String padString = \\\u0026#34;12345\\\u0026#34;;\\n\u0026#34; + \u0026#34; String finalPad = \\\u0026#34;\\\u0026#34;;\\n\u0026#34; + \u0026#34; int NeedLength = 8 - oriValue.length();\\n\u0026#34; + \u0026#34; while (NeedLength \u0026gt; 0) {\\n\u0026#34; + \u0026#34;\\n\u0026#34; + \u0026#34; if (NeedLength \u0026gt;= padString.length()) {\\n\u0026#34; + \u0026#34; finalPad += padString;\\n\u0026#34; + \u0026#34; NeedLength -= padString.length();\\n\u0026#34; + \u0026#34; } else {\\n\u0026#34; + \u0026#34; finalPad += padString.substring(0, NeedLength);\\n\u0026#34; + \u0026#34; NeedLength = 0;\\n\u0026#34; + \u0026#34; }\\n\u0026#34; + \u0026#34; }\\n\u0026#34; + \u0026#34; String newValue= finalPad + oriValue;\\n\u0026#34; + \u0026#34; record.setColumn(1, new StringColumn(newValue));\\n\u0026#34; + \u0026#34; return record;\u0026#34;; Job定义 本例中，配置3个UDF。 { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { \u0026#34;channel\u0026#34;: 1 }, \u0026#34;errorLimit\u0026#34;: { \u0026#34;record\u0026#34;: 0 } }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;streamreader\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;column\u0026#34;: [ { \u0026#34;value\u0026#34;: \u0026#34;DataX\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34; }, { \u0026#34;value\u0026#34;: 19890604, \u0026#34;type\u0026#34;: \u0026#34;long\u0026#34; }, { \u0026#34;value\u0026#34;: \u0026#34;1989-06-04 00:00:00\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;date\u0026#34; }, { \u0026#34;value\u0026#34;: true, \u0026#34;type\u0026#34;: \u0026#34;bool\u0026#34; }, { \u0026#34;value\u0026#34;: \u0026#34;test\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;bytes\u0026#34; } ], \u0026#34;sliceRecordCount\u0026#34;: 100000 } }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;streamwriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;print\u0026#34;: false, \u0026#34;encoding\u0026#34;: \u0026#34;UTF-8\u0026#34; } }, \u0026#34;transformer\u0026#34;: [ { \u0026#34;name\u0026#34;: \u0026#34;dx_substr\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;columnIndex\u0026#34;:5, \u0026#34;paras\u0026#34;:[\u0026#34;1\u0026#34;,\u0026#34;3\u0026#34;] } }, { \u0026#34;name\u0026#34;: \u0026#34;dx_replace\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;columnIndex\u0026#34;:4, \u0026#34;paras\u0026#34;:[\u0026#34;3\u0026#34;,\u0026#34;4\u0026#34;,\u0026#34;****\u0026#34;] } }, { \u0026#34;name\u0026#34;: \u0026#34;dx_groovy\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;code\u0026#34;: \u0026#34;//groovy code//\u0026#34;, \u0026#34;extraPackage\u0026#34;:[ \u0026#34;import somePackage1;\u0026#34;, \u0026#34;import somePackage2;\u0026#34; ] } } ] } ] } } 计量和脏数据 Transform过程涉及到数据的转换，可能造成数据的增加或减少，因此更加需要精确度量，包括：\n",
   "keywords": [
     "datax"
   ],
   "articleBody": "DataX Transformer Transformer定义 在数据同步、传输过程中，存在用户对于数据传输进行特殊定制化的需求场景，包括裁剪列、转换列等工作，可以借助ETL的T过程实现(Transformer)。DataX包含了完整的E(Extract)、T(Transformer)、L(Load)支持。\n运行模型 UDF手册 dx_substr 参数：3个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：字段值的开始位置。 第三个参数：目标字段长度。 返回： 从字符串的指定位置（包含）截取指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer） 举例： dx_substr(1,\"2\",\"5\") column 1的value为“dataxTest”=\u003e\"taxTe\" dx_substr(1,\"5\",\"10\") column 1的value为“dataxTest”=\u003e\"Test\" dx_pad 参数：4个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：“l”,“r”, 指示是在头进行pad，还是尾进行pad。 第三个参数：目标字段长度。 第四个参数：需要pad的字符。 返回： 如果源字符串长度小于目标字段长度，按照位置添加pad字符后返回。如果长于，直接截断（都截右边）。如果字段为空值，转换为空字符串进行pad，即最后的字符串全是需要pad的字符 举例： dx_pad(1,\"l\",\"4\",\"A\"), 如果column 1 的值为 xyz=\u003e Axyz， 值为 xyzzzzz =\u003e xyzz dx_pad(1,\"r\",\"4\",\"A\"), 如果column 1 的值为 xyz=\u003e xyzA， 值为 xyzzzzz =\u003e xyzz dx_replace 参数：4个 第一个参数：字段编号，对应record中第几个字段。 第二个参数：字段值的开始位置。 第三个参数：需要替换的字段长度。 第四个参数：需要替换的字符串。 返回： 从字符串的指定位置（包含）替换指定长度的字符串。如果开始位置非法抛出异常。如果字段为空值，直接返回（即不参与本transformer） 举例： dx_replace(1,\"2\",\"4\",\"****\") column 1的value为“dataxTest”=\u003e\"da****est\" dx_replace(1,\"5\",\"10\",\"****\") column 1的value为“dataxTest”=\u003e\"data****\" dx_filter （关联filter暂不支持，即多个字段的联合判断，函参太过复杂，用户难以使用。） 参数： 第一个参数：字段编号，对应record中第几个字段。 第二个参数：运算符，支持一下运算符：like, not like, \u003e, =, \u003c, \u003e=, !=, \u003c= 第三个参数：正则表达式（java正则表达式）、值。 返回： 如果匹配正则表达式，返回Null，表示过滤该行。不匹配表达式时，表示保留该行。（注意是该行）。对于\u003e=\u003c都是对字段直接compare的结果. like ， not like是将字段转换成String，然后和目标正则表达式进行全匹配。 , =, \u003c, \u003e=, !=, \u003c= 对于DoubleColumn比较double值，对于LongColumn和DateColumn比较long值，其他StringColumn，BooleanColumn以及ByteColumn均比较的是StringColumn值。\n如果目标colunn为空（null），对于 = null的过滤条件，将满足条件，被过滤。！=null的过滤条件，null不满足过滤条件，不被过滤。 like，字段为null不满足条件，不被过滤，和not like，字段为null满足条件，被过滤。 举例： dx_filter(1,\"like\",\"dataTest\") dx_filter(1,\"\u003e=\",\"10\") dx_groovy 参数。 第一个参数： groovy code 第二个参数（列表或者为空）：extraPackage 备注： dx_groovy只能调用一次。不能多次调用。 groovy code中支持java.lang, java.util的包，可直接引用的对象有record，以及element下的各种column（BoolColumn.class,BytesColumn.class,DateColumn.class,DoubleColumn.class,LongColumn.class,StringColumn.class）。不支持其他包，如果用户有需要用到其他包，可设置extraPackage，注意extraPackage不支持第三方jar包。 groovy code中，返回更新过的Record（比如record.setColumn(columnIndex, new StringColumn(newValue));），或者null。返回null表示过滤此行。 用户可以直接调用静态的Util方式（GroovyTransformerStaticUtil），目前GroovyTransformerStaticUtil的方法列表 (按需补充)： 举例: groovy 实现的subStr: String code = \"Column column = record.getColumn(1);\\n\" + \" String oriValue = column.asString();\\n\" + \" String newValue = oriValue.substring(0, 3);\\n\" + \" record.setColumn(1, new StringColumn(newValue));\\n\" + \" return record;\"; dx_groovy(record); groovy 实现的Replace String code2 = \"Column column = record.getColumn(1);\\n\" + \" String oriValue = column.asString();\\n\" + \" String newValue = \\\"****\\\" + oriValue.substring(3, oriValue.length());\\n\" + \" record.setColumn(1, new StringColumn(newValue));\\n\" + \" return record;\"; groovy 实现的Pad String code3 = \"Column column = record.getColumn(1);\\n\" + \" String oriValue = column.asString();\\n\" + \" String padString = \\\"12345\\\";\\n\" + \" String finalPad = \\\"\\\";\\n\" + \" int NeedLength = 8 - oriValue.length();\\n\" + \" while (NeedLength \u003e 0) {\\n\" + \"\\n\" + \" if (NeedLength \u003e= padString.length()) {\\n\" + \" finalPad += padString;\\n\" + \" NeedLength -= padString.length();\\n\" + \" } else {\\n\" + \" finalPad += padString.substring(0, NeedLength);\\n\" + \" NeedLength = 0;\\n\" + \" }\\n\" + \" }\\n\" + \" String newValue= finalPad + oriValue;\\n\" + \" record.setColumn(1, new StringColumn(newValue));\\n\" + \" return record;\"; Job定义 本例中，配置3个UDF。 { \"job\": { \"setting\": { \"speed\": { \"channel\": 1 }, \"errorLimit\": { \"record\": 0 } }, \"content\": [ { \"reader\": { \"name\": \"streamreader\", \"parameter\": { \"column\": [ { \"value\": \"DataX\", \"type\": \"string\" }, { \"value\": 19890604, \"type\": \"long\" }, { \"value\": \"1989-06-04 00:00:00\", \"type\": \"date\" }, { \"value\": true, \"type\": \"bool\" }, { \"value\": \"test\", \"type\": \"bytes\" } ], \"sliceRecordCount\": 100000 } }, \"writer\": { \"name\": \"streamwriter\", \"parameter\": { \"print\": false, \"encoding\": \"UTF-8\" } }, \"transformer\": [ { \"name\": \"dx_substr\", \"parameter\": { \"columnIndex\":5, \"paras\":[\"1\",\"3\"] } }, { \"name\": \"dx_replace\", \"parameter\": { \"columnIndex\":4, \"paras\":[\"3\",\"4\",\"****\"] } }, { \"name\": \"dx_groovy\", \"parameter\": { \"code\": \"//groovy code//\", \"extraPackage\":[ \"import somePackage1;\", \"import somePackage2;\" ] } } ] } ] } } 计量和脏数据 Transform过程涉及到数据的转换，可能造成数据的增加或减少，因此更加需要精确度量，包括：\nTransform的入参Record条数、字节数。 Transform的出参Record条数、字节数。 Transform的脏数据Record条数、字节数。 如果是多个Transform，某一个发生脏数据，将不会再进行后面的transform，直接统计为脏数据。 目前只提供了所有Transform的计量（成功，失败，过滤的count，以及transform的消耗时间）。 涉及到运行过程的计量数据展现定义如下：\nTotal 1000000 records, 22000000 bytes | Transform 100000 records(in), 10000 records(out) | Speed 2.10MB/s, 100000 records/s | Error 0 records, 0 bytes | Percentage 100.00% 注意，这里主要记录转换的输入输出，需要检测数据输入输出的记录数量变化。\n涉及到最终作业的计量数据展现定义如下：\n任务启动时刻 : 2015-03-10 17:34:21 任务结束时刻 : 2015-03-10 17:34:31 任务总计耗时 : 10s 任务平均流量 : 2.10MB/s 记录写入速度 : 100000rec/s 转换输入总数\t: 1000000 转换输出总数\t: 1000000 读出记录总数 : 1000000 同步失败总数 : 0 注意，这里主要记录转换的输入输出，需要检测数据输入输出的记录数量变化。\n",
   "wordCount" : "465",
-  "inLanguage": "en",
+  "inLanguage": "zh-cn",
   "datePublished": "2021-02-02T17:45:01Z",
   "dateModified": "2021-02-02T17:45:01Z",
   "mainEntityOfPage": {
@@ -162,6 +820,8 @@
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -171,32 +831,32 @@
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/1/" title="1s">
+                <a href="https://haokiu.com/1/" title="1">
                     <span>后端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/2/" title="2s">
+                <a href="https://haokiu.com/2/" title="2">
                     <span>前端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/3/" title="3s">
+                <a href="https://haokiu.com/3/" title="3">
                     <span>区块链</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/4/" title="4s">
+                <a href="https://haokiu.com/4/" title="4">
                     <span>大数据</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/5/" title="5s">
+                <a href="https://haokiu.com/5/" title="5">
                     <span>linux</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/6/" title="6s">
+                <a href="https://haokiu.com/6/" title="6">
                     <span>其他</span>
                 </a>
             </li>
@@ -217,7 +877,7 @@
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    
     <h1 class="post-title">
       DataX Transformer
     </h1>
@@ -500,13 +1160,21 @@ String code3 = &#34;Column column = record.getColumn(1);\n&#34; +
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+      <li><a href="https://haokiu.com/tags/datax/">Datax</a></li>
     </ul>
 
   </footer>
 </article>
     </main>
     
+<footer class="footer">
+    <span>haokiu.com</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />

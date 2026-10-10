@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>pixiublog on haokiu</title>
+    <title>Pixiublog on haokiu</title>
     <link>https://haokiu.com/tags/pixiublog/</link>
-    <description>Recent content in pixiublog on haokiu</description>
+    <description>Recent content in Pixiublog on haokiu</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
     <copyright>haokiu.com</copyright>
@@ -14,8 +14,15 @@
       <pubDate>Fri, 16 Oct 2020 17:10:58 +0000</pubDate>
       
       <guid>https://haokiu.com/blog/5XKHkb/</guid>
-      <description>服务经常会重启失败，写了个简单的shell叫脚本，可以发现服务端口是否起来，没有发现监听端口会重启服务
-1.监控脚本 if [ -z &amp;#34;`lsof -i:443 | grep LISTEN`&amp;#34; ];then echo -e &amp;#34;restart $(date +&amp;#39;%Y-%m-%d %H:%M:%S&amp;#39;)&amp;#34; systemctl restart pixiublog fi 2.系统定时任务 */3 * * * * /usr/local/pixiublog/monitor.sh &amp;gt;&amp;gt; /usr/local/pixiublog/monitor.log 2&amp;gt;&amp;amp;1 </description>
+      <description>&lt;p&gt;服务经常会重启失败，写了个简单的shell叫脚本，可以发现服务端口是否起来，没有发现监听端口会重启服务&lt;/p&gt;
+&lt;h3 id=&#34;1监控脚本&#34;&gt;1.监控脚本&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;if [ -z &amp;#34;`lsof -i:443 | grep LISTEN`&amp;#34; ];then
+    echo -e &amp;#34;restart $(date +&amp;#39;%Y-%m-%d %H:%M:%S&amp;#39;)&amp;#34;
+    systemctl restart pixiublog
+fi
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;2系统定时任务&#34;&gt;2.系统定时任务&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;*/3 * * * * /usr/local/pixiublog/monitor.sh &amp;gt;&amp;gt; /usr/local/pixiublog/monitor.log 2&amp;gt;&amp;amp;1
+&lt;/code&gt;&lt;/pre&gt;</description>
     </item>
     
     <item>
@@ -24,8 +31,25 @@
       <pubDate>Thu, 15 Oct 2020 17:08:15 +0000</pubDate>
       
       <guid>https://haokiu.com/blog/v3yn45/</guid>
-      <description>haokiu 的启动脚本，配置 https 可以参考beego 通过acms.sh 使用 https
-#!/bin/sh siteDir=&amp;#39;/usr/local/pixiublog&amp;#39; appName=&amp;#39;pixiublogMain&amp;#39; echo &amp;#34;kill the running program&amp;#34; ps -ef | grep $appName | grep -v grep | awk &amp;#39;{print $2}&amp;#39; | xargs kill -9 echo &amp;#34;sleep 3 secons for app to shutdown&amp;#34; sleep 3 echo &amp;#34;start program&amp;#34; cd $siteDir nohup $siteDir/$appName &amp;gt;&amp;gt; $siteDir/console.log 2&amp;gt;&amp;amp;1 &amp;amp; </description>
+      <description>&lt;p&gt;&lt;a href=&#34;https://haokiu.com&#34;&gt;haokiu&lt;/a&gt; 的启动脚本，配置 https 可以参考&lt;a href=&#34;https://haokiu.com/blog/qP3u4V&#34;&gt;beego 通过acms.sh 使用 https&lt;/a&gt;&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;#!/bin/sh
+siteDir=&amp;#39;/usr/local/pixiublog&amp;#39;
+
+appName=&amp;#39;pixiublogMain&amp;#39;
+
+echo &amp;#34;kill the running program&amp;#34;
+
+ps -ef | grep $appName | grep -v grep | awk &amp;#39;{print $2}&amp;#39; | xargs kill -9
+
+echo &amp;#34;sleep 3 secons for app to shutdown&amp;#34;
+sleep 3
+
+echo &amp;#34;start program&amp;#34;
+
+cd $siteDir
+
+nohup $siteDir/$appName &amp;gt;&amp;gt; $siteDir/console.log 2&amp;gt;&amp;amp;1 &amp;amp;
+&lt;/code&gt;&lt;/pre&gt;</description>
     </item>
     
     <item>
@@ -34,10 +58,44 @@
       <pubDate>Tue, 13 Oct 2020 15:20:09 +0000</pubDate>
       
       <guid>https://haokiu.com/blog/qP3u4V/</guid>
-      <description>beego 通过 acme.sh 使用 https
-安装acms.sh curl https://get.acme.sh | sh 生成证书 如果使用的是 beego 框架，需添加可访问的静态文件目录：
-//acme.sh 自动验证网站目录，不使用https可以忽略 beego.SetStaticPath(&amp;#34;/.well-known&amp;#34;, &amp;#34;.well-known&amp;#34;) acme.sh --issue -d haokiu.com -d www.haokiu.com --webroot /usr/local/pixiublog/ 设置pixiublog开机启动 1. 编写开机启动脚本 vim /usr/lib/systemd/system/pixiublog.service
-[Unit] Description=The pixiublog Process Manager After=syslog.target network.target [Service] Type=forking ExecStart=sh /usr/local/pixiublog/start.sh ExecReload=/bin/kill -USR2 $MAINPID ExecStop=/bin/kill -SIGINT $MAINPID [Install] WantedBy=multi-user.target 2. 设置开机启动 systemctl enable pixiublog 安装证书 acme.sh --install-cert -d haokiu.com \ --cert-file /home/blog/cert/cert.pem \ --key-file /home/blog/cert/key.pem \ --fullchain-file /home/blog/cert/fullchain.pem \ --reloadcmd &amp;#34;systemctl restart pixiublog&amp;#34; beego app.conf 配置 EnableHTTPS = true HTTPSPort = 443 HTTPSCertFile = &amp;#34;/home/blog/cert/fullchain.pem&amp;#34; HTTPSKeyFile = &amp;#34;/home/blog/cert/key.pem&amp;#34; 参考 acme.sh 使用</description>
+      <description>&lt;p&gt;beego 通过 acme.sh 使用 https&lt;/p&gt;
+&lt;h2 id=&#34;安装acmssh&#34;&gt;安装acms.sh&lt;/h2&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl  https://get.acme.sh | sh
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;生成证书&#34;&gt;生成证书&lt;/h2&gt;
+&lt;p&gt;如果使用的是 beego 框架，需添加可访问的静态文件目录：&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;//acme.sh 自动验证网站目录，不使用https可以忽略
+beego.SetStaticPath(&amp;#34;/.well-known&amp;#34;, &amp;#34;.well-known&amp;#34;)
+&lt;/code&gt;&lt;/pre&gt;&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;acme.sh  --issue  -d haokiu.com -d www.haokiu.com  --webroot  /usr/local/pixiublog/
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;设置pixiublog开机启动&#34;&gt;设置pixiublog开机启动&lt;/h2&gt;
+&lt;h3 id=&#34;1-编写开机启动脚本&#34;&gt;1. 编写开机启动脚本&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;vim /usr/lib/systemd/system/pixiublog.service&lt;/code&gt;&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;[Unit]
+Description=The pixiublog Process Manager
+After=syslog.target network.target
+
+[Service]
+Type=forking
+ExecStart=sh /usr/local/pixiublog/start.sh
+ExecReload=/bin/kill -USR2 $MAINPID
+ExecStop=/bin/kill -SIGINT $MAINPID
+
+[Install]
+WantedBy=multi-user.target
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;2-设置开机启动&#34;&gt;2. 设置开机启动&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;systemctl enable pixiublog
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;安装证书&#34;&gt;安装证书&lt;/h2&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;acme.sh --install-cert -d haokiu.com \
+--cert-file      /home/blog/cert/cert.pem  \
+--key-file       /home/blog/cert/key.pem  \
+--fullchain-file /home/blog/cert/fullchain.pem \
+--reloadcmd     &amp;#34;systemctl restart pixiublog&amp;#34;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;beego-appconf-配置&#34;&gt;beego app.conf 配置&lt;/h2&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;EnableHTTPS = true
+HTTPSPort = 443
+HTTPSCertFile = &amp;#34;/home/blog/cert/fullchain.pem&amp;#34;
+HTTPSKeyFile = &amp;#34;/home/blog/cert/key.pem&amp;#34;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://haokiu.com/blog/6D0DBH&#34;&gt;acme.sh 使用&lt;/a&gt;&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -46,8 +104,49 @@
       <pubDate>Thu, 17 Sep 2020 21:52:12 +0000</pubDate>
       
       <guid>https://haokiu.com/blog/1gTd1h/</guid>
-      <description>网站的部署脚本
-#!/bin/sh #部署目录 siteDir=&amp;#39;/usr/local/pixiublog&amp;#39; # 源代码目录 cd /root/pixiublog echo &amp;#34;update code&amp;#34; git pull echo &amp;#34;build pixiublog&amp;#34; go build main.go echo &amp;#34;remove old&amp;#34; rm -rf $siteDir/views rm -rf $siteDir/static rm -rf $siteDir/pixiublog echo &amp;#34;mv new program to $siteDir&amp;#34; cp main $siteDir/pixiublog cp -rf views $siteDir/ cp -rf static $siteDir/ echo &amp;#34;kill the running program&amp;#34; ps -ef | grep &amp;#39;pixiublog&amp;#39; | grep -v grep | awk &amp;#39;{print $2}&amp;#39; | xargs kill -9 echo &amp;#34;start program&amp;#34; cd $siteDir nohup $siteDir/pixiublog &amp;gt;&amp;gt; $siteDir/console.log 2&amp;gt;&amp;amp;1 &amp;amp; </description>
+      <description>&lt;p&gt;网站的部署脚本&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#!/bin/sh
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#部署目录&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;siteDir&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;/usr/local/pixiublog&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 源代码目录&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cd /root/pixiublog
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;update code&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git pull
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;build pixiublog&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;go build main.go
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;remove old&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;rm -rf $siteDir/views
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;rm -rf $siteDir/static
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;rm -rf $siteDir/pixiublog
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;mv new program to &lt;/span&gt;$siteDir&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cp main $siteDir/pixiublog
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cp -rf views $siteDir/
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cp -rf static $siteDir/
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;kill the running program&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ps -ef | grep &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;pixiublog&amp;#39;&lt;/span&gt; | grep -v grep | awk &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;{print $2}&amp;#39;&lt;/span&gt; | xargs kill -9
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;start program&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cd $siteDir
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nohup $siteDir/pixiublog &amp;gt;&amp;gt; $siteDir/console.log 2&amp;gt;&amp;amp;&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt; &amp;amp;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
     </item>
     
   </channel>

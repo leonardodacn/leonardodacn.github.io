@@ -14,9 +14,11 @@
       <pubDate>Tue, 02 Feb 2021 20:57:44 +0000</pubDate>
       
       <guid>https://haokiu.com/blog/a0lZoj/</guid>
-      <description>linux复制文件和目录用cp命令，--parents 参数可以确保不存在目录的创建，比如文件 cp --parents java/doc/readme.md ../doc ，如果目录 doc不存在目录：java/doc则会创建。
-高级操作：
-#查找当前目录下所有.md文件，并将它们复制到DataxDoc目录，如果目录不存在则双肩 find . -name &amp;#34;*.md&amp;#34; | xargs -I {} cp --parents {} ../DataxDoc </description>
+      <description>&lt;p&gt;linux复制文件和目录用cp命令，&lt;code&gt;--parents&lt;/code&gt; 参数可以确保不存在目录的创建，比如文件 &lt;code&gt;cp --parents java/doc/readme.md ../doc&lt;/code&gt; ，如果目录 doc不存在目录：java/doc则会创建。&lt;/p&gt;
+&lt;p&gt;高级操作：&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;#查找当前目录下所有.md文件，并将它们复制到DataxDoc目录，如果目录不存在则双肩
+find . -name &amp;#34;*.md&amp;#34; | xargs -I {} cp --parents {} ../DataxDoc
+&lt;/code&gt;&lt;/pre&gt;</description>
     </item>
     
     <item>
@@ -25,16 +27,36 @@
       <pubDate>Thu, 14 Jan 2021 15:20:19 +0000</pubDate>
       
       <guid>https://haokiu.com/blog/fhRygg/</guid>
-      <description>什么是 Vim？ Vim 是一个历史悠久的文本编辑器，可以追溯到 qed。 Bram Moolenaar 于 1991 年发布初始版本。
-Linux、Mac 用户，可以使用包管理器安装 Vim，对于 Windows 用户，可以从 我的网盘 下载。 该版本可轻易添加 python 、python3 、lua 等支持，只需要安装 python、lua 即可。
-项目在 Github 上开发，项目讨论请订阅 vim_dev 邮件列表。
-通过阅读 Why, oh WHY, do those #?@! nutheads use vi? 来对 Vim 进行大致的了解。
-Vim 哲学 Vim 采用模式编辑的理念，即它提供了多种模式，按键在不同的模式下作用不同。 你可以在普通模式 下浏览文件，在插入模式下插入文本， 在可视模式下选择行，在命令模式下执行命令等等。起初这听起来可能很复杂， 但是这有一个很大的优点：不需要通过同时按住多个键来完成操作， 大多数时候你只需要依次按下这些按键即可。越常用的操作，所需要的按键数量越少。
-和模式编辑紧密相连的概念是 操作符 和 动作。操作符 指的是开始某个行为， 例如：修改、删除或者选择文本，之后你要用一个 动作 来指定需要操作的文本区域。 比如，要改变括号内的文本，需要执行 ci( （读做 change inner parentheses）； 删除整个段落的内容，需要执行 dap （读做：delete around paragraph）。
-如果你能看见 Vim 老司机操作，你会发现他们使用 Vim 脚本语言就如同钢琴师弹钢琴一样。复杂的操作只需要几个按键就能完成。他们甚至不用刻意去想，因为这已经成为肌肉记忆了。这减少认识负荷并帮助人们专注于实际任务。
-入门 Vim 自带一个交互式的教程，内含你需要了解的最基础的信息，你可以通过终端运行以下命令打开教程：
-$ vimtutor 不要因为这个看上去很无聊而跳过，按照此教程多练习。你以前用的 IDE 或者其他编辑器很少是有“模式”概念的，因此一开始你会很难适应模式切换。但是你 Vim 使用的越多，肌肉记忆 将越容易形成。
-Vim 基于一个 vi 克隆，叫做 Stevie，支持两种运行模式：&amp;ldquo;compatible&amp;rdquo; 和 &amp;ldquo;nocompatible&amp;rdquo;。在兼容模式下运行 Vim 意味着使用 vi 的默认设置，而不是 Vim 的默认设置。除非你新建一个用户的 vimrc 或者使用 vim -N 命令启动 Vim，否则就是在兼容模式下运行 Vim！请大家不要在兼容模式下运行 Vim。</description>
+      <description>&lt;h2 id=&#34;什么是-vim&#34;&gt;什么是 Vim？&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/vim/vim&#34;&gt;Vim&lt;/a&gt; 是一个历史悠久的文本编辑器，可以追溯到
+&lt;a href=&#34;https://en.wikipedia.org/wiki/QED_(text_editor)&#34;&gt;qed&lt;/a&gt;。
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Bram_Moolenaar&#34;&gt;Bram Moolenaar&lt;/a&gt; 于
+1991 年发布初始版本。&lt;/p&gt;
+&lt;p&gt;Linux、Mac 用户，可以使用包管理器安装 Vim，对于 Windows 用户，可以从
+&lt;a href=&#34;https://share.weiyun.com/da2be5937ac0e2bd3abc26355fad1204&#34;&gt;我的网盘&lt;/a&gt; 下载。
+该版本可轻易添加 &lt;code&gt;python&lt;/code&gt; 、&lt;code&gt;python3&lt;/code&gt; 、&lt;code&gt;lua&lt;/code&gt; 等支持，只需要安装 python、lua
+即可。&lt;/p&gt;
+&lt;p&gt;项目在 &lt;a href=&#34;https://github.com/vim/vim&#34;&gt;Github&lt;/a&gt; 上开发，项目讨论请订阅
+&lt;a href=&#34;https://groups.google.com/forum/#!forum/vim_dev&#34;&gt;&lt;code&gt;vim_dev&lt;/code&gt;&lt;/a&gt; 邮件列表。&lt;/p&gt;
+&lt;p&gt;通过阅读 &lt;a href=&#34;http://www.viemu.com/a-why-vi-vim.html&#34;&gt;Why, oh WHY, do those #?@! nutheads use vi?&lt;/a&gt;
+来对 Vim 进行大致的了解。&lt;/p&gt;
+&lt;h2 id=&#34;vim-哲学&#34;&gt;Vim 哲学&lt;/h2&gt;
+&lt;p&gt;Vim 采用模式编辑的理念，即它提供了多种模式，按键在不同的模式下作用不同。
+你可以在&lt;strong&gt;普通模式&lt;/strong&gt; 下浏览文件，在&lt;strong&gt;插入模式&lt;/strong&gt;下插入文本，
+在&lt;strong&gt;可视模式&lt;/strong&gt;下选择行，在&lt;strong&gt;命令模式&lt;/strong&gt;下执行命令等等。起初这听起来可能很复杂，
+但是这有一个很大的优点：不需要通过同时按住多个键来完成操作，
+大多数时候你只需要依次按下这些按键即可。越常用的操作，所需要的按键数量越少。&lt;/p&gt;
+&lt;p&gt;和模式编辑紧密相连的概念是 &lt;strong&gt;操作符&lt;/strong&gt; 和 &lt;strong&gt;动作&lt;/strong&gt;。&lt;strong&gt;操作符&lt;/strong&gt; 指的是开始某个行为，
+例如：修改、删除或者选择文本，之后你要用一个 &lt;strong&gt;动作&lt;/strong&gt; 来指定需要操作的文本区域。
+比如，要改变括号内的文本，需要执行 &lt;code&gt;ci(&lt;/code&gt; （读做 &lt;code&gt;change inner parentheses&lt;/code&gt;）；
+删除整个段落的内容，需要执行 &lt;code&gt;dap&lt;/code&gt; （读做：&lt;code&gt;delete around paragraph&lt;/code&gt;）。&lt;/p&gt;
+&lt;p&gt;如果你能看见 Vim 老司机操作，你会发现他们使用 Vim 脚本语言就如同钢琴师弹钢琴一样。复杂的操作只需要几个按键就能完成。他们甚至不用刻意去想，因为这已经成为&lt;a href=&#34;https://en.wikipedia.org/wiki/Muscle_memory&#34;&gt;肌肉记忆&lt;/a&gt;了。这减少&lt;a href=&#34;https://en.wikipedia.org/wiki/Cognitive_load&#34;&gt;认识负荷&lt;/a&gt;并帮助人们专注于实际任务。&lt;/p&gt;
+&lt;h2 id=&#34;入门&#34;&gt;入门&lt;/h2&gt;
+&lt;p&gt;Vim 自带一个交互式的教程，内含你需要了解的最基础的信息，你可以通过终端运行以下命令打开教程：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ vimtutor
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;不要因为这个看上去很无聊而跳过，按照此教程多练习。你以前用的 IDE 或者其他编辑器很少是有“模式”概念的，因此一开始你会很难适应模式切换。但是你 Vim 使用的越多，&lt;a href=&#34;https://en.wikipedia.org/wiki/Muscle_memory&#34;&gt;肌肉记忆&lt;/a&gt; 将越容易形成。&lt;/p&gt;
+&lt;p&gt;Vim 基于一个 &lt;a href=&#34;https://en.wikipedia.org/wiki/Vi&#34;&gt;vi&lt;/a&gt; 克隆，叫做 &lt;a href=&#34;https://en.wikipedia.org/wiki/Stevie_(text_editor)&#34;&gt;Stevie&lt;/a&gt;，支持两种运行模式：&amp;ldquo;compatible&amp;rdquo; 和 &amp;ldquo;nocompatible&amp;rdquo;。在兼容模式下运行 Vim 意味着使用 vi 的默认设置，而不是 Vim 的默认设置。除非你新建一个用户的 &lt;code&gt;vimrc&lt;/code&gt; 或者使用 &lt;code&gt;vim -N&lt;/code&gt; 命令启动 Vim，否则就是在兼容模式下运行 Vim！请大家不要在兼容模式下运行 Vim。&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -43,12 +65,20 @@ Vim 基于一个 vi 克隆，叫做 Stevie，支持两种运行模式：&amp;ldq
       <pubDate>Tue, 24 Nov 2020 13:56:48 +0000</pubDate>
       
       <guid>https://haokiu.com/blog/d5nhvK/</guid>
-      <description>为了节省空间，docker 容器里面有很多命令是没有安装的，提示： Reading package lists&amp;hellip; Done Building dependency tree Reading state information&amp;hellip; Done E: Unable to locate package vim
-更新apt-get源 这时候需要敲：apt-get update
-这个命令的作用是：同步 /etc/apt/sources.list 和 /etc/apt/sources.list.d 中列出的源的索引，这样才能获取到最新的软件包。
-安装vim apt-get install vim
-安装telnet apt-get install telnet
-安装ifconfig apt-get install net-tools</description>
+      <description>&lt;p&gt;为了节省空间，docker 容器里面有很多命令是没有安装的，提示：
+Reading package lists&amp;hellip; Done
+Building dependency tree
+Reading state information&amp;hellip; Done
+E: Unable to locate package vim&lt;/p&gt;
+&lt;h3 id=&#34;更新apt-get源&#34;&gt;更新apt-get源&lt;/h3&gt;
+&lt;p&gt;这时候需要敲：&lt;code&gt;apt-get update&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;这个命令的作用是：同步 /etc/apt/sources.list 和 /etc/apt/sources.list.d 中列出的源的索引，这样才能获取到最新的软件包。&lt;/p&gt;
+&lt;h3 id=&#34;安装vim&#34;&gt;安装vim&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;apt-get install vim&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id=&#34;安装telnet&#34;&gt;安装telnet&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;apt-get install  telnet&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id=&#34;安装ifconfig&#34;&gt;安装ifconfig&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;apt-get install net-tools&lt;/code&gt;&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -57,9 +87,12 @@ Vim 基于一个 vi 克隆，叫做 Stevie，支持两种运行模式：&amp;ldq
       <pubDate>Mon, 09 Nov 2020 09:25:45 +0000</pubDate>
       
       <guid>https://haokiu.com/blog/ss9sfI/</guid>
-      <description>有时需要查看本地开发的git项目的远程仓库地址
-git remote -v 可以方便的查看远程仓库的地址
-git remote -v origin https://gitee.com/leonardodacn/pixiublog.git (fetch) origin https://gitee.com/leonardodacn/pixiublog.git (push) -v : verbose，冗余的意思</description>
+      <description>&lt;p&gt;有时需要查看本地开发的git项目的远程仓库地址&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;git remote -v&lt;/code&gt; 可以方便的查看远程仓库的地址&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;git remote -v                                                                                        
+origin  https://gitee.com/leonardodacn/pixiublog.git (fetch)
+origin  https://gitee.com/leonardodacn/pixiublog.git (push)
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;-v : verbose，冗余的意思&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -68,8 +101,15 @@ git remote -v origin https://gitee.com/leonardodacn/pixiublog.git (fetch) origin
       <pubDate>Fri, 16 Oct 2020 17:10:58 +0000</pubDate>
       
       <guid>https://haokiu.com/blog/5XKHkb/</guid>
-      <description>服务经常会重启失败，写了个简单的shell叫脚本，可以发现服务端口是否起来，没有发现监听端口会重启服务
-1.监控脚本 if [ -z &amp;#34;`lsof -i:443 | grep LISTEN`&amp;#34; ];then echo -e &amp;#34;restart $(date +&amp;#39;%Y-%m-%d %H:%M:%S&amp;#39;)&amp;#34; systemctl restart pixiublog fi 2.系统定时任务 */3 * * * * /usr/local/pixiublog/monitor.sh &amp;gt;&amp;gt; /usr/local/pixiublog/monitor.log 2&amp;gt;&amp;amp;1 </description>
+      <description>&lt;p&gt;服务经常会重启失败，写了个简单的shell叫脚本，可以发现服务端口是否起来，没有发现监听端口会重启服务&lt;/p&gt;
+&lt;h3 id=&#34;1监控脚本&#34;&gt;1.监控脚本&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;if [ -z &amp;#34;`lsof -i:443 | grep LISTEN`&amp;#34; ];then
+    echo -e &amp;#34;restart $(date +&amp;#39;%Y-%m-%d %H:%M:%S&amp;#39;)&amp;#34;
+    systemctl restart pixiublog
+fi
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;2系统定时任务&#34;&gt;2.系统定时任务&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;*/3 * * * * /usr/local/pixiublog/monitor.sh &amp;gt;&amp;gt; /usr/local/pixiublog/monitor.log 2&amp;gt;&amp;amp;1
+&lt;/code&gt;&lt;/pre&gt;</description>
     </item>
     
     <item>
@@ -78,8 +118,25 @@ git remote -v origin https://gitee.com/leonardodacn/pixiublog.git (fetch) origin
       <pubDate>Thu, 15 Oct 2020 17:08:15 +0000</pubDate>
       
       <guid>https://haokiu.com/blog/v3yn45/</guid>
-      <description>haokiu 的启动脚本，配置 https 可以参考beego 通过acms.sh 使用 https
-#!/bin/sh siteDir=&amp;#39;/usr/local/pixiublog&amp;#39; appName=&amp;#39;pixiublogMain&amp;#39; echo &amp;#34;kill the running program&amp;#34; ps -ef | grep $appName | grep -v grep | awk &amp;#39;{print $2}&amp;#39; | xargs kill -9 echo &amp;#34;sleep 3 secons for app to shutdown&amp;#34; sleep 3 echo &amp;#34;start program&amp;#34; cd $siteDir nohup $siteDir/$appName &amp;gt;&amp;gt; $siteDir/console.log 2&amp;gt;&amp;amp;1 &amp;amp; </description>
+      <description>&lt;p&gt;&lt;a href=&#34;https://haokiu.com&#34;&gt;haokiu&lt;/a&gt; 的启动脚本，配置 https 可以参考&lt;a href=&#34;https://haokiu.com/blog/qP3u4V&#34;&gt;beego 通过acms.sh 使用 https&lt;/a&gt;&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;#!/bin/sh
+siteDir=&amp;#39;/usr/local/pixiublog&amp;#39;
+
+appName=&amp;#39;pixiublogMain&amp;#39;
+
+echo &amp;#34;kill the running program&amp;#34;
+
+ps -ef | grep $appName | grep -v grep | awk &amp;#39;{print $2}&amp;#39; | xargs kill -9
+
+echo &amp;#34;sleep 3 secons for app to shutdown&amp;#34;
+sleep 3
+
+echo &amp;#34;start program&amp;#34;
+
+cd $siteDir
+
+nohup $siteDir/$appName &amp;gt;&amp;gt; $siteDir/console.log 2&amp;gt;&amp;amp;1 &amp;amp;
+&lt;/code&gt;&lt;/pre&gt;</description>
     </item>
     
     <item>
@@ -88,8 +145,49 @@ git remote -v origin https://gitee.com/leonardodacn/pixiublog.git (fetch) origin
       <pubDate>Thu, 17 Sep 2020 21:52:12 +0000</pubDate>
       
       <guid>https://haokiu.com/blog/1gTd1h/</guid>
-      <description>网站的部署脚本
-#!/bin/sh #部署目录 siteDir=&amp;#39;/usr/local/pixiublog&amp;#39; # 源代码目录 cd /root/pixiublog echo &amp;#34;update code&amp;#34; git pull echo &amp;#34;build pixiublog&amp;#34; go build main.go echo &amp;#34;remove old&amp;#34; rm -rf $siteDir/views rm -rf $siteDir/static rm -rf $siteDir/pixiublog echo &amp;#34;mv new program to $siteDir&amp;#34; cp main $siteDir/pixiublog cp -rf views $siteDir/ cp -rf static $siteDir/ echo &amp;#34;kill the running program&amp;#34; ps -ef | grep &amp;#39;pixiublog&amp;#39; | grep -v grep | awk &amp;#39;{print $2}&amp;#39; | xargs kill -9 echo &amp;#34;start program&amp;#34; cd $siteDir nohup $siteDir/pixiublog &amp;gt;&amp;gt; $siteDir/console.log 2&amp;gt;&amp;amp;1 &amp;amp; </description>
+      <description>&lt;p&gt;网站的部署脚本&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#!/bin/sh
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#部署目录&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;siteDir&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;/usr/local/pixiublog&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 源代码目录&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cd /root/pixiublog
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;update code&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git pull
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;build pixiublog&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;go build main.go
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;remove old&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;rm -rf $siteDir/views
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;rm -rf $siteDir/static
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;rm -rf $siteDir/pixiublog
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;mv new program to &lt;/span&gt;$siteDir&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cp main $siteDir/pixiublog
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cp -rf views $siteDir/
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cp -rf static $siteDir/
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;kill the running program&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ps -ef | grep &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;pixiublog&amp;#39;&lt;/span&gt; | grep -v grep | awk &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;{print $2}&amp;#39;&lt;/span&gt; | xargs kill -9
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;start program&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cd $siteDir
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nohup $siteDir/pixiublog &amp;gt;&amp;gt; $siteDir/console.log 2&amp;gt;&amp;amp;&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt; &amp;amp;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
     </item>
     
   </channel>

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="zh-cn" dir="auto">
 
 <head>
-	<meta name="generator" content="Hugo 0.119.0"><meta charset="utf-8">
+	<meta name="generator" content="Hugo 0.167.0"><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
@@ -11,7 +11,7 @@
 <meta name="description" content="">
 <meta name="author" content="">
 <link rel="canonical" href="https://haokiu.com/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
 <link rel="icon" href="https://haokiu.com/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
@@ -21,6 +21,7 @@
 <meta name="msapplication-TileColor" content="#2e2e33">
 <link rel="alternate" type="application/rss+xml" href="https://haokiu.com/index.xml">
 <link rel="alternate" type="application/json" href="https://haokiu.com/index.json">
+<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/">
 <noscript>
     <style>
         #theme-toggle,
@@ -118,6 +119,8 @@
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -127,32 +130,32 @@
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/1/" title="1s">
+                <a href="https://haokiu.com/1/" title="1">
                     <span>后端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/2/" title="2s">
+                <a href="https://haokiu.com/2/" title="2">
                     <span>前端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/3/" title="3s">
+                <a href="https://haokiu.com/3/" title="3">
                     <span>区块链</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/4/" title="4s">
+                <a href="https://haokiu.com/4/" title="4">
                     <span>大数据</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/5/" title="5s">
+                <a href="https://haokiu.com/5/" title="5">
                     <span>linux</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/6/" title="6s">
+                <a href="https://haokiu.com/6/" title="6">
                     <span>其他</span>
                 </a>
             </li>
@@ -182,7 +185,8 @@ libevent的核心是事件驱动、同步非阻塞，为了达到这一目标，
 1. 统一的关键 libevent支持多种I/O多路复用技术的关键就在于结构体eventop，这个结构体前面也曾提到过，它的成员是一系列的函数指针, 定义在event-internal.h文件中：
 struct eventop { const char *name; void *(*init)(struct event_base *); // 初始化 int (*add)(void *, struct event *); // 注册事件 int (*del)(void *, struct event *); // 删除事件 int (*dispatch)(struct event_base *, void *, struct timeval *); // 事件分发 void (*dealloc)(struct event_base *, void *); // 注销，释放资源 /* set if we need to reinitialize the event base */ int need_reinit; }; 在libevent中，每种I/O demultiplex机制的实现都必须提供这五个函数接口，来完成自身的初始化、销毁释放；对事件的注册、注销和分发。 比如对于epoll，libevent实现了5个对应的接口函数，并在初始化时并将eventop的5个函数指针指向这5个函数，那么程序就可以使用epoll作为I/O demultiplex机制了。
 2. 设置I/O demultiplex机制 libevent把所有支持的I/O demultiplex机制存储在一个全局静态数组eventops中，并在初始化时选择使用何种机制，数组内容根据优先级顺序声明如下：
-/* In order of preference */ static const struct eventop *eventops[] = { #ifdef HAVE_EVENT_PORTS &amp;evportops, #endif #ifdef HAVE_WORKING_KQUEUE &amp;kqops, #endif #ifdef HAVE_EPOLL &amp;epollops, #endif #ifdef HAVE_DEVPOLL &amp;devpollops, #endif #ifdef HAVE_POLL &amp;pollops, #endif #ifdef HAVE_SELECT &amp;selectops, #endif #ifdef WIN32 &amp;win32ops, #endif NULL }; 然后libevent根据系统配置和编译选项决定使用哪一种I/O demultiplex机制，这段代码在函数**event_base_new()**中：...</p>
+/* In order of preference */ static const struct eventop *eventops[] = { #ifdef HAVE_EVENT_PORTS &amp;evportops, #endif #ifdef HAVE_WORKING_KQUEUE &amp;kqops, #endif #ifdef HAVE_EPOLL &amp;epollops, #endif #ifdef HAVE_DEVPOLL &amp;devpollops, #endif #ifdef HAVE_POLL &amp;pollops, #endif #ifdef HAVE_SELECT &amp;selectops, #endif #ifdef WIN32 &amp;win32ops, #endif NULL }; 然后libevent根据系统配置和编译选项决定使用哪一种I/O demultiplex机制，这段代码在函数**event_base_new()**中：
+...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
   <a class="entry-link" aria-label="post link to libevent源码深度剖析10" href="https://haokiu.com/blog/f567712a9375435692b3217e444f19e5/"></a>
@@ -200,7 +204,8 @@ struct eventop { const char *name; void *(*init)(struct event_base *); // 初始
 static void detect_monotonic(void){ #if defined(HAVE_CLOCK_GETTIME) &amp;&amp; defined(CLOCK_MONOTONIC) struct timespec ts; if (clock_gettime(CLOCK_MONOTONIC, &amp;ts) == 0) use_monotonic = 1; // 系统支持monotonic时间 #endif } Monotonic时间指示的是系统从boot后到现在所经过的时间，如果系统支持Monotonic时间就将全局变量use_monotonic设置为1，设置use_monotonic到底有什么用，这个在后面说到时间校正时就能看出来了。
 2. 时间缓存 结构体event_base中的tv_cache，用来记录时间缓存。这个还要从函数**gettime()**说起，先来看看该函数的代码：
 static int gettime(struct event_base *base, struct timeval *tp){ // 如果tv_cache时间缓存已设置，就直接使用 if (base-&gt;tv_cache.tv_sec) { *tp = base-&gt;tv_cache; return (0); } // 如果支持monotonic，就用clock_gettime获取monotonic时间 #if defined(HAVE_CLOCK_GETTIME) &amp;&amp; defined(CLOCK_MONOTONIC) if (use_monotonic) { struct timespec ts; if (clock_gettime(CLOCK_MONOTONIC, &amp;ts) == -1) return (-1); tp-&gt;tv_sec = ts.tv_sec; tp-&gt;tv_usec = ts.tv_nsec / 1000; return (0); } #endif // 否则只能取得系统当前时间 return (evutil_gettimeofday(tp, NULL)); } 如果tv_cache已经设置，那么就直接使用缓存的时间；否则需要再次执行系统调用获取系统时间。 函数**evutil_gettimeofday()用来获取当前系统时间，在Linux下其实就是系统调用gettimeofday()；Windows没有提供函数gettimeofday，而是通过调用_ftime()**来完成的。 在每次系统事件循环中，时间缓存tv_cache将会被相应的清空和设置，再次来看看下面event_base_loop的主要代码逻辑：
-int event_base_loop(struct event_base *base, int flags){ // 清空时间缓存 base-&gt;tv_cache.tv_sec = 0; while(!...</p>
+int event_base_loop(struct event_base *base, int flags){ // 清空时间缓存 base-&gt;tv_cache.tv_sec = 0; while(!done){ timeout_correct(base, &amp;tv); // 时间校正 // 更新event_tv到tv_cache指示的时间或者当前时间（第一次） // event_tv &lt;--- tv_cache gettime(base, &amp;base-&gt;event_tv); // 清空时间缓存-- 时间点1 base-&gt;tv_cache.tv_sec = 0; // 等待I/O事件就绪 res = evsel-&gt;dispatch(base, evbase, tv_p); // 缓存tv_cache存储了当前时间的值-- 时间点2 // tv_cache &lt;--- now gettime(base, &amp;base-&gt;tv_cache); // .. 处理就绪事件 } // 退出时也要清空时间缓存 base-&gt;tv_cache.tv_sec = 0; return (0); } 时间event_tv指示了dispatch()上次返回，也就是I/O事件就绪时的时间，第一次进入循环时，由于tv_cache被清空，因此gettime()执行系统调用获取当前系统时间；而后将会更新为tv_cache指示的时间。 时间tv_cache在dispatch()返回后被设置为当前系统时间，因此它缓存了本次I/O事件就绪时的时间（event_tv）。 从代码逻辑里可以看出event_tv取得的是tv_cache上一次的值，因此event_tv应该小于tv_cache的值。 设置时间缓存的优点是不必每次获取时间都执行系统调用，这是个相对费时的操作；在上面标注的时间点2到时间点1的这段时间（处理就绪事件时），调用gettime()取得的都是tv_cache缓存的时间。
+...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
   <a class="entry-link" aria-label="post link to libevent源码深度剖析11" href="https://haokiu.com/blog/136973dd819b459bac605bcb1a25571c/"></a>
@@ -221,7 +226,8 @@ libevent本身不是多线程安全的，在多核的时代，如何能充分利
 2.3 消息通知&#43;同步层 有个折中机制可以减少消息通信的开销，就是提取一个同步层，还拿上面的例子来说，你把工作安排都存放在一个工作队列中，而且你能够保证“任何人把新任务扔到这个队列”，“自己取出当前第一个任务”等这些操作都能够保证不会把队列搞乱（其实就是个加锁的队列容器）。 再来看看处理过程和上面有什么不同： 1 当时你正在写文档； 2 你的头找到了一个任务，要指派给你，帮他搞个PPT； 2 头有个PPT要你搞定，他把任务push到你的工作队列中，包括了PPT的格式、内容等信息； 3 头发个消息（一个字节）到你信箱，有个PPT要帮他搞定，这时你并不鸟他； 4 你写好文档，发现有新消息（这预示着有新任务来了），检查工作队列知道头有个PPT要你搞定，你开始搞PPT； … 工作队列其实就是一个加锁的容器（队列、链表等等），这个很容易实现实现；而消息通知仅需要一个字节，具体的任务都push到了在工作队列中，因此想比2.2减少了不少通信开销。 多线程编程有很多陷阱，线程间资源的同步互斥不是一两句能说得清的，而且出现bug很难跟踪调试；这也有很多的经验和教训，因此如果让我选择，在绝大多数情况下都会选择机制3作为实现多线程的方法。
 3. 例子——memcached Memcached中的网络部分就是基于libevent完成的，其中的多线程模型就是典型的消息通知&#43;同步层机制。下面的图足够说明其多线程模型了，其中有详细的文字说明。
 注：该图的具体出处忘记了，感谢原作者。
-4. 小节 本节更是libevent的使用方面的技巧，讨论了一下如何让libevent支持多线程，以及几种支持多线程的机制，和memcached使用libevent的多线程模型。</p>
+4. 小节 本节更是libevent的使用方面的技巧，讨论了一下如何让libevent支持多线程，以及几种支持多线程的机制，和memcached使用libevent的多线程模型。
+</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
   <a class="entry-link" aria-label="post link to libevent源码深度剖析12" href="https://haokiu.com/blog/1f455bc4e89944fe8fb0ca8f3bbcdc1b/"></a>
@@ -244,7 +250,8 @@ libevent本身不是多线程安全的，在多核的时代，如何能充分利
 6 接着线程 2 也进入 event_base_loop ，并设置 evsignal_base = base2 ；并等待；
 于是 evsignal_base 就指向了 base2 ；
 7 信号 ALARM 触发，调用服务例程：
-static void evsignal_handler(int sig){ ... evsignal_base-&gt;sig.evsigcaught[sig]&#43;&#43;; evsignal_base-&gt;sig.evsignal_caught = 1; /* Wake up our notification mechanism */ send(evsignal_base-&gt;sig.ev_signal_pair[0], &#34;a&#34;, 1, 0); ... } 于是 base2 得到通知 ALARM 信号发生了，而实际上 ALARM 是注册在 base1 上的， base2 上的 ALARM 注册 event 是空的，于是处理函数将不能得到调用；因此在 libevent 中，如果需要处理信号，只能将信号注册到一个 libevent 实例上。...</p>
+static void evsignal_handler(int sig){ ... evsignal_base-&gt;sig.evsigcaught[sig]&#43;&#43;; evsignal_base-&gt;sig.evsignal_caught = 1; /* Wake up our notification mechanism */ send(evsignal_base-&gt;sig.ev_signal_pair[0], &#34;a&#34;, 1, 0); ... } 于是 base2 得到通知 ALARM 信号发生了，而实际上 ALARM 是注册在 base1 上的， base2 上的 ALARM 注册 event 是空的，于是处理函数将不能得到调用；因此在 libevent 中，如果需要处理信号，只能将信号注册到一个 libevent 实例上。
+...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
   <a class="entry-link" aria-label="post link to libevent源码深度剖析13" href="https://haokiu.com/blog/b05b12b227ee4ce494fe99d9116d6a23/"></a>
@@ -262,7 +269,8 @@ static void evsignal_handler(int sig){ ... evsignal_base-&gt;sig.evsigcaught[sig
 libevent已经被广泛的应用，作为底层的网络库；比如memcached、Vomit、Nylon、Netchat等等。 libevent当前的最新稳定版是1.4.13；这也是本文参照的版本。
 3. 学习的好处 学习libevent有助于提升程序设计功力，除了网络程序设计方面外，libevent的代码里有很多有用的设计技巧和基础数据结构，比如信息隐藏、函数指针、c语言的多态支持、链表和堆等等，都有助于提升自身的程序功力。 程序设计不止要了解框架，很多细节之处恰恰也是事关整个系统成败的关键。只对libevent本身的框架大概了解，那或许仅仅是一知半解，不深入代码分析，就难以了解其设计的精巧之处，也就难以为自己所用。
 事实上libevent本身就是一个典型的Reactor模型，理解Reactor模式是理解libevent的基石；因此下一节将介绍典型的事件驱动设计模式——Reactor模式。
-参考资料： libevent官方地址: http://monkey.org/~provos/libevent/</p>
+参考资料： libevent官方地址: http://monkey.org/~provos/libevent/
+</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
   <a class="entry-link" aria-label="post link to libevent源码深度剖析一" href="https://haokiu.com/blog/8aa77e3ff7e54bdb8899e32f75300864/"></a>
@@ -303,7 +311,13 @@ B树一般不会直接问，问的最多的形式是通过问 MySQL 索引实现
 编码基本功 还有一类面试题不好分类，笔者姑且将其当作是考察编码基本功，这类问题既可以考察算法也可以考察你写代码基本素养，这些素养不仅包括编码风格、计算机英语水平、调试能力等，还包括你对细节的掌握和易错点理解，如有意识地对边界条件的检查和非法值的过滤。请读者看以下的代码执行结果是什么？（笔者2011年去北京中关村的鼎普面试的问题）
 for(char i = 0; i &lt; 256; &#43;&#43;i) { printf(&#34;%d\n&#34;, i); } 下面再列举几个常见的编码题：
 实现一个 memmov 函数
-这个题目考查点在于 memmov 函数与 memcpy 函数的区别，这两者对于源地址与目标地址内存有重叠的这一情况的处理方式是不一样的。...</p>
+这个题目考查点在于 memmov 函数与 memcpy 函数的区别，这两者对于源地址与目标地址内存有重叠的这一情况的处理方式是不一样的。
+实现strcpy或strcpy函数
+这个函数写出来没啥难度，但是除了边界条件需要检查以外，还有一个容易被忽视的地方即其返回值一定要是目标内存地址，以支持所谓的链式拷贝。即：
+strcpy(dest3, strcpy(dest2, strcpy(dest1, src1))); 实现atoi函数
+这个函数的签名如下：
+int atoi(const char* p); 容易疏忽的地方有如下几点：
+...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
   <a class="entry-link" aria-label="post link to Linux C/C&#43;&#43;后端开发面试问哪些问题" href="https://haokiu.com/blog/8570010b5d82422da83500ab481816be/"></a>
@@ -324,7 +338,9 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event* event); 参数说明
 参数 op，操作类型，取值有 EPOLL_CTL_ADD、EPOLL_CTL_MOD 和 EPOLL_CTL_DEL，分别表示向 epollfd 上添加、修改和移除一个其他 fd，当取值是 EPOLL_CTL_DEL，第四个参数 event 忽略不计，可以设置为 NULL；
 参数 fd，即需要被操作的 fd；
 参数 event，这是一个 epoll_event 结构体的地址，epoll_event 结构体定义如下：
-struct epoll_event { uint32_t events; /* 需要检测的 fd 事件，取值与 poll 函数一样 */ epoll_data_t data; /* 用户自定义数据 */ }; epoll_event 结构体的 data 字段的类型是 epoll_data_t，我们可以利用这个字段设置一个自己的自定义数据，它本质上是一个 Union 对象，在 64 位操作系统中其大小是 8 字节，其定义如下：...</p>
+struct epoll_event { uint32_t events; /* 需要检测的 fd 事件，取值与 poll 函数一样 */ epoll_data_t data; /* 用户自定义数据 */ }; epoll_event 结构体的 data 字段的类型是 epoll_data_t，我们可以利用这个字段设置一个自己的自定义数据，它本质上是一个 Union 对象，在 64 位操作系统中其大小是 8 字节，其定义如下：
+typedef union epoll_data { void* ptr; int fd; uint32_t u32; uint64_t u64; } epoll_data_t; 函数返回值：epoll_ctl 调用成功返回 0，调用失败返回 -1，你可以通过 errno 错误码获取具体的错误原因。
+...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
   <a class="entry-link" aria-label="post link to Linux epoll 模型（含LT 模式和 ET 模式详解）" href="https://haokiu.com/blog/e4e0126749ad480399c46665753f03e4/"></a>
@@ -347,7 +363,8 @@ tcpdump 常用的选项有：
 -w 将抓取的包的原始信息（不解析，也不输出）写入文件中，后跟文件名：
 tcpdump -i any -w filename -r 从利用 -w 选项保存的包文件中读取数据包信息。
 除了可以使用选项以外，tcpdump 还支持各种数据包过滤的表达式，常见的形式如下：
-## 仅显示经过端口 8888 上的数据包（包括tcp:8888和udp:8888） tcpdump -i any &#39;port 8888&#39; ## 仅显示经过端口是 tcp:8888 上的数据包 tcpdump -i any &#39;tcp port 8888&#39; ## 仅显示从源端口是 tcp:8888 的数据包 tcpdump -i any &#39;tcp src port 8888&#39; ## 仅显示源端口是 tcp:8888 或目标端口是 udp:9999 的包 tcpdump -i any &#39;tcp src port 8888 or udp dst port 9999&#39; ## 仅显示地址是127....</p>
+## 仅显示经过端口 8888 上的数据包（包括tcp:8888和udp:8888） tcpdump -i any &#39;port 8888&#39; ## 仅显示经过端口是 tcp:8888 上的数据包 tcpdump -i any &#39;tcp port 8888&#39; ## 仅显示从源端口是 tcp:8888 的数据包 tcpdump -i any &#39;tcp src port 8888&#39; ## 仅显示源端口是 tcp:8888 或目标端口是 udp:9999 的包 tcpdump -i any &#39;tcp src port 8888 or udp dst port 9999&#39; ## 仅显示地址是127.0.0.1 且源端口是 tcp:9999 的包 ，以 ASCII 和十六进制显示详细输出， ## 不显示 ip 地址和端口号的别名 tcpdump -i any &#39;src host 127.0.0.1 and tcp src port 9999&#39; -XX -nn -vv 下面我们通过三个具体的操作实例来演示一下使用 tcpdump 的抓包过程。
+...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
   <a class="entry-link" aria-label="post link to Linux tcpdump 使用介绍" href="https://haokiu.com/blog/6eecf1781f7d4e1691c367ebf702d4d2/"></a>
@@ -368,7 +385,8 @@ yum install nc nc 命令常见的用法是模拟一个服务器程序被其他�
 [root@iZ238vnojlyZ ~]# nc -v -l 0.0.0.0 6000 Ncat: Version 6.40 ( http://nmap.org/ncat ) Ncat: Listening on 0.0.0.0:6000 模拟一个客户端程序
 用 nc 命令模拟一个客户端程序时，我们不需要使用 -l 选项，直接写上 ip 地址（或域名，nc 命令可以自动解析域名）和端口号即可，示例如下：
 ## 连接百度 web 服务器 [root@iZ238vnojlyZ ~]# nc -v www.baidu.com 80 Ncat: Version 6.40 ( http://nmap.org/ncat ) Ncat: Connected to 115.239.211.112:80. 输出提示我们成功连接上百度 Web 服务器。
-我们知道客户端连接服务器一般都是操作系统随机分配一个可用的端口号连接到服务器上去，使用 nc 命令作为客户端时可以使用 -p 选项指定使用哪个端口号连接服务器，例如，我们希望通过本地 5555 端口连接百度的 Web 服务器，可以这么输入：...</p>
+我们知道客户端连接服务器一般都是操作系统随机分配一个可用的端口号连接到服务器上去，使用 nc 命令作为客户端时可以使用 -p 选项指定使用哪个端口号连接服务器，例如，我们希望通过本地 5555 端口连接百度的 Web 服务器，可以这么输入：
+...</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
   <a class="entry-link" aria-label="post link to Linux 网络故障排查的瑞士军刀" href="https://haokiu.com/blog/501d5d7dacf24f4098180740dba82434/"></a>
@@ -397,7 +415,8 @@ yum install nc nc 命令常见的用法是模拟一个服务器程序被其他�
 15 Hash表扩容
 16 线程交互
 17 状态机
-​</p>
+​
+</p>
   </div>
   <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
   <a class="entry-link" aria-label="post link to Memcached源码分析" href="https://haokiu.com/blog/d10283bf526c437a9e64e40d5afa25c4/"></a>
@@ -405,14 +424,22 @@ yum install nc nc 命令常见的用法是模拟一个服务器程序被其他�
 <footer class="page-footer">
   <nav class="pagination">
     <a class="prev" href="https://haokiu.com/index/10/">
-      «&nbsp;Prev&nbsp;
+      «&nbsp;&nbsp;
     </a>
-    <a class="next" href="https://haokiu.com/index/12/">Next&nbsp;&nbsp;»
+    <a class="next" href="https://haokiu.com/index/12/">&nbsp;&nbsp;»
     </a>
   </nav>
 </footer>
     </main>
     
+<footer class="footer">
+    <span>haokiu.com</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />

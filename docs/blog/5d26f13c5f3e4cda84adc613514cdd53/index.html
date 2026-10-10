@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="zh-cn" dir="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,33 +7,184 @@
 <meta name="robots" content="index, follow">
 <title>DataX ADS写入 | haokiu</title>
 <meta name="keywords" content="datax">
-<meta name="description" content="DataX ADS写入 1 快速介绍 欢迎ADS加入DataX生态圈！ADSWriter插件实现了其他数据源向ADS写入功能，现有DataX所有的数据源均可以无缝接入ADS，实现数据快速导入ADS。
+<meta name="description" content="DataX ADS写入
+
+1 快速介绍
+
+欢迎ADS加入DataX生态圈！ADSWriter插件实现了其他数据源向ADS写入功能，现有DataX所有的数据源均可以无缝接入ADS，实现数据快速导入ADS。
 ADS写入预计支持两种实现方式：
+
+
 ADSWriter 支持向ODPS中转落地导入ADS方式，优点在于当数据量较大时(&gt;1KW)，可以以较快速度进行导入，缺点引入了ODPS作为落地中转，因此牵涉三方系统(DataX、ADS、ODPS)鉴权认证。
+
+
 ADSWriter 同时支持向ADS直接写入的方式，优点在于小批量数据写入能够较快完成(&lt;1KW)，缺点在于大数据导入较慢。
+
+
 注意：
+
 如果从ODPS导入数据到ADS，请用户提前在源ODPS的Project中授权ADS Build账号具有读取你源表ODPS的权限，同时，ODPS源表创建人和ADS写入属于同一个阿里云账号。
+
+
+
+
+
 如果从非ODPS导入数据到ADS，请用户提前在目的端ADS空间授权ADS Build账号具备Load data权限。
+
 以上涉及ADS Build账号请联系ADS管理员提供。
-2 实现原理 ADS写入预计支持两种实现方式：
-2.1 Load模式 DataX 将数据导入ADS为当前导入任务分配的ADS项目表，随后DataX通知ADS完成数据加载。该类数据导入方式实际上是写ADS完成数据同步，由于ADS是分布式存储集群，因此该通道吞吐量较大，可以支持TB级别数据导入。
+2 实现原理
+ADS写入预计支持两种实现方式：
+2.1 Load模式
+DataX 将数据导入ADS为当前导入任务分配的ADS项目表，随后DataX通知ADS完成数据加载。该类数据导入方式实际上是写ADS完成数据同步，由于ADS是分布式存储集群，因此该通道吞吐量较大，可以支持TB级别数据导入。
+
+
+
+
 DataX底层得到明文的 jdbc://host:port/dbname &#43; username &#43; password &#43; table， 以此连接ADS， 执行show grants; 前置检查该用户是否有ADS中目标表的Load Data或者更高的权限。注意，此时ADSWriter使用用户填写的ADS用户名&#43;密码信息完成登录鉴权工作。
+
+
 检查通过后，通过ADS中目标表的元数据反向生成ODPS DDL，在ODPS中间project中，以ADSWriter的账户建立ODPS表（非分区表，生命周期设为1-2Day), 并调用ODPSWriter把数据源的数据写入该ODPS表中。
 注意，这里需要使用中转ODPS的账号AK向中转ODPS写入数据。
+
+
 写入完成后，以中转ODPS账号连接ADS，发起Load Data From ‘odps://中转project/中转table/&rsquo; [overwrite] into adsdb.adstable [partition (xx,xx=xx)]; 这个命令返回一个Job ID需要记录。
 注意，此时ADS使用自己的Build账号访问中转ODPS，因此需要中转ODPS对这个Build账号提前开放读取权限。
+
+
 连接ADS一分钟一次轮询执行 select state from information_schema.job_instances where job_id like ‘$Job ID’，查询状态，注意这个第一个一分钟可能查不到状态记录。
+
+
 Success或者Fail后返回给用户，然后删除中转ODPS表，任务结束。
+
+
 上述流程是从其他非ODPS数据源导入ADS流程，对于ODPS导入ADS流程使用如下流程：
-2.2 Insert模式 DataX 将数据直连ADS接口，利用ADS暴露的INSERT接口直写到ADS。该类数据导入方式写入吞吐量较小，不适合大批量数据写入。有如下注意点：
+
+
+2.2 Insert模式
+DataX 将数据直连ADS接口，利用ADS暴露的INSERT接口直写到ADS。该类数据导入方式写入吞吐量较小，不适合大批量数据写入。有如下注意点：
+
+
 ADSWriter使用JDBC连接直连ADS，并只使用了JDBC Statement进行数据插入。ADS不支持PreparedStatement，故ADSWriter只能单行多线程进行写入。
+
+
 ADSWriter支持筛选部分列，列换序等功能，即用户可以填写列。
+
+
 考虑到ADS负载问题，建议ADSWriter Insert模式建议用户使用TPS限流，最高在1W TPS。
+
+
 ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，保证数据在ADS整体更新。
-3 功能说明 3.1 配置样例 这里使用一份从内存产生到ADS，使用Load模式进行导入的数据。 { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 2 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;streamreader&#34;, &#34;parameter&#34;: { &#34;column&#34;: [ { &#34;value&#34;: &#34;DataX&#34;, &#34;type&#34;: &#34;string&#34; }, { &#34;value&#34;: &#34;test&#34;, &#34;type&#34;: &#34;bytes&#34; } ], &#34;sliceRecordCount&#34;: 100000 } }, &#34;writer&#34;: { &#34;name&#34;: &#34;adswriter&#34;, &#34;parameter&#34;: { &#34;odps&#34;: { &#34;accessId&#34;: &#34;xxx&#34;, &#34;accessKey&#34;: &#34;xxx&#34;, &#34;account&#34;: &#34;xxx@aliyun.">
+
+
+3 功能说明
+3.1 配置样例
+
+这里使用一份从内存产生到ADS，使用Load模式进行导入的数据。
+
+{
+  &#34;job&#34;: {
+    &#34;setting&#34;: {
+      &#34;speed&#34;: {
+        &#34;channel&#34;: 2
+      }
+    },
+    &#34;content&#34;: [
+      {
+        &#34;reader&#34;: {
+          &#34;name&#34;: &#34;streamreader&#34;,
+          &#34;parameter&#34;: {
+            &#34;column&#34;: [
+              {
+                &#34;value&#34;: &#34;DataX&#34;,
+                &#34;type&#34;: &#34;string&#34;
+              },
+              {
+                &#34;value&#34;: &#34;test&#34;,
+                &#34;type&#34;: &#34;bytes&#34;
+              }
+            ],
+            &#34;sliceRecordCount&#34;: 100000
+          }
+        },
+        &#34;writer&#34;: {
+          &#34;name&#34;: &#34;adswriter&#34;,
+          &#34;parameter&#34;: {
+            &#34;odps&#34;: {
+              &#34;accessId&#34;: &#34;xxx&#34;,
+              &#34;accessKey&#34;: &#34;xxx&#34;,
+              &#34;account&#34;: &#34;xxx@aliyun.com&#34;,
+              &#34;odpsServer&#34;: &#34;xxx&#34;,
+              &#34;tunnelServer&#34;: &#34;xxx&#34;,
+              &#34;accountType&#34;: &#34;aliyun&#34;,
+              &#34;project&#34;: &#34;transfer_project&#34;
+            },
+            &#34;writeMode&#34;: &#34;load&#34;,
+            &#34;url&#34;: &#34;127.0.0.1:3306&#34;,
+            &#34;schema&#34;: &#34;schema&#34;,
+            &#34;table&#34;: &#34;table&#34;,
+            &#34;username&#34;: &#34;username&#34;,
+            &#34;password&#34;: &#34;password&#34;,
+            &#34;partition&#34;: &#34;&#34;,
+            &#34;lifeCycle&#34;: 2,
+            &#34;overWrite&#34;: true,
+          }
+        }
+      }
+    ]
+  }
+}
+
+这里使用一份从内存产生到ADS，使用Insert模式进行导入的数据。
+
+{
+  &#34;job&#34;: {
+    &#34;setting&#34;: {
+      &#34;speed&#34;: {
+        &#34;channel&#34;: 2
+      }
+    },
+    &#34;content&#34;: [
+      {
+        &#34;reader&#34;: {
+          &#34;name&#34;: &#34;streamreader&#34;,
+          &#34;parameter&#34;: {
+            &#34;column&#34;: [
+              {
+                &#34;value&#34;: &#34;DataX&#34;,
+                &#34;type&#34;: &#34;string&#34;
+              },
+              {
+                &#34;value&#34;: &#34;test&#34;,
+                &#34;type&#34;: &#34;bytes&#34;
+              }
+            ],
+            &#34;sliceRecordCount&#34;: 100000
+          }
+        },
+        &#34;writer&#34;: {
+          &#34;name&#34;: &#34;adswriter&#34;,
+          &#34;parameter&#34;: {
+            &#34;writeMode&#34;: &#34;insert&#34;,
+            &#34;url&#34;: &#34;127.0.0.1:3306&#34;,
+            &#34;schema&#34;: &#34;schema&#34;,
+            &#34;table&#34;: &#34;table&#34;,
+            &#34;column&#34;: [&#34;*&#34;],
+            &#34;username&#34;: &#34;username&#34;,
+            &#34;password&#34;: &#34;password&#34;,
+            &#34;partition&#34;: &#34;id,ds=2015&#34;
+          }
+        }
+      }
+    ]
+  }
+}
+3.2 参数说明 （用户配置规格）
+
+
+url">
 <meta name="author" content="">
 <link rel="canonical" href="https://haokiu.com/blog/5d26f13c5f3e4cda84adc613514cdd53/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
 <script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="https://haokiu.com/favicon.ico">
@@ -43,6 +194,7 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
 <link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/blog/5d26f13c5f3e4cda84adc613514cdd53/">
 <noscript>
     <style>
         #theme-toggle,
@@ -80,30 +232,181 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
 
     </style>
 </noscript><meta property="og:title" content="DataX ADS写入" />
-<meta property="og:description" content="DataX ADS写入 1 快速介绍 欢迎ADS加入DataX生态圈！ADSWriter插件实现了其他数据源向ADS写入功能，现有DataX所有的数据源均可以无缝接入ADS，实现数据快速导入ADS。
+<meta property="og:description" content="DataX ADS写入
+
+1 快速介绍
+
+欢迎ADS加入DataX生态圈！ADSWriter插件实现了其他数据源向ADS写入功能，现有DataX所有的数据源均可以无缝接入ADS，实现数据快速导入ADS。
 ADS写入预计支持两种实现方式：
+
+
 ADSWriter 支持向ODPS中转落地导入ADS方式，优点在于当数据量较大时(&gt;1KW)，可以以较快速度进行导入，缺点引入了ODPS作为落地中转，因此牵涉三方系统(DataX、ADS、ODPS)鉴权认证。
+
+
 ADSWriter 同时支持向ADS直接写入的方式，优点在于小批量数据写入能够较快完成(&lt;1KW)，缺点在于大数据导入较慢。
+
+
 注意：
+
 如果从ODPS导入数据到ADS，请用户提前在源ODPS的Project中授权ADS Build账号具有读取你源表ODPS的权限，同时，ODPS源表创建人和ADS写入属于同一个阿里云账号。
+
+
+
+
+
 如果从非ODPS导入数据到ADS，请用户提前在目的端ADS空间授权ADS Build账号具备Load data权限。
+
 以上涉及ADS Build账号请联系ADS管理员提供。
-2 实现原理 ADS写入预计支持两种实现方式：
-2.1 Load模式 DataX 将数据导入ADS为当前导入任务分配的ADS项目表，随后DataX通知ADS完成数据加载。该类数据导入方式实际上是写ADS完成数据同步，由于ADS是分布式存储集群，因此该通道吞吐量较大，可以支持TB级别数据导入。
+2 实现原理
+ADS写入预计支持两种实现方式：
+2.1 Load模式
+DataX 将数据导入ADS为当前导入任务分配的ADS项目表，随后DataX通知ADS完成数据加载。该类数据导入方式实际上是写ADS完成数据同步，由于ADS是分布式存储集群，因此该通道吞吐量较大，可以支持TB级别数据导入。
+
+
+
+
 DataX底层得到明文的 jdbc://host:port/dbname &#43; username &#43; password &#43; table， 以此连接ADS， 执行show grants; 前置检查该用户是否有ADS中目标表的Load Data或者更高的权限。注意，此时ADSWriter使用用户填写的ADS用户名&#43;密码信息完成登录鉴权工作。
+
+
 检查通过后，通过ADS中目标表的元数据反向生成ODPS DDL，在ODPS中间project中，以ADSWriter的账户建立ODPS表（非分区表，生命周期设为1-2Day), 并调用ODPSWriter把数据源的数据写入该ODPS表中。
 注意，这里需要使用中转ODPS的账号AK向中转ODPS写入数据。
+
+
 写入完成后，以中转ODPS账号连接ADS，发起Load Data From ‘odps://中转project/中转table/&rsquo; [overwrite] into adsdb.adstable [partition (xx,xx=xx)]; 这个命令返回一个Job ID需要记录。
 注意，此时ADS使用自己的Build账号访问中转ODPS，因此需要中转ODPS对这个Build账号提前开放读取权限。
+
+
 连接ADS一分钟一次轮询执行 select state from information_schema.job_instances where job_id like ‘$Job ID’，查询状态，注意这个第一个一分钟可能查不到状态记录。
+
+
 Success或者Fail后返回给用户，然后删除中转ODPS表，任务结束。
+
+
 上述流程是从其他非ODPS数据源导入ADS流程，对于ODPS导入ADS流程使用如下流程：
-2.2 Insert模式 DataX 将数据直连ADS接口，利用ADS暴露的INSERT接口直写到ADS。该类数据导入方式写入吞吐量较小，不适合大批量数据写入。有如下注意点：
+
+
+2.2 Insert模式
+DataX 将数据直连ADS接口，利用ADS暴露的INSERT接口直写到ADS。该类数据导入方式写入吞吐量较小，不适合大批量数据写入。有如下注意点：
+
+
 ADSWriter使用JDBC连接直连ADS，并只使用了JDBC Statement进行数据插入。ADS不支持PreparedStatement，故ADSWriter只能单行多线程进行写入。
+
+
 ADSWriter支持筛选部分列，列换序等功能，即用户可以填写列。
+
+
 考虑到ADS负载问题，建议ADSWriter Insert模式建议用户使用TPS限流，最高在1W TPS。
+
+
 ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，保证数据在ADS整体更新。
-3 功能说明 3.1 配置样例 这里使用一份从内存产生到ADS，使用Load模式进行导入的数据。 { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 2 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;streamreader&#34;, &#34;parameter&#34;: { &#34;column&#34;: [ { &#34;value&#34;: &#34;DataX&#34;, &#34;type&#34;: &#34;string&#34; }, { &#34;value&#34;: &#34;test&#34;, &#34;type&#34;: &#34;bytes&#34; } ], &#34;sliceRecordCount&#34;: 100000 } }, &#34;writer&#34;: { &#34;name&#34;: &#34;adswriter&#34;, &#34;parameter&#34;: { &#34;odps&#34;: { &#34;accessId&#34;: &#34;xxx&#34;, &#34;accessKey&#34;: &#34;xxx&#34;, &#34;account&#34;: &#34;xxx@aliyun." />
+
+
+3 功能说明
+3.1 配置样例
+
+这里使用一份从内存产生到ADS，使用Load模式进行导入的数据。
+
+{
+  &#34;job&#34;: {
+    &#34;setting&#34;: {
+      &#34;speed&#34;: {
+        &#34;channel&#34;: 2
+      }
+    },
+    &#34;content&#34;: [
+      {
+        &#34;reader&#34;: {
+          &#34;name&#34;: &#34;streamreader&#34;,
+          &#34;parameter&#34;: {
+            &#34;column&#34;: [
+              {
+                &#34;value&#34;: &#34;DataX&#34;,
+                &#34;type&#34;: &#34;string&#34;
+              },
+              {
+                &#34;value&#34;: &#34;test&#34;,
+                &#34;type&#34;: &#34;bytes&#34;
+              }
+            ],
+            &#34;sliceRecordCount&#34;: 100000
+          }
+        },
+        &#34;writer&#34;: {
+          &#34;name&#34;: &#34;adswriter&#34;,
+          &#34;parameter&#34;: {
+            &#34;odps&#34;: {
+              &#34;accessId&#34;: &#34;xxx&#34;,
+              &#34;accessKey&#34;: &#34;xxx&#34;,
+              &#34;account&#34;: &#34;xxx@aliyun.com&#34;,
+              &#34;odpsServer&#34;: &#34;xxx&#34;,
+              &#34;tunnelServer&#34;: &#34;xxx&#34;,
+              &#34;accountType&#34;: &#34;aliyun&#34;,
+              &#34;project&#34;: &#34;transfer_project&#34;
+            },
+            &#34;writeMode&#34;: &#34;load&#34;,
+            &#34;url&#34;: &#34;127.0.0.1:3306&#34;,
+            &#34;schema&#34;: &#34;schema&#34;,
+            &#34;table&#34;: &#34;table&#34;,
+            &#34;username&#34;: &#34;username&#34;,
+            &#34;password&#34;: &#34;password&#34;,
+            &#34;partition&#34;: &#34;&#34;,
+            &#34;lifeCycle&#34;: 2,
+            &#34;overWrite&#34;: true,
+          }
+        }
+      }
+    ]
+  }
+}
+
+这里使用一份从内存产生到ADS，使用Insert模式进行导入的数据。
+
+{
+  &#34;job&#34;: {
+    &#34;setting&#34;: {
+      &#34;speed&#34;: {
+        &#34;channel&#34;: 2
+      }
+    },
+    &#34;content&#34;: [
+      {
+        &#34;reader&#34;: {
+          &#34;name&#34;: &#34;streamreader&#34;,
+          &#34;parameter&#34;: {
+            &#34;column&#34;: [
+              {
+                &#34;value&#34;: &#34;DataX&#34;,
+                &#34;type&#34;: &#34;string&#34;
+              },
+              {
+                &#34;value&#34;: &#34;test&#34;,
+                &#34;type&#34;: &#34;bytes&#34;
+              }
+            ],
+            &#34;sliceRecordCount&#34;: 100000
+          }
+        },
+        &#34;writer&#34;: {
+          &#34;name&#34;: &#34;adswriter&#34;,
+          &#34;parameter&#34;: {
+            &#34;writeMode&#34;: &#34;insert&#34;,
+            &#34;url&#34;: &#34;127.0.0.1:3306&#34;,
+            &#34;schema&#34;: &#34;schema&#34;,
+            &#34;table&#34;: &#34;table&#34;,
+            &#34;column&#34;: [&#34;*&#34;],
+            &#34;username&#34;: &#34;username&#34;,
+            &#34;password&#34;: &#34;password&#34;,
+            &#34;partition&#34;: &#34;id,ds=2015&#34;
+          }
+        }
+      }
+    ]
+  }
+}
+3.2 参数说明 （用户配置规格）
+
+
+url" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://haokiu.com/blog/5d26f13c5f3e4cda84adc613514cdd53/" /><meta property="article:section" content="4" />
 <meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
@@ -111,30 +414,181 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="DataX ADS写入"/>
-<meta name="twitter:description" content="DataX ADS写入 1 快速介绍 欢迎ADS加入DataX生态圈！ADSWriter插件实现了其他数据源向ADS写入功能，现有DataX所有的数据源均可以无缝接入ADS，实现数据快速导入ADS。
+<meta name="twitter:description" content="DataX ADS写入
+
+1 快速介绍
+
+欢迎ADS加入DataX生态圈！ADSWriter插件实现了其他数据源向ADS写入功能，现有DataX所有的数据源均可以无缝接入ADS，实现数据快速导入ADS。
 ADS写入预计支持两种实现方式：
+
+
 ADSWriter 支持向ODPS中转落地导入ADS方式，优点在于当数据量较大时(&gt;1KW)，可以以较快速度进行导入，缺点引入了ODPS作为落地中转，因此牵涉三方系统(DataX、ADS、ODPS)鉴权认证。
+
+
 ADSWriter 同时支持向ADS直接写入的方式，优点在于小批量数据写入能够较快完成(&lt;1KW)，缺点在于大数据导入较慢。
+
+
 注意：
+
 如果从ODPS导入数据到ADS，请用户提前在源ODPS的Project中授权ADS Build账号具有读取你源表ODPS的权限，同时，ODPS源表创建人和ADS写入属于同一个阿里云账号。
+
+
+
+
+
 如果从非ODPS导入数据到ADS，请用户提前在目的端ADS空间授权ADS Build账号具备Load data权限。
+
 以上涉及ADS Build账号请联系ADS管理员提供。
-2 实现原理 ADS写入预计支持两种实现方式：
-2.1 Load模式 DataX 将数据导入ADS为当前导入任务分配的ADS项目表，随后DataX通知ADS完成数据加载。该类数据导入方式实际上是写ADS完成数据同步，由于ADS是分布式存储集群，因此该通道吞吐量较大，可以支持TB级别数据导入。
+2 实现原理
+ADS写入预计支持两种实现方式：
+2.1 Load模式
+DataX 将数据导入ADS为当前导入任务分配的ADS项目表，随后DataX通知ADS完成数据加载。该类数据导入方式实际上是写ADS完成数据同步，由于ADS是分布式存储集群，因此该通道吞吐量较大，可以支持TB级别数据导入。
+
+
+
+
 DataX底层得到明文的 jdbc://host:port/dbname &#43; username &#43; password &#43; table， 以此连接ADS， 执行show grants; 前置检查该用户是否有ADS中目标表的Load Data或者更高的权限。注意，此时ADSWriter使用用户填写的ADS用户名&#43;密码信息完成登录鉴权工作。
+
+
 检查通过后，通过ADS中目标表的元数据反向生成ODPS DDL，在ODPS中间project中，以ADSWriter的账户建立ODPS表（非分区表，生命周期设为1-2Day), 并调用ODPSWriter把数据源的数据写入该ODPS表中。
 注意，这里需要使用中转ODPS的账号AK向中转ODPS写入数据。
+
+
 写入完成后，以中转ODPS账号连接ADS，发起Load Data From ‘odps://中转project/中转table/&rsquo; [overwrite] into adsdb.adstable [partition (xx,xx=xx)]; 这个命令返回一个Job ID需要记录。
 注意，此时ADS使用自己的Build账号访问中转ODPS，因此需要中转ODPS对这个Build账号提前开放读取权限。
+
+
 连接ADS一分钟一次轮询执行 select state from information_schema.job_instances where job_id like ‘$Job ID’，查询状态，注意这个第一个一分钟可能查不到状态记录。
+
+
 Success或者Fail后返回给用户，然后删除中转ODPS表，任务结束。
+
+
 上述流程是从其他非ODPS数据源导入ADS流程，对于ODPS导入ADS流程使用如下流程：
-2.2 Insert模式 DataX 将数据直连ADS接口，利用ADS暴露的INSERT接口直写到ADS。该类数据导入方式写入吞吐量较小，不适合大批量数据写入。有如下注意点：
+
+
+2.2 Insert模式
+DataX 将数据直连ADS接口，利用ADS暴露的INSERT接口直写到ADS。该类数据导入方式写入吞吐量较小，不适合大批量数据写入。有如下注意点：
+
+
 ADSWriter使用JDBC连接直连ADS，并只使用了JDBC Statement进行数据插入。ADS不支持PreparedStatement，故ADSWriter只能单行多线程进行写入。
+
+
 ADSWriter支持筛选部分列，列换序等功能，即用户可以填写列。
+
+
 考虑到ADS负载问题，建议ADSWriter Insert模式建议用户使用TPS限流，最高在1W TPS。
+
+
 ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，保证数据在ADS整体更新。
-3 功能说明 3.1 配置样例 这里使用一份从内存产生到ADS，使用Load模式进行导入的数据。 { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 2 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;streamreader&#34;, &#34;parameter&#34;: { &#34;column&#34;: [ { &#34;value&#34;: &#34;DataX&#34;, &#34;type&#34;: &#34;string&#34; }, { &#34;value&#34;: &#34;test&#34;, &#34;type&#34;: &#34;bytes&#34; } ], &#34;sliceRecordCount&#34;: 100000 } }, &#34;writer&#34;: { &#34;name&#34;: &#34;adswriter&#34;, &#34;parameter&#34;: { &#34;odps&#34;: { &#34;accessId&#34;: &#34;xxx&#34;, &#34;accessKey&#34;: &#34;xxx&#34;, &#34;account&#34;: &#34;xxx@aliyun."/>
+
+
+3 功能说明
+3.1 配置样例
+
+这里使用一份从内存产生到ADS，使用Load模式进行导入的数据。
+
+{
+  &#34;job&#34;: {
+    &#34;setting&#34;: {
+      &#34;speed&#34;: {
+        &#34;channel&#34;: 2
+      }
+    },
+    &#34;content&#34;: [
+      {
+        &#34;reader&#34;: {
+          &#34;name&#34;: &#34;streamreader&#34;,
+          &#34;parameter&#34;: {
+            &#34;column&#34;: [
+              {
+                &#34;value&#34;: &#34;DataX&#34;,
+                &#34;type&#34;: &#34;string&#34;
+              },
+              {
+                &#34;value&#34;: &#34;test&#34;,
+                &#34;type&#34;: &#34;bytes&#34;
+              }
+            ],
+            &#34;sliceRecordCount&#34;: 100000
+          }
+        },
+        &#34;writer&#34;: {
+          &#34;name&#34;: &#34;adswriter&#34;,
+          &#34;parameter&#34;: {
+            &#34;odps&#34;: {
+              &#34;accessId&#34;: &#34;xxx&#34;,
+              &#34;accessKey&#34;: &#34;xxx&#34;,
+              &#34;account&#34;: &#34;xxx@aliyun.com&#34;,
+              &#34;odpsServer&#34;: &#34;xxx&#34;,
+              &#34;tunnelServer&#34;: &#34;xxx&#34;,
+              &#34;accountType&#34;: &#34;aliyun&#34;,
+              &#34;project&#34;: &#34;transfer_project&#34;
+            },
+            &#34;writeMode&#34;: &#34;load&#34;,
+            &#34;url&#34;: &#34;127.0.0.1:3306&#34;,
+            &#34;schema&#34;: &#34;schema&#34;,
+            &#34;table&#34;: &#34;table&#34;,
+            &#34;username&#34;: &#34;username&#34;,
+            &#34;password&#34;: &#34;password&#34;,
+            &#34;partition&#34;: &#34;&#34;,
+            &#34;lifeCycle&#34;: 2,
+            &#34;overWrite&#34;: true,
+          }
+        }
+      }
+    ]
+  }
+}
+
+这里使用一份从内存产生到ADS，使用Insert模式进行导入的数据。
+
+{
+  &#34;job&#34;: {
+    &#34;setting&#34;: {
+      &#34;speed&#34;: {
+        &#34;channel&#34;: 2
+      }
+    },
+    &#34;content&#34;: [
+      {
+        &#34;reader&#34;: {
+          &#34;name&#34;: &#34;streamreader&#34;,
+          &#34;parameter&#34;: {
+            &#34;column&#34;: [
+              {
+                &#34;value&#34;: &#34;DataX&#34;,
+                &#34;type&#34;: &#34;string&#34;
+              },
+              {
+                &#34;value&#34;: &#34;test&#34;,
+                &#34;type&#34;: &#34;bytes&#34;
+              }
+            ],
+            &#34;sliceRecordCount&#34;: 100000
+          }
+        },
+        &#34;writer&#34;: {
+          &#34;name&#34;: &#34;adswriter&#34;,
+          &#34;parameter&#34;: {
+            &#34;writeMode&#34;: &#34;insert&#34;,
+            &#34;url&#34;: &#34;127.0.0.1:3306&#34;,
+            &#34;schema&#34;: &#34;schema&#34;,
+            &#34;table&#34;: &#34;table&#34;,
+            &#34;column&#34;: [&#34;*&#34;],
+            &#34;username&#34;: &#34;username&#34;,
+            &#34;password&#34;: &#34;password&#34;,
+            &#34;partition&#34;: &#34;id,ds=2015&#34;
+          }
+        }
+      }
+    ]
+  }
+}
+3.2 参数说明 （用户配置规格）
+
+
+url"/>
 
 
 <script type="application/ld+json">
@@ -145,7 +599,7 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
     {
       "@type": "ListItem",
       "position":  1 ,
-      "name": "4s",
+      "name": "4",
       "item": "https://haokiu.com/4/"
     }, 
     {
@@ -163,13 +617,13 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
   "@type": "BlogPosting",
   "headline": "DataX ADS写入",
   "name": "DataX ADS写入",
-  "description": "DataX ADS写入 1 快速介绍 欢迎ADS加入DataX生态圈！ADSWriter插件实现了其他数据源向ADS写入功能，现有DataX所有的数据源均可以无缝接入ADS，实现数据快速导入ADS。\nADS写入预计支持两种实现方式：\nADSWriter 支持向ODPS中转落地导入ADS方式，优点在于当数据量较大时(\u0026gt;1KW)，可以以较快速度进行导入，缺点引入了ODPS作为落地中转，因此牵涉三方系统(DataX、ADS、ODPS)鉴权认证。\nADSWriter 同时支持向ADS直接写入的方式，优点在于小批量数据写入能够较快完成(\u0026lt;1KW)，缺点在于大数据导入较慢。\n注意：\n如果从ODPS导入数据到ADS，请用户提前在源ODPS的Project中授权ADS Build账号具有读取你源表ODPS的权限，同时，ODPS源表创建人和ADS写入属于同一个阿里云账号。\n如果从非ODPS导入数据到ADS，请用户提前在目的端ADS空间授权ADS Build账号具备Load data权限。\n以上涉及ADS Build账号请联系ADS管理员提供。\n2 实现原理 ADS写入预计支持两种实现方式：\n2.1 Load模式 DataX 将数据导入ADS为当前导入任务分配的ADS项目表，随后DataX通知ADS完成数据加载。该类数据导入方式实际上是写ADS完成数据同步，由于ADS是分布式存储集群，因此该通道吞吐量较大，可以支持TB级别数据导入。\nDataX底层得到明文的 jdbc://host:port/dbname + username + password + table， 以此连接ADS， 执行show grants; 前置检查该用户是否有ADS中目标表的Load Data或者更高的权限。注意，此时ADSWriter使用用户填写的ADS用户名+密码信息完成登录鉴权工作。\n检查通过后，通过ADS中目标表的元数据反向生成ODPS DDL，在ODPS中间project中，以ADSWriter的账户建立ODPS表（非分区表，生命周期设为1-2Day), 并调用ODPSWriter把数据源的数据写入该ODPS表中。\n注意，这里需要使用中转ODPS的账号AK向中转ODPS写入数据。\n写入完成后，以中转ODPS账号连接ADS，发起Load Data From ‘odps://中转project/中转table/\u0026rsquo; [overwrite] into adsdb.adstable [partition (xx,xx=xx)]; 这个命令返回一个Job ID需要记录。\n注意，此时ADS使用自己的Build账号访问中转ODPS，因此需要中转ODPS对这个Build账号提前开放读取权限。\n连接ADS一分钟一次轮询执行 select state from information_schema.job_instances where job_id like ‘$Job ID’，查询状态，注意这个第一个一分钟可能查不到状态记录。\nSuccess或者Fail后返回给用户，然后删除中转ODPS表，任务结束。\n上述流程是从其他非ODPS数据源导入ADS流程，对于ODPS导入ADS流程使用如下流程：\n2.2 Insert模式 DataX 将数据直连ADS接口，利用ADS暴露的INSERT接口直写到ADS。该类数据导入方式写入吞吐量较小，不适合大批量数据写入。有如下注意点：\nADSWriter使用JDBC连接直连ADS，并只使用了JDBC Statement进行数据插入。ADS不支持PreparedStatement，故ADSWriter只能单行多线程进行写入。\nADSWriter支持筛选部分列，列换序等功能，即用户可以填写列。\n考虑到ADS负载问题，建议ADSWriter Insert模式建议用户使用TPS限流，最高在1W TPS。\nADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，保证数据在ADS整体更新。\n3 功能说明 3.1 配置样例 这里使用一份从内存产生到ADS，使用Load模式进行导入的数据。 { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { \u0026#34;channel\u0026#34;: 2 } }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;streamreader\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;column\u0026#34;: [ { \u0026#34;value\u0026#34;: \u0026#34;DataX\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34; }, { \u0026#34;value\u0026#34;: \u0026#34;test\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;bytes\u0026#34; } ], \u0026#34;sliceRecordCount\u0026#34;: 100000 } }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;adswriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;odps\u0026#34;: { \u0026#34;accessId\u0026#34;: \u0026#34;xxx\u0026#34;, \u0026#34;accessKey\u0026#34;: \u0026#34;xxx\u0026#34;, \u0026#34;account\u0026#34;: \u0026#34;xxx@aliyun.",
+  "description": "DataX ADS写入 1 快速介绍 欢迎ADS加入DataX生态圈！ADSWriter插件实现了其他数据源向ADS写入功能，现有DataX所有的数据源均可以无缝接入ADS，实现数据快速导入ADS。\nADS写入预计支持两种实现方式：\nADSWriter 支持向ODPS中转落地导入ADS方式，优点在于当数据量较大时(\u0026gt;1KW)，可以以较快速度进行导入，缺点引入了ODPS作为落地中转，因此牵涉三方系统(DataX、ADS、ODPS)鉴权认证。\nADSWriter 同时支持向ADS直接写入的方式，优点在于小批量数据写入能够较快完成(\u0026lt;1KW)，缺点在于大数据导入较慢。\n注意：\n如果从ODPS导入数据到ADS，请用户提前在源ODPS的Project中授权ADS Build账号具有读取你源表ODPS的权限，同时，ODPS源表创建人和ADS写入属于同一个阿里云账号。\n如果从非ODPS导入数据到ADS，请用户提前在目的端ADS空间授权ADS Build账号具备Load data权限。\n以上涉及ADS Build账号请联系ADS管理员提供。\n2 实现原理 ADS写入预计支持两种实现方式：\n2.1 Load模式 DataX 将数据导入ADS为当前导入任务分配的ADS项目表，随后DataX通知ADS完成数据加载。该类数据导入方式实际上是写ADS完成数据同步，由于ADS是分布式存储集群，因此该通道吞吐量较大，可以支持TB级别数据导入。\nDataX底层得到明文的 jdbc://host:port/dbname + username + password + table， 以此连接ADS， 执行show grants; 前置检查该用户是否有ADS中目标表的Load Data或者更高的权限。注意，此时ADSWriter使用用户填写的ADS用户名+密码信息完成登录鉴权工作。\n检查通过后，通过ADS中目标表的元数据反向生成ODPS DDL，在ODPS中间project中，以ADSWriter的账户建立ODPS表（非分区表，生命周期设为1-2Day), 并调用ODPSWriter把数据源的数据写入该ODPS表中。\n注意，这里需要使用中转ODPS的账号AK向中转ODPS写入数据。\n写入完成后，以中转ODPS账号连接ADS，发起Load Data From ‘odps://中转project/中转table/\u0026rsquo; [overwrite] into adsdb.adstable [partition (xx,xx=xx)]; 这个命令返回一个Job ID需要记录。\n注意，此时ADS使用自己的Build账号访问中转ODPS，因此需要中转ODPS对这个Build账号提前开放读取权限。\n连接ADS一分钟一次轮询执行 select state from information_schema.job_instances where job_id like ‘$Job ID’，查询状态，注意这个第一个一分钟可能查不到状态记录。\nSuccess或者Fail后返回给用户，然后删除中转ODPS表，任务结束。\n上述流程是从其他非ODPS数据源导入ADS流程，对于ODPS导入ADS流程使用如下流程：\n2.2 Insert模式 DataX 将数据直连ADS接口，利用ADS暴露的INSERT接口直写到ADS。该类数据导入方式写入吞吐量较小，不适合大批量数据写入。有如下注意点：\nADSWriter使用JDBC连接直连ADS，并只使用了JDBC Statement进行数据插入。ADS不支持PreparedStatement，故ADSWriter只能单行多线程进行写入。\nADSWriter支持筛选部分列，列换序等功能，即用户可以填写列。\n考虑到ADS负载问题，建议ADSWriter Insert模式建议用户使用TPS限流，最高在1W TPS。\nADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，保证数据在ADS整体更新。\n3 功能说明 3.1 配置样例 这里使用一份从内存产生到ADS，使用Load模式进行导入的数据。 { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { \u0026#34;channel\u0026#34;: 2 } }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;streamreader\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;column\u0026#34;: [ { \u0026#34;value\u0026#34;: \u0026#34;DataX\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34; }, { \u0026#34;value\u0026#34;: \u0026#34;test\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;bytes\u0026#34; } ], \u0026#34;sliceRecordCount\u0026#34;: 100000 } }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;adswriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;odps\u0026#34;: { \u0026#34;accessId\u0026#34;: \u0026#34;xxx\u0026#34;, \u0026#34;accessKey\u0026#34;: \u0026#34;xxx\u0026#34;, \u0026#34;account\u0026#34;: \u0026#34;xxx@aliyun.com\u0026#34;, \u0026#34;odpsServer\u0026#34;: \u0026#34;xxx\u0026#34;, \u0026#34;tunnelServer\u0026#34;: \u0026#34;xxx\u0026#34;, \u0026#34;accountType\u0026#34;: \u0026#34;aliyun\u0026#34;, \u0026#34;project\u0026#34;: \u0026#34;transfer_project\u0026#34; }, \u0026#34;writeMode\u0026#34;: \u0026#34;load\u0026#34;, \u0026#34;url\u0026#34;: \u0026#34;127.0.0.1:3306\u0026#34;, \u0026#34;schema\u0026#34;: \u0026#34;schema\u0026#34;, \u0026#34;table\u0026#34;: \u0026#34;table\u0026#34;, \u0026#34;username\u0026#34;: \u0026#34;username\u0026#34;, \u0026#34;password\u0026#34;: \u0026#34;password\u0026#34;, \u0026#34;partition\u0026#34;: \u0026#34;\u0026#34;, \u0026#34;lifeCycle\u0026#34;: 2, \u0026#34;overWrite\u0026#34;: true, } } } ] } } 这里使用一份从内存产生到ADS，使用Insert模式进行导入的数据。 { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { \u0026#34;channel\u0026#34;: 2 } }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;streamreader\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;column\u0026#34;: [ { \u0026#34;value\u0026#34;: \u0026#34;DataX\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;string\u0026#34; }, { \u0026#34;value\u0026#34;: \u0026#34;test\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;bytes\u0026#34; } ], \u0026#34;sliceRecordCount\u0026#34;: 100000 } }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;adswriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;writeMode\u0026#34;: \u0026#34;insert\u0026#34;, \u0026#34;url\u0026#34;: \u0026#34;127.0.0.1:3306\u0026#34;, \u0026#34;schema\u0026#34;: \u0026#34;schema\u0026#34;, \u0026#34;table\u0026#34;: \u0026#34;table\u0026#34;, \u0026#34;column\u0026#34;: [\u0026#34;*\u0026#34;], \u0026#34;username\u0026#34;: \u0026#34;username\u0026#34;, \u0026#34;password\u0026#34;: \u0026#34;password\u0026#34;, \u0026#34;partition\u0026#34;: \u0026#34;id,ds=2015\u0026#34; } } } ] } } 3.2 参数说明 （用户配置规格） url\n",
   "keywords": [
     "datax"
   ],
   "articleBody": "DataX ADS写入 1 快速介绍 欢迎ADS加入DataX生态圈！ADSWriter插件实现了其他数据源向ADS写入功能，现有DataX所有的数据源均可以无缝接入ADS，实现数据快速导入ADS。\nADS写入预计支持两种实现方式：\nADSWriter 支持向ODPS中转落地导入ADS方式，优点在于当数据量较大时(\u003e1KW)，可以以较快速度进行导入，缺点引入了ODPS作为落地中转，因此牵涉三方系统(DataX、ADS、ODPS)鉴权认证。\nADSWriter 同时支持向ADS直接写入的方式，优点在于小批量数据写入能够较快完成(\u003c1KW)，缺点在于大数据导入较慢。\n注意：\n如果从ODPS导入数据到ADS，请用户提前在源ODPS的Project中授权ADS Build账号具有读取你源表ODPS的权限，同时，ODPS源表创建人和ADS写入属于同一个阿里云账号。\n如果从非ODPS导入数据到ADS，请用户提前在目的端ADS空间授权ADS Build账号具备Load data权限。\n以上涉及ADS Build账号请联系ADS管理员提供。\n2 实现原理 ADS写入预计支持两种实现方式：\n2.1 Load模式 DataX 将数据导入ADS为当前导入任务分配的ADS项目表，随后DataX通知ADS完成数据加载。该类数据导入方式实际上是写ADS完成数据同步，由于ADS是分布式存储集群，因此该通道吞吐量较大，可以支持TB级别数据导入。\nDataX底层得到明文的 jdbc://host:port/dbname + username + password + table， 以此连接ADS， 执行show grants; 前置检查该用户是否有ADS中目标表的Load Data或者更高的权限。注意，此时ADSWriter使用用户填写的ADS用户名+密码信息完成登录鉴权工作。\n检查通过后，通过ADS中目标表的元数据反向生成ODPS DDL，在ODPS中间project中，以ADSWriter的账户建立ODPS表（非分区表，生命周期设为1-2Day), 并调用ODPSWriter把数据源的数据写入该ODPS表中。\n注意，这里需要使用中转ODPS的账号AK向中转ODPS写入数据。\n写入完成后，以中转ODPS账号连接ADS，发起Load Data From ‘odps://中转project/中转table/’ [overwrite] into adsdb.adstable [partition (xx,xx=xx)]; 这个命令返回一个Job ID需要记录。\n注意，此时ADS使用自己的Build账号访问中转ODPS，因此需要中转ODPS对这个Build账号提前开放读取权限。\n连接ADS一分钟一次轮询执行 select state from information_schema.job_instances where job_id like ‘$Job ID’，查询状态，注意这个第一个一分钟可能查不到状态记录。\nSuccess或者Fail后返回给用户，然后删除中转ODPS表，任务结束。\n上述流程是从其他非ODPS数据源导入ADS流程，对于ODPS导入ADS流程使用如下流程：\n2.2 Insert模式 DataX 将数据直连ADS接口，利用ADS暴露的INSERT接口直写到ADS。该类数据导入方式写入吞吐量较小，不适合大批量数据写入。有如下注意点：\nADSWriter使用JDBC连接直连ADS，并只使用了JDBC Statement进行数据插入。ADS不支持PreparedStatement，故ADSWriter只能单行多线程进行写入。\nADSWriter支持筛选部分列，列换序等功能，即用户可以填写列。\n考虑到ADS负载问题，建议ADSWriter Insert模式建议用户使用TPS限流，最高在1W TPS。\nADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，保证数据在ADS整体更新。\n3 功能说明 3.1 配置样例 这里使用一份从内存产生到ADS，使用Load模式进行导入的数据。 { \"job\": { \"setting\": { \"speed\": { \"channel\": 2 } }, \"content\": [ { \"reader\": { \"name\": \"streamreader\", \"parameter\": { \"column\": [ { \"value\": \"DataX\", \"type\": \"string\" }, { \"value\": \"test\", \"type\": \"bytes\" } ], \"sliceRecordCount\": 100000 } }, \"writer\": { \"name\": \"adswriter\", \"parameter\": { \"odps\": { \"accessId\": \"xxx\", \"accessKey\": \"xxx\", \"account\": \"xxx@aliyun.com\", \"odpsServer\": \"xxx\", \"tunnelServer\": \"xxx\", \"accountType\": \"aliyun\", \"project\": \"transfer_project\" }, \"writeMode\": \"load\", \"url\": \"127.0.0.1:3306\", \"schema\": \"schema\", \"table\": \"table\", \"username\": \"username\", \"password\": \"password\", \"partition\": \"\", \"lifeCycle\": 2, \"overWrite\": true, } } } ] } } 这里使用一份从内存产生到ADS，使用Insert模式进行导入的数据。 { \"job\": { \"setting\": { \"speed\": { \"channel\": 2 } }, \"content\": [ { \"reader\": { \"name\": \"streamreader\", \"parameter\": { \"column\": [ { \"value\": \"DataX\", \"type\": \"string\" }, { \"value\": \"test\", \"type\": \"bytes\" } ], \"sliceRecordCount\": 100000 } }, \"writer\": { \"name\": \"adswriter\", \"parameter\": { \"writeMode\": \"insert\", \"url\": \"127.0.0.1:3306\", \"schema\": \"schema\", \"table\": \"table\", \"column\": [\"*\"], \"username\": \"username\", \"password\": \"password\", \"partition\": \"id,ds=2015\" } } } ] } } 3.2 参数说明 （用户配置规格） url\n描述：ADS连接信息，格式为\"ip:port\"。\n必选：是 默认值：无 schema\n描述：ADS的schema名称。\n必选：是 默认值：无 username\n描述：ADS对应的username，目前就是accessId 必选：是 默认值：无 password\n描述：ADS对应的password，目前就是accessKey 必选：是 默认值：无 table\n描述：目的表的表名称。\n必选：是 默认值：无 partition\n描述：目标表的分区名称，当目标表为分区表，需要指定该字段。\n必选：否 默认值：无 writeMode\n描述：支持Load和Insert两种写入模式\n必选：是 默认值：无 column\n描述：目的表字段列表，可以为[\"*\"]，或者具体的字段列表，例如[“a”, “b”, “c”]\n必选：是 默认值：无 overWrite\n描述：ADS写入是否覆盖当前写入的表，true为覆盖写入，false为不覆盖(追加)写入。当writeMode为Load，该值才会生效。\n必选：是 默认值：无 lifeCycle\n描述：ADS 临时表生命周期。当writeMode为Load时，该值才会生效。\n必选：是 默认值：无 batchSize\n描述：ADS 提交数据写的批量条数，当writeMode为insert时，该值才会生效。\n必选：writeMode为insert时才有用 默认值：32 bufferSize\n描述：DataX数据收集缓冲区大小，缓冲区的目的是攒一个较大的buffer，源头的数据首先进入到此buffer中进行排序，排序完成后再提交ads写。排序是根据ads的分区列模式进行的，排序的目的是数据顺序对ADS服务端更友好，出于性能考虑。bufferSize缓冲区中的数据会经过batchSize批量提交到ADS中，一般如果要设置bufferSize，设置bufferSize为batchSize数量的多倍。当writeMode为insert时，该值才会生效。\n必选：writeMode为insert时才有用 默认值：默认不配置不开启此功能 3.3 类型转换 DataX 内部类型 ADS 数据类型 Long int, tinyint, smallint, int, bigint Double float, double, decimal String varchar Date date Boolean bool Bytes 无 注意:\nmultivalue ADS支持multivalue类型，DataX对于该类型支持待定？ 4 插件约束 如果Reader为ODPS，且ADSWriter写入模式为Load模式时，ODPS的partition只支持如下三种配置方式(以两级分区为例)：\n\"partition\":[\"pt=*,ds=*\"] (读取test表所有分区的数据) \"partition\":[\"pt=1,ds=*\"] (读取test表下面，一级分区pt=1下面的所有二级分区) \"partition\":[\"pt=1,ds=hangzhou\"] (读取test表下面，一级分区pt=1下面，二级分区ds=hz的数据) 5 性能报告（线上环境实测） 5.1 环境准备 5.2 测试报告 6 FAQ ",
   "wordCount" : "336",
-  "inLanguage": "en",
+  "inLanguage": "zh-cn",
   "datePublished": "2021-02-02T17:45:01Z",
   "dateModified": "2021-02-02T17:45:01Z",
   "mainEntityOfPage": {
@@ -225,6 +679,8 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -234,32 +690,32 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/1/" title="1s">
+                <a href="https://haokiu.com/1/" title="1">
                     <span>后端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/2/" title="2s">
+                <a href="https://haokiu.com/2/" title="2">
                     <span>前端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/3/" title="3s">
+                <a href="https://haokiu.com/3/" title="3">
                     <span>区块链</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/4/" title="4s">
+                <a href="https://haokiu.com/4/" title="4">
                     <span>大数据</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/5/" title="5s">
+                <a href="https://haokiu.com/5/" title="5">
                     <span>linux</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/6/" title="6s">
+                <a href="https://haokiu.com/6/" title="6">
                     <span>其他</span>
                 </a>
             </li>
@@ -280,7 +736,7 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    
     <h1 class="post-title">
       DataX ADS写入
     </h1>
@@ -340,7 +796,7 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
   <div class="post-content"><h1 id="datax-ads写入">DataX ADS写入</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
-<!-- raw HTML omitted -->
+<br />
 <p>欢迎ADS加入DataX生态圈！ADSWriter插件实现了其他数据源向ADS写入功能，现有DataX所有的数据源均可以无缝接入ADS，实现数据快速导入ADS。</p>
 <p>ADS写入预计支持两种实现方式：</p>
 <ul>
@@ -517,10 +973,10 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
 <p>描述：ADS连接信息，格式为&quot;ip:port&quot;。</p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -531,10 +987,10 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
 <p>描述：ADS的schema名称。</p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -542,13 +998,13 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
 <p><strong>username</strong></p>
 <ul>
 <li>
-<p>描述：ADS对应的username，目前就是accessId <!-- raw HTML omitted --></p>
+<p>描述：ADS对应的username，目前就是accessId <br /></p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -556,13 +1012,13 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
 <p><strong>password</strong></p>
 <ul>
 <li>
-<p>描述：ADS对应的password，目前就是accessKey <!-- raw HTML omitted --></p>
+<p>描述：ADS对应的password，目前就是accessKey <br /></p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -573,10 +1029,10 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
 <p>描述：目的表的表名称。</p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -587,10 +1043,10 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
 <p>描述：目标表的分区名称，当目标表为分区表，需要指定该字段。</p>
 </li>
 <li>
-<p>必选：否 <!-- raw HTML omitted --></p>
+<p>必选：否 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -601,10 +1057,10 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
 <p>描述：支持Load和Insert两种写入模式</p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -615,10 +1071,10 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
 <p>描述：目的表字段列表，可以为[&quot;*&quot;]，或者具体的字段列表，例如[&ldquo;a&rdquo;, &ldquo;b&rdquo;, &ldquo;c&rdquo;]</p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -629,10 +1085,10 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
 <p>描述：ADS写入是否覆盖当前写入的表，true为覆盖写入，false为不覆盖(追加)写入。当writeMode为Load，该值才会生效。</p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -643,10 +1099,10 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
 <p>描述：ADS 临时表生命周期。当writeMode为Load时，该值才会生效。</p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -657,10 +1113,10 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
 <p>描述：ADS 提交数据写的批量条数，当writeMode为insert时，该值才会生效。</p>
 </li>
 <li>
-<p>必选：writeMode为insert时才有用 <!-- raw HTML omitted --></p>
+<p>必选：writeMode为insert时才有用 <br /></p>
 </li>
 <li>
-<p>默认值：32 <!-- raw HTML omitted --></p>
+<p>默认值：32 <br /></p>
 </li>
 </ul>
 </li>
@@ -671,48 +1127,48 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
 <p>描述：DataX数据收集缓冲区大小，缓冲区的目的是攒一个较大的buffer，源头的数据首先进入到此buffer中进行排序，排序完成后再提交ads写。排序是根据ads的分区列模式进行的，排序的目的是数据顺序对ADS服务端更友好，出于性能考虑。bufferSize缓冲区中的数据会经过batchSize批量提交到ADS中，一般如果要设置bufferSize，设置bufferSize为batchSize数量的多倍。当writeMode为insert时，该值才会生效。</p>
 </li>
 <li>
-<p>必选：writeMode为insert时才有用 <!-- raw HTML omitted --></p>
+<p>必选：writeMode为insert时才有用 <br /></p>
 </li>
 <li>
-<p>默认值：默认不配置不开启此功能 <!-- raw HTML omitted --></p>
+<p>默认值：默认不配置不开启此功能 <br /></p>
 </li>
 </ul>
 </li>
 </ul>
 <h3 id="33-类型转换">3.3 类型转换</h3>
 <table>
-<thead>
-<tr>
-<th>DataX 内部类型</th>
-<th>ADS 数据类型</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Long</td>
-<td>int, tinyint, smallint, int, bigint</td>
-</tr>
-<tr>
-<td>Double</td>
-<td>float, double, decimal</td>
-</tr>
-<tr>
-<td>String</td>
-<td>varchar</td>
-</tr>
-<tr>
-<td>Date</td>
-<td>date</td>
-</tr>
-<tr>
-<td>Boolean</td>
-<td>bool</td>
-</tr>
-<tr>
-<td>Bytes</td>
-<td>无</td>
-</tr>
-</tbody>
+	<thead>
+			<tr>
+					<th>DataX 内部类型</th>
+					<th>ADS 数据类型</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Long</td>
+					<td>int, tinyint, smallint, int, bigint</td>
+			</tr>
+			<tr>
+					<td>Double</td>
+					<td>float, double, decimal</td>
+			</tr>
+			<tr>
+					<td>String</td>
+					<td>varchar</td>
+			</tr>
+			<tr>
+					<td>Date</td>
+					<td>date</td>
+			</tr>
+			<tr>
+					<td>Boolean</td>
+					<td>bool</td>
+			</tr>
+			<tr>
+					<td>Bytes</td>
+					<td>无</td>
+			</tr>
+	</tbody>
 </table>
 <p>注意:</p>
 <ul>
@@ -732,13 +1188,21 @@ ADSWriter在所有Task完成写入任务后，Job Post单例执行flush工作，
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+      <li><a href="https://haokiu.com/tags/datax/">Datax</a></li>
     </ul>
 
   </footer>
 </article>
     </main>
     
+<footer class="footer">
+    <span>haokiu.com</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>linux on haokiu</title>
+    <title>Linux on haokiu</title>
     <link>https://haokiu.com/tags/linux/</link>
-    <description>Recent content in linux on haokiu</description>
+    <description>Recent content in Linux on haokiu</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
     <copyright>haokiu.com</copyright>
@@ -14,9 +14,11 @@
       <pubDate>Tue, 02 Feb 2021 20:57:44 +0000</pubDate>
       
       <guid>https://haokiu.com/blog/a0lZoj/</guid>
-      <description>linux复制文件和目录用cp命令，--parents 参数可以确保不存在目录的创建，比如文件 cp --parents java/doc/readme.md ../doc ，如果目录 doc不存在目录：java/doc则会创建。
-高级操作：
-#查找当前目录下所有.md文件，并将它们复制到DataxDoc目录，如果目录不存在则双肩 find . -name &amp;#34;*.md&amp;#34; | xargs -I {} cp --parents {} ../DataxDoc </description>
+      <description>&lt;p&gt;linux复制文件和目录用cp命令，&lt;code&gt;--parents&lt;/code&gt; 参数可以确保不存在目录的创建，比如文件 &lt;code&gt;cp --parents java/doc/readme.md ../doc&lt;/code&gt; ，如果目录 doc不存在目录：java/doc则会创建。&lt;/p&gt;
+&lt;p&gt;高级操作：&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;#查找当前目录下所有.md文件，并将它们复制到DataxDoc目录，如果目录不存在则双肩
+find . -name &amp;#34;*.md&amp;#34; | xargs -I {} cp --parents {} ../DataxDoc
+&lt;/code&gt;&lt;/pre&gt;</description>
     </item>
     
     <item>
@@ -25,16 +27,36 @@
       <pubDate>Thu, 14 Jan 2021 15:20:19 +0000</pubDate>
       
       <guid>https://haokiu.com/blog/fhRygg/</guid>
-      <description>什么是 Vim？ Vim 是一个历史悠久的文本编辑器，可以追溯到 qed。 Bram Moolenaar 于 1991 年发布初始版本。
-Linux、Mac 用户，可以使用包管理器安装 Vim，对于 Windows 用户，可以从 我的网盘 下载。 该版本可轻易添加 python 、python3 、lua 等支持，只需要安装 python、lua 即可。
-项目在 Github 上开发，项目讨论请订阅 vim_dev 邮件列表。
-通过阅读 Why, oh WHY, do those #?@! nutheads use vi? 来对 Vim 进行大致的了解。
-Vim 哲学 Vim 采用模式编辑的理念，即它提供了多种模式，按键在不同的模式下作用不同。 你可以在普通模式 下浏览文件，在插入模式下插入文本， 在可视模式下选择行，在命令模式下执行命令等等。起初这听起来可能很复杂， 但是这有一个很大的优点：不需要通过同时按住多个键来完成操作， 大多数时候你只需要依次按下这些按键即可。越常用的操作，所需要的按键数量越少。
-和模式编辑紧密相连的概念是 操作符 和 动作。操作符 指的是开始某个行为， 例如：修改、删除或者选择文本，之后你要用一个 动作 来指定需要操作的文本区域。 比如，要改变括号内的文本，需要执行 ci( （读做 change inner parentheses）； 删除整个段落的内容，需要执行 dap （读做：delete around paragraph）。
-如果你能看见 Vim 老司机操作，你会发现他们使用 Vim 脚本语言就如同钢琴师弹钢琴一样。复杂的操作只需要几个按键就能完成。他们甚至不用刻意去想，因为这已经成为肌肉记忆了。这减少认识负荷并帮助人们专注于实际任务。
-入门 Vim 自带一个交互式的教程，内含你需要了解的最基础的信息，你可以通过终端运行以下命令打开教程：
-$ vimtutor 不要因为这个看上去很无聊而跳过，按照此教程多练习。你以前用的 IDE 或者其他编辑器很少是有“模式”概念的，因此一开始你会很难适应模式切换。但是你 Vim 使用的越多，肌肉记忆 将越容易形成。
-Vim 基于一个 vi 克隆，叫做 Stevie，支持两种运行模式：&amp;ldquo;compatible&amp;rdquo; 和 &amp;ldquo;nocompatible&amp;rdquo;。在兼容模式下运行 Vim 意味着使用 vi 的默认设置，而不是 Vim 的默认设置。除非你新建一个用户的 vimrc 或者使用 vim -N 命令启动 Vim，否则就是在兼容模式下运行 Vim！请大家不要在兼容模式下运行 Vim。</description>
+      <description>&lt;h2 id=&#34;什么是-vim&#34;&gt;什么是 Vim？&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/vim/vim&#34;&gt;Vim&lt;/a&gt; 是一个历史悠久的文本编辑器，可以追溯到
+&lt;a href=&#34;https://en.wikipedia.org/wiki/QED_(text_editor)&#34;&gt;qed&lt;/a&gt;。
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Bram_Moolenaar&#34;&gt;Bram Moolenaar&lt;/a&gt; 于
+1991 年发布初始版本。&lt;/p&gt;
+&lt;p&gt;Linux、Mac 用户，可以使用包管理器安装 Vim，对于 Windows 用户，可以从
+&lt;a href=&#34;https://share.weiyun.com/da2be5937ac0e2bd3abc26355fad1204&#34;&gt;我的网盘&lt;/a&gt; 下载。
+该版本可轻易添加 &lt;code&gt;python&lt;/code&gt; 、&lt;code&gt;python3&lt;/code&gt; 、&lt;code&gt;lua&lt;/code&gt; 等支持，只需要安装 python、lua
+即可。&lt;/p&gt;
+&lt;p&gt;项目在 &lt;a href=&#34;https://github.com/vim/vim&#34;&gt;Github&lt;/a&gt; 上开发，项目讨论请订阅
+&lt;a href=&#34;https://groups.google.com/forum/#!forum/vim_dev&#34;&gt;&lt;code&gt;vim_dev&lt;/code&gt;&lt;/a&gt; 邮件列表。&lt;/p&gt;
+&lt;p&gt;通过阅读 &lt;a href=&#34;http://www.viemu.com/a-why-vi-vim.html&#34;&gt;Why, oh WHY, do those #?@! nutheads use vi?&lt;/a&gt;
+来对 Vim 进行大致的了解。&lt;/p&gt;
+&lt;h2 id=&#34;vim-哲学&#34;&gt;Vim 哲学&lt;/h2&gt;
+&lt;p&gt;Vim 采用模式编辑的理念，即它提供了多种模式，按键在不同的模式下作用不同。
+你可以在&lt;strong&gt;普通模式&lt;/strong&gt; 下浏览文件，在&lt;strong&gt;插入模式&lt;/strong&gt;下插入文本，
+在&lt;strong&gt;可视模式&lt;/strong&gt;下选择行，在&lt;strong&gt;命令模式&lt;/strong&gt;下执行命令等等。起初这听起来可能很复杂，
+但是这有一个很大的优点：不需要通过同时按住多个键来完成操作，
+大多数时候你只需要依次按下这些按键即可。越常用的操作，所需要的按键数量越少。&lt;/p&gt;
+&lt;p&gt;和模式编辑紧密相连的概念是 &lt;strong&gt;操作符&lt;/strong&gt; 和 &lt;strong&gt;动作&lt;/strong&gt;。&lt;strong&gt;操作符&lt;/strong&gt; 指的是开始某个行为，
+例如：修改、删除或者选择文本，之后你要用一个 &lt;strong&gt;动作&lt;/strong&gt; 来指定需要操作的文本区域。
+比如，要改变括号内的文本，需要执行 &lt;code&gt;ci(&lt;/code&gt; （读做 &lt;code&gt;change inner parentheses&lt;/code&gt;）；
+删除整个段落的内容，需要执行 &lt;code&gt;dap&lt;/code&gt; （读做：&lt;code&gt;delete around paragraph&lt;/code&gt;）。&lt;/p&gt;
+&lt;p&gt;如果你能看见 Vim 老司机操作，你会发现他们使用 Vim 脚本语言就如同钢琴师弹钢琴一样。复杂的操作只需要几个按键就能完成。他们甚至不用刻意去想，因为这已经成为&lt;a href=&#34;https://en.wikipedia.org/wiki/Muscle_memory&#34;&gt;肌肉记忆&lt;/a&gt;了。这减少&lt;a href=&#34;https://en.wikipedia.org/wiki/Cognitive_load&#34;&gt;认识负荷&lt;/a&gt;并帮助人们专注于实际任务。&lt;/p&gt;
+&lt;h2 id=&#34;入门&#34;&gt;入门&lt;/h2&gt;
+&lt;p&gt;Vim 自带一个交互式的教程，内含你需要了解的最基础的信息，你可以通过终端运行以下命令打开教程：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ vimtutor
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;不要因为这个看上去很无聊而跳过，按照此教程多练习。你以前用的 IDE 或者其他编辑器很少是有“模式”概念的，因此一开始你会很难适应模式切换。但是你 Vim 使用的越多，&lt;a href=&#34;https://en.wikipedia.org/wiki/Muscle_memory&#34;&gt;肌肉记忆&lt;/a&gt; 将越容易形成。&lt;/p&gt;
+&lt;p&gt;Vim 基于一个 &lt;a href=&#34;https://en.wikipedia.org/wiki/Vi&#34;&gt;vi&lt;/a&gt; 克隆，叫做 &lt;a href=&#34;https://en.wikipedia.org/wiki/Stevie_(text_editor)&#34;&gt;Stevie&lt;/a&gt;，支持两种运行模式：&amp;ldquo;compatible&amp;rdquo; 和 &amp;ldquo;nocompatible&amp;rdquo;。在兼容模式下运行 Vim 意味着使用 vi 的默认设置，而不是 Vim 的默认设置。除非你新建一个用户的 &lt;code&gt;vimrc&lt;/code&gt; 或者使用 &lt;code&gt;vim -N&lt;/code&gt; 命令启动 Vim，否则就是在兼容模式下运行 Vim！请大家不要在兼容模式下运行 Vim。&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -43,8 +65,15 @@ Vim 基于一个 vi 克隆，叫做 Stevie，支持两种运行模式：&amp;ldq
       <pubDate>Fri, 16 Oct 2020 17:10:58 +0000</pubDate>
       
       <guid>https://haokiu.com/blog/5XKHkb/</guid>
-      <description>服务经常会重启失败，写了个简单的shell叫脚本，可以发现服务端口是否起来，没有发现监听端口会重启服务
-1.监控脚本 if [ -z &amp;#34;`lsof -i:443 | grep LISTEN`&amp;#34; ];then echo -e &amp;#34;restart $(date +&amp;#39;%Y-%m-%d %H:%M:%S&amp;#39;)&amp;#34; systemctl restart pixiublog fi 2.系统定时任务 */3 * * * * /usr/local/pixiublog/monitor.sh &amp;gt;&amp;gt; /usr/local/pixiublog/monitor.log 2&amp;gt;&amp;amp;1 </description>
+      <description>&lt;p&gt;服务经常会重启失败，写了个简单的shell叫脚本，可以发现服务端口是否起来，没有发现监听端口会重启服务&lt;/p&gt;
+&lt;h3 id=&#34;1监控脚本&#34;&gt;1.监控脚本&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;if [ -z &amp;#34;`lsof -i:443 | grep LISTEN`&amp;#34; ];then
+    echo -e &amp;#34;restart $(date +&amp;#39;%Y-%m-%d %H:%M:%S&amp;#39;)&amp;#34;
+    systemctl restart pixiublog
+fi
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;2系统定时任务&#34;&gt;2.系统定时任务&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;*/3 * * * * /usr/local/pixiublog/monitor.sh &amp;gt;&amp;gt; /usr/local/pixiublog/monitor.log 2&amp;gt;&amp;amp;1
+&lt;/code&gt;&lt;/pre&gt;</description>
     </item>
     
     <item>
@@ -53,8 +82,25 @@ Vim 基于一个 vi 克隆，叫做 Stevie，支持两种运行模式：&amp;ldq
       <pubDate>Thu, 15 Oct 2020 17:08:15 +0000</pubDate>
       
       <guid>https://haokiu.com/blog/v3yn45/</guid>
-      <description>haokiu 的启动脚本，配置 https 可以参考beego 通过acms.sh 使用 https
-#!/bin/sh siteDir=&amp;#39;/usr/local/pixiublog&amp;#39; appName=&amp;#39;pixiublogMain&amp;#39; echo &amp;#34;kill the running program&amp;#34; ps -ef | grep $appName | grep -v grep | awk &amp;#39;{print $2}&amp;#39; | xargs kill -9 echo &amp;#34;sleep 3 secons for app to shutdown&amp;#34; sleep 3 echo &amp;#34;start program&amp;#34; cd $siteDir nohup $siteDir/$appName &amp;gt;&amp;gt; $siteDir/console.log 2&amp;gt;&amp;amp;1 &amp;amp; </description>
+      <description>&lt;p&gt;&lt;a href=&#34;https://haokiu.com&#34;&gt;haokiu&lt;/a&gt; 的启动脚本，配置 https 可以参考&lt;a href=&#34;https://haokiu.com/blog/qP3u4V&#34;&gt;beego 通过acms.sh 使用 https&lt;/a&gt;&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;#!/bin/sh
+siteDir=&amp;#39;/usr/local/pixiublog&amp;#39;
+
+appName=&amp;#39;pixiublogMain&amp;#39;
+
+echo &amp;#34;kill the running program&amp;#34;
+
+ps -ef | grep $appName | grep -v grep | awk &amp;#39;{print $2}&amp;#39; | xargs kill -9
+
+echo &amp;#34;sleep 3 secons for app to shutdown&amp;#34;
+sleep 3
+
+echo &amp;#34;start program&amp;#34;
+
+cd $siteDir
+
+nohup $siteDir/$appName &amp;gt;&amp;gt; $siteDir/console.log 2&amp;gt;&amp;amp;1 &amp;amp;
+&lt;/code&gt;&lt;/pre&gt;</description>
     </item>
     
     <item>
@@ -63,10 +109,44 @@ Vim 基于一个 vi 克隆，叫做 Stevie，支持两种运行模式：&amp;ldq
       <pubDate>Tue, 13 Oct 2020 15:20:09 +0000</pubDate>
       
       <guid>https://haokiu.com/blog/qP3u4V/</guid>
-      <description>beego 通过 acme.sh 使用 https
-安装acms.sh curl https://get.acme.sh | sh 生成证书 如果使用的是 beego 框架，需添加可访问的静态文件目录：
-//acme.sh 自动验证网站目录，不使用https可以忽略 beego.SetStaticPath(&amp;#34;/.well-known&amp;#34;, &amp;#34;.well-known&amp;#34;) acme.sh --issue -d haokiu.com -d www.haokiu.com --webroot /usr/local/pixiublog/ 设置pixiublog开机启动 1. 编写开机启动脚本 vim /usr/lib/systemd/system/pixiublog.service
-[Unit] Description=The pixiublog Process Manager After=syslog.target network.target [Service] Type=forking ExecStart=sh /usr/local/pixiublog/start.sh ExecReload=/bin/kill -USR2 $MAINPID ExecStop=/bin/kill -SIGINT $MAINPID [Install] WantedBy=multi-user.target 2. 设置开机启动 systemctl enable pixiublog 安装证书 acme.sh --install-cert -d haokiu.com \ --cert-file /home/blog/cert/cert.pem \ --key-file /home/blog/cert/key.pem \ --fullchain-file /home/blog/cert/fullchain.pem \ --reloadcmd &amp;#34;systemctl restart pixiublog&amp;#34; beego app.conf 配置 EnableHTTPS = true HTTPSPort = 443 HTTPSCertFile = &amp;#34;/home/blog/cert/fullchain.pem&amp;#34; HTTPSKeyFile = &amp;#34;/home/blog/cert/key.pem&amp;#34; 参考 acme.sh 使用</description>
+      <description>&lt;p&gt;beego 通过 acme.sh 使用 https&lt;/p&gt;
+&lt;h2 id=&#34;安装acmssh&#34;&gt;安装acms.sh&lt;/h2&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl  https://get.acme.sh | sh
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;生成证书&#34;&gt;生成证书&lt;/h2&gt;
+&lt;p&gt;如果使用的是 beego 框架，需添加可访问的静态文件目录：&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;//acme.sh 自动验证网站目录，不使用https可以忽略
+beego.SetStaticPath(&amp;#34;/.well-known&amp;#34;, &amp;#34;.well-known&amp;#34;)
+&lt;/code&gt;&lt;/pre&gt;&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;acme.sh  --issue  -d haokiu.com -d www.haokiu.com  --webroot  /usr/local/pixiublog/
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;设置pixiublog开机启动&#34;&gt;设置pixiublog开机启动&lt;/h2&gt;
+&lt;h3 id=&#34;1-编写开机启动脚本&#34;&gt;1. 编写开机启动脚本&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;vim /usr/lib/systemd/system/pixiublog.service&lt;/code&gt;&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;[Unit]
+Description=The pixiublog Process Manager
+After=syslog.target network.target
+
+[Service]
+Type=forking
+ExecStart=sh /usr/local/pixiublog/start.sh
+ExecReload=/bin/kill -USR2 $MAINPID
+ExecStop=/bin/kill -SIGINT $MAINPID
+
+[Install]
+WantedBy=multi-user.target
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;2-设置开机启动&#34;&gt;2. 设置开机启动&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;systemctl enable pixiublog
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;安装证书&#34;&gt;安装证书&lt;/h2&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;acme.sh --install-cert -d haokiu.com \
+--cert-file      /home/blog/cert/cert.pem  \
+--key-file       /home/blog/cert/key.pem  \
+--fullchain-file /home/blog/cert/fullchain.pem \
+--reloadcmd     &amp;#34;systemctl restart pixiublog&amp;#34;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;beego-appconf-配置&#34;&gt;beego app.conf 配置&lt;/h2&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;EnableHTTPS = true
+HTTPSPort = 443
+HTTPSCertFile = &amp;#34;/home/blog/cert/fullchain.pem&amp;#34;
+HTTPSKeyFile = &amp;#34;/home/blog/cert/key.pem&amp;#34;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://haokiu.com/blog/6D0DBH&#34;&gt;acme.sh 使用&lt;/a&gt;&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -75,18 +155,39 @@ Vim 基于一个 vi 克隆，叫做 Stevie，支持两种运行模式：&amp;ldq
       <pubDate>Mon, 12 Oct 2020 18:01:57 +0000</pubDate>
       
       <guid>https://haokiu.com/blog/6D0DBH/</guid>
-      <description>acme.sh 实现了 acme 协议, 可以从 letsencrypt 生成免费的证书。这个脚本可以非常方便的管理 letsencrypt 的证书，省去很多繁琐操作。有了这个脚本就可以方便地给网站使用 https 了
-主要步骤:
-安装 acme.sh 生成证书 copy 证书到 nginx/apache 或者其他服务 更新证书 更新 acme.sh 出错怎么办, 如何调试 下面详细介绍.
-1. 安装 acme.sh 安装很简单, 一个命令:
-curl https://get.acme.sh | sh 普通用户和 root 用户都可以安装使用. 安装过程进行了以下几步:
-把 acme.sh 安装到你的 home 目录下: ~/.acme.sh/ 并创建 一个 bash 的 alias, 方便你的使用: alias acme.sh=~/.acme.sh/acme.sh
-2). 自动为你创建 cronjob, 每天 0:00 点自动检测所有的证书, 如果快过期了, 需要更新, 则会自动更新证书.
-更高级的安装选项请参考: https://github.com/Neilpang/acme.sh/wiki/How-to-install
-安装过程不会污染已有的系统任何功能和文件, 所有的修改都限制在安装目录中: ~/.acme.sh/
-2. 生成证书 acme.sh 实现了 acme 协议支持的所有验证协议. 一般有两种方式验证: http 和 dns 验证.
-1. http 方式需要在你的网站根目录下放置一个文件, 来验证你的域名所有权,完成验证. 然后就可以生成证书了. acme.sh --issue -d mydomain.com -d www.mydomain.com --webroot /home/wwwroot/mydomain.com/ 只需要指定域名, 并指定域名所在的网站根目录. acme.sh 会全自动的生成验证文件, 并放到网站的根目录, 然后自动完成验证. 最后会聪明的删除验证文件. 整个过程没有任何副作用.
-如果你用的 apache服务器, acme.</description>
+      <description>&lt;p&gt;&lt;strong&gt;acme.sh&lt;/strong&gt; 实现了 &lt;code&gt;acme&lt;/code&gt; 协议, 可以从 letsencrypt 生成免费的证书。这个脚本可以非常方便的管理 letsencrypt 的证书，省去很多繁琐操作。有了这个脚本就可以方便地给网站使用 https 了&lt;/p&gt;
+&lt;p&gt;主要步骤:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;安装 &lt;strong&gt;acme.sh&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;生成证书&lt;/li&gt;
+&lt;li&gt;copy 证书到 nginx/apache 或者其他服务&lt;/li&gt;
+&lt;li&gt;更新证书&lt;/li&gt;
+&lt;li&gt;更新 &lt;strong&gt;acme.sh&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;出错怎么办, 如何调试&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;下面详细介绍.&lt;/p&gt;
+&lt;h1 id=&#34;1-安装-acmesh&#34;&gt;1. 安装 &lt;strong&gt;acme.sh&lt;/strong&gt;&lt;/h1&gt;
+&lt;p&gt;安装很简单, 一个命令:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl  https://get.acme.sh | sh
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;普通用户和 root 用户都可以安装使用.
+安装过程进行了以下几步:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;把 acme.sh 安装到你的 &lt;strong&gt;home&lt;/strong&gt; 目录下:&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;~/.acme.sh/
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;并创建 一个 bash 的 alias, 方便你的使用:  &lt;code&gt;alias acme.sh=~/.acme.sh/acme.sh&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;2). 自动为你创建 cronjob,  每天 0:00 点自动检测所有的证书, 如果快过期了, 需要更新, 则会自动更新证书.&lt;/p&gt;
+&lt;p&gt;更高级的安装选项请参考: &lt;a href=&#34;https://github.com/Neilpang/acme.sh/wiki/How-to-install&#34;&gt;https://github.com/Neilpang/acme.sh/wiki/How-to-install&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;安装过程不会污染已有的系统任何功能和文件&lt;/strong&gt;, 所有的修改都限制在安装目录中: &lt;code&gt;~/.acme.sh/&lt;/code&gt;&lt;/p&gt;
+&lt;h1 id=&#34;2-生成证书&#34;&gt;2. 生成证书&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;acme.sh&lt;/strong&gt; 实现了 &lt;strong&gt;acme&lt;/strong&gt; 协议支持的所有验证协议.
+一般有两种方式验证: http 和 dns 验证.&lt;/p&gt;
+&lt;h3 id=&#34;1-http-方式需要在你的网站根目录下放置一个文件-来验证你的域名所有权完成验证-然后就可以生成证书了&#34;&gt;1. http 方式需要在你的网站根目录下放置一个文件, 来验证你的域名所有权,完成验证. 然后就可以生成证书了.&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;acme.sh  --issue  -d mydomain.com -d www.mydomain.com  --webroot  /home/wwwroot/mydomain.com/
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;只需要指定域名, 并指定域名所在的网站根目录. &lt;strong&gt;acme.sh&lt;/strong&gt; 会全自动的生成验证文件, 并放到网站的根目录, 然后自动完成验证. 最后会聪明的删除验证文件. 整个过程没有任何副作用.&lt;/p&gt;
+&lt;p&gt;如果你用的 &lt;strong&gt;apache&lt;/strong&gt;服务器, &lt;strong&gt;acme.sh&lt;/strong&gt; 还可以智能的从 &lt;strong&gt;apache&lt;/strong&gt;的配置中自动完成验证, 你不需要指定网站根目录:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;acme.sh --issue  -d mydomain.com   --apache
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;如果你用的 &lt;strong&gt;nginx&lt;/strong&gt;服务器, 或者反代, &lt;strong&gt;acme.sh&lt;/strong&gt; 还可以智能的从 &lt;strong&gt;nginx&lt;/strong&gt;的配置中自动完成验证, 你不需要指定网站根目录:&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -95,8 +196,49 @@ curl https://get.acme.sh | sh 普通用户和 root 用户都可以安装使用. 
       <pubDate>Thu, 17 Sep 2020 21:52:12 +0000</pubDate>
       
       <guid>https://haokiu.com/blog/1gTd1h/</guid>
-      <description>网站的部署脚本
-#!/bin/sh #部署目录 siteDir=&amp;#39;/usr/local/pixiublog&amp;#39; # 源代码目录 cd /root/pixiublog echo &amp;#34;update code&amp;#34; git pull echo &amp;#34;build pixiublog&amp;#34; go build main.go echo &amp;#34;remove old&amp;#34; rm -rf $siteDir/views rm -rf $siteDir/static rm -rf $siteDir/pixiublog echo &amp;#34;mv new program to $siteDir&amp;#34; cp main $siteDir/pixiublog cp -rf views $siteDir/ cp -rf static $siteDir/ echo &amp;#34;kill the running program&amp;#34; ps -ef | grep &amp;#39;pixiublog&amp;#39; | grep -v grep | awk &amp;#39;{print $2}&amp;#39; | xargs kill -9 echo &amp;#34;start program&amp;#34; cd $siteDir nohup $siteDir/pixiublog &amp;gt;&amp;gt; $siteDir/console.log 2&amp;gt;&amp;amp;1 &amp;amp; </description>
+      <description>&lt;p&gt;网站的部署脚本&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#!/bin/sh
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#部署目录&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;siteDir&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;/usr/local/pixiublog&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 源代码目录&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cd /root/pixiublog
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;update code&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git pull
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;build pixiublog&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;go build main.go
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;remove old&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;rm -rf $siteDir/views
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;rm -rf $siteDir/static
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;rm -rf $siteDir/pixiublog
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;mv new program to &lt;/span&gt;$siteDir&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cp main $siteDir/pixiublog
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cp -rf views $siteDir/
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cp -rf static $siteDir/
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;kill the running program&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ps -ef | grep &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;pixiublog&amp;#39;&lt;/span&gt; | grep -v grep | awk &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;{print $2}&amp;#39;&lt;/span&gt; | xargs kill -9
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;start program&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cd $siteDir
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nohup $siteDir/pixiublog &amp;gt;&amp;gt; $siteDir/console.log 2&amp;gt;&amp;amp;&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt; &amp;amp;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
     </item>
     
   </channel>

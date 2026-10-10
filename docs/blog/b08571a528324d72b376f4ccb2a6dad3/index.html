@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="zh-cn" dir="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,13 +7,42 @@
 <meta name="robots" content="index, follow">
 <title>C&#43;&#43; 17 结构化绑定 | haokiu</title>
 <meta name="keywords" content="">
-<meta name="description" content="C&#43;&#43; 17 结构化绑定 stl 的 map 容器很多读者应该都很熟悉，map 容器提供了一个 insert 方法，我们用该方法向 map 中插入元素，但是应该很少有人记得 insert 方法的返回值是什么类型，让我们来看一下 C&#43;&#43;98/03 提供的 insert 方法的签名：
-std::pair&lt;iterator,bool&gt; insert( const value_type&amp; value ); 这里我们仅关心其返回值，这个返回值是一个 std::pair 类型，由于 map 中的元素的 key 不允许重复，所以如果 insert 方法调用成功，T1 是被成功插入到 map 中的元素的迭代器，T2 的类型为 bool，此时其值为 true（表示插入成功）；如果 insert 由于 key 重复，T1 是造成 insert 插入失败、已经存在于 map 中的元素的迭代器，此时 T2 的值为 false（表示插入失败）。
+<meta name="description" content="C&#43;&#43; 17 结构化绑定
+stl 的 map 容器很多读者应该都很熟悉，map 容器提供了一个 insert 方法，我们用该方法向 map 中插入元素，但是应该很少有人记得 insert 方法的返回值是什么类型，让我们来看一下 C&#43;&#43;98/03 提供的 insert 方法的签名：
+std::pair&lt;iterator,bool&gt; insert( const value_type&amp; value );
+这里我们仅关心其返回值，这个返回值是一个 std::pair 类型，由于 map 中的元素的 key 不允许重复，所以如果 insert 方法调用成功，T1 是被成功插入到 map 中的元素的迭代器，T2 的类型为 bool，此时其值为 true（表示插入成功）；如果 insert 由于 key 重复，T1 是造成 insert 插入失败、已经存在于 map 中的元素的迭代器，此时 T2 的值为 false（表示插入失败）。
 在 C&#43;&#43;98/03 标准中我们可以使用 std::pair 的 first 和 second 属性来分别引用 T1 和 T2 的值。如下面的我们熟悉的代码所示：
-#include &lt;iostream&gt; #include &lt;string&gt; #include &lt;map&gt; int main() { std::map&lt;std::string, int&gt; cities; cities[&#34;beijing&#34;] = 0; cities[&#34;shanghai&#34;] = 1; cities[&#34;shenzhen&#34;] = 2; cities[&#34;guangzhou&#34;] = 3; //for (const auto&amp; [key, value] : m) //{ // std::cout &lt;&lt; key &lt;&lt; &#34;: &#34; &lt;&lt; value &lt;&lt; std::endl; //} //这一行在 C&#43;&#43;11 之前写法实在太麻烦了， //std::pair&lt;std::map&lt;std::string, int&gt;::iterator, int&gt; insertResult = cities.">
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;map&gt;
+
+int main()
+{
+    std::map&lt;std::string, int&gt; cities;
+    cities[&#34;beijing&#34;]   = 0;
+    cities[&#34;shanghai&#34;]  = 1;
+    cities[&#34;shenzhen&#34;]  = 2;
+    cities[&#34;guangzhou&#34;] = 3;
+
+    //for (const auto&amp; [key, value] : m)
+    //{
+    //    std::cout &lt;&lt; key &lt;&lt; &#34;: &#34; &lt;&lt; value &lt;&lt; std::endl;
+    //}
+
+    //这一行在 C&#43;&#43;11 之前写法实在太麻烦了，
+    //std::pair&lt;std::map&lt;std::string, int&gt;::iterator, int&gt; insertResult = cities.insert(std::pair&lt;std::string, int&gt;(&#34;shanghai&#34;, 2));
+    //C&#43;&#43; 11中我们写成：
+    auto insertResult = cities.insert(std::pair&lt;std::string, int&gt;(&#34;shanghai&#34;, 2));
+
+    std::cout &lt;&lt; &#34;Is insertion successful ? &#34; &lt;&lt; (insertResult.second ? &#34;true&#34; : &#34;false&#34;) 
+              &lt;&lt; &#34;, element key: &#34; &lt;&lt; insertResult.first-&gt;first &lt;&lt; &#34;, value: &#34; &lt;&lt; insertResult.first-&gt;second &lt;&lt; std::endl;
+
+    return 0;
+}
+代码 19 行实在太啰嗦了，我们使用 auto 关键字让编译器自动推导类型。">
 <meta name="author" content="">
 <link rel="canonical" href="https://haokiu.com/blog/b08571a528324d72b376f4ccb2a6dad3/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
 <script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="https://haokiu.com/favicon.ico">
@@ -23,6 +52,7 @@ std::pair&lt;iterator,bool&gt; insert( const value_type&amp; value ); 这里我�
 <link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/blog/b08571a528324d72b376f4ccb2a6dad3/">
 <noscript>
     <style>
         #theme-toggle,
@@ -60,10 +90,39 @@ std::pair&lt;iterator,bool&gt; insert( const value_type&amp; value ); 这里我�
 
     </style>
 </noscript><meta property="og:title" content="C&#43;&#43; 17 结构化绑定" />
-<meta property="og:description" content="C&#43;&#43; 17 结构化绑定 stl 的 map 容器很多读者应该都很熟悉，map 容器提供了一个 insert 方法，我们用该方法向 map 中插入元素，但是应该很少有人记得 insert 方法的返回值是什么类型，让我们来看一下 C&#43;&#43;98/03 提供的 insert 方法的签名：
-std::pair&lt;iterator,bool&gt; insert( const value_type&amp; value ); 这里我们仅关心其返回值，这个返回值是一个 std::pair 类型，由于 map 中的元素的 key 不允许重复，所以如果 insert 方法调用成功，T1 是被成功插入到 map 中的元素的迭代器，T2 的类型为 bool，此时其值为 true（表示插入成功）；如果 insert 由于 key 重复，T1 是造成 insert 插入失败、已经存在于 map 中的元素的迭代器，此时 T2 的值为 false（表示插入失败）。
+<meta property="og:description" content="C&#43;&#43; 17 结构化绑定
+stl 的 map 容器很多读者应该都很熟悉，map 容器提供了一个 insert 方法，我们用该方法向 map 中插入元素，但是应该很少有人记得 insert 方法的返回值是什么类型，让我们来看一下 C&#43;&#43;98/03 提供的 insert 方法的签名：
+std::pair&lt;iterator,bool&gt; insert( const value_type&amp; value );
+这里我们仅关心其返回值，这个返回值是一个 std::pair 类型，由于 map 中的元素的 key 不允许重复，所以如果 insert 方法调用成功，T1 是被成功插入到 map 中的元素的迭代器，T2 的类型为 bool，此时其值为 true（表示插入成功）；如果 insert 由于 key 重复，T1 是造成 insert 插入失败、已经存在于 map 中的元素的迭代器，此时 T2 的值为 false（表示插入失败）。
 在 C&#43;&#43;98/03 标准中我们可以使用 std::pair 的 first 和 second 属性来分别引用 T1 和 T2 的值。如下面的我们熟悉的代码所示：
-#include &lt;iostream&gt; #include &lt;string&gt; #include &lt;map&gt; int main() { std::map&lt;std::string, int&gt; cities; cities[&#34;beijing&#34;] = 0; cities[&#34;shanghai&#34;] = 1; cities[&#34;shenzhen&#34;] = 2; cities[&#34;guangzhou&#34;] = 3; //for (const auto&amp; [key, value] : m) //{ // std::cout &lt;&lt; key &lt;&lt; &#34;: &#34; &lt;&lt; value &lt;&lt; std::endl; //} //这一行在 C&#43;&#43;11 之前写法实在太麻烦了， //std::pair&lt;std::map&lt;std::string, int&gt;::iterator, int&gt; insertResult = cities." />
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;map&gt;
+
+int main()
+{
+    std::map&lt;std::string, int&gt; cities;
+    cities[&#34;beijing&#34;]   = 0;
+    cities[&#34;shanghai&#34;]  = 1;
+    cities[&#34;shenzhen&#34;]  = 2;
+    cities[&#34;guangzhou&#34;] = 3;
+
+    //for (const auto&amp; [key, value] : m)
+    //{
+    //    std::cout &lt;&lt; key &lt;&lt; &#34;: &#34; &lt;&lt; value &lt;&lt; std::endl;
+    //}
+
+    //这一行在 C&#43;&#43;11 之前写法实在太麻烦了，
+    //std::pair&lt;std::map&lt;std::string, int&gt;::iterator, int&gt; insertResult = cities.insert(std::pair&lt;std::string, int&gt;(&#34;shanghai&#34;, 2));
+    //C&#43;&#43; 11中我们写成：
+    auto insertResult = cities.insert(std::pair&lt;std::string, int&gt;(&#34;shanghai&#34;, 2));
+
+    std::cout &lt;&lt; &#34;Is insertion successful ? &#34; &lt;&lt; (insertResult.second ? &#34;true&#34; : &#34;false&#34;) 
+              &lt;&lt; &#34;, element key: &#34; &lt;&lt; insertResult.first-&gt;first &lt;&lt; &#34;, value: &#34; &lt;&lt; insertResult.first-&gt;second &lt;&lt; std::endl;
+
+    return 0;
+}
+代码 19 行实在太啰嗦了，我们使用 auto 关键字让编译器自动推导类型。" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://haokiu.com/blog/b08571a528324d72b376f4ccb2a6dad3/" /><meta property="article:section" content="1" />
 <meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
@@ -71,10 +130,39 @@ std::pair&lt;iterator,bool&gt; insert( const value_type&amp; value ); 这里我�
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="C&#43;&#43; 17 结构化绑定"/>
-<meta name="twitter:description" content="C&#43;&#43; 17 结构化绑定 stl 的 map 容器很多读者应该都很熟悉，map 容器提供了一个 insert 方法，我们用该方法向 map 中插入元素，但是应该很少有人记得 insert 方法的返回值是什么类型，让我们来看一下 C&#43;&#43;98/03 提供的 insert 方法的签名：
-std::pair&lt;iterator,bool&gt; insert( const value_type&amp; value ); 这里我们仅关心其返回值，这个返回值是一个 std::pair 类型，由于 map 中的元素的 key 不允许重复，所以如果 insert 方法调用成功，T1 是被成功插入到 map 中的元素的迭代器，T2 的类型为 bool，此时其值为 true（表示插入成功）；如果 insert 由于 key 重复，T1 是造成 insert 插入失败、已经存在于 map 中的元素的迭代器，此时 T2 的值为 false（表示插入失败）。
+<meta name="twitter:description" content="C&#43;&#43; 17 结构化绑定
+stl 的 map 容器很多读者应该都很熟悉，map 容器提供了一个 insert 方法，我们用该方法向 map 中插入元素，但是应该很少有人记得 insert 方法的返回值是什么类型，让我们来看一下 C&#43;&#43;98/03 提供的 insert 方法的签名：
+std::pair&lt;iterator,bool&gt; insert( const value_type&amp; value );
+这里我们仅关心其返回值，这个返回值是一个 std::pair 类型，由于 map 中的元素的 key 不允许重复，所以如果 insert 方法调用成功，T1 是被成功插入到 map 中的元素的迭代器，T2 的类型为 bool，此时其值为 true（表示插入成功）；如果 insert 由于 key 重复，T1 是造成 insert 插入失败、已经存在于 map 中的元素的迭代器，此时 T2 的值为 false（表示插入失败）。
 在 C&#43;&#43;98/03 标准中我们可以使用 std::pair 的 first 和 second 属性来分别引用 T1 和 T2 的值。如下面的我们熟悉的代码所示：
-#include &lt;iostream&gt; #include &lt;string&gt; #include &lt;map&gt; int main() { std::map&lt;std::string, int&gt; cities; cities[&#34;beijing&#34;] = 0; cities[&#34;shanghai&#34;] = 1; cities[&#34;shenzhen&#34;] = 2; cities[&#34;guangzhou&#34;] = 3; //for (const auto&amp; [key, value] : m) //{ // std::cout &lt;&lt; key &lt;&lt; &#34;: &#34; &lt;&lt; value &lt;&lt; std::endl; //} //这一行在 C&#43;&#43;11 之前写法实在太麻烦了， //std::pair&lt;std::map&lt;std::string, int&gt;::iterator, int&gt; insertResult = cities."/>
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;map&gt;
+
+int main()
+{
+    std::map&lt;std::string, int&gt; cities;
+    cities[&#34;beijing&#34;]   = 0;
+    cities[&#34;shanghai&#34;]  = 1;
+    cities[&#34;shenzhen&#34;]  = 2;
+    cities[&#34;guangzhou&#34;] = 3;
+
+    //for (const auto&amp; [key, value] : m)
+    //{
+    //    std::cout &lt;&lt; key &lt;&lt; &#34;: &#34; &lt;&lt; value &lt;&lt; std::endl;
+    //}
+
+    //这一行在 C&#43;&#43;11 之前写法实在太麻烦了，
+    //std::pair&lt;std::map&lt;std::string, int&gt;::iterator, int&gt; insertResult = cities.insert(std::pair&lt;std::string, int&gt;(&#34;shanghai&#34;, 2));
+    //C&#43;&#43; 11中我们写成：
+    auto insertResult = cities.insert(std::pair&lt;std::string, int&gt;(&#34;shanghai&#34;, 2));
+
+    std::cout &lt;&lt; &#34;Is insertion successful ? &#34; &lt;&lt; (insertResult.second ? &#34;true&#34; : &#34;false&#34;) 
+              &lt;&lt; &#34;, element key: &#34; &lt;&lt; insertResult.first-&gt;first &lt;&lt; &#34;, value: &#34; &lt;&lt; insertResult.first-&gt;second &lt;&lt; std::endl;
+
+    return 0;
+}
+代码 19 行实在太啰嗦了，我们使用 auto 关键字让编译器自动推导类型。"/>
 
 
 <script type="application/ld+json">
@@ -85,7 +173,7 @@ std::pair&lt;iterator,bool&gt; insert( const value_type&amp; value ); 这里我�
     {
       "@type": "ListItem",
       "position":  1 ,
-      "name": "1s",
+      "name": "1",
       "item": "https://haokiu.com/1/"
     }, 
     {
@@ -103,13 +191,13 @@ std::pair&lt;iterator,bool&gt; insert( const value_type&amp; value ); 这里我�
   "@type": "BlogPosting",
   "headline": "C++ 17 结构化绑定",
   "name": "C\u002b\u002b 17 结构化绑定",
-  "description": "C++ 17 结构化绑定 stl 的 map 容器很多读者应该都很熟悉，map 容器提供了一个 insert 方法，我们用该方法向 map 中插入元素，但是应该很少有人记得 insert 方法的返回值是什么类型，让我们来看一下 C++98/03 提供的 insert 方法的签名：\nstd::pair\u0026lt;iterator,bool\u0026gt; insert( const value_type\u0026amp; value ); 这里我们仅关心其返回值，这个返回值是一个 std::pair 类型，由于 map 中的元素的 key 不允许重复，所以如果 insert 方法调用成功，T1 是被成功插入到 map 中的元素的迭代器，T2 的类型为 bool，此时其值为 true（表示插入成功）；如果 insert 由于 key 重复，T1 是造成 insert 插入失败、已经存在于 map 中的元素的迭代器，此时 T2 的值为 false（表示插入失败）。\n在 C++98/03 标准中我们可以使用 std::pair 的 first 和 second 属性来分别引用 T1 和 T2 的值。如下面的我们熟悉的代码所示：\n#include \u0026lt;iostream\u0026gt; #include \u0026lt;string\u0026gt; #include \u0026lt;map\u0026gt; int main() { std::map\u0026lt;std::string, int\u0026gt; cities; cities[\u0026#34;beijing\u0026#34;] = 0; cities[\u0026#34;shanghai\u0026#34;] = 1; cities[\u0026#34;shenzhen\u0026#34;] = 2; cities[\u0026#34;guangzhou\u0026#34;] = 3; //for (const auto\u0026amp; [key, value] : m) //{ // std::cout \u0026lt;\u0026lt; key \u0026lt;\u0026lt; \u0026#34;: \u0026#34; \u0026lt;\u0026lt; value \u0026lt;\u0026lt; std::endl; //} //这一行在 C++11 之前写法实在太麻烦了， //std::pair\u0026lt;std::map\u0026lt;std::string, int\u0026gt;::iterator, int\u0026gt; insertResult = cities.",
+  "description": "C++ 17 结构化绑定 stl 的 map 容器很多读者应该都很熟悉，map 容器提供了一个 insert 方法，我们用该方法向 map 中插入元素，但是应该很少有人记得 insert 方法的返回值是什么类型，让我们来看一下 C++98/03 提供的 insert 方法的签名：\nstd::pair\u0026lt;iterator,bool\u0026gt; insert( const value_type\u0026amp; value ); 这里我们仅关心其返回值，这个返回值是一个 std::pair 类型，由于 map 中的元素的 key 不允许重复，所以如果 insert 方法调用成功，T1 是被成功插入到 map 中的元素的迭代器，T2 的类型为 bool，此时其值为 true（表示插入成功）；如果 insert 由于 key 重复，T1 是造成 insert 插入失败、已经存在于 map 中的元素的迭代器，此时 T2 的值为 false（表示插入失败）。\n在 C++98/03 标准中我们可以使用 std::pair 的 first 和 second 属性来分别引用 T1 和 T2 的值。如下面的我们熟悉的代码所示：\n#include \u0026lt;iostream\u0026gt; #include \u0026lt;string\u0026gt; #include \u0026lt;map\u0026gt; int main() { std::map\u0026lt;std::string, int\u0026gt; cities; cities[\u0026#34;beijing\u0026#34;] = 0; cities[\u0026#34;shanghai\u0026#34;] = 1; cities[\u0026#34;shenzhen\u0026#34;] = 2; cities[\u0026#34;guangzhou\u0026#34;] = 3; //for (const auto\u0026amp; [key, value] : m) //{ // std::cout \u0026lt;\u0026lt; key \u0026lt;\u0026lt; \u0026#34;: \u0026#34; \u0026lt;\u0026lt; value \u0026lt;\u0026lt; std::endl; //} //这一行在 C++11 之前写法实在太麻烦了， //std::pair\u0026lt;std::map\u0026lt;std::string, int\u0026gt;::iterator, int\u0026gt; insertResult = cities.insert(std::pair\u0026lt;std::string, int\u0026gt;(\u0026#34;shanghai\u0026#34;, 2)); //C++ 11中我们写成： auto insertResult = cities.insert(std::pair\u0026lt;std::string, int\u0026gt;(\u0026#34;shanghai\u0026#34;, 2)); std::cout \u0026lt;\u0026lt; \u0026#34;Is insertion successful ? \u0026#34; \u0026lt;\u0026lt; (insertResult.second ? \u0026#34;true\u0026#34; : \u0026#34;false\u0026#34;) \u0026lt;\u0026lt; \u0026#34;, element key: \u0026#34; \u0026lt;\u0026lt; insertResult.first-\u0026gt;first \u0026lt;\u0026lt; \u0026#34;, value: \u0026#34; \u0026lt;\u0026lt; insertResult.first-\u0026gt;second \u0026lt;\u0026lt; std::endl; return 0; } 代码 19 行实在太啰嗦了，我们使用 auto 关键字让编译器自动推导类型。\n",
   "keywords": [
     
   ],
   "articleBody": "C++ 17 结构化绑定 stl 的 map 容器很多读者应该都很熟悉，map 容器提供了一个 insert 方法，我们用该方法向 map 中插入元素，但是应该很少有人记得 insert 方法的返回值是什么类型，让我们来看一下 C++98/03 提供的 insert 方法的签名：\nstd::pair insert( const value_type\u0026 value ); 这里我们仅关心其返回值，这个返回值是一个 std::pair 类型，由于 map 中的元素的 key 不允许重复，所以如果 insert 方法调用成功，T1 是被成功插入到 map 中的元素的迭代器，T2 的类型为 bool，此时其值为 true（表示插入成功）；如果 insert 由于 key 重复，T1 是造成 insert 插入失败、已经存在于 map 中的元素的迭代器，此时 T2 的值为 false（表示插入失败）。\n在 C++98/03 标准中我们可以使用 std::pair 的 first 和 second 属性来分别引用 T1 和 T2 的值。如下面的我们熟悉的代码所示：\n#include #include #include int main() { std::map cities; cities[\"beijing\"] = 0; cities[\"shanghai\"] = 1; cities[\"shenzhen\"] = 2; cities[\"guangzhou\"] = 3; //for (const auto\u0026 [key, value] : m) //{ // std::cout \u003c\u003c key \u003c\u003c \": \" \u003c\u003c value \u003c\u003c std::endl; //} //这一行在 C++11 之前写法实在太麻烦了， //std::pair",
   "wordCount" : "620",
-  "inLanguage": "en",
+  "inLanguage": "zh-cn",
   "datePublished": "2021-01-11T09:20:42Z",
   "dateModified": "2021-01-11T09:20:42Z",
   "mainEntityOfPage": {
@@ -165,6 +253,8 @@ std::pair&lt;iterator,bool&gt; insert( const value_type&amp; value ); 这里我�
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -174,32 +264,32 @@ std::pair&lt;iterator,bool&gt; insert( const value_type&amp; value ); 这里我�
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/1/" title="1s">
+                <a href="https://haokiu.com/1/" title="1">
                     <span>后端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/2/" title="2s">
+                <a href="https://haokiu.com/2/" title="2">
                     <span>前端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/3/" title="3s">
+                <a href="https://haokiu.com/3/" title="3">
                     <span>区块链</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/4/" title="4s">
+                <a href="https://haokiu.com/4/" title="4">
                     <span>大数据</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/5/" title="5s">
+                <a href="https://haokiu.com/5/" title="5">
                     <span>linux</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/6/" title="6s">
+                <a href="https://haokiu.com/6/" title="6">
                     <span>其他</span>
                 </a>
             </li>
@@ -220,7 +310,7 @@ std::pair&lt;iterator,bool&gt; insert( const value_type&amp; value ); 这里我�
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    
     <h1 class="post-title">
       C&#43;&#43; 17 结构化绑定
     </h1>
@@ -399,12 +489,12 @@ auto [first, second] = std::pair&lt;int, int&gt;(1, 2);
     </ul>
 <nav class="paginav">
   <a class="prev" href="https://haokiu.com/blog/48af9bced29e4786944b5661c4155665/">
-    <span class="title">« Prev</span>
+    <span class="title">« </span>
     <br>
     <span>bind 函数重难点解析</span>
   </a>
   <a class="next" href="https://haokiu.com/blog/6176f55c32444820a0055fadcf89273c/">
-    <span class="title">Next »</span>
+    <span class="title"> »</span>
     <br>
     <span>C&#43;&#43;必知必会的知识点</span>
   </a>
@@ -414,6 +504,14 @@ auto [first, second] = std::pair&lt;int, int&gt;(1, 2);
 </article>
     </main>
     
+<footer class="footer">
+    <span>haokiu.com</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />

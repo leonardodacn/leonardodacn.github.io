@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="zh-cn" dir="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,15 +7,69 @@
 <meta name="robots" content="index, follow">
 <title>libevent源码深度剖析06 | haokiu</title>
 <meta name="keywords" content="">
-<meta name="description" content="libevent源码深度剖析06 初见事件处理框架
+<meta name="description" content="libevent源码深度剖析06
+初见事件处理框架
 前面已经对libevent的事件处理框架和event结构体做了描述，现在是时候剖析libevent对事件的详细处理流程了，本节将分析libevent的事件处理框架event_base和libevent注册、删除事件的具体流程，可结合前一节libevent对event的管理。
-1. 事件处理框架-event_base 回想Reactor模式的几个基本组件，本节讲解的部分对应于Reactor框架组件。在libevent中，这就表现为event_base结构体，结构体声明如下，它位于event-internal.h文件中：
-struct event_base { const struct eventop *evsel; void *evbase;　int event_count; /* counts number of total events */ int event_count_active; /* counts number of active events */ int event_gotterm; /* Set to terminate loop */ int event_break; /* Set to terminate loop immediately */ /* active event management */ struct event_list **activequeues; int nactivequeues; /* signal handling info */ struct evsignal_info sig; struct event_list eventqueue; struct timeval event_tv; struct min_heap timeheap; struct timeval tv_cache; }; 下面详细解释一下结构体中各字段的含义。
-evsel和evbase这两个字段的设置可能会让人有些迷惑，这里你可以把evsel和evbase看作是类和静态函数的关系，比如添加事件时的调用行为：evsel-&gt;add(evbase, ev)，实际执行操作的是evbase；这相当于class::add(instance, ev)，instance就是class的一个对象实例。 evsel指向了全局变量static const struct eventop *eventops[]中的一个； 前面也说过，libevent将系统提供的I/O demultiplex机制统一封装成了eventop结构；因此eventops[]包含了select、poll、kequeue和epoll等等其中的若干个全局实例对象。 evbase实际上是一个eventop实例对象； 先来看看eventop结构体，它的成员是一系列的函数指针, 在event-internal.h文件中：
-struct eventop { const char *name; void *(*init)(struct event_base *); // 初始化 int (*add)(void *, struct event *); // 注册事件 int (*del)(void *, struct event *); // 删除事件 int (*dispatch)(struct event_base *, void *, struct timeval *); // 事件分发 void (*dealloc)(struct event_base *, void *); // 注销，释放资源 /* set if we need to reinitialize the event base */ int need_reinit; }; 也就是说，在libevent中，每种I/O demultiplex机制的实现都必须提供这五个函数接口，来完成自身的初始化、销毁释放；对事件的注册、注销和分发。 比如对于epoll，libevent实现了5个对应的接口函数，并在初始化时并将eventop的5个函数指针指向这5个函数，那么程序就可以使用epoll作为I/O demultiplex机制了，这个在后面会再次提到。">
+1. 事件处理框架-event_base
+回想Reactor模式的几个基本组件，本节讲解的部分对应于Reactor框架组件。在libevent中，这就表现为event_base结构体，结构体声明如下，它位于event-internal.h文件中：
+struct event_base {
+    const struct eventop *evsel;
+    void *evbase;　
+    int event_count;  /* counts number of total events */
+    int event_count_active; /* counts number of active events */
+    int event_gotterm;  /* Set to terminate loop */
+    int event_break;  /* Set to terminate loop immediately */
+    /* active event management */
+    struct event_list **activequeues;
+    int nactivequeues;
+    /* signal handling info */
+    struct evsignal_info sig;
+    struct event_list eventqueue;
+    struct timeval event_tv;
+    struct min_heap timeheap;
+    struct timeval tv_cache;
+};
+下面详细解释一下结构体中各字段的含义。
+
+
+evsel和evbase这两个字段的设置可能会让人有些迷惑，这里你可以把evsel和evbase看作是类和静态函数的关系，比如添加事件时的调用行为：evsel-&gt;add(evbase, ev)，实际执行操作的是evbase；这相当于class::add(instance, ev)，instance就是class的一个对象实例。
+evsel指向了全局变量static const struct eventop *eventops[]中的一个；
+前面也说过，libevent将系统提供的I/O demultiplex机制统一封装成了eventop结构；因此eventops[]包含了select、poll、kequeue和epoll等等其中的若干个全局实例对象。
+evbase实际上是一个eventop实例对象；
+先来看看eventop结构体，它的成员是一系列的函数指针, 在event-internal.h文件中：
+struct eventop {
+    const char *name;
+    void *(*init)(struct event_base *); // 初始化
+    int (*add)(void *, struct event *); // 注册事件
+    int (*del)(void *, struct event *); // 删除事件
+    int (*dispatch)(struct event_base *, void *, struct timeval *); // 事件分发
+    void (*dealloc)(struct event_base *, void *); // 注销，释放资源
+    /* set if we need to reinitialize the event base */
+    int need_reinit;
+};
+也就是说，在libevent中，每种I/O demultiplex机制的实现都必须提供这五个函数接口，来完成自身的初始化、销毁释放；对事件的注册、注销和分发。
+比如对于epoll，libevent实现了5个对应的接口函数，并在初始化时并将eventop的5个函数指针指向这5个函数，那么程序就可以使用epoll作为I/O demultiplex机制了，这个在后面会再次提到。
+
+
+activequeues是一个二级指针，前面讲过libevent支持事件优先级，因此你可以把它看作是数组，其中的元素activequeues[priority]是一个链表，链表的每个节点指向一个优先级为priority的就绪事件event。
+
+
+eventqueue，链表，保存了所有的注册事件event的指针。
+
+
+sig是由来管理信号的结构体，将在后面信号处理时专门讲解；
+
+
+timeheap是管理定时事件的小根堆，将在后面定时事件处理时专门讲解；
+
+
+event_tv和tv_cache是libevent用于时间管理的变量，将在后面讲到；
+其它各个变量都能因名知意，就不再啰嗦了。
+
+">
 <meta name="author" content="">
 <link rel="canonical" href="https://haokiu.com/blog/fc115cade0c049a8ab14e737a22b37fe/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
 <script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="https://haokiu.com/favicon.ico">
@@ -25,6 +79,7 @@ struct eventop { const char *name; void *(*init)(struct event_base *); // 初始
 <link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/blog/fc115cade0c049a8ab14e737a22b37fe/">
 <noscript>
     <style>
         #theme-toggle,
@@ -62,12 +117,66 @@ struct eventop { const char *name; void *(*init)(struct event_base *); // 初始
 
     </style>
 </noscript><meta property="og:title" content="libevent源码深度剖析06" />
-<meta property="og:description" content="libevent源码深度剖析06 初见事件处理框架
+<meta property="og:description" content="libevent源码深度剖析06
+初见事件处理框架
 前面已经对libevent的事件处理框架和event结构体做了描述，现在是时候剖析libevent对事件的详细处理流程了，本节将分析libevent的事件处理框架event_base和libevent注册、删除事件的具体流程，可结合前一节libevent对event的管理。
-1. 事件处理框架-event_base 回想Reactor模式的几个基本组件，本节讲解的部分对应于Reactor框架组件。在libevent中，这就表现为event_base结构体，结构体声明如下，它位于event-internal.h文件中：
-struct event_base { const struct eventop *evsel; void *evbase;　int event_count; /* counts number of total events */ int event_count_active; /* counts number of active events */ int event_gotterm; /* Set to terminate loop */ int event_break; /* Set to terminate loop immediately */ /* active event management */ struct event_list **activequeues; int nactivequeues; /* signal handling info */ struct evsignal_info sig; struct event_list eventqueue; struct timeval event_tv; struct min_heap timeheap; struct timeval tv_cache; }; 下面详细解释一下结构体中各字段的含义。
-evsel和evbase这两个字段的设置可能会让人有些迷惑，这里你可以把evsel和evbase看作是类和静态函数的关系，比如添加事件时的调用行为：evsel-&gt;add(evbase, ev)，实际执行操作的是evbase；这相当于class::add(instance, ev)，instance就是class的一个对象实例。 evsel指向了全局变量static const struct eventop *eventops[]中的一个； 前面也说过，libevent将系统提供的I/O demultiplex机制统一封装成了eventop结构；因此eventops[]包含了select、poll、kequeue和epoll等等其中的若干个全局实例对象。 evbase实际上是一个eventop实例对象； 先来看看eventop结构体，它的成员是一系列的函数指针, 在event-internal.h文件中：
-struct eventop { const char *name; void *(*init)(struct event_base *); // 初始化 int (*add)(void *, struct event *); // 注册事件 int (*del)(void *, struct event *); // 删除事件 int (*dispatch)(struct event_base *, void *, struct timeval *); // 事件分发 void (*dealloc)(struct event_base *, void *); // 注销，释放资源 /* set if we need to reinitialize the event base */ int need_reinit; }; 也就是说，在libevent中，每种I/O demultiplex机制的实现都必须提供这五个函数接口，来完成自身的初始化、销毁释放；对事件的注册、注销和分发。 比如对于epoll，libevent实现了5个对应的接口函数，并在初始化时并将eventop的5个函数指针指向这5个函数，那么程序就可以使用epoll作为I/O demultiplex机制了，这个在后面会再次提到。" />
+1. 事件处理框架-event_base
+回想Reactor模式的几个基本组件，本节讲解的部分对应于Reactor框架组件。在libevent中，这就表现为event_base结构体，结构体声明如下，它位于event-internal.h文件中：
+struct event_base {
+    const struct eventop *evsel;
+    void *evbase;　
+    int event_count;  /* counts number of total events */
+    int event_count_active; /* counts number of active events */
+    int event_gotterm;  /* Set to terminate loop */
+    int event_break;  /* Set to terminate loop immediately */
+    /* active event management */
+    struct event_list **activequeues;
+    int nactivequeues;
+    /* signal handling info */
+    struct evsignal_info sig;
+    struct event_list eventqueue;
+    struct timeval event_tv;
+    struct min_heap timeheap;
+    struct timeval tv_cache;
+};
+下面详细解释一下结构体中各字段的含义。
+
+
+evsel和evbase这两个字段的设置可能会让人有些迷惑，这里你可以把evsel和evbase看作是类和静态函数的关系，比如添加事件时的调用行为：evsel-&gt;add(evbase, ev)，实际执行操作的是evbase；这相当于class::add(instance, ev)，instance就是class的一个对象实例。
+evsel指向了全局变量static const struct eventop *eventops[]中的一个；
+前面也说过，libevent将系统提供的I/O demultiplex机制统一封装成了eventop结构；因此eventops[]包含了select、poll、kequeue和epoll等等其中的若干个全局实例对象。
+evbase实际上是一个eventop实例对象；
+先来看看eventop结构体，它的成员是一系列的函数指针, 在event-internal.h文件中：
+struct eventop {
+    const char *name;
+    void *(*init)(struct event_base *); // 初始化
+    int (*add)(void *, struct event *); // 注册事件
+    int (*del)(void *, struct event *); // 删除事件
+    int (*dispatch)(struct event_base *, void *, struct timeval *); // 事件分发
+    void (*dealloc)(struct event_base *, void *); // 注销，释放资源
+    /* set if we need to reinitialize the event base */
+    int need_reinit;
+};
+也就是说，在libevent中，每种I/O demultiplex机制的实现都必须提供这五个函数接口，来完成自身的初始化、销毁释放；对事件的注册、注销和分发。
+比如对于epoll，libevent实现了5个对应的接口函数，并在初始化时并将eventop的5个函数指针指向这5个函数，那么程序就可以使用epoll作为I/O demultiplex机制了，这个在后面会再次提到。
+
+
+activequeues是一个二级指针，前面讲过libevent支持事件优先级，因此你可以把它看作是数组，其中的元素activequeues[priority]是一个链表，链表的每个节点指向一个优先级为priority的就绪事件event。
+
+
+eventqueue，链表，保存了所有的注册事件event的指针。
+
+
+sig是由来管理信号的结构体，将在后面信号处理时专门讲解；
+
+
+timeheap是管理定时事件的小根堆，将在后面定时事件处理时专门讲解；
+
+
+event_tv和tv_cache是libevent用于时间管理的变量，将在后面讲到；
+其它各个变量都能因名知意，就不再啰嗦了。
+
+" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://haokiu.com/blog/fc115cade0c049a8ab14e737a22b37fe/" /><meta property="article:section" content="1" />
 <meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
@@ -75,12 +184,66 @@ struct eventop { const char *name; void *(*init)(struct event_base *); // 初始
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="libevent源码深度剖析06"/>
-<meta name="twitter:description" content="libevent源码深度剖析06 初见事件处理框架
+<meta name="twitter:description" content="libevent源码深度剖析06
+初见事件处理框架
 前面已经对libevent的事件处理框架和event结构体做了描述，现在是时候剖析libevent对事件的详细处理流程了，本节将分析libevent的事件处理框架event_base和libevent注册、删除事件的具体流程，可结合前一节libevent对event的管理。
-1. 事件处理框架-event_base 回想Reactor模式的几个基本组件，本节讲解的部分对应于Reactor框架组件。在libevent中，这就表现为event_base结构体，结构体声明如下，它位于event-internal.h文件中：
-struct event_base { const struct eventop *evsel; void *evbase;　int event_count; /* counts number of total events */ int event_count_active; /* counts number of active events */ int event_gotterm; /* Set to terminate loop */ int event_break; /* Set to terminate loop immediately */ /* active event management */ struct event_list **activequeues; int nactivequeues; /* signal handling info */ struct evsignal_info sig; struct event_list eventqueue; struct timeval event_tv; struct min_heap timeheap; struct timeval tv_cache; }; 下面详细解释一下结构体中各字段的含义。
-evsel和evbase这两个字段的设置可能会让人有些迷惑，这里你可以把evsel和evbase看作是类和静态函数的关系，比如添加事件时的调用行为：evsel-&gt;add(evbase, ev)，实际执行操作的是evbase；这相当于class::add(instance, ev)，instance就是class的一个对象实例。 evsel指向了全局变量static const struct eventop *eventops[]中的一个； 前面也说过，libevent将系统提供的I/O demultiplex机制统一封装成了eventop结构；因此eventops[]包含了select、poll、kequeue和epoll等等其中的若干个全局实例对象。 evbase实际上是一个eventop实例对象； 先来看看eventop结构体，它的成员是一系列的函数指针, 在event-internal.h文件中：
-struct eventop { const char *name; void *(*init)(struct event_base *); // 初始化 int (*add)(void *, struct event *); // 注册事件 int (*del)(void *, struct event *); // 删除事件 int (*dispatch)(struct event_base *, void *, struct timeval *); // 事件分发 void (*dealloc)(struct event_base *, void *); // 注销，释放资源 /* set if we need to reinitialize the event base */ int need_reinit; }; 也就是说，在libevent中，每种I/O demultiplex机制的实现都必须提供这五个函数接口，来完成自身的初始化、销毁释放；对事件的注册、注销和分发。 比如对于epoll，libevent实现了5个对应的接口函数，并在初始化时并将eventop的5个函数指针指向这5个函数，那么程序就可以使用epoll作为I/O demultiplex机制了，这个在后面会再次提到。"/>
+1. 事件处理框架-event_base
+回想Reactor模式的几个基本组件，本节讲解的部分对应于Reactor框架组件。在libevent中，这就表现为event_base结构体，结构体声明如下，它位于event-internal.h文件中：
+struct event_base {
+    const struct eventop *evsel;
+    void *evbase;　
+    int event_count;  /* counts number of total events */
+    int event_count_active; /* counts number of active events */
+    int event_gotterm;  /* Set to terminate loop */
+    int event_break;  /* Set to terminate loop immediately */
+    /* active event management */
+    struct event_list **activequeues;
+    int nactivequeues;
+    /* signal handling info */
+    struct evsignal_info sig;
+    struct event_list eventqueue;
+    struct timeval event_tv;
+    struct min_heap timeheap;
+    struct timeval tv_cache;
+};
+下面详细解释一下结构体中各字段的含义。
+
+
+evsel和evbase这两个字段的设置可能会让人有些迷惑，这里你可以把evsel和evbase看作是类和静态函数的关系，比如添加事件时的调用行为：evsel-&gt;add(evbase, ev)，实际执行操作的是evbase；这相当于class::add(instance, ev)，instance就是class的一个对象实例。
+evsel指向了全局变量static const struct eventop *eventops[]中的一个；
+前面也说过，libevent将系统提供的I/O demultiplex机制统一封装成了eventop结构；因此eventops[]包含了select、poll、kequeue和epoll等等其中的若干个全局实例对象。
+evbase实际上是一个eventop实例对象；
+先来看看eventop结构体，它的成员是一系列的函数指针, 在event-internal.h文件中：
+struct eventop {
+    const char *name;
+    void *(*init)(struct event_base *); // 初始化
+    int (*add)(void *, struct event *); // 注册事件
+    int (*del)(void *, struct event *); // 删除事件
+    int (*dispatch)(struct event_base *, void *, struct timeval *); // 事件分发
+    void (*dealloc)(struct event_base *, void *); // 注销，释放资源
+    /* set if we need to reinitialize the event base */
+    int need_reinit;
+};
+也就是说，在libevent中，每种I/O demultiplex机制的实现都必须提供这五个函数接口，来完成自身的初始化、销毁释放；对事件的注册、注销和分发。
+比如对于epoll，libevent实现了5个对应的接口函数，并在初始化时并将eventop的5个函数指针指向这5个函数，那么程序就可以使用epoll作为I/O demultiplex机制了，这个在后面会再次提到。
+
+
+activequeues是一个二级指针，前面讲过libevent支持事件优先级，因此你可以把它看作是数组，其中的元素activequeues[priority]是一个链表，链表的每个节点指向一个优先级为priority的就绪事件event。
+
+
+eventqueue，链表，保存了所有的注册事件event的指针。
+
+
+sig是由来管理信号的结构体，将在后面信号处理时专门讲解；
+
+
+timeheap是管理定时事件的小根堆，将在后面定时事件处理时专门讲解；
+
+
+event_tv和tv_cache是libevent用于时间管理的变量，将在后面讲到；
+其它各个变量都能因名知意，就不再啰嗦了。
+
+"/>
 
 
 <script type="application/ld+json">
@@ -91,7 +254,7 @@ struct eventop { const char *name; void *(*init)(struct event_base *); // 初始
     {
       "@type": "ListItem",
       "position":  1 ,
-      "name": "1s",
+      "name": "1",
       "item": "https://haokiu.com/1/"
     }, 
     {
@@ -109,13 +272,13 @@ struct eventop { const char *name; void *(*init)(struct event_base *); // 初始
   "@type": "BlogPosting",
   "headline": "libevent源码深度剖析06",
   "name": "libevent源码深度剖析06",
-  "description": "libevent源码深度剖析06 初见事件处理框架\n前面已经对libevent的事件处理框架和event结构体做了描述，现在是时候剖析libevent对事件的详细处理流程了，本节将分析libevent的事件处理框架event_base和libevent注册、删除事件的具体流程，可结合前一节libevent对event的管理。\n1. 事件处理框架-event_base 回想Reactor模式的几个基本组件，本节讲解的部分对应于Reactor框架组件。在libevent中，这就表现为event_base结构体，结构体声明如下，它位于event-internal.h文件中：\nstruct event_base { const struct eventop *evsel; void *evbase;　int event_count; /* counts number of total events */ int event_count_active; /* counts number of active events */ int event_gotterm; /* Set to terminate loop */ int event_break; /* Set to terminate loop immediately */ /* active event management */ struct event_list **activequeues; int nactivequeues; /* signal handling info */ struct evsignal_info sig; struct event_list eventqueue; struct timeval event_tv; struct min_heap timeheap; struct timeval tv_cache; }; 下面详细解释一下结构体中各字段的含义。\nevsel和evbase这两个字段的设置可能会让人有些迷惑，这里你可以把evsel和evbase看作是类和静态函数的关系，比如添加事件时的调用行为：evsel-\u0026gt;add(evbase, ev)，实际执行操作的是evbase；这相当于class::add(instance, ev)，instance就是class的一个对象实例。 evsel指向了全局变量static const struct eventop *eventops[]中的一个； 前面也说过，libevent将系统提供的I/O demultiplex机制统一封装成了eventop结构；因此eventops[]包含了select、poll、kequeue和epoll等等其中的若干个全局实例对象。 evbase实际上是一个eventop实例对象； 先来看看eventop结构体，它的成员是一系列的函数指针, 在event-internal.h文件中：\nstruct eventop { const char *name; void *(*init)(struct event_base *); // 初始化 int (*add)(void *, struct event *); // 注册事件 int (*del)(void *, struct event *); // 删除事件 int (*dispatch)(struct event_base *, void *, struct timeval *); // 事件分发 void (*dealloc)(struct event_base *, void *); // 注销，释放资源 /* set if we need to reinitialize the event base */ int need_reinit; }; 也就是说，在libevent中，每种I/O demultiplex机制的实现都必须提供这五个函数接口，来完成自身的初始化、销毁释放；对事件的注册、注销和分发。 比如对于epoll，libevent实现了5个对应的接口函数，并在初始化时并将eventop的5个函数指针指向这5个函数，那么程序就可以使用epoll作为I/O demultiplex机制了，这个在后面会再次提到。",
+  "description": "libevent源码深度剖析06 初见事件处理框架\n前面已经对libevent的事件处理框架和event结构体做了描述，现在是时候剖析libevent对事件的详细处理流程了，本节将分析libevent的事件处理框架event_base和libevent注册、删除事件的具体流程，可结合前一节libevent对event的管理。\n1. 事件处理框架-event_base 回想Reactor模式的几个基本组件，本节讲解的部分对应于Reactor框架组件。在libevent中，这就表现为event_base结构体，结构体声明如下，它位于event-internal.h文件中：\nstruct event_base { const struct eventop *evsel; void *evbase;　int event_count; /* counts number of total events */ int event_count_active; /* counts number of active events */ int event_gotterm; /* Set to terminate loop */ int event_break; /* Set to terminate loop immediately */ /* active event management */ struct event_list **activequeues; int nactivequeues; /* signal handling info */ struct evsignal_info sig; struct event_list eventqueue; struct timeval event_tv; struct min_heap timeheap; struct timeval tv_cache; }; 下面详细解释一下结构体中各字段的含义。\nevsel和evbase这两个字段的设置可能会让人有些迷惑，这里你可以把evsel和evbase看作是类和静态函数的关系，比如添加事件时的调用行为：evsel-\u0026gt;add(evbase, ev)，实际执行操作的是evbase；这相当于class::add(instance, ev)，instance就是class的一个对象实例。 evsel指向了全局变量static const struct eventop *eventops[]中的一个； 前面也说过，libevent将系统提供的I/O demultiplex机制统一封装成了eventop结构；因此eventops[]包含了select、poll、kequeue和epoll等等其中的若干个全局实例对象。 evbase实际上是一个eventop实例对象； 先来看看eventop结构体，它的成员是一系列的函数指针, 在event-internal.h文件中：\nstruct eventop { const char *name; void *(*init)(struct event_base *); // 初始化 int (*add)(void *, struct event *); // 注册事件 int (*del)(void *, struct event *); // 删除事件 int (*dispatch)(struct event_base *, void *, struct timeval *); // 事件分发 void (*dealloc)(struct event_base *, void *); // 注销，释放资源 /* set if we need to reinitialize the event base */ int need_reinit; }; 也就是说，在libevent中，每种I/O demultiplex机制的实现都必须提供这五个函数接口，来完成自身的初始化、销毁释放；对事件的注册、注销和分发。 比如对于epoll，libevent实现了5个对应的接口函数，并在初始化时并将eventop的5个函数指针指向这5个函数，那么程序就可以使用epoll作为I/O demultiplex机制了，这个在后面会再次提到。\nactivequeues是一个二级指针，前面讲过libevent支持事件优先级，因此你可以把它看作是数组，其中的元素activequeues[priority]是一个链表，链表的每个节点指向一个优先级为priority的就绪事件event。\neventqueue，链表，保存了所有的注册事件event的指针。\nsig是由来管理信号的结构体，将在后面信号处理时专门讲解；\ntimeheap是管理定时事件的小根堆，将在后面定时事件处理时专门讲解；\nevent_tv和tv_cache是libevent用于时间管理的变量，将在后面讲到； 其它各个变量都能因名知意，就不再啰嗦了。\n",
   "keywords": [
     
   ],
   "articleBody": "libevent源码深度剖析06 初见事件处理框架\n前面已经对libevent的事件处理框架和event结构体做了描述，现在是时候剖析libevent对事件的详细处理流程了，本节将分析libevent的事件处理框架event_base和libevent注册、删除事件的具体流程，可结合前一节libevent对event的管理。\n1. 事件处理框架-event_base 回想Reactor模式的几个基本组件，本节讲解的部分对应于Reactor框架组件。在libevent中，这就表现为event_base结构体，结构体声明如下，它位于event-internal.h文件中：\nstruct event_base { const struct eventop *evsel; void *evbase;　int event_count; /* counts number of total events */ int event_count_active; /* counts number of active events */ int event_gotterm; /* Set to terminate loop */ int event_break; /* Set to terminate loop immediately */ /* active event management */ struct event_list **activequeues; int nactivequeues; /* signal handling info */ struct evsignal_info sig; struct event_list eventqueue; struct timeval event_tv; struct min_heap timeheap; struct timeval tv_cache; }; 下面详细解释一下结构体中各字段的含义。\nevsel和evbase这两个字段的设置可能会让人有些迷惑，这里你可以把evsel和evbase看作是类和静态函数的关系，比如添加事件时的调用行为：evsel-\u003eadd(evbase, ev)，实际执行操作的是evbase；这相当于class::add(instance, ev)，instance就是class的一个对象实例。 evsel指向了全局变量static const struct eventop *eventops[]中的一个； 前面也说过，libevent将系统提供的I/O demultiplex机制统一封装成了eventop结构；因此eventops[]包含了select、poll、kequeue和epoll等等其中的若干个全局实例对象。 evbase实际上是一个eventop实例对象； 先来看看eventop结构体，它的成员是一系列的函数指针, 在event-internal.h文件中：\nstruct eventop { const char *name; void *(*init)(struct event_base *); // 初始化 int (*add)(void *, struct event *); // 注册事件 int (*del)(void *, struct event *); // 删除事件 int (*dispatch)(struct event_base *, void *, struct timeval *); // 事件分发 void (*dealloc)(struct event_base *, void *); // 注销，释放资源 /* set if we need to reinitialize the event base */ int need_reinit; }; 也就是说，在libevent中，每种I/O demultiplex机制的实现都必须提供这五个函数接口，来完成自身的初始化、销毁释放；对事件的注册、注销和分发。 比如对于epoll，libevent实现了5个对应的接口函数，并在初始化时并将eventop的5个函数指针指向这5个函数，那么程序就可以使用epoll作为I/O demultiplex机制了，这个在后面会再次提到。\nactivequeues是一个二级指针，前面讲过libevent支持事件优先级，因此你可以把它看作是数组，其中的元素activequeues[priority]是一个链表，链表的每个节点指向一个优先级为priority的就绪事件event。\neventqueue，链表，保存了所有的注册事件event的指针。\nsig是由来管理信号的结构体，将在后面信号处理时专门讲解；\ntimeheap是管理定时事件的小根堆，将在后面定时事件处理时专门讲解；\nevent_tv和tv_cache是libevent用于时间管理的变量，将在后面讲到； 其它各个变量都能因名知意，就不再啰嗦了。\n2. 创建和初始化event_base 创建一个event_base对象也既是创建了一个新的libevent实例，程序需要通过调用event_init()（内部调用event_base_new函数执行具体操作）函数来创建，该函数同时还对新生成的libevent实例进行了初始化。\n该函数首先为event_base实例申请空间， 然后初始化timer mini-heap，选择并初始化合适的系统I/O 的demultiplexer机制，初始化各事件链表； 函数还检测了系统的时间设置，为后面的时间管理打下基础。\n3. 接口函数 前面提到Reactor框架的作用就是提供事件的注册、注销接口；根据系统提供的事件多路分发机制执行事件循环，当有事件进入“就绪”状态时，调用注册事件的回调函数来处理事件。 Libevent中对应的接口函数主要就是：\nint event_add(struct event *ev, const struct timeval *timeout); int event_del(struct event *ev); int event_base_loop(struct event_base *base, int loops); void event_active(struct event *event, int res, short events); void event_process_active(struct event_base *base); 本节将按介绍事件注册和删除的代码流程，libevent的事件循环框架将在下一节再具体描述。\n对于定时事件，这些函数将调用timer heap管理接口执行插入和删除操作； 对于I/O和Signal事件将调用eventopadd和delete接口函数执行插入和删除操作（eventop会对Signal事件调用Signal处理接口执行操作）； 这些组件将在后面的内容描述。\n1）注册事件 函数原型：\nint event_add(struct event *ev, const struct timeval *tv) 参数：ev：指向要注册的事件； tv：超时时间；\ne函数将ev注册到ev-\u003eev_base上，事件类型由ev-\u003eev_events指明，\n如果注册成功，v将被插入到已注册链表中； 如果tv不是NULL，则会同时注册定时事件，将ev添加到timer堆上； 如果其中有一步操作失败，那么函数保证没有事件会被注册，可以讲这相当于一个原子操作。这个函数也体现了libevent细节之处的巧妙设计，且仔细看程序代码，部分有省略，注释直接附在代码中。\nint event_add(struct event *ev, const struct timeval *tv) { struct event_base *base = ev-\u003eev_base; // 要注册到的event_base const struct eventop *evsel = base-\u003eevsel; void *evbase = base-\u003eevbase; // base使用的系统I/O策略 // 新的timer事件，调用timer heap接口在堆上预留一个位置 // 注：这样能保证该操作的原子性： // 向系统I/O机制注册可能会失败，而当在堆上预留成功后， // 定时事件的添加将肯定不会失败； // 而预留位置的可能结果是堆扩充，但是内部元素并不会改变 if (tv != NULL \u0026\u0026 !(ev-\u003eev_flags \u0026 EVLIST_TIMEOUT)) { if (min_heap_reserve(\u0026base-\u003etimeheap, 1 + min_heap_size(\u0026base-\u003etimeheap)) == -1) return (-1); /* ENOMEM == errno */ } // 如果事件ev不在已注册或者激活链表中，则调用evbase注册事件 if ((ev-\u003eev_events \u0026 (EV_READ|EV_WRITE|EV_SIGNAL)) \u0026\u0026 !(ev-\u003eev_flags \u0026 (EVLIST_INSERTED|EVLIST_ACTIVE))) { res = evsel-\u003eadd(evbase, ev); if (res != -1) // 注册成功，插入event到已注册链表中 event_queue_insert(base, ev, EVLIST_INSERTED); } // 准备添加定时事件 if (res != -1 \u0026\u0026 tv != NULL) { struct timeval now; // EVLIST_TIMEOUT表明event已经在定时器堆中了，删除旧的 if (ev-\u003eev_flags \u0026 EVLIST_TIMEOUT) event_queue_remove(base, ev, EVLIST_TIMEOUT); // 如果事件已经是就绪状态则从激活链表中删除 if ((ev-\u003eev_flags \u0026 EVLIST_ACTIVE) \u0026\u0026 (ev-\u003eev_res \u0026 EV_TIMEOUT)) { // 将ev_callback调用次数设置为0 if (ev-\u003eev_ncalls \u0026\u0026 ev-\u003eev_pncalls) { *ev-\u003eev_pncalls = 0; } event_queue_remove(base, ev, EVLIST_ACTIVE); } // 计算时间，并插入到timer小根堆中 gettime(base, \u0026now); evutil_timeradd(\u0026now, tv, \u0026ev-\u003eev_timeout); event_queue_insert(base, ev, EVLIST_TIMEOUT); } return (res); } event_queue_insert()负责将事件插入到对应的链表中，下面是程序代码； event_queue_remove()负责将事件从对应的链表中删除，这里就不再重复贴代码了； void event_queue_insert(struct event_base *base, struct event *ev, int queue) { // ev可能已经在激活列表中了，避免重复插入 if (ev-\u003eev_flags \u0026 queue) { if (queue \u0026 EVLIST_ACTIVE) return; } // ... ev-\u003eev_flags |= queue; // 记录queue标记 switch (queue) { case EVLIST_INSERTED: // I/O或Signal事件，加入已注册事件链表 TAILQ_INSERT_TAIL(\u0026base-\u003eeventqueue, ev, ev_next); break; case EVLIST_ACTIVE: // 就绪事件，加入激活链表 base-\u003eevent_count_active++; TAILQ_INSERT_TAIL(base-\u003eactivequeues[ev-\u003eev_pri], ev, ev_active_next); break; case EVLIST_TIMEOUT: // 定时事件，加入堆 min_heap_push(\u0026base-\u003etimeheap, ev); break; } } 2）删除事件： 函数原型为：\nint event_del(struct event *ev); 该函数将删除事件ev\n对于I/O事件，从I/O 的demultiplexer上将事件注销； 对于Signal事件，将从Signal事件链表中删除； 对于定时事件，将从堆上删除； 同样删除事件的操作则不一定是原子的，比如删除时间事件之后，有可能从系统I/O机制中注销会失败。\nint event_del(struct event *ev) { struct event_base *base; const struct eventop *evsel; void *evbase; // ev_base为NULL，表明ev没有被注册 if (ev-\u003eev_base == NULL) return (-1); // 取得ev注册的event_base和eventop指针 base = ev-\u003eev_base; evsel = base-\u003eevsel; evbase = base-\u003eevbase; // 将ev_callback调用次数设置为 if (ev-\u003eev_ncalls \u0026\u0026 ev-\u003eev_pncalls) { *ev-\u003eev_pncalls = 0; } // 从对应的链表中删除 if (ev-\u003eev_flags \u0026 EVLIST_TIMEOUT) event_queue_remove(base, ev, EVLIST_TIMEOUT); if (ev-\u003eev_flags \u0026 EVLIST_ACTIVE) event_queue_remove(base, ev, EVLIST_ACTIVE); if (ev-\u003eev_flags \u0026 EVLIST_INSERTED) { event_queue_remove(base, ev, EVLIST_INSERTED); // EVLIST_INSERTED表明是I/O或者Signal事件， // 需要调用I/O demultiplexer注销事件 return (evsel-\u003edel(evbase, ev)); } return (0); } 4. 小结 分析了event_base这一重要结构体，初步看到了libevent对系统的I/O demultiplex机制的封装event_op结构，并结合源代码分析了事件的注册和删除处理，下面将会接着分析事件管理框架中的主事件循环部分。\n",
   "wordCount" : "537",
-  "inLanguage": "en",
+  "inLanguage": "zh-cn",
   "datePublished": "2021-01-11T09:20:42Z",
   "dateModified": "2021-01-11T09:20:42Z",
   "mainEntityOfPage": {
@@ -171,6 +334,8 @@ struct eventop { const char *name; void *(*init)(struct event_base *); // 初始
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -180,32 +345,32 @@ struct eventop { const char *name; void *(*init)(struct event_base *); // 初始
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/1/" title="1s">
+                <a href="https://haokiu.com/1/" title="1">
                     <span>后端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/2/" title="2s">
+                <a href="https://haokiu.com/2/" title="2">
                     <span>前端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/3/" title="3s">
+                <a href="https://haokiu.com/3/" title="3">
                     <span>区块链</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/4/" title="4s">
+                <a href="https://haokiu.com/4/" title="4">
                     <span>大数据</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/5/" title="5s">
+                <a href="https://haokiu.com/5/" title="5">
                     <span>linux</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/6/" title="6s">
+                <a href="https://haokiu.com/6/" title="6">
                     <span>其他</span>
                 </a>
             </li>
@@ -226,7 +391,7 @@ struct eventop { const char *name; void *(*init)(struct event_base *); // 初始
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    
     <h1 class="post-title">
       libevent源码深度剖析06
     </h1>
@@ -471,12 +636,12 @@ tv：超时时间；</p>
     </ul>
 <nav class="paginav">
   <a class="prev" href="https://haokiu.com/blog/1f6a82cdb17742a49514907b604e44c1/">
-    <span class="title">« Prev</span>
+    <span class="title">« </span>
     <br>
     <span>libevent源码深度剖析05</span>
   </a>
   <a class="next" href="https://haokiu.com/blog/1fa932a07dd84e9fbdde728e110c098f/">
-    <span class="title">Next »</span>
+    <span class="title"> »</span>
     <br>
     <span>libevent源码深度剖析07</span>
   </a>
@@ -486,6 +651,14 @@ tv：超时时间；</p>
 </article>
     </main>
     
+<footer class="footer">
+    <span>haokiu.com</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />

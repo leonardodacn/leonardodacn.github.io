@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="zh-cn" dir="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,24 +7,42 @@
 <meta name="robots" content="index, follow">
 <title>2.1 Go1的包机制 | haokiu</title>
 <meta name="keywords" content="">
-<meta name="description" content="2.1 Go1的包机制 同⽬录Go源⽂件的集合构成包，而同⽬录下⼦⽬录对应的包的集合构成模块（暂不考虑子模块）。因此，要了解模块之前需要先了解包。
-2.1.1 包是最小链接单位 Go语言是一种编译型的语言，链接的最小单位是包，对应go/ast.Package类型，多个包链接为一个可执行程序。在当前的官方实现中，一个包一般对应一个路径目录下的全部的Go语言源文件，而目录的路径包含了表示包的唯一路径名。Go语言的规范中包只是一个抽象的概念，并不要求包一定是以目录的方式展现，在未来包或者是模块也可能以压缩文件的方式展现。
+<meta name="description" content="2.1 Go1的包机制
+同⽬录Go源⽂件的集合构成包，而同⽬录下⼦⽬录对应的包的集合构成模块（暂不考虑子模块）。因此，要了解模块之前需要先了解包。
+2.1.1 包是最小链接单位
+Go语言是一种编译型的语言，链接的最小单位是包，对应go/ast.Package类型，多个包链接为一个可执行程序。在当前的官方实现中，一个包一般对应一个路径目录下的全部的Go语言源文件，而目录的路径包含了表示包的唯一路径名。Go语言的规范中包只是一个抽象的概念，并不要求包一定是以目录的方式展现，在未来包或者是模块也可能以压缩文件的方式展现。
 包是Go语言应用编译和链接的基本单位，因此模块最终的目的是为了管理这些包的版本。
-2.1.2 包目录布局的演变 在Go语言刚刚开源、还没有GOPATH环境变量之前，Go语言标准库的包全部是放在$(GOROOT)/src目录之下的，比如标准库中的image/png包对应$(GOROOT)/src/image/png目录。而第三方的包也可以放在$(GOROOT)/src目录，这时候Go语言的构建工具是不区分标准库的包和第三方包的。此外第三方或自己的应用对应的包，可以放在$(GOROOT)目录之外的任意目录。
+2.1.2 包目录布局的演变
+在Go语言刚刚开源、还没有GOPATH环境变量之前，Go语言标准库的包全部是放在$(GOROOT)/src目录之下的，比如标准库中的image/png包对应$(GOROOT)/src/image/png目录。而第三方的包也可以放在$(GOROOT)/src目录，这时候Go语言的构建工具是不区分标准库的包和第三方包的。此外第三方或自己的应用对应的包，可以放在$(GOROOT)目录之外的任意目录。
 比如可以在任意目录创建一个hello.go文件：
-package hello import &#34;fmt&#34; func PrintHello() { fmt.Printf(&#34;Hello, 世界\n&#34;) } 然后在同级的目录创建一个Makefile文件用于管理构建工作：
-include $(GOROOT)/src/Make.inc TARG=github.com/chai2010/go2-book/ch2/hello GOFILES=./hello.go include $(GOROOT)/src/Make.pkg 第一个语句包含构建环境，最后的语句表示这是一个包。最重要的TARG变量定义了包的路径，而GOFILES则表示了包由哪些Go文件组成。然后执行make nuke就可以编译生成$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件。当另一个包要导入hello包时，实际上是从$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件读取包的信息。
+package hello
+
+import &#34;fmt&#34;
+
+func PrintHello() {
+	fmt.Printf(&#34;Hello, 世界\n&#34;)
+}
+然后在同级的目录创建一个Makefile文件用于管理构建工作：
+include $(GOROOT)/src/Make.inc
+
+TARG=github.com/chai2010/go2-book/ch2/hello
+GOFILES=./hello.go
+
+include $(GOROOT)/src/Make.pkg
+第一个语句包含构建环境，最后的语句表示这是一个包。最重要的TARG变量定义了包的路径，而GOFILES则表示了包由哪些Go文件组成。然后执行make nuke就可以编译生成$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件。当另一个包要导入hello包时，实际上是从$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件读取包的信息。
 在Go1之前的史前时代，一切包都是手工构建安装的，因此包的版本管理也是手工的方式进行。如果需要使用社区开源的第三方包，需要手工下载代码放到合适的目录正确编译并安装之后才可以使用。
 为了将标准库的包和第三方的包分开管理，避免第三方包代码污染$(GOROOT)/src和$(GOROOT)/pkg目录，Go语言引入了GOPATH环境变量。GOPATH环境变量对应的目录用于管理非标准库的包，其中src用户存放Go代码，pkg用于存放编译后的.a文件，bin用于存放编译后的可执行程序。此后直到Go1.10，Go语言所有和包版本管理相关的工作都是基于GOPATH特性展开。
-2.1.3 GOPATH特性的扩展 扩展GOPATH的目标都是为了更方便管理包。Go语言的包有三种类型：首先是叶子包，此类包最多依赖标准库，不依赖第三方包；其次是main包表示一个应用，它不能被其它包导入（单元测试除外）；最后是普通的依赖第三方包的非main包。比较特殊的main包同时也是一个叶子包。
+2.1.3 GOPATH特性的扩展
+扩展GOPATH的目标都是为了更方便管理包。Go语言的包有三种类型：首先是叶子包，此类包最多依赖标准库，不依赖第三方包；其次是main包表示一个应用，它不能被其它包导入（单元测试除外）；最后是普通的依赖第三方包的非main包。比较特殊的main包同时也是一个叶子包。
 叶子包自身很少会遇到版本管理问题，因为不会遇到因为依赖第三方包产生的各种问题，因此叶子包的开发者很少关注版本管理的问题。稍微复杂一点的是main包，main包是包依赖中的根包。main包不担心被其它包依赖，因此它其实是可以通过一个独占的GOPATH来维护所有依赖的第三方包的。最复杂的是既不是main包，也不是普通的叶子包，因为普通包需要管理其依赖的第三方包，同时一般又不能单独管理GOAPTH。在vendor出现之前的版本管理实践中，普通包的版本比较简陋，很多普通包甚至都没有版本管理，只有master一个最新版本。
 GOPATH的扩展主要分为横向和纵向两个方向。横向就是同时并列维护多个GOPATH目录，通过手工方式调整其中某些目录来实现目录中包版本切换的目的。纵向扩展一般在管理main包对应的应用程序中使用，通过在包内部创建临时的GOPATH子目录，在GOPATH子目录中包含全部第三方依赖的拷贝来实现外部依赖包版本的管理。
 社区中早期出现的Godeps工具就是通过在当前目录下创建Godeps/_workspace子目录来管理维护依赖的第三方包的版本。Godeps的实践成果最终被吸收到来Go语言中，通过vendor机制实现来main包的依赖管理（不是版本管理）。但是最终vendor机制也带来了各种问题（稍后的章节会讨论），最终官方完全重新设计了模块化的特性。
-2.1.4 模块化之后的包目录路径 通过vendor机制来实现版本管理的尝试虽然失败了，但是通过横向扩展GOPATH的来维护同一个包的不同版本的思路却在模块中复活了。模块化通过重新组织目录结构，实现了同时管理同一个包的不同版本需求。
+2.1.4 模块化之后的包目录路径
+通过vendor机制来实现版本管理的尝试虽然失败了，但是通过横向扩展GOPATH的来维护同一个包的不同版本的思路却在模块中复活了。模块化通过重新组织目录结构，实现了同时管理同一个包的不同版本需求。
 比如之前$(GOPATH)/src/github.com/chai2010/pbgo包的1.0.0版本，在模块化之后将对应$(HOME)/go/pkg/mod/github.com/chai2010/pbgo@1.0.0。模块化通过$(HOME)/go/pkg/mod目录管理第三方的依赖包，同时通过pkg@x.y.z的版本后缀来区分同一个包的不同版本。这其实和多个GOPATH并列存放的思路是类似，不过模块化对多版本支持的更加完美。">
 <meta name="author" content="">
 <link rel="canonical" href="https://haokiu.com/blog/e07062bd3a82483893b16c9a014f22dc/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
 <script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="https://haokiu.com/favicon.ico">
@@ -34,6 +52,7 @@ GOPATH的扩展主要分为横向和纵向两个方向。横向就是同时并�
 <link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/blog/e07062bd3a82483893b16c9a014f22dc/">
 <noscript>
     <style>
         #theme-toggle,
@@ -71,20 +90,38 @@ GOPATH的扩展主要分为横向和纵向两个方向。横向就是同时并�
 
     </style>
 </noscript><meta property="og:title" content="2.1 Go1的包机制" />
-<meta property="og:description" content="2.1 Go1的包机制 同⽬录Go源⽂件的集合构成包，而同⽬录下⼦⽬录对应的包的集合构成模块（暂不考虑子模块）。因此，要了解模块之前需要先了解包。
-2.1.1 包是最小链接单位 Go语言是一种编译型的语言，链接的最小单位是包，对应go/ast.Package类型，多个包链接为一个可执行程序。在当前的官方实现中，一个包一般对应一个路径目录下的全部的Go语言源文件，而目录的路径包含了表示包的唯一路径名。Go语言的规范中包只是一个抽象的概念，并不要求包一定是以目录的方式展现，在未来包或者是模块也可能以压缩文件的方式展现。
+<meta property="og:description" content="2.1 Go1的包机制
+同⽬录Go源⽂件的集合构成包，而同⽬录下⼦⽬录对应的包的集合构成模块（暂不考虑子模块）。因此，要了解模块之前需要先了解包。
+2.1.1 包是最小链接单位
+Go语言是一种编译型的语言，链接的最小单位是包，对应go/ast.Package类型，多个包链接为一个可执行程序。在当前的官方实现中，一个包一般对应一个路径目录下的全部的Go语言源文件，而目录的路径包含了表示包的唯一路径名。Go语言的规范中包只是一个抽象的概念，并不要求包一定是以目录的方式展现，在未来包或者是模块也可能以压缩文件的方式展现。
 包是Go语言应用编译和链接的基本单位，因此模块最终的目的是为了管理这些包的版本。
-2.1.2 包目录布局的演变 在Go语言刚刚开源、还没有GOPATH环境变量之前，Go语言标准库的包全部是放在$(GOROOT)/src目录之下的，比如标准库中的image/png包对应$(GOROOT)/src/image/png目录。而第三方的包也可以放在$(GOROOT)/src目录，这时候Go语言的构建工具是不区分标准库的包和第三方包的。此外第三方或自己的应用对应的包，可以放在$(GOROOT)目录之外的任意目录。
+2.1.2 包目录布局的演变
+在Go语言刚刚开源、还没有GOPATH环境变量之前，Go语言标准库的包全部是放在$(GOROOT)/src目录之下的，比如标准库中的image/png包对应$(GOROOT)/src/image/png目录。而第三方的包也可以放在$(GOROOT)/src目录，这时候Go语言的构建工具是不区分标准库的包和第三方包的。此外第三方或自己的应用对应的包，可以放在$(GOROOT)目录之外的任意目录。
 比如可以在任意目录创建一个hello.go文件：
-package hello import &#34;fmt&#34; func PrintHello() { fmt.Printf(&#34;Hello, 世界\n&#34;) } 然后在同级的目录创建一个Makefile文件用于管理构建工作：
-include $(GOROOT)/src/Make.inc TARG=github.com/chai2010/go2-book/ch2/hello GOFILES=./hello.go include $(GOROOT)/src/Make.pkg 第一个语句包含构建环境，最后的语句表示这是一个包。最重要的TARG变量定义了包的路径，而GOFILES则表示了包由哪些Go文件组成。然后执行make nuke就可以编译生成$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件。当另一个包要导入hello包时，实际上是从$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件读取包的信息。
+package hello
+
+import &#34;fmt&#34;
+
+func PrintHello() {
+	fmt.Printf(&#34;Hello, 世界\n&#34;)
+}
+然后在同级的目录创建一个Makefile文件用于管理构建工作：
+include $(GOROOT)/src/Make.inc
+
+TARG=github.com/chai2010/go2-book/ch2/hello
+GOFILES=./hello.go
+
+include $(GOROOT)/src/Make.pkg
+第一个语句包含构建环境，最后的语句表示这是一个包。最重要的TARG变量定义了包的路径，而GOFILES则表示了包由哪些Go文件组成。然后执行make nuke就可以编译生成$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件。当另一个包要导入hello包时，实际上是从$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件读取包的信息。
 在Go1之前的史前时代，一切包都是手工构建安装的，因此包的版本管理也是手工的方式进行。如果需要使用社区开源的第三方包，需要手工下载代码放到合适的目录正确编译并安装之后才可以使用。
 为了将标准库的包和第三方的包分开管理，避免第三方包代码污染$(GOROOT)/src和$(GOROOT)/pkg目录，Go语言引入了GOPATH环境变量。GOPATH环境变量对应的目录用于管理非标准库的包，其中src用户存放Go代码，pkg用于存放编译后的.a文件，bin用于存放编译后的可执行程序。此后直到Go1.10，Go语言所有和包版本管理相关的工作都是基于GOPATH特性展开。
-2.1.3 GOPATH特性的扩展 扩展GOPATH的目标都是为了更方便管理包。Go语言的包有三种类型：首先是叶子包，此类包最多依赖标准库，不依赖第三方包；其次是main包表示一个应用，它不能被其它包导入（单元测试除外）；最后是普通的依赖第三方包的非main包。比较特殊的main包同时也是一个叶子包。
+2.1.3 GOPATH特性的扩展
+扩展GOPATH的目标都是为了更方便管理包。Go语言的包有三种类型：首先是叶子包，此类包最多依赖标准库，不依赖第三方包；其次是main包表示一个应用，它不能被其它包导入（单元测试除外）；最后是普通的依赖第三方包的非main包。比较特殊的main包同时也是一个叶子包。
 叶子包自身很少会遇到版本管理问题，因为不会遇到因为依赖第三方包产生的各种问题，因此叶子包的开发者很少关注版本管理的问题。稍微复杂一点的是main包，main包是包依赖中的根包。main包不担心被其它包依赖，因此它其实是可以通过一个独占的GOPATH来维护所有依赖的第三方包的。最复杂的是既不是main包，也不是普通的叶子包，因为普通包需要管理其依赖的第三方包，同时一般又不能单独管理GOAPTH。在vendor出现之前的版本管理实践中，普通包的版本比较简陋，很多普通包甚至都没有版本管理，只有master一个最新版本。
 GOPATH的扩展主要分为横向和纵向两个方向。横向就是同时并列维护多个GOPATH目录，通过手工方式调整其中某些目录来实现目录中包版本切换的目的。纵向扩展一般在管理main包对应的应用程序中使用，通过在包内部创建临时的GOPATH子目录，在GOPATH子目录中包含全部第三方依赖的拷贝来实现外部依赖包版本的管理。
 社区中早期出现的Godeps工具就是通过在当前目录下创建Godeps/_workspace子目录来管理维护依赖的第三方包的版本。Godeps的实践成果最终被吸收到来Go语言中，通过vendor机制实现来main包的依赖管理（不是版本管理）。但是最终vendor机制也带来了各种问题（稍后的章节会讨论），最终官方完全重新设计了模块化的特性。
-2.1.4 模块化之后的包目录路径 通过vendor机制来实现版本管理的尝试虽然失败了，但是通过横向扩展GOPATH的来维护同一个包的不同版本的思路却在模块中复活了。模块化通过重新组织目录结构，实现了同时管理同一个包的不同版本需求。
+2.1.4 模块化之后的包目录路径
+通过vendor机制来实现版本管理的尝试虽然失败了，但是通过横向扩展GOPATH的来维护同一个包的不同版本的思路却在模块中复活了。模块化通过重新组织目录结构，实现了同时管理同一个包的不同版本需求。
 比如之前$(GOPATH)/src/github.com/chai2010/pbgo包的1.0.0版本，在模块化之后将对应$(HOME)/go/pkg/mod/github.com/chai2010/pbgo@1.0.0。模块化通过$(HOME)/go/pkg/mod目录管理第三方的依赖包，同时通过pkg@x.y.z的版本后缀来区分同一个包的不同版本。这其实和多个GOPATH并列存放的思路是类似，不过模块化对多版本支持的更加完美。" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://haokiu.com/blog/e07062bd3a82483893b16c9a014f22dc/" /><meta property="article:section" content="1" />
@@ -93,20 +130,38 @@ GOPATH的扩展主要分为横向和纵向两个方向。横向就是同时并�
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="2.1 Go1的包机制"/>
-<meta name="twitter:description" content="2.1 Go1的包机制 同⽬录Go源⽂件的集合构成包，而同⽬录下⼦⽬录对应的包的集合构成模块（暂不考虑子模块）。因此，要了解模块之前需要先了解包。
-2.1.1 包是最小链接单位 Go语言是一种编译型的语言，链接的最小单位是包，对应go/ast.Package类型，多个包链接为一个可执行程序。在当前的官方实现中，一个包一般对应一个路径目录下的全部的Go语言源文件，而目录的路径包含了表示包的唯一路径名。Go语言的规范中包只是一个抽象的概念，并不要求包一定是以目录的方式展现，在未来包或者是模块也可能以压缩文件的方式展现。
+<meta name="twitter:description" content="2.1 Go1的包机制
+同⽬录Go源⽂件的集合构成包，而同⽬录下⼦⽬录对应的包的集合构成模块（暂不考虑子模块）。因此，要了解模块之前需要先了解包。
+2.1.1 包是最小链接单位
+Go语言是一种编译型的语言，链接的最小单位是包，对应go/ast.Package类型，多个包链接为一个可执行程序。在当前的官方实现中，一个包一般对应一个路径目录下的全部的Go语言源文件，而目录的路径包含了表示包的唯一路径名。Go语言的规范中包只是一个抽象的概念，并不要求包一定是以目录的方式展现，在未来包或者是模块也可能以压缩文件的方式展现。
 包是Go语言应用编译和链接的基本单位，因此模块最终的目的是为了管理这些包的版本。
-2.1.2 包目录布局的演变 在Go语言刚刚开源、还没有GOPATH环境变量之前，Go语言标准库的包全部是放在$(GOROOT)/src目录之下的，比如标准库中的image/png包对应$(GOROOT)/src/image/png目录。而第三方的包也可以放在$(GOROOT)/src目录，这时候Go语言的构建工具是不区分标准库的包和第三方包的。此外第三方或自己的应用对应的包，可以放在$(GOROOT)目录之外的任意目录。
+2.1.2 包目录布局的演变
+在Go语言刚刚开源、还没有GOPATH环境变量之前，Go语言标准库的包全部是放在$(GOROOT)/src目录之下的，比如标准库中的image/png包对应$(GOROOT)/src/image/png目录。而第三方的包也可以放在$(GOROOT)/src目录，这时候Go语言的构建工具是不区分标准库的包和第三方包的。此外第三方或自己的应用对应的包，可以放在$(GOROOT)目录之外的任意目录。
 比如可以在任意目录创建一个hello.go文件：
-package hello import &#34;fmt&#34; func PrintHello() { fmt.Printf(&#34;Hello, 世界\n&#34;) } 然后在同级的目录创建一个Makefile文件用于管理构建工作：
-include $(GOROOT)/src/Make.inc TARG=github.com/chai2010/go2-book/ch2/hello GOFILES=./hello.go include $(GOROOT)/src/Make.pkg 第一个语句包含构建环境，最后的语句表示这是一个包。最重要的TARG变量定义了包的路径，而GOFILES则表示了包由哪些Go文件组成。然后执行make nuke就可以编译生成$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件。当另一个包要导入hello包时，实际上是从$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件读取包的信息。
+package hello
+
+import &#34;fmt&#34;
+
+func PrintHello() {
+	fmt.Printf(&#34;Hello, 世界\n&#34;)
+}
+然后在同级的目录创建一个Makefile文件用于管理构建工作：
+include $(GOROOT)/src/Make.inc
+
+TARG=github.com/chai2010/go2-book/ch2/hello
+GOFILES=./hello.go
+
+include $(GOROOT)/src/Make.pkg
+第一个语句包含构建环境，最后的语句表示这是一个包。最重要的TARG变量定义了包的路径，而GOFILES则表示了包由哪些Go文件组成。然后执行make nuke就可以编译生成$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件。当另一个包要导入hello包时，实际上是从$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件读取包的信息。
 在Go1之前的史前时代，一切包都是手工构建安装的，因此包的版本管理也是手工的方式进行。如果需要使用社区开源的第三方包，需要手工下载代码放到合适的目录正确编译并安装之后才可以使用。
 为了将标准库的包和第三方的包分开管理，避免第三方包代码污染$(GOROOT)/src和$(GOROOT)/pkg目录，Go语言引入了GOPATH环境变量。GOPATH环境变量对应的目录用于管理非标准库的包，其中src用户存放Go代码，pkg用于存放编译后的.a文件，bin用于存放编译后的可执行程序。此后直到Go1.10，Go语言所有和包版本管理相关的工作都是基于GOPATH特性展开。
-2.1.3 GOPATH特性的扩展 扩展GOPATH的目标都是为了更方便管理包。Go语言的包有三种类型：首先是叶子包，此类包最多依赖标准库，不依赖第三方包；其次是main包表示一个应用，它不能被其它包导入（单元测试除外）；最后是普通的依赖第三方包的非main包。比较特殊的main包同时也是一个叶子包。
+2.1.3 GOPATH特性的扩展
+扩展GOPATH的目标都是为了更方便管理包。Go语言的包有三种类型：首先是叶子包，此类包最多依赖标准库，不依赖第三方包；其次是main包表示一个应用，它不能被其它包导入（单元测试除外）；最后是普通的依赖第三方包的非main包。比较特殊的main包同时也是一个叶子包。
 叶子包自身很少会遇到版本管理问题，因为不会遇到因为依赖第三方包产生的各种问题，因此叶子包的开发者很少关注版本管理的问题。稍微复杂一点的是main包，main包是包依赖中的根包。main包不担心被其它包依赖，因此它其实是可以通过一个独占的GOPATH来维护所有依赖的第三方包的。最复杂的是既不是main包，也不是普通的叶子包，因为普通包需要管理其依赖的第三方包，同时一般又不能单独管理GOAPTH。在vendor出现之前的版本管理实践中，普通包的版本比较简陋，很多普通包甚至都没有版本管理，只有master一个最新版本。
 GOPATH的扩展主要分为横向和纵向两个方向。横向就是同时并列维护多个GOPATH目录，通过手工方式调整其中某些目录来实现目录中包版本切换的目的。纵向扩展一般在管理main包对应的应用程序中使用，通过在包内部创建临时的GOPATH子目录，在GOPATH子目录中包含全部第三方依赖的拷贝来实现外部依赖包版本的管理。
 社区中早期出现的Godeps工具就是通过在当前目录下创建Godeps/_workspace子目录来管理维护依赖的第三方包的版本。Godeps的实践成果最终被吸收到来Go语言中，通过vendor机制实现来main包的依赖管理（不是版本管理）。但是最终vendor机制也带来了各种问题（稍后的章节会讨论），最终官方完全重新设计了模块化的特性。
-2.1.4 模块化之后的包目录路径 通过vendor机制来实现版本管理的尝试虽然失败了，但是通过横向扩展GOPATH的来维护同一个包的不同版本的思路却在模块中复活了。模块化通过重新组织目录结构，实现了同时管理同一个包的不同版本需求。
+2.1.4 模块化之后的包目录路径
+通过vendor机制来实现版本管理的尝试虽然失败了，但是通过横向扩展GOPATH的来维护同一个包的不同版本的思路却在模块中复活了。模块化通过重新组织目录结构，实现了同时管理同一个包的不同版本需求。
 比如之前$(GOPATH)/src/github.com/chai2010/pbgo包的1.0.0版本，在模块化之后将对应$(HOME)/go/pkg/mod/github.com/chai2010/pbgo@1.0.0。模块化通过$(HOME)/go/pkg/mod目录管理第三方的依赖包，同时通过pkg@x.y.z的版本后缀来区分同一个包的不同版本。这其实和多个GOPATH并列存放的思路是类似，不过模块化对多版本支持的更加完美。"/>
 
 
@@ -118,7 +173,7 @@ GOPATH的扩展主要分为横向和纵向两个方向。横向就是同时并�
     {
       "@type": "ListItem",
       "position":  1 ,
-      "name": "1s",
+      "name": "1",
       "item": "https://haokiu.com/1/"
     }, 
     {
@@ -136,13 +191,13 @@ GOPATH的扩展主要分为横向和纵向两个方向。横向就是同时并�
   "@type": "BlogPosting",
   "headline": "2.1 Go1的包机制",
   "name": "2.1 Go1的包机制",
-  "description": "2.1 Go1的包机制 同⽬录Go源⽂件的集合构成包，而同⽬录下⼦⽬录对应的包的集合构成模块（暂不考虑子模块）。因此，要了解模块之前需要先了解包。\n2.1.1 包是最小链接单位 Go语言是一种编译型的语言，链接的最小单位是包，对应go/ast.Package类型，多个包链接为一个可执行程序。在当前的官方实现中，一个包一般对应一个路径目录下的全部的Go语言源文件，而目录的路径包含了表示包的唯一路径名。Go语言的规范中包只是一个抽象的概念，并不要求包一定是以目录的方式展现，在未来包或者是模块也可能以压缩文件的方式展现。\n包是Go语言应用编译和链接的基本单位，因此模块最终的目的是为了管理这些包的版本。\n2.1.2 包目录布局的演变 在Go语言刚刚开源、还没有GOPATH环境变量之前，Go语言标准库的包全部是放在$(GOROOT)/src目录之下的，比如标准库中的image/png包对应$(GOROOT)/src/image/png目录。而第三方的包也可以放在$(GOROOT)/src目录，这时候Go语言的构建工具是不区分标准库的包和第三方包的。此外第三方或自己的应用对应的包，可以放在$(GOROOT)目录之外的任意目录。\n比如可以在任意目录创建一个hello.go文件：\npackage hello import \u0026#34;fmt\u0026#34; func PrintHello() { fmt.Printf(\u0026#34;Hello, 世界\\n\u0026#34;) } 然后在同级的目录创建一个Makefile文件用于管理构建工作：\ninclude $(GOROOT)/src/Make.inc TARG=github.com/chai2010/go2-book/ch2/hello GOFILES=./hello.go include $(GOROOT)/src/Make.pkg 第一个语句包含构建环境，最后的语句表示这是一个包。最重要的TARG变量定义了包的路径，而GOFILES则表示了包由哪些Go文件组成。然后执行make nuke就可以编译生成$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件。当另一个包要导入hello包时，实际上是从$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件读取包的信息。\n在Go1之前的史前时代，一切包都是手工构建安装的，因此包的版本管理也是手工的方式进行。如果需要使用社区开源的第三方包，需要手工下载代码放到合适的目录正确编译并安装之后才可以使用。\n为了将标准库的包和第三方的包分开管理，避免第三方包代码污染$(GOROOT)/src和$(GOROOT)/pkg目录，Go语言引入了GOPATH环境变量。GOPATH环境变量对应的目录用于管理非标准库的包，其中src用户存放Go代码，pkg用于存放编译后的.a文件，bin用于存放编译后的可执行程序。此后直到Go1.10，Go语言所有和包版本管理相关的工作都是基于GOPATH特性展开。\n2.1.3 GOPATH特性的扩展 扩展GOPATH的目标都是为了更方便管理包。Go语言的包有三种类型：首先是叶子包，此类包最多依赖标准库，不依赖第三方包；其次是main包表示一个应用，它不能被其它包导入（单元测试除外）；最后是普通的依赖第三方包的非main包。比较特殊的main包同时也是一个叶子包。\n叶子包自身很少会遇到版本管理问题，因为不会遇到因为依赖第三方包产生的各种问题，因此叶子包的开发者很少关注版本管理的问题。稍微复杂一点的是main包，main包是包依赖中的根包。main包不担心被其它包依赖，因此它其实是可以通过一个独占的GOPATH来维护所有依赖的第三方包的。最复杂的是既不是main包，也不是普通的叶子包，因为普通包需要管理其依赖的第三方包，同时一般又不能单独管理GOAPTH。在vendor出现之前的版本管理实践中，普通包的版本比较简陋，很多普通包甚至都没有版本管理，只有master一个最新版本。\nGOPATH的扩展主要分为横向和纵向两个方向。横向就是同时并列维护多个GOPATH目录，通过手工方式调整其中某些目录来实现目录中包版本切换的目的。纵向扩展一般在管理main包对应的应用程序中使用，通过在包内部创建临时的GOPATH子目录，在GOPATH子目录中包含全部第三方依赖的拷贝来实现外部依赖包版本的管理。\n社区中早期出现的Godeps工具就是通过在当前目录下创建Godeps/_workspace子目录来管理维护依赖的第三方包的版本。Godeps的实践成果最终被吸收到来Go语言中，通过vendor机制实现来main包的依赖管理（不是版本管理）。但是最终vendor机制也带来了各种问题（稍后的章节会讨论），最终官方完全重新设计了模块化的特性。\n2.1.4 模块化之后的包目录路径 通过vendor机制来实现版本管理的尝试虽然失败了，但是通过横向扩展GOPATH的来维护同一个包的不同版本的思路却在模块中复活了。模块化通过重新组织目录结构，实现了同时管理同一个包的不同版本需求。\n比如之前$(GOPATH)/src/github.com/chai2010/pbgo包的1.0.0版本，在模块化之后将对应$(HOME)/go/pkg/mod/github.com/chai2010/pbgo@1.0.0。模块化通过$(HOME)/go/pkg/mod目录管理第三方的依赖包，同时通过pkg@x.y.z的版本后缀来区分同一个包的不同版本。这其实和多个GOPATH并列存放的思路是类似，不过模块化对多版本支持的更加完美。",
+  "description": "2.1 Go1的包机制 同⽬录Go源⽂件的集合构成包，而同⽬录下⼦⽬录对应的包的集合构成模块（暂不考虑子模块）。因此，要了解模块之前需要先了解包。\n2.1.1 包是最小链接单位 Go语言是一种编译型的语言，链接的最小单位是包，对应go/ast.Package类型，多个包链接为一个可执行程序。在当前的官方实现中，一个包一般对应一个路径目录下的全部的Go语言源文件，而目录的路径包含了表示包的唯一路径名。Go语言的规范中包只是一个抽象的概念，并不要求包一定是以目录的方式展现，在未来包或者是模块也可能以压缩文件的方式展现。\n包是Go语言应用编译和链接的基本单位，因此模块最终的目的是为了管理这些包的版本。\n2.1.2 包目录布局的演变 在Go语言刚刚开源、还没有GOPATH环境变量之前，Go语言标准库的包全部是放在$(GOROOT)/src目录之下的，比如标准库中的image/png包对应$(GOROOT)/src/image/png目录。而第三方的包也可以放在$(GOROOT)/src目录，这时候Go语言的构建工具是不区分标准库的包和第三方包的。此外第三方或自己的应用对应的包，可以放在$(GOROOT)目录之外的任意目录。\n比如可以在任意目录创建一个hello.go文件：\npackage hello import \u0026#34;fmt\u0026#34; func PrintHello() { fmt.Printf(\u0026#34;Hello, 世界\\n\u0026#34;) } 然后在同级的目录创建一个Makefile文件用于管理构建工作：\ninclude $(GOROOT)/src/Make.inc TARG=github.com/chai2010/go2-book/ch2/hello GOFILES=./hello.go include $(GOROOT)/src/Make.pkg 第一个语句包含构建环境，最后的语句表示这是一个包。最重要的TARG变量定义了包的路径，而GOFILES则表示了包由哪些Go文件组成。然后执行make nuke就可以编译生成$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件。当另一个包要导入hello包时，实际上是从$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件读取包的信息。\n在Go1之前的史前时代，一切包都是手工构建安装的，因此包的版本管理也是手工的方式进行。如果需要使用社区开源的第三方包，需要手工下载代码放到合适的目录正确编译并安装之后才可以使用。\n为了将标准库的包和第三方的包分开管理，避免第三方包代码污染$(GOROOT)/src和$(GOROOT)/pkg目录，Go语言引入了GOPATH环境变量。GOPATH环境变量对应的目录用于管理非标准库的包，其中src用户存放Go代码，pkg用于存放编译后的.a文件，bin用于存放编译后的可执行程序。此后直到Go1.10，Go语言所有和包版本管理相关的工作都是基于GOPATH特性展开。\n2.1.3 GOPATH特性的扩展 扩展GOPATH的目标都是为了更方便管理包。Go语言的包有三种类型：首先是叶子包，此类包最多依赖标准库，不依赖第三方包；其次是main包表示一个应用，它不能被其它包导入（单元测试除外）；最后是普通的依赖第三方包的非main包。比较特殊的main包同时也是一个叶子包。\n叶子包自身很少会遇到版本管理问题，因为不会遇到因为依赖第三方包产生的各种问题，因此叶子包的开发者很少关注版本管理的问题。稍微复杂一点的是main包，main包是包依赖中的根包。main包不担心被其它包依赖，因此它其实是可以通过一个独占的GOPATH来维护所有依赖的第三方包的。最复杂的是既不是main包，也不是普通的叶子包，因为普通包需要管理其依赖的第三方包，同时一般又不能单独管理GOAPTH。在vendor出现之前的版本管理实践中，普通包的版本比较简陋，很多普通包甚至都没有版本管理，只有master一个最新版本。\nGOPATH的扩展主要分为横向和纵向两个方向。横向就是同时并列维护多个GOPATH目录，通过手工方式调整其中某些目录来实现目录中包版本切换的目的。纵向扩展一般在管理main包对应的应用程序中使用，通过在包内部创建临时的GOPATH子目录，在GOPATH子目录中包含全部第三方依赖的拷贝来实现外部依赖包版本的管理。\n社区中早期出现的Godeps工具就是通过在当前目录下创建Godeps/_workspace子目录来管理维护依赖的第三方包的版本。Godeps的实践成果最终被吸收到来Go语言中，通过vendor机制实现来main包的依赖管理（不是版本管理）。但是最终vendor机制也带来了各种问题（稍后的章节会讨论），最终官方完全重新设计了模块化的特性。\n2.1.4 模块化之后的包目录路径 通过vendor机制来实现版本管理的尝试虽然失败了，但是通过横向扩展GOPATH的来维护同一个包的不同版本的思路却在模块中复活了。模块化通过重新组织目录结构，实现了同时管理同一个包的不同版本需求。\n比如之前$(GOPATH)/src/github.com/chai2010/pbgo包的1.0.0版本，在模块化之后将对应$(HOME)/go/pkg/mod/github.com/chai2010/pbgo@1.0.0。模块化通过$(HOME)/go/pkg/mod目录管理第三方的依赖包，同时通过pkg@x.y.z的版本后缀来区分同一个包的不同版本。这其实和多个GOPATH并列存放的思路是类似，不过模块化对多版本支持的更加完美。\n",
   "keywords": [
     
   ],
   "articleBody": "2.1 Go1的包机制 同⽬录Go源⽂件的集合构成包，而同⽬录下⼦⽬录对应的包的集合构成模块（暂不考虑子模块）。因此，要了解模块之前需要先了解包。\n2.1.1 包是最小链接单位 Go语言是一种编译型的语言，链接的最小单位是包，对应go/ast.Package类型，多个包链接为一个可执行程序。在当前的官方实现中，一个包一般对应一个路径目录下的全部的Go语言源文件，而目录的路径包含了表示包的唯一路径名。Go语言的规范中包只是一个抽象的概念，并不要求包一定是以目录的方式展现，在未来包或者是模块也可能以压缩文件的方式展现。\n包是Go语言应用编译和链接的基本单位，因此模块最终的目的是为了管理这些包的版本。\n2.1.2 包目录布局的演变 在Go语言刚刚开源、还没有GOPATH环境变量之前，Go语言标准库的包全部是放在$(GOROOT)/src目录之下的，比如标准库中的image/png包对应$(GOROOT)/src/image/png目录。而第三方的包也可以放在$(GOROOT)/src目录，这时候Go语言的构建工具是不区分标准库的包和第三方包的。此外第三方或自己的应用对应的包，可以放在$(GOROOT)目录之外的任意目录。\n比如可以在任意目录创建一个hello.go文件：\npackage hello import \"fmt\" func PrintHello() { fmt.Printf(\"Hello, 世界\\n\") } 然后在同级的目录创建一个Makefile文件用于管理构建工作：\ninclude $(GOROOT)/src/Make.inc TARG=github.com/chai2010/go2-book/ch2/hello GOFILES=./hello.go include $(GOROOT)/src/Make.pkg 第一个语句包含构建环境，最后的语句表示这是一个包。最重要的TARG变量定义了包的路径，而GOFILES则表示了包由哪些Go文件组成。然后执行make nuke就可以编译生成$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件。当另一个包要导入hello包时，实际上是从$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件读取包的信息。\n在Go1之前的史前时代，一切包都是手工构建安装的，因此包的版本管理也是手工的方式进行。如果需要使用社区开源的第三方包，需要手工下载代码放到合适的目录正确编译并安装之后才可以使用。\n为了将标准库的包和第三方的包分开管理，避免第三方包代码污染$(GOROOT)/src和$(GOROOT)/pkg目录，Go语言引入了GOPATH环境变量。GOPATH环境变量对应的目录用于管理非标准库的包，其中src用户存放Go代码，pkg用于存放编译后的.a文件，bin用于存放编译后的可执行程序。此后直到Go1.10，Go语言所有和包版本管理相关的工作都是基于GOPATH特性展开。\n2.1.3 GOPATH特性的扩展 扩展GOPATH的目标都是为了更方便管理包。Go语言的包有三种类型：首先是叶子包，此类包最多依赖标准库，不依赖第三方包；其次是main包表示一个应用，它不能被其它包导入（单元测试除外）；最后是普通的依赖第三方包的非main包。比较特殊的main包同时也是一个叶子包。\n叶子包自身很少会遇到版本管理问题，因为不会遇到因为依赖第三方包产生的各种问题，因此叶子包的开发者很少关注版本管理的问题。稍微复杂一点的是main包，main包是包依赖中的根包。main包不担心被其它包依赖，因此它其实是可以通过一个独占的GOPATH来维护所有依赖的第三方包的。最复杂的是既不是main包，也不是普通的叶子包，因为普通包需要管理其依赖的第三方包，同时一般又不能单独管理GOAPTH。在vendor出现之前的版本管理实践中，普通包的版本比较简陋，很多普通包甚至都没有版本管理，只有master一个最新版本。\nGOPATH的扩展主要分为横向和纵向两个方向。横向就是同时并列维护多个GOPATH目录，通过手工方式调整其中某些目录来实现目录中包版本切换的目的。纵向扩展一般在管理main包对应的应用程序中使用，通过在包内部创建临时的GOPATH子目录，在GOPATH子目录中包含全部第三方依赖的拷贝来实现外部依赖包版本的管理。\n社区中早期出现的Godeps工具就是通过在当前目录下创建Godeps/_workspace子目录来管理维护依赖的第三方包的版本。Godeps的实践成果最终被吸收到来Go语言中，通过vendor机制实现来main包的依赖管理（不是版本管理）。但是最终vendor机制也带来了各种问题（稍后的章节会讨论），最终官方完全重新设计了模块化的特性。\n2.1.4 模块化之后的包目录路径 通过vendor机制来实现版本管理的尝试虽然失败了，但是通过横向扩展GOPATH的来维护同一个包的不同版本的思路却在模块中复活了。模块化通过重新组织目录结构，实现了同时管理同一个包的不同版本需求。\n比如之前$(GOPATH)/src/github.com/chai2010/pbgo包的1.0.0版本，在模块化之后将对应$(HOME)/go/pkg/mod/github.com/chai2010/pbgo@1.0.0。模块化通过$(HOME)/go/pkg/mod目录管理第三方的依赖包，同时通过pkg@x.y.z的版本后缀来区分同一个包的不同版本。这其实和多个GOPATH并列存放的思路是类似，不过模块化对多版本支持的更加完美。\n",
   "wordCount" : "42",
-  "inLanguage": "en",
+  "inLanguage": "zh-cn",
   "datePublished": "2021-01-22T15:40:43Z",
   "dateModified": "2021-01-22T15:40:43Z",
   "mainEntityOfPage": {
@@ -198,6 +253,8 @@ GOPATH的扩展主要分为横向和纵向两个方向。横向就是同时并�
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -207,32 +264,32 @@ GOPATH的扩展主要分为横向和纵向两个方向。横向就是同时并�
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/1/" title="1s">
+                <a href="https://haokiu.com/1/" title="1">
                     <span>后端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/2/" title="2s">
+                <a href="https://haokiu.com/2/" title="2">
                     <span>前端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/3/" title="3s">
+                <a href="https://haokiu.com/3/" title="3">
                     <span>区块链</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/4/" title="4s">
+                <a href="https://haokiu.com/4/" title="4">
                     <span>大数据</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/5/" title="5s">
+                <a href="https://haokiu.com/5/" title="5">
                     <span>linux</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/6/" title="6s">
+                <a href="https://haokiu.com/6/" title="6">
                     <span>其他</span>
                 </a>
             </li>
@@ -253,7 +310,7 @@ GOPATH的扩展主要分为横向和纵向两个方向。横向就是同时并�
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    
     <h1 class="post-title">
       2.1 Go1的包机制
     </h1>
@@ -294,7 +351,7 @@ GOPATH的扩展主要分为横向和纵向两个方向。横向就是同时并�
 <h2 id="212-包目录布局的演变">2.1.2 包目录布局的演变</h2>
 <p>在Go语言刚刚开源、还没有<code>GOPATH</code>环境变量之前，Go语言标准库的包全部是放在<code>$(GOROOT)/src</code>目录之下的，比如标准库中的<code>image/png</code>包对应<code>$(GOROOT)/src/image/png</code>目录。而第三方的包也可以放在<code>$(GOROOT)/src</code>目录，这时候Go语言的构建工具是不区分标准库的包和第三方包的。此外第三方或自己的应用对应的包，可以放在<code>$(GOROOT)</code>目录之外的任意目录。</p>
 <p>比如可以在任意目录创建一个<code>hello.go</code>文件：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">hello</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">hello</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;fmt&#34;</span>
 </span></span><span style="display:flex;"><span>
@@ -302,7 +359,7 @@ GOPATH的扩展主要分为横向和纵向两个方向。横向就是同时并�
 </span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Hello, 世界\n&#34;</span>)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>然后在同级的目录创建一个<code>Makefile</code>文件用于管理构建工作：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Makefile" data-lang="Makefile"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">include</span> <span style="color:#66d9ef">$(</span>GOROOT<span style="color:#66d9ef">)</span><span style="color:#960050;background-color:#1e0010">/src/Make.inc</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-Makefile" data-lang="Makefile"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">include</span> <span style="color:#66d9ef">$(</span>GOROOT<span style="color:#66d9ef">)</span><span style="color:#960050;background-color:#1e0010">/src/Make.inc</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>TARG<span style="color:#f92672">=</span>github.com/chai2010/go2-book/ch2/hello
 </span></span><span style="display:flex;"><span>GOFILES<span style="color:#f92672">=</span>./hello.go
@@ -327,12 +384,12 @@ GOPATH的扩展主要分为横向和纵向两个方向。横向就是同时并�
     </ul>
 <nav class="paginav">
   <a class="prev" href="https://haokiu.com/blog/4f9267cc85a647979aa3803c5c435407/">
-    <span class="title">« Prev</span>
+    <span class="title">« </span>
     <br>
     <span>1.4 Go2诞生</span>
   </a>
   <a class="next" href="https://haokiu.com/blog/ba3f4751a98a484f995283b9377b90d1/">
-    <span class="title">Next »</span>
+    <span class="title"> »</span>
     <br>
     <span>2.2 基于vendor的版本管理</span>
   </a>
@@ -342,6 +399,14 @@ GOPATH的扩展主要分为横向和纵向两个方向。横向就是同时并�
 </article>
     </main>
     
+<footer class="footer">
+    <span>haokiu.com</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />

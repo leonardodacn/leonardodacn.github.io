@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="zh-cn" dir="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,16 +7,224 @@
 <meta name="robots" content="index, follow">
 <title>OTSWriter 插件文档 | haokiu</title>
 <meta name="keywords" content="datax">
-<meta name="description" content="OTSWriter 插件文档 1 快速介绍 OTSWriter插件实现了向OTS写入数据，目前支持三种写入方式：
+<meta name="description" content="OTSWriter 插件文档
+
+1 快速介绍
+OTSWriter插件实现了向OTS写入数据，目前支持三种写入方式：
+
+
 PutRow，对应于OTS API PutRow，插入数据到指定的行，如果该行不存在，则新增一行；若该行存在，则覆盖原有行。
+
+
 UpdateRow，对应于OTS API UpdateRow，更新指定行的数据，如果该行不存在，则新增一行；若该行存在，则根据请求的内容在这一行中新增、修改或者删除指定列的值。
+
+
 DeleteRow，对应于OTS API DeleteRow，删除指定行的数据。
+
+
 OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，提供海量结构化数据的存储和实时访问。OTS 以实例和表的形式组织数据，通过数据分片和负载均衡技术，实现规模上的无缝扩展。
-2 实现原理 简而言之，OTSWriter通过OTS官方Java SDK连接到OTS服务端，并通过SDK写入OTS服务端。OTSWriter本身对于写入过程做了很多优化，包括写入超时重试、异常写入重试、批量提交等Feature。
-3 功能说明 3.1 配置样例 配置一个写入OTS作业: { &#34;job&#34;: { &#34;setting&#34;: { }, &#34;content&#34;: [ { &#34;reader&#34;: {}, &#34;writer&#34;: { &#34;name&#34;: &#34;otswriter&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;:&#34;&#34;, &#34;accessId&#34;:&#34;&#34;, &#34;accessKey&#34;:&#34;&#34;, &#34;instanceName&#34;:&#34;&#34;, // 导出数据表的表名 &#34;table&#34;:&#34;&#34;, // Writer支持不同类型之间进行相互转换 // 如下类型转换不支持: // ================================ // int -&gt; binary // double -&gt; bool, binary // bool -&gt; binary // bytes -&gt; int, double, bool // ================================ // 需要导入的PK列名，区分大小写 // 类型支持：STRING，INT // 1. 支持类型转换，注意类型转换时的精度丢失 // 2. 顺序不要求和表的Meta一致 &#34;primaryKey&#34; : [ {&#34;name&#34;:&#34;pk1&#34;, &#34;type&#34;:&#34;string&#34;}, {&#34;name&#34;:&#34;pk2&#34;, &#34;type&#34;:&#34;int&#34;} ], // 需要导入的列名，区分大小写 // 类型支持STRING，INT，DOUBLE，BOOL和BINARY &#34;column&#34; : [ {&#34;name&#34;:&#34;col2&#34;, &#34;type&#34;:&#34;INT&#34;}, {&#34;name&#34;:&#34;col3&#34;, &#34;type&#34;:&#34;STRING&#34;}, {&#34;name&#34;:&#34;col4&#34;, &#34;type&#34;:&#34;STRING&#34;}, {&#34;name&#34;:&#34;col5&#34;, &#34;type&#34;:&#34;BINARY&#34;}, {&#34;name&#34;:&#34;col6&#34;, &#34;type&#34;:&#34;DOUBLE&#34;} ], // 写入OTS的方式 // PutRow : 等同于OTS API中PutRow操作，检查条件是ignore // UpdateRow : 等同于OTS API中UpdateRow操作，检查条件是ignore // DeleteRow: 等同于OTS API中DeleteRow操作，检查条件是ignore &#34;writeMode&#34; : &#34;PutRow&#34; } } } ] } } 3.">
+2 实现原理
+简而言之，OTSWriter通过OTS官方Java SDK连接到OTS服务端，并通过SDK写入OTS服务端。OTSWriter本身对于写入过程做了很多优化，包括写入超时重试、异常写入重试、批量提交等Feature。
+3 功能说明
+3.1 配置样例
+
+配置一个写入OTS作业:
+
+{
+    &#34;job&#34;: {
+        &#34;setting&#34;: {
+        },
+        &#34;content&#34;: [
+            {
+                &#34;reader&#34;: {},
+                &#34;writer&#34;: {
+                    &#34;name&#34;: &#34;otswriter&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;endpoint&#34;:&#34;&#34;,
+                        &#34;accessId&#34;:&#34;&#34;,
+                        &#34;accessKey&#34;:&#34;&#34;,
+                        &#34;instanceName&#34;:&#34;&#34;,
+                        // 导出数据表的表名
+                        &#34;table&#34;:&#34;&#34;,
+
+                        // Writer支持不同类型之间进行相互转换
+                        // 如下类型转换不支持:
+                        // ================================
+                        //    int    -&gt; binary
+                        //    double -&gt; bool, binary
+                        //    bool   -&gt; binary
+                        //    bytes  -&gt; int, double, bool
+                        // ================================
+
+                        // 需要导入的PK列名，区分大小写
+                        // 类型支持：STRING，INT
+                        // 1. 支持类型转换，注意类型转换时的精度丢失
+                        // 2. 顺序不要求和表的Meta一致
+                        &#34;primaryKey&#34; : [
+                            {&#34;name&#34;:&#34;pk1&#34;, &#34;type&#34;:&#34;string&#34;},
+                            {&#34;name&#34;:&#34;pk2&#34;, &#34;type&#34;:&#34;int&#34;}
+                        ],
+
+                        // 需要导入的列名，区分大小写
+                        // 类型支持STRING，INT，DOUBLE，BOOL和BINARY
+                        &#34;column&#34; : [
+                            {&#34;name&#34;:&#34;col2&#34;, &#34;type&#34;:&#34;INT&#34;},
+                            {&#34;name&#34;:&#34;col3&#34;, &#34;type&#34;:&#34;STRING&#34;},
+                            {&#34;name&#34;:&#34;col4&#34;, &#34;type&#34;:&#34;STRING&#34;},
+                            {&#34;name&#34;:&#34;col5&#34;, &#34;type&#34;:&#34;BINARY&#34;},
+                            {&#34;name&#34;:&#34;col6&#34;, &#34;type&#34;:&#34;DOUBLE&#34;}
+                        ],
+
+                        // 写入OTS的方式
+                        // PutRow : 等同于OTS API中PutRow操作，检查条件是ignore
+                        // UpdateRow : 等同于OTS API中UpdateRow操作，检查条件是ignore
+                        // DeleteRow: 等同于OTS API中DeleteRow操作，检查条件是ignore
+                        &#34;writeMode&#34; : &#34;PutRow&#34;
+                    }
+                }
+            }
+        ]
+    }
+}
+3.2 参数说明
+
+
+endpoint
+
+
+描述：OTS Server的EndPoint(服务地址)，例如http://bazhen.cn−hangzhou.ots.aliyuncs.com。
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+accessId
+
+
+描述：OTS的accessId 
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+accessKey
+
+
+描述：OTS的accessKey  
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+instanceName
+
+
+描述：OTS的实例名称，实例是用户使用和管理 OTS 服务的实体，用户在开通 OTS 服务之后，需要通过管理控制台来创建实例，然后在实例内进行表的创建和管理。实例是 OTS 资源管理的基础单元，OTS 对应用程序的访问控制和资源计量都在实例级别完成。 
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+table
+
+
+描述：所选取的需要抽取的表名称，这里有且只能填写一张表。在OTS不存在多表同步的需求。
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+primaryKey
+
+
+描述: OTS的主键信息，使用JSON的数组描述字段信息。OTS本身是NoSQL系统，在OTSWriter导入数据过程中，必须指定相应地字段名称。
+OTS的PrimaryKey只能支持STRING，INT两种类型，因此OTSWriter本身也限定填写上述两种类型。
+DataX本身支持类型转换的，因此对于源头数据非String/Int，OTSWriter会进行数据类型转换。
+配置实例:
+&#34;primaryKey&#34; : [
+                    {&#34;name&#34;:&#34;pk1&#34;, &#34;type&#34;:&#34;string&#34;},
+                    {&#34;name&#34;:&#34;pk2&#34;, &#34;type&#34;:&#34;int&#34;}
+                ],
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+column
+
+
+描述：所配置的表中需要同步的列名集合，使用JSON的数组描述字段信息。使用格式为
+	{&#34;name&#34;:&#34;col2&#34;, &#34;type&#34;:&#34;INT&#34;},
+其中的name指定写入的OTS列名，type指定写入的类型。OTS类型支持STRING，INT，DOUBLE，BOOL和BINARY几种类型 。
+写入过程不支持常量、函数或者自定义表达式。
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+writeMode
+
+
+描述：写入模式，目前支持两种模式，
+
+
+PutRow，对应于OTS API PutRow，插入数据到指定的行，如果该行不存在，则新增一行；若该行存在，则覆盖原有行。
+
+
+UpdateRow，对应于OTS API UpdateRow，更新指定行的数据，如果该行不存在，则新增一行；若该行存在，则根据请求的内容在这一行中新增、修改或者删除指定列的值。
+
+
+DeleteRow，对应于OTS API DeleteRow，删除指定行的数据。
+
+
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+">
 <meta name="author" content="">
 <link rel="canonical" href="https://haokiu.com/blog/7d2496e6853044daa824d7a78226b07d/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
 <script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="https://haokiu.com/favicon.ico">
@@ -26,6 +234,7 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
 <link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/blog/7d2496e6853044daa824d7a78226b07d/">
 <noscript>
     <style>
         #theme-toggle,
@@ -63,13 +272,221 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
 
     </style>
 </noscript><meta property="og:title" content="OTSWriter 插件文档" />
-<meta property="og:description" content="OTSWriter 插件文档 1 快速介绍 OTSWriter插件实现了向OTS写入数据，目前支持三种写入方式：
+<meta property="og:description" content="OTSWriter 插件文档
+
+1 快速介绍
+OTSWriter插件实现了向OTS写入数据，目前支持三种写入方式：
+
+
 PutRow，对应于OTS API PutRow，插入数据到指定的行，如果该行不存在，则新增一行；若该行存在，则覆盖原有行。
+
+
 UpdateRow，对应于OTS API UpdateRow，更新指定行的数据，如果该行不存在，则新增一行；若该行存在，则根据请求的内容在这一行中新增、修改或者删除指定列的值。
+
+
 DeleteRow，对应于OTS API DeleteRow，删除指定行的数据。
+
+
 OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，提供海量结构化数据的存储和实时访问。OTS 以实例和表的形式组织数据，通过数据分片和负载均衡技术，实现规模上的无缝扩展。
-2 实现原理 简而言之，OTSWriter通过OTS官方Java SDK连接到OTS服务端，并通过SDK写入OTS服务端。OTSWriter本身对于写入过程做了很多优化，包括写入超时重试、异常写入重试、批量提交等Feature。
-3 功能说明 3.1 配置样例 配置一个写入OTS作业: { &#34;job&#34;: { &#34;setting&#34;: { }, &#34;content&#34;: [ { &#34;reader&#34;: {}, &#34;writer&#34;: { &#34;name&#34;: &#34;otswriter&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;:&#34;&#34;, &#34;accessId&#34;:&#34;&#34;, &#34;accessKey&#34;:&#34;&#34;, &#34;instanceName&#34;:&#34;&#34;, // 导出数据表的表名 &#34;table&#34;:&#34;&#34;, // Writer支持不同类型之间进行相互转换 // 如下类型转换不支持: // ================================ // int -&gt; binary // double -&gt; bool, binary // bool -&gt; binary // bytes -&gt; int, double, bool // ================================ // 需要导入的PK列名，区分大小写 // 类型支持：STRING，INT // 1. 支持类型转换，注意类型转换时的精度丢失 // 2. 顺序不要求和表的Meta一致 &#34;primaryKey&#34; : [ {&#34;name&#34;:&#34;pk1&#34;, &#34;type&#34;:&#34;string&#34;}, {&#34;name&#34;:&#34;pk2&#34;, &#34;type&#34;:&#34;int&#34;} ], // 需要导入的列名，区分大小写 // 类型支持STRING，INT，DOUBLE，BOOL和BINARY &#34;column&#34; : [ {&#34;name&#34;:&#34;col2&#34;, &#34;type&#34;:&#34;INT&#34;}, {&#34;name&#34;:&#34;col3&#34;, &#34;type&#34;:&#34;STRING&#34;}, {&#34;name&#34;:&#34;col4&#34;, &#34;type&#34;:&#34;STRING&#34;}, {&#34;name&#34;:&#34;col5&#34;, &#34;type&#34;:&#34;BINARY&#34;}, {&#34;name&#34;:&#34;col6&#34;, &#34;type&#34;:&#34;DOUBLE&#34;} ], // 写入OTS的方式 // PutRow : 等同于OTS API中PutRow操作，检查条件是ignore // UpdateRow : 等同于OTS API中UpdateRow操作，检查条件是ignore // DeleteRow: 等同于OTS API中DeleteRow操作，检查条件是ignore &#34;writeMode&#34; : &#34;PutRow&#34; } } } ] } } 3." />
+2 实现原理
+简而言之，OTSWriter通过OTS官方Java SDK连接到OTS服务端，并通过SDK写入OTS服务端。OTSWriter本身对于写入过程做了很多优化，包括写入超时重试、异常写入重试、批量提交等Feature。
+3 功能说明
+3.1 配置样例
+
+配置一个写入OTS作业:
+
+{
+    &#34;job&#34;: {
+        &#34;setting&#34;: {
+        },
+        &#34;content&#34;: [
+            {
+                &#34;reader&#34;: {},
+                &#34;writer&#34;: {
+                    &#34;name&#34;: &#34;otswriter&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;endpoint&#34;:&#34;&#34;,
+                        &#34;accessId&#34;:&#34;&#34;,
+                        &#34;accessKey&#34;:&#34;&#34;,
+                        &#34;instanceName&#34;:&#34;&#34;,
+                        // 导出数据表的表名
+                        &#34;table&#34;:&#34;&#34;,
+
+                        // Writer支持不同类型之间进行相互转换
+                        // 如下类型转换不支持:
+                        // ================================
+                        //    int    -&gt; binary
+                        //    double -&gt; bool, binary
+                        //    bool   -&gt; binary
+                        //    bytes  -&gt; int, double, bool
+                        // ================================
+
+                        // 需要导入的PK列名，区分大小写
+                        // 类型支持：STRING，INT
+                        // 1. 支持类型转换，注意类型转换时的精度丢失
+                        // 2. 顺序不要求和表的Meta一致
+                        &#34;primaryKey&#34; : [
+                            {&#34;name&#34;:&#34;pk1&#34;, &#34;type&#34;:&#34;string&#34;},
+                            {&#34;name&#34;:&#34;pk2&#34;, &#34;type&#34;:&#34;int&#34;}
+                        ],
+
+                        // 需要导入的列名，区分大小写
+                        // 类型支持STRING，INT，DOUBLE，BOOL和BINARY
+                        &#34;column&#34; : [
+                            {&#34;name&#34;:&#34;col2&#34;, &#34;type&#34;:&#34;INT&#34;},
+                            {&#34;name&#34;:&#34;col3&#34;, &#34;type&#34;:&#34;STRING&#34;},
+                            {&#34;name&#34;:&#34;col4&#34;, &#34;type&#34;:&#34;STRING&#34;},
+                            {&#34;name&#34;:&#34;col5&#34;, &#34;type&#34;:&#34;BINARY&#34;},
+                            {&#34;name&#34;:&#34;col6&#34;, &#34;type&#34;:&#34;DOUBLE&#34;}
+                        ],
+
+                        // 写入OTS的方式
+                        // PutRow : 等同于OTS API中PutRow操作，检查条件是ignore
+                        // UpdateRow : 等同于OTS API中UpdateRow操作，检查条件是ignore
+                        // DeleteRow: 等同于OTS API中DeleteRow操作，检查条件是ignore
+                        &#34;writeMode&#34; : &#34;PutRow&#34;
+                    }
+                }
+            }
+        ]
+    }
+}
+3.2 参数说明
+
+
+endpoint
+
+
+描述：OTS Server的EndPoint(服务地址)，例如http://bazhen.cn−hangzhou.ots.aliyuncs.com。
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+accessId
+
+
+描述：OTS的accessId 
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+accessKey
+
+
+描述：OTS的accessKey  
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+instanceName
+
+
+描述：OTS的实例名称，实例是用户使用和管理 OTS 服务的实体，用户在开通 OTS 服务之后，需要通过管理控制台来创建实例，然后在实例内进行表的创建和管理。实例是 OTS 资源管理的基础单元，OTS 对应用程序的访问控制和资源计量都在实例级别完成。 
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+table
+
+
+描述：所选取的需要抽取的表名称，这里有且只能填写一张表。在OTS不存在多表同步的需求。
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+primaryKey
+
+
+描述: OTS的主键信息，使用JSON的数组描述字段信息。OTS本身是NoSQL系统，在OTSWriter导入数据过程中，必须指定相应地字段名称。
+OTS的PrimaryKey只能支持STRING，INT两种类型，因此OTSWriter本身也限定填写上述两种类型。
+DataX本身支持类型转换的，因此对于源头数据非String/Int，OTSWriter会进行数据类型转换。
+配置实例:
+&#34;primaryKey&#34; : [
+                    {&#34;name&#34;:&#34;pk1&#34;, &#34;type&#34;:&#34;string&#34;},
+                    {&#34;name&#34;:&#34;pk2&#34;, &#34;type&#34;:&#34;int&#34;}
+                ],
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+column
+
+
+描述：所配置的表中需要同步的列名集合，使用JSON的数组描述字段信息。使用格式为
+	{&#34;name&#34;:&#34;col2&#34;, &#34;type&#34;:&#34;INT&#34;},
+其中的name指定写入的OTS列名，type指定写入的类型。OTS类型支持STRING，INT，DOUBLE，BOOL和BINARY几种类型 。
+写入过程不支持常量、函数或者自定义表达式。
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+writeMode
+
+
+描述：写入模式，目前支持两种模式，
+
+
+PutRow，对应于OTS API PutRow，插入数据到指定的行，如果该行不存在，则新增一行；若该行存在，则覆盖原有行。
+
+
+UpdateRow，对应于OTS API UpdateRow，更新指定行的数据，如果该行不存在，则新增一行；若该行存在，则根据请求的内容在这一行中新增、修改或者删除指定列的值。
+
+
+DeleteRow，对应于OTS API DeleteRow，删除指定行的数据。
+
+
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://haokiu.com/blog/7d2496e6853044daa824d7a78226b07d/" /><meta property="article:section" content="4" />
 <meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
@@ -77,13 +494,221 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="OTSWriter 插件文档"/>
-<meta name="twitter:description" content="OTSWriter 插件文档 1 快速介绍 OTSWriter插件实现了向OTS写入数据，目前支持三种写入方式：
+<meta name="twitter:description" content="OTSWriter 插件文档
+
+1 快速介绍
+OTSWriter插件实现了向OTS写入数据，目前支持三种写入方式：
+
+
 PutRow，对应于OTS API PutRow，插入数据到指定的行，如果该行不存在，则新增一行；若该行存在，则覆盖原有行。
+
+
 UpdateRow，对应于OTS API UpdateRow，更新指定行的数据，如果该行不存在，则新增一行；若该行存在，则根据请求的内容在这一行中新增、修改或者删除指定列的值。
+
+
 DeleteRow，对应于OTS API DeleteRow，删除指定行的数据。
+
+
 OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，提供海量结构化数据的存储和实时访问。OTS 以实例和表的形式组织数据，通过数据分片和负载均衡技术，实现规模上的无缝扩展。
-2 实现原理 简而言之，OTSWriter通过OTS官方Java SDK连接到OTS服务端，并通过SDK写入OTS服务端。OTSWriter本身对于写入过程做了很多优化，包括写入超时重试、异常写入重试、批量提交等Feature。
-3 功能说明 3.1 配置样例 配置一个写入OTS作业: { &#34;job&#34;: { &#34;setting&#34;: { }, &#34;content&#34;: [ { &#34;reader&#34;: {}, &#34;writer&#34;: { &#34;name&#34;: &#34;otswriter&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;:&#34;&#34;, &#34;accessId&#34;:&#34;&#34;, &#34;accessKey&#34;:&#34;&#34;, &#34;instanceName&#34;:&#34;&#34;, // 导出数据表的表名 &#34;table&#34;:&#34;&#34;, // Writer支持不同类型之间进行相互转换 // 如下类型转换不支持: // ================================ // int -&gt; binary // double -&gt; bool, binary // bool -&gt; binary // bytes -&gt; int, double, bool // ================================ // 需要导入的PK列名，区分大小写 // 类型支持：STRING，INT // 1. 支持类型转换，注意类型转换时的精度丢失 // 2. 顺序不要求和表的Meta一致 &#34;primaryKey&#34; : [ {&#34;name&#34;:&#34;pk1&#34;, &#34;type&#34;:&#34;string&#34;}, {&#34;name&#34;:&#34;pk2&#34;, &#34;type&#34;:&#34;int&#34;} ], // 需要导入的列名，区分大小写 // 类型支持STRING，INT，DOUBLE，BOOL和BINARY &#34;column&#34; : [ {&#34;name&#34;:&#34;col2&#34;, &#34;type&#34;:&#34;INT&#34;}, {&#34;name&#34;:&#34;col3&#34;, &#34;type&#34;:&#34;STRING&#34;}, {&#34;name&#34;:&#34;col4&#34;, &#34;type&#34;:&#34;STRING&#34;}, {&#34;name&#34;:&#34;col5&#34;, &#34;type&#34;:&#34;BINARY&#34;}, {&#34;name&#34;:&#34;col6&#34;, &#34;type&#34;:&#34;DOUBLE&#34;} ], // 写入OTS的方式 // PutRow : 等同于OTS API中PutRow操作，检查条件是ignore // UpdateRow : 等同于OTS API中UpdateRow操作，检查条件是ignore // DeleteRow: 等同于OTS API中DeleteRow操作，检查条件是ignore &#34;writeMode&#34; : &#34;PutRow&#34; } } } ] } } 3."/>
+2 实现原理
+简而言之，OTSWriter通过OTS官方Java SDK连接到OTS服务端，并通过SDK写入OTS服务端。OTSWriter本身对于写入过程做了很多优化，包括写入超时重试、异常写入重试、批量提交等Feature。
+3 功能说明
+3.1 配置样例
+
+配置一个写入OTS作业:
+
+{
+    &#34;job&#34;: {
+        &#34;setting&#34;: {
+        },
+        &#34;content&#34;: [
+            {
+                &#34;reader&#34;: {},
+                &#34;writer&#34;: {
+                    &#34;name&#34;: &#34;otswriter&#34;,
+                    &#34;parameter&#34;: {
+                        &#34;endpoint&#34;:&#34;&#34;,
+                        &#34;accessId&#34;:&#34;&#34;,
+                        &#34;accessKey&#34;:&#34;&#34;,
+                        &#34;instanceName&#34;:&#34;&#34;,
+                        // 导出数据表的表名
+                        &#34;table&#34;:&#34;&#34;,
+
+                        // Writer支持不同类型之间进行相互转换
+                        // 如下类型转换不支持:
+                        // ================================
+                        //    int    -&gt; binary
+                        //    double -&gt; bool, binary
+                        //    bool   -&gt; binary
+                        //    bytes  -&gt; int, double, bool
+                        // ================================
+
+                        // 需要导入的PK列名，区分大小写
+                        // 类型支持：STRING，INT
+                        // 1. 支持类型转换，注意类型转换时的精度丢失
+                        // 2. 顺序不要求和表的Meta一致
+                        &#34;primaryKey&#34; : [
+                            {&#34;name&#34;:&#34;pk1&#34;, &#34;type&#34;:&#34;string&#34;},
+                            {&#34;name&#34;:&#34;pk2&#34;, &#34;type&#34;:&#34;int&#34;}
+                        ],
+
+                        // 需要导入的列名，区分大小写
+                        // 类型支持STRING，INT，DOUBLE，BOOL和BINARY
+                        &#34;column&#34; : [
+                            {&#34;name&#34;:&#34;col2&#34;, &#34;type&#34;:&#34;INT&#34;},
+                            {&#34;name&#34;:&#34;col3&#34;, &#34;type&#34;:&#34;STRING&#34;},
+                            {&#34;name&#34;:&#34;col4&#34;, &#34;type&#34;:&#34;STRING&#34;},
+                            {&#34;name&#34;:&#34;col5&#34;, &#34;type&#34;:&#34;BINARY&#34;},
+                            {&#34;name&#34;:&#34;col6&#34;, &#34;type&#34;:&#34;DOUBLE&#34;}
+                        ],
+
+                        // 写入OTS的方式
+                        // PutRow : 等同于OTS API中PutRow操作，检查条件是ignore
+                        // UpdateRow : 等同于OTS API中UpdateRow操作，检查条件是ignore
+                        // DeleteRow: 等同于OTS API中DeleteRow操作，检查条件是ignore
+                        &#34;writeMode&#34; : &#34;PutRow&#34;
+                    }
+                }
+            }
+        ]
+    }
+}
+3.2 参数说明
+
+
+endpoint
+
+
+描述：OTS Server的EndPoint(服务地址)，例如http://bazhen.cn−hangzhou.ots.aliyuncs.com。
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+accessId
+
+
+描述：OTS的accessId 
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+accessKey
+
+
+描述：OTS的accessKey  
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+instanceName
+
+
+描述：OTS的实例名称，实例是用户使用和管理 OTS 服务的实体，用户在开通 OTS 服务之后，需要通过管理控制台来创建实例，然后在实例内进行表的创建和管理。实例是 OTS 资源管理的基础单元，OTS 对应用程序的访问控制和资源计量都在实例级别完成。 
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+table
+
+
+描述：所选取的需要抽取的表名称，这里有且只能填写一张表。在OTS不存在多表同步的需求。
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+primaryKey
+
+
+描述: OTS的主键信息，使用JSON的数组描述字段信息。OTS本身是NoSQL系统，在OTSWriter导入数据过程中，必须指定相应地字段名称。
+OTS的PrimaryKey只能支持STRING，INT两种类型，因此OTSWriter本身也限定填写上述两种类型。
+DataX本身支持类型转换的，因此对于源头数据非String/Int，OTSWriter会进行数据类型转换。
+配置实例:
+&#34;primaryKey&#34; : [
+                    {&#34;name&#34;:&#34;pk1&#34;, &#34;type&#34;:&#34;string&#34;},
+                    {&#34;name&#34;:&#34;pk2&#34;, &#34;type&#34;:&#34;int&#34;}
+                ],
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+column
+
+
+描述：所配置的表中需要同步的列名集合，使用JSON的数组描述字段信息。使用格式为
+	{&#34;name&#34;:&#34;col2&#34;, &#34;type&#34;:&#34;INT&#34;},
+其中的name指定写入的OTS列名，type指定写入的类型。OTS类型支持STRING，INT，DOUBLE，BOOL和BINARY几种类型 。
+写入过程不支持常量、函数或者自定义表达式。
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+writeMode
+
+
+描述：写入模式，目前支持两种模式，
+
+
+PutRow，对应于OTS API PutRow，插入数据到指定的行，如果该行不存在，则新增一行；若该行存在，则覆盖原有行。
+
+
+UpdateRow，对应于OTS API UpdateRow，更新指定行的数据，如果该行不存在，则新增一行；若该行存在，则根据请求的内容在这一行中新增、修改或者删除指定列的值。
+
+
+DeleteRow，对应于OTS API DeleteRow，删除指定行的数据。
+
+
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+"/>
 
 
 <script type="application/ld+json">
@@ -94,7 +719,7 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
     {
       "@type": "ListItem",
       "position":  1 ,
-      "name": "4s",
+      "name": "4",
       "item": "https://haokiu.com/4/"
     }, 
     {
@@ -112,13 +737,13 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
   "@type": "BlogPosting",
   "headline": "OTSWriter 插件文档",
   "name": "OTSWriter 插件文档",
-  "description": "OTSWriter 插件文档 1 快速介绍 OTSWriter插件实现了向OTS写入数据，目前支持三种写入方式：\nPutRow，对应于OTS API PutRow，插入数据到指定的行，如果该行不存在，则新增一行；若该行存在，则覆盖原有行。\nUpdateRow，对应于OTS API UpdateRow，更新指定行的数据，如果该行不存在，则新增一行；若该行存在，则根据请求的内容在这一行中新增、修改或者删除指定列的值。\nDeleteRow，对应于OTS API DeleteRow，删除指定行的数据。\nOTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，提供海量结构化数据的存储和实时访问。OTS 以实例和表的形式组织数据，通过数据分片和负载均衡技术，实现规模上的无缝扩展。\n2 实现原理 简而言之，OTSWriter通过OTS官方Java SDK连接到OTS服务端，并通过SDK写入OTS服务端。OTSWriter本身对于写入过程做了很多优化，包括写入超时重试、异常写入重试、批量提交等Feature。\n3 功能说明 3.1 配置样例 配置一个写入OTS作业: { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: {}, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;otswriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;endpoint\u0026#34;:\u0026#34;\u0026#34;, \u0026#34;accessId\u0026#34;:\u0026#34;\u0026#34;, \u0026#34;accessKey\u0026#34;:\u0026#34;\u0026#34;, \u0026#34;instanceName\u0026#34;:\u0026#34;\u0026#34;, // 导出数据表的表名 \u0026#34;table\u0026#34;:\u0026#34;\u0026#34;, // Writer支持不同类型之间进行相互转换 // 如下类型转换不支持: // ================================ // int -\u0026gt; binary // double -\u0026gt; bool, binary // bool -\u0026gt; binary // bytes -\u0026gt; int, double, bool // ================================ // 需要导入的PK列名，区分大小写 // 类型支持：STRING，INT // 1. 支持类型转换，注意类型转换时的精度丢失 // 2. 顺序不要求和表的Meta一致 \u0026#34;primaryKey\u0026#34; : [ {\u0026#34;name\u0026#34;:\u0026#34;pk1\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;string\u0026#34;}, {\u0026#34;name\u0026#34;:\u0026#34;pk2\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;int\u0026#34;} ], // 需要导入的列名，区分大小写 // 类型支持STRING，INT，DOUBLE，BOOL和BINARY \u0026#34;column\u0026#34; : [ {\u0026#34;name\u0026#34;:\u0026#34;col2\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;INT\u0026#34;}, {\u0026#34;name\u0026#34;:\u0026#34;col3\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;STRING\u0026#34;}, {\u0026#34;name\u0026#34;:\u0026#34;col4\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;STRING\u0026#34;}, {\u0026#34;name\u0026#34;:\u0026#34;col5\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;BINARY\u0026#34;}, {\u0026#34;name\u0026#34;:\u0026#34;col6\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;DOUBLE\u0026#34;} ], // 写入OTS的方式 // PutRow : 等同于OTS API中PutRow操作，检查条件是ignore // UpdateRow : 等同于OTS API中UpdateRow操作，检查条件是ignore // DeleteRow: 等同于OTS API中DeleteRow操作，检查条件是ignore \u0026#34;writeMode\u0026#34; : \u0026#34;PutRow\u0026#34; } } } ] } } 3.",
+  "description": "OTSWriter 插件文档 1 快速介绍 OTSWriter插件实现了向OTS写入数据，目前支持三种写入方式：\nPutRow，对应于OTS API PutRow，插入数据到指定的行，如果该行不存在，则新增一行；若该行存在，则覆盖原有行。\nUpdateRow，对应于OTS API UpdateRow，更新指定行的数据，如果该行不存在，则新增一行；若该行存在，则根据请求的内容在这一行中新增、修改或者删除指定列的值。\nDeleteRow，对应于OTS API DeleteRow，删除指定行的数据。\nOTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，提供海量结构化数据的存储和实时访问。OTS 以实例和表的形式组织数据，通过数据分片和负载均衡技术，实现规模上的无缝扩展。\n2 实现原理 简而言之，OTSWriter通过OTS官方Java SDK连接到OTS服务端，并通过SDK写入OTS服务端。OTSWriter本身对于写入过程做了很多优化，包括写入超时重试、异常写入重试、批量提交等Feature。\n3 功能说明 3.1 配置样例 配置一个写入OTS作业: { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: {}, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;otswriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;endpoint\u0026#34;:\u0026#34;\u0026#34;, \u0026#34;accessId\u0026#34;:\u0026#34;\u0026#34;, \u0026#34;accessKey\u0026#34;:\u0026#34;\u0026#34;, \u0026#34;instanceName\u0026#34;:\u0026#34;\u0026#34;, // 导出数据表的表名 \u0026#34;table\u0026#34;:\u0026#34;\u0026#34;, // Writer支持不同类型之间进行相互转换 // 如下类型转换不支持: // ================================ // int -\u0026gt; binary // double -\u0026gt; bool, binary // bool -\u0026gt; binary // bytes -\u0026gt; int, double, bool // ================================ // 需要导入的PK列名，区分大小写 // 类型支持：STRING，INT // 1. 支持类型转换，注意类型转换时的精度丢失 // 2. 顺序不要求和表的Meta一致 \u0026#34;primaryKey\u0026#34; : [ {\u0026#34;name\u0026#34;:\u0026#34;pk1\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;string\u0026#34;}, {\u0026#34;name\u0026#34;:\u0026#34;pk2\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;int\u0026#34;} ], // 需要导入的列名，区分大小写 // 类型支持STRING，INT，DOUBLE，BOOL和BINARY \u0026#34;column\u0026#34; : [ {\u0026#34;name\u0026#34;:\u0026#34;col2\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;INT\u0026#34;}, {\u0026#34;name\u0026#34;:\u0026#34;col3\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;STRING\u0026#34;}, {\u0026#34;name\u0026#34;:\u0026#34;col4\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;STRING\u0026#34;}, {\u0026#34;name\u0026#34;:\u0026#34;col5\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;BINARY\u0026#34;}, {\u0026#34;name\u0026#34;:\u0026#34;col6\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;DOUBLE\u0026#34;} ], // 写入OTS的方式 // PutRow : 等同于OTS API中PutRow操作，检查条件是ignore // UpdateRow : 等同于OTS API中UpdateRow操作，检查条件是ignore // DeleteRow: 等同于OTS API中DeleteRow操作，检查条件是ignore \u0026#34;writeMode\u0026#34; : \u0026#34;PutRow\u0026#34; } } } ] } } 3.2 参数说明 endpoint\n描述：OTS Server的EndPoint(服务地址)，例如http://bazhen.cn−hangzhou.ots.aliyuncs.com。\n必选：是 默认值：无 accessId\n描述：OTS的accessId 必选：是 默认值：无 accessKey\n描述：OTS的accessKey 必选：是 默认值：无 instanceName\n描述：OTS的实例名称，实例是用户使用和管理 OTS 服务的实体，用户在开通 OTS 服务之后，需要通过管理控制台来创建实例，然后在实例内进行表的创建和管理。实例是 OTS 资源管理的基础单元，OTS 对应用程序的访问控制和资源计量都在实例级别完成。 必选：是 默认值：无 table\n描述：所选取的需要抽取的表名称，这里有且只能填写一张表。在OTS不存在多表同步的需求。\n必选：是 默认值：无 primaryKey\n描述: OTS的主键信息，使用JSON的数组描述字段信息。OTS本身是NoSQL系统，在OTSWriter导入数据过程中，必须指定相应地字段名称。\nOTS的PrimaryKey只能支持STRING，INT两种类型，因此OTSWriter本身也限定填写上述两种类型。\nDataX本身支持类型转换的，因此对于源头数据非String/Int，OTSWriter会进行数据类型转换。\n配置实例:\n\u0026#34;primaryKey\u0026#34; : [ {\u0026#34;name\u0026#34;:\u0026#34;pk1\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;string\u0026#34;}, {\u0026#34;name\u0026#34;:\u0026#34;pk2\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;int\u0026#34;} ], 必选：是 默认值：无 column\n描述：所配置的表中需要同步的列名集合，使用JSON的数组描述字段信息。使用格式为\n{\u0026#34;name\u0026#34;:\u0026#34;col2\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;INT\u0026#34;}, 其中的name指定写入的OTS列名，type指定写入的类型。OTS类型支持STRING，INT，DOUBLE，BOOL和BINARY几种类型 。\n写入过程不支持常量、函数或者自定义表达式。\n必选：是 默认值：无 writeMode\n描述：写入模式，目前支持两种模式，\nPutRow，对应于OTS API PutRow，插入数据到指定的行，如果该行不存在，则新增一行；若该行存在，则覆盖原有行。\nUpdateRow，对应于OTS API UpdateRow，更新指定行的数据，如果该行不存在，则新增一行；若该行存在，则根据请求的内容在这一行中新增、修改或者删除指定列的值。\nDeleteRow，对应于OTS API DeleteRow，删除指定行的数据。\n必选：是 默认值：无 ",
   "keywords": [
     "datax"
   ],
   "articleBody": "OTSWriter 插件文档 1 快速介绍 OTSWriter插件实现了向OTS写入数据，目前支持三种写入方式：\nPutRow，对应于OTS API PutRow，插入数据到指定的行，如果该行不存在，则新增一行；若该行存在，则覆盖原有行。\nUpdateRow，对应于OTS API UpdateRow，更新指定行的数据，如果该行不存在，则新增一行；若该行存在，则根据请求的内容在这一行中新增、修改或者删除指定列的值。\nDeleteRow，对应于OTS API DeleteRow，删除指定行的数据。\nOTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，提供海量结构化数据的存储和实时访问。OTS 以实例和表的形式组织数据，通过数据分片和负载均衡技术，实现规模上的无缝扩展。\n2 实现原理 简而言之，OTSWriter通过OTS官方Java SDK连接到OTS服务端，并通过SDK写入OTS服务端。OTSWriter本身对于写入过程做了很多优化，包括写入超时重试、异常写入重试、批量提交等Feature。\n3 功能说明 3.1 配置样例 配置一个写入OTS作业: { \"job\": { \"setting\": { }, \"content\": [ { \"reader\": {}, \"writer\": { \"name\": \"otswriter\", \"parameter\": { \"endpoint\":\"\", \"accessId\":\"\", \"accessKey\":\"\", \"instanceName\":\"\", // 导出数据表的表名 \"table\":\"\", // Writer支持不同类型之间进行相互转换 // 如下类型转换不支持: // ================================ // int -\u003e binary // double -\u003e bool, binary // bool -\u003e binary // bytes -\u003e int, double, bool // ================================ // 需要导入的PK列名，区分大小写 // 类型支持：STRING，INT // 1. 支持类型转换，注意类型转换时的精度丢失 // 2. 顺序不要求和表的Meta一致 \"primaryKey\" : [ {\"name\":\"pk1\", \"type\":\"string\"}, {\"name\":\"pk2\", \"type\":\"int\"} ], // 需要导入的列名，区分大小写 // 类型支持STRING，INT，DOUBLE，BOOL和BINARY \"column\" : [ {\"name\":\"col2\", \"type\":\"INT\"}, {\"name\":\"col3\", \"type\":\"STRING\"}, {\"name\":\"col4\", \"type\":\"STRING\"}, {\"name\":\"col5\", \"type\":\"BINARY\"}, {\"name\":\"col6\", \"type\":\"DOUBLE\"} ], // 写入OTS的方式 // PutRow : 等同于OTS API中PutRow操作，检查条件是ignore // UpdateRow : 等同于OTS API中UpdateRow操作，检查条件是ignore // DeleteRow: 等同于OTS API中DeleteRow操作，检查条件是ignore \"writeMode\" : \"PutRow\" } } } ] } } 3.2 参数说明 endpoint\n描述：OTS Server的EndPoint(服务地址)，例如http://bazhen.cn−hangzhou.ots.aliyuncs.com。\n必选：是 默认值：无 accessId\n描述：OTS的accessId 必选：是 默认值：无 accessKey\n描述：OTS的accessKey 必选：是 默认值：无 instanceName\n描述：OTS的实例名称，实例是用户使用和管理 OTS 服务的实体，用户在开通 OTS 服务之后，需要通过管理控制台来创建实例，然后在实例内进行表的创建和管理。实例是 OTS 资源管理的基础单元，OTS 对应用程序的访问控制和资源计量都在实例级别完成。 必选：是 默认值：无 table\n描述：所选取的需要抽取的表名称，这里有且只能填写一张表。在OTS不存在多表同步的需求。\n必选：是 默认值：无 primaryKey\n描述: OTS的主键信息，使用JSON的数组描述字段信息。OTS本身是NoSQL系统，在OTSWriter导入数据过程中，必须指定相应地字段名称。\nOTS的PrimaryKey只能支持STRING，INT两种类型，因此OTSWriter本身也限定填写上述两种类型。\nDataX本身支持类型转换的，因此对于源头数据非String/Int，OTSWriter会进行数据类型转换。\n配置实例:\n\"primaryKey\" : [ {\"name\":\"pk1\", \"type\":\"string\"}, {\"name\":\"pk2\", \"type\":\"int\"} ], 必选：是 默认值：无 column\n描述：所配置的表中需要同步的列名集合，使用JSON的数组描述字段信息。使用格式为\n{\"name\":\"col2\", \"type\":\"INT\"}, 其中的name指定写入的OTS列名，type指定写入的类型。OTS类型支持STRING，INT，DOUBLE，BOOL和BINARY几种类型 。\n写入过程不支持常量、函数或者自定义表达式。\n必选：是 默认值：无 writeMode\n描述：写入模式，目前支持两种模式，\nPutRow，对应于OTS API PutRow，插入数据到指定的行，如果该行不存在，则新增一行；若该行存在，则覆盖原有行。\nUpdateRow，对应于OTS API UpdateRow，更新指定行的数据，如果该行不存在，则新增一行；若该行存在，则根据请求的内容在这一行中新增、修改或者删除指定列的值。\nDeleteRow，对应于OTS API DeleteRow，删除指定行的数据。\n必选：是 默认值：无 3.3 类型转换 目前OTSWriter支持所有OTS类型，下面列出OTSWriter针对OTS类型转换列表:\nDataX 内部类型 OTS 数据类型 Long Integer Double Double String String Boolean Boolean Bytes Binary 注意，OTS本身不支持日期型类型。应用层一般使用Long报错时间的Unix TimeStamp。 4 性能报告 4.1 环境准备 4.1.1 数据特征 2列PK（10 + 8），15列String(10 Byte), 2两列Integer(8 Byte)，算上Column Name每行大概327Byte，每次BatchWriteRow写入100行数据，所以当个请求的数据大小是32KB。\n4.1.2 机器参数 OTS端：3台前端机，5台后端机\nDataX运行端: 24核CPU， 98GB内存\n4.2 测试报告 4.2.1 测试报告 并发数 DataX CPU DATAX流量 OTS 流量 BatchWrite前端QPS BatchWriteRow前端延时 40 1027% Speed 22.13MB/s, 112640 records/s 65.8M/s 42 153ms 50 1218% Speed 24.11MB/s, 122700 records/s 73.5M/s 47 174ms 60 1355% Speed 25.31MB/s, 128854 records/s 78.1M/s 50 190ms 70 1578% Speed 26.35MB/s, 134121 records/s 80.8M/s 52 210ms 80 1771% Speed 26.55MB/s, 135161 records/s 82.7M/s 53 230ms 5 约束限制 5.1 写入幂等性 OTS写入本身是支持幂等性的，也就是使用OTS SDK同一条数据写入OTS系统，一次和多次请求的结果可以理解为一致的。因此对于OTSWriter多次尝试写入同一条数据与写入一条数据结果是等同的。\n5.2 单任务FailOver 由于OTS写入本身是幂等性的，因此可以支持单任务FailOver。即一旦写入Fail，DataX会重新启动相关子任务进行重试。\n6 FAQ ",
   "wordCount" : "312",
-  "inLanguage": "en",
+  "inLanguage": "zh-cn",
   "datePublished": "2021-02-02T17:45:01Z",
   "dateModified": "2021-02-02T17:45:01Z",
   "mainEntityOfPage": {
@@ -174,6 +799,8 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -183,32 +810,32 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/1/" title="1s">
+                <a href="https://haokiu.com/1/" title="1">
                     <span>后端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/2/" title="2s">
+                <a href="https://haokiu.com/2/" title="2">
                     <span>前端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/3/" title="3s">
+                <a href="https://haokiu.com/3/" title="3">
                     <span>区块链</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/4/" title="4s">
+                <a href="https://haokiu.com/4/" title="4">
                     <span>大数据</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/5/" title="5s">
+                <a href="https://haokiu.com/5/" title="5">
                     <span>linux</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/6/" title="6s">
+                <a href="https://haokiu.com/6/" title="6">
                     <span>其他</span>
                 </a>
             </li>
@@ -229,7 +856,7 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    
     <h1 class="post-title">
       OTSWriter 插件文档
     </h1>
@@ -384,10 +1011,10 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
 <p>描述：OTS Server的EndPoint(服务地址)，例如http://bazhen.cn−hangzhou.ots.aliyuncs.com。</p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -395,13 +1022,13 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
 <p><strong>accessId</strong></p>
 <ul>
 <li>
-<p>描述：OTS的accessId <!-- raw HTML omitted --></p>
+<p>描述：OTS的accessId <br /></p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -409,13 +1036,13 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
 <p><strong>accessKey</strong></p>
 <ul>
 <li>
-<p>描述：OTS的accessKey  <!-- raw HTML omitted --></p>
+<p>描述：OTS的accessKey  <br /></p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -423,13 +1050,13 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
 <p><strong>instanceName</strong></p>
 <ul>
 <li>
-<p>描述：OTS的实例名称，实例是用户使用和管理 OTS 服务的实体，用户在开通 OTS 服务之后，需要通过管理控制台来创建实例，然后在实例内进行表的创建和管理。实例是 OTS 资源管理的基础单元，OTS 对应用程序的访问控制和资源计量都在实例级别完成。 <!-- raw HTML omitted --></p>
+<p>描述：OTS的实例名称，实例是用户使用和管理 OTS 服务的实体，用户在开通 OTS 服务之后，需要通过管理控制台来创建实例，然后在实例内进行表的创建和管理。实例是 OTS 资源管理的基础单元，OTS 对应用程序的访问控制和资源计量都在实例级别完成。 <br /></p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -437,13 +1064,13 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
 <p><strong>table</strong></p>
 <ul>
 <li>
-<p>描述：所选取的需要抽取的表名称，这里有且只能填写一张表。在OTS不存在多表同步的需求。<!-- raw HTML omitted --></p>
+<p>描述：所选取的需要抽取的表名称，这里有且只能填写一张表。在OTS不存在多表同步的需求。<br /></p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -455,16 +1082,16 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
 <p>OTS的PrimaryKey只能支持STRING，INT两种类型，因此OTSWriter本身也限定填写上述两种类型。</p>
 <p>DataX本身支持类型转换的，因此对于源头数据非String/Int，OTSWriter会进行数据类型转换。</p>
 <p>配置实例:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#e6db74">&#34;primaryKey&#34;</span> <span style="color:#960050;background-color:#1e0010">:</span> [
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#e6db74">&#34;primaryKey&#34;</span> <span style="color:#960050;background-color:#1e0010">:</span> [
 </span></span><span style="display:flex;"><span>                    {<span style="color:#f92672">&#34;name&#34;</span>:<span style="color:#e6db74">&#34;pk1&#34;</span>, <span style="color:#f92672">&#34;type&#34;</span>:<span style="color:#e6db74">&#34;string&#34;</span>},
 </span></span><span style="display:flex;"><span>                    {<span style="color:#f92672">&#34;name&#34;</span>:<span style="color:#e6db74">&#34;pk2&#34;</span>, <span style="color:#f92672">&#34;type&#34;</span>:<span style="color:#e6db74">&#34;int&#34;</span>}
 </span></span><span style="display:flex;"><span>                ]<span style="color:#960050;background-color:#1e0010">,</span>
 </span></span></code></pre></div></li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -473,15 +1100,15 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
 <ul>
 <li>
 <p>描述：所配置的表中需要同步的列名集合，使用JSON的数组描述字段信息。使用格式为</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>	{<span style="color:#f92672">&#34;name&#34;</span>:<span style="color:#e6db74">&#34;col2&#34;</span>, <span style="color:#f92672">&#34;type&#34;</span>:<span style="color:#e6db74">&#34;INT&#34;</span>}<span style="color:#960050;background-color:#1e0010">,</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>	{<span style="color:#f92672">&#34;name&#34;</span>:<span style="color:#e6db74">&#34;col2&#34;</span>, <span style="color:#f92672">&#34;type&#34;</span>:<span style="color:#e6db74">&#34;INT&#34;</span>}<span style="color:#960050;background-color:#1e0010">,</span>
 </span></span></code></pre></div><p>其中的name指定写入的OTS列名，type指定写入的类型。OTS类型支持STRING，INT，DOUBLE，BOOL和BINARY几种类型 。</p>
 <p>写入过程不支持常量、函数或者自定义表达式。</p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -503,10 +1130,10 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
 </ul>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -514,34 +1141,34 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
 <h3 id="33-类型转换">3.3 类型转换</h3>
 <p>目前OTSWriter支持所有OTS类型，下面列出OTSWriter针对OTS类型转换列表:</p>
 <table>
-<thead>
-<tr>
-<th>DataX 内部类型</th>
-<th>OTS 数据类型</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Long</td>
-<td>Integer</td>
-</tr>
-<tr>
-<td>Double</td>
-<td>Double</td>
-</tr>
-<tr>
-<td>String</td>
-<td>String</td>
-</tr>
-<tr>
-<td>Boolean</td>
-<td>Boolean</td>
-</tr>
-<tr>
-<td>Bytes</td>
-<td>Binary</td>
-</tr>
-</tbody>
+	<thead>
+			<tr>
+					<th>DataX 内部类型</th>
+					<th>OTS 数据类型</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Long</td>
+					<td>Integer</td>
+			</tr>
+			<tr>
+					<td>Double</td>
+					<td>Double</td>
+			</tr>
+			<tr>
+					<td>String</td>
+					<td>String</td>
+			</tr>
+			<tr>
+					<td>Boolean</td>
+					<td>Boolean</td>
+			</tr>
+			<tr>
+					<td>Bytes</td>
+					<td>Binary</td>
+			</tr>
+	</tbody>
 </table>
 <ul>
 <li>注意，OTS本身不支持日期型类型。应用层一般使用Long报错时间的Unix TimeStamp。</li>
@@ -556,58 +1183,58 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
 <h3 id="42-测试报告">4.2 测试报告</h3>
 <h4 id="421-测试报告">4.2.1 测试报告</h4>
 <table>
-<thead>
-<tr>
-<th>并发数</th>
-<th>DataX CPU</th>
-<th>DATAX流量</th>
-<th>OTS 流量</th>
-<th>BatchWrite前端QPS</th>
-<th>BatchWriteRow前端延时</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>40</td>
-<td>1027%</td>
-<td>Speed 22.13MB/s, 112640 records/s</td>
-<td>65.8M/s</td>
-<td>42</td>
-<td>153ms</td>
-</tr>
-<tr>
-<td>50</td>
-<td>1218%</td>
-<td>Speed 24.11MB/s, 122700 records/s</td>
-<td>73.5M/s</td>
-<td>47</td>
-<td>174ms</td>
-</tr>
-<tr>
-<td>60</td>
-<td>1355%</td>
-<td>Speed 25.31MB/s, 128854 records/s</td>
-<td>78.1M/s</td>
-<td>50</td>
-<td>190ms</td>
-</tr>
-<tr>
-<td>70</td>
-<td>1578%</td>
-<td>Speed 26.35MB/s, 134121 records/s</td>
-<td>80.8M/s</td>
-<td>52</td>
-<td>210ms</td>
-</tr>
-<tr>
-<td>80</td>
-<td>1771%</td>
-<td>Speed 26.55MB/s, 135161 records/s</td>
-<td>82.7M/s</td>
-<td>53</td>
-<td>230ms</td>
-</tr>
-</tbody>
+	<thead>
+			<tr>
+					<th>并发数</th>
+					<th>DataX CPU</th>
+					<th>DATAX流量</th>
+					<th>OTS 流量</th>
+					<th>BatchWrite前端QPS</th>
+					<th>BatchWriteRow前端延时</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>40</td>
+					<td>1027%</td>
+					<td>Speed 22.13MB/s, 112640 records/s</td>
+					<td>65.8M/s</td>
+					<td>42</td>
+					<td>153ms</td>
+			</tr>
+			<tr>
+					<td>50</td>
+					<td>1218%</td>
+					<td>Speed 24.11MB/s, 122700 records/s</td>
+					<td>73.5M/s</td>
+					<td>47</td>
+					<td>174ms</td>
+			</tr>
+			<tr>
+					<td>60</td>
+					<td>1355%</td>
+					<td>Speed 25.31MB/s, 128854 records/s</td>
+					<td>78.1M/s</td>
+					<td>50</td>
+					<td>190ms</td>
+			</tr>
+			<tr>
+					<td>70</td>
+					<td>1578%</td>
+					<td>Speed 26.35MB/s, 134121 records/s</td>
+					<td>80.8M/s</td>
+					<td>52</td>
+					<td>210ms</td>
+			</tr>
+			<tr>
+					<td>80</td>
+					<td>1771%</td>
+					<td>Speed 26.55MB/s, 135161 records/s</td>
+					<td>82.7M/s</td>
+					<td>53</td>
+					<td>230ms</td>
+			</tr>
+	</tbody>
 </table>
 <h2 id="5-约束限制">5 约束限制</h2>
 <h3 id="51-写入幂等性">5.1 写入幂等性</h3>
@@ -620,13 +1247,21 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+      <li><a href="https://haokiu.com/tags/datax/">Datax</a></li>
     </ul>
 
   </footer>
 </article>
     </main>
     
+<footer class="footer">
+    <span>haokiu.com</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />

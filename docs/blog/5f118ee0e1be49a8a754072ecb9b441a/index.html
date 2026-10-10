@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="zh-cn" dir="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,17 +7,43 @@
 <meta name="robots" content="index, follow">
 <title>腾讯后台开发实习生技能要求 | haokiu</title>
 <meta name="keywords" content="">
-<meta name="description" content="腾讯后台开发实习生技能要求 如题，应届生除了要良好地掌握算法和数据结构以外，以下一些技能点列表希望对大家有帮助，有兴趣的朋友可以参考这个针对性地补缺补差。文章列出的技能点有的要求熟悉，有的了解即可，注意技能点前面的修饰词。如果没有明确给出“熟悉”“了解”等字眼，要求均为熟悉。
-一、操作系统方面 多线程相关与线程之间同步技术 熟练使用（但不局限于）以下linux API
+<meta name="description" content="腾讯后台开发实习生技能要求
+
+如题，应届生除了要良好地掌握算法和数据结构以外，以下一些技能点列表希望对大家有帮助，有兴趣的朋友可以参考这个针对性地补缺补差。文章列出的技能点有的要求熟悉，有的了解即可，注意技能点前面的修饰词。如果没有明确给出“熟悉”“了解”等字眼，要求均为熟悉。
+
+一、操作系统方面
+
+多线程相关与线程之间同步技术
+
+熟练使用（但不局限于）以下linux API
 linux下的线程创建、等待、获取线程id
-int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine) (void *), void *arg); int pthread_join(pthread_t thread, void **retval); pthread_t pthread_self(void); 常见线程之间的同步技术（何时该用那种技术）
+int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine) (void *), void *arg);
+int pthread_join(pthread_t thread, void **retval);
+pthread_t pthread_self(void);
+常见线程之间的同步技术（何时该用那种技术）
 互斥体
-int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *mutexattr); int pthread_mutex_destroy(pthread_mutex_t *mutex); int pthread_mutex_lock(pthread_mutex_t *mutex); int pthread_mutex_trylock(pthread_mutex_t *mutex); int pthread_mutex_unlock(pthread_mutex_t *mutex); 信号量
-int sem_init(sem_t *sem, int pshared, unsigned int value); int sem_destroy(sem_t *sem); int sem_wait(sem_t *sem); int sem_post(sem_t *sem); int sem_getvalue(sem_t *sem, int *valp); 条件变量
-int pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *restrict attr); int pthread_cond_destroy(pthread_cond_t *cond); int pthread_cond_signal(pthread_cond_t *cond); int pthread_cond_broadcast(pthread_cond_t *cond); int pthread_cond_wait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex); int pthread_cond_timedwait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex, const struct timespec *restrict abstime); 读写/自旋锁">
+int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *mutexattr);  
+int pthread_mutex_destroy(pthread_mutex_t *mutex);  
+int pthread_mutex_lock(pthread_mutex_t *mutex);  
+int pthread_mutex_trylock(pthread_mutex_t *mutex);  
+int pthread_mutex_unlock(pthread_mutex_t *mutex); 
+信号量
+int sem_init(sem_t *sem, int pshared, unsigned int value);
+int sem_destroy(sem_t *sem);
+int sem_wait(sem_t *sem); 
+int sem_post(sem_t *sem);
+int sem_getvalue(sem_t *sem, int *valp);
+条件变量
+int pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *restrict attr);
+int pthread_cond_destroy(pthread_cond_t *cond);
+int pthread_cond_signal(pthread_cond_t *cond);
+int pthread_cond_broadcast(pthread_cond_t *cond);
+int pthread_cond_wait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex);
+int pthread_cond_timedwait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex, const struct timespec *restrict abstime);
+读写/自旋锁">
 <meta name="author" content="">
 <link rel="canonical" href="https://haokiu.com/blog/5f118ee0e1be49a8a754072ecb9b441a/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
 <script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="https://haokiu.com/favicon.ico">
@@ -27,6 +53,7 @@ int pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *r
 <link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/blog/5f118ee0e1be49a8a754072ecb9b441a/">
 <noscript>
     <style>
         #theme-toggle,
@@ -64,14 +91,40 @@ int pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *r
 
     </style>
 </noscript><meta property="og:title" content="腾讯后台开发实习生技能要求" />
-<meta property="og:description" content="腾讯后台开发实习生技能要求 如题，应届生除了要良好地掌握算法和数据结构以外，以下一些技能点列表希望对大家有帮助，有兴趣的朋友可以参考这个针对性地补缺补差。文章列出的技能点有的要求熟悉，有的了解即可，注意技能点前面的修饰词。如果没有明确给出“熟悉”“了解”等字眼，要求均为熟悉。
-一、操作系统方面 多线程相关与线程之间同步技术 熟练使用（但不局限于）以下linux API
+<meta property="og:description" content="腾讯后台开发实习生技能要求
+
+如题，应届生除了要良好地掌握算法和数据结构以外，以下一些技能点列表希望对大家有帮助，有兴趣的朋友可以参考这个针对性地补缺补差。文章列出的技能点有的要求熟悉，有的了解即可，注意技能点前面的修饰词。如果没有明确给出“熟悉”“了解”等字眼，要求均为熟悉。
+
+一、操作系统方面
+
+多线程相关与线程之间同步技术
+
+熟练使用（但不局限于）以下linux API
 linux下的线程创建、等待、获取线程id
-int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine) (void *), void *arg); int pthread_join(pthread_t thread, void **retval); pthread_t pthread_self(void); 常见线程之间的同步技术（何时该用那种技术）
+int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine) (void *), void *arg);
+int pthread_join(pthread_t thread, void **retval);
+pthread_t pthread_self(void);
+常见线程之间的同步技术（何时该用那种技术）
 互斥体
-int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *mutexattr); int pthread_mutex_destroy(pthread_mutex_t *mutex); int pthread_mutex_lock(pthread_mutex_t *mutex); int pthread_mutex_trylock(pthread_mutex_t *mutex); int pthread_mutex_unlock(pthread_mutex_t *mutex); 信号量
-int sem_init(sem_t *sem, int pshared, unsigned int value); int sem_destroy(sem_t *sem); int sem_wait(sem_t *sem); int sem_post(sem_t *sem); int sem_getvalue(sem_t *sem, int *valp); 条件变量
-int pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *restrict attr); int pthread_cond_destroy(pthread_cond_t *cond); int pthread_cond_signal(pthread_cond_t *cond); int pthread_cond_broadcast(pthread_cond_t *cond); int pthread_cond_wait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex); int pthread_cond_timedwait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex, const struct timespec *restrict abstime); 读写/自旋锁" />
+int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *mutexattr);  
+int pthread_mutex_destroy(pthread_mutex_t *mutex);  
+int pthread_mutex_lock(pthread_mutex_t *mutex);  
+int pthread_mutex_trylock(pthread_mutex_t *mutex);  
+int pthread_mutex_unlock(pthread_mutex_t *mutex); 
+信号量
+int sem_init(sem_t *sem, int pshared, unsigned int value);
+int sem_destroy(sem_t *sem);
+int sem_wait(sem_t *sem); 
+int sem_post(sem_t *sem);
+int sem_getvalue(sem_t *sem, int *valp);
+条件变量
+int pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *restrict attr);
+int pthread_cond_destroy(pthread_cond_t *cond);
+int pthread_cond_signal(pthread_cond_t *cond);
+int pthread_cond_broadcast(pthread_cond_t *cond);
+int pthread_cond_wait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex);
+int pthread_cond_timedwait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex, const struct timespec *restrict abstime);
+读写/自旋锁" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://haokiu.com/blog/5f118ee0e1be49a8a754072ecb9b441a/" /><meta property="article:section" content="1" />
 <meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
@@ -79,14 +132,40 @@ int pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *r
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="腾讯后台开发实习生技能要求"/>
-<meta name="twitter:description" content="腾讯后台开发实习生技能要求 如题，应届生除了要良好地掌握算法和数据结构以外，以下一些技能点列表希望对大家有帮助，有兴趣的朋友可以参考这个针对性地补缺补差。文章列出的技能点有的要求熟悉，有的了解即可，注意技能点前面的修饰词。如果没有明确给出“熟悉”“了解”等字眼，要求均为熟悉。
-一、操作系统方面 多线程相关与线程之间同步技术 熟练使用（但不局限于）以下linux API
+<meta name="twitter:description" content="腾讯后台开发实习生技能要求
+
+如题，应届生除了要良好地掌握算法和数据结构以外，以下一些技能点列表希望对大家有帮助，有兴趣的朋友可以参考这个针对性地补缺补差。文章列出的技能点有的要求熟悉，有的了解即可，注意技能点前面的修饰词。如果没有明确给出“熟悉”“了解”等字眼，要求均为熟悉。
+
+一、操作系统方面
+
+多线程相关与线程之间同步技术
+
+熟练使用（但不局限于）以下linux API
 linux下的线程创建、等待、获取线程id
-int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine) (void *), void *arg); int pthread_join(pthread_t thread, void **retval); pthread_t pthread_self(void); 常见线程之间的同步技术（何时该用那种技术）
+int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine) (void *), void *arg);
+int pthread_join(pthread_t thread, void **retval);
+pthread_t pthread_self(void);
+常见线程之间的同步技术（何时该用那种技术）
 互斥体
-int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *mutexattr); int pthread_mutex_destroy(pthread_mutex_t *mutex); int pthread_mutex_lock(pthread_mutex_t *mutex); int pthread_mutex_trylock(pthread_mutex_t *mutex); int pthread_mutex_unlock(pthread_mutex_t *mutex); 信号量
-int sem_init(sem_t *sem, int pshared, unsigned int value); int sem_destroy(sem_t *sem); int sem_wait(sem_t *sem); int sem_post(sem_t *sem); int sem_getvalue(sem_t *sem, int *valp); 条件变量
-int pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *restrict attr); int pthread_cond_destroy(pthread_cond_t *cond); int pthread_cond_signal(pthread_cond_t *cond); int pthread_cond_broadcast(pthread_cond_t *cond); int pthread_cond_wait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex); int pthread_cond_timedwait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex, const struct timespec *restrict abstime); 读写/自旋锁"/>
+int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *mutexattr);  
+int pthread_mutex_destroy(pthread_mutex_t *mutex);  
+int pthread_mutex_lock(pthread_mutex_t *mutex);  
+int pthread_mutex_trylock(pthread_mutex_t *mutex);  
+int pthread_mutex_unlock(pthread_mutex_t *mutex); 
+信号量
+int sem_init(sem_t *sem, int pshared, unsigned int value);
+int sem_destroy(sem_t *sem);
+int sem_wait(sem_t *sem); 
+int sem_post(sem_t *sem);
+int sem_getvalue(sem_t *sem, int *valp);
+条件变量
+int pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *restrict attr);
+int pthread_cond_destroy(pthread_cond_t *cond);
+int pthread_cond_signal(pthread_cond_t *cond);
+int pthread_cond_broadcast(pthread_cond_t *cond);
+int pthread_cond_wait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex);
+int pthread_cond_timedwait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex, const struct timespec *restrict abstime);
+读写/自旋锁"/>
 
 
 <script type="application/ld+json">
@@ -97,7 +176,7 @@ int pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *r
     {
       "@type": "ListItem",
       "position":  1 ,
-      "name": "1s",
+      "name": "1",
       "item": "https://haokiu.com/1/"
     }, 
     {
@@ -115,13 +194,13 @@ int pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *r
   "@type": "BlogPosting",
   "headline": "腾讯后台开发实习生技能要求",
   "name": "腾讯后台开发实习生技能要求",
-  "description": "腾讯后台开发实习生技能要求 如题，应届生除了要良好地掌握算法和数据结构以外，以下一些技能点列表希望对大家有帮助，有兴趣的朋友可以参考这个针对性地补缺补差。文章列出的技能点有的要求熟悉，有的了解即可，注意技能点前面的修饰词。如果没有明确给出“熟悉”“了解”等字眼，要求均为熟悉。\n一、操作系统方面 多线程相关与线程之间同步技术 熟练使用（但不局限于）以下linux API\nlinux下的线程创建、等待、获取线程id\nint pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine) (void *), void *arg); int pthread_join(pthread_t thread, void **retval); pthread_t pthread_self(void); 常见线程之间的同步技术（何时该用那种技术）\n互斥体\nint pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *mutexattr); int pthread_mutex_destroy(pthread_mutex_t *mutex); int pthread_mutex_lock(pthread_mutex_t *mutex); int pthread_mutex_trylock(pthread_mutex_t *mutex); int pthread_mutex_unlock(pthread_mutex_t *mutex); 信号量\nint sem_init(sem_t *sem, int pshared, unsigned int value); int sem_destroy(sem_t *sem); int sem_wait(sem_t *sem); int sem_post(sem_t *sem); int sem_getvalue(sem_t *sem, int *valp); 条件变量\nint pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *restrict attr); int pthread_cond_destroy(pthread_cond_t *cond); int pthread_cond_signal(pthread_cond_t *cond); int pthread_cond_broadcast(pthread_cond_t *cond); int pthread_cond_wait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex); int pthread_cond_timedwait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex, const struct timespec *restrict abstime); 读写/自旋锁",
+  "description": "腾讯后台开发实习生技能要求 如题，应届生除了要良好地掌握算法和数据结构以外，以下一些技能点列表希望对大家有帮助，有兴趣的朋友可以参考这个针对性地补缺补差。文章列出的技能点有的要求熟悉，有的了解即可，注意技能点前面的修饰词。如果没有明确给出“熟悉”“了解”等字眼，要求均为熟悉。\n一、操作系统方面 多线程相关与线程之间同步技术 熟练使用（但不局限于）以下linux API\nlinux下的线程创建、等待、获取线程id\nint pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine) (void *), void *arg); int pthread_join(pthread_t thread, void **retval); pthread_t pthread_self(void); 常见线程之间的同步技术（何时该用那种技术）\n互斥体\nint pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *mutexattr); int pthread_mutex_destroy(pthread_mutex_t *mutex); int pthread_mutex_lock(pthread_mutex_t *mutex); int pthread_mutex_trylock(pthread_mutex_t *mutex); int pthread_mutex_unlock(pthread_mutex_t *mutex); 信号量\nint sem_init(sem_t *sem, int pshared, unsigned int value); int sem_destroy(sem_t *sem); int sem_wait(sem_t *sem); int sem_post(sem_t *sem); int sem_getvalue(sem_t *sem, int *valp); 条件变量\nint pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *restrict attr); int pthread_cond_destroy(pthread_cond_t *cond); int pthread_cond_signal(pthread_cond_t *cond); int pthread_cond_broadcast(pthread_cond_t *cond); int pthread_cond_wait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex); int pthread_cond_timedwait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex, const struct timespec *restrict abstime); 读写/自旋锁\n",
   "keywords": [
     
   ],
   "articleBody": "腾讯后台开发实习生技能要求 如题，应届生除了要良好地掌握算法和数据结构以外，以下一些技能点列表希望对大家有帮助，有兴趣的朋友可以参考这个针对性地补缺补差。文章列出的技能点有的要求熟悉，有的了解即可，注意技能点前面的修饰词。如果没有明确给出“熟悉”“了解”等字眼，要求均为熟悉。\n一、操作系统方面 多线程相关与线程之间同步技术 熟练使用（但不局限于）以下linux API\nlinux下的线程创建、等待、获取线程id\nint pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine) (void *), void *arg); int pthread_join(pthread_t thread, void **retval); pthread_t pthread_self(void); 常见线程之间的同步技术（何时该用那种技术）\n互斥体\nint pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *mutexattr); int pthread_mutex_destroy(pthread_mutex_t *mutex); int pthread_mutex_lock(pthread_mutex_t *mutex); int pthread_mutex_trylock(pthread_mutex_t *mutex); int pthread_mutex_unlock(pthread_mutex_t *mutex); 信号量\nint sem_init(sem_t *sem, int pshared, unsigned int value); int sem_destroy(sem_t *sem); int sem_wait(sem_t *sem); int sem_post(sem_t *sem); int sem_getvalue(sem_t *sem, int *valp); 条件变量\nint pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *restrict attr); int pthread_cond_destroy(pthread_cond_t *cond); int pthread_cond_signal(pthread_cond_t *cond); int pthread_cond_broadcast(pthread_cond_t *cond); int pthread_cond_wait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex); int pthread_cond_timedwait(pthread_cond_t *restrict cond, pthread_mutex_t *restrict mutex, const struct timespec *restrict abstime); 读写/自旋锁\nint pthread_rwlock_init(pthread_rwlock_t *restrict rwlock, const pthread_rwlockattr_t *restrict attr); int pthread_rwlock_destroy(pthread_rwlock_t *rwlock); int pthread_rwlock_rdlock(pthread_rwlock_t *rwlock); int pthread_rwlock_tryrdlock(pthread_rwlock_t *rwlock); int pthread_rwlock_wrlock(pthread_rwlock_t *rwlock); int pthread_rwlock_trywrlock(pthread_rwlock_t *rwlock); int pthread_rwlock_unlock(pthread_rwlock_t *rwlock); //这两个函数在Linux和Mac的man文档里都没有，新版的pthread.h里面也没有，旧版的能找到 int pthread_rwlock_timedrdlock_np(pthread_rwlock_t *rwlock, const struct timespec *deltatime); int pthread_rwlock_timedwrlock_np(pthread_rwlock_t *rwlock, const struct timespec *deltatime); int pthread_spin_init (__pthread_spinlock_t *__lock, int __pshared); int pthread_spin_destroy (__pthread_spinlock_t *__lock); int pthread_spin_trylock (__pthread_spinlock_t *__lock); int pthread_spin_unlock (__pthread_spinlock_t *__lock); int pthread_spin_lock (__pthread_spinlock_t *__lock); 熟悉守护进程的创建、原理 了解计划作业crontab 熟悉进程、线程状态查看命令（top、strace、pstack） 熟悉内存状态查看命令memstat、free 熟悉IO状态查看命令iostat、df、du 了解linux文件的权限、用户、时间（ctime、mtime、atime）、inode等文件基本属性，熟练使用chmod、chown、chgrp等基本命令。 熟悉文件传输命令scp、rz、sz命令、 熟悉文件定位命令find、whereis命令。 熟悉软链接，熟悉ln命令。 熟悉lsof命令。 二、网络 熟悉tcp状态机（三次握手、四次挥手）。 熟悉tcpdump命令。 熟悉网络状态和防火墙状态查看命令：netstat、ifconfig、iptables 熟悉socket API，包括但不限于（connect、accept、bind、listen、send/sendto、recv/recvfrom、select、gethostbyname） int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen); int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen); int bind(int socket, const struct sockaddr *address, socklen_t address_len); int listen(int sockfd, int backlog); ssize_t send(int sockfd, const void *buf, size_t len, int flags); ssize_t sendto(int sockfd, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen); ssize_t recv(int sockfd, void *buf, size_t len, int flags); ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *src_addr, socklen_t *addrlen); int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout); void FD_CLR(int fd, fd_set *set); int FD_ISSET(int fd, fd_set *set); void FD_SET(int fd, fd_set *set); void FD_ZERO(fd_set *set); struct hostent *gethostbyname(const char *name); 熟悉epoll，熟悉水平触发与边缘触发。 int epoll_create(int size); int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event); int epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout); 熟悉阻塞socket和非阻塞socket在connect、send、recv等行为上的区别，如何将socket设置为非阻塞的。 三、脚本工具 了解shell基本语法、变量操作、函数、循环/条件判断等程序结构。 熟练使用文本编辑工具vi/vim。 了解使用文本处理命令grep、sed、cut。 了解awk命令。 四、数据库 熟悉数据表结构设计（三范式、字段属性）。 了解查询优化（索引的概念与创建、sql优化）。 熟悉常见的mysql API函数： mysql_real_connect mysql_select_db mysql_query mysql_store_result mysql_free_result mysql_num_rows mysql_close mysql_errno 五、编程语言 C/C++方面\n熟悉内存分布（堆、栈、静态/全局/局部变量、虚指针…） 熟悉Makefile。 熟悉gdb调试（断点、查看内存、执行跟踪、了解CPU主要寄存器作用…）。 熟悉性能分析工具(gprof)。 熟悉C-Runtime常用函数（如字符串格式化函数printf、scanf，字符串比较连接函数、内存分配函数、文件与目录操作函数等）。 熟悉stl库。 熟悉OO思想、常见设计模式（如单例模式、工厂设计模式、装饰者模式、Builder模式、生产者消费者模式、策略模式等）。 熟悉RAII、pimpl惯用法。 有一定的代码质量和重构能力。 文章版权所有，转载请保留文章末尾版权信息和公众号信息。\n",
   "wordCount" : "356",
-  "inLanguage": "en",
+  "inLanguage": "zh-cn",
   "datePublished": "2021-01-11T09:20:42Z",
   "dateModified": "2021-01-11T09:20:42Z",
   "mainEntityOfPage": {
@@ -177,6 +256,8 @@ int pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *r
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -186,32 +267,32 @@ int pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *r
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/1/" title="1s">
+                <a href="https://haokiu.com/1/" title="1">
                     <span>后端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/2/" title="2s">
+                <a href="https://haokiu.com/2/" title="2">
                     <span>前端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/3/" title="3s">
+                <a href="https://haokiu.com/3/" title="3">
                     <span>区块链</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/4/" title="4s">
+                <a href="https://haokiu.com/4/" title="4">
                     <span>大数据</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/5/" title="5s">
+                <a href="https://haokiu.com/5/" title="5">
                     <span>linux</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/6/" title="6s">
+                <a href="https://haokiu.com/6/" title="6">
                     <span>其他</span>
                 </a>
             </li>
@@ -232,7 +313,7 @@ int pthread_cond_init(pthread_cond_t *restrict cond, const pthread_condattr_t *r
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    
     <h1 class="post-title">
       腾讯后台开发实习生技能要求
     </h1>
@@ -401,15 +482,15 @@ mysql_errno
     <ul class="post-tags">
     </ul>
 <nav class="paginav">
-  <a class="prev" href="https://haokiu.com/blog/61401d1e68344e7b94c634f9b00cdbe4/">
-    <span class="title">« Prev</span>
+  <a class="prev" href="https://haokiu.com/blog/0f72f7a83bbb4b4fb76a05dc63f5480c/">
+    <span class="title">« </span>
     <br>
-    <span>聊聊如何拿大厂的 offer</span>
+    <span>谈一谈年终奖</span>
   </a>
-  <a class="next" href="https://haokiu.com/blog/913fb3f31d024baf871726b2f22cdfde/">
-    <span class="title">Next »</span>
+  <a class="next" href="https://haokiu.com/blog/6e60982d515240e4b34e2f0e22647f58/">
+    <span class="title"> »</span>
     <br>
-    <span>详解 C&#43;&#43; 11 中的智能指针</span>
+    <span>网络编程</span>
   </a>
 </nav>
 
@@ -417,6 +498,14 @@ mysql_errno
 </article>
     </main>
     
+<footer class="footer">
+    <span>haokiu.com</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />

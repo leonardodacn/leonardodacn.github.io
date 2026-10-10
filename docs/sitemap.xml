@@ -2,10 +2,10 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://haokiu.com/categories/3/</loc>
+    <loc>https://haokiu.com/3/</loc>
     <lastmod>2023-06-24T15:03:53+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/3/</loc>
+    <loc>https://haokiu.com/categories/3/</loc>
     <lastmod>2023-06-24T15:03:53+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/categories/</loc>
@@ -26,10 +26,10 @@
     <loc>https://haokiu.com/blog/wgJnpu/</loc>
     <lastmod>2023-05-21T09:05:24+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/categories/6/</loc>
+    <loc>https://haokiu.com/6/</loc>
     <lastmod>2023-03-18T14:42:36+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/6/</loc>
+    <loc>https://haokiu.com/categories/6/</loc>
     <lastmod>2023-03-18T14:42:36+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/blog/googo/</loc>
@@ -39,12 +39,6 @@
     <lastmod>2021-06-08T17:51:46+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/blog/bk-5/</loc>
-    <lastmod>2021-06-08T17:51:46+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/3426588a7834499f8a9a1b7e46817c0c/</loc>
-    <lastmod>2021-06-08T17:51:46+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/cffcc67d768246fd8624b3e5b98854f5/</loc>
     <lastmod>2021-06-08T17:51:46+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/blog/e15796699f1a419ba85731d159eba322/</loc>
@@ -71,16 +65,22 @@
     <loc>https://haokiu.com/blog/f6ad1487667e4880973e3b21505810be/</loc>
     <lastmod>2021-06-08T17:51:46+00:00</lastmod>
   </url><url>
+    <loc>https://haokiu.com/blog/3426588a7834499f8a9a1b7e46817c0c/</loc>
+    <lastmod>2021-06-08T17:51:46+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/cffcc67d768246fd8624b3e5b98854f5/</loc>
+    <lastmod>2021-06-08T17:51:46+00:00</lastmod>
+  </url><url>
     <loc>https://haokiu.com/blog/g6ADCM/</loc>
     <lastmod>2021-06-08T10:09:53+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/tags/%E5%85%B6%E4%BB%96/</loc>
     <lastmod>2021-06-08T10:09:53+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/categories/1/</loc>
+    <loc>https://haokiu.com/1/</loc>
     <lastmod>2021-02-24T10:24:56+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/1/</loc>
+    <loc>https://haokiu.com/categories/1/</loc>
     <lastmod>2021-02-24T10:24:56+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/tags/java/</loc>
@@ -95,10 +95,10 @@
     <loc>https://haokiu.com/blog/eth2/</loc>
     <lastmod>2021-02-16T13:43:25+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/categories/5/</loc>
+    <loc>https://haokiu.com/5/</loc>
     <lastmod>2021-02-02T20:57:44+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/5/</loc>
+    <loc>https://haokiu.com/categories/5/</loc>
     <lastmod>2021-02-02T20:57:44+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/tags/linux/</loc>
@@ -107,10 +107,10 @@
     <loc>https://haokiu.com/blog/a0lZoj/</loc>
     <lastmod>2021-02-02T20:57:44+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/categories/4/</loc>
+    <loc>https://haokiu.com/4/</loc>
     <lastmod>2021-02-02T17:45:01+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/4/</loc>
+    <loc>https://haokiu.com/categories/4/</loc>
     <lastmod>2021-02-02T17:45:01+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/blog/b0b0444d45c74c8f8b1a9fc4d2af738a/</loc>
@@ -338,9 +338,6 @@
     <loc>https://haokiu.com/tags/golang/</loc>
     <lastmod>2021-01-22T15:40:43+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/blog/1f4511a4eff2422184945a24e32887e2/</loc>
-    <lastmod>2021-01-22T15:40:43+00:00</lastmod>
-  </url><url>
     <loc>https://haokiu.com/blog/c3984397f8e5480f81aaaeaf1b82ac23/</loc>
     <lastmod>2021-01-22T15:40:43+00:00</lastmod>
   </url><url>
@@ -348,6 +345,9 @@
     <lastmod>2021-01-22T15:40:43+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/blog/615b0dd45d2e4323805039e0ffb41808/</loc>
+    <lastmod>2021-01-22T15:40:43+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/1f4511a4eff2422184945a24e32887e2/</loc>
     <lastmod>2021-01-22T15:40:43+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/tags/beego/</loc>
@@ -374,39 +374,6 @@
     <loc>https://haokiu.com/blog/23cb111095cb47f3b6115efccd11086d/</loc>
     <lastmod>2021-01-11T09:20:43+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/blog/d7e436585f754029be5279a858049912/</loc>
-    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/450c6c7995774bec88a383c0ce41cfdc/</loc>
-    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/7f969a868ee54e84982aa97c89e7cdbd/</loc>
-    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/1469709fbebd462cb012819cdfb07156/</loc>
-    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/f6db032966024846bbd5dbc28868bb17/</loc>
-    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/82046162d4f74d3b9745ef1e8f8cdf57/</loc>
-    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/1549ab1669fe40dda14c41a84df83415/</loc>
-    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/049d41c798c54956b4c2b094aacec413/</loc>
-    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/1908cdb9f5c747b996136e3b3e408b8d/</loc>
-    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/01f6fc4ce7c54057a2379aab6b98843f/</loc>
-    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/e50a72b7fb4e47a9904a05621e5b692f/</loc>
-    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
-  </url><url>
     <loc>https://haokiu.com/blog/32ba3bce20124dd380cdde0bba6ef5b9/</loc>
     <lastmod>2021-01-11T09:20:43+00:00</lastmod>
   </url><url>
@@ -417,6 +384,39 @@
     <lastmod>2021-01-11T09:20:43+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/blog/95e6ea6c39e345bf8177b77fb2d24548/</loc>
+    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/049d41c798c54956b4c2b094aacec413/</loc>
+    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/1908cdb9f5c747b996136e3b3e408b8d/</loc>
+    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/1549ab1669fe40dda14c41a84df83415/</loc>
+    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/1469709fbebd462cb012819cdfb07156/</loc>
+    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/f6db032966024846bbd5dbc28868bb17/</loc>
+    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/7f969a868ee54e84982aa97c89e7cdbd/</loc>
+    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/82046162d4f74d3b9745ef1e8f8cdf57/</loc>
+    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/d7e436585f754029be5279a858049912/</loc>
+    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/01f6fc4ce7c54057a2379aab6b98843f/</loc>
+    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/450c6c7995774bec88a383c0ce41cfdc/</loc>
+    <lastmod>2021-01-11T09:20:43+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/e50a72b7fb4e47a9904a05621e5b692f/</loc>
     <lastmod>2021-01-11T09:20:43+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/blog/8c53924ed21041948dff215384cdb81d/</loc>
@@ -449,10 +449,10 @@
     <loc>https://haokiu.com/blog/867310d7f5a74f758c1745b3083cfcc8/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/blog/ace809ec27124ecc987bcd4c7eec569f/</loc>
+    <loc>https://haokiu.com/blog/601f5e2b4c0a4303a540259d9d394d0b/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/blog/601f5e2b4c0a4303a540259d9d394d0b/</loc>
+    <loc>https://haokiu.com/blog/ace809ec27124ecc987bcd4c7eec569f/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/blog/ee4c77c4daf64f5f821d76808ec0b8b3/</loc>
@@ -632,37 +632,22 @@
     <loc>https://haokiu.com/blog/2a422d9fa3fe4cddbcbef326866d8943/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/blog/778cf564240e4d19ad39e0e271d66b3d/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/4d2fa7e9284a4e7fb742bdda30d20da6/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/596315b99d2f40dba9c9ea13e975bd9d/</loc>
+    <loc>https://haokiu.com/blog/63c41390d91c4392a0d3cc433c49a4ac/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/blog/9a03435a987949d28e30905f7a0c839b/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/blog/f56b1e30eede4a21b7fd293a33a1e47a/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/63c41390d91c4392a0d3cc433c49a4ac/</loc>
+    <loc>https://haokiu.com/blog/596315b99d2f40dba9c9ea13e975bd9d/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/blog/9dbcb2b8ef6b4cdbab38c3845d520ef0/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
+    <loc>https://haokiu.com/blog/4d2fa7e9284a4e7fb742bdda30d20da6/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
     <loc>https://haokiu.com/blog/857ca75e1a154abc91281759ea864d5c/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/1e01253c10f9435e84a4106aa149ab68/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/4547681a8a0d42759accab81b61267ab/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/50d829bedab44857aaf08cfd61e6c952/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/blog/a795d0b698914f3898a0896633cd92ad/</loc>
@@ -671,13 +656,28 @@
     <loc>https://haokiu.com/blog/314f7e41e35f43db9facbca467726a7a/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
+    <loc>https://haokiu.com/blog/4547681a8a0d42759accab81b61267ab/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/50d829bedab44857aaf08cfd61e6c952/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
     <loc>https://haokiu.com/blog/3fee4e4314af42ee9fa58cda4aa0b839/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/1e01253c10f9435e84a4106aa149ab68/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/blog/c82fe349df914fb8943e4aa3231c9cad/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
+    <loc>https://haokiu.com/blog/f56b1e30eede4a21b7fd293a33a1e47a/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
     <loc>https://haokiu.com/blog/8f65d01cc42d4c8782d95eed02dd4eb5/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/778cf564240e4d19ad39e0e271d66b3d/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/blog/3ba1e9453dcc49edb8ee1597bb133cdd/</loc>
@@ -704,114 +704,6 @@
     <loc>https://haokiu.com/blog/e3f33300987a43d08044b27dbbc5e9ec/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/blog/15d5370937664a8d84891f5e983b87f4/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/f3b5fbeb80e645c9b5bd3d1feea7b387/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/416ada8e33704bdcadd3202dd2413740/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/86a8b9de9c914f8ab93a3d36b455838b/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/92d9492b21aa444d81eb4f31c1bfabb1/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/fea618d6d104410cb5df6bc54d9529f2/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/2ec66b5605c8455e833f06d2a23fff09/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/e1e38f7ff0e941c8ad6e51923070551d/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/42f423476e5d4262bcb032f3cf4c40d3/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/f8c9189db8404c76867e71440f136a2c/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/745f468dc9234e4f95ac9d848e64fa0b/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/2d2976c6ad824a1b9e2c44ffad106432/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/a21d8fb5077b4bdfacf0cd5f4583f1cc/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/cf3a65cd7c2a40d1a4dbfd708c471c01/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/966ed73cc54b4cf5bdae1e1e5adba616/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/3418f291fe18455999e74a1f1dbad72a/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/b46f16d0f9f8415e94eb76455deea0f0/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/624d2104f4a54c50940f5de425c06ab0/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/dd345ae60ca14a61866fcc2f232aed74/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/9a2768ae509d48689a05cf010b262b09/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/79cb378b756e457cbcb3a3c669a8e4c0/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/5b6afa35b0644098b8b4d0c853f20358/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/7a566da932f2481388ca678c2dc2c1ac/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/fce122b624fd44a88df285c221d765b8/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/b9e6c063ac4a43aca14c01cc45b2f8fa/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/d949dd8f005d45c7b6c71ea9a87a0712/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/40c71c6aa54540abb1c141d82ca0cd49/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/c5ae7c2ab16046b2b12deffde01da947/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/b7d459605e1d4d46adba41bdb0c66b78/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/5d978400ccba478eaaa6a166b4ffba8d/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/27166845330344e4bf4f9a385e69fc94/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/bb7da7e0bc524808b2a072fb43da3a8e/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/ec8d1fd1cfc24923bdb71accca3fc1e4/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/c1e71fdf335346f5aadad6e1d1dc3e55/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/f64c601f237d4cac97445aa4b0e07369/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
-    <loc>https://haokiu.com/blog/9c853d8576774df7ad52d79d740d95f1/</loc>
-    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
-  </url><url>
     <loc>https://haokiu.com/blog/2137687badbe411cac56094071bcc338/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
@@ -824,28 +716,136 @@
     <loc>https://haokiu.com/blog/c092595334ac4b29914e418b3aae0648/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/blog/6e60982d515240e4b34e2f0e22647f58/</loc>
+    <loc>https://haokiu.com/blog/9c853d8576774df7ad52d79d740d95f1/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/blog/ec34cfea56f74c0d9a622ef5cbc4f812/</loc>
+    <loc>https://haokiu.com/blog/f8c9189db8404c76867e71440f136a2c/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/blog/eb4b0ccb7b2942b989b3655d832bb0e0/</loc>
+    <loc>https://haokiu.com/blog/2ec66b5605c8455e833f06d2a23fff09/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/blog/cbd700214d4e4bc691c5f33f6e905343/</loc>
+    <loc>https://haokiu.com/blog/e1e38f7ff0e941c8ad6e51923070551d/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/42f423476e5d4262bcb032f3cf4c40d3/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/92d9492b21aa444d81eb4f31c1bfabb1/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/86a8b9de9c914f8ab93a3d36b455838b/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/fea618d6d104410cb5df6bc54d9529f2/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/416ada8e33704bdcadd3202dd2413740/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/f3b5fbeb80e645c9b5bd3d1feea7b387/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/dd345ae60ca14a61866fcc2f232aed74/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/bb7da7e0bc524808b2a072fb43da3a8e/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/5d978400ccba478eaaa6a166b4ffba8d/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/27166845330344e4bf4f9a385e69fc94/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/b7d459605e1d4d46adba41bdb0c66b78/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/624d2104f4a54c50940f5de425c06ab0/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/3418f291fe18455999e74a1f1dbad72a/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/b46f16d0f9f8415e94eb76455deea0f0/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/d949dd8f005d45c7b6c71ea9a87a0712/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/40c71c6aa54540abb1c141d82ca0cd49/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/cf3a65cd7c2a40d1a4dbfd708c471c01/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/966ed73cc54b4cf5bdae1e1e5adba616/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/blog/61401d1e68344e7b94c634f9b00cdbe4/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
+    <loc>https://haokiu.com/blog/cbd700214d4e4bc691c5f33f6e905343/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/2d2976c6ad824a1b9e2c44ffad106432/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/79cb378b756e457cbcb3a3c669a8e4c0/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/9a2768ae509d48689a05cf010b262b09/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/ec8d1fd1cfc24923bdb71accca3fc1e4/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/0f72f7a83bbb4b4fb76a05dc63f5480c/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
     <loc>https://haokiu.com/blog/5f118ee0e1be49a8a754072ecb9b441a/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/6e60982d515240e4b34e2f0e22647f58/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/eb4b0ccb7b2942b989b3655d832bb0e0/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/ec34cfea56f74c0d9a622ef5cbc4f812/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/15d5370937664a8d84891f5e983b87f4/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/fce122b624fd44a88df285c221d765b8/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/b9e6c063ac4a43aca14c01cc45b2f8fa/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/7a566da932f2481388ca678c2dc2c1ac/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/5b6afa35b0644098b8b4d0c853f20358/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/blog/913fb3f31d024baf871726b2f22cdfde/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/blog/0f72f7a83bbb4b4fb76a05dc63f5480c/</loc>
+    <loc>https://haokiu.com/blog/f64c601f237d4cac97445aa4b0e07369/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/c1e71fdf335346f5aadad6e1d1dc3e55/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/c5ae7c2ab16046b2b12deffde01da947/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/745f468dc9234e4f95ac9d848e64fa0b/</loc>
+    <lastmod>2021-01-11T09:20:42+00:00</lastmod>
+  </url><url>
+    <loc>https://haokiu.com/blog/a21d8fb5077b4bdfacf0cd5f4583f1cc/</loc>
     <lastmod>2021-01-11T09:20:42+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/tags/docker/</loc>
@@ -932,10 +932,10 @@
     <loc>https://haokiu.com/blog/LcW9jL/</loc>
     <lastmod>2020-09-22T09:22:43+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/categories/2/</loc>
+    <loc>https://haokiu.com/2/</loc>
     <lastmod>2020-09-21T09:30:35+00:00</lastmod>
   </url><url>
-    <loc>https://haokiu.com/2/</loc>
+    <loc>https://haokiu.com/categories/2/</loc>
     <lastmod>2020-09-21T09:30:35+00:00</lastmod>
   </url><url>
     <loc>https://haokiu.com/blog/Cqhoxc/</loc>

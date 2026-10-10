@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="zh-cn" dir="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -12,14 +12,88 @@
 **优化成本：**硬件&gt;系统配置&gt;数据库表结构&gt;SQL 及索引。
 **优化效果：**硬件&lt;系统配置&lt;数据库表结构&lt;SQL 及索引。
 对于MySQL层优化我一般遵从五个原则：
-**减少数据访问：**设置合理的字段类型，启用压缩，通过索引访问等减少磁盘 IO。 **返回更少的数据：**只返回需要的字段和数据分页处理，减少磁盘 IO 及网络 IO。 **减少交互次数：**批量 DML 操作，函数存储等减少数据连接次数。 **减少服务器 CPU 开销：**尽量减少数据库排序操作以及全表查询，减少 CPU 内存占用。 **利用更多资源：**使用表分区，可以增加并行操作，更大限度利用 CPU 资源。 总结到 SQL 优化中，就如下三点：
-最大化利用索引。 尽可能避免全表扫描。 减少无效数据的查询。 理解 SQL 优化原理 ，首先要搞清楚 SQL 执行顺序。
+
+**减少数据访问：**设置合理的字段类型，启用压缩，通过索引访问等减少磁盘 IO。
+**返回更少的数据：**只返回需要的字段和数据分页处理，减少磁盘 IO 及网络 IO。
+**减少交互次数：**批量 DML 操作，函数存储等减少数据连接次数。
+**减少服务器 CPU 开销：**尽量减少数据库排序操作以及全表查询，减少 CPU 内存占用。
+**利用更多资源：**使用表分区，可以增加并行操作，更大限度利用 CPU 资源。
+
+总结到 SQL 优化中，就如下三点：
+
+最大化利用索引。
+尽可能避免全表扫描。
+减少无效数据的查询。
+
+理解 SQL 优化原理 ，首先要搞清楚 SQL 执行顺序。
 SELECT 语句，语法顺序如下：
-1. SELECT 2. DISTINCT &lt;select_list&gt; 3. FROM &lt;left_table&gt; 4. &lt;join_type&gt; JOIN &lt;right_table&gt; 5. ON &lt;join_condition&gt; 6. WHERE &lt;where_condition&gt; 7. GROUP BY &lt;group_by_list&gt; 8. HAVING &lt;having_condition&gt; 9. ORDER BY &lt;order_by_condition&gt; 10.LIMIT &lt;limit_number&gt; SELECT 语句，执行顺序如下：
-FROM &lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一个表。 ON &lt;筛选条件&gt; # 对笛卡尔积的虚表进行筛选 JOIN &lt;join, left join, right join...&gt; &lt;join表&gt; # 指定join，用于添加数据到on之后的虚表中，例如left join会将左表的剩余数据添加到虚表中 WHERE &lt;where条件&gt; # 对上述虚表进行筛选 GROUP BY &lt;分组条件&gt; # 分组 &lt;SUM()等聚合函数&gt; # 用于having子句进行判断，在书写上这类聚合函数是写在having判断里面的 HAVING &lt;分组筛选&gt; # 对分组后的结果进行聚合筛选 SELECT &lt;返回数据列表&gt; # 返回的单列必须在group by子句中，聚合函数除外 DISTINCT # 数据除重 ORDER BY &lt;排序条件&gt; # 排序 LIMIT &lt;行数限制&gt; 以下 SQL 优化策略适用于数据量较大的场景下，如果数据量较小，没必要以此为准，以免画蛇添足。">
+  1. SELECT 
+  
+  2. DISTINCT &lt;select_list&gt;
+  
+  3. FROM &lt;left_table&gt;
+  
+  4. &lt;join_type&gt; JOIN &lt;right_table&gt;
+  
+  5. ON &lt;join_condition&gt;
+  
+  6. WHERE &lt;where_condition&gt;
+  
+  7. GROUP BY &lt;group_by_list&gt;
+  
+  8. HAVING &lt;having_condition&gt;
+  
+  9. ORDER BY &lt;order_by_condition&gt;
+  
+  10.LIMIT &lt;limit_number&gt;
+SELECT 语句，执行顺序如下：
+FROM
+&lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一个表。
+ON
+&lt;筛选条件&gt; # 对笛卡尔积的虚表进行筛选
+JOIN &lt;join, left join, right join...&gt; 
+&lt;join表&gt; # 指定join，用于添加数据到on之后的虚表中，例如left join会将左表的剩余数据添加到虚表中
+WHERE
+&lt;where条件&gt; # 对上述虚表进行筛选
+GROUP BY
+&lt;分组条件&gt; # 分组
+&lt;SUM()等聚合函数&gt; # 用于having子句进行判断，在书写上这类聚合函数是写在having判断里面的
+HAVING
+&lt;分组筛选&gt; # 对分组后的结果进行聚合筛选
+SELECT
+&lt;返回数据列表&gt; # 返回的单列必须在group by子句中，聚合函数除外
+DISTINCT # 数据除重
+ORDER BY
+&lt;排序条件&gt; # 排序
+LIMIT
+&lt;行数限制&gt;
+以下 SQL 优化策略适用于数据量较大的场景下，如果数据量较小，没必要以此为准，以免画蛇添足。
+避免不走索引的场景
+①尽量避免在字段开头模糊查询，会导致数据库引擎放弃索引进行全表扫描
+如下：
+SELECT * FROM t WHERE username LIKE &#39;%陈%&#39;
+**优化方式：**尽量在字段后面使用模糊查询。
+如下：
+SELECT * FROM t WHERE username LIKE &#39;陈%&#39;
+如果需求是要在前面使用模糊查询：
+
+
+使用 MySQL 内置函数 INSTR（str，substr）来匹配，作用类似于 Java 中的 indexOf()，查询字符串出现的角标位置。
+
+
+使用 FullText 全文索引，用 match against 检索。
+
+数据量较大的情况，建议引用 ElasticSearch、Solr，亿级数据量检索速度秒级。
+
+
+
+当表数据量较少（几千条儿那种），别整花里胡哨的，直接用 like &lsquo;%xx%&rsquo;。
+②尽量避免使用 in 和 not in，会导致引擎走全表扫描
+
+">
 <meta name="author" content="">
 <link rel="canonical" href="https://haokiu.com/blog/XEhpYv/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
 <script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="https://haokiu.com/favicon.ico">
@@ -29,6 +103,7 @@ FROM &lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一�
 <link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/blog/XEhpYv/">
 <noscript>
     <style>
         #theme-toggle,
@@ -71,11 +146,85 @@ FROM &lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一�
 **优化成本：**硬件&gt;系统配置&gt;数据库表结构&gt;SQL 及索引。
 **优化效果：**硬件&lt;系统配置&lt;数据库表结构&lt;SQL 及索引。
 对于MySQL层优化我一般遵从五个原则：
-**减少数据访问：**设置合理的字段类型，启用压缩，通过索引访问等减少磁盘 IO。 **返回更少的数据：**只返回需要的字段和数据分页处理，减少磁盘 IO 及网络 IO。 **减少交互次数：**批量 DML 操作，函数存储等减少数据连接次数。 **减少服务器 CPU 开销：**尽量减少数据库排序操作以及全表查询，减少 CPU 内存占用。 **利用更多资源：**使用表分区，可以增加并行操作，更大限度利用 CPU 资源。 总结到 SQL 优化中，就如下三点：
-最大化利用索引。 尽可能避免全表扫描。 减少无效数据的查询。 理解 SQL 优化原理 ，首先要搞清楚 SQL 执行顺序。
+
+**减少数据访问：**设置合理的字段类型，启用压缩，通过索引访问等减少磁盘 IO。
+**返回更少的数据：**只返回需要的字段和数据分页处理，减少磁盘 IO 及网络 IO。
+**减少交互次数：**批量 DML 操作，函数存储等减少数据连接次数。
+**减少服务器 CPU 开销：**尽量减少数据库排序操作以及全表查询，减少 CPU 内存占用。
+**利用更多资源：**使用表分区，可以增加并行操作，更大限度利用 CPU 资源。
+
+总结到 SQL 优化中，就如下三点：
+
+最大化利用索引。
+尽可能避免全表扫描。
+减少无效数据的查询。
+
+理解 SQL 优化原理 ，首先要搞清楚 SQL 执行顺序。
 SELECT 语句，语法顺序如下：
-1. SELECT 2. DISTINCT &lt;select_list&gt; 3. FROM &lt;left_table&gt; 4. &lt;join_type&gt; JOIN &lt;right_table&gt; 5. ON &lt;join_condition&gt; 6. WHERE &lt;where_condition&gt; 7. GROUP BY &lt;group_by_list&gt; 8. HAVING &lt;having_condition&gt; 9. ORDER BY &lt;order_by_condition&gt; 10.LIMIT &lt;limit_number&gt; SELECT 语句，执行顺序如下：
-FROM &lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一个表。 ON &lt;筛选条件&gt; # 对笛卡尔积的虚表进行筛选 JOIN &lt;join, left join, right join...&gt; &lt;join表&gt; # 指定join，用于添加数据到on之后的虚表中，例如left join会将左表的剩余数据添加到虚表中 WHERE &lt;where条件&gt; # 对上述虚表进行筛选 GROUP BY &lt;分组条件&gt; # 分组 &lt;SUM()等聚合函数&gt; # 用于having子句进行判断，在书写上这类聚合函数是写在having判断里面的 HAVING &lt;分组筛选&gt; # 对分组后的结果进行聚合筛选 SELECT &lt;返回数据列表&gt; # 返回的单列必须在group by子句中，聚合函数除外 DISTINCT # 数据除重 ORDER BY &lt;排序条件&gt; # 排序 LIMIT &lt;行数限制&gt; 以下 SQL 优化策略适用于数据量较大的场景下，如果数据量较小，没必要以此为准，以免画蛇添足。" />
+  1. SELECT 
+  
+  2. DISTINCT &lt;select_list&gt;
+  
+  3. FROM &lt;left_table&gt;
+  
+  4. &lt;join_type&gt; JOIN &lt;right_table&gt;
+  
+  5. ON &lt;join_condition&gt;
+  
+  6. WHERE &lt;where_condition&gt;
+  
+  7. GROUP BY &lt;group_by_list&gt;
+  
+  8. HAVING &lt;having_condition&gt;
+  
+  9. ORDER BY &lt;order_by_condition&gt;
+  
+  10.LIMIT &lt;limit_number&gt;
+SELECT 语句，执行顺序如下：
+FROM
+&lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一个表。
+ON
+&lt;筛选条件&gt; # 对笛卡尔积的虚表进行筛选
+JOIN &lt;join, left join, right join...&gt; 
+&lt;join表&gt; # 指定join，用于添加数据到on之后的虚表中，例如left join会将左表的剩余数据添加到虚表中
+WHERE
+&lt;where条件&gt; # 对上述虚表进行筛选
+GROUP BY
+&lt;分组条件&gt; # 分组
+&lt;SUM()等聚合函数&gt; # 用于having子句进行判断，在书写上这类聚合函数是写在having判断里面的
+HAVING
+&lt;分组筛选&gt; # 对分组后的结果进行聚合筛选
+SELECT
+&lt;返回数据列表&gt; # 返回的单列必须在group by子句中，聚合函数除外
+DISTINCT # 数据除重
+ORDER BY
+&lt;排序条件&gt; # 排序
+LIMIT
+&lt;行数限制&gt;
+以下 SQL 优化策略适用于数据量较大的场景下，如果数据量较小，没必要以此为准，以免画蛇添足。
+避免不走索引的场景
+①尽量避免在字段开头模糊查询，会导致数据库引擎放弃索引进行全表扫描
+如下：
+SELECT * FROM t WHERE username LIKE &#39;%陈%&#39;
+**优化方式：**尽量在字段后面使用模糊查询。
+如下：
+SELECT * FROM t WHERE username LIKE &#39;陈%&#39;
+如果需求是要在前面使用模糊查询：
+
+
+使用 MySQL 内置函数 INSTR（str，substr）来匹配，作用类似于 Java 中的 indexOf()，查询字符串出现的角标位置。
+
+
+使用 FullText 全文索引，用 match against 检索。
+
+数据量较大的情况，建议引用 ElasticSearch、Solr，亿级数据量检索速度秒级。
+
+
+
+当表数据量较少（几千条儿那种），别整花里胡哨的，直接用 like &lsquo;%xx%&rsquo;。
+②尽量避免使用 in 和 not in，会导致引擎走全表扫描
+
+" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://haokiu.com/blog/XEhpYv/" /><meta property="article:section" content="4" />
 <meta property="article:published_time" content="2020-09-23T16:59:17+00:00" />
@@ -88,11 +237,85 @@ FROM &lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一�
 **优化成本：**硬件&gt;系统配置&gt;数据库表结构&gt;SQL 及索引。
 **优化效果：**硬件&lt;系统配置&lt;数据库表结构&lt;SQL 及索引。
 对于MySQL层优化我一般遵从五个原则：
-**减少数据访问：**设置合理的字段类型，启用压缩，通过索引访问等减少磁盘 IO。 **返回更少的数据：**只返回需要的字段和数据分页处理，减少磁盘 IO 及网络 IO。 **减少交互次数：**批量 DML 操作，函数存储等减少数据连接次数。 **减少服务器 CPU 开销：**尽量减少数据库排序操作以及全表查询，减少 CPU 内存占用。 **利用更多资源：**使用表分区，可以增加并行操作，更大限度利用 CPU 资源。 总结到 SQL 优化中，就如下三点：
-最大化利用索引。 尽可能避免全表扫描。 减少无效数据的查询。 理解 SQL 优化原理 ，首先要搞清楚 SQL 执行顺序。
+
+**减少数据访问：**设置合理的字段类型，启用压缩，通过索引访问等减少磁盘 IO。
+**返回更少的数据：**只返回需要的字段和数据分页处理，减少磁盘 IO 及网络 IO。
+**减少交互次数：**批量 DML 操作，函数存储等减少数据连接次数。
+**减少服务器 CPU 开销：**尽量减少数据库排序操作以及全表查询，减少 CPU 内存占用。
+**利用更多资源：**使用表分区，可以增加并行操作，更大限度利用 CPU 资源。
+
+总结到 SQL 优化中，就如下三点：
+
+最大化利用索引。
+尽可能避免全表扫描。
+减少无效数据的查询。
+
+理解 SQL 优化原理 ，首先要搞清楚 SQL 执行顺序。
 SELECT 语句，语法顺序如下：
-1. SELECT 2. DISTINCT &lt;select_list&gt; 3. FROM &lt;left_table&gt; 4. &lt;join_type&gt; JOIN &lt;right_table&gt; 5. ON &lt;join_condition&gt; 6. WHERE &lt;where_condition&gt; 7. GROUP BY &lt;group_by_list&gt; 8. HAVING &lt;having_condition&gt; 9. ORDER BY &lt;order_by_condition&gt; 10.LIMIT &lt;limit_number&gt; SELECT 语句，执行顺序如下：
-FROM &lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一个表。 ON &lt;筛选条件&gt; # 对笛卡尔积的虚表进行筛选 JOIN &lt;join, left join, right join...&gt; &lt;join表&gt; # 指定join，用于添加数据到on之后的虚表中，例如left join会将左表的剩余数据添加到虚表中 WHERE &lt;where条件&gt; # 对上述虚表进行筛选 GROUP BY &lt;分组条件&gt; # 分组 &lt;SUM()等聚合函数&gt; # 用于having子句进行判断，在书写上这类聚合函数是写在having判断里面的 HAVING &lt;分组筛选&gt; # 对分组后的结果进行聚合筛选 SELECT &lt;返回数据列表&gt; # 返回的单列必须在group by子句中，聚合函数除外 DISTINCT # 数据除重 ORDER BY &lt;排序条件&gt; # 排序 LIMIT &lt;行数限制&gt; 以下 SQL 优化策略适用于数据量较大的场景下，如果数据量较小，没必要以此为准，以免画蛇添足。"/>
+  1. SELECT 
+  
+  2. DISTINCT &lt;select_list&gt;
+  
+  3. FROM &lt;left_table&gt;
+  
+  4. &lt;join_type&gt; JOIN &lt;right_table&gt;
+  
+  5. ON &lt;join_condition&gt;
+  
+  6. WHERE &lt;where_condition&gt;
+  
+  7. GROUP BY &lt;group_by_list&gt;
+  
+  8. HAVING &lt;having_condition&gt;
+  
+  9. ORDER BY &lt;order_by_condition&gt;
+  
+  10.LIMIT &lt;limit_number&gt;
+SELECT 语句，执行顺序如下：
+FROM
+&lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一个表。
+ON
+&lt;筛选条件&gt; # 对笛卡尔积的虚表进行筛选
+JOIN &lt;join, left join, right join...&gt; 
+&lt;join表&gt; # 指定join，用于添加数据到on之后的虚表中，例如left join会将左表的剩余数据添加到虚表中
+WHERE
+&lt;where条件&gt; # 对上述虚表进行筛选
+GROUP BY
+&lt;分组条件&gt; # 分组
+&lt;SUM()等聚合函数&gt; # 用于having子句进行判断，在书写上这类聚合函数是写在having判断里面的
+HAVING
+&lt;分组筛选&gt; # 对分组后的结果进行聚合筛选
+SELECT
+&lt;返回数据列表&gt; # 返回的单列必须在group by子句中，聚合函数除外
+DISTINCT # 数据除重
+ORDER BY
+&lt;排序条件&gt; # 排序
+LIMIT
+&lt;行数限制&gt;
+以下 SQL 优化策略适用于数据量较大的场景下，如果数据量较小，没必要以此为准，以免画蛇添足。
+避免不走索引的场景
+①尽量避免在字段开头模糊查询，会导致数据库引擎放弃索引进行全表扫描
+如下：
+SELECT * FROM t WHERE username LIKE &#39;%陈%&#39;
+**优化方式：**尽量在字段后面使用模糊查询。
+如下：
+SELECT * FROM t WHERE username LIKE &#39;陈%&#39;
+如果需求是要在前面使用模糊查询：
+
+
+使用 MySQL 内置函数 INSTR（str，substr）来匹配，作用类似于 Java 中的 indexOf()，查询字符串出现的角标位置。
+
+
+使用 FullText 全文索引，用 match against 检索。
+
+数据量较大的情况，建议引用 ElasticSearch、Solr，亿级数据量检索速度秒级。
+
+
+
+当表数据量较少（几千条儿那种），别整花里胡哨的，直接用 like &lsquo;%xx%&rsquo;。
+②尽量避免使用 in 和 not in，会导致引擎走全表扫描
+
+"/>
 
 
 <script type="application/ld+json">
@@ -103,7 +326,7 @@ FROM &lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一�
     {
       "@type": "ListItem",
       "position":  1 ,
-      "name": "4s",
+      "name": "4",
       "item": "https://haokiu.com/4/"
     }, 
     {
@@ -121,13 +344,13 @@ FROM &lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一�
   "@type": "BlogPosting",
   "headline": "sql 优化",
   "name": "sql 优化",
-  "description": "SQL 优化已经成为衡量程序猿优秀与否的硬性指标，甚至在各大厂招聘岗位职能上都有明码标注。\n有朋友疑问到，SQL 优化真的有这么重要么？如下图所示，SQL 优化在提升系统性能中是：成本最低和优化效果最明显的途径。\n**优化成本：**硬件\u0026gt;系统配置\u0026gt;数据库表结构\u0026gt;SQL 及索引。\n**优化效果：**硬件\u0026lt;系统配置\u0026lt;数据库表结构\u0026lt;SQL 及索引。\n对于MySQL层优化我一般遵从五个原则：\n**减少数据访问：**设置合理的字段类型，启用压缩，通过索引访问等减少磁盘 IO。 **返回更少的数据：**只返回需要的字段和数据分页处理，减少磁盘 IO 及网络 IO。 **减少交互次数：**批量 DML 操作，函数存储等减少数据连接次数。 **减少服务器 CPU 开销：**尽量减少数据库排序操作以及全表查询，减少 CPU 内存占用。 **利用更多资源：**使用表分区，可以增加并行操作，更大限度利用 CPU 资源。 总结到 SQL 优化中，就如下三点：\n最大化利用索引。 尽可能避免全表扫描。 减少无效数据的查询。 理解 SQL 优化原理 ，首先要搞清楚 SQL 执行顺序。\nSELECT 语句，语法顺序如下：\n1. SELECT 2. DISTINCT \u0026lt;select_list\u0026gt; 3. FROM \u0026lt;left_table\u0026gt; 4. \u0026lt;join_type\u0026gt; JOIN \u0026lt;right_table\u0026gt; 5. ON \u0026lt;join_condition\u0026gt; 6. WHERE \u0026lt;where_condition\u0026gt; 7. GROUP BY \u0026lt;group_by_list\u0026gt; 8. HAVING \u0026lt;having_condition\u0026gt; 9. ORDER BY \u0026lt;order_by_condition\u0026gt; 10.LIMIT \u0026lt;limit_number\u0026gt; SELECT 语句，执行顺序如下：\nFROM \u0026lt;表名\u0026gt; # 选取表，将多个表数据通过笛卡尔积变成一个表。 ON \u0026lt;筛选条件\u0026gt; # 对笛卡尔积的虚表进行筛选 JOIN \u0026lt;join, left join, right join...\u0026gt; \u0026lt;join表\u0026gt; # 指定join，用于添加数据到on之后的虚表中，例如left join会将左表的剩余数据添加到虚表中 WHERE \u0026lt;where条件\u0026gt; # 对上述虚表进行筛选 GROUP BY \u0026lt;分组条件\u0026gt; # 分组 \u0026lt;SUM()等聚合函数\u0026gt; # 用于having子句进行判断，在书写上这类聚合函数是写在having判断里面的 HAVING \u0026lt;分组筛选\u0026gt; # 对分组后的结果进行聚合筛选 SELECT \u0026lt;返回数据列表\u0026gt; # 返回的单列必须在group by子句中，聚合函数除外 DISTINCT # 数据除重 ORDER BY \u0026lt;排序条件\u0026gt; # 排序 LIMIT \u0026lt;行数限制\u0026gt; 以下 SQL 优化策略适用于数据量较大的场景下，如果数据量较小，没必要以此为准，以免画蛇添足。",
+  "description": "SQL 优化已经成为衡量程序猿优秀与否的硬性指标，甚至在各大厂招聘岗位职能上都有明码标注。\n有朋友疑问到，SQL 优化真的有这么重要么？如下图所示，SQL 优化在提升系统性能中是：成本最低和优化效果最明显的途径。\n**优化成本：**硬件\u0026gt;系统配置\u0026gt;数据库表结构\u0026gt;SQL 及索引。\n**优化效果：**硬件\u0026lt;系统配置\u0026lt;数据库表结构\u0026lt;SQL 及索引。\n对于MySQL层优化我一般遵从五个原则：\n**减少数据访问：**设置合理的字段类型，启用压缩，通过索引访问等减少磁盘 IO。 **返回更少的数据：**只返回需要的字段和数据分页处理，减少磁盘 IO 及网络 IO。 **减少交互次数：**批量 DML 操作，函数存储等减少数据连接次数。 **减少服务器 CPU 开销：**尽量减少数据库排序操作以及全表查询，减少 CPU 内存占用。 **利用更多资源：**使用表分区，可以增加并行操作，更大限度利用 CPU 资源。 总结到 SQL 优化中，就如下三点：\n最大化利用索引。 尽可能避免全表扫描。 减少无效数据的查询。 理解 SQL 优化原理 ，首先要搞清楚 SQL 执行顺序。\nSELECT 语句，语法顺序如下：\n1. SELECT 2. DISTINCT \u0026lt;select_list\u0026gt; 3. FROM \u0026lt;left_table\u0026gt; 4. \u0026lt;join_type\u0026gt; JOIN \u0026lt;right_table\u0026gt; 5. ON \u0026lt;join_condition\u0026gt; 6. WHERE \u0026lt;where_condition\u0026gt; 7. GROUP BY \u0026lt;group_by_list\u0026gt; 8. HAVING \u0026lt;having_condition\u0026gt; 9. ORDER BY \u0026lt;order_by_condition\u0026gt; 10.LIMIT \u0026lt;limit_number\u0026gt; SELECT 语句，执行顺序如下：\nFROM \u0026lt;表名\u0026gt; # 选取表，将多个表数据通过笛卡尔积变成一个表。 ON \u0026lt;筛选条件\u0026gt; # 对笛卡尔积的虚表进行筛选 JOIN \u0026lt;join, left join, right join...\u0026gt; \u0026lt;join表\u0026gt; # 指定join，用于添加数据到on之后的虚表中，例如left join会将左表的剩余数据添加到虚表中 WHERE \u0026lt;where条件\u0026gt; # 对上述虚表进行筛选 GROUP BY \u0026lt;分组条件\u0026gt; # 分组 \u0026lt;SUM()等聚合函数\u0026gt; # 用于having子句进行判断，在书写上这类聚合函数是写在having判断里面的 HAVING \u0026lt;分组筛选\u0026gt; # 对分组后的结果进行聚合筛选 SELECT \u0026lt;返回数据列表\u0026gt; # 返回的单列必须在group by子句中，聚合函数除外 DISTINCT # 数据除重 ORDER BY \u0026lt;排序条件\u0026gt; # 排序 LIMIT \u0026lt;行数限制\u0026gt; 以下 SQL 优化策略适用于数据量较大的场景下，如果数据量较小，没必要以此为准，以免画蛇添足。\n避免不走索引的场景\n①尽量避免在字段开头模糊查询，会导致数据库引擎放弃索引进行全表扫描\n如下：\nSELECT * FROM t WHERE username LIKE \u0026#39;%陈%\u0026#39; **优化方式：**尽量在字段后面使用模糊查询。\n如下：\nSELECT * FROM t WHERE username LIKE \u0026#39;陈%\u0026#39; 如果需求是要在前面使用模糊查询：\n使用 MySQL 内置函数 INSTR（str，substr）来匹配，作用类似于 Java 中的 indexOf()，查询字符串出现的角标位置。\n使用 FullText 全文索引，用 match against 检索。\n数据量较大的情况，建议引用 ElasticSearch、Solr，亿级数据量检索速度秒级。 当表数据量较少（几千条儿那种），别整花里胡哨的，直接用 like \u0026lsquo;%xx%\u0026rsquo;。\n②尽量避免使用 in 和 not in，会导致引擎走全表扫描\n",
   "keywords": [
     "sql,优化"
   ],
   "articleBody": "SQL 优化已经成为衡量程序猿优秀与否的硬性指标，甚至在各大厂招聘岗位职能上都有明码标注。\n有朋友疑问到，SQL 优化真的有这么重要么？如下图所示，SQL 优化在提升系统性能中是：成本最低和优化效果最明显的途径。\n**优化成本：**硬件\u003e系统配置\u003e数据库表结构\u003eSQL 及索引。\n**优化效果：**硬件\u003c系统配置\u003c数据库表结构",
   "wordCount" : "1100",
-  "inLanguage": "en",
+  "inLanguage": "zh-cn",
   "datePublished": "2020-09-23T16:59:17Z",
   "dateModified": "2020-09-23T16:59:17Z",
   "mainEntityOfPage": {
@@ -183,6 +406,8 @@ FROM &lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一�
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -192,32 +417,32 @@ FROM &lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一�
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/1/" title="1s">
+                <a href="https://haokiu.com/1/" title="1">
                     <span>后端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/2/" title="2s">
+                <a href="https://haokiu.com/2/" title="2">
                     <span>前端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/3/" title="3s">
+                <a href="https://haokiu.com/3/" title="3">
                     <span>区块链</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/4/" title="4s">
+                <a href="https://haokiu.com/4/" title="4">
                     <span>大数据</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/5/" title="5s">
+                <a href="https://haokiu.com/5/" title="5">
                     <span>linux</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/6/" title="6s">
+                <a href="https://haokiu.com/6/" title="6">
                     <span>其他</span>
                 </a>
             </li>
@@ -238,7 +463,7 @@ FROM &lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一�
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    
     <h1 class="post-title">
       sql 优化
     </h1>
@@ -267,7 +492,7 @@ FROM &lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一�
 </ul>
 <p>理解 SQL 优化原理 ，首先要搞清楚 SQL 执行顺序。</p>
 <p><strong>SELECT 语句，语法顺序如下：</strong></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span>  <span style="color:#ae81ff">1</span>. <span style="color:#66d9ef">SELECT</span> 
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span>  <span style="color:#ae81ff">1</span>. <span style="color:#66d9ef">SELECT</span> 
 </span></span><span style="display:flex;"><span>  
 </span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">2</span>. <span style="color:#66d9ef">DISTINCT</span> <span style="color:#f92672">&lt;</span>select_list<span style="color:#f92672">&gt;</span>
 </span></span><span style="display:flex;"><span>  
@@ -287,7 +512,7 @@ FROM &lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一�
 </span></span><span style="display:flex;"><span>  
 </span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">10</span>.<span style="color:#66d9ef">LIMIT</span> <span style="color:#f92672">&lt;</span>limit_number<span style="color:#f92672">&gt;</span>
 </span></span></code></pre></div><p><strong>SELECT 语句，执行顺序如下：</strong></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span>
 </span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">表名</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">#</span> <span style="color:#960050;background-color:#1e0010">选取表，将多个表数据通过笛卡尔积变成一个表。</span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">ON</span>
 </span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">筛选条件</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">#</span> <span style="color:#960050;background-color:#1e0010">对笛卡尔积的虚表进行筛选</span>
@@ -311,10 +536,10 @@ FROM &lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一�
 <p>避免不走索引的场景</p>
 <p><strong>①尽量避免在字段开头模糊查询，会导致数据库引擎放弃索引进行全表扫描</strong></p>
 <p>如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> username <span style="color:#66d9ef">LIKE</span> <span style="color:#e6db74">&#39;%陈%&#39;</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> username <span style="color:#66d9ef">LIKE</span> <span style="color:#e6db74">&#39;%陈%&#39;</span>
 </span></span></code></pre></div><p>**优化方式：**尽量在字段后面使用模糊查询。</p>
 <p>如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> username <span style="color:#66d9ef">LIKE</span> <span style="color:#e6db74">&#39;陈%&#39;</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> username <span style="color:#66d9ef">LIKE</span> <span style="color:#e6db74">&#39;陈%&#39;</span>
 </span></span></code></pre></div><p>如果需求是要在前面使用模糊查询：</p>
 <ul>
 <li>
@@ -332,56 +557,56 @@ FROM &lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一�
 </li>
 </ul>
 <p>如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> id <span style="color:#66d9ef">IN</span> (<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">3</span>)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> id <span style="color:#66d9ef">IN</span> (<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">3</span>)
 </span></span></code></pre></div><p>**优化方式：**如果是连续数值，可以用 between 代替。</p>
 <p>如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> id <span style="color:#66d9ef">BETWEEN</span> <span style="color:#ae81ff">2</span> <span style="color:#66d9ef">AND</span> <span style="color:#ae81ff">3</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> id <span style="color:#66d9ef">BETWEEN</span> <span style="color:#ae81ff">2</span> <span style="color:#66d9ef">AND</span> <span style="color:#ae81ff">3</span>
 </span></span></code></pre></div><p>如果是子查询，可以用 exists 代替。</p>
 <p>如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 不走索引
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> A <span style="color:#66d9ef">where</span> A.id <span style="color:#66d9ef">in</span> (<span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> B);
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 不走索引
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> A <span style="color:#66d9ef">where</span> A.id <span style="color:#66d9ef">in</span> (<span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> B);
 </span></span><span style="display:flex;"><span><span style="color:#75715e">-- 走索引 
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> A <span style="color:#66d9ef">where</span> <span style="color:#66d9ef">exists</span> (<span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> B <span style="color:#66d9ef">where</span> B.id <span style="color:#f92672">=</span> A.id);
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> A <span style="color:#66d9ef">where</span> <span style="color:#66d9ef">exists</span> (<span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> B <span style="color:#66d9ef">where</span> B.id <span style="color:#f92672">=</span> A.id);
 </span></span></code></pre></div><p><strong>③尽量避免使用 or，会导致数据库引擎放弃索引进行全表扫描</strong></p>
 <p>如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> id <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">OR</span> id <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> id <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">OR</span> id <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>
 </span></span></code></pre></div><p>**优化方式：**可以用 union 代替 or。</p>
 <p>如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> id <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> id <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
 </span></span><span style="display:flex;"><span>   <span style="color:#66d9ef">UNION</span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> id <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>
 </span></span></code></pre></div><p><strong>④尽量避免进行 null 值的判断，会导致数据库引擎放弃索引进行全表扫描</strong></p>
 <p>如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> score <span style="color:#66d9ef">IS</span> <span style="color:#66d9ef">NULL</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> score <span style="color:#66d9ef">IS</span> <span style="color:#66d9ef">NULL</span>
 </span></span></code></pre></div><p>**优化方式：**可以给字段添加默认值 0，对 0 值进行判断。</p>
 <p>如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> score <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> score <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
 </span></span></code></pre></div><p><strong>⑤尽量避免在 where 条件中等号的左侧进行表达式、函数操作，会导致数据库引擎放弃索引进行全表扫描</strong></p>
 <p>可以将表达式、函数操作移动到等号右侧，如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 全表扫描 
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> T <span style="color:#66d9ef">WHERE</span> score<span style="color:#f92672">/</span><span style="color:#ae81ff">10</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">9</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 全表扫描 
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> T <span style="color:#66d9ef">WHERE</span> score<span style="color:#f92672">/</span><span style="color:#ae81ff">10</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">9</span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e">-- 走索引
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> T <span style="color:#66d9ef">WHERE</span> score <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span><span style="color:#f92672">*</span><span style="color:#ae81ff">9</span>
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> T <span style="color:#66d9ef">WHERE</span> score <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span><span style="color:#f92672">*</span><span style="color:#ae81ff">9</span>
 </span></span></code></pre></div><p><strong>⑥当数据量大时，避免使用 where 1=1 的条件</strong></p>
 <p>通常为了方便拼装查询条件，我们会默认使用该条件，数据库引擎会放弃索引进行全表扫描。</p>
 <p>如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> username, age, sex <span style="color:#66d9ef">FROM</span> T <span style="color:#66d9ef">WHERE</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> username, age, sex <span style="color:#66d9ef">FROM</span> T <span style="color:#66d9ef">WHERE</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>
 </span></span></code></pre></div><p>**优化方式：**用代码拼装 SQL 时进行判断，没 where 条件就去掉 where，有 where 条件就加 and。</p>
 <p><strong>⑦查询条件不能用 &lt;&gt; 或者 !=</strong></p>
 <p>使用索引列作为条件进行查询时，需要避免使用&lt;&gt;或者!=等判断条件。</p>
 <p>如确实业务需要，使用到不等于符号，需要在重新评估索引建立，避免在此字段上建立索引，改由查询条件中其他索引字段代替。</p>
 <p><strong>⑧where 条件仅包含复合索引非前置列</strong></p>
 <p>如下：复合（联合）索引包含 key_part1，key_part2，key_part3 三列，但 SQL 语句没有包含索引前置列&quot;key_part1&quot;，按照 MySQL 联合索引的最左匹配原则，不会走联合索引。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> col1 <span style="color:#66d9ef">from</span> <span style="color:#66d9ef">table</span> <span style="color:#66d9ef">where</span> key_part2<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> <span style="color:#66d9ef">and</span> key_part3<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> col1 <span style="color:#66d9ef">from</span> <span style="color:#66d9ef">table</span> <span style="color:#66d9ef">where</span> key_part2<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> <span style="color:#66d9ef">and</span> key_part3<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>
 </span></span></code></pre></div><p><strong>⑨隐式类型转换造成不使用索引</strong></p>
 <p>如下 SQL 语句由于索引对列类型为 varchar，但给定的值为数值，涉及隐式类型转换，造成不能正确走索引。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> col1 <span style="color:#66d9ef">from</span> <span style="color:#66d9ef">table</span> <span style="color:#66d9ef">where</span> col_varchar<span style="color:#f92672">=</span><span style="color:#ae81ff">123</span>; 
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> col1 <span style="color:#66d9ef">from</span> <span style="color:#66d9ef">table</span> <span style="color:#66d9ef">where</span> col_varchar<span style="color:#f92672">=</span><span style="color:#ae81ff">123</span>; 
 </span></span></code></pre></div><p><strong>⑩order by 条件要与 where 中条件一致，否则 order by 不会利用索引进行排序</strong></p>
 <p>如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 不走age索引
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">order</span> <span style="color:#66d9ef">by</span> age;
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 不走age索引
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">order</span> <span style="color:#66d9ef">by</span> age;
 </span></span><span style="display:flex;"><span><span style="color:#75715e">-- 走age索引
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">where</span> age <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#66d9ef">order</span> <span style="color:#66d9ef">by</span> age;
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">where</span> age <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#66d9ef">order</span> <span style="color:#66d9ef">by</span> age;
 </span></span></code></pre></div><p>对于上面的语句，数据库的处理顺序是：</p>
 <ul>
 <li>**第一步：**根据 where 条件和统计信息生成执行计划，得到数据。</li>
@@ -411,7 +636,7 @@ FROM &lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一�
 <p>在查询的时候，数据库系统会自动分析查询语句，并选择一个最合适的索引。但是很多时候，数据库系统的查询优化器并不一定总是能使用最优索引。</p>
 <p>如果我们知道如何选择索引，可以使用 FORCE INDEX 强制查询使用指定的索引。</p>
 <p>例如：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> students <span style="color:#66d9ef">FORCE</span> <span style="color:#66d9ef">INDEX</span> (idx_class_id) <span style="color:#66d9ef">WHERE</span> class_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> id <span style="color:#66d9ef">DESC</span>;
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> students <span style="color:#66d9ef">FORCE</span> <span style="color:#66d9ef">INDEX</span> (idx_class_id) <span style="color:#66d9ef">WHERE</span> class_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> id <span style="color:#66d9ef">DESC</span>;
 </span></span></code></pre></div><p>SELECT 语句其他优化</p>
 <p><strong>①避免出现 select *</strong></p>
 <p>首先，select * 操作在任何类型数据库中都不是一个好的 SQL 编写习惯。</p>
@@ -436,11 +661,11 @@ FROM &lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一�
 <p><strong>①大批量插入数据</strong></p>
 <p>如果同时执行大量的插入，建议使用多个值的 INSERT 语句（方法二）。这比使用分开 INSERT 语句快（方法一），一般情况下批量插入效率有几倍的差别。</p>
 <p>方法一：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">insert</span> <span style="color:#66d9ef">into</span> T <span style="color:#66d9ef">values</span>(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>); 
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">insert</span> <span style="color:#66d9ef">into</span> T <span style="color:#66d9ef">values</span>(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>); 
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">insert</span> <span style="color:#66d9ef">into</span> T <span style="color:#66d9ef">values</span>(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">3</span>); 
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">insert</span> <span style="color:#66d9ef">into</span> T <span style="color:#66d9ef">values</span>(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">4</span>);
 </span></span></code></pre></div><p>方法二：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">Insert</span> <span style="color:#66d9ef">into</span> T <span style="color:#66d9ef">values</span>(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>),(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">3</span>),(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">4</span>); 
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">Insert</span> <span style="color:#66d9ef">into</span> T <span style="color:#66d9ef">values</span>(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>),(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">3</span>),(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">4</span>); 
 </span></span></code></pre></div><p>选择后一种方法的原因有三：</p>
 <ul>
 <li>减少 SQL 语句解析的操作，MySQL 没有类似 Oracle 的 share pool，采用方法二，只需要解析一次就能进行数据的插入操作。</li>
@@ -464,7 +689,7 @@ FROM &lt;表名&gt; # 选取表，将多个表数据通过笛卡尔积变成一�
 <p>简单方法实现：</p>
 </li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">Update</span> t1 <span style="color:#66d9ef">set</span> time<span style="color:#f92672">=</span>now() <span style="color:#66d9ef">where</span> col1<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>; 
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">Update</span> t1 <span style="color:#66d9ef">set</span> time<span style="color:#f92672">=</span>now() <span style="color:#66d9ef">where</span> col1<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>; 
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">Select</span> time <span style="color:#66d9ef">from</span> t1 <span style="color:#66d9ef">where</span> id <span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>;
 </span></span></code></pre></div><p>使用变量，可以重写为以下方式：</p>
 <pre tabindex="0"><code>Update t1 set time=now () where col1=1 and @now: = now (); 
@@ -506,15 +731,15 @@ Select @now;
 <p>如果显式包括一个包含相同的列的 ORDER BY 子句，MySQL 可以毫不减速地对它进行优化，尽管仍然进行排序。</p>
 <p>因此，如果查询包括 GROUP BY 但你并不想对分组的值进行排序，你可以指定 ORDER BY NULL 禁止排序。</p>
 <p>例如：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> col1, col2, <span style="color:#66d9ef">COUNT</span>(<span style="color:#f92672">*</span>) <span style="color:#66d9ef">FROM</span> <span style="color:#66d9ef">table</span> <span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> col1, col2 <span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> <span style="color:#66d9ef">NULL</span> ;
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> col1, col2, <span style="color:#66d9ef">COUNT</span>(<span style="color:#f92672">*</span>) <span style="color:#66d9ef">FROM</span> <span style="color:#66d9ef">table</span> <span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> col1, col2 <span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> <span style="color:#66d9ef">NULL</span> ;
 </span></span></code></pre></div><p><strong>③优化 join 语句</strong></p>
 <p>MySQL 中可以通过子查询来使用 SELECT 语句来创建一个单列的查询结果，然后把这个结果作为过滤条件用在另一个查询中。</p>
 <p>使用子查询可以一次性的完成很多逻辑上需要多个步骤才能完成的 SQL 操作，同时也可以避免事务或者表锁死，并且写起来也很容易。但是，有些情况下，子查询可以被更有效率的连接（JOIN）..替代。</p>
 <p>例子：假设要将所有没有订单记录的用户取出来，可以用下面这个查询完成：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> col1 <span style="color:#66d9ef">FROM</span> customerinfo <span style="color:#66d9ef">WHERE</span> CustomerID <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">in</span> (<span style="color:#66d9ef">SELECT</span> CustomerID <span style="color:#66d9ef">FROM</span> salesinfo )
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> col1 <span style="color:#66d9ef">FROM</span> customerinfo <span style="color:#66d9ef">WHERE</span> CustomerID <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">in</span> (<span style="color:#66d9ef">SELECT</span> CustomerID <span style="color:#66d9ef">FROM</span> salesinfo )
 </span></span></code></pre></div><p>如果使用连接（JOIN）..来完成这个查询工作，速度将会有所提升。</p>
 <p>尤其是当 salesinfo 表中对 CustomerID 建有索引的话，性能将会更好，查询如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> col1 <span style="color:#66d9ef">FROM</span> customerinfo 
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> col1 <span style="color:#66d9ef">FROM</span> customerinfo 
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">LEFT</span> <span style="color:#66d9ef">JOIN</span> salesinfoON customerinfo.CustomerID<span style="color:#f92672">=</span>salesinfo.CustomerID 
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> salesinfo.CustomerID <span style="color:#66d9ef">IS</span> <span style="color:#66d9ef">NULL</span>
 </span></span></code></pre></div><p>连接（JOIN）..之所以更有效率一些，是因为 MySQL 不需要在内存中创建临时表来完成这个逻辑上的需要两个步骤的查询工作。</p>
@@ -522,11 +747,11 @@ Select @now;
 <p>MySQL 通过创建并填充临时表的方式来执行 union 查询。除非确实要消除重复的行，否则建议使用 union all。</p>
 <p>原因在于如果没有 all 这个关键词，MySQL 会给临时表加上 distinct 选项，这会导致对整个临时表的数据做唯一性校验，这样做的消耗相当高。</p>
 <p>高效：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> COL1, COL2, COL3 <span style="color:#66d9ef">FROM</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">WHERE</span> COL1 <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span> 
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> COL1, COL2, COL3 <span style="color:#66d9ef">FROM</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">WHERE</span> COL1 <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span> 
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">UNION</span> <span style="color:#66d9ef">ALL</span> 
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> COL1, COL2, COL3 <span style="color:#66d9ef">FROM</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">WHERE</span> COL3<span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;TEST&#39;</span>;
 </span></span></code></pre></div><p>低效：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> COL1, COL2, COL3 <span style="color:#66d9ef">FROM</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">WHERE</span> COL1 <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span> 
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> COL1, COL2, COL3 <span style="color:#66d9ef">FROM</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">WHERE</span> COL1 <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span> 
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">UNION</span> 
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> COL1, COL2, COL3 <span style="color:#66d9ef">FROM</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">WHERE</span> COL3<span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;TEST&#39;</span>;
 </span></span></code></pre></div><p><strong>⑤拆分复杂 SQL 为多个小 SQL，避免大事务</strong></p>
@@ -543,13 +768,13 @@ Select @now;
 <p><strong>⑦使用合理的分页方式以提高分页效率</strong></p>
 <p>使用合理的分页方式以提高分页效率 针对展现等分页需求，合适的分页方式能够提高分页的效率。</p>
 <p>案例 1：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> thread_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">10000</span> <span style="color:#66d9ef">and</span> deleted <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span> 
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> thread_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">10000</span> <span style="color:#66d9ef">and</span> deleted <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span> 
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">order</span> <span style="color:#66d9ef">by</span> gmt_create <span style="color:#66d9ef">asc</span> <span style="color:#66d9ef">limit</span> <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">15</span>;
 </span></span></code></pre></div><p>上述例子通过一次性根据过滤条件取出所有字段进行排序返回。数据访问开销=索引 IO+索引全部记录结果对应的表数据 IO。</p>
 <p>因此，该种写法越翻到后面执行效率越差，时间越长，尤其表数据量很大的时候。</p>
 <p>适用场景：当中间结果集很小（10000 行以下）或者查询条件复杂（指涉及多个不同查询字段或者多表连接）时适用。</p>
 <p>案例 2：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> t.<span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> (<span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> thread_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">10000</span> <span style="color:#66d9ef">and</span> deleted <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> t.<span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> (<span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> thread_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">10000</span> <span style="color:#66d9ef">and</span> deleted <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">order</span> <span style="color:#66d9ef">by</span> gmt_create <span style="color:#66d9ef">asc</span> <span style="color:#66d9ef">limit</span> <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">15</span>) a, t 
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">where</span> a.id <span style="color:#f92672">=</span> t.id;
 </span></span></code></pre></div><p>上述例子必须满足 t 表主键是 id 列，且有覆盖索引 secondary key：（thread_id, deleted, gmt_create）。</p>
@@ -562,7 +787,7 @@ Select @now;
 <p>这是因为引擎在处理查询和连接时会 逐个比较字符串中每一个字符，而对于数字型而言只需要比较一次就够了。</p>
 <p><strong>③</strong>查询数据量大的表 会造成查询缓慢。主要的原因是扫描行数过多。这个时候可以通过程序，分段分页进行查询，循环遍历，将结果合并处理进行展示。</p>
 <p>要查询 100000 到 100050 的数据，如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> (<span style="color:#66d9ef">SELECT</span> ROW_NUMBER() OVER(<span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> ID <span style="color:#66d9ef">ASC</span>) <span style="color:#66d9ef">AS</span> rowid,<span style="color:#f92672">*</span> 
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> (<span style="color:#66d9ef">SELECT</span> ROW_NUMBER() OVER(<span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> ID <span style="color:#66d9ef">ASC</span>) <span style="color:#66d9ef">AS</span> rowid,<span style="color:#f92672">*</span> 
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> infoTab)t <span style="color:#66d9ef">WHERE</span> t.rowid <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">100000</span> <span style="color:#66d9ef">AND</span> t.rowid <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">100050</span>
 </span></span></code></pre></div><p><strong>④</strong>用 varchar/nvarchar 代替 char/nchar。</p>
 <p>尽可能的使用 varchar/nvarchar 代替 char/nchar ，因为首先变长字段存储空间小，可以节省存储空间，其次对于查询来说，在一个相对较小的字段内搜索效率显然要高些。</p>
@@ -572,13 +797,21 @@ Select @now;
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="https://haokiu.com/tags/bigdata/">bigdata</a></li>
+      <li><a href="https://haokiu.com/tags/bigdata/">Bigdata</a></li>
     </ul>
 
   </footer>
 </article>
     </main>
     
+<footer class="footer">
+    <span>haokiu.com</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />

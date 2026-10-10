@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="zh-cn" dir="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,16 +10,21 @@
 <meta name="description" content="S3是Simple Storage Service的缩写，即简单存储服务。亚马逊的名词缩写也都遵循这个习惯，例如Elastic Compute Cloud缩写为EC2等等。
 S3说的玄乎一点可以叫云存储，通俗一点就是大网盘。其概念类似于分布式文家系统，同Google的GFS应该在一个层面。
 目前的阿里的oss，腾讯的cos，七牛云存储都兼容aws的S3，所以要更换这些服务商之间提供的云存储非常容易，只需要简单的修改Access Key, Secrect Key等就行。
-S3的定义如下 Amazon S3 is a web service that enables you to store data in the cloud. You can then download the data or use the data with other AWS services, such as Amazon Elastic Cloud Computer (EC2).
+S3的定义如下
+Amazon S3 is a web service that enables you to store data in the cloud. You can then download the data or use the data with other AWS services, such as Amazon Elastic Cloud Computer (EC2).
 看来除了做网盘只用，S3存储的数据还可以被其他的亚马逊高层服务直接引用，这一点比国内的简单的网盘提供商高不少，亚马逊大网盘是其整体Solution中的有机组成部分。
-基本概念 1. bucket – 类比于文件系统的目录 A bucket is a Container for objects stored in Amazon S3. Every object is contained in a bucket. For example, if the object named photos/puppy.jpg is stored in the johnsmith bucket, then it is addressable using the URL http://johnsmith.s3.amazonaws.com/photos/puppy.jpg
+基本概念
+1. bucket – 类比于文件系统的目录
+A bucket is a Container for objects stored in Amazon S3. Every object is contained in a bucket. For example, if the object named photos/puppy.jpg is stored in the johnsmith bucket, then it is addressable using the URL http://johnsmith.s3.amazonaws.com/photos/puppy.jpg
 似乎目录不能嵌套，也就是不能有子目录，官方的说法是起到namespace的作用，是访问控制的基本单位，其实丫还是个目录。
-2. Object – 类比文件系统的文件 对象中带有对象名名，对象属性，对象本身最大5G，其实也还是个文件。
+2. Object – 类比文件系统的文件
+对象中带有对象名名，对象属性，对象本身最大5G，其实也还是个文件。
 目前object有Versioning的属性（即对象不同历史版本的cache概念），这个是文件系统不具备的，在早期看到的S3资料中没有这一概念，应该是演进的结果，其面对的应该是有版本控制的需求的用户。
-3. Keys – 类比文件名 key的样式也是URL，记住亚马逊的服务都是使用Web Service或REST方式访问的。">
+3. Keys – 类比文件名
+key的样式也是URL，记住亚马逊的服务都是使用Web Service或REST方式访问的。">
 <meta name="author" content="">
 <link rel="canonical" href="https://haokiu.com/blog/d0DCeH/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
 <script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="https://haokiu.com/favicon.ico">
@@ -29,6 +34,7 @@ S3的定义如下 Amazon S3 is a web service that enables you to store data in t
 <link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/blog/d0DCeH/">
 <noscript>
     <style>
         #theme-toggle,
@@ -69,13 +75,18 @@ S3的定义如下 Amazon S3 is a web service that enables you to store data in t
 <meta property="og:description" content="S3是Simple Storage Service的缩写，即简单存储服务。亚马逊的名词缩写也都遵循这个习惯，例如Elastic Compute Cloud缩写为EC2等等。
 S3说的玄乎一点可以叫云存储，通俗一点就是大网盘。其概念类似于分布式文家系统，同Google的GFS应该在一个层面。
 目前的阿里的oss，腾讯的cos，七牛云存储都兼容aws的S3，所以要更换这些服务商之间提供的云存储非常容易，只需要简单的修改Access Key, Secrect Key等就行。
-S3的定义如下 Amazon S3 is a web service that enables you to store data in the cloud. You can then download the data or use the data with other AWS services, such as Amazon Elastic Cloud Computer (EC2).
+S3的定义如下
+Amazon S3 is a web service that enables you to store data in the cloud. You can then download the data or use the data with other AWS services, such as Amazon Elastic Cloud Computer (EC2).
 看来除了做网盘只用，S3存储的数据还可以被其他的亚马逊高层服务直接引用，这一点比国内的简单的网盘提供商高不少，亚马逊大网盘是其整体Solution中的有机组成部分。
-基本概念 1. bucket – 类比于文件系统的目录 A bucket is a Container for objects stored in Amazon S3. Every object is contained in a bucket. For example, if the object named photos/puppy.jpg is stored in the johnsmith bucket, then it is addressable using the URL http://johnsmith.s3.amazonaws.com/photos/puppy.jpg
+基本概念
+1. bucket – 类比于文件系统的目录
+A bucket is a Container for objects stored in Amazon S3. Every object is contained in a bucket. For example, if the object named photos/puppy.jpg is stored in the johnsmith bucket, then it is addressable using the URL http://johnsmith.s3.amazonaws.com/photos/puppy.jpg
 似乎目录不能嵌套，也就是不能有子目录，官方的说法是起到namespace的作用，是访问控制的基本单位，其实丫还是个目录。
-2. Object – 类比文件系统的文件 对象中带有对象名名，对象属性，对象本身最大5G，其实也还是个文件。
+2. Object – 类比文件系统的文件
+对象中带有对象名名，对象属性，对象本身最大5G，其实也还是个文件。
 目前object有Versioning的属性（即对象不同历史版本的cache概念），这个是文件系统不具备的，在早期看到的S3资料中没有这一概念，应该是演进的结果，其面对的应该是有版本控制的需求的用户。
-3. Keys – 类比文件名 key的样式也是URL，记住亚马逊的服务都是使用Web Service或REST方式访问的。" />
+3. Keys – 类比文件名
+key的样式也是URL，记住亚马逊的服务都是使用Web Service或REST方式访问的。" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://haokiu.com/blog/d0DCeH/" /><meta property="article:section" content="1" />
 <meta property="article:published_time" content="2020-09-18T15:17:51+00:00" />
@@ -86,13 +97,18 @@ S3的定义如下 Amazon S3 is a web service that enables you to store data in t
 <meta name="twitter:description" content="S3是Simple Storage Service的缩写，即简单存储服务。亚马逊的名词缩写也都遵循这个习惯，例如Elastic Compute Cloud缩写为EC2等等。
 S3说的玄乎一点可以叫云存储，通俗一点就是大网盘。其概念类似于分布式文家系统，同Google的GFS应该在一个层面。
 目前的阿里的oss，腾讯的cos，七牛云存储都兼容aws的S3，所以要更换这些服务商之间提供的云存储非常容易，只需要简单的修改Access Key, Secrect Key等就行。
-S3的定义如下 Amazon S3 is a web service that enables you to store data in the cloud. You can then download the data or use the data with other AWS services, such as Amazon Elastic Cloud Computer (EC2).
+S3的定义如下
+Amazon S3 is a web service that enables you to store data in the cloud. You can then download the data or use the data with other AWS services, such as Amazon Elastic Cloud Computer (EC2).
 看来除了做网盘只用，S3存储的数据还可以被其他的亚马逊高层服务直接引用，这一点比国内的简单的网盘提供商高不少，亚马逊大网盘是其整体Solution中的有机组成部分。
-基本概念 1. bucket – 类比于文件系统的目录 A bucket is a Container for objects stored in Amazon S3. Every object is contained in a bucket. For example, if the object named photos/puppy.jpg is stored in the johnsmith bucket, then it is addressable using the URL http://johnsmith.s3.amazonaws.com/photos/puppy.jpg
+基本概念
+1. bucket – 类比于文件系统的目录
+A bucket is a Container for objects stored in Amazon S3. Every object is contained in a bucket. For example, if the object named photos/puppy.jpg is stored in the johnsmith bucket, then it is addressable using the URL http://johnsmith.s3.amazonaws.com/photos/puppy.jpg
 似乎目录不能嵌套，也就是不能有子目录，官方的说法是起到namespace的作用，是访问控制的基本单位，其实丫还是个目录。
-2. Object – 类比文件系统的文件 对象中带有对象名名，对象属性，对象本身最大5G，其实也还是个文件。
+2. Object – 类比文件系统的文件
+对象中带有对象名名，对象属性，对象本身最大5G，其实也还是个文件。
 目前object有Versioning的属性（即对象不同历史版本的cache概念），这个是文件系统不具备的，在早期看到的S3资料中没有这一概念，应该是演进的结果，其面对的应该是有版本控制的需求的用户。
-3. Keys – 类比文件名 key的样式也是URL，记住亚马逊的服务都是使用Web Service或REST方式访问的。"/>
+3. Keys – 类比文件名
+key的样式也是URL，记住亚马逊的服务都是使用Web Service或REST方式访问的。"/>
 
 
 <script type="application/ld+json">
@@ -103,7 +119,7 @@ S3的定义如下 Amazon S3 is a web service that enables you to store data in t
     {
       "@type": "ListItem",
       "position":  1 ,
-      "name": "1s",
+      "name": "1",
       "item": "https://haokiu.com/1/"
     }, 
     {
@@ -121,13 +137,13 @@ S3的定义如下 Amazon S3 is a web service that enables you to store data in t
   "@type": "BlogPosting",
   "headline": "S3协议",
   "name": "S3协议",
-  "description": "S3是Simple Storage Service的缩写，即简单存储服务。亚马逊的名词缩写也都遵循这个习惯，例如Elastic Compute Cloud缩写为EC2等等。\nS3说的玄乎一点可以叫云存储，通俗一点就是大网盘。其概念类似于分布式文家系统，同Google的GFS应该在一个层面。\n目前的阿里的oss，腾讯的cos，七牛云存储都兼容aws的S3，所以要更换这些服务商之间提供的云存储非常容易，只需要简单的修改Access Key, Secrect Key等就行。\nS3的定义如下 Amazon S3 is a web service that enables you to store data in the cloud. You can then download the data or use the data with other AWS services, such as Amazon Elastic Cloud Computer (EC2).\n看来除了做网盘只用，S3存储的数据还可以被其他的亚马逊高层服务直接引用，这一点比国内的简单的网盘提供商高不少，亚马逊大网盘是其整体Solution中的有机组成部分。\n基本概念 1. bucket – 类比于文件系统的目录 A bucket is a Container for objects stored in Amazon S3. Every object is contained in a bucket. For example, if the object named photos/puppy.jpg is stored in the johnsmith bucket, then it is addressable using the URL http://johnsmith.s3.amazonaws.com/photos/puppy.jpg\n似乎目录不能嵌套，也就是不能有子目录，官方的说法是起到namespace的作用，是访问控制的基本单位，其实丫还是个目录。\n2. Object – 类比文件系统的文件 对象中带有对象名名，对象属性，对象本身最大5G，其实也还是个文件。\n目前object有Versioning的属性（即对象不同历史版本的cache概念），这个是文件系统不具备的，在早期看到的S3资料中没有这一概念，应该是演进的结果，其面对的应该是有版本控制的需求的用户。\n3. Keys – 类比文件名 key的样式也是URL，记住亚马逊的服务都是使用Web Service或REST方式访问的。",
+  "description": "S3是Simple Storage Service的缩写，即简单存储服务。亚马逊的名词缩写也都遵循这个习惯，例如Elastic Compute Cloud缩写为EC2等等。\nS3说的玄乎一点可以叫云存储，通俗一点就是大网盘。其概念类似于分布式文家系统，同Google的GFS应该在一个层面。\n目前的阿里的oss，腾讯的cos，七牛云存储都兼容aws的S3，所以要更换这些服务商之间提供的云存储非常容易，只需要简单的修改Access Key, Secrect Key等就行。\nS3的定义如下 Amazon S3 is a web service that enables you to store data in the cloud. You can then download the data or use the data with other AWS services, such as Amazon Elastic Cloud Computer (EC2).\n看来除了做网盘只用，S3存储的数据还可以被其他的亚马逊高层服务直接引用，这一点比国内的简单的网盘提供商高不少，亚马逊大网盘是其整体Solution中的有机组成部分。\n基本概念 1. bucket – 类比于文件系统的目录 A bucket is a Container for objects stored in Amazon S3. Every object is contained in a bucket. For example, if the object named photos/puppy.jpg is stored in the johnsmith bucket, then it is addressable using the URL http://johnsmith.s3.amazonaws.com/photos/puppy.jpg\n似乎目录不能嵌套，也就是不能有子目录，官方的说法是起到namespace的作用，是访问控制的基本单位，其实丫还是个目录。\n2. Object – 类比文件系统的文件 对象中带有对象名名，对象属性，对象本身最大5G，其实也还是个文件。\n目前object有Versioning的属性（即对象不同历史版本的cache概念），这个是文件系统不具备的，在早期看到的S3资料中没有这一概念，应该是演进的结果，其面对的应该是有版本控制的需求的用户。\n3. Keys – 类比文件名 key的样式也是URL，记住亚马逊的服务都是使用Web Service或REST方式访问的。\n",
   "keywords": [
     "s3,oss,cos,qiniu"
   ],
   "articleBody": "S3是Simple Storage Service的缩写，即简单存储服务。亚马逊的名词缩写也都遵循这个习惯，例如Elastic Compute Cloud缩写为EC2等等。\nS3说的玄乎一点可以叫云存储，通俗一点就是大网盘。其概念类似于分布式文家系统，同Google的GFS应该在一个层面。\n目前的阿里的oss，腾讯的cos，七牛云存储都兼容aws的S3，所以要更换这些服务商之间提供的云存储非常容易，只需要简单的修改Access Key, Secrect Key等就行。\nS3的定义如下 Amazon S3 is a web service that enables you to store data in the cloud. You can then download the data or use the data with other AWS services, such as Amazon Elastic Cloud Computer (EC2).\n看来除了做网盘只用，S3存储的数据还可以被其他的亚马逊高层服务直接引用，这一点比国内的简单的网盘提供商高不少，亚马逊大网盘是其整体Solution中的有机组成部分。\n基本概念 1. bucket – 类比于文件系统的目录 A bucket is a Container for objects stored in Amazon S3. Every object is contained in a bucket. For example, if the object named photos/puppy.jpg is stored in the johnsmith bucket, then it is addressable using the URL http://johnsmith.s3.amazonaws.com/photos/puppy.jpg\n似乎目录不能嵌套，也就是不能有子目录，官方的说法是起到namespace的作用，是访问控制的基本单位，其实丫还是个目录。\n2. Object – 类比文件系统的文件 对象中带有对象名名，对象属性，对象本身最大5G，其实也还是个文件。\n目前object有Versioning的属性（即对象不同历史版本的cache概念），这个是文件系统不具备的，在早期看到的S3资料中没有这一概念，应该是演进的结果，其面对的应该是有版本控制的需求的用户。\n3. Keys – 类比文件名 key的样式也是URL，记住亚马逊的服务都是使用Web Service或REST方式访问的。\n例如，http://doc.s3.amazonaws.com/2006-03-01/AmazonS3.wsdl\n其中‘doc’就是目录名（桶名），”2006-03-01/AmazonS3.wsdl”是文件名（对象名）。\n如果引入了version则bucket + key + version唯一标示一个版本的文件。\n4. Versioning – 类比CVS中的一个版本 同名文件的写入，并不覆盖已有文件而是增加了一个最新的文件版本。\n同样的删除也不真正删除，而是mark了删除标记。\n当最新版本mark为deleted之后，对该对象的get操作返回404错误，除非明确指定一个历史版本。\n当然也可以指定版本永久删除其中一个拷贝。\n5. Regions – 文件存储的地理位置 这个也是文件系统中不存在的，就是不同的地理区域，用户可以指定将文件存在某个国家的服务器。我个人认为，这不是一个很好的概念，作为云的提供商，应该对于应用屏蔽这些部署细节。工程实现同技术理想还是有差距。目前其可以指定的server位置有美国、爱尔兰、新加坡等地。\n接口API 常用的API就是读、写、增、删、改、查等等。使用标准的SOAP和REST定义。\n尤其一提的是对于对象的获取，除了用http直接按照C/S方式获取之外，亚马逊支持BT协议，也就是说提供种子。从用户角度想，亚马逊会 charge更少的钱，但同时亚马逊自身也会减负。bt下载的速度就不太稳定了，基本取决于种子“质量”也就是取决于对文件感兴趣的人的多寡。例如命名为 “XX门”估计文件下载能够快很多。\n参考 http://aws.amazon.com/s3/#functionality\nhttp://docs.amazonwebservices.com/AmazonS3/2006-03-01/\nhttp://developer.amazonwebservices.com/connect/forum.jspa?forumID=24\n",
   "wordCount" : "134",
-  "inLanguage": "en",
+  "inLanguage": "zh-cn",
   "datePublished": "2020-09-18T15:17:51Z",
   "dateModified": "2020-09-18T15:17:51Z",
   "mainEntityOfPage": {
@@ -183,6 +199,8 @@ S3的定义如下 Amazon S3 is a web service that enables you to store data in t
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -192,32 +210,32 @@ S3的定义如下 Amazon S3 is a web service that enables you to store data in t
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/1/" title="1s">
+                <a href="https://haokiu.com/1/" title="1">
                     <span>后端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/2/" title="2s">
+                <a href="https://haokiu.com/2/" title="2">
                     <span>前端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/3/" title="3s">
+                <a href="https://haokiu.com/3/" title="3">
                     <span>区块链</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/4/" title="4s">
+                <a href="https://haokiu.com/4/" title="4">
                     <span>大数据</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/5/" title="5s">
+                <a href="https://haokiu.com/5/" title="5">
                     <span>linux</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/6/" title="6s">
+                <a href="https://haokiu.com/6/" title="6">
                     <span>其他</span>
                 </a>
             </li>
@@ -238,7 +256,7 @@ S3的定义如下 Amazon S3 is a web service that enables you to store data in t
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    
     <h1 class="post-title">
       S3协议
     </h1>
@@ -319,12 +337,12 @@ S3的定义如下 Amazon S3 is a web service that enables you to store data in t
     </ul>
 <nav class="paginav">
   <a class="prev" href="https://haokiu.com/blog/dpoeTs/">
-    <span class="title">« Prev</span>
+    <span class="title">« </span>
     <br>
     <span>golang 计算文件和字符串的 md5 值</span>
   </a>
   <a class="next" href="https://haokiu.com/blog/Cd6WaZ/">
-    <span class="title">Next »</span>
+    <span class="title"> »</span>
     <br>
     <span>golang 判断目录或文件是否存在</span>
   </a>
@@ -334,6 +352,14 @@ S3的定义如下 Amazon S3 is a web service that enables you to store data in t
 </article>
     </main>
     
+<footer class="footer">
+    <span>haokiu.com</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />

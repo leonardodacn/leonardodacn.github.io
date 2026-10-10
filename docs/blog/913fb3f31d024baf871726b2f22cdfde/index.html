@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="zh-cn" dir="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,16 +7,82 @@
 <meta name="robots" content="index, follow">
 <title>详解 C&#43;&#43; 11 中的智能指针 | haokiu</title>
 <meta name="keywords" content="">
-<meta name="description" content="详解 C&#43;&#43; 11 中的智能指针 C/C&#43;&#43; 语言最为人所诟病的特性之一就是存在内存泄露问题，因此后来的大多数语言都提供了内置内存分配与释放功能，有的甚至干脆对语言的使用者屏蔽了内存指针这一概念。这里不置贬褒，手动分配内存与手动释放内存有利也有弊，自动分配内存和自动释放内存亦如此，这是两种不同的设计哲学。有人认为，内存如此重要的东西怎么能放心交给用户去管理呢？而另外一些人则认为，内存如此重要的东西怎么能放心交给系统去管理呢？在 C/C&#43;&#43; 语言中，内存泄露的问题一直困扰着广大的开发者，因此各类库和工具的一直在努力尝试各种方法去检测和避免内存泄露，如 boost，智能指针技术应运而生。
-C&#43;&#43; 98/03 的尝试——std::auto_ptr 在 2019 年讨论 std::auto_ptr 不免有点让人怀疑是不是有点过时了，确实如此，随着 C&#43;&#43;11 标准的出现（最新标准是 C&#43;&#43;20），std::auto_ptr 已经被彻底废弃了，取而代之是 std::unique_ptr。然而，我之所以还向你介绍一下 std::auto_ptr 的用法以及它的设计不足之处是想让你了解 C&#43;&#43; 语言中智能指针的发展过程，一项技术如果我们了解它过去的样子和发展的轨迹，我们就能更好地掌握它，不是吗？
+<meta name="description" content="详解 C&#43;&#43; 11 中的智能指针
+C/C&#43;&#43; 语言最为人所诟病的特性之一就是存在内存泄露问题，因此后来的大多数语言都提供了内置内存分配与释放功能，有的甚至干脆对语言的使用者屏蔽了内存指针这一概念。这里不置贬褒，手动分配内存与手动释放内存有利也有弊，自动分配内存和自动释放内存亦如此，这是两种不同的设计哲学。有人认为，内存如此重要的东西怎么能放心交给用户去管理呢？而另外一些人则认为，内存如此重要的东西怎么能放心交给系统去管理呢？在 C/C&#43;&#43; 语言中，内存泄露的问题一直困扰着广大的开发者，因此各类库和工具的一直在努力尝试各种方法去检测和避免内存泄露，如 boost，智能指针技术应运而生。
+C&#43;&#43; 98/03 的尝试——std::auto_ptr
+在 2019 年讨论 std::auto_ptr 不免有点让人怀疑是不是有点过时了，确实如此，随着 C&#43;&#43;11 标准的出现（最新标准是 C&#43;&#43;20），std::auto_ptr 已经被彻底废弃了，取而代之是 std::unique_ptr。然而，我之所以还向你介绍一下 std::auto_ptr 的用法以及它的设计不足之处是想让你了解 C&#43;&#43; 语言中智能指针的发展过程，一项技术如果我们了解它过去的样子和发展的轨迹，我们就能更好地掌握它，不是吗？
 std::auto_ptr 的基本用法如下代码所示：
-#include &lt;memory&gt; int main() { //初始化方式1 std::auto_ptr&lt;int&gt; sp1(new int(8)); //初始化方式2 std::auto_ptr&lt;int&gt; sp2; sp2.reset(new int(8)); return 0; } 智能指针对象 sp1 和 sp2 均持有一个在堆上分配 int 对象，其值均是 8，这两块堆内存均可以在 sp1 和 sp2 释放时得到释放。这是 std::auto_ptr 的基本用法。
+#include &lt;memory&gt;
+
+int main()
+{
+    //初始化方式1
+    std::auto_ptr&lt;int&gt; sp1(new int(8));
+    //初始化方式2
+    std::auto_ptr&lt;int&gt; sp2;
+    sp2.reset(new int(8));
+
+    return 0;
+}
+智能指针对象 sp1 和 sp2 均持有一个在堆上分配 int 对象，其值均是 8，这两块堆内存均可以在 sp1 和 sp2 释放时得到释放。这是 std::auto_ptr 的基本用法。
+
 sp 是 smart pointer（智能指针）的简写。
+
 std::auto_ptr 真正让人容易误用的地方是其不常用的复制语义，即当复制一个 std::auto_ptr 对象时（拷贝复制或 operator = 复制），原对象所持有的堆内存对象也会转移给复制出来的对象。示例代码如下：
-#include &lt;iostream&gt; #include &lt;memory&gt; int main() { //测试拷贝构造 std::auto_ptr&lt;int&gt; sp1(new int(8)); std::auto_ptr&lt;int&gt; sp2(sp1); if (sp1.get() != NULL) { std::cout &lt;&lt; &#34;sp1 is not empty.&#34; &lt;&lt; std::endl; } else { std::cout &lt;&lt; &#34;sp1 is empty.">
+#include &lt;iostream&gt;
+#include &lt;memory&gt;
+
+int main()
+{
+    //测试拷贝构造
+    std::auto_ptr&lt;int&gt; sp1(new int(8));
+    std::auto_ptr&lt;int&gt; sp2(sp1);
+    if (sp1.get() != NULL)
+    {
+        std::cout &lt;&lt; &#34;sp1 is not empty.&#34; &lt;&lt; std::endl;
+    }
+    else
+    {
+        std::cout &lt;&lt; &#34;sp1 is empty.&#34; &lt;&lt; std::endl;
+    }
+
+    if (sp2.get() != NULL)
+    {
+        std::cout &lt;&lt; &#34;sp2 is not empty.&#34; &lt;&lt; std::endl;
+    }
+    else
+    {
+        std::cout &lt;&lt; &#34;sp2 is empty.&#34; &lt;&lt; std::endl;
+    }
+
+    //测试赋值构造
+    std::auto_ptr&lt;int&gt; sp3(new int(8));
+    std::auto_ptr&lt;int&gt; sp4;
+    sp4 = sp3;
+    if (sp3.get() != NULL)
+    {
+        std::cout &lt;&lt; &#34;sp3 is not empty.&#34; &lt;&lt; std::endl;
+    }
+    else
+    {
+        std::cout &lt;&lt; &#34;sp3 is empty.&#34; &lt;&lt; std::endl;
+    }
+
+    if (sp4.get() != NULL)
+    {
+        std::cout &lt;&lt; &#34;sp4 is not empty.&#34; &lt;&lt; std::endl;
+    }
+    else
+    {
+        std::cout &lt;&lt; &#34;sp4 is empty.&#34; &lt;&lt; std::endl;
+    }
+
+    return 0;
+}
+上述代码中分别利用拷贝构造（sp1 =&gt; sp2）和 赋值构造（sp3 =&gt; sp4）来创建新的 std::auto_ptr 对象，因此 sp1 持有的堆对象被转移给 sp2，sp3 持有的堆对象被转移给 sp4。我们得到程序执行结果如下：">
 <meta name="author" content="">
 <link rel="canonical" href="https://haokiu.com/blog/913fb3f31d024baf871726b2f22cdfde/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
 <script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="https://haokiu.com/favicon.ico">
@@ -26,6 +92,7 @@ std::auto_ptr 真正让人容易误用的地方是其不常用的复制语义，
 <link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/blog/913fb3f31d024baf871726b2f22cdfde/">
 <noscript>
     <style>
         #theme-toggle,
@@ -63,13 +130,79 @@ std::auto_ptr 真正让人容易误用的地方是其不常用的复制语义，
 
     </style>
 </noscript><meta property="og:title" content="详解 C&#43;&#43; 11 中的智能指针" />
-<meta property="og:description" content="详解 C&#43;&#43; 11 中的智能指针 C/C&#43;&#43; 语言最为人所诟病的特性之一就是存在内存泄露问题，因此后来的大多数语言都提供了内置内存分配与释放功能，有的甚至干脆对语言的使用者屏蔽了内存指针这一概念。这里不置贬褒，手动分配内存与手动释放内存有利也有弊，自动分配内存和自动释放内存亦如此，这是两种不同的设计哲学。有人认为，内存如此重要的东西怎么能放心交给用户去管理呢？而另外一些人则认为，内存如此重要的东西怎么能放心交给系统去管理呢？在 C/C&#43;&#43; 语言中，内存泄露的问题一直困扰着广大的开发者，因此各类库和工具的一直在努力尝试各种方法去检测和避免内存泄露，如 boost，智能指针技术应运而生。
-C&#43;&#43; 98/03 的尝试——std::auto_ptr 在 2019 年讨论 std::auto_ptr 不免有点让人怀疑是不是有点过时了，确实如此，随着 C&#43;&#43;11 标准的出现（最新标准是 C&#43;&#43;20），std::auto_ptr 已经被彻底废弃了，取而代之是 std::unique_ptr。然而，我之所以还向你介绍一下 std::auto_ptr 的用法以及它的设计不足之处是想让你了解 C&#43;&#43; 语言中智能指针的发展过程，一项技术如果我们了解它过去的样子和发展的轨迹，我们就能更好地掌握它，不是吗？
+<meta property="og:description" content="详解 C&#43;&#43; 11 中的智能指针
+C/C&#43;&#43; 语言最为人所诟病的特性之一就是存在内存泄露问题，因此后来的大多数语言都提供了内置内存分配与释放功能，有的甚至干脆对语言的使用者屏蔽了内存指针这一概念。这里不置贬褒，手动分配内存与手动释放内存有利也有弊，自动分配内存和自动释放内存亦如此，这是两种不同的设计哲学。有人认为，内存如此重要的东西怎么能放心交给用户去管理呢？而另外一些人则认为，内存如此重要的东西怎么能放心交给系统去管理呢？在 C/C&#43;&#43; 语言中，内存泄露的问题一直困扰着广大的开发者，因此各类库和工具的一直在努力尝试各种方法去检测和避免内存泄露，如 boost，智能指针技术应运而生。
+C&#43;&#43; 98/03 的尝试——std::auto_ptr
+在 2019 年讨论 std::auto_ptr 不免有点让人怀疑是不是有点过时了，确实如此，随着 C&#43;&#43;11 标准的出现（最新标准是 C&#43;&#43;20），std::auto_ptr 已经被彻底废弃了，取而代之是 std::unique_ptr。然而，我之所以还向你介绍一下 std::auto_ptr 的用法以及它的设计不足之处是想让你了解 C&#43;&#43; 语言中智能指针的发展过程，一项技术如果我们了解它过去的样子和发展的轨迹，我们就能更好地掌握它，不是吗？
 std::auto_ptr 的基本用法如下代码所示：
-#include &lt;memory&gt; int main() { //初始化方式1 std::auto_ptr&lt;int&gt; sp1(new int(8)); //初始化方式2 std::auto_ptr&lt;int&gt; sp2; sp2.reset(new int(8)); return 0; } 智能指针对象 sp1 和 sp2 均持有一个在堆上分配 int 对象，其值均是 8，这两块堆内存均可以在 sp1 和 sp2 释放时得到释放。这是 std::auto_ptr 的基本用法。
+#include &lt;memory&gt;
+
+int main()
+{
+    //初始化方式1
+    std::auto_ptr&lt;int&gt; sp1(new int(8));
+    //初始化方式2
+    std::auto_ptr&lt;int&gt; sp2;
+    sp2.reset(new int(8));
+
+    return 0;
+}
+智能指针对象 sp1 和 sp2 均持有一个在堆上分配 int 对象，其值均是 8，这两块堆内存均可以在 sp1 和 sp2 释放时得到释放。这是 std::auto_ptr 的基本用法。
+
 sp 是 smart pointer（智能指针）的简写。
+
 std::auto_ptr 真正让人容易误用的地方是其不常用的复制语义，即当复制一个 std::auto_ptr 对象时（拷贝复制或 operator = 复制），原对象所持有的堆内存对象也会转移给复制出来的对象。示例代码如下：
-#include &lt;iostream&gt; #include &lt;memory&gt; int main() { //测试拷贝构造 std::auto_ptr&lt;int&gt; sp1(new int(8)); std::auto_ptr&lt;int&gt; sp2(sp1); if (sp1.get() != NULL) { std::cout &lt;&lt; &#34;sp1 is not empty.&#34; &lt;&lt; std::endl; } else { std::cout &lt;&lt; &#34;sp1 is empty." />
+#include &lt;iostream&gt;
+#include &lt;memory&gt;
+
+int main()
+{
+    //测试拷贝构造
+    std::auto_ptr&lt;int&gt; sp1(new int(8));
+    std::auto_ptr&lt;int&gt; sp2(sp1);
+    if (sp1.get() != NULL)
+    {
+        std::cout &lt;&lt; &#34;sp1 is not empty.&#34; &lt;&lt; std::endl;
+    }
+    else
+    {
+        std::cout &lt;&lt; &#34;sp1 is empty.&#34; &lt;&lt; std::endl;
+    }
+
+    if (sp2.get() != NULL)
+    {
+        std::cout &lt;&lt; &#34;sp2 is not empty.&#34; &lt;&lt; std::endl;
+    }
+    else
+    {
+        std::cout &lt;&lt; &#34;sp2 is empty.&#34; &lt;&lt; std::endl;
+    }
+
+    //测试赋值构造
+    std::auto_ptr&lt;int&gt; sp3(new int(8));
+    std::auto_ptr&lt;int&gt; sp4;
+    sp4 = sp3;
+    if (sp3.get() != NULL)
+    {
+        std::cout &lt;&lt; &#34;sp3 is not empty.&#34; &lt;&lt; std::endl;
+    }
+    else
+    {
+        std::cout &lt;&lt; &#34;sp3 is empty.&#34; &lt;&lt; std::endl;
+    }
+
+    if (sp4.get() != NULL)
+    {
+        std::cout &lt;&lt; &#34;sp4 is not empty.&#34; &lt;&lt; std::endl;
+    }
+    else
+    {
+        std::cout &lt;&lt; &#34;sp4 is empty.&#34; &lt;&lt; std::endl;
+    }
+
+    return 0;
+}
+上述代码中分别利用拷贝构造（sp1 =&gt; sp2）和 赋值构造（sp3 =&gt; sp4）来创建新的 std::auto_ptr 对象，因此 sp1 持有的堆对象被转移给 sp2，sp3 持有的堆对象被转移给 sp4。我们得到程序执行结果如下：" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://haokiu.com/blog/913fb3f31d024baf871726b2f22cdfde/" /><meta property="article:section" content="1" />
 <meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
@@ -77,13 +210,79 @@ std::auto_ptr 真正让人容易误用的地方是其不常用的复制语义，
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="详解 C&#43;&#43; 11 中的智能指针"/>
-<meta name="twitter:description" content="详解 C&#43;&#43; 11 中的智能指针 C/C&#43;&#43; 语言最为人所诟病的特性之一就是存在内存泄露问题，因此后来的大多数语言都提供了内置内存分配与释放功能，有的甚至干脆对语言的使用者屏蔽了内存指针这一概念。这里不置贬褒，手动分配内存与手动释放内存有利也有弊，自动分配内存和自动释放内存亦如此，这是两种不同的设计哲学。有人认为，内存如此重要的东西怎么能放心交给用户去管理呢？而另外一些人则认为，内存如此重要的东西怎么能放心交给系统去管理呢？在 C/C&#43;&#43; 语言中，内存泄露的问题一直困扰着广大的开发者，因此各类库和工具的一直在努力尝试各种方法去检测和避免内存泄露，如 boost，智能指针技术应运而生。
-C&#43;&#43; 98/03 的尝试——std::auto_ptr 在 2019 年讨论 std::auto_ptr 不免有点让人怀疑是不是有点过时了，确实如此，随着 C&#43;&#43;11 标准的出现（最新标准是 C&#43;&#43;20），std::auto_ptr 已经被彻底废弃了，取而代之是 std::unique_ptr。然而，我之所以还向你介绍一下 std::auto_ptr 的用法以及它的设计不足之处是想让你了解 C&#43;&#43; 语言中智能指针的发展过程，一项技术如果我们了解它过去的样子和发展的轨迹，我们就能更好地掌握它，不是吗？
+<meta name="twitter:description" content="详解 C&#43;&#43; 11 中的智能指针
+C/C&#43;&#43; 语言最为人所诟病的特性之一就是存在内存泄露问题，因此后来的大多数语言都提供了内置内存分配与释放功能，有的甚至干脆对语言的使用者屏蔽了内存指针这一概念。这里不置贬褒，手动分配内存与手动释放内存有利也有弊，自动分配内存和自动释放内存亦如此，这是两种不同的设计哲学。有人认为，内存如此重要的东西怎么能放心交给用户去管理呢？而另外一些人则认为，内存如此重要的东西怎么能放心交给系统去管理呢？在 C/C&#43;&#43; 语言中，内存泄露的问题一直困扰着广大的开发者，因此各类库和工具的一直在努力尝试各种方法去检测和避免内存泄露，如 boost，智能指针技术应运而生。
+C&#43;&#43; 98/03 的尝试——std::auto_ptr
+在 2019 年讨论 std::auto_ptr 不免有点让人怀疑是不是有点过时了，确实如此，随着 C&#43;&#43;11 标准的出现（最新标准是 C&#43;&#43;20），std::auto_ptr 已经被彻底废弃了，取而代之是 std::unique_ptr。然而，我之所以还向你介绍一下 std::auto_ptr 的用法以及它的设计不足之处是想让你了解 C&#43;&#43; 语言中智能指针的发展过程，一项技术如果我们了解它过去的样子和发展的轨迹，我们就能更好地掌握它，不是吗？
 std::auto_ptr 的基本用法如下代码所示：
-#include &lt;memory&gt; int main() { //初始化方式1 std::auto_ptr&lt;int&gt; sp1(new int(8)); //初始化方式2 std::auto_ptr&lt;int&gt; sp2; sp2.reset(new int(8)); return 0; } 智能指针对象 sp1 和 sp2 均持有一个在堆上分配 int 对象，其值均是 8，这两块堆内存均可以在 sp1 和 sp2 释放时得到释放。这是 std::auto_ptr 的基本用法。
+#include &lt;memory&gt;
+
+int main()
+{
+    //初始化方式1
+    std::auto_ptr&lt;int&gt; sp1(new int(8));
+    //初始化方式2
+    std::auto_ptr&lt;int&gt; sp2;
+    sp2.reset(new int(8));
+
+    return 0;
+}
+智能指针对象 sp1 和 sp2 均持有一个在堆上分配 int 对象，其值均是 8，这两块堆内存均可以在 sp1 和 sp2 释放时得到释放。这是 std::auto_ptr 的基本用法。
+
 sp 是 smart pointer（智能指针）的简写。
+
 std::auto_ptr 真正让人容易误用的地方是其不常用的复制语义，即当复制一个 std::auto_ptr 对象时（拷贝复制或 operator = 复制），原对象所持有的堆内存对象也会转移给复制出来的对象。示例代码如下：
-#include &lt;iostream&gt; #include &lt;memory&gt; int main() { //测试拷贝构造 std::auto_ptr&lt;int&gt; sp1(new int(8)); std::auto_ptr&lt;int&gt; sp2(sp1); if (sp1.get() != NULL) { std::cout &lt;&lt; &#34;sp1 is not empty.&#34; &lt;&lt; std::endl; } else { std::cout &lt;&lt; &#34;sp1 is empty."/>
+#include &lt;iostream&gt;
+#include &lt;memory&gt;
+
+int main()
+{
+    //测试拷贝构造
+    std::auto_ptr&lt;int&gt; sp1(new int(8));
+    std::auto_ptr&lt;int&gt; sp2(sp1);
+    if (sp1.get() != NULL)
+    {
+        std::cout &lt;&lt; &#34;sp1 is not empty.&#34; &lt;&lt; std::endl;
+    }
+    else
+    {
+        std::cout &lt;&lt; &#34;sp1 is empty.&#34; &lt;&lt; std::endl;
+    }
+
+    if (sp2.get() != NULL)
+    {
+        std::cout &lt;&lt; &#34;sp2 is not empty.&#34; &lt;&lt; std::endl;
+    }
+    else
+    {
+        std::cout &lt;&lt; &#34;sp2 is empty.&#34; &lt;&lt; std::endl;
+    }
+
+    //测试赋值构造
+    std::auto_ptr&lt;int&gt; sp3(new int(8));
+    std::auto_ptr&lt;int&gt; sp4;
+    sp4 = sp3;
+    if (sp3.get() != NULL)
+    {
+        std::cout &lt;&lt; &#34;sp3 is not empty.&#34; &lt;&lt; std::endl;
+    }
+    else
+    {
+        std::cout &lt;&lt; &#34;sp3 is empty.&#34; &lt;&lt; std::endl;
+    }
+
+    if (sp4.get() != NULL)
+    {
+        std::cout &lt;&lt; &#34;sp4 is not empty.&#34; &lt;&lt; std::endl;
+    }
+    else
+    {
+        std::cout &lt;&lt; &#34;sp4 is empty.&#34; &lt;&lt; std::endl;
+    }
+
+    return 0;
+}
+上述代码中分别利用拷贝构造（sp1 =&gt; sp2）和 赋值构造（sp3 =&gt; sp4）来创建新的 std::auto_ptr 对象，因此 sp1 持有的堆对象被转移给 sp2，sp3 持有的堆对象被转移给 sp4。我们得到程序执行结果如下："/>
 
 
 <script type="application/ld+json">
@@ -94,7 +293,7 @@ std::auto_ptr 真正让人容易误用的地方是其不常用的复制语义，
     {
       "@type": "ListItem",
       "position":  1 ,
-      "name": "1s",
+      "name": "1",
       "item": "https://haokiu.com/1/"
     }, 
     {
@@ -112,13 +311,13 @@ std::auto_ptr 真正让人容易误用的地方是其不常用的复制语义，
   "@type": "BlogPosting",
   "headline": "详解 C++ 11 中的智能指针",
   "name": "详解 C\u002b\u002b 11 中的智能指针",
-  "description": "详解 C++ 11 中的智能指针 C/C++ 语言最为人所诟病的特性之一就是存在内存泄露问题，因此后来的大多数语言都提供了内置内存分配与释放功能，有的甚至干脆对语言的使用者屏蔽了内存指针这一概念。这里不置贬褒，手动分配内存与手动释放内存有利也有弊，自动分配内存和自动释放内存亦如此，这是两种不同的设计哲学。有人认为，内存如此重要的东西怎么能放心交给用户去管理呢？而另外一些人则认为，内存如此重要的东西怎么能放心交给系统去管理呢？在 C/C++ 语言中，内存泄露的问题一直困扰着广大的开发者，因此各类库和工具的一直在努力尝试各种方法去检测和避免内存泄露，如 boost，智能指针技术应运而生。\nC++ 98/03 的尝试——std::auto_ptr 在 2019 年讨论 std::auto_ptr 不免有点让人怀疑是不是有点过时了，确实如此，随着 C++11 标准的出现（最新标准是 C++20），std::auto_ptr 已经被彻底废弃了，取而代之是 std::unique_ptr。然而，我之所以还向你介绍一下 std::auto_ptr 的用法以及它的设计不足之处是想让你了解 C++ 语言中智能指针的发展过程，一项技术如果我们了解它过去的样子和发展的轨迹，我们就能更好地掌握它，不是吗？\nstd::auto_ptr 的基本用法如下代码所示：\n#include \u0026lt;memory\u0026gt; int main() { //初始化方式1 std::auto_ptr\u0026lt;int\u0026gt; sp1(new int(8)); //初始化方式2 std::auto_ptr\u0026lt;int\u0026gt; sp2; sp2.reset(new int(8)); return 0; } 智能指针对象 sp1 和 sp2 均持有一个在堆上分配 int 对象，其值均是 8，这两块堆内存均可以在 sp1 和 sp2 释放时得到释放。这是 std::auto_ptr 的基本用法。\nsp 是 smart pointer（智能指针）的简写。\nstd::auto_ptr 真正让人容易误用的地方是其不常用的复制语义，即当复制一个 std::auto_ptr 对象时（拷贝复制或 operator = 复制），原对象所持有的堆内存对象也会转移给复制出来的对象。示例代码如下：\n#include \u0026lt;iostream\u0026gt; #include \u0026lt;memory\u0026gt; int main() { //测试拷贝构造 std::auto_ptr\u0026lt;int\u0026gt; sp1(new int(8)); std::auto_ptr\u0026lt;int\u0026gt; sp2(sp1); if (sp1.get() != NULL) { std::cout \u0026lt;\u0026lt; \u0026#34;sp1 is not empty.\u0026#34; \u0026lt;\u0026lt; std::endl; } else { std::cout \u0026lt;\u0026lt; \u0026#34;sp1 is empty.",
+  "description": "详解 C++ 11 中的智能指针 C/C++ 语言最为人所诟病的特性之一就是存在内存泄露问题，因此后来的大多数语言都提供了内置内存分配与释放功能，有的甚至干脆对语言的使用者屏蔽了内存指针这一概念。这里不置贬褒，手动分配内存与手动释放内存有利也有弊，自动分配内存和自动释放内存亦如此，这是两种不同的设计哲学。有人认为，内存如此重要的东西怎么能放心交给用户去管理呢？而另外一些人则认为，内存如此重要的东西怎么能放心交给系统去管理呢？在 C/C++ 语言中，内存泄露的问题一直困扰着广大的开发者，因此各类库和工具的一直在努力尝试各种方法去检测和避免内存泄露，如 boost，智能指针技术应运而生。\nC++ 98/03 的尝试——std::auto_ptr 在 2019 年讨论 std::auto_ptr 不免有点让人怀疑是不是有点过时了，确实如此，随着 C++11 标准的出现（最新标准是 C++20），std::auto_ptr 已经被彻底废弃了，取而代之是 std::unique_ptr。然而，我之所以还向你介绍一下 std::auto_ptr 的用法以及它的设计不足之处是想让你了解 C++ 语言中智能指针的发展过程，一项技术如果我们了解它过去的样子和发展的轨迹，我们就能更好地掌握它，不是吗？\nstd::auto_ptr 的基本用法如下代码所示：\n#include \u0026lt;memory\u0026gt; int main() { //初始化方式1 std::auto_ptr\u0026lt;int\u0026gt; sp1(new int(8)); //初始化方式2 std::auto_ptr\u0026lt;int\u0026gt; sp2; sp2.reset(new int(8)); return 0; } 智能指针对象 sp1 和 sp2 均持有一个在堆上分配 int 对象，其值均是 8，这两块堆内存均可以在 sp1 和 sp2 释放时得到释放。这是 std::auto_ptr 的基本用法。\nsp 是 smart pointer（智能指针）的简写。\nstd::auto_ptr 真正让人容易误用的地方是其不常用的复制语义，即当复制一个 std::auto_ptr 对象时（拷贝复制或 operator = 复制），原对象所持有的堆内存对象也会转移给复制出来的对象。示例代码如下：\n#include \u0026lt;iostream\u0026gt; #include \u0026lt;memory\u0026gt; int main() { //测试拷贝构造 std::auto_ptr\u0026lt;int\u0026gt; sp1(new int(8)); std::auto_ptr\u0026lt;int\u0026gt; sp2(sp1); if (sp1.get() != NULL) { std::cout \u0026lt;\u0026lt; \u0026#34;sp1 is not empty.\u0026#34; \u0026lt;\u0026lt; std::endl; } else { std::cout \u0026lt;\u0026lt; \u0026#34;sp1 is empty.\u0026#34; \u0026lt;\u0026lt; std::endl; } if (sp2.get() != NULL) { std::cout \u0026lt;\u0026lt; \u0026#34;sp2 is not empty.\u0026#34; \u0026lt;\u0026lt; std::endl; } else { std::cout \u0026lt;\u0026lt; \u0026#34;sp2 is empty.\u0026#34; \u0026lt;\u0026lt; std::endl; } //测试赋值构造 std::auto_ptr\u0026lt;int\u0026gt; sp3(new int(8)); std::auto_ptr\u0026lt;int\u0026gt; sp4; sp4 = sp3; if (sp3.get() != NULL) { std::cout \u0026lt;\u0026lt; \u0026#34;sp3 is not empty.\u0026#34; \u0026lt;\u0026lt; std::endl; } else { std::cout \u0026lt;\u0026lt; \u0026#34;sp3 is empty.\u0026#34; \u0026lt;\u0026lt; std::endl; } if (sp4.get() != NULL) { std::cout \u0026lt;\u0026lt; \u0026#34;sp4 is not empty.\u0026#34; \u0026lt;\u0026lt; std::endl; } else { std::cout \u0026lt;\u0026lt; \u0026#34;sp4 is empty.\u0026#34; \u0026lt;\u0026lt; std::endl; } return 0; } 上述代码中分别利用拷贝构造（sp1 =\u0026gt; sp2）和 赋值构造（sp3 =\u0026gt; sp4）来创建新的 std::auto_ptr 对象，因此 sp1 持有的堆对象被转移给 sp2，sp3 持有的堆对象被转移给 sp4。我们得到程序执行结果如下：\n",
   "keywords": [
     
   ],
   "articleBody": "详解 C++ 11 中的智能指针 C/C++ 语言最为人所诟病的特性之一就是存在内存泄露问题，因此后来的大多数语言都提供了内置内存分配与释放功能，有的甚至干脆对语言的使用者屏蔽了内存指针这一概念。这里不置贬褒，手动分配内存与手动释放内存有利也有弊，自动分配内存和自动释放内存亦如此，这是两种不同的设计哲学。有人认为，内存如此重要的东西怎么能放心交给用户去管理呢？而另外一些人则认为，内存如此重要的东西怎么能放心交给系统去管理呢？在 C/C++ 语言中，内存泄露的问题一直困扰着广大的开发者，因此各类库和工具的一直在努力尝试各种方法去检测和避免内存泄露，如 boost，智能指针技术应运而生。\nC++ 98/03 的尝试——std::auto_ptr 在 2019 年讨论 std::auto_ptr 不免有点让人怀疑是不是有点过时了，确实如此，随着 C++11 标准的出现（最新标准是 C++20），std::auto_ptr 已经被彻底废弃了，取而代之是 std::unique_ptr。然而，我之所以还向你介绍一下 std::auto_ptr 的用法以及它的设计不足之处是想让你了解 C++ 语言中智能指针的发展过程，一项技术如果我们了解它过去的样子和发展的轨迹，我们就能更好地掌握它，不是吗？\nstd::auto_ptr 的基本用法如下代码所示：\n#include int main() { //初始化方式1 std::auto_ptr sp1(new int(8)); //初始化方式2 std::auto_ptr sp2; sp2.reset(new int(8)); return 0; } 智能指针对象 sp1 和 sp2 均持有一个在堆上分配 int 对象，其值均是 8，这两块堆内存均可以在 sp1 和 sp2 释放时得到释放。这是 std::auto_ptr 的基本用法。\nsp 是 smart pointer（智能指针）的简写。\nstd::auto_ptr 真正让人容易误用的地方是其不常用的复制语义，即当复制一个 std::auto_ptr 对象时（拷贝复制或 operator = 复制），原对象所持有的堆内存对象也会转移给复制出来的对象。示例代码如下：\n#include #include int main() { //测试拷贝构造 std::auto_ptr sp1(new int(8)); std::auto_ptr sp2(sp1); if (sp1.get() != NULL) { std::cout \u003c\u003c \"sp1 is not empty.\" \u003c\u003c std::endl; } else { std::cout \u003c\u003c \"sp1 is empty.\" \u003c\u003c std::endl; } if (sp2.get() != NULL) { std::cout \u003c\u003c \"sp2 is not empty.\" \u003c\u003c std::endl; } else { std::cout \u003c\u003c \"sp2 is empty.\" \u003c\u003c std::endl; } //测试赋值构造 std::auto_ptr sp3(new int(8)); std::auto_ptr sp4; sp4 = sp3; if (sp3.get() != NULL) { std::cout \u003c\u003c \"sp3 is not empty.\" \u003c\u003c std::endl; } else { std::cout \u003c\u003c \"sp3 is empty.\" \u003c\u003c std::endl; } if (sp4.get() != NULL) { std::cout \u003c\u003c \"sp4 is not empty.\" \u003c\u003c std::endl; } else { std::cout \u003c\u003c \"sp4 is empty.\" \u003c\u003c std::endl; } return 0; } 上述代码中分别利用拷贝构造（sp1 =\u003e sp2）和 赋值构造（sp3 =\u003e sp4）来创建新的 std::auto_ptr 对象，因此 sp1 持有的堆对象被转移给 sp2，sp3 持有的堆对象被转移给 sp4。我们得到程序执行结果如下：\n[root@iZ238vnojlyZ testx]# g++ -g -o test_auto_ptr test_auto_ptr.cpp [root@iZ238vnojlyZ testx]# ./test_auto_ptr sp1 is empty. sp2 is not empty. sp3 is empty. sp4 is not empty. 由于 std::auto_ptr 这种不常用的复制语义，我们应该避免在 stl 容器中使用 std::auto_ptr，例如我们绝不应该写出如下代码：\nstd::vector",
   "wordCount" : "1783",
-  "inLanguage": "en",
+  "inLanguage": "zh-cn",
   "datePublished": "2021-01-11T09:20:42Z",
   "dateModified": "2021-01-11T09:20:42Z",
   "mainEntityOfPage": {
@@ -174,6 +373,8 @@ std::auto_ptr 真正让人容易误用的地方是其不常用的复制语义，
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -183,32 +384,32 @@ std::auto_ptr 真正让人容易误用的地方是其不常用的复制语义，
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/1/" title="1s">
+                <a href="https://haokiu.com/1/" title="1">
                     <span>后端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/2/" title="2s">
+                <a href="https://haokiu.com/2/" title="2">
                     <span>前端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/3/" title="3s">
+                <a href="https://haokiu.com/3/" title="3">
                     <span>区块链</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/4/" title="4s">
+                <a href="https://haokiu.com/4/" title="4">
                     <span>大数据</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/5/" title="5s">
+                <a href="https://haokiu.com/5/" title="5">
                     <span>linux</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/6/" title="6s">
+                <a href="https://haokiu.com/6/" title="6">
                     <span>其他</span>
                 </a>
             </li>
@@ -229,7 +430,7 @@ std::auto_ptr 真正让人容易误用的地方是其不常用的复制语义，
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    
     <h1 class="post-title">
       详解 C&#43;&#43; 11 中的智能指针
     </h1>
@@ -837,7 +1038,7 @@ private:
     std::vector&lt;std::weak_ptr&lt;Subscriber&gt;&gt;   m_subscribers;
 };
 </code></pre><h4 id="智能指针对象的大小">智能指针对象的大小</h4>
-<p>一个 <strong>std::unique_ptr</strong> 对象大小与裸指针大小相同（即 sizeof(std::unique_ptr<!-- raw HTML omitted -->) == sizeof(void*)），而 <strong>std::shared_ptr</strong> 的大小是 <strong>std::unique_ptr</strong> 的一倍。以下是我分别在 Visual Studio 2019 和 gcc/g++ 4.8 上（二者都编译成 x64 程序）的测试结果：</p>
+<p>一个 <strong>std::unique_ptr</strong> 对象大小与裸指针大小相同（即 sizeof(std::unique_ptr<T>) == sizeof(void*)），而 <strong>std::shared_ptr</strong> 的大小是 <strong>std::unique_ptr</strong> 的一倍。以下是我分别在 Visual Studio 2019 和 gcc/g++ 4.8 上（二者都编译成 x64 程序）的测试结果：</p>
 <p><strong>测试代码</strong></p>
 <pre tabindex="0"><code>#include &lt;iostream&gt;
 #include &lt;memory&gt;
@@ -999,15 +1200,15 @@ private:
     <ul class="post-tags">
     </ul>
 <nav class="paginav">
-  <a class="prev" href="https://haokiu.com/blog/5f118ee0e1be49a8a754072ecb9b441a/">
-    <span class="title">« Prev</span>
+  <a class="prev" href="https://haokiu.com/blog/5b6afa35b0644098b8b4d0c853f20358/">
+    <span class="title">« </span>
     <br>
-    <span>腾讯后台开发实习生技能要求</span>
+    <span>我是一名程序员，结婚时女友要求我用两年的工资作为彩礼，我该不该答应？</span>
   </a>
-  <a class="next" href="https://haokiu.com/blog/0f72f7a83bbb4b4fb76a05dc63f5480c/">
-    <span class="title">Next »</span>
+  <a class="next" href="https://haokiu.com/blog/f64c601f237d4cac97445aa4b0e07369/">
+    <span class="title"> »</span>
     <br>
-    <span>谈一谈年终奖</span>
+    <span>用Visual Studio调试Linux程序</span>
   </a>
 </nav>
 
@@ -1015,6 +1216,14 @@ private:
 </article>
     </main>
     
+<footer class="footer">
+    <span>haokiu.com</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />

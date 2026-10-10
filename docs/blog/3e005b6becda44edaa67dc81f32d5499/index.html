@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="zh-cn" dir="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,20 +7,53 @@
 <meta name="robots" content="index, follow">
 <title>leveldb源码分析6 | haokiu</title>
 <meta name="keywords" content="">
-<meta name="description" content="leveldb源码分析6 本系列《leveldb源码分析》共有22篇文章，这是第六篇。
-5. 操作Log 2 5.3 读日志 日志读取显然比写入要复杂，要检查checksum，检查是否有损坏等等，处理各种错误。
-5.3.1 类层次 Reader主要用到了两个接口，一个是汇报错误的Reporter，另一个是log文件读取类SequentialFile。
+<meta name="description" content="leveldb源码分析6
+本系列《leveldb源码分析》共有22篇文章，这是第六篇。
+5. 操作Log 2
+5.3 读日志
+日志读取显然比写入要复杂，要检查checksum，检查是否有损坏等等，处理各种错误。
+5.3.1 类层次
+Reader主要用到了两个接口，一个是汇报错误的Reporter，另一个是log文件读取类SequentialFile。
 Reporter的接口只有一个：
-void Corruption(size_t bytes,const Status&amp; status); SequentialFile有两个接口：
-Status Read(size_t n, Slice* result, char* scratch); Status Skip(uint64_t n); 说明下，Read接口有一个result参数传递结果就行了，为何还有一个scratch呢，这个就和Slice相关了。它的字符串指针是传入的外部char*指针，自己并不负责内存的管理与分配。因此Read接口需要调用者提供一个字符串指针，实际存放字符串的地方。
+void Corruption(size_t bytes,const Status&amp; status);
+SequentialFile有两个接口：
+Status Read(size_t n, Slice* result, char* scratch);
+Status Skip(uint64_t n);
+说明下，Read接口有一个result参数传递结果就行了，为何还有一个scratch呢，这个就和Slice相关了。它的字符串指针是传入的外部char*指针，自己并不负责内存的管理与分配。因此Read接口需要调用者提供一个字符串指针，实际存放字符串的地方。
+
+
 Reader类有几个成员变量，需要注意：
-bool eof_; // 上次Read()返回长度&lt; kBlockSize，暗示到了文件结尾EOF uint64_t last_record_offset_; // 函数ReadRecord返回的上一个record的偏移 uint64_t end_of_buffer_offset_;// 当前的读取偏移 uint64_t const initial_offset_;// 偏移，从哪里开始读取第一条record Slice buffer_; // 读取的内容 5.3.2日志读取流程 Reader只有一个接口，那就是ReadRecord，下面来分析下这个函数。
-S1 根据initial offset跳转到调用者指定的位置，开始读取日志文件。跳转就是直接调用SequentialFile的Seek接口。 另外，需要先调整调用者传入的initialoffset参数，调整和跳转逻辑在SkipToInitialBlock函数中。
-if (last_record_offset_ &lt;initial_offset_) { // 当前偏移 &lt; 指定的偏移，需要Seek if (!SkipToInitialBlock()) return false; } 下面的代码是SkipToInitialBlock函数调整read offset的逻辑：
-// 计算在block内的偏移位置，并圆整到开始读取block的起始位置 size_t offset_in_block =initial_offset_ % kBlockSize; uint64_t block_start_location =initial_offset_ - offset_in_block; // 如果偏移在最后的6byte里，肯定不是一条完整的记录，跳到下一个block if (offset_in_block &gt;kBlockSize - 6) { offset_in_block = 0; block_start_location &#43;=kBlockSize; } end_of_buffer_offset_ =block_start_location; // 设置读取偏移 if (block_start_location &gt; 0) file_-&gt;Skip(block_start_location); // 跳转 首先计算出在block内的偏移位置，然后圆整到要读取block的起始位置。开始读取日志的时候都要保证读取的是完整的block，这就是调整的目的。">
+bool eof_;          
+// 上次Read()返回长度&lt; kBlockSize，暗示到了文件结尾EOF
+uint64_t last_record_offset_;  // 函数ReadRecord返回的上一个record的偏移
+uint64_t end_of_buffer_offset_;// 当前的读取偏移
+uint64_t const initial_offset_;// 偏移，从哪里开始读取第一条record
+Slice   buffer_;               // 读取的内容
+5.3.2日志读取流程
+Reader只有一个接口，那就是ReadRecord，下面来分析下这个函数。
+S1 根据initial offset跳转到调用者指定的位置，开始读取日志文件。跳转就是直接调用SequentialFile的Seek接口。
+另外，需要先调整调用者传入的initialoffset参数，调整和跳转逻辑在SkipToInitialBlock函数中。
+if (last_record_offset_ &lt;initial_offset_) 
+{ // 当前偏移 &lt; 指定的偏移，需要Seek
+	if (!SkipToInitialBlock()) return false;
+}
+下面的代码是SkipToInitialBlock函数调整read offset的逻辑：
+// 计算在block内的偏移位置，并圆整到开始读取block的起始位置
+size_t offset_in_block =initial_offset_ % kBlockSize;
+uint64_t block_start_location =initial_offset_ - offset_in_block;
+// 如果偏移在最后的6byte里，肯定不是一条完整的记录，跳到下一个block
+if (offset_in_block &gt;kBlockSize - 6)
+{
+     offset_in_block = 0;
+     block_start_location &#43;=kBlockSize;
+}
+end_of_buffer_offset_ =block_start_location;            
+// 设置读取偏移
+if (block_start_location &gt; 0)  file_-&gt;Skip(block_start_location); // 跳转
+首先计算出在block内的偏移位置，然后圆整到要读取block的起始位置。开始读取日志的时候都要保证读取的是完整的block，这就是调整的目的。">
 <meta name="author" content="">
 <link rel="canonical" href="https://haokiu.com/blog/3e005b6becda44edaa67dc81f32d5499/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
 <script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="https://haokiu.com/favicon.ico">
@@ -30,6 +63,7 @@ if (last_record_offset_ &lt;initial_offset_) { // 当前偏移 &lt; 指定的偏
 <link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/blog/3e005b6becda44edaa67dc81f32d5499/">
 <noscript>
     <style>
         #theme-toggle,
@@ -67,17 +101,50 @@ if (last_record_offset_ &lt;initial_offset_) { // 当前偏移 &lt; 指定的偏
 
     </style>
 </noscript><meta property="og:title" content="leveldb源码分析6" />
-<meta property="og:description" content="leveldb源码分析6 本系列《leveldb源码分析》共有22篇文章，这是第六篇。
-5. 操作Log 2 5.3 读日志 日志读取显然比写入要复杂，要检查checksum，检查是否有损坏等等，处理各种错误。
-5.3.1 类层次 Reader主要用到了两个接口，一个是汇报错误的Reporter，另一个是log文件读取类SequentialFile。
+<meta property="og:description" content="leveldb源码分析6
+本系列《leveldb源码分析》共有22篇文章，这是第六篇。
+5. 操作Log 2
+5.3 读日志
+日志读取显然比写入要复杂，要检查checksum，检查是否有损坏等等，处理各种错误。
+5.3.1 类层次
+Reader主要用到了两个接口，一个是汇报错误的Reporter，另一个是log文件读取类SequentialFile。
 Reporter的接口只有一个：
-void Corruption(size_t bytes,const Status&amp; status); SequentialFile有两个接口：
-Status Read(size_t n, Slice* result, char* scratch); Status Skip(uint64_t n); 说明下，Read接口有一个result参数传递结果就行了，为何还有一个scratch呢，这个就和Slice相关了。它的字符串指针是传入的外部char*指针，自己并不负责内存的管理与分配。因此Read接口需要调用者提供一个字符串指针，实际存放字符串的地方。
+void Corruption(size_t bytes,const Status&amp; status);
+SequentialFile有两个接口：
+Status Read(size_t n, Slice* result, char* scratch);
+Status Skip(uint64_t n);
+说明下，Read接口有一个result参数传递结果就行了，为何还有一个scratch呢，这个就和Slice相关了。它的字符串指针是传入的外部char*指针，自己并不负责内存的管理与分配。因此Read接口需要调用者提供一个字符串指针，实际存放字符串的地方。
+
+
 Reader类有几个成员变量，需要注意：
-bool eof_; // 上次Read()返回长度&lt; kBlockSize，暗示到了文件结尾EOF uint64_t last_record_offset_; // 函数ReadRecord返回的上一个record的偏移 uint64_t end_of_buffer_offset_;// 当前的读取偏移 uint64_t const initial_offset_;// 偏移，从哪里开始读取第一条record Slice buffer_; // 读取的内容 5.3.2日志读取流程 Reader只有一个接口，那就是ReadRecord，下面来分析下这个函数。
-S1 根据initial offset跳转到调用者指定的位置，开始读取日志文件。跳转就是直接调用SequentialFile的Seek接口。 另外，需要先调整调用者传入的initialoffset参数，调整和跳转逻辑在SkipToInitialBlock函数中。
-if (last_record_offset_ &lt;initial_offset_) { // 当前偏移 &lt; 指定的偏移，需要Seek if (!SkipToInitialBlock()) return false; } 下面的代码是SkipToInitialBlock函数调整read offset的逻辑：
-// 计算在block内的偏移位置，并圆整到开始读取block的起始位置 size_t offset_in_block =initial_offset_ % kBlockSize; uint64_t block_start_location =initial_offset_ - offset_in_block; // 如果偏移在最后的6byte里，肯定不是一条完整的记录，跳到下一个block if (offset_in_block &gt;kBlockSize - 6) { offset_in_block = 0; block_start_location &#43;=kBlockSize; } end_of_buffer_offset_ =block_start_location; // 设置读取偏移 if (block_start_location &gt; 0) file_-&gt;Skip(block_start_location); // 跳转 首先计算出在block内的偏移位置，然后圆整到要读取block的起始位置。开始读取日志的时候都要保证读取的是完整的block，这就是调整的目的。" />
+bool eof_;          
+// 上次Read()返回长度&lt; kBlockSize，暗示到了文件结尾EOF
+uint64_t last_record_offset_;  // 函数ReadRecord返回的上一个record的偏移
+uint64_t end_of_buffer_offset_;// 当前的读取偏移
+uint64_t const initial_offset_;// 偏移，从哪里开始读取第一条record
+Slice   buffer_;               // 读取的内容
+5.3.2日志读取流程
+Reader只有一个接口，那就是ReadRecord，下面来分析下这个函数。
+S1 根据initial offset跳转到调用者指定的位置，开始读取日志文件。跳转就是直接调用SequentialFile的Seek接口。
+另外，需要先调整调用者传入的initialoffset参数，调整和跳转逻辑在SkipToInitialBlock函数中。
+if (last_record_offset_ &lt;initial_offset_) 
+{ // 当前偏移 &lt; 指定的偏移，需要Seek
+	if (!SkipToInitialBlock()) return false;
+}
+下面的代码是SkipToInitialBlock函数调整read offset的逻辑：
+// 计算在block内的偏移位置，并圆整到开始读取block的起始位置
+size_t offset_in_block =initial_offset_ % kBlockSize;
+uint64_t block_start_location =initial_offset_ - offset_in_block;
+// 如果偏移在最后的6byte里，肯定不是一条完整的记录，跳到下一个block
+if (offset_in_block &gt;kBlockSize - 6)
+{
+     offset_in_block = 0;
+     block_start_location &#43;=kBlockSize;
+}
+end_of_buffer_offset_ =block_start_location;            
+// 设置读取偏移
+if (block_start_location &gt; 0)  file_-&gt;Skip(block_start_location); // 跳转
+首先计算出在block内的偏移位置，然后圆整到要读取block的起始位置。开始读取日志的时候都要保证读取的是完整的block，这就是调整的目的。" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://haokiu.com/blog/3e005b6becda44edaa67dc81f32d5499/" /><meta property="article:section" content="1" />
 <meta property="article:published_time" content="2021-01-11T09:20:42+00:00" />
@@ -85,17 +152,50 @@ if (last_record_offset_ &lt;initial_offset_) { // 当前偏移 &lt; 指定的偏
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="leveldb源码分析6"/>
-<meta name="twitter:description" content="leveldb源码分析6 本系列《leveldb源码分析》共有22篇文章，这是第六篇。
-5. 操作Log 2 5.3 读日志 日志读取显然比写入要复杂，要检查checksum，检查是否有损坏等等，处理各种错误。
-5.3.1 类层次 Reader主要用到了两个接口，一个是汇报错误的Reporter，另一个是log文件读取类SequentialFile。
+<meta name="twitter:description" content="leveldb源码分析6
+本系列《leveldb源码分析》共有22篇文章，这是第六篇。
+5. 操作Log 2
+5.3 读日志
+日志读取显然比写入要复杂，要检查checksum，检查是否有损坏等等，处理各种错误。
+5.3.1 类层次
+Reader主要用到了两个接口，一个是汇报错误的Reporter，另一个是log文件读取类SequentialFile。
 Reporter的接口只有一个：
-void Corruption(size_t bytes,const Status&amp; status); SequentialFile有两个接口：
-Status Read(size_t n, Slice* result, char* scratch); Status Skip(uint64_t n); 说明下，Read接口有一个result参数传递结果就行了，为何还有一个scratch呢，这个就和Slice相关了。它的字符串指针是传入的外部char*指针，自己并不负责内存的管理与分配。因此Read接口需要调用者提供一个字符串指针，实际存放字符串的地方。
+void Corruption(size_t bytes,const Status&amp; status);
+SequentialFile有两个接口：
+Status Read(size_t n, Slice* result, char* scratch);
+Status Skip(uint64_t n);
+说明下，Read接口有一个result参数传递结果就行了，为何还有一个scratch呢，这个就和Slice相关了。它的字符串指针是传入的外部char*指针，自己并不负责内存的管理与分配。因此Read接口需要调用者提供一个字符串指针，实际存放字符串的地方。
+
+
 Reader类有几个成员变量，需要注意：
-bool eof_; // 上次Read()返回长度&lt; kBlockSize，暗示到了文件结尾EOF uint64_t last_record_offset_; // 函数ReadRecord返回的上一个record的偏移 uint64_t end_of_buffer_offset_;// 当前的读取偏移 uint64_t const initial_offset_;// 偏移，从哪里开始读取第一条record Slice buffer_; // 读取的内容 5.3.2日志读取流程 Reader只有一个接口，那就是ReadRecord，下面来分析下这个函数。
-S1 根据initial offset跳转到调用者指定的位置，开始读取日志文件。跳转就是直接调用SequentialFile的Seek接口。 另外，需要先调整调用者传入的initialoffset参数，调整和跳转逻辑在SkipToInitialBlock函数中。
-if (last_record_offset_ &lt;initial_offset_) { // 当前偏移 &lt; 指定的偏移，需要Seek if (!SkipToInitialBlock()) return false; } 下面的代码是SkipToInitialBlock函数调整read offset的逻辑：
-// 计算在block内的偏移位置，并圆整到开始读取block的起始位置 size_t offset_in_block =initial_offset_ % kBlockSize; uint64_t block_start_location =initial_offset_ - offset_in_block; // 如果偏移在最后的6byte里，肯定不是一条完整的记录，跳到下一个block if (offset_in_block &gt;kBlockSize - 6) { offset_in_block = 0; block_start_location &#43;=kBlockSize; } end_of_buffer_offset_ =block_start_location; // 设置读取偏移 if (block_start_location &gt; 0) file_-&gt;Skip(block_start_location); // 跳转 首先计算出在block内的偏移位置，然后圆整到要读取block的起始位置。开始读取日志的时候都要保证读取的是完整的block，这就是调整的目的。"/>
+bool eof_;          
+// 上次Read()返回长度&lt; kBlockSize，暗示到了文件结尾EOF
+uint64_t last_record_offset_;  // 函数ReadRecord返回的上一个record的偏移
+uint64_t end_of_buffer_offset_;// 当前的读取偏移
+uint64_t const initial_offset_;// 偏移，从哪里开始读取第一条record
+Slice   buffer_;               // 读取的内容
+5.3.2日志读取流程
+Reader只有一个接口，那就是ReadRecord，下面来分析下这个函数。
+S1 根据initial offset跳转到调用者指定的位置，开始读取日志文件。跳转就是直接调用SequentialFile的Seek接口。
+另外，需要先调整调用者传入的initialoffset参数，调整和跳转逻辑在SkipToInitialBlock函数中。
+if (last_record_offset_ &lt;initial_offset_) 
+{ // 当前偏移 &lt; 指定的偏移，需要Seek
+	if (!SkipToInitialBlock()) return false;
+}
+下面的代码是SkipToInitialBlock函数调整read offset的逻辑：
+// 计算在block内的偏移位置，并圆整到开始读取block的起始位置
+size_t offset_in_block =initial_offset_ % kBlockSize;
+uint64_t block_start_location =initial_offset_ - offset_in_block;
+// 如果偏移在最后的6byte里，肯定不是一条完整的记录，跳到下一个block
+if (offset_in_block &gt;kBlockSize - 6)
+{
+     offset_in_block = 0;
+     block_start_location &#43;=kBlockSize;
+}
+end_of_buffer_offset_ =block_start_location;            
+// 设置读取偏移
+if (block_start_location &gt; 0)  file_-&gt;Skip(block_start_location); // 跳转
+首先计算出在block内的偏移位置，然后圆整到要读取block的起始位置。开始读取日志的时候都要保证读取的是完整的block，这就是调整的目的。"/>
 
 
 <script type="application/ld+json">
@@ -106,7 +206,7 @@ if (last_record_offset_ &lt;initial_offset_) { // 当前偏移 &lt; 指定的偏
     {
       "@type": "ListItem",
       "position":  1 ,
-      "name": "1s",
+      "name": "1",
       "item": "https://haokiu.com/1/"
     }, 
     {
@@ -124,13 +224,13 @@ if (last_record_offset_ &lt;initial_offset_) { // 当前偏移 &lt; 指定的偏
   "@type": "BlogPosting",
   "headline": "leveldb源码分析6",
   "name": "leveldb源码分析6",
-  "description": "leveldb源码分析6 本系列《leveldb源码分析》共有22篇文章，这是第六篇。\n5. 操作Log 2 5.3 读日志 日志读取显然比写入要复杂，要检查checksum，检查是否有损坏等等，处理各种错误。\n5.3.1 类层次 Reader主要用到了两个接口，一个是汇报错误的Reporter，另一个是log文件读取类SequentialFile。\nReporter的接口只有一个：\nvoid Corruption(size_t bytes,const Status\u0026amp; status); SequentialFile有两个接口：\nStatus Read(size_t n, Slice* result, char* scratch); Status Skip(uint64_t n); 说明下，Read接口有一个result参数传递结果就行了，为何还有一个scratch呢，这个就和Slice相关了。它的字符串指针是传入的外部char*指针，自己并不负责内存的管理与分配。因此Read接口需要调用者提供一个字符串指针，实际存放字符串的地方。\nReader类有几个成员变量，需要注意：\nbool eof_; // 上次Read()返回长度\u0026lt; kBlockSize，暗示到了文件结尾EOF uint64_t last_record_offset_; // 函数ReadRecord返回的上一个record的偏移 uint64_t end_of_buffer_offset_;// 当前的读取偏移 uint64_t const initial_offset_;// 偏移，从哪里开始读取第一条record Slice buffer_; // 读取的内容 5.3.2日志读取流程 Reader只有一个接口，那就是ReadRecord，下面来分析下这个函数。\nS1 根据initial offset跳转到调用者指定的位置，开始读取日志文件。跳转就是直接调用SequentialFile的Seek接口。 另外，需要先调整调用者传入的initialoffset参数，调整和跳转逻辑在SkipToInitialBlock函数中。\nif (last_record_offset_ \u0026lt;initial_offset_) { // 当前偏移 \u0026lt; 指定的偏移，需要Seek if (!SkipToInitialBlock()) return false; } 下面的代码是SkipToInitialBlock函数调整read offset的逻辑：\n// 计算在block内的偏移位置，并圆整到开始读取block的起始位置 size_t offset_in_block =initial_offset_ % kBlockSize; uint64_t block_start_location =initial_offset_ - offset_in_block; // 如果偏移在最后的6byte里，肯定不是一条完整的记录，跳到下一个block if (offset_in_block \u0026gt;kBlockSize - 6) { offset_in_block = 0; block_start_location +=kBlockSize; } end_of_buffer_offset_ =block_start_location; // 设置读取偏移 if (block_start_location \u0026gt; 0) file_-\u0026gt;Skip(block_start_location); // 跳转 首先计算出在block内的偏移位置，然后圆整到要读取block的起始位置。开始读取日志的时候都要保证读取的是完整的block，这就是调整的目的。",
+  "description": "leveldb源码分析6 本系列《leveldb源码分析》共有22篇文章，这是第六篇。\n5. 操作Log 2 5.3 读日志 日志读取显然比写入要复杂，要检查checksum，检查是否有损坏等等，处理各种错误。\n5.3.1 类层次 Reader主要用到了两个接口，一个是汇报错误的Reporter，另一个是log文件读取类SequentialFile。\nReporter的接口只有一个：\nvoid Corruption(size_t bytes,const Status\u0026amp; status); SequentialFile有两个接口：\nStatus Read(size_t n, Slice* result, char* scratch); Status Skip(uint64_t n); 说明下，Read接口有一个result参数传递结果就行了，为何还有一个scratch呢，这个就和Slice相关了。它的字符串指针是传入的外部char*指针，自己并不负责内存的管理与分配。因此Read接口需要调用者提供一个字符串指针，实际存放字符串的地方。\nReader类有几个成员变量，需要注意：\nbool eof_; // 上次Read()返回长度\u0026lt; kBlockSize，暗示到了文件结尾EOF uint64_t last_record_offset_; // 函数ReadRecord返回的上一个record的偏移 uint64_t end_of_buffer_offset_;// 当前的读取偏移 uint64_t const initial_offset_;// 偏移，从哪里开始读取第一条record Slice buffer_; // 读取的内容 5.3.2日志读取流程 Reader只有一个接口，那就是ReadRecord，下面来分析下这个函数。\nS1 根据initial offset跳转到调用者指定的位置，开始读取日志文件。跳转就是直接调用SequentialFile的Seek接口。 另外，需要先调整调用者传入的initialoffset参数，调整和跳转逻辑在SkipToInitialBlock函数中。\nif (last_record_offset_ \u0026lt;initial_offset_) { // 当前偏移 \u0026lt; 指定的偏移，需要Seek if (!SkipToInitialBlock()) return false; } 下面的代码是SkipToInitialBlock函数调整read offset的逻辑：\n// 计算在block内的偏移位置，并圆整到开始读取block的起始位置 size_t offset_in_block =initial_offset_ % kBlockSize; uint64_t block_start_location =initial_offset_ - offset_in_block; // 如果偏移在最后的6byte里，肯定不是一条完整的记录，跳到下一个block if (offset_in_block \u0026gt;kBlockSize - 6) { offset_in_block = 0; block_start_location +=kBlockSize; } end_of_buffer_offset_ =block_start_location; // 设置读取偏移 if (block_start_location \u0026gt; 0) file_-\u0026gt;Skip(block_start_location); // 跳转 首先计算出在block内的偏移位置，然后圆整到要读取block的起始位置。开始读取日志的时候都要保证读取的是完整的block，这就是调整的目的。\n",
   "keywords": [
     
   ],
   "articleBody": "leveldb源码分析6 本系列《leveldb源码分析》共有22篇文章，这是第六篇。\n5. 操作Log 2 5.3 读日志 日志读取显然比写入要复杂，要检查checksum，检查是否有损坏等等，处理各种错误。\n5.3.1 类层次 Reader主要用到了两个接口，一个是汇报错误的Reporter，另一个是log文件读取类SequentialFile。\nReporter的接口只有一个：\nvoid Corruption(size_t bytes,const Status\u0026 status); SequentialFile有两个接口：\nStatus Read(size_t n, Slice* result, char* scratch); Status Skip(uint64_t n); 说明下，Read接口有一个result参数传递结果就行了，为何还有一个scratch呢，这个就和Slice相关了。它的字符串指针是传入的外部char*指针，自己并不负责内存的管理与分配。因此Read接口需要调用者提供一个字符串指针，实际存放字符串的地方。\nReader类有几个成员变量，需要注意：\nbool eof_; // 上次Read()返回长度\u003c kBlockSize，暗示到了文件结尾EOF uint64_t last_record_offset_; // 函数ReadRecord返回的上一个record的偏移 uint64_t end_of_buffer_offset_;// 当前的读取偏移 uint64_t const initial_offset_;// 偏移，从哪里开始读取第一条record Slice buffer_; // 读取的内容 5.3.2日志读取流程 Reader只有一个接口，那就是ReadRecord，下面来分析下这个函数。\nS1 根据initial offset跳转到调用者指定的位置，开始读取日志文件。跳转就是直接调用SequentialFile的Seek接口。 另外，需要先调整调用者传入的initialoffset参数，调整和跳转逻辑在SkipToInitialBlock函数中。\nif (last_record_offset_ ",
   "wordCount" : "491",
-  "inLanguage": "en",
+  "inLanguage": "zh-cn",
   "datePublished": "2021-01-11T09:20:42Z",
   "dateModified": "2021-01-11T09:20:42Z",
   "mainEntityOfPage": {
@@ -186,6 +286,8 @@ if (last_record_offset_ &lt;initial_offset_) { // 当前偏移 &lt; 指定的偏
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -195,32 +297,32 @@ if (last_record_offset_ &lt;initial_offset_) { // 当前偏移 &lt; 指定的偏
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/1/" title="1s">
+                <a href="https://haokiu.com/1/" title="1">
                     <span>后端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/2/" title="2s">
+                <a href="https://haokiu.com/2/" title="2">
                     <span>前端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/3/" title="3s">
+                <a href="https://haokiu.com/3/" title="3">
                     <span>区块链</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/4/" title="4s">
+                <a href="https://haokiu.com/4/" title="4">
                     <span>大数据</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/5/" title="5s">
+                <a href="https://haokiu.com/5/" title="5">
                     <span>linux</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/6/" title="6s">
+                <a href="https://haokiu.com/6/" title="6">
                     <span>其他</span>
                 </a>
             </li>
@@ -241,7 +343,7 @@ if (last_record_offset_ &lt;initial_offset_) { // 当前偏移 &lt; 指定的偏
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/1/">1s</a></div>
+    
     <h1 class="post-title">
       leveldb源码分析6
     </h1>
@@ -285,7 +387,7 @@ if (last_record_offset_ &lt;initial_offset_) { // 当前偏移 &lt; 指定的偏
                 <li>
                     <a href="#s1-%e5%a6%82%e6%9e%9cbuffer_%e5%b0%8f%e4%ba%8eblock-header%e5%a4%a7%e5%b0%8fkheadersize%e8%bf%9b%e5%85%a5%e5%a6%82%e4%b8%8b%e7%9a%84%e5%87%a0%e4%b8%aa%e5%88%86%e6%94%af" aria-label="S1 如果buffer_小于block header大小kHeaderSize，进入如下的几个分支：">S1 如果buffer_小于block header大小kHeaderSize，进入如下的几个分支：</a></li>
                 <li>
-                    <a href="#s2-%e8%bf%9b%e5%85%a5%e5%88%b0%e8%bf%99%e9%87%8c%e8%a1%a8%e6%98%8e%e4%b8%8a%e6%ac%a1%e5%be%aa%e7%8e%af%e4%b8%ad%e7%9a%84read%e8%af%bb%e5%8f%96%e5%88%b0%e4%ba%86%e4%b8%80%e4%b8%aa%e5%ae%8c%e6%95%b4%e7%9a%84log-recordcontinue%e5%90%8e%e7%9a%84%e7%ac%ac%e4%ba%8c%e6%ac%a1%e5%be%aa%e7%8e%af%e5%88%a4%e6%96%adbuffer_size--kheadersize%e5%b0%86%e6%89%a7%e8%a1%8c%e5%88%b0%e6%ad%a4%e5%a4%84" aria-label="S2 进入到这里表明上次循环中的Read读取到了一个完整的log record，continue后的第二次循环判断buffer_.size() &amp;gt;= kHeaderSize将执行到此处。">S2 进入到这里表明上次循环中的Read读取到了一个完整的log record，continue后的第二次循环判断buffer_.size() &gt;= kHeaderSize将执行到此处。</a></li>
+                    <a href="#s2-%e8%bf%9b%e5%85%a5%e5%88%b0%e8%bf%99%e9%87%8c%e8%a1%a8%e6%98%8e%e4%b8%8a%e6%ac%a1%e5%be%aa%e7%8e%af%e4%b8%ad%e7%9a%84read%e8%af%bb%e5%8f%96%e5%88%b0%e4%ba%86%e4%b8%80%e4%b8%aa%e5%ae%8c%e6%95%b4%e7%9a%84log-recordcontinue%e5%90%8e%e7%9a%84%e7%ac%ac%e4%ba%8c%e6%ac%a1%e5%be%aa%e7%8e%af%e5%88%a4%e6%96%adbuffer_size--kheadersize%e5%b0%86%e6%89%a7%e8%a1%8c%e5%88%b0%e6%ad%a4%e5%a4%84" aria-label="S2 进入到这里表明上次循环中的Read读取到了一个完整的log record，continue后的第二次循环判断buffer_.size() &gt;= kHeaderSize将执行到此处。">S2 进入到这里表明上次循环中的Read读取到了一个完整的log record，continue后的第二次循环判断buffer_.size() &gt;= kHeaderSize将执行到此处。</a></li>
                 <li>
                     <a href="#s3-%e6%a0%a1%e9%aa%8ccrc32%e5%a6%82%e6%9e%9c%e6%a0%a1%e9%aa%8c%e5%87%ba%e9%94%99%e5%88%99%e6%b1%87%e6%8a%a5%e9%94%99%e8%af%af%e5%b9%b6%e8%bf%94%e5%9b%9ekbadrecord" aria-label="S3 校验CRC32，如果校验出错，则汇报错误，并返回kBadRecord。">S3 校验CRC32，如果校验出错，则汇报错误，并返回kBadRecord。</a></li>
                 <li>
@@ -505,12 +607,12 @@ return type;
     </ul>
 <nav class="paginav">
   <a class="prev" href="https://haokiu.com/blog/81982087975a4f49913e723952169670/">
-    <span class="title">« Prev</span>
+    <span class="title">« </span>
     <br>
     <span>leveldb源码分析5</span>
   </a>
   <a class="next" href="https://haokiu.com/blog/b3a81cdfb8624332bd1f184097675b32/">
-    <span class="title">Next »</span>
+    <span class="title"> »</span>
     <br>
     <span>leveldb源码分析7</span>
   </a>
@@ -520,6 +622,14 @@ return type;
 </article>
     </main>
     
+<footer class="footer">
+    <span>haokiu.com</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />

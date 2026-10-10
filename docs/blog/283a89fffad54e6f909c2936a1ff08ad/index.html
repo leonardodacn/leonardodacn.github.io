@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="zh-cn" dir="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,18 +7,115 @@
 <meta name="robots" content="index, follow">
 <title>hbase11xsqlreader  插件文档 | haokiu</title>
 <meta name="keywords" content="datax">
-<meta name="description" content="hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。
-2 实现原理 简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
-hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。
-2 实现原理 简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
-3 功能说明 3.1 配置样例 配置一个从Phoenix同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &#34;byte&#34;:10485760 }, //出错限制 &#34;errorLimit&#34;: { //出错的record条数上限，当大于该值即报错。 &#34;record&#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { //指定插件为hbase11xsqlreader &#34;name&#34;: &#34;hbase11xsqlreader&#34;, &#34;parameter&#34;: { //填写连接Phoenix的hbase集群zk地址 &#34;hbaseConfig&#34;: { &#34;hbase.zookeeper.quorum&#34;: &#34;hb-proxy-xxx-002.hbase.rds.aliyuncs.com,hb-proxy-xxx-001.hbase.rds.aliyuncs.com,hb-proxy-xxx-003.hbase.rds.aliyuncs.com&#34; }, //填写要读取的phoenix的表名 &#34;table&#34;: &#34;US_POPULATION&#34;, //填写要读取的列名，不填读取所有列 &#34;column&#34;: [ ] } }, &#34;writer&#34;: { //writer类型 &#34;name&#34;: &#34;streamwriter&#34;, //是否打印内容 &#34;parameter&#34;: { &#34;print&#34;:true, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3.2 参数说明 hbaseConfig
+<meta name="description" content="hbase11xsqlreader  插件文档
+
+1 快速介绍
+hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。
+2 实现原理
+简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+hbase11xsqlreader  插件文档
+
+1 快速介绍
+hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。
+2 实现原理
+简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+3 功能说明
+3.1 配置样例
+
+配置一个从Phoenix同步抽取数据到本地的作业:
+
+{
+    &#34;job&#34;: {
+        &#34;setting&#34;: {
+            &#34;speed&#34;: {
+            //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它.
+                &#34;byte&#34;:10485760
+            },  
+            //出错限制
+            &#34;errorLimit&#34;: {
+                //出错的record条数上限，当大于该值即报错。
+                &#34;record&#34;: 0,
+                //出错的record百分比上限 1.0表示100%，0.02表示2%
+                &#34;percentage&#34;: 0.02
+            }   
+        },  
+        &#34;content&#34;: [ { 
+                &#34;reader&#34;: {
+                     //指定插件为hbase11xsqlreader
+                    &#34;name&#34;: &#34;hbase11xsqlreader&#34;,
+                    &#34;parameter&#34;: {
+                         //填写连接Phoenix的hbase集群zk地址
+                        &#34;hbaseConfig&#34;: {
+                            &#34;hbase.zookeeper.quorum&#34;: &#34;hb-proxy-xxx-002.hbase.rds.aliyuncs.com,hb-proxy-xxx-001.hbase.rds.aliyuncs.com,hb-proxy-xxx-003.hbase.rds.aliyuncs.com&#34;
+                        },  
+                        //填写要读取的phoenix的表名
+                        &#34;table&#34;: &#34;US_POPULATION&#34;,
+                        //填写要读取的列名，不填读取所有列
+                        &#34;column&#34;: [
+                        ]   
+                    }   
+                },  
+                &#34;writer&#34;: {
+                    //writer类型
+                    &#34;name&#34;: &#34;streamwriter&#34;,
+                     //是否打印内容
+                    &#34;parameter&#34;: {
+                        &#34;print&#34;:true,
+                        &#34;encoding&#34;: &#34;UTF-8&#34;
+                    }   
+                }   
+            }   
+        ]   
+    }   
+}
+3.2 参数说明
+
+
+hbaseConfig
+
+
 描述：hbase11xsqlreader需要通过Phoenix客户端去连接hbase集群，因此这里需要填写对应hbase集群的zkurl地址，注意不要添加2181。
-必选：是 默认值：无 table
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+table
+
+
 描述：编写Phoenix中的表名,如果有namespace，该值设置为&rsquo;namespace.tablename&#39;
-必选：是 默认值：无 column">
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+column
+
+
+描述：填写需要从phoenix表中读取的列名集合，使用JSON的数组描述字段信息，空值表示读取所有列。
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+">
 <meta name="author" content="">
 <link rel="canonical" href="https://haokiu.com/blog/283a89fffad54e6f909c2936a1ff08ad/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
 <script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="https://haokiu.com/favicon.ico">
@@ -28,6 +125,7 @@ hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了�
 <link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/blog/283a89fffad54e6f909c2936a1ff08ad/">
 <noscript>
     <style>
         #theme-toggle,
@@ -65,15 +163,112 @@ hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了�
 
     </style>
 </noscript><meta property="og:title" content="hbase11xsqlreader  插件文档" />
-<meta property="og:description" content="hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。
-2 实现原理 简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
-hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。
-2 实现原理 简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
-3 功能说明 3.1 配置样例 配置一个从Phoenix同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &#34;byte&#34;:10485760 }, //出错限制 &#34;errorLimit&#34;: { //出错的record条数上限，当大于该值即报错。 &#34;record&#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { //指定插件为hbase11xsqlreader &#34;name&#34;: &#34;hbase11xsqlreader&#34;, &#34;parameter&#34;: { //填写连接Phoenix的hbase集群zk地址 &#34;hbaseConfig&#34;: { &#34;hbase.zookeeper.quorum&#34;: &#34;hb-proxy-xxx-002.hbase.rds.aliyuncs.com,hb-proxy-xxx-001.hbase.rds.aliyuncs.com,hb-proxy-xxx-003.hbase.rds.aliyuncs.com&#34; }, //填写要读取的phoenix的表名 &#34;table&#34;: &#34;US_POPULATION&#34;, //填写要读取的列名，不填读取所有列 &#34;column&#34;: [ ] } }, &#34;writer&#34;: { //writer类型 &#34;name&#34;: &#34;streamwriter&#34;, //是否打印内容 &#34;parameter&#34;: { &#34;print&#34;:true, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3.2 参数说明 hbaseConfig
+<meta property="og:description" content="hbase11xsqlreader  插件文档
+
+1 快速介绍
+hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。
+2 实现原理
+简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+hbase11xsqlreader  插件文档
+
+1 快速介绍
+hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。
+2 实现原理
+简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+3 功能说明
+3.1 配置样例
+
+配置一个从Phoenix同步抽取数据到本地的作业:
+
+{
+    &#34;job&#34;: {
+        &#34;setting&#34;: {
+            &#34;speed&#34;: {
+            //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它.
+                &#34;byte&#34;:10485760
+            },  
+            //出错限制
+            &#34;errorLimit&#34;: {
+                //出错的record条数上限，当大于该值即报错。
+                &#34;record&#34;: 0,
+                //出错的record百分比上限 1.0表示100%，0.02表示2%
+                &#34;percentage&#34;: 0.02
+            }   
+        },  
+        &#34;content&#34;: [ { 
+                &#34;reader&#34;: {
+                     //指定插件为hbase11xsqlreader
+                    &#34;name&#34;: &#34;hbase11xsqlreader&#34;,
+                    &#34;parameter&#34;: {
+                         //填写连接Phoenix的hbase集群zk地址
+                        &#34;hbaseConfig&#34;: {
+                            &#34;hbase.zookeeper.quorum&#34;: &#34;hb-proxy-xxx-002.hbase.rds.aliyuncs.com,hb-proxy-xxx-001.hbase.rds.aliyuncs.com,hb-proxy-xxx-003.hbase.rds.aliyuncs.com&#34;
+                        },  
+                        //填写要读取的phoenix的表名
+                        &#34;table&#34;: &#34;US_POPULATION&#34;,
+                        //填写要读取的列名，不填读取所有列
+                        &#34;column&#34;: [
+                        ]   
+                    }   
+                },  
+                &#34;writer&#34;: {
+                    //writer类型
+                    &#34;name&#34;: &#34;streamwriter&#34;,
+                     //是否打印内容
+                    &#34;parameter&#34;: {
+                        &#34;print&#34;:true,
+                        &#34;encoding&#34;: &#34;UTF-8&#34;
+                    }   
+                }   
+            }   
+        ]   
+    }   
+}
+3.2 参数说明
+
+
+hbaseConfig
+
+
 描述：hbase11xsqlreader需要通过Phoenix客户端去连接hbase集群，因此这里需要填写对应hbase集群的zkurl地址，注意不要添加2181。
-必选：是 默认值：无 table
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+table
+
+
 描述：编写Phoenix中的表名,如果有namespace，该值设置为&rsquo;namespace.tablename&#39;
-必选：是 默认值：无 column" />
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+column
+
+
+描述：填写需要从phoenix表中读取的列名集合，使用JSON的数组描述字段信息，空值表示读取所有列。
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://haokiu.com/blog/283a89fffad54e6f909c2936a1ff08ad/" /><meta property="article:section" content="4" />
 <meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
@@ -81,15 +276,112 @@ hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了�
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="hbase11xsqlreader  插件文档"/>
-<meta name="twitter:description" content="hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。
-2 实现原理 简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
-hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。
-2 实现原理 简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
-3 功能说明 3.1 配置样例 配置一个从Phoenix同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &#34;byte&#34;:10485760 }, //出错限制 &#34;errorLimit&#34;: { //出错的record条数上限，当大于该值即报错。 &#34;record&#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { //指定插件为hbase11xsqlreader &#34;name&#34;: &#34;hbase11xsqlreader&#34;, &#34;parameter&#34;: { //填写连接Phoenix的hbase集群zk地址 &#34;hbaseConfig&#34;: { &#34;hbase.zookeeper.quorum&#34;: &#34;hb-proxy-xxx-002.hbase.rds.aliyuncs.com,hb-proxy-xxx-001.hbase.rds.aliyuncs.com,hb-proxy-xxx-003.hbase.rds.aliyuncs.com&#34; }, //填写要读取的phoenix的表名 &#34;table&#34;: &#34;US_POPULATION&#34;, //填写要读取的列名，不填读取所有列 &#34;column&#34;: [ ] } }, &#34;writer&#34;: { //writer类型 &#34;name&#34;: &#34;streamwriter&#34;, //是否打印内容 &#34;parameter&#34;: { &#34;print&#34;:true, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3.2 参数说明 hbaseConfig
+<meta name="twitter:description" content="hbase11xsqlreader  插件文档
+
+1 快速介绍
+hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。
+2 实现原理
+简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+hbase11xsqlreader  插件文档
+
+1 快速介绍
+hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。
+2 实现原理
+简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
+3 功能说明
+3.1 配置样例
+
+配置一个从Phoenix同步抽取数据到本地的作业:
+
+{
+    &#34;job&#34;: {
+        &#34;setting&#34;: {
+            &#34;speed&#34;: {
+            //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它.
+                &#34;byte&#34;:10485760
+            },  
+            //出错限制
+            &#34;errorLimit&#34;: {
+                //出错的record条数上限，当大于该值即报错。
+                &#34;record&#34;: 0,
+                //出错的record百分比上限 1.0表示100%，0.02表示2%
+                &#34;percentage&#34;: 0.02
+            }   
+        },  
+        &#34;content&#34;: [ { 
+                &#34;reader&#34;: {
+                     //指定插件为hbase11xsqlreader
+                    &#34;name&#34;: &#34;hbase11xsqlreader&#34;,
+                    &#34;parameter&#34;: {
+                         //填写连接Phoenix的hbase集群zk地址
+                        &#34;hbaseConfig&#34;: {
+                            &#34;hbase.zookeeper.quorum&#34;: &#34;hb-proxy-xxx-002.hbase.rds.aliyuncs.com,hb-proxy-xxx-001.hbase.rds.aliyuncs.com,hb-proxy-xxx-003.hbase.rds.aliyuncs.com&#34;
+                        },  
+                        //填写要读取的phoenix的表名
+                        &#34;table&#34;: &#34;US_POPULATION&#34;,
+                        //填写要读取的列名，不填读取所有列
+                        &#34;column&#34;: [
+                        ]   
+                    }   
+                },  
+                &#34;writer&#34;: {
+                    //writer类型
+                    &#34;name&#34;: &#34;streamwriter&#34;,
+                     //是否打印内容
+                    &#34;parameter&#34;: {
+                        &#34;print&#34;:true,
+                        &#34;encoding&#34;: &#34;UTF-8&#34;
+                    }   
+                }   
+            }   
+        ]   
+    }   
+}
+3.2 参数说明
+
+
+hbaseConfig
+
+
 描述：hbase11xsqlreader需要通过Phoenix客户端去连接hbase集群，因此这里需要填写对应hbase集群的zkurl地址，注意不要添加2181。
-必选：是 默认值：无 table
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+table
+
+
 描述：编写Phoenix中的表名,如果有namespace，该值设置为&rsquo;namespace.tablename&#39;
-必选：是 默认值：无 column"/>
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+
+column
+
+
+描述：填写需要从phoenix表中读取的列名集合，使用JSON的数组描述字段信息，空值表示读取所有列。
+
+
+必选：是 
+
+
+默认值：无 
+
+
+
+"/>
 
 
 <script type="application/ld+json">
@@ -100,7 +392,7 @@ hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了�
     {
       "@type": "ListItem",
       "position":  1 ,
-      "name": "4s",
+      "name": "4",
       "item": "https://haokiu.com/4/"
     }, 
     {
@@ -118,13 +410,13 @@ hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了�
   "@type": "BlogPosting",
   "headline": "hbase11xsqlreader  插件文档",
   "name": "hbase11xsqlreader  插件文档",
-  "description": "hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。\n2 实现原理 简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。\nhbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。\n2 实现原理 简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。\n3 功能说明 3.1 配置样例 配置一个从Phoenix同步抽取数据到本地的作业: { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. \u0026#34;byte\u0026#34;:10485760 }, //出错限制 \u0026#34;errorLimit\u0026#34;: { //出错的record条数上限，当大于该值即报错。 \u0026#34;record\u0026#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% \u0026#34;percentage\u0026#34;: 0.02 } }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { //指定插件为hbase11xsqlreader \u0026#34;name\u0026#34;: \u0026#34;hbase11xsqlreader\u0026#34;, \u0026#34;parameter\u0026#34;: { //填写连接Phoenix的hbase集群zk地址 \u0026#34;hbaseConfig\u0026#34;: { \u0026#34;hbase.zookeeper.quorum\u0026#34;: \u0026#34;hb-proxy-xxx-002.hbase.rds.aliyuncs.com,hb-proxy-xxx-001.hbase.rds.aliyuncs.com,hb-proxy-xxx-003.hbase.rds.aliyuncs.com\u0026#34; }, //填写要读取的phoenix的表名 \u0026#34;table\u0026#34;: \u0026#34;US_POPULATION\u0026#34;, //填写要读取的列名，不填读取所有列 \u0026#34;column\u0026#34;: [ ] } }, \u0026#34;writer\u0026#34;: { //writer类型 \u0026#34;name\u0026#34;: \u0026#34;streamwriter\u0026#34;, //是否打印内容 \u0026#34;parameter\u0026#34;: { \u0026#34;print\u0026#34;:true, \u0026#34;encoding\u0026#34;: \u0026#34;UTF-8\u0026#34; } } } ] } } 3.2 参数说明 hbaseConfig\n描述：hbase11xsqlreader需要通过Phoenix客户端去连接hbase集群，因此这里需要填写对应hbase集群的zkurl地址，注意不要添加2181。\n必选：是 默认值：无 table\n描述：编写Phoenix中的表名,如果有namespace，该值设置为\u0026rsquo;namespace.tablename'\n必选：是 默认值：无 column",
+  "description": "hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。\n2 实现原理 简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。\nhbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。\n2 实现原理 简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。\n3 功能说明 3.1 配置样例 配置一个从Phoenix同步抽取数据到本地的作业: { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. \u0026#34;byte\u0026#34;:10485760 }, //出错限制 \u0026#34;errorLimit\u0026#34;: { //出错的record条数上限，当大于该值即报错。 \u0026#34;record\u0026#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% \u0026#34;percentage\u0026#34;: 0.02 } }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { //指定插件为hbase11xsqlreader \u0026#34;name\u0026#34;: \u0026#34;hbase11xsqlreader\u0026#34;, \u0026#34;parameter\u0026#34;: { //填写连接Phoenix的hbase集群zk地址 \u0026#34;hbaseConfig\u0026#34;: { \u0026#34;hbase.zookeeper.quorum\u0026#34;: \u0026#34;hb-proxy-xxx-002.hbase.rds.aliyuncs.com,hb-proxy-xxx-001.hbase.rds.aliyuncs.com,hb-proxy-xxx-003.hbase.rds.aliyuncs.com\u0026#34; }, //填写要读取的phoenix的表名 \u0026#34;table\u0026#34;: \u0026#34;US_POPULATION\u0026#34;, //填写要读取的列名，不填读取所有列 \u0026#34;column\u0026#34;: [ ] } }, \u0026#34;writer\u0026#34;: { //writer类型 \u0026#34;name\u0026#34;: \u0026#34;streamwriter\u0026#34;, //是否打印内容 \u0026#34;parameter\u0026#34;: { \u0026#34;print\u0026#34;:true, \u0026#34;encoding\u0026#34;: \u0026#34;UTF-8\u0026#34; } } } ] } } 3.2 参数说明 hbaseConfig\n描述：hbase11xsqlreader需要通过Phoenix客户端去连接hbase集群，因此这里需要填写对应hbase集群的zkurl地址，注意不要添加2181。\n必选：是 默认值：无 table\n描述：编写Phoenix中的表名,如果有namespace，该值设置为\u0026rsquo;namespace.tablename'\n必选：是 默认值：无 column\n描述：填写需要从phoenix表中读取的列名集合，使用JSON的数组描述字段信息，空值表示读取所有列。\n必选：是 默认值：无 ",
   "keywords": [
     "datax"
   ],
   "articleBody": "hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。\n2 实现原理 简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。\nhbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。\n2 实现原理 简而言之，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并根据用户配置的信息生成查询SELECT 语句，然后发送到HBase集群，并将返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。\n3 功能说明 3.1 配置样例 配置一个从Phoenix同步抽取数据到本地的作业: { \"job\": { \"setting\": { \"speed\": { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. \"byte\":10485760 }, //出错限制 \"errorLimit\": { //出错的record条数上限，当大于该值即报错。 \"record\": 0, //出错的record百分比上限 1.0表示100%，0.02表示2% \"percentage\": 0.02 } }, \"content\": [ { \"reader\": { //指定插件为hbase11xsqlreader \"name\": \"hbase11xsqlreader\", \"parameter\": { //填写连接Phoenix的hbase集群zk地址 \"hbaseConfig\": { \"hbase.zookeeper.quorum\": \"hb-proxy-xxx-002.hbase.rds.aliyuncs.com,hb-proxy-xxx-001.hbase.rds.aliyuncs.com,hb-proxy-xxx-003.hbase.rds.aliyuncs.com\" }, //填写要读取的phoenix的表名 \"table\": \"US_POPULATION\", //填写要读取的列名，不填读取所有列 \"column\": [ ] } }, \"writer\": { //writer类型 \"name\": \"streamwriter\", //是否打印内容 \"parameter\": { \"print\":true, \"encoding\": \"UTF-8\" } } } ] } } 3.2 参数说明 hbaseConfig\n描述：hbase11xsqlreader需要通过Phoenix客户端去连接hbase集群，因此这里需要填写对应hbase集群的zkurl地址，注意不要添加2181。\n必选：是 默认值：无 table\n描述：编写Phoenix中的表名,如果有namespace，该值设置为’namespace.tablename'\n必选：是 默认值：无 column\n描述：填写需要从phoenix表中读取的列名集合，使用JSON的数组描述字段信息，空值表示读取所有列。\n必选：是 默认值：无 3.3 类型转换 目前hbase11xsqlreader支持大部分Phoenix类型，但也存在部分个别类型没有支持的情况，请注意检查你的类型。\n下面列出MysqlReader针对Mysql类型转换列表:\nDataX 内部类型 Phoenix 数据类型 String CHAR, VARCHAR Bytes BINARY, VARBINARY Bool BOOLEAN Long INTEGER, TINYINT, SMALLINT, BIGINT Double FLOAT, DECIMAL, DOUBLE, Date DATE, TIME, TIMESTAMP 4 性能报告 略\n5 约束限制 略\n6 FAQ 3 功能说明 3.1 配置样例 配置一个从Phoenix同步抽取数据到本地的作业: { \"job\": { \"setting\": { \"speed\": { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. \"byte\":10485760 }, //出错限制 \"errorLimit\": { //出错的record条数上限，当大于该值即报错。 \"record\": 0, //出错的record百分比上限 1.0表示100%，0.02表示2% \"percentage\": 0.02 } }, \"content\": [ { \"reader\": { //指定插件为hbase11xsqlreader \"name\": \"hbase11xsqlreader\", \"parameter\": { //填写连接Phoenix的hbase集群zk地址 \"hbaseConfig\": { \"hbase.zookeeper.quorum\": \"hb-proxy-xxx-002.hbase.rds.aliyuncs.com,hb-proxy-xxx-001.hbase.rds.aliyuncs.com,hb-proxy-xxx-003.hbase.rds.aliyuncs.com\" }, //填写要读取的phoenix的表名 \"table\": \"US_POPULATION\", //填写要读取的列名，不填读取所有列 \"column\": [ ] } }, \"writer\": { //writer类型 \"name\": \"streamwriter\", //是否打印内容 \"parameter\": { \"print\":true, \"encoding\": \"UTF-8\" } } } ] } } 3.2 参数说明 hbaseConfig\n描述：hbase11xsqlreader需要通过Phoenix客户端去连接hbase集群，因此这里需要填写对应hbase集群的zkurl地址，注意不要添加2181。\n必选：是 默认值：无 table\n描述：编写Phoenix中的表名,如果有namespace，该值设置为’namespace.tablename'\n必选：是 默认值：无 column\n描述：填写需要从phoenix表中读取的列名集合，使用JSON的数组描述字段信息，空值表示读取所有列。\n必选：是 默认值：无 3.3 类型转换 目前hbase11xsqlreader支持大部分Phoenix类型，但也存在部分个别类型没有支持的情况，请注意检查你的类型。\n下面列出MysqlReader针对Mysql类型转换列表:\nDataX 内部类型 Phoenix 数据类型 String CHAR, VARCHAR Bytes BINARY, VARBINARY Bool BOOLEAN Long INTEGER, TINYINT, SMALLINT, BIGINT Double FLOAT, DECIMAL, DOUBLE, Date DATE, TIME, TIMESTAMP 4 性能报告 略\n5 约束限制 略\n6 FAQ ",
   "wordCount" : "260",
-  "inLanguage": "en",
+  "inLanguage": "zh-cn",
   "datePublished": "2021-02-02T17:45:01Z",
   "dateModified": "2021-02-02T17:45:01Z",
   "mainEntityOfPage": {
@@ -180,6 +472,8 @@ hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了�
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -189,32 +483,32 @@ hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了�
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/1/" title="1s">
+                <a href="https://haokiu.com/1/" title="1">
                     <span>后端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/2/" title="2s">
+                <a href="https://haokiu.com/2/" title="2">
                     <span>前端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/3/" title="3s">
+                <a href="https://haokiu.com/3/" title="3">
                     <span>区块链</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/4/" title="4s">
+                <a href="https://haokiu.com/4/" title="4">
                     <span>大数据</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/5/" title="5s">
+                <a href="https://haokiu.com/5/" title="5">
                     <span>linux</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/6/" title="6s">
+                <a href="https://haokiu.com/6/" title="6">
                     <span>其他</span>
                 </a>
             </li>
@@ -235,7 +529,7 @@ hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了�
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    
     <h1 class="post-title">
       hbase11xsqlreader  插件文档
     </h1>
@@ -374,10 +668,10 @@ hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了�
 <p>描述：hbase11xsqlreader需要通过Phoenix客户端去连接hbase集群，因此这里需要填写对应hbase集群的zkurl地址，注意不要添加2181。</p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -388,10 +682,10 @@ hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了�
 <p>描述：编写Phoenix中的表名,如果有namespace，该值设置为&rsquo;namespace.tablename'</p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -402,10 +696,10 @@ hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了�
 <p>描述：填写需要从phoenix表中读取的列名集合，使用JSON的数组描述字段信息，空值表示读取所有列。</p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -414,38 +708,38 @@ hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了�
 <p>目前hbase11xsqlreader支持大部分Phoenix类型，但也存在部分个别类型没有支持的情况，请注意检查你的类型。</p>
 <p>下面列出MysqlReader针对Mysql类型转换列表:</p>
 <table>
-<thead>
-<tr>
-<th>DataX 内部类型</th>
-<th>Phoenix 数据类型</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>String</td>
-<td>CHAR, VARCHAR</td>
-</tr>
-<tr>
-<td>Bytes</td>
-<td>BINARY, VARBINARY</td>
-</tr>
-<tr>
-<td>Bool</td>
-<td>BOOLEAN</td>
-</tr>
-<tr>
-<td>Long</td>
-<td>INTEGER, TINYINT, SMALLINT, BIGINT</td>
-</tr>
-<tr>
-<td>Double</td>
-<td>FLOAT, DECIMAL, DOUBLE,</td>
-</tr>
-<tr>
-<td>Date</td>
-<td>DATE, TIME, TIMESTAMP</td>
-</tr>
-</tbody>
+	<thead>
+			<tr>
+					<th>DataX 内部类型</th>
+					<th>Phoenix 数据类型</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>String</td>
+					<td>CHAR, VARCHAR</td>
+			</tr>
+			<tr>
+					<td>Bytes</td>
+					<td>BINARY, VARBINARY</td>
+			</tr>
+			<tr>
+					<td>Bool</td>
+					<td>BOOLEAN</td>
+			</tr>
+			<tr>
+					<td>Long</td>
+					<td>INTEGER, TINYINT, SMALLINT, BIGINT</td>
+			</tr>
+			<tr>
+					<td>Double</td>
+					<td>FLOAT, DECIMAL, DOUBLE,</td>
+			</tr>
+			<tr>
+					<td>Date</td>
+					<td>DATE, TIME, TIMESTAMP</td>
+			</tr>
+	</tbody>
 </table>
 <h2 id="4-性能报告">4 性能报告</h2>
 <p>略</p>
@@ -511,10 +805,10 @@ hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了�
 <p>描述：hbase11xsqlreader需要通过Phoenix客户端去连接hbase集群，因此这里需要填写对应hbase集群的zkurl地址，注意不要添加2181。</p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -525,10 +819,10 @@ hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了�
 <p>描述：编写Phoenix中的表名,如果有namespace，该值设置为&rsquo;namespace.tablename'</p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -539,10 +833,10 @@ hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了�
 <p>描述：填写需要从phoenix表中读取的列名集合，使用JSON的数组描述字段信息，空值表示读取所有列。</p>
 </li>
 <li>
-<p>必选：是 <!-- raw HTML omitted --></p>
+<p>必选：是 <br /></p>
 </li>
 <li>
-<p>默认值：无 <!-- raw HTML omitted --></p>
+<p>默认值：无 <br /></p>
 </li>
 </ul>
 </li>
@@ -551,38 +845,38 @@ hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了�
 <p>目前hbase11xsqlreader支持大部分Phoenix类型，但也存在部分个别类型没有支持的情况，请注意检查你的类型。</p>
 <p>下面列出MysqlReader针对Mysql类型转换列表:</p>
 <table>
-<thead>
-<tr>
-<th>DataX 内部类型</th>
-<th>Phoenix 数据类型</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>String</td>
-<td>CHAR, VARCHAR</td>
-</tr>
-<tr>
-<td>Bytes</td>
-<td>BINARY, VARBINARY</td>
-</tr>
-<tr>
-<td>Bool</td>
-<td>BOOLEAN</td>
-</tr>
-<tr>
-<td>Long</td>
-<td>INTEGER, TINYINT, SMALLINT, BIGINT</td>
-</tr>
-<tr>
-<td>Double</td>
-<td>FLOAT, DECIMAL, DOUBLE,</td>
-</tr>
-<tr>
-<td>Date</td>
-<td>DATE, TIME, TIMESTAMP</td>
-</tr>
-</tbody>
+	<thead>
+			<tr>
+					<th>DataX 内部类型</th>
+					<th>Phoenix 数据类型</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>String</td>
+					<td>CHAR, VARCHAR</td>
+			</tr>
+			<tr>
+					<td>Bytes</td>
+					<td>BINARY, VARBINARY</td>
+			</tr>
+			<tr>
+					<td>Bool</td>
+					<td>BOOLEAN</td>
+			</tr>
+			<tr>
+					<td>Long</td>
+					<td>INTEGER, TINYINT, SMALLINT, BIGINT</td>
+			</tr>
+			<tr>
+					<td>Double</td>
+					<td>FLOAT, DECIMAL, DOUBLE,</td>
+			</tr>
+			<tr>
+					<td>Date</td>
+					<td>DATE, TIME, TIMESTAMP</td>
+			</tr>
+	</tbody>
 </table>
 <h2 id="4-性能报告-1">4 性能报告</h2>
 <p>略</p>
@@ -595,13 +889,21 @@ hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了�
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+      <li><a href="https://haokiu.com/tags/datax/">Datax</a></li>
     </ul>
 
   </footer>
 </article>
     </main>
     
+<footer class="footer">
+    <span>haokiu.com</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="zh-cn" dir="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,7 +10,7 @@
 <meta name="description" content="">
 <meta name="author" content="">
 <link rel="canonical" href="https://haokiu.com/categories/4/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
 <link rel="icon" href="https://haokiu.com/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
@@ -19,6 +19,7 @@
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
 <link rel="alternate" type="application/rss+xml" href="https://haokiu.com/categories/4/index.xml">
+<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/categories/4/">
 <noscript>
     <style>
         #theme-toggle,
@@ -103,6 +104,8 @@
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -112,32 +115,32 @@
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/1/" title="1s">
+                <a href="https://haokiu.com/1/" title="1">
                     <span>后端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/2/" title="2s">
+                <a href="https://haokiu.com/2/" title="2">
                     <span>前端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/3/" title="3s">
+                <a href="https://haokiu.com/3/" title="3">
                     <span>区块链</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/4/" title="4s">
+                <a href="https://haokiu.com/4/" title="4">
                     <span>大数据</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/5/" title="5s">
+                <a href="https://haokiu.com/5/" title="5">
                     <span>linux</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/6/" title="6s">
+                <a href="https://haokiu.com/6/" title="6">
                     <span>其他</span>
                 </a>
             </li>
@@ -155,7 +158,7 @@
     </nav>
 </header>
 <main class="main"> 
-<header class="page-header"><div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/categories/">Categories</a></div>
+<header class="page-header">
   <h1>
     4
   </h1>
@@ -180,7 +183,20 @@
 必选：否 默认值：无 column
 描述：填写需要从phoenix表中读取的列名集合，使用JSON的数组描述字段信息，空值表示读取所有列。
 必选： 否
-默认值：全部列 splitKey...</p>
+默认值：全部列 splitKey
+描述：读取表时对表进行切分并行读取，切分时有两种方式：1.根据该列的最大最小值按照指定channel个数均分，这种方式仅支持整形和字符串类型切分列；2.根据设置的splitPoint进行切分
+必选：是 默认值：无 splitPoints
+描述：由于根据切分列最大最小值切分时不能保证避免数据热点，splitKey支持用户根据数据特征动态指定切分点，对表数据进行切分。建议切分点根据Region的startkey和endkey设置，保证每个查询对应单个Region
+必选： 否
+默认值：无 where
+描述：支持对表查询增加过滤条件，每个切分都会携带该过滤条件。
+必选： 否
+默认值：无
+querySql
+描述：支持指定多个查询语句，但查询列类型和数目必须保持一致，用户可根据实际情况手动输入表查询语句或多表联合查询语句，设置该参数后，除queryserverAddress参数必须设置外，其余参数将失去作用或可不设置。
+必选： 否
+默认值：无
+...</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
   <a class="entry-link" aria-label="post link to hbase20xsqlreader  插件文档" href="https://haokiu.com/blog/d74e56a13f78424182e14164c8b4e5e4/"></a>
@@ -195,7 +211,16 @@
     <p>HBase20xsqlwriter插件文档 1. 快速介绍 HBase20xsqlwriter实现了向hbase中的SQL表(phoenix)批量导入数据的功能。Phoenix因为对rowkey做了数据编码，所以，直接使用HBaseAPI进行写入会面临手工数据转换的问题，麻烦且易错。本插件提供了SQL方式直接向Phoenix表写入数据。
 在底层实现上，通过Phoenix QueryServer的轻客户端驱动，执行UPSERT语句向Phoenix写入数据。
 1.1 支持的功能 支持带索引的表的数据导入，可以同步更新所有的索引表 1.2 限制 要求版本为Phoenix5.x及HBase2.x 仅支持通过Phoenix QeuryServer导入数据，因此您Phoenix必须启动QueryServer服务才能使用本插件 不支持清空已有表数据 仅支持通过phoenix创建的表，不支持原生HBase表 不支持带时间戳的数据导入 2. 实现原理 通过Phoenix轻客户端，连接Phoenix QueryServer服务，执行UPSERT语句向表中批量写入数据。因为使用上层接口，所以，可以同步更新索引表。
-3. 配置说明 3.1 配置样例 { &#34;job&#34;: { &#34;entry&#34;: { &#34;jvm&#34;: &#34;-Xms2048m -Xmx2048m&#34; }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;txtfilereader&#34;, &#34;parameter&#34;: { &#34;path&#34;: &#34;/Users/shf/workplace/datax_test/hbase20xsqlwriter/txt/normal.txt&#34;, &#34;charset&#34;: &#34;UTF-8&#34;, &#34;column&#34;: [ { &#34;index&#34;: 0, &#34;type&#34;: &#34;String&#34; }, { &#34;index&#34;: 1, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 2, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 3, &#34;type&#34;: &#34;string&#34; } ], &#34;fieldDelimiter&#34;: &#34;,&#34; } }, &#34;writer&#34;: { &#34;name&#34;: &#34;hbase20xsqlwriter&#34;, &#34;parameter&#34;: { &#34;batchSize&#34;: &#34;100&#34;, &#34;column&#34;: [ &#34;UID&#34;, &#34;TS&#34;, &#34;EVENTID&#34;, &#34;CONTENT&#34; ], &#34;queryServerAddress&#34;: &#34;http://127.0.0.1:8765&#34;, &#34;nullMode&#34;: &#34;skip&#34;, &#34;table&#34;: &#34;目标hbase表名，大小写有关&#34; } } } ], &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 5 } } } } 3....</p>
+3. 配置说明 3.1 配置样例 { &#34;job&#34;: { &#34;entry&#34;: { &#34;jvm&#34;: &#34;-Xms2048m -Xmx2048m&#34; }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;txtfilereader&#34;, &#34;parameter&#34;: { &#34;path&#34;: &#34;/Users/shf/workplace/datax_test/hbase20xsqlwriter/txt/normal.txt&#34;, &#34;charset&#34;: &#34;UTF-8&#34;, &#34;column&#34;: [ { &#34;index&#34;: 0, &#34;type&#34;: &#34;String&#34; }, { &#34;index&#34;: 1, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 2, &#34;type&#34;: &#34;string&#34; }, { &#34;index&#34;: 3, &#34;type&#34;: &#34;string&#34; } ], &#34;fieldDelimiter&#34;: &#34;,&#34; } }, &#34;writer&#34;: { &#34;name&#34;: &#34;hbase20xsqlwriter&#34;, &#34;parameter&#34;: { &#34;batchSize&#34;: &#34;100&#34;, &#34;column&#34;: [ &#34;UID&#34;, &#34;TS&#34;, &#34;EVENTID&#34;, &#34;CONTENT&#34; ], &#34;queryServerAddress&#34;: &#34;http://127.0.0.1:8765&#34;, &#34;nullMode&#34;: &#34;skip&#34;, &#34;table&#34;: &#34;目标hbase表名，大小写有关&#34; } } } ], &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 5 } } } } 3.2 参数说明 name
+描述：插件名字，必须是hbase11xsqlwriter 必选：是 默认值：无 schema
+描述：表所在的schema
+必选：否 默认值：无 table
+描述：要导入的表名，大小写敏感，通常phoenix表都是大写表名 必选：是 默认值：无 column
+描述：列名，大小写敏感，通常phoenix的列名都是大写。 需要注意列的顺序，必须与reader输出的列的顺序一一对应。 不需要填写数据类型，会自动从phoenix获取列的元数据 必选：是 默认值：无 queryServerAddress
+描述：Phoenix QueryServer地址，为必填项，格式：http://NULL:NULL，如http://172.16.34.58:8765。 增强版/Lindorm 用户若需透传user, password参数，可以在queryServerAddress后增加对应可选属性. 格式参考：http://127.0.0.1:8765;user=root;password=root 必选：是 默认值：无 serialization
+描述：QueryServer使用的序列化协议 必选：否 默认值：PROTOBUF batchSize
+描述：批量写入的最大行数 必选：否 默认值：256 nullMode
+描述：读取到的列值为null时，如何处理。目前有两种方式： skip：跳过这一列，即不插入这一列(如果该行的这一列之前已经存在，则会被删除) empty：插入空值，值类型的空值是0，varchar的空值是空字符串 必选：否 默认值：skip ...</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
   <a class="entry-link" aria-label="post link to HBase20xsqlwriter插件文档" href="https://haokiu.com/blog/28250260969448579bc8cee8c2963319/"></a>
@@ -210,7 +235,32 @@
     <p>KingbaseesReader 插件文档 1 快速介绍 KingbaseesReader插件实现了从KingbaseES读取数据。在底层实现上，KingbaseesReader通过JDBC连接远程KingbaseES数据库，并执行相应的sql语句将数据从KingbaseES库中SELECT出来。
 2 实现原理 简而言之，KingbaseesReader通过JDBC连接器连接到远程的KingbaseES数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程KingbaseES数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
 对于用户配置Table、Column、Where的信息，KingbaseesReader将其拼接为SQL语句发送到KingbaseES数据库；对于用户配置querySql信息，KingbaseesReader直接将其发送到KingbaseES数据库。
-3 功能说明 3.1 配置样例 配置一个从KingbaseES数据库同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &#34;byte&#34;: 1048576 }, //出错限制 &#34;errorLimit&#34;: { //出错的record条数上限，当大于该值即报错。 &#34;record&#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;kingbaseesreader&#34;, &#34;parameter&#34;: { // 数据库连接用户名 &#34;username&#34;: &#34;xx&#34;, // 数据库连接密码 &#34;password&#34;: &#34;xx&#34;, &#34;column&#34;: [ &#34;id&#34;，&#34;name&#34; ], //切分主键 &#34;splitPk&#34;: &#34;id&#34;, &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;table&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:kingbase8://host:port/database&#34; ] } ] } }, &#34;writer&#34;: { //writer类型 &#34;name&#34;: &#34;streamwriter&#34;, //是否打印内容 &#34;parameter&#34;: { &#34;print&#34;:true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: 1048576 }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;kingbaseesreader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;xx&#34;, &#34;password&#34;: &#34;xx&#34;, &#34;where&#34;: &#34;&#34;, &#34;connection&#34;: [ { &#34;querySql&#34;: [ &#34;select db_id,on_line_flag from db_info where db_id &lt; 10;&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:kingbase8://host:port/database&#34;, &#34;jdbc:kingbase8://host:port/database&#34; ] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;: false, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3....</p>
+3 功能说明 3.1 配置样例 配置一个从KingbaseES数据库同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &#34;byte&#34;: 1048576 }, //出错限制 &#34;errorLimit&#34;: { //出错的record条数上限，当大于该值即报错。 &#34;record&#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;kingbaseesreader&#34;, &#34;parameter&#34;: { // 数据库连接用户名 &#34;username&#34;: &#34;xx&#34;, // 数据库连接密码 &#34;password&#34;: &#34;xx&#34;, &#34;column&#34;: [ &#34;id&#34;，&#34;name&#34; ], //切分主键 &#34;splitPk&#34;: &#34;id&#34;, &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;table&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:kingbase8://host:port/database&#34; ] } ] } }, &#34;writer&#34;: { //writer类型 &#34;name&#34;: &#34;streamwriter&#34;, //是否打印内容 &#34;parameter&#34;: { &#34;print&#34;:true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: 1048576 }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;kingbaseesreader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;xx&#34;, &#34;password&#34;: &#34;xx&#34;, &#34;where&#34;: &#34;&#34;, &#34;connection&#34;: [ { &#34;querySql&#34;: [ &#34;select db_id,on_line_flag from db_info where db_id &lt; 10;&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:kingbase8://host:port/database&#34;, &#34;jdbc:kingbase8://host:port/database&#34; ] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;: false, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3.2 参数说明 jdbcUrl
+描述：描述的是到对端数据库的JDBC连接信息，使用JSON的数组描述，并支持一个库填写多个连接地址。之所以使用JSON数组描述连接信息，是因为阿里集团内部支持多个IP探测，如果配置了多个，KingbaseesReader可以依次探测ip的可连接性，直到选择一个合法的IP。如果全部连接失败，KingbaseesReader报错。 注意，jdbcUrl必须包含在connection配置单元中。对于阿里集团外部使用情况，JSON数组填写一个JDBC连接即可。
+jdbcUrl按照KingbaseES官方规范，并可以填写连接附件控制信息。具体请参看KingbaseES官方文档。
+必选：是 默认值：无 username
+描述：数据源的用户名 必选：是 默认值：无 password
+描述：数据源指定用户名的密码 必选：是 默认值：无 table
+描述：所选取的需要同步的表。使用JSON的数组描述，因此支持多张表同时抽取。当配置为多张表时，用户自己需保证多张表是同一schema结构，KingbaseesReader不予检查表是否同一逻辑表。注意，table必须包含在connection配置单元中。
+必选：是 默认值：无 column
+描述：所配置的表中需要同步的列名集合，使用JSON的数组描述字段信息。用户使用*代表默认使用所有列配置，例如[’*’]。
+支持列裁剪，即列可以挑选部分列进行导出。
+支持列换序，即列可以不按照表schema信息进行导出。
+支持常量配置，用户需要按照KingbaseES语法格式: [“id”, “‘hello’::varchar”, “true”, “2.5::real”, “power(2,3)”] id为普通列名，‘hello’::varchar为字符串常量，true为布尔值，2.5为浮点数, power(2,3)为函数。
+column必须用户显示指定同步的列集合，不允许为空！
+必选：是 默认值：无 splitPk
+描述：KingbaseesReader进行数据抽取时，如果指定splitPk，表示用户希望使用splitPk代表的字段进行数据分片，DataX因此会启动并发任务进行数据同步，这样可以大大提供数据同步的效能。
+推荐splitPk用户使用表主键，因为表主键通常情况下比较均匀，因此切分出来的分片也不容易出现数据热点。
+目前splitPk仅支持整形数据切分，不支持浮点、字符串型、日期等其他类型。如果用户指定其他非支持类型，KingbaseesReader将报错！
+splitPk设置为空，底层将视作用户不允许对单表进行切分，因此使用单通道进行抽取。
+必选：否 默认值：空 where
+描述：筛选条件，KingbaseesReader根据指定的column、table、where条件拼接SQL，并根据这个SQL进行数据抽取。在实际业务场景中，往往会选择当天的数据进行同步，可以将where条件指定为gmt_create &gt; $bizdate 。注意：不可以将where条件指定为limit 10，limit不是SQL的合法where子句。
+where条件可以有效地进行业务增量同步。	where条件不配置或者为空，视作全表同步数据。 必选：否 默认值：无 querySql
+描述：在有些业务场景下，where这一配置项不足以描述所筛选的条件，用户可以通过该配置型来自定义筛选SQL。当用户配置了这一项之后，DataX系统就会忽略table，column这些配置型，直接使用这个配置项的内容对数据进行筛选，例如需要进行多表join后同步数据，使用select a,b from table_a join table_b on table_a.id = table_b.id 当用户配置querySql时，KingbaseesReader直接忽略table、column、where条件的配置。
+必选：否 默认值：无 fetchSize
+描述：该配置项定义了插件和数据库服务器端每次批量数据获取条数，该值决定了DataX和服务器端的网络交互次数，能够较大的提升数据抽取性能。
+注意，该值过大(&gt;2048)可能造成DataX进程OOM。。
+必选：否 默认值：1024 ...</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
   <a class="entry-link" aria-label="post link to KingbaseesReader 插件文档" href="https://haokiu.com/blog/cc7bd03f72154435ae9af2d67a214f6d/"></a>
@@ -226,7 +276,27 @@
 不同于其他关系型数据库，MysqlReader不支持FetchSize.
 2 实现原理 简而言之，MysqlReader通过JDBC连接器连接到远程的Mysql数据库，并根据用户配置的信息生成查询SELECT SQL语句，然后发送到远程Mysql数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
 对于用户配置Table、Column、Where的信息，MysqlReader将其拼接为SQL语句发送到Mysql数据库；对于用户配置querySql信息，MysqlReader直接将其发送到Mysql数据库。
-3 功能说明 3.1 配置样例 配置一个从Mysql数据库同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 3 }, &#34;errorLimit&#34;: { &#34;record&#34;: 0, &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;mysqlreader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;root&#34;, &#34;password&#34;: &#34;root&#34;, &#34;column&#34;: [ &#34;id&#34;, &#34;name&#34; ], &#34;splitPk&#34;: &#34;db_id&#34;, &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;table&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:mysql://127.0.0.1:3306/database&#34; ] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;:true } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;:1 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;mysqlreader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;root&#34;, &#34;password&#34;: &#34;root&#34;, &#34;connection&#34;: [ { &#34;querySql&#34;: [ &#34;select db_id,on_line_flag from db_info where db_id &lt; 10;&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:mysql://bad_ip:3306/database&#34;, &#34;jdbc:mysql://127....</p>
+3 功能说明 3.1 配置样例 配置一个从Mysql数据库同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 3 }, &#34;errorLimit&#34;: { &#34;record&#34;: 0, &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;mysqlreader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;root&#34;, &#34;password&#34;: &#34;root&#34;, &#34;column&#34;: [ &#34;id&#34;, &#34;name&#34; ], &#34;splitPk&#34;: &#34;db_id&#34;, &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;table&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:mysql://127.0.0.1:3306/database&#34; ] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;:true } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;:1 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;mysqlreader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;root&#34;, &#34;password&#34;: &#34;root&#34;, &#34;connection&#34;: [ { &#34;querySql&#34;: [ &#34;select db_id,on_line_flag from db_info where db_id &lt; 10;&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:mysql://bad_ip:3306/database&#34;, &#34;jdbc:mysql://127.0.0.1:bad_port/database&#34;, &#34;jdbc:mysql://127.0.0.1:3306/database&#34; ] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;: false, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3.2 参数说明 jdbcUrl
+描述：描述的是到对端数据库的JDBC连接信息，使用JSON的数组描述，并支持一个库填写多个连接地址。之所以使用JSON数组描述连接信息，是因为阿里集团内部支持多个IP探测，如果配置了多个，MysqlReader可以依次探测ip的可连接性，直到选择一个合法的IP。如果全部连接失败，MysqlReader报错。 注意，jdbcUrl必须包含在connection配置单元中。对于阿里集团外部使用情况，JSON数组填写一个JDBC连接即可。
+jdbcUrl按照Mysql官方规范，并可以填写连接附件控制信息。具体请参看Mysql官方文档。
+必选：是 默认值：无 username
+描述：数据源的用户名 必选：是 默认值：无 password
+描述：数据源指定用户名的密码 必选：是 默认值：无 table
+描述：所选取的需要同步的表。使用JSON的数组描述，因此支持多张表同时抽取。当配置为多张表时，用户自己需保证多张表是同一schema结构，MysqlReader不予检查表是否同一逻辑表。注意，table必须包含在connection配置单元中。
+必选：是 默认值：无 column
+描述：所配置的表中需要同步的列名集合，使用JSON的数组描述字段信息。用户使用*代表默认使用所有列配置，例如[’*’]。
+支持列裁剪，即列可以挑选部分列进行导出。
+支持列换序，即列可以不按照表schema信息进行导出。
+支持常量配置，用户需要按照Mysql SQL语法格式: [“id”, “`table`”, “1”, “‘bazhen.csy’”, “null”, “to_char(a &#43; 1)”, “2.3” , “true”] id为普通列名，`table`为包含保留在的列名，1为整形数字常量，‘bazhen.csy’为字符串常量，null为空指针，to_char(a &#43; 1)为表达式，2.3为浮点数，true为布尔值。
+必选：是 默认值：无 splitPk
+描述：MysqlReader进行数据抽取时，如果指定splitPk，表示用户希望使用splitPk代表的字段进行数据分片，DataX因此会启动并发任务进行数据同步，这样可以大大提供数据同步的效能。
+推荐splitPk用户使用表主键，因为表主键通常情况下比较均匀，因此切分出来的分片也不容易出现数据热点。
+目前splitPk仅支持整形数据切分，不支持浮点、字符串、日期等其他类型。如果用户指定其他非支持类型，MysqlReader将报错！
+如果splitPk不填写，包括不提供splitPk或者splitPk值为空，DataX视作使用单通道同步该表数据。 必选：否 默认值：空 where
+描述：筛选条件，MysqlReader根据指定的column、table、where条件拼接SQL，并根据这个SQL进行数据抽取。在实际业务场景中，往往会选择当天的数据进行同步，可以将where条件指定为gmt_create &gt; $bizdate 。注意：不可以将where条件指定为limit 10，limit不是SQL的合法where子句。
+where条件可以有效地进行业务增量同步。如果不填写where语句，包括不提供where的key或者value，DataX均视作同步全量数据。 必选：否 默认值：无 querySql
+描述：在有些业务场景下，where这一配置项不足以描述所筛选的条件，用户可以通过该配置型来自定义筛选SQL。当用户配置了这一项之后，DataX系统就会忽略table，column这些配置型，直接使用这个配置项的内容对数据进行筛选，例如需要进行多表join后同步数据，使用select a,b from table_a join table_b on table_a.id = table_b.id 当用户配置querySql时，MysqlReader直接忽略table、column、where条件的配置，querySql优先级大于table、column、where选项。
+必选：否 默认值：无 ...</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
   <a class="entry-link" aria-label="post link to MysqlReader 插件文档" href="https://haokiu.com/blog/29875f5b780c46929670f9b8699ed462/"></a>
@@ -241,7 +311,11 @@
     <p>OpenTSDBReader 插件文档 1 快速介绍 OpenTSDBReader 插件实现了从 OpenTSDB 读取数据。OpenTSDB 是主要由 Yahoo 维护的、可扩展的、分布式时序数据库，与阿里巴巴自研 TSDB 的关系与区别详见阿里云官网：《相比 OpenTSDB 优势》
 2 实现原理 在底层实现上，OpenTSDBReader 通过 HTTP 请求链接到 OpenTSDB 实例，利用 /api/config 接口获取到其底层存储 HBase 的连接信息，再利用 AsyncHBase 框架连接 HBase，通过 Scan 的方式将数据点扫描出来。整个同步的过程通过 metric 和时间段进行切分，即某个 metric 在某一个小时内的数据迁移，组合成一个迁移 Task。
 3 功能说明 3.1 配置样例 配置一个从 OpenTSDB 数据库同步抽取数据到本地的作业： { &#34;job&#34;: { &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;opentsdbreader&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;: &#34;http://localhost:4242&#34;, &#34;column&#34;: [ &#34;m&#34; ], &#34;beginDateTime&#34;: &#34;2019-01-01 00:00:00&#34;, &#34;endDateTime&#34;: &#34;2019-01-01 03:00:00&#34; } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;encoding&#34;: &#34;UTF-8&#34;, &#34;print&#34;: true } } } ], &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 1 } } } } 3.2 参数说明 name
-描述：本插件的名称 必选：是 默认值：opentsdbreader parameter...</p>
+描述：本插件的名称 必选：是 默认值：opentsdbreader parameter
+endpoint 描述：OpenTSDB 的 HTTP 连接地址 必选：是 格式：http://IP:Port 默认值：无
+column 描述：数据迁移任务需要迁移的 Metric 列表 必选：是 默认值：无 beginDateTime
+描述：和 endDateTime 配合使用，用于指定哪个时间段内的数据点，需要被迁移 必选：是 格式：yyyy-MM-dd HH:mm:ss 默认值：无 注意：指定起止时间会自动忽略分钟和秒，转为整点时刻，例如 2019-4-18 的 [3:35, 4:55) 会被转为 [3:00, 4:00) endDateTime
+描述：和 beginDateTime 配合使用，用于指定哪个时间段内的数据点，需要被迁移 必选：是 格式：yyyy-MM-dd HH:mm:ss 默认值：无 注意：指定起止时间会自动忽略分钟和秒，转为整点时刻，例如 2019-4-18 的 [3:35, 4:55) 会被转为 [3:00, 4:00) ...</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
   <a class="entry-link" aria-label="post link to OpenTSDBReader 插件文档" href="https://haokiu.com/blog/4e39a8595b6247fabfd6f625f053b0b6/"></a>
@@ -256,7 +330,33 @@
     <p>OracleReader 插件文档 1 快速介绍 OracleReader插件实现了从Oracle读取数据。在底层实现上，OracleReader通过JDBC连接远程Oracle数据库，并执行相应的sql语句将数据从Oracle库中SELECT出来。
 2 实现原理 简而言之，OracleReader通过JDBC连接器连接到远程的Oracle数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程Oracle数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
 对于用户配置Table、Column、Where的信息，OracleReader将其拼接为SQL语句发送到Oracle数据库；对于用户配置querySql信息，Oracle直接将其发送到Oracle数据库。
-3 功能说明 3.1 配置样例 配置一个从Oracle数据库同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { //设置传输速度 byte/s 尽量逼近这个速度但是不高于它. // channel 表示通道数量，byte表示通道速度，如果单通道速度1MB，配置byte为1048576表示一个channel &#34;byte&#34;: 1048576 }, //出错限制 &#34;errorLimit&#34;: { //先选择record &#34;record&#34;: 0, //百分比 1表示100% &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;oraclereader&#34;, &#34;parameter&#34;: { // 数据库连接用户名 &#34;username&#34;: &#34;root&#34;, // 数据库连接密码 &#34;password&#34;: &#34;root&#34;, &#34;column&#34;: [ &#34;id&#34;,&#34;name&#34; ], //切分主键 &#34;splitPk&#34;: &#34;db_id&#34;, &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;table&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:oracle:thin:@[HOST_NAME]:PORT:[DATABASE_NAME]&#34; ] } ] } }, &#34;writer&#34;: { //writer类型 &#34;name&#34;: &#34;streamwriter&#34;, // 是否打印内容 &#34;parameter&#34;: { &#34;print&#34;: true } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 5 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;oraclereader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;root&#34;, &#34;password&#34;: &#34;root&#34;, &#34;where&#34;: &#34;&#34;, &#34;connection&#34;: [ { &#34;querySql&#34;: [ &#34;select db_id,on_line_flag from db_info where db_id &lt; 10&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:oracle:thin:@[HOST_NAME]:PORT:[DATABASE_NAME]&#34; ] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;visible&#34;: false, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3....</p>
+3 功能说明 3.1 配置样例 配置一个从Oracle数据库同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { //设置传输速度 byte/s 尽量逼近这个速度但是不高于它. // channel 表示通道数量，byte表示通道速度，如果单通道速度1MB，配置byte为1048576表示一个channel &#34;byte&#34;: 1048576 }, //出错限制 &#34;errorLimit&#34;: { //先选择record &#34;record&#34;: 0, //百分比 1表示100% &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;oraclereader&#34;, &#34;parameter&#34;: { // 数据库连接用户名 &#34;username&#34;: &#34;root&#34;, // 数据库连接密码 &#34;password&#34;: &#34;root&#34;, &#34;column&#34;: [ &#34;id&#34;,&#34;name&#34; ], //切分主键 &#34;splitPk&#34;: &#34;db_id&#34;, &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;table&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:oracle:thin:@[HOST_NAME]:PORT:[DATABASE_NAME]&#34; ] } ] } }, &#34;writer&#34;: { //writer类型 &#34;name&#34;: &#34;streamwriter&#34;, // 是否打印内容 &#34;parameter&#34;: { &#34;print&#34;: true } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 5 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;oraclereader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;root&#34;, &#34;password&#34;: &#34;root&#34;, &#34;where&#34;: &#34;&#34;, &#34;connection&#34;: [ { &#34;querySql&#34;: [ &#34;select db_id,on_line_flag from db_info where db_id &lt; 10&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:oracle:thin:@[HOST_NAME]:PORT:[DATABASE_NAME]&#34; ] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;visible&#34;: false, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3.2 参数说明 jdbcUrl
+描述：描述的是到对端数据库的JDBC连接信息，使用JSON的数组描述，并支持一个库填写多个连接地址。之所以使用JSON数组描述连接信息，是因为阿里集团内部支持多个IP探测，如果配置了多个，OracleReader可以依次探测ip的可连接性，直到选择一个合法的IP。如果全部连接失败，OracleReader报错。 注意，jdbcUrl必须包含在connection配置单元中。对于阿里集团外部使用情况，JSON数组填写一个JDBC连接即可。
+jdbcUrl按照Oracle官方规范，并可以填写连接附件控制信息。具体请参看Oracle官方文档。
+必选：是 默认值：无 username
+描述：数据源的用户名 必选：是 默认值：无 password
+描述：数据源指定用户名的密码 必选：是 默认值：无 table
+描述：所选取的需要同步的表。使用JSON的数组描述，因此支持多张表同时抽取。当配置为多张表时，用户自己需保证多张表是同一schema结构，OracleReader不予检查表是否同一逻辑表。注意，table必须包含在connection配置单元中。
+必选：是 默认值：无 column
+描述：所配置的表中需要同步的列名集合，使用JSON的数组描述字段信息。用户使用*代表默认使用所有列配置，例如[’*’]。
+支持列裁剪，即列可以挑选部分列进行导出。
+支持列换序，即列可以不按照表schema信息进行导出。
+支持常量配置，用户需要按照JSON格式: [“id”, “table”, “1”, “‘bazhen.csy’”, “null”, “to_char(a &#43; 1)”, “2.3” , “true”] id为普通列名，`table`为包含保留在的列名，1为整形数字常量，‘bazhen.csy’为字符串常量，null为空指针，to_char(a &#43; 1)为表达式，2.3为浮点数，true为布尔值。
+Column必须显示填写，不允许为空！
+必选：是 默认值：无 splitPk
+描述：OracleReader进行数据抽取时，如果指定splitPk，表示用户希望使用splitPk代表的字段进行数据分片，DataX因此会启动并发任务进行数据同步，这样可以大大提供数据同步的效能。
+推荐splitPk用户使用表主键，因为表主键通常情况下比较均匀，因此切分出来的分片也不容易出现数据热点。
+目前splitPk仅支持整形、字符串型数据切分，不支持浮点、日期等其他类型。如果用户指定其他非支持类型，OracleReader将报错！
+splitPk如果不填写，将视作用户不对单表进行切分，OracleReader使用单通道同步全量数据。
+必选：否 默认值：无 where
+描述：筛选条件，MysqlReader根据指定的column、table、where条件拼接SQL，并根据这个SQL进行数据抽取。在实际业务场景中，往往会选择当天的数据进行同步，可以将where条件指定为gmt_create &gt; $bizdate 。注意：不可以将where条件指定为limit 10，limit不是SQL的合法where子句。
+where条件可以有效地进行业务增量同步。 必选：否 默认值：无 querySql
+描述：在有些业务场景下，where这一配置项不足以描述所筛选的条件，用户可以通过该配置型来自定义筛选SQL。当用户配置了这一项之后，DataX系统就会忽略table，column这些配置型，直接使用这个配置项的内容对数据进行筛选，例如需要进行多表join后同步数据，使用select a,b from table_a join table_b on table_a.id = table_b.id 当用户配置querySql时，OracleReader直接忽略table、column、where条件的配置。
+必选：否 默认值：无 fetchSize
+描述：该配置项定义了插件和数据库服务器端每次批量数据获取条数，该值决定了DataX和服务器端的网络交互次数，能够较大的提升数据抽取性能。
+注意，该值过大(&gt;2048)可能造成DataX进程OOM。。
+必选：否 默认值：1024 session
+描述：控制写入数据的时间格式，时区等的配置，如果表中有时间字段，配置该值以明确告知写入 oracle 的时间格式。通常配置的参数为：NLS_DATE_FORMAT,NLS_TIME_FORMAT。其配置的值为 json 格式，例如： ...</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
   <a class="entry-link" aria-label="post link to OracleReader 插件文档" href="https://haokiu.com/blog/0ffdd59e828b4bb0a53cef538910db12/"></a>
@@ -272,7 +372,24 @@
 全表抽取 范围抽取 指定分片抽取 OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，提供海量结构化数据的存储和实时访问。OTS 以实例和表的形式组织数据，通过数据分片和负载均衡技术，实现规模上的无缝扩展。
 2 实现原理 简而言之，OTSReader通过OTS官方Java SDK连接到OTS服务端，获取并按照DataX官方协议标准转为DataX字段信息传递给下游Writer端。
 OTSReader会根据OTS的表范围，按照Datax并发的数目N，将范围等分为N份Task。每个Task都会有一个OTSReader线程来执行。
-3 功能说明 3.1 配置样例 配置一个从OTS全表同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;otsreader&#34;, &#34;parameter&#34;: { /* ----------- 必填 --------------*/ &#34;endpoint&#34;:&#34;&#34;, &#34;accessId&#34;:&#34;&#34;, &#34;accessKey&#34;:&#34;&#34;, &#34;instanceName&#34;:&#34;&#34;, // 导出数据表的表名 &#34;table&#34;:&#34;&#34;, // 需要导出的列名，支持重复列和常量列，区分大小写 // 常量列：类型支持STRING，INT，DOUBLE，BOOL和BINARY // 备注：BINARY需要通过Base64转换为对应的字符串传入插件 &#34;column&#34;:[ {&#34;name&#34;:&#34;col1&#34;}, // 普通列 {&#34;name&#34;:&#34;col2&#34;}, // 普通列 {&#34;name&#34;:&#34;col3&#34;}, // 普通列 {&#34;type&#34;:&#34;STRING&#34;, &#34;value&#34; : &#34;bazhen&#34;}, // 常量列(字符串) {&#34;type&#34;:&#34;INT&#34;, &#34;value&#34; : &#34;&#34;}, // 常量列(整形) {&#34;type&#34;:&#34;DOUBLE&#34;, &#34;value&#34; : &#34;&#34;}, // 常量列(浮点) {&#34;type&#34;:&#34;BOOL&#34;, &#34;value&#34; : &#34;&#34;}, // 常量列(布尔) {&#34;type&#34;:&#34;BINARY&#34;, &#34;value&#34; : &#34;Base64(bin)&#34;} // 常量列(二进制),使用Base64编码完成 ], &#34;range&#34;:{ // 导出数据的起始范围 // 支持INF_MIN, INF_MAX, STRING, INT &#34;begin&#34;:[ {&#34;type&#34;:&#34;INF_MIN&#34;}, ], // 导出数据的结束范围 // 支持INF_MIN, INF_MAX, STRING, INT &#34;end&#34;:[ {&#34;type&#34;:&#34;INF_MAX&#34;}, ] } } }, &#34;writer&#34;: {} } ] } } 配置一个定义抽取范围的OTSReader： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;byte&#34;:10485760 }, &#34;errorLimit&#34;:0....</p>
+3 功能说明 3.1 配置样例 配置一个从OTS全表同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;otsreader&#34;, &#34;parameter&#34;: { /* ----------- 必填 --------------*/ &#34;endpoint&#34;:&#34;&#34;, &#34;accessId&#34;:&#34;&#34;, &#34;accessKey&#34;:&#34;&#34;, &#34;instanceName&#34;:&#34;&#34;, // 导出数据表的表名 &#34;table&#34;:&#34;&#34;, // 需要导出的列名，支持重复列和常量列，区分大小写 // 常量列：类型支持STRING，INT，DOUBLE，BOOL和BINARY // 备注：BINARY需要通过Base64转换为对应的字符串传入插件 &#34;column&#34;:[ {&#34;name&#34;:&#34;col1&#34;}, // 普通列 {&#34;name&#34;:&#34;col2&#34;}, // 普通列 {&#34;name&#34;:&#34;col3&#34;}, // 普通列 {&#34;type&#34;:&#34;STRING&#34;, &#34;value&#34; : &#34;bazhen&#34;}, // 常量列(字符串) {&#34;type&#34;:&#34;INT&#34;, &#34;value&#34; : &#34;&#34;}, // 常量列(整形) {&#34;type&#34;:&#34;DOUBLE&#34;, &#34;value&#34; : &#34;&#34;}, // 常量列(浮点) {&#34;type&#34;:&#34;BOOL&#34;, &#34;value&#34; : &#34;&#34;}, // 常量列(布尔) {&#34;type&#34;:&#34;BINARY&#34;, &#34;value&#34; : &#34;Base64(bin)&#34;} // 常量列(二进制),使用Base64编码完成 ], &#34;range&#34;:{ // 导出数据的起始范围 // 支持INF_MIN, INF_MAX, STRING, INT &#34;begin&#34;:[ {&#34;type&#34;:&#34;INF_MIN&#34;}, ], // 导出数据的结束范围 // 支持INF_MIN, INF_MAX, STRING, INT &#34;end&#34;:[ {&#34;type&#34;:&#34;INF_MAX&#34;}, ] } } }, &#34;writer&#34;: {} } ] } } 配置一个定义抽取范围的OTSReader： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;byte&#34;:10485760 }, &#34;errorLimit&#34;:0.0 }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;otsreader&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;:&#34;&#34;, &#34;accessId&#34;:&#34;&#34;, &#34;accessKey&#34;:&#34;&#34;, &#34;instanceName&#34;:&#34;&#34;, // 导出数据表的表名 &#34;table&#34;:&#34;&#34;, // 需要导出的列名，支持重复类和常量列，区分大小写 // 常量列：类型支持STRING，INT，DOUBLE，BOOL和BINARY // 备注：BINARY需要通过Base64转换为对应的字符串传入插件 &#34;column&#34;:[ {&#34;name&#34;:&#34;col1&#34;}, // 普通列 {&#34;name&#34;:&#34;col2&#34;}, // 普通列 {&#34;name&#34;:&#34;col3&#34;}, // 普通列 {&#34;type&#34;:&#34;STRING&#34;,&#34;value&#34; : &#34;&#34;}, // 常量列(字符串) {&#34;type&#34;:&#34;INT&#34;,&#34;value&#34; : &#34;&#34;}, // 常量列(整形) {&#34;type&#34;:&#34;DOUBLE&#34;,&#34;value&#34; : &#34;&#34;}, // 常量列(浮点) {&#34;type&#34;:&#34;BOOL&#34;,&#34;value&#34; : &#34;&#34;}, // 常量列(布尔) {&#34;type&#34;:&#34;BINARY&#34;,&#34;value&#34; : &#34;Base64(bin)&#34;} // 常量列(二进制) ], &#34;range&#34;:{ // 导出数据的起始范围 // 支持INF_MIN, INF_MAX, STRING, INT &#34;begin&#34;:[ {&#34;type&#34;:&#34;INF_MIN&#34;}, {&#34;type&#34;:&#34;INF_MAX&#34;}, {&#34;type&#34;:&#34;STRING&#34;, &#34;value&#34;:&#34;hello&#34;}, {&#34;type&#34;:&#34;INT&#34;, &#34;value&#34;:&#34;2999&#34;}, ], // 导出数据的结束范围 // 支持INF_MIN, INF_MAX, STRING, INT &#34;end&#34;:[ {&#34;type&#34;:&#34;INF_MAX&#34;}, {&#34;type&#34;:&#34;INF_MIN&#34;}, {&#34;type&#34;:&#34;STRING&#34;, &#34;value&#34;:&#34;hello&#34;}, {&#34;type&#34;:&#34;INT&#34;, &#34;value&#34;:&#34;2999&#34;}, ] } } }, &#34;writer&#34;: {} } ] } } 3.2 参数说明 endpoint
+描述：OTS Server的EndPoint地址，例如http://bazhen.cn−hangzhou.ots.aliyuncs.com。
+必选：是 默认值：无 accessId
+描述：OTS的accessId 必选：是 默认值：无 accessKey
+描述：OTS的accessKey 必选：是 默认值：无 instanceName
+描述：OTS的实例名称，实例是用户使用和管理 OTS 服务的实体，用户在开通 OTS 服务之后，需要通过管理控制台来创建实例，然后在实例内进行表的创建和管理。实例是 OTS 资源管理的基础单元，OTS 对应用程序的访问控制和资源计量都在实例级别完成。 必选：是 默认值：无 table
+描述：所选取的需要抽取的表名称，这里有且只能填写一张表。在OTS不存在多表同步的需求。
+必选：是 默认值：无 column
+描述：所配置的表中需要同步的列名集合，使用JSON的数组描述字段信息。由于OTS本身是NoSQL系统，在OTSReader抽取数据过程中，必须指定相应地字段名称。
+支持普通的列读取，例如: {“name”:“col1”}
+支持部分列读取，如用户不配置该列，则OTSReader不予读取。
+支持常量列读取，例如: {“type”:“STRING”, “value” : “DataX”}。使用type描述常量类型，目前支持STRING、INT、DOUBLE、BOOL、BINARY(用户使用Base64编码填写)、INF_MIN(OTS的系统限定最小值，使用该值用户不能填写value属性，否则报错)、INF_MAX(OTS的系统限定最大值，使用该值用户不能填写value属性，否则报错)。
+不支持函数或者自定义表达式，由于OTS本身不提供类似SQL的函数或者表达式功能，OTSReader也不能提供函数或表达式列功能。
+必选：是 默认值：无 begin/end
+描述：该配置项必须配对使用，用于支持OTS表范围抽取。begin/end中描述的是OTS PrimaryKey的区间分布状态，而且必须保证区间覆盖到所有的PrimaryKey，需要指定该表下所有的PrimaryKey范围，不能遗漏任意一个PrimaryKey，对于无限大小的区间，可以使用{“type”:“INF_MIN”}，{“type”:“INF_MAX”}指代。例如对一张主键为 [DeviceID, SellerID]的OTS进行抽取任务，begin/end可以配置为: &#34;range&#34;: { &#34;begin&#34;: { {&#34;type&#34;:&#34;INF_MIN&#34;}, //指定deviceID最小值 {&#34;type&#34;:&#34;INT&#34;, &#34;value&#34;:&#34;0&#34;} //指定deviceID最小值 }, &#34;end&#34;: { {&#34;type&#34;:&#34;INF_MAX&#34;}, //指定deviceID抽取最大值 {&#34;type&#34;:&#34;INT&#34;, &#34;value&#34;:&#34;9999&#34;} //指定deviceID抽取最大值 } } 如果要对上述表抽取全表，可以使用如下配置： &#34;range&#34;: { &#34;begin&#34;: [ {&#34;type&#34;:&#34;INF_MIN&#34;}, //指定deviceID最小值 {&#34;type&#34;:&#34;INF_MIN&#34;} //指定SellerID最小值 ], &#34;end&#34;: [ {&#34;type&#34;:&#34;INF_MAX&#34;}, //指定deviceID抽取最大值 {&#34;type&#34;:&#34;INF_MAX&#34;} //指定SellerID抽取最大值 ] } 必选：是 默认值：空 split
+描述：该配置项属于高级配置项，是用户自己定义切分配置信息，普通情况下不建议用户使用。适用场景通常在OTS数据存储发生热点，使用OTSReader自动切分的策略不能生效情况下，使用用户自定义的切分规则。split指定是的在Begin、End区间内的切分点，且只能是partitionKey的切分点信息，即在split仅配置partitionKey，而不需要指定全部的PrimaryKey。
+例如对一张主键为 [DeviceID, SellerID]的OTS进行抽取任务，可以配置为:
+&#34;range&#34;: { &#34;begin&#34;: { {&#34;type&#34;:&#34;INF_MIN&#34;}, //指定deviceID最小值 {&#34;type&#34;:&#34;INF_MIN&#34;} //指定deviceID最小值 }, &#34;end&#34;: { {&#34;type&#34;:&#34;INF_MAX&#34;}, //指定deviceID抽取最大值 {&#34;type&#34;:&#34;INF_MAX&#34;} //指定deviceID抽取最大值 }， // 用户指定的切分点，如果指定了切分点，Job将按照begin、end和split进行Task的切分， // 切分的列只能是Partition Key（ParimaryKey的第一列） // 支持INF_MIN, INF_MAX, STRING, INT &#34;split&#34;:[ {&#34;type&#34;:&#34;STRING&#34;, &#34;value&#34;:&#34;1&#34;}, {&#34;type&#34;:&#34;STRING&#34;, &#34;value&#34;:&#34;2&#34;}, {&#34;type&#34;:&#34;STRING&#34;, &#34;value&#34;:&#34;3&#34;}, {&#34;type&#34;:&#34;STRING&#34;, &#34;value&#34;:&#34;4&#34;}, {&#34;type&#34;:&#34;STRING&#34;, &#34;value&#34;:&#34;5&#34;} ] } 必选：否 默认值：无 ...</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
   <a class="entry-link" aria-label="post link to OTSReader 插件文档" href="https://haokiu.com/blog/2dc5ba5f4d58498e8453bd2d8efde079/"></a>
@@ -290,7 +407,28 @@ UpdateRow，对应于OTS API UpdateRow，更新指定行的数据，如果该行
 DeleteRow，对应于OTS API DeleteRow，删除指定行的数据。
 OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，提供海量结构化数据的存储和实时访问。OTS 以实例和表的形式组织数据，通过数据分片和负载均衡技术，实现规模上的无缝扩展。
 2 实现原理 简而言之，OTSWriter通过OTS官方Java SDK连接到OTS服务端，并通过SDK写入OTS服务端。OTSWriter本身对于写入过程做了很多优化，包括写入超时重试、异常写入重试、批量提交等Feature。
-3 功能说明 3.1 配置样例 配置一个写入OTS作业: { &#34;job&#34;: { &#34;setting&#34;: { }, &#34;content&#34;: [ { &#34;reader&#34;: {}, &#34;writer&#34;: { &#34;name&#34;: &#34;otswriter&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;:&#34;&#34;, &#34;accessId&#34;:&#34;&#34;, &#34;accessKey&#34;:&#34;&#34;, &#34;instanceName&#34;:&#34;&#34;, // 导出数据表的表名 &#34;table&#34;:&#34;&#34;, // Writer支持不同类型之间进行相互转换 // 如下类型转换不支持: // ================================ // int -&gt; binary // double -&gt; bool, binary // bool -&gt; binary // bytes -&gt; int, double, bool // ================================ // 需要导入的PK列名，区分大小写 // 类型支持：STRING，INT // 1. 支持类型转换，注意类型转换时的精度丢失 // 2. 顺序不要求和表的Meta一致 &#34;primaryKey&#34; : [ {&#34;name&#34;:&#34;pk1&#34;, &#34;type&#34;:&#34;string&#34;}, {&#34;name&#34;:&#34;pk2&#34;, &#34;type&#34;:&#34;int&#34;} ], // 需要导入的列名，区分大小写 // 类型支持STRING，INT，DOUBLE，BOOL和BINARY &#34;column&#34; : [ {&#34;name&#34;:&#34;col2&#34;, &#34;type&#34;:&#34;INT&#34;}, {&#34;name&#34;:&#34;col3&#34;, &#34;type&#34;:&#34;STRING&#34;}, {&#34;name&#34;:&#34;col4&#34;, &#34;type&#34;:&#34;STRING&#34;}, {&#34;name&#34;:&#34;col5&#34;, &#34;type&#34;:&#34;BINARY&#34;}, {&#34;name&#34;:&#34;col6&#34;, &#34;type&#34;:&#34;DOUBLE&#34;} ], // 写入OTS的方式 // PutRow : 等同于OTS API中PutRow操作，检查条件是ignore // UpdateRow : 等同于OTS API中UpdateRow操作，检查条件是ignore // DeleteRow: 等同于OTS API中DeleteRow操作，检查条件是ignore &#34;writeMode&#34; : &#34;PutRow&#34; } } } ] } } 3....</p>
+3 功能说明 3.1 配置样例 配置一个写入OTS作业: { &#34;job&#34;: { &#34;setting&#34;: { }, &#34;content&#34;: [ { &#34;reader&#34;: {}, &#34;writer&#34;: { &#34;name&#34;: &#34;otswriter&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;:&#34;&#34;, &#34;accessId&#34;:&#34;&#34;, &#34;accessKey&#34;:&#34;&#34;, &#34;instanceName&#34;:&#34;&#34;, // 导出数据表的表名 &#34;table&#34;:&#34;&#34;, // Writer支持不同类型之间进行相互转换 // 如下类型转换不支持: // ================================ // int -&gt; binary // double -&gt; bool, binary // bool -&gt; binary // bytes -&gt; int, double, bool // ================================ // 需要导入的PK列名，区分大小写 // 类型支持：STRING，INT // 1. 支持类型转换，注意类型转换时的精度丢失 // 2. 顺序不要求和表的Meta一致 &#34;primaryKey&#34; : [ {&#34;name&#34;:&#34;pk1&#34;, &#34;type&#34;:&#34;string&#34;}, {&#34;name&#34;:&#34;pk2&#34;, &#34;type&#34;:&#34;int&#34;} ], // 需要导入的列名，区分大小写 // 类型支持STRING，INT，DOUBLE，BOOL和BINARY &#34;column&#34; : [ {&#34;name&#34;:&#34;col2&#34;, &#34;type&#34;:&#34;INT&#34;}, {&#34;name&#34;:&#34;col3&#34;, &#34;type&#34;:&#34;STRING&#34;}, {&#34;name&#34;:&#34;col4&#34;, &#34;type&#34;:&#34;STRING&#34;}, {&#34;name&#34;:&#34;col5&#34;, &#34;type&#34;:&#34;BINARY&#34;}, {&#34;name&#34;:&#34;col6&#34;, &#34;type&#34;:&#34;DOUBLE&#34;} ], // 写入OTS的方式 // PutRow : 等同于OTS API中PutRow操作，检查条件是ignore // UpdateRow : 等同于OTS API中UpdateRow操作，检查条件是ignore // DeleteRow: 等同于OTS API中DeleteRow操作，检查条件是ignore &#34;writeMode&#34; : &#34;PutRow&#34; } } } ] } } 3.2 参数说明 endpoint
+描述：OTS Server的EndPoint(服务地址)，例如http://bazhen.cn−hangzhou.ots.aliyuncs.com。
+必选：是 默认值：无 accessId
+描述：OTS的accessId 必选：是 默认值：无 accessKey
+描述：OTS的accessKey 必选：是 默认值：无 instanceName
+描述：OTS的实例名称，实例是用户使用和管理 OTS 服务的实体，用户在开通 OTS 服务之后，需要通过管理控制台来创建实例，然后在实例内进行表的创建和管理。实例是 OTS 资源管理的基础单元，OTS 对应用程序的访问控制和资源计量都在实例级别完成。 必选：是 默认值：无 table
+描述：所选取的需要抽取的表名称，这里有且只能填写一张表。在OTS不存在多表同步的需求。
+必选：是 默认值：无 primaryKey
+描述: OTS的主键信息，使用JSON的数组描述字段信息。OTS本身是NoSQL系统，在OTSWriter导入数据过程中，必须指定相应地字段名称。
+OTS的PrimaryKey只能支持STRING，INT两种类型，因此OTSWriter本身也限定填写上述两种类型。
+DataX本身支持类型转换的，因此对于源头数据非String/Int，OTSWriter会进行数据类型转换。
+配置实例:
+&#34;primaryKey&#34; : [ {&#34;name&#34;:&#34;pk1&#34;, &#34;type&#34;:&#34;string&#34;}, {&#34;name&#34;:&#34;pk2&#34;, &#34;type&#34;:&#34;int&#34;} ], 必选：是 默认值：无 column
+描述：所配置的表中需要同步的列名集合，使用JSON的数组描述字段信息。使用格式为
+{&#34;name&#34;:&#34;col2&#34;, &#34;type&#34;:&#34;INT&#34;}, 其中的name指定写入的OTS列名，type指定写入的类型。OTS类型支持STRING，INT，DOUBLE，BOOL和BINARY几种类型 。
+写入过程不支持常量、函数或者自定义表达式。
+必选：是 默认值：无 writeMode
+描述：写入模式，目前支持两种模式，
+PutRow，对应于OTS API PutRow，插入数据到指定的行，如果该行不存在，则新增一行；若该行存在，则覆盖原有行。
+UpdateRow，对应于OTS API UpdateRow，更新指定行的数据，如果该行不存在，则新增一行；若该行存在，则根据请求的内容在这一行中新增、修改或者删除指定列的值。
+DeleteRow，对应于OTS API DeleteRow，删除指定行的数据。
+必选：是 默认值：无 ...</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
   <a class="entry-link" aria-label="post link to OTSWriter 插件文档" href="https://haokiu.com/blog/7d2496e6853044daa824d7a78226b07d/"></a>
@@ -305,7 +443,32 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
     <p>PostgresqlReader 插件文档 1 快速介绍 PostgresqlReader插件实现了从PostgreSQL读取数据。在底层实现上，PostgresqlReader通过JDBC连接远程PostgreSQL数据库，并执行相应的sql语句将数据从PostgreSQL库中SELECT出来。
 2 实现原理 简而言之，PostgresqlReader通过JDBC连接器连接到远程的PostgreSQL数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程PostgreSQL数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
 对于用户配置Table、Column、Where的信息，PostgresqlReader将其拼接为SQL语句发送到PostgreSQL数据库；对于用户配置querySql信息，PostgresqlReader直接将其发送到PostgreSQL数据库。
-3 功能说明 3.1 配置样例 配置一个从PostgreSQL数据库同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &#34;byte&#34;: 1048576 }, //出错限制 &#34;errorLimit&#34;: { //出错的record条数上限，当大于该值即报错。 &#34;record&#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;postgresqlreader&#34;, &#34;parameter&#34;: { // 数据库连接用户名 &#34;username&#34;: &#34;xx&#34;, // 数据库连接密码 &#34;password&#34;: &#34;xx&#34;, &#34;column&#34;: [ &#34;id&#34;，&#34;name&#34; ], //切分主键 &#34;splitPk&#34;: &#34;id&#34;, &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;table&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:postgresql://host:port/database&#34; ] } ] } }, &#34;writer&#34;: { //writer类型 &#34;name&#34;: &#34;streamwriter&#34;, //是否打印内容 &#34;parameter&#34;: { &#34;print&#34;:true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: 1048576 }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;postgresqlreader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;xx&#34;, &#34;password&#34;: &#34;xx&#34;, &#34;where&#34;: &#34;&#34;, &#34;connection&#34;: [ { &#34;querySql&#34;: [ &#34;select db_id,on_line_flag from db_info where db_id &lt; 10;&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:postgresql://host:port/database&#34;, &#34;jdbc:postgresql://host:port/database&#34; ] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;: false, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3....</p>
+3 功能说明 3.1 配置样例 配置一个从PostgreSQL数据库同步抽取数据到本地的作业: { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { //设置传输速度，单位为byte/s，DataX运行会尽可能达到该速度但是不超过它. &#34;byte&#34;: 1048576 }, //出错限制 &#34;errorLimit&#34;: { //出错的record条数上限，当大于该值即报错。 &#34;record&#34;: 0, //出错的record百分比上限 1.0表示100%，0.02表示2% &#34;percentage&#34;: 0.02 } }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;postgresqlreader&#34;, &#34;parameter&#34;: { // 数据库连接用户名 &#34;username&#34;: &#34;xx&#34;, // 数据库连接密码 &#34;password&#34;: &#34;xx&#34;, &#34;column&#34;: [ &#34;id&#34;，&#34;name&#34; ], //切分主键 &#34;splitPk&#34;: &#34;id&#34;, &#34;connection&#34;: [ { &#34;table&#34;: [ &#34;table&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:postgresql://host:port/database&#34; ] } ] } }, &#34;writer&#34;: { //writer类型 &#34;name&#34;: &#34;streamwriter&#34;, //是否打印内容 &#34;parameter&#34;: { &#34;print&#34;:true, } } } ] } } 配置一个自定义SQL的数据库同步任务到本地内容的作业： { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: 1048576 }, &#34;content&#34;: [ { &#34;reader&#34;: { &#34;name&#34;: &#34;postgresqlreader&#34;, &#34;parameter&#34;: { &#34;username&#34;: &#34;xx&#34;, &#34;password&#34;: &#34;xx&#34;, &#34;where&#34;: &#34;&#34;, &#34;connection&#34;: [ { &#34;querySql&#34;: [ &#34;select db_id,on_line_flag from db_info where db_id &lt; 10;&#34; ], &#34;jdbcUrl&#34;: [ &#34;jdbc:postgresql://host:port/database&#34;, &#34;jdbc:postgresql://host:port/database&#34; ] } ] } }, &#34;writer&#34;: { &#34;name&#34;: &#34;streamwriter&#34;, &#34;parameter&#34;: { &#34;print&#34;: false, &#34;encoding&#34;: &#34;UTF-8&#34; } } } ] } } 3.2 参数说明 jdbcUrl
+描述：描述的是到对端数据库的JDBC连接信息，使用JSON的数组描述，并支持一个库填写多个连接地址。之所以使用JSON数组描述连接信息，是因为阿里集团内部支持多个IP探测，如果配置了多个，PostgresqlReader可以依次探测ip的可连接性，直到选择一个合法的IP。如果全部连接失败，PostgresqlReader报错。 注意，jdbcUrl必须包含在connection配置单元中。对于阿里集团外部使用情况，JSON数组填写一个JDBC连接即可。
+jdbcUrl按照PostgreSQL官方规范，并可以填写连接附件控制信息。具体请参看PostgreSQL官方文档。
+必选：是 默认值：无 username
+描述：数据源的用户名 必选：是 默认值：无 password
+描述：数据源指定用户名的密码 必选：是 默认值：无 table
+描述：所选取的需要同步的表。使用JSON的数组描述，因此支持多张表同时抽取。当配置为多张表时，用户自己需保证多张表是同一schema结构，PostgresqlReader不予检查表是否同一逻辑表。注意，table必须包含在connection配置单元中。
+必选：是 默认值：无 column
+描述：所配置的表中需要同步的列名集合，使用JSON的数组描述字段信息。用户使用*代表默认使用所有列配置，例如[’*’]。
+支持列裁剪，即列可以挑选部分列进行导出。
+支持列换序，即列可以不按照表schema信息进行导出。
+支持常量配置，用户需要按照PostgreSQL语法格式: [“id”, “‘hello’::varchar”, “true”, “2.5::real”, “power(2,3)”] id为普通列名，‘hello’::varchar为字符串常量，true为布尔值，2.5为浮点数, power(2,3)为函数。
+column必须用户显示指定同步的列集合，不允许为空！
+必选：是 默认值：无 splitPk
+描述：PostgresqlReader进行数据抽取时，如果指定splitPk，表示用户希望使用splitPk代表的字段进行数据分片，DataX因此会启动并发任务进行数据同步，这样可以大大提供数据同步的效能。
+推荐splitPk用户使用表主键，因为表主键通常情况下比较均匀，因此切分出来的分片也不容易出现数据热点。
+目前splitPk仅支持整形数据切分，不支持浮点、字符串型、日期等其他类型。如果用户指定其他非支持类型，PostgresqlReader将报错！
+splitPk设置为空，底层将视作用户不允许对单表进行切分，因此使用单通道进行抽取。
+必选：否 默认值：空 where
+描述：筛选条件，MysqlReader根据指定的column、table、where条件拼接SQL，并根据这个SQL进行数据抽取。在实际业务场景中，往往会选择当天的数据进行同步，可以将where条件指定为gmt_create &gt; $bizdate 。注意：不可以将where条件指定为limit 10，limit不是SQL的合法where子句。
+where条件可以有效地进行业务增量同步。	where条件不配置或者为空，视作全表同步数据。 必选：否 默认值：无 querySql
+描述：在有些业务场景下，where这一配置项不足以描述所筛选的条件，用户可以通过该配置型来自定义筛选SQL。当用户配置了这一项之后，DataX系统就会忽略table，column这些配置型，直接使用这个配置项的内容对数据进行筛选，例如需要进行多表join后同步数据，使用select a,b from table_a join table_b on table_a.id = table_b.id 当用户配置querySql时，PostgresqlReader直接忽略table、column、where条件的配置。
+必选：否 默认值：无 fetchSize
+描述：该配置项定义了插件和数据库服务器端每次批量数据获取条数，该值决定了DataX和服务器端的网络交互次数，能够较大的提升数据抽取性能。
+注意，该值过大(&gt;2048)可能造成DataX进程OOM。。
+必选：否 默认值：1024 ...</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
   <a class="entry-link" aria-label="post link to PostgresqlReader 插件文档" href="https://haokiu.com/blog/0adf103bd70440a1978ecbcc7dd63787/"></a>
@@ -320,7 +483,33 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
     <p>RDBMSReader 插件文档 1 快速介绍 RDBMSReader插件实现了从RDBMS读取数据。在底层实现上，RDBMSReader通过JDBC连接远程RDBMS数据库，并执行相应的sql语句将数据从RDBMS库中SELECT出来。目前支持达梦、db2、PPAS、Sybase数据库的读取。RDBMSReader是一个通用的关系数据库读插件，您可以通过注册数据库驱动等方式增加任意多样的关系数据库读支持。
 2 实现原理 简而言之，RDBMSReader通过JDBC连接器连接到远程的RDBMS数据库，并根据用户配置的信息生成查询SELECT SQL语句并发送到远程RDBMS数据库，并将该SQL执行返回结果使用DataX自定义的数据类型拼装为抽象的数据集，并传递给下游Writer处理。
 对于用户配置Table、Column、Where的信息，RDBMSReader将其拼接为SQL语句发送到RDBMS数据库；对于用户配置querySql信息，RDBMS直接将其发送到RDBMS数据库。
-3 功能说明 3.1 配置样例 配置一个从RDBMS数据库同步抽取数据作业: {&#34;job&#34;: {&#34;setting&#34;: {&#34;speed&#34;: {&#34;byte&#34;: 1048576},&#34;errorLimit&#34;: {&#34;record&#34;: 0,&#34;percentage&#34;: 0.02}},&#34;content&#34;: [{&#34;reader&#34;: {&#34;name&#34;: &#34;rdbmsreader&#34;,&#34;parameter&#34;: {&#34;username&#34;: &#34;xxx&#34;,&#34;password&#34;: &#34;xxx&#34;,&#34;column&#34;: [&#34;id&#34;,&#34;name&#34;],&#34;splitPk&#34;: &#34;pk&#34;,&#34;connection&#34;: [{&#34;table&#34;: [&#34;table&#34;],&#34;jdbcUrl&#34;: [&#34;jdbc:dm://ip:port/database&#34;]}],&#34;fetchSize&#34;: 1024,&#34;where&#34;: &#34;1 = 1&#34;}},&#34;writer&#34;: {&#34;name&#34;: &#34;streamwriter&#34;,&#34;parameter&#34;: {&#34;print&#34;: true}}}]}} 配置一个自定义SQL的数据库同步任务到ODPS的作业： {&#34;job&#34;: {&#34;setting&#34;: {&#34;speed&#34;: {&#34;byte&#34;: 1048576},&#34;errorLimit&#34;: {&#34;record&#34;: 0,&#34;percentage&#34;: 0....</p>
+3 功能说明 3.1 配置样例 配置一个从RDBMS数据库同步抽取数据作业: {&#34;job&#34;: {&#34;setting&#34;: {&#34;speed&#34;: {&#34;byte&#34;: 1048576},&#34;errorLimit&#34;: {&#34;record&#34;: 0,&#34;percentage&#34;: 0.02}},&#34;content&#34;: [{&#34;reader&#34;: {&#34;name&#34;: &#34;rdbmsreader&#34;,&#34;parameter&#34;: {&#34;username&#34;: &#34;xxx&#34;,&#34;password&#34;: &#34;xxx&#34;,&#34;column&#34;: [&#34;id&#34;,&#34;name&#34;],&#34;splitPk&#34;: &#34;pk&#34;,&#34;connection&#34;: [{&#34;table&#34;: [&#34;table&#34;],&#34;jdbcUrl&#34;: [&#34;jdbc:dm://ip:port/database&#34;]}],&#34;fetchSize&#34;: 1024,&#34;where&#34;: &#34;1 = 1&#34;}},&#34;writer&#34;: {&#34;name&#34;: &#34;streamwriter&#34;,&#34;parameter&#34;: {&#34;print&#34;: true}}}]}} 配置一个自定义SQL的数据库同步任务到ODPS的作业： {&#34;job&#34;: {&#34;setting&#34;: {&#34;speed&#34;: {&#34;byte&#34;: 1048576},&#34;errorLimit&#34;: {&#34;record&#34;: 0,&#34;percentage&#34;: 0.02}},&#34;content&#34;: [{&#34;reader&#34;: {&#34;name&#34;: &#34;rdbmsreader&#34;,&#34;parameter&#34;: {&#34;username&#34;: &#34;xxx&#34;,&#34;password&#34;: &#34;xxx&#34;,&#34;column&#34;: [&#34;id&#34;,&#34;name&#34;],&#34;splitPk&#34;: &#34;pk&#34;,&#34;connection&#34;: [{&#34;querySql&#34;: [&#34;SELECT * from dual&#34;],&#34;jdbcUrl&#34;: [&#34;jdbc:dm://ip:port/database&#34;]}],&#34;fetchSize&#34;: 1024,&#34;where&#34;: &#34;1 = 1&#34;}},&#34;writer&#34;: {&#34;name&#34;: &#34;streamwriter&#34;,&#34;parameter&#34;: {&#34;print&#34;: true}}}]}} 3.2 参数说明 jdbcUrl
+描述：描述的是到对端数据库的JDBC连接信息，jdbcUrl按照RDBMS官方规范，并可以填写连接附件控制信息。请注意不同的数据库jdbc的格式是不同的，DataX会根据具体jdbc的格式选择合适的数据库驱动完成数据读取。
+达梦 jdbc:dm://ip:port/database db2格式 jdbc:db2://ip:port/database PPAS格式 jdbc:edb://ip:port/database rdbmswriter如何增加新的数据库支持:
+进入rdbmsreader对应目录，这里${DATAX_HOME}为DataX主目录，即: ${DATAX_HOME}/plugin/reader/rdbmswriter 在rdbmsreader插件目录下有plugin.json配置文件，在此文件中注册您具体的数据库驱动，具体放在drivers数组中。rdbmsreader插件在任务执行时会动态选择合适的数据库驱动连接数据库。 {&#34;name&#34;: &#34;rdbmsreader&#34;,&#34;class&#34;: &#34;com.alibaba.datax.plugin.reader.rdbmsreader.RdbmsReader&#34;,&#34;description&#34;: &#34;useScene: prod. mechanism: Jdbc connection using the database, execute select sql, retrieve data from the ResultSet. warn: The more you know about the database, the less problems you encounter.&#34;,&#34;developer&#34;: &#34;alibaba&#34;,&#34;drivers&#34;: [&#34;dm.jdbc.driver.DmDriver&#34;,&#34;com.ibm.db2.jcc.DB2Driver&#34;,&#34;com.sybase.jdbc3.jdbc.SybDriver&#34;,&#34;com.edb.Driver&#34;]} 在rdbmsreader插件目录下有libs子目录，您需要将您具体的数据库驱动放到libs目录下。 $tree.|-- libs| |-- Dm7JdbcDriver16.jar| |-- commons-collections-3.0.jar| |-- commons-io-2.4.jar| |-- commons-lang3-3.3.2.jar| |-- commons-math3-3.1.1.jar| |-- datax-common-0.0.1-SNAPSHOT.jar| |-- datax-service-face-1.0.23-20160120.024328-1.jar| |-- db2jcc4.jar| |-- druid-1.0.15.jar| |-- edb-jdbc16.jar| |-- fastjson-1.1.46.sec01.jar| |-- guava-r05.jar| |-- hamcrest-core-1.3.jar| |-- jconn3-1.0.0-SNAPSHOT.jar| |-- logback-classic-1.0.13.jar| |-- logback-core-1.0.13.jar| |-- plugin-rdbms-util-0.0.1-SNAPSHOT.jar| `-- slf4j-api-1.7.10.jar|-- plugin.json|-- plugin_job_template.json`-- rdbmsreader-0.0.1-SNAPSHOT.jar 必选：是 默认值：无 username
+描述：数据源的用户名。 必选：是 默认值：无 password
+描述：数据源指定用户名的密码。 必选：是 默认值：无 table
+描述：所选取的需要同步的表名。
+必选：是 默认值：无 column
+描述：所配置的表中需要同步的列名集合，使用JSON的数组描述字段信息。用户使用代表默认使用所有列配置，例如[’’]。
+支持列裁剪，即列可以挑选部分列进行导出。
+支持列换序，即列可以不按照表schema信息进行导出。
+支持常量配置，用户需要按照JSON格式: [“id”, “1”, “‘bazhen.csy’”, “null”, “to_char(a &#43; 1)”, “2.3” , “true”] id为普通列名，1为整形数字常量，‘bazhen.csy’为字符串常量，null为空指针，to_char(a &#43; 1)为表达式，2.3为浮点数，true为布尔值。
+Column必须显示填写，不允许为空！
+必选：是 默认值：无 splitPk
+描述：RDBMSReader进行数据抽取时，如果指定splitPk，表示用户希望使用splitPk代表的字段进行数据分片，DataX因此会启动并发任务进行数据同步，这样可以大大提供数据同步的效能。
+推荐splitPk用户使用表主键，因为表主键通常情况下比较均匀，因此切分出来的分片也不容易出现数据热点。
+目前splitPk仅支持整形数据切分，不支持浮点、字符串型、日期等其他类型。如果用户指定其他非支持类型，RDBMSReader将报错！
+splitPk如果不填写，将视作用户不对单表进行切分，RDBMSReader使用单通道同步全量数据。
+必选：否 默认值：空 where
+描述：筛选条件，RDBMSReader根据指定的column、table、where条件拼接SQL，并根据这个SQL进行数据抽取。例如在做测试时，可以将where条件指定为limit 10；在实际业务场景中，往往会选择当天的数据进行同步，可以将where条件指定为gmt_create &gt; $bizdate 。
+。
+where条件可以有效地进行业务增量同步。where条件不配置或者为空，视作全表同步数据。必选：否 默认值：无 querySql
+描述：在有些业务场景下，where这一配置项不足以描述所筛选的条件，用户可以通过该配置型来自定义筛选SQL。当用户配置了这一项之后，DataX系统就会忽略table，column这些配置型，直接使用这个配置项的内容对数据进行筛选，例如需要进行多表join后同步数据，使用select a,b from table_a join table_b on table_a.id = table_b.id 当用户配置querySql时，RDBMSReader直接忽略table、column、where条件的配置。
+必选：否 默认值：无 fetchSize
+描述：该配置项定义了插件和数据库服务器端每次批量数据获取条数，该值决定了DataX和服务器端的网络交互次数，能够较大的提升数据抽取性能。
+注意，该值过大(&gt;2048)可能造成DataX进程OOM。。
+必选：否 默认值：1024 ...</p>
   </div>
   <footer class="entry-footer"><span title='2021-02-02 17:45:01 +0000 UTC'>February 2, 2021</span></footer>
   <a class="entry-link" aria-label="post link to RDBMSReader 插件文档" href="https://haokiu.com/blog/34c79077064f4502a247f840e8b64c46/"></a>
@@ -328,14 +517,22 @@ OTS是构建在阿里云飞天分布式系统之上的 NoSQL数据库服务，�
 <footer class="page-footer">
   <nav class="pagination">
     <a class="prev" href="https://haokiu.com/categories/4/index/4/">
-      «&nbsp;Prev&nbsp;
+      «&nbsp;&nbsp;
     </a>
-    <a class="next" href="https://haokiu.com/categories/4/index/6/">Next&nbsp;&nbsp;»
+    <a class="next" href="https://haokiu.com/categories/4/index/6/">&nbsp;&nbsp;»
     </a>
   </nav>
 </footer>
     </main>
     
+<footer class="footer">
+    <span>haokiu.com</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />

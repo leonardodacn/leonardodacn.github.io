@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="zh-cn" dir="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,12 +7,306 @@
 <meta name="robots" content="index, follow">
 <title>DataX ElasticSearchWriter | haokiu</title>
 <meta name="keywords" content="datax">
-<meta name="description" content="DataX ElasticSearchWriter 1 快速介绍 数据导入elasticsearch的插件
-2 实现原理 使用elasticsearch的rest api接口， 批量把从reader读入的数据写入elasticsearch
-3 功能说明 3.1 配置样例 job.json { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 1 } }, &#34;content&#34;: [ { &#34;reader&#34;: { ... }, &#34;writer&#34;: { &#34;name&#34;: &#34;elasticsearchwriter&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;: &#34;http://xxx:9999&#34;, &#34;accessId&#34;: &#34;xxxx&#34;, &#34;accessKey&#34;: &#34;xxxx&#34;, &#34;index&#34;: &#34;test-1&#34;, &#34;type&#34;: &#34;default&#34;, &#34;cleanup&#34;: true, &#34;settings&#34;: {&#34;index&#34; :{&#34;number_of_shards&#34;: 1, &#34;number_of_replicas&#34;: 0}}, &#34;discovery&#34;: false, &#34;batchSize&#34;: 1000, &#34;splitter&#34;: &#34;,&#34;, &#34;column&#34;: [ {&#34;name&#34;: &#34;pk&#34;, &#34;type&#34;: &#34;id&#34;}, { &#34;name&#34;: &#34;col_ip&#34;,&#34;type&#34;: &#34;ip&#34; }, { &#34;name&#34;: &#34;col_double&#34;,&#34;type&#34;: &#34;double&#34; }, { &#34;name&#34;: &#34;col_long&#34;,&#34;type&#34;: &#34;long&#34; }, { &#34;name&#34;: &#34;col_integer&#34;,&#34;type&#34;: &#34;integer&#34; }, { &#34;name&#34;: &#34;col_keyword&#34;, &#34;type&#34;: &#34;keyword&#34; }, { &#34;name&#34;: &#34;col_text&#34;, &#34;type&#34;: &#34;text&#34;, &#34;analyzer&#34;: &#34;ik_max_word&#34;}, { &#34;name&#34;: &#34;col_geo_point&#34;, &#34;type&#34;: &#34;geo_point&#34; }, { &#34;name&#34;: &#34;col_date&#34;, &#34;type&#34;: &#34;date&#34;, &#34;format&#34;: &#34;yyyy-MM-dd HH:mm:ss&#34;}, { &#34;name&#34;: &#34;col_nested1&#34;, &#34;type&#34;: &#34;nested&#34; }, { &#34;name&#34;: &#34;col_nested2&#34;, &#34;type&#34;: &#34;nested&#34; }, { &#34;name&#34;: &#34;col_object1&#34;, &#34;type&#34;: &#34;object&#34; }, { &#34;name&#34;: &#34;col_object2&#34;, &#34;type&#34;: &#34;object&#34; }, { &#34;name&#34;: &#34;col_integer_array&#34;, &#34;type&#34;:&#34;integer&#34;, &#34;array&#34;:true}, { &#34;name&#34;: &#34;col_geo_shape&#34;, &#34;type&#34;:&#34;geo_shape&#34;, &#34;tree&#34;: &#34;quadtree&#34;, &#34;precision&#34;: &#34;10m&#34;} ] } } } ] } } 3.">
+<meta name="description" content="DataX ElasticSearchWriter
+
+1 快速介绍
+数据导入elasticsearch的插件
+2 实现原理
+使用elasticsearch的rest api接口， 批量把从reader读入的数据写入elasticsearch
+3 功能说明
+3.1 配置样例
+job.json
+{
+  &#34;job&#34;: {
+    &#34;setting&#34;: {
+        &#34;speed&#34;: {
+            &#34;channel&#34;: 1
+        }
+    },
+    &#34;content&#34;: [
+      {
+        &#34;reader&#34;: {
+          ...
+        },
+        &#34;writer&#34;: {
+          &#34;name&#34;: &#34;elasticsearchwriter&#34;,
+          &#34;parameter&#34;: {
+            &#34;endpoint&#34;: &#34;http://xxx:9999&#34;,
+            &#34;accessId&#34;: &#34;xxxx&#34;,
+            &#34;accessKey&#34;: &#34;xxxx&#34;,
+            &#34;index&#34;: &#34;test-1&#34;,
+            &#34;type&#34;: &#34;default&#34;,
+            &#34;cleanup&#34;: true,
+            &#34;settings&#34;: {&#34;index&#34; :{&#34;number_of_shards&#34;: 1, &#34;number_of_replicas&#34;: 0}},
+            &#34;discovery&#34;: false,
+            &#34;batchSize&#34;: 1000,
+            &#34;splitter&#34;: &#34;,&#34;,
+            &#34;column&#34;: [
+              {&#34;name&#34;: &#34;pk&#34;, &#34;type&#34;: &#34;id&#34;},
+              { &#34;name&#34;: &#34;col_ip&#34;,&#34;type&#34;: &#34;ip&#34; },
+              { &#34;name&#34;: &#34;col_double&#34;,&#34;type&#34;: &#34;double&#34; },
+              { &#34;name&#34;: &#34;col_long&#34;,&#34;type&#34;: &#34;long&#34; },
+              { &#34;name&#34;: &#34;col_integer&#34;,&#34;type&#34;: &#34;integer&#34; },
+              { &#34;name&#34;: &#34;col_keyword&#34;, &#34;type&#34;: &#34;keyword&#34; },
+              { &#34;name&#34;: &#34;col_text&#34;, &#34;type&#34;: &#34;text&#34;, &#34;analyzer&#34;: &#34;ik_max_word&#34;},
+              { &#34;name&#34;: &#34;col_geo_point&#34;, &#34;type&#34;: &#34;geo_point&#34; },
+              { &#34;name&#34;: &#34;col_date&#34;, &#34;type&#34;: &#34;date&#34;, &#34;format&#34;: &#34;yyyy-MM-dd HH:mm:ss&#34;},
+              { &#34;name&#34;: &#34;col_nested1&#34;, &#34;type&#34;: &#34;nested&#34; },
+              { &#34;name&#34;: &#34;col_nested2&#34;, &#34;type&#34;: &#34;nested&#34; },
+              { &#34;name&#34;: &#34;col_object1&#34;, &#34;type&#34;: &#34;object&#34; },
+              { &#34;name&#34;: &#34;col_object2&#34;, &#34;type&#34;: &#34;object&#34; },
+              { &#34;name&#34;: &#34;col_integer_array&#34;, &#34;type&#34;:&#34;integer&#34;, &#34;array&#34;:true},
+              { &#34;name&#34;: &#34;col_geo_shape&#34;, &#34;type&#34;:&#34;geo_shape&#34;, &#34;tree&#34;: &#34;quadtree&#34;, &#34;precision&#34;: &#34;10m&#34;}
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+3.2 参数说明
+
+
+endpoint
+
+
+描述：ElasticSearch的连接地址
+
+
+必选：是
+
+
+默认值：无
+
+
+accessId
+
+
+描述：http auth中的user
+
+
+必选：否
+
+
+默认值：空
+
+
+accessKey
+
+
+描述：http auth中的password
+
+
+必选：否
+
+
+默认值：空
+
+
+index
+
+
+描述：elasticsearch中的index名
+
+
+必选：是
+
+
+默认值：无
+
+
+type
+
+
+描述：elasticsearch中index的type名
+
+
+必选：否
+
+
+默认值：index名
+
+
+cleanup
+
+
+描述：是否删除原表
+
+
+必选：否
+
+
+默认值：false
+
+
+batchSize
+
+
+描述：每次批量数据的条数
+
+
+必选：否
+
+
+默认值：1000
+
+
+trySize
+
+
+描述：失败后重试的次数
+
+
+必选：否
+
+
+默认值：30
+
+
+timeout
+
+
+描述：客户端超时时间
+
+
+必选：否
+
+
+默认值：600000
+
+
+discovery
+
+
+描述：启用节点发现将(轮询)并定期更新客户机中的服务器列表。
+
+
+必选：否
+
+
+默认值：false
+
+
+compression
+
+
+描述：http请求，开启压缩
+
+
+必选：否
+
+
+默认值：true
+
+
+multiThread
+
+
+描述：http请求，是否有多线程
+
+
+必选：否
+
+
+默认值：true
+
+
+ignoreWriteError
+
+
+描述：忽略写入错误，不重试，继续写入
+
+
+必选：否
+
+
+默认值：false
+
+
+ignoreParseError
+
+
+描述：忽略解析数据格式错误，继续写入
+
+
+必选：否
+
+
+默认值：true
+
+
+alias
+
+
+描述：数据导入完成后写入别名
+
+
+必选：否
+
+
+默认值：无
+
+
+aliasMode
+
+
+描述：数据导入完成后增加别名的模式，append(增加模式), exclusive(只留这一个)
+
+
+必选：否
+
+
+默认值：append
+
+
+settings
+
+
+描述：创建index时候的settings, 与elasticsearch官方相同
+
+
+必选：否
+
+
+默认值：无
+
+
+splitter
+
+
+描述：如果插入数据是array，就使用指定分隔符
+
+
+必选：否
+
+
+默认值：-,-
+
+
+column
+
+
+描述：elasticsearch所支持的字段类型，样例中包含了全部
+
+
+必选：是
+
+
+dynamic
+
+
+描述: 不使用datax的mappings，使用es自己的自动mappings
+
+
+必选: 否
+
+
+默认值: false
+
+">
 <meta name="author" content="">
 <link rel="canonical" href="https://haokiu.com/blog/5e857fe9cf5743dc837f14fbc9f0a876/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
 <script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="https://haokiu.com/favicon.ico">
@@ -22,6 +316,7 @@
 <link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/blog/5e857fe9cf5743dc837f14fbc9f0a876/">
 <noscript>
     <style>
         #theme-toggle,
@@ -59,9 +354,303 @@
 
     </style>
 </noscript><meta property="og:title" content="DataX ElasticSearchWriter" />
-<meta property="og:description" content="DataX ElasticSearchWriter 1 快速介绍 数据导入elasticsearch的插件
-2 实现原理 使用elasticsearch的rest api接口， 批量把从reader读入的数据写入elasticsearch
-3 功能说明 3.1 配置样例 job.json { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 1 } }, &#34;content&#34;: [ { &#34;reader&#34;: { ... }, &#34;writer&#34;: { &#34;name&#34;: &#34;elasticsearchwriter&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;: &#34;http://xxx:9999&#34;, &#34;accessId&#34;: &#34;xxxx&#34;, &#34;accessKey&#34;: &#34;xxxx&#34;, &#34;index&#34;: &#34;test-1&#34;, &#34;type&#34;: &#34;default&#34;, &#34;cleanup&#34;: true, &#34;settings&#34;: {&#34;index&#34; :{&#34;number_of_shards&#34;: 1, &#34;number_of_replicas&#34;: 0}}, &#34;discovery&#34;: false, &#34;batchSize&#34;: 1000, &#34;splitter&#34;: &#34;,&#34;, &#34;column&#34;: [ {&#34;name&#34;: &#34;pk&#34;, &#34;type&#34;: &#34;id&#34;}, { &#34;name&#34;: &#34;col_ip&#34;,&#34;type&#34;: &#34;ip&#34; }, { &#34;name&#34;: &#34;col_double&#34;,&#34;type&#34;: &#34;double&#34; }, { &#34;name&#34;: &#34;col_long&#34;,&#34;type&#34;: &#34;long&#34; }, { &#34;name&#34;: &#34;col_integer&#34;,&#34;type&#34;: &#34;integer&#34; }, { &#34;name&#34;: &#34;col_keyword&#34;, &#34;type&#34;: &#34;keyword&#34; }, { &#34;name&#34;: &#34;col_text&#34;, &#34;type&#34;: &#34;text&#34;, &#34;analyzer&#34;: &#34;ik_max_word&#34;}, { &#34;name&#34;: &#34;col_geo_point&#34;, &#34;type&#34;: &#34;geo_point&#34; }, { &#34;name&#34;: &#34;col_date&#34;, &#34;type&#34;: &#34;date&#34;, &#34;format&#34;: &#34;yyyy-MM-dd HH:mm:ss&#34;}, { &#34;name&#34;: &#34;col_nested1&#34;, &#34;type&#34;: &#34;nested&#34; }, { &#34;name&#34;: &#34;col_nested2&#34;, &#34;type&#34;: &#34;nested&#34; }, { &#34;name&#34;: &#34;col_object1&#34;, &#34;type&#34;: &#34;object&#34; }, { &#34;name&#34;: &#34;col_object2&#34;, &#34;type&#34;: &#34;object&#34; }, { &#34;name&#34;: &#34;col_integer_array&#34;, &#34;type&#34;:&#34;integer&#34;, &#34;array&#34;:true}, { &#34;name&#34;: &#34;col_geo_shape&#34;, &#34;type&#34;:&#34;geo_shape&#34;, &#34;tree&#34;: &#34;quadtree&#34;, &#34;precision&#34;: &#34;10m&#34;} ] } } } ] } } 3." />
+<meta property="og:description" content="DataX ElasticSearchWriter
+
+1 快速介绍
+数据导入elasticsearch的插件
+2 实现原理
+使用elasticsearch的rest api接口， 批量把从reader读入的数据写入elasticsearch
+3 功能说明
+3.1 配置样例
+job.json
+{
+  &#34;job&#34;: {
+    &#34;setting&#34;: {
+        &#34;speed&#34;: {
+            &#34;channel&#34;: 1
+        }
+    },
+    &#34;content&#34;: [
+      {
+        &#34;reader&#34;: {
+          ...
+        },
+        &#34;writer&#34;: {
+          &#34;name&#34;: &#34;elasticsearchwriter&#34;,
+          &#34;parameter&#34;: {
+            &#34;endpoint&#34;: &#34;http://xxx:9999&#34;,
+            &#34;accessId&#34;: &#34;xxxx&#34;,
+            &#34;accessKey&#34;: &#34;xxxx&#34;,
+            &#34;index&#34;: &#34;test-1&#34;,
+            &#34;type&#34;: &#34;default&#34;,
+            &#34;cleanup&#34;: true,
+            &#34;settings&#34;: {&#34;index&#34; :{&#34;number_of_shards&#34;: 1, &#34;number_of_replicas&#34;: 0}},
+            &#34;discovery&#34;: false,
+            &#34;batchSize&#34;: 1000,
+            &#34;splitter&#34;: &#34;,&#34;,
+            &#34;column&#34;: [
+              {&#34;name&#34;: &#34;pk&#34;, &#34;type&#34;: &#34;id&#34;},
+              { &#34;name&#34;: &#34;col_ip&#34;,&#34;type&#34;: &#34;ip&#34; },
+              { &#34;name&#34;: &#34;col_double&#34;,&#34;type&#34;: &#34;double&#34; },
+              { &#34;name&#34;: &#34;col_long&#34;,&#34;type&#34;: &#34;long&#34; },
+              { &#34;name&#34;: &#34;col_integer&#34;,&#34;type&#34;: &#34;integer&#34; },
+              { &#34;name&#34;: &#34;col_keyword&#34;, &#34;type&#34;: &#34;keyword&#34; },
+              { &#34;name&#34;: &#34;col_text&#34;, &#34;type&#34;: &#34;text&#34;, &#34;analyzer&#34;: &#34;ik_max_word&#34;},
+              { &#34;name&#34;: &#34;col_geo_point&#34;, &#34;type&#34;: &#34;geo_point&#34; },
+              { &#34;name&#34;: &#34;col_date&#34;, &#34;type&#34;: &#34;date&#34;, &#34;format&#34;: &#34;yyyy-MM-dd HH:mm:ss&#34;},
+              { &#34;name&#34;: &#34;col_nested1&#34;, &#34;type&#34;: &#34;nested&#34; },
+              { &#34;name&#34;: &#34;col_nested2&#34;, &#34;type&#34;: &#34;nested&#34; },
+              { &#34;name&#34;: &#34;col_object1&#34;, &#34;type&#34;: &#34;object&#34; },
+              { &#34;name&#34;: &#34;col_object2&#34;, &#34;type&#34;: &#34;object&#34; },
+              { &#34;name&#34;: &#34;col_integer_array&#34;, &#34;type&#34;:&#34;integer&#34;, &#34;array&#34;:true},
+              { &#34;name&#34;: &#34;col_geo_shape&#34;, &#34;type&#34;:&#34;geo_shape&#34;, &#34;tree&#34;: &#34;quadtree&#34;, &#34;precision&#34;: &#34;10m&#34;}
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+3.2 参数说明
+
+
+endpoint
+
+
+描述：ElasticSearch的连接地址
+
+
+必选：是
+
+
+默认值：无
+
+
+accessId
+
+
+描述：http auth中的user
+
+
+必选：否
+
+
+默认值：空
+
+
+accessKey
+
+
+描述：http auth中的password
+
+
+必选：否
+
+
+默认值：空
+
+
+index
+
+
+描述：elasticsearch中的index名
+
+
+必选：是
+
+
+默认值：无
+
+
+type
+
+
+描述：elasticsearch中index的type名
+
+
+必选：否
+
+
+默认值：index名
+
+
+cleanup
+
+
+描述：是否删除原表
+
+
+必选：否
+
+
+默认值：false
+
+
+batchSize
+
+
+描述：每次批量数据的条数
+
+
+必选：否
+
+
+默认值：1000
+
+
+trySize
+
+
+描述：失败后重试的次数
+
+
+必选：否
+
+
+默认值：30
+
+
+timeout
+
+
+描述：客户端超时时间
+
+
+必选：否
+
+
+默认值：600000
+
+
+discovery
+
+
+描述：启用节点发现将(轮询)并定期更新客户机中的服务器列表。
+
+
+必选：否
+
+
+默认值：false
+
+
+compression
+
+
+描述：http请求，开启压缩
+
+
+必选：否
+
+
+默认值：true
+
+
+multiThread
+
+
+描述：http请求，是否有多线程
+
+
+必选：否
+
+
+默认值：true
+
+
+ignoreWriteError
+
+
+描述：忽略写入错误，不重试，继续写入
+
+
+必选：否
+
+
+默认值：false
+
+
+ignoreParseError
+
+
+描述：忽略解析数据格式错误，继续写入
+
+
+必选：否
+
+
+默认值：true
+
+
+alias
+
+
+描述：数据导入完成后写入别名
+
+
+必选：否
+
+
+默认值：无
+
+
+aliasMode
+
+
+描述：数据导入完成后增加别名的模式，append(增加模式), exclusive(只留这一个)
+
+
+必选：否
+
+
+默认值：append
+
+
+settings
+
+
+描述：创建index时候的settings, 与elasticsearch官方相同
+
+
+必选：否
+
+
+默认值：无
+
+
+splitter
+
+
+描述：如果插入数据是array，就使用指定分隔符
+
+
+必选：否
+
+
+默认值：-,-
+
+
+column
+
+
+描述：elasticsearch所支持的字段类型，样例中包含了全部
+
+
+必选：是
+
+
+dynamic
+
+
+描述: 不使用datax的mappings，使用es自己的自动mappings
+
+
+必选: 否
+
+
+默认值: false
+
+" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://haokiu.com/blog/5e857fe9cf5743dc837f14fbc9f0a876/" /><meta property="article:section" content="4" />
 <meta property="article:published_time" content="2021-02-02T17:45:01+00:00" />
@@ -69,9 +658,303 @@
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="DataX ElasticSearchWriter"/>
-<meta name="twitter:description" content="DataX ElasticSearchWriter 1 快速介绍 数据导入elasticsearch的插件
-2 实现原理 使用elasticsearch的rest api接口， 批量把从reader读入的数据写入elasticsearch
-3 功能说明 3.1 配置样例 job.json { &#34;job&#34;: { &#34;setting&#34;: { &#34;speed&#34;: { &#34;channel&#34;: 1 } }, &#34;content&#34;: [ { &#34;reader&#34;: { ... }, &#34;writer&#34;: { &#34;name&#34;: &#34;elasticsearchwriter&#34;, &#34;parameter&#34;: { &#34;endpoint&#34;: &#34;http://xxx:9999&#34;, &#34;accessId&#34;: &#34;xxxx&#34;, &#34;accessKey&#34;: &#34;xxxx&#34;, &#34;index&#34;: &#34;test-1&#34;, &#34;type&#34;: &#34;default&#34;, &#34;cleanup&#34;: true, &#34;settings&#34;: {&#34;index&#34; :{&#34;number_of_shards&#34;: 1, &#34;number_of_replicas&#34;: 0}}, &#34;discovery&#34;: false, &#34;batchSize&#34;: 1000, &#34;splitter&#34;: &#34;,&#34;, &#34;column&#34;: [ {&#34;name&#34;: &#34;pk&#34;, &#34;type&#34;: &#34;id&#34;}, { &#34;name&#34;: &#34;col_ip&#34;,&#34;type&#34;: &#34;ip&#34; }, { &#34;name&#34;: &#34;col_double&#34;,&#34;type&#34;: &#34;double&#34; }, { &#34;name&#34;: &#34;col_long&#34;,&#34;type&#34;: &#34;long&#34; }, { &#34;name&#34;: &#34;col_integer&#34;,&#34;type&#34;: &#34;integer&#34; }, { &#34;name&#34;: &#34;col_keyword&#34;, &#34;type&#34;: &#34;keyword&#34; }, { &#34;name&#34;: &#34;col_text&#34;, &#34;type&#34;: &#34;text&#34;, &#34;analyzer&#34;: &#34;ik_max_word&#34;}, { &#34;name&#34;: &#34;col_geo_point&#34;, &#34;type&#34;: &#34;geo_point&#34; }, { &#34;name&#34;: &#34;col_date&#34;, &#34;type&#34;: &#34;date&#34;, &#34;format&#34;: &#34;yyyy-MM-dd HH:mm:ss&#34;}, { &#34;name&#34;: &#34;col_nested1&#34;, &#34;type&#34;: &#34;nested&#34; }, { &#34;name&#34;: &#34;col_nested2&#34;, &#34;type&#34;: &#34;nested&#34; }, { &#34;name&#34;: &#34;col_object1&#34;, &#34;type&#34;: &#34;object&#34; }, { &#34;name&#34;: &#34;col_object2&#34;, &#34;type&#34;: &#34;object&#34; }, { &#34;name&#34;: &#34;col_integer_array&#34;, &#34;type&#34;:&#34;integer&#34;, &#34;array&#34;:true}, { &#34;name&#34;: &#34;col_geo_shape&#34;, &#34;type&#34;:&#34;geo_shape&#34;, &#34;tree&#34;: &#34;quadtree&#34;, &#34;precision&#34;: &#34;10m&#34;} ] } } } ] } } 3."/>
+<meta name="twitter:description" content="DataX ElasticSearchWriter
+
+1 快速介绍
+数据导入elasticsearch的插件
+2 实现原理
+使用elasticsearch的rest api接口， 批量把从reader读入的数据写入elasticsearch
+3 功能说明
+3.1 配置样例
+job.json
+{
+  &#34;job&#34;: {
+    &#34;setting&#34;: {
+        &#34;speed&#34;: {
+            &#34;channel&#34;: 1
+        }
+    },
+    &#34;content&#34;: [
+      {
+        &#34;reader&#34;: {
+          ...
+        },
+        &#34;writer&#34;: {
+          &#34;name&#34;: &#34;elasticsearchwriter&#34;,
+          &#34;parameter&#34;: {
+            &#34;endpoint&#34;: &#34;http://xxx:9999&#34;,
+            &#34;accessId&#34;: &#34;xxxx&#34;,
+            &#34;accessKey&#34;: &#34;xxxx&#34;,
+            &#34;index&#34;: &#34;test-1&#34;,
+            &#34;type&#34;: &#34;default&#34;,
+            &#34;cleanup&#34;: true,
+            &#34;settings&#34;: {&#34;index&#34; :{&#34;number_of_shards&#34;: 1, &#34;number_of_replicas&#34;: 0}},
+            &#34;discovery&#34;: false,
+            &#34;batchSize&#34;: 1000,
+            &#34;splitter&#34;: &#34;,&#34;,
+            &#34;column&#34;: [
+              {&#34;name&#34;: &#34;pk&#34;, &#34;type&#34;: &#34;id&#34;},
+              { &#34;name&#34;: &#34;col_ip&#34;,&#34;type&#34;: &#34;ip&#34; },
+              { &#34;name&#34;: &#34;col_double&#34;,&#34;type&#34;: &#34;double&#34; },
+              { &#34;name&#34;: &#34;col_long&#34;,&#34;type&#34;: &#34;long&#34; },
+              { &#34;name&#34;: &#34;col_integer&#34;,&#34;type&#34;: &#34;integer&#34; },
+              { &#34;name&#34;: &#34;col_keyword&#34;, &#34;type&#34;: &#34;keyword&#34; },
+              { &#34;name&#34;: &#34;col_text&#34;, &#34;type&#34;: &#34;text&#34;, &#34;analyzer&#34;: &#34;ik_max_word&#34;},
+              { &#34;name&#34;: &#34;col_geo_point&#34;, &#34;type&#34;: &#34;geo_point&#34; },
+              { &#34;name&#34;: &#34;col_date&#34;, &#34;type&#34;: &#34;date&#34;, &#34;format&#34;: &#34;yyyy-MM-dd HH:mm:ss&#34;},
+              { &#34;name&#34;: &#34;col_nested1&#34;, &#34;type&#34;: &#34;nested&#34; },
+              { &#34;name&#34;: &#34;col_nested2&#34;, &#34;type&#34;: &#34;nested&#34; },
+              { &#34;name&#34;: &#34;col_object1&#34;, &#34;type&#34;: &#34;object&#34; },
+              { &#34;name&#34;: &#34;col_object2&#34;, &#34;type&#34;: &#34;object&#34; },
+              { &#34;name&#34;: &#34;col_integer_array&#34;, &#34;type&#34;:&#34;integer&#34;, &#34;array&#34;:true},
+              { &#34;name&#34;: &#34;col_geo_shape&#34;, &#34;type&#34;:&#34;geo_shape&#34;, &#34;tree&#34;: &#34;quadtree&#34;, &#34;precision&#34;: &#34;10m&#34;}
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+3.2 参数说明
+
+
+endpoint
+
+
+描述：ElasticSearch的连接地址
+
+
+必选：是
+
+
+默认值：无
+
+
+accessId
+
+
+描述：http auth中的user
+
+
+必选：否
+
+
+默认值：空
+
+
+accessKey
+
+
+描述：http auth中的password
+
+
+必选：否
+
+
+默认值：空
+
+
+index
+
+
+描述：elasticsearch中的index名
+
+
+必选：是
+
+
+默认值：无
+
+
+type
+
+
+描述：elasticsearch中index的type名
+
+
+必选：否
+
+
+默认值：index名
+
+
+cleanup
+
+
+描述：是否删除原表
+
+
+必选：否
+
+
+默认值：false
+
+
+batchSize
+
+
+描述：每次批量数据的条数
+
+
+必选：否
+
+
+默认值：1000
+
+
+trySize
+
+
+描述：失败后重试的次数
+
+
+必选：否
+
+
+默认值：30
+
+
+timeout
+
+
+描述：客户端超时时间
+
+
+必选：否
+
+
+默认值：600000
+
+
+discovery
+
+
+描述：启用节点发现将(轮询)并定期更新客户机中的服务器列表。
+
+
+必选：否
+
+
+默认值：false
+
+
+compression
+
+
+描述：http请求，开启压缩
+
+
+必选：否
+
+
+默认值：true
+
+
+multiThread
+
+
+描述：http请求，是否有多线程
+
+
+必选：否
+
+
+默认值：true
+
+
+ignoreWriteError
+
+
+描述：忽略写入错误，不重试，继续写入
+
+
+必选：否
+
+
+默认值：false
+
+
+ignoreParseError
+
+
+描述：忽略解析数据格式错误，继续写入
+
+
+必选：否
+
+
+默认值：true
+
+
+alias
+
+
+描述：数据导入完成后写入别名
+
+
+必选：否
+
+
+默认值：无
+
+
+aliasMode
+
+
+描述：数据导入完成后增加别名的模式，append(增加模式), exclusive(只留这一个)
+
+
+必选：否
+
+
+默认值：append
+
+
+settings
+
+
+描述：创建index时候的settings, 与elasticsearch官方相同
+
+
+必选：否
+
+
+默认值：无
+
+
+splitter
+
+
+描述：如果插入数据是array，就使用指定分隔符
+
+
+必选：否
+
+
+默认值：-,-
+
+
+column
+
+
+描述：elasticsearch所支持的字段类型，样例中包含了全部
+
+
+必选：是
+
+
+dynamic
+
+
+描述: 不使用datax的mappings，使用es自己的自动mappings
+
+
+必选: 否
+
+
+默认值: false
+
+"/>
 
 
 <script type="application/ld+json">
@@ -82,7 +965,7 @@
     {
       "@type": "ListItem",
       "position":  1 ,
-      "name": "4s",
+      "name": "4",
       "item": "https://haokiu.com/4/"
     }, 
     {
@@ -100,13 +983,13 @@
   "@type": "BlogPosting",
   "headline": "DataX ElasticSearchWriter",
   "name": "DataX ElasticSearchWriter",
-  "description": "DataX ElasticSearchWriter 1 快速介绍 数据导入elasticsearch的插件\n2 实现原理 使用elasticsearch的rest api接口， 批量把从reader读入的数据写入elasticsearch\n3 功能说明 3.1 配置样例 job.json { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { \u0026#34;channel\u0026#34;: 1 } }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { ... }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;elasticsearchwriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;endpoint\u0026#34;: \u0026#34;http://xxx:9999\u0026#34;, \u0026#34;accessId\u0026#34;: \u0026#34;xxxx\u0026#34;, \u0026#34;accessKey\u0026#34;: \u0026#34;xxxx\u0026#34;, \u0026#34;index\u0026#34;: \u0026#34;test-1\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;default\u0026#34;, \u0026#34;cleanup\u0026#34;: true, \u0026#34;settings\u0026#34;: {\u0026#34;index\u0026#34; :{\u0026#34;number_of_shards\u0026#34;: 1, \u0026#34;number_of_replicas\u0026#34;: 0}}, \u0026#34;discovery\u0026#34;: false, \u0026#34;batchSize\u0026#34;: 1000, \u0026#34;splitter\u0026#34;: \u0026#34;,\u0026#34;, \u0026#34;column\u0026#34;: [ {\u0026#34;name\u0026#34;: \u0026#34;pk\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;id\u0026#34;}, { \u0026#34;name\u0026#34;: \u0026#34;col_ip\u0026#34;,\u0026#34;type\u0026#34;: \u0026#34;ip\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_double\u0026#34;,\u0026#34;type\u0026#34;: \u0026#34;double\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_long\u0026#34;,\u0026#34;type\u0026#34;: \u0026#34;long\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_integer\u0026#34;,\u0026#34;type\u0026#34;: \u0026#34;integer\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_keyword\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;keyword\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_text\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;text\u0026#34;, \u0026#34;analyzer\u0026#34;: \u0026#34;ik_max_word\u0026#34;}, { \u0026#34;name\u0026#34;: \u0026#34;col_geo_point\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;geo_point\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_date\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;date\u0026#34;, \u0026#34;format\u0026#34;: \u0026#34;yyyy-MM-dd HH:mm:ss\u0026#34;}, { \u0026#34;name\u0026#34;: \u0026#34;col_nested1\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;nested\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_nested2\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;nested\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_object1\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;object\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_object2\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;object\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_integer_array\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;integer\u0026#34;, \u0026#34;array\u0026#34;:true}, { \u0026#34;name\u0026#34;: \u0026#34;col_geo_shape\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;geo_shape\u0026#34;, \u0026#34;tree\u0026#34;: \u0026#34;quadtree\u0026#34;, \u0026#34;precision\u0026#34;: \u0026#34;10m\u0026#34;} ] } } } ] } } 3.",
+  "description": "DataX ElasticSearchWriter 1 快速介绍 数据导入elasticsearch的插件\n2 实现原理 使用elasticsearch的rest api接口， 批量把从reader读入的数据写入elasticsearch\n3 功能说明 3.1 配置样例 job.json { \u0026#34;job\u0026#34;: { \u0026#34;setting\u0026#34;: { \u0026#34;speed\u0026#34;: { \u0026#34;channel\u0026#34;: 1 } }, \u0026#34;content\u0026#34;: [ { \u0026#34;reader\u0026#34;: { ... }, \u0026#34;writer\u0026#34;: { \u0026#34;name\u0026#34;: \u0026#34;elasticsearchwriter\u0026#34;, \u0026#34;parameter\u0026#34;: { \u0026#34;endpoint\u0026#34;: \u0026#34;http://xxx:9999\u0026#34;, \u0026#34;accessId\u0026#34;: \u0026#34;xxxx\u0026#34;, \u0026#34;accessKey\u0026#34;: \u0026#34;xxxx\u0026#34;, \u0026#34;index\u0026#34;: \u0026#34;test-1\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;default\u0026#34;, \u0026#34;cleanup\u0026#34;: true, \u0026#34;settings\u0026#34;: {\u0026#34;index\u0026#34; :{\u0026#34;number_of_shards\u0026#34;: 1, \u0026#34;number_of_replicas\u0026#34;: 0}}, \u0026#34;discovery\u0026#34;: false, \u0026#34;batchSize\u0026#34;: 1000, \u0026#34;splitter\u0026#34;: \u0026#34;,\u0026#34;, \u0026#34;column\u0026#34;: [ {\u0026#34;name\u0026#34;: \u0026#34;pk\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;id\u0026#34;}, { \u0026#34;name\u0026#34;: \u0026#34;col_ip\u0026#34;,\u0026#34;type\u0026#34;: \u0026#34;ip\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_double\u0026#34;,\u0026#34;type\u0026#34;: \u0026#34;double\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_long\u0026#34;,\u0026#34;type\u0026#34;: \u0026#34;long\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_integer\u0026#34;,\u0026#34;type\u0026#34;: \u0026#34;integer\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_keyword\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;keyword\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_text\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;text\u0026#34;, \u0026#34;analyzer\u0026#34;: \u0026#34;ik_max_word\u0026#34;}, { \u0026#34;name\u0026#34;: \u0026#34;col_geo_point\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;geo_point\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_date\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;date\u0026#34;, \u0026#34;format\u0026#34;: \u0026#34;yyyy-MM-dd HH:mm:ss\u0026#34;}, { \u0026#34;name\u0026#34;: \u0026#34;col_nested1\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;nested\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_nested2\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;nested\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_object1\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;object\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_object2\u0026#34;, \u0026#34;type\u0026#34;: \u0026#34;object\u0026#34; }, { \u0026#34;name\u0026#34;: \u0026#34;col_integer_array\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;integer\u0026#34;, \u0026#34;array\u0026#34;:true}, { \u0026#34;name\u0026#34;: \u0026#34;col_geo_shape\u0026#34;, \u0026#34;type\u0026#34;:\u0026#34;geo_shape\u0026#34;, \u0026#34;tree\u0026#34;: \u0026#34;quadtree\u0026#34;, \u0026#34;precision\u0026#34;: \u0026#34;10m\u0026#34;} ] } } } ] } } 3.2 参数说明 endpoint\n描述：ElasticSearch的连接地址\n必选：是\n默认值：无\naccessId\n描述：http auth中的user\n必选：否\n默认值：空\naccessKey\n描述：http auth中的password\n必选：否\n默认值：空\nindex\n描述：elasticsearch中的index名\n必选：是\n默认值：无\ntype\n描述：elasticsearch中index的type名\n必选：否\n默认值：index名\ncleanup\n描述：是否删除原表\n必选：否\n默认值：false\nbatchSize\n描述：每次批量数据的条数\n必选：否\n默认值：1000\ntrySize\n描述：失败后重试的次数\n必选：否\n默认值：30\ntimeout\n描述：客户端超时时间\n必选：否\n默认值：600000\ndiscovery\n描述：启用节点发现将(轮询)并定期更新客户机中的服务器列表。\n必选：否\n默认值：false\ncompression\n描述：http请求，开启压缩\n必选：否\n默认值：true\nmultiThread\n描述：http请求，是否有多线程\n必选：否\n默认值：true\nignoreWriteError\n描述：忽略写入错误，不重试，继续写入\n必选：否\n默认值：false\nignoreParseError\n描述：忽略解析数据格式错误，继续写入\n必选：否\n默认值：true\nalias\n描述：数据导入完成后写入别名\n必选：否\n默认值：无\naliasMode\n描述：数据导入完成后增加别名的模式，append(增加模式), exclusive(只留这一个)\n必选：否\n默认值：append\nsettings\n描述：创建index时候的settings, 与elasticsearch官方相同\n必选：否\n默认值：无\nsplitter\n描述：如果插入数据是array，就使用指定分隔符\n必选：否\n默认值：-,-\ncolumn\n描述：elasticsearch所支持的字段类型，样例中包含了全部\n必选：是\ndynamic\n描述: 不使用datax的mappings，使用es自己的自动mappings\n必选: 否\n默认值: false\n",
   "keywords": [
     "datax"
   ],
   "articleBody": "DataX ElasticSearchWriter 1 快速介绍 数据导入elasticsearch的插件\n2 实现原理 使用elasticsearch的rest api接口， 批量把从reader读入的数据写入elasticsearch\n3 功能说明 3.1 配置样例 job.json { \"job\": { \"setting\": { \"speed\": { \"channel\": 1 } }, \"content\": [ { \"reader\": { ... }, \"writer\": { \"name\": \"elasticsearchwriter\", \"parameter\": { \"endpoint\": \"http://xxx:9999\", \"accessId\": \"xxxx\", \"accessKey\": \"xxxx\", \"index\": \"test-1\", \"type\": \"default\", \"cleanup\": true, \"settings\": {\"index\" :{\"number_of_shards\": 1, \"number_of_replicas\": 0}}, \"discovery\": false, \"batchSize\": 1000, \"splitter\": \",\", \"column\": [ {\"name\": \"pk\", \"type\": \"id\"}, { \"name\": \"col_ip\",\"type\": \"ip\" }, { \"name\": \"col_double\",\"type\": \"double\" }, { \"name\": \"col_long\",\"type\": \"long\" }, { \"name\": \"col_integer\",\"type\": \"integer\" }, { \"name\": \"col_keyword\", \"type\": \"keyword\" }, { \"name\": \"col_text\", \"type\": \"text\", \"analyzer\": \"ik_max_word\"}, { \"name\": \"col_geo_point\", \"type\": \"geo_point\" }, { \"name\": \"col_date\", \"type\": \"date\", \"format\": \"yyyy-MM-dd HH:mm:ss\"}, { \"name\": \"col_nested1\", \"type\": \"nested\" }, { \"name\": \"col_nested2\", \"type\": \"nested\" }, { \"name\": \"col_object1\", \"type\": \"object\" }, { \"name\": \"col_object2\", \"type\": \"object\" }, { \"name\": \"col_integer_array\", \"type\":\"integer\", \"array\":true}, { \"name\": \"col_geo_shape\", \"type\":\"geo_shape\", \"tree\": \"quadtree\", \"precision\": \"10m\"} ] } } } ] } } 3.2 参数说明 endpoint\n描述：ElasticSearch的连接地址\n必选：是\n默认值：无\naccessId\n描述：http auth中的user\n必选：否\n默认值：空\naccessKey\n描述：http auth中的password\n必选：否\n默认值：空\nindex\n描述：elasticsearch中的index名\n必选：是\n默认值：无\ntype\n描述：elasticsearch中index的type名\n必选：否\n默认值：index名\ncleanup\n描述：是否删除原表\n必选：否\n默认值：false\nbatchSize\n描述：每次批量数据的条数\n必选：否\n默认值：1000\ntrySize\n描述：失败后重试的次数\n必选：否\n默认值：30\ntimeout\n描述：客户端超时时间\n必选：否\n默认值：600000\ndiscovery\n描述：启用节点发现将(轮询)并定期更新客户机中的服务器列表。\n必选：否\n默认值：false\ncompression\n描述：http请求，开启压缩\n必选：否\n默认值：true\nmultiThread\n描述：http请求，是否有多线程\n必选：否\n默认值：true\nignoreWriteError\n描述：忽略写入错误，不重试，继续写入\n必选：否\n默认值：false\nignoreParseError\n描述：忽略解析数据格式错误，继续写入\n必选：否\n默认值：true\nalias\n描述：数据导入完成后写入别名\n必选：否\n默认值：无\naliasMode\n描述：数据导入完成后增加别名的模式，append(增加模式), exclusive(只留这一个)\n必选：否\n默认值：append\nsettings\n描述：创建index时候的settings, 与elasticsearch官方相同\n必选：否\n默认值：无\nsplitter\n描述：如果插入数据是array，就使用指定分隔符\n必选：否\n默认值：-,-\ncolumn\n描述：elasticsearch所支持的字段类型，样例中包含了全部\n必选：是\ndynamic\n描述: 不使用datax的mappings，使用es自己的自动mappings\n必选: 否\n默认值: false\n4 性能报告 4.1 环境准备 总数据量 1kw条数据, 每条0.1kb 1个shard, 0个replica 不加id，这样默认是append_only模式，不检查版本，插入速度会有20%左右的提升 4.1.1 输入数据类型(streamreader) {\"value\": \"1.1.1.1\", \"type\": \"string\"}, {\"value\": 19890604.0, \"type\": \"double\"}, {\"value\": 19890604, \"type\": \"long\"}, {\"value\": 19890604, \"type\": \"long\"}, {\"value\": \"hello world\", \"type\": \"string\"}, {\"value\": \"hello world\", \"type\": \"string\"}, {\"value\": \"41.12,-71.34\", \"type\": \"string\"}, {\"value\": \"2017-05-25\", \"type\": \"string\"}, 4.1.2 输出数据类型(eswriter) { \"name\": \"col_ip\",\"type\": \"ip\" }, { \"name\": \"col_double\",\"type\": \"double\" }, { \"name\": \"col_long\",\"type\": \"long\" }, { \"name\": \"col_integer\",\"type\": \"integer\" }, { \"name\": \"col_keyword\", \"type\": \"keyword\" }, { \"name\": \"col_text\", \"type\": \"text\"}, { \"name\": \"col_geo_point\", \"type\": \"geo_point\" }, { \"name\": \"col_date\", \"type\": \"date\"} 4.1.2 机器参数 cpu: 32 Intel(R) Xeon(R) CPU E5-2650 v2 @ 2.60GHz mem: 128G net: 千兆双网卡 4.1.3 DataX jvm 参数 -Xms1024m -Xmx1024m -XX:+HeapDumpOnOutOfMemoryError\n4.2 测试报告 通道数 批量提交行数 DataX速度(Rec/s) DataX流量(MB/s) 4 256 11013 0.828 4 1024 19417 1.43 4 4096 23923 1.76 4 8172 24449 1.80 8 256 21459 1.58 8 1024 37037 2.72 8 4096 45454 3.34 8 8172 45871 3.37 16 1024 67567 4.96 16 4096 78125 5.74 16 8172 77519 5.69 32 1024 94339 6.93 32 4096 96153 7.06 64 1024 91743 6.74 4.3 测试总结 最好的结果是32通道，每次传4096，如果单条数据很大， 请适当减少批量数，防止oom 当然这个很容易水平扩展，而且es也是分布式的，多设置几个shard也可以水平扩展 5 约束限制 如果导入id，这样数据导入失败也会重试，重新导入也仅仅是覆盖，保证数据一致性 如果不导入id，就是append_only模式，elasticsearch自动生成id，速度会提升20%左右，但数据无法修复，适合日志型数据(对数据精度要求不高的) ",
   "wordCount" : "431",
-  "inLanguage": "en",
+  "inLanguage": "zh-cn",
   "datePublished": "2021-02-02T17:45:01Z",
   "dateModified": "2021-02-02T17:45:01Z",
   "mainEntityOfPage": {
@@ -162,6 +1045,8 @@
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -171,32 +1056,32 @@
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/1/" title="1s">
+                <a href="https://haokiu.com/1/" title="1">
                     <span>后端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/2/" title="2s">
+                <a href="https://haokiu.com/2/" title="2">
                     <span>前端</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/3/" title="3s">
+                <a href="https://haokiu.com/3/" title="3">
                     <span>区块链</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/4/" title="4s">
+                <a href="https://haokiu.com/4/" title="4">
                     <span>大数据</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/5/" title="5s">
+                <a href="https://haokiu.com/5/" title="5">
                     <span>linux</span>
                 </a>
             </li>
             <li>
-                <a href="https://haokiu.com/6/" title="6s">
+                <a href="https://haokiu.com/6/" title="6">
                     <span>其他</span>
                 </a>
             </li>
@@ -217,7 +1102,7 @@
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="https://haokiu.com/">Home</a>&nbsp;»&nbsp;<a href="https://haokiu.com/4/">4s</a></div>
+    
     <h1 class="post-title">
       DataX ElasticSearchWriter
     </h1>
@@ -612,100 +1497,100 @@
 <p>-Xms1024m -Xmx1024m -XX:+HeapDumpOnOutOfMemoryError</p>
 <h3 id="42-测试报告">4.2 测试报告</h3>
 <table>
-<thead>
-<tr>
-<th>通道数</th>
-<th>批量提交行数</th>
-<th>DataX速度(Rec/s)</th>
-<th>DataX流量(MB/s)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>4</td>
-<td>256</td>
-<td>11013</td>
-<td>0.828</td>
-</tr>
-<tr>
-<td>4</td>
-<td>1024</td>
-<td>19417</td>
-<td>1.43</td>
-</tr>
-<tr>
-<td>4</td>
-<td>4096</td>
-<td>23923</td>
-<td>1.76</td>
-</tr>
-<tr>
-<td>4</td>
-<td>8172</td>
-<td>24449</td>
-<td>1.80</td>
-</tr>
-<tr>
-<td>8</td>
-<td>256</td>
-<td>21459</td>
-<td>1.58</td>
-</tr>
-<tr>
-<td>8</td>
-<td>1024</td>
-<td>37037</td>
-<td>2.72</td>
-</tr>
-<tr>
-<td>8</td>
-<td>4096</td>
-<td>45454</td>
-<td>3.34</td>
-</tr>
-<tr>
-<td>8</td>
-<td>8172</td>
-<td>45871</td>
-<td>3.37</td>
-</tr>
-<tr>
-<td>16</td>
-<td>1024</td>
-<td>67567</td>
-<td>4.96</td>
-</tr>
-<tr>
-<td>16</td>
-<td>4096</td>
-<td>78125</td>
-<td>5.74</td>
-</tr>
-<tr>
-<td>16</td>
-<td>8172</td>
-<td>77519</td>
-<td>5.69</td>
-</tr>
-<tr>
-<td>32</td>
-<td>1024</td>
-<td>94339</td>
-<td>6.93</td>
-</tr>
-<tr>
-<td>32</td>
-<td>4096</td>
-<td>96153</td>
-<td>7.06</td>
-</tr>
-<tr>
-<td>64</td>
-<td>1024</td>
-<td>91743</td>
-<td>6.74</td>
-</tr>
-</tbody>
+	<thead>
+			<tr>
+					<th>通道数</th>
+					<th>批量提交行数</th>
+					<th>DataX速度(Rec/s)</th>
+					<th>DataX流量(MB/s)</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>4</td>
+					<td>256</td>
+					<td>11013</td>
+					<td>0.828</td>
+			</tr>
+			<tr>
+					<td>4</td>
+					<td>1024</td>
+					<td>19417</td>
+					<td>1.43</td>
+			</tr>
+			<tr>
+					<td>4</td>
+					<td>4096</td>
+					<td>23923</td>
+					<td>1.76</td>
+			</tr>
+			<tr>
+					<td>4</td>
+					<td>8172</td>
+					<td>24449</td>
+					<td>1.80</td>
+			</tr>
+			<tr>
+					<td>8</td>
+					<td>256</td>
+					<td>21459</td>
+					<td>1.58</td>
+			</tr>
+			<tr>
+					<td>8</td>
+					<td>1024</td>
+					<td>37037</td>
+					<td>2.72</td>
+			</tr>
+			<tr>
+					<td>8</td>
+					<td>4096</td>
+					<td>45454</td>
+					<td>3.34</td>
+			</tr>
+			<tr>
+					<td>8</td>
+					<td>8172</td>
+					<td>45871</td>
+					<td>3.37</td>
+			</tr>
+			<tr>
+					<td>16</td>
+					<td>1024</td>
+					<td>67567</td>
+					<td>4.96</td>
+			</tr>
+			<tr>
+					<td>16</td>
+					<td>4096</td>
+					<td>78125</td>
+					<td>5.74</td>
+			</tr>
+			<tr>
+					<td>16</td>
+					<td>8172</td>
+					<td>77519</td>
+					<td>5.69</td>
+			</tr>
+			<tr>
+					<td>32</td>
+					<td>1024</td>
+					<td>94339</td>
+					<td>6.93</td>
+			</tr>
+			<tr>
+					<td>32</td>
+					<td>4096</td>
+					<td>96153</td>
+					<td>7.06</td>
+			</tr>
+			<tr>
+					<td>64</td>
+					<td>1024</td>
+					<td>91743</td>
+					<td>6.74</td>
+			</tr>
+	</tbody>
 </table>
 <h3 id="43-测试总结">4.3 测试总结</h3>
 <ul>
@@ -722,13 +1607,21 @@
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="https://haokiu.com/tags/datax/">datax</a></li>
+      <li><a href="https://haokiu.com/tags/datax/">Datax</a></li>
     </ul>
 
   </footer>
 </article>
     </main>
     
+<footer class="footer">
+    <span>haokiu.com</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />

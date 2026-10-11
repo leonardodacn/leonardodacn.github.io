@@ -7,5 +7,7 @@ Gate.io芝麻开门创立于2013年，是全球真实交易量TOP10的数字资�
 
 使用下面的链接注册，可以获得平台的奖励
 
-https://www.gatewebsite.app/share/HAOKIUXX
+https://www.gatewebsite.app/share/HAOKIUXX/
+
+或者使用gate的邀请码：HAOKIUXX
 

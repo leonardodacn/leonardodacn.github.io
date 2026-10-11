@@ -23,7 +23,7 @@ typedef struct { long int __fds_bits[16]; //可以看成是128 bit的数组 } fd
 void FD_CLR(int fd, fd_set *set); 原理和 FD_SET 相同，即将对应的标志位由1变0即可。
 如果，我们需要将 fd_set 中所有的 fd 都清掉，则使用宏 FD_ZERO：
 void FD_ZERO(fd_set *set); 当 select 函数返回时， 我们使用 FD_ISSET 宏来判断某个 fd 是否有我们关心的事件，FD_ISSET 宏的定义如下：
-...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to select 函数重难点解析" href=https://haokiu.com/blog/2369cd70c2354e9c844815c14f31134c/></a></article><article class=post-entry><header class=entry-header><h2>socket 的阻塞模式和非阻塞模式</h2></header><div class=entry-content><p>socket 的阻塞模式和非阻塞模式 对 socket 在阻塞和非阻塞模式下的各个函数的行为差别深入的理解是掌握网络编程的基本要求之一，是重点也是难点。
+...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to select 函数重难点解析" href=https://haokiu.com/blog/2369cd70c2354e9c844815c14f31134c/></a></article><article class=post-entry><header class=entry-header><h2>socket 的阻塞模式和非阻塞模式</h2></header><div class=entry-content><p>socket 的阻塞模式和非阻塞模式 对 socket 在阻塞和非阻塞模式下的各个函数的行为差别深入的理解是掌握网络编程的基本要求之一，是重点也是难点。
 阻塞和非阻塞模式下，我们常讨论的具有不同行为表现的 socket 函数一般有如下几个，见下表：
 connect accept send (Linux 平台上对 socket 进行操作时也包括 write 函数，下文中对 send 函数的讨论也适用于 write 函数) recv (Linux 平台上对 socket 进行操作时也包括 read 函数，下文中对 recv 函数的讨论也适用于 read 函数) 限于文章篇幅，本文只讨论 send 和recv函数，connect 和 accept 函数我们将在该系列的后面文章中讨论。在正式讨论之前，我们先解释一下阻塞模式和非阻塞模式的概念。所谓阻塞模式，就当某个函数“执行成功的条件”当前不能满足时，该函数会阻塞当前执行线程，程序执行流在超时时间到达或“执行成功的条件”满足后恢复继续执行。而非阻塞模式恰恰相反，即使某个函数的“执行成功的条件”不当前不能满足，该函数也不会阻塞当前执行线程，而是立即返回，继续运行执行程序流。如果读者不太明白这两个定义也没关系，后面我们会以具体的示例来讲解这两种模式的区别。
 如何将 socket 设置成非阻塞模式 无论是 Windows 还是 Linux 平台，默认创建的 socket 都是阻塞模式的。
@@ -32,14 +32,14 @@ int oldSocketFlag = fcntl(sockfd, F_GETFL, 0); int newSocketFlag = oldSocketFlag
 当然，Linux 下的 socket() 创建函数也可以直接在创建时将 socket 设置为非阻塞模式，socket() 函数的签名如下：
 int socket(int domain, int type, int protocol); 给 type 参数增加一个 SOCK_NONBLOCK 标志即可，例如：
 int s = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP); 不仅如此，Linux 系统下利用 accept() 函数返回的代表与客户端通信的 socket 也提供了一个扩展函数 accept4()，直接将 accept 函数返回的 socket 设置成非阻塞的。
-...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to socket 的阻塞模式和非阻塞模式" href=https://haokiu.com/blog/7a9421787c4a4e7482e4f3ea6234c7ac/></a></article><article class=post-entry><header class=entry-header><h2>TCP 协议如何解决粘包、半包问题</h2></header><div class=entry-content><p>TCP 协议如何解决粘包、半包问题 一 TCP 协议是流式协议 很多读者从接触网络知识以来，应该听说过这句话：TCP 协议是流式协议。那么这句话到底是什么意思呢？所谓流式协议，即协议的内容是像流水一样的字节流，内容与内容之间没有明确的分界标志，需要我们人为地去给这些协议划分边界。
+...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to socket 的阻塞模式和非阻塞模式" href=https://haokiu.com/blog/7a9421787c4a4e7482e4f3ea6234c7ac/></a></article><article class=post-entry><header class=entry-header><h2>TCP 协议如何解决粘包、半包问题</h2></header><div class=entry-content><p>TCP 协议如何解决粘包、半包问题 一 TCP 协议是流式协议 很多读者从接触网络知识以来，应该听说过这句话：TCP 协议是流式协议。那么这句话到底是什么意思呢？所谓流式协议，即协议的内容是像流水一样的字节流，内容与内容之间没有明确的分界标志，需要我们人为地去给这些协议划分边界。
 举个例子，A 与 B 进行 TCP 通信，A 先后给 B 发送了一个 100 字节和 200 字节的数据包，那么 B 是如何收到呢？B 可能先收到 100 字节，再收到 200 字节；也可能先收到 50 字节，再收到 250 字节；或者先收到 100 字节，再收到 100 字节，再收到 200 字节；或者先收到 20 字节，再收到 20 字节，再收到 60 字节，再收到 100 字节，再收到 50 字节，再收到 50 字节……
 不知道读者看出规律没有？规律就是 A 一共给 B 发送了 300 字节，B 可能以一次或者多次任意形式的总数为 300 字节收到。假设 A 给 B 发送的 100 字节和 200 字节分别都是一个数据包，对于发送端 A 来说，这个是可以区分的，但是对于 B 来说，如果不人为规定多长为一个数据包，B 每次是不知道应该把收到的数据中多少字节作为一个有效的数据包的。而规定每次把多少数据当成一个包就是协议格式规范的内容之一。
 经常会有新手写出类似下面这样的代码：
 发送端：
 //...省略创建socket，建立连接等部分不相关的逻辑... char buf[] = "the quick brown fox jumps over a lazy dog."; int n = send(socket, buf, strlen(buf), 0); //...省略出错处理逻辑... 接收端：
 //省略创建socket，建立连接等部分不相关的逻辑... char recvBuf[50] = { 0 }; int n = recv(socket, recvBuf, 50, 0); //省略出错处理逻辑... printf("recvBuf: %s", recvBuf); 为了专注问题本身的讨论，我这里省略掉了建立连接和部分错误处理的逻辑。上述代码中发送端给接收端发送了一串字符”the quick brown fox jumps over a lazy dog.“，接收端收到后将其打印出来。
-...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to TCP 协议如何解决粘包、半包问题" href=https://haokiu.com/blog/7b86f55ffdcd4434a17beb9dbf7b9527/></a></article><article class=post-entry><header class=entry-header><h2>TeamTalk源码解析</h2></header><div class=entry-content><p>TeamTalk源码解析 01 TeamTalk介绍
+...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to TCP 协议如何解决粘包、半包问题" href=https://haokiu.com/blog/7b86f55ffdcd4434a17beb9dbf7b9527/></a></article><article class=post-entry><header class=entry-header><h2>TeamTalk源码解析</h2></header><div class=entry-content><p>TeamTalk源码解析 01 TeamTalk介绍
 02 服务器端的程序的编译与部署
 03 服务器端的程序架构介绍
 04 服务器端db_proxy_server源码分析
@@ -49,7 +49,7 @@ int s = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP); 不仅如此�
 08 服务器端file_server源码分析
 09 服务器端route_server源码分析
 10 开放一个TeamTalk测试服务器地址和几个测试账号
-11 pc客户端源码分析</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to TeamTalk源码解析" href=https://haokiu.com/blog/0da28a69a69242919c3333dc8e970a8f/></a></article><article class=post-entry><header class=entry-header><h2>不定参数函数实现var_arg系列的宏</h2></header><div class=entry-content><p>不定参数函数实现var_arg系列的宏 电驴的源码日志模块有一个叫 DebugLogError 函数，其签名如下：
+11 pc客户端源码分析</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to TeamTalk源码解析" href=https://haokiu.com/blog/0da28a69a69242919c3333dc8e970a8f/></a></article><article class=post-entry><header class=entry-header><h2>不定参数函数实现var_arg系列的宏</h2></header><div class=entry-content><p>不定参数函数实现var_arg系列的宏 电驴的源码日志模块有一个叫 DebugLogError 函数，其签名如下：
 //代码位于easyMule-master/src/WorkLayer/Log.h 55行 void DebugLogError(LPCTSTR pszLine, ...); 电驴的源码可以在公众号【 高性能服务器开发 】后台回复“获取电驴源码”即可获取。
 这个函数的申明在 Log.h 头文件中，是一个全局函数，其实现代码在 Log.cpp 文件中：
 //代码位于easyMule-master/src/WorkLayer/Log.cpp 111行 void DebugLogError(LPCTSTR pszFmt, ...) { va_list argp; va_start(argp, pszFmt); LogV(LOG_DEBUG | LOG_ERROR, pszFmt, argp); va_end(argp); } 这个函数是一个具有不定参数的函数（也就是参数个数不确定），比如调用这个函数我们可以传入一个参数，也可以传入二个或者三个参数等等：
@@ -57,19 +57,19 @@ DebugLogError(L"我喜欢你!"); DebugLogError(L"我喜欢你!", L"你喜欢谁�
 你可以通过这段代码学习到编写方法，奥秘就在DebugLogError()中使用的几个你从来没见过的宏，让我们欢迎它们：
 va_list va_start va_end 这几个宏是C函数库提供的，位于头文件stdarg.h中。下面我们利用这几个宏自定义一个ShowLove()函数：
 #include &lt;stdio.h> #include &lt;tchar.h> #include &lt;stdarg.h> #include &lt;locale.h> int ShowLove(wchar_t* szFirstSentence, ...) { //用来统计可变参数数量 int num = 0; //第一步： //申明一个va_list类型对象ap，用于对参数进行遍历 va_list ap; //第二步： //使用va_start对变量进行初始化 //这里需要注意的是: //在传统C语言中，va_start把ap中内部指针设置为传递给函数参数的【第一个实参】； //而在标准的C中，va_start接受一个额外参数，也就是最后一个【固定参数】的名称， //并把ap中的内部指针设置为传递给函数的第一个【可变参数】. //所以你在VC++ 6.0和VS2008等高版本的编译器中使用va_start需要注意区别 //这里使用标准C va_start(ap, szFirstSentence); //第三步： //使用va_arg宏返回实参列表中的下一个参数值，并把ap的内部指针推向下一个参数（如果有的话） //必须指定下一个参数的类型。 //在调用va_start之后第一次调用va_arg将返回第一个可变参数的值 wprintf(szFirstSentence); wchar_t* p = 0; while(p = va_arg(ap, wchar_t*)) { wprintf(L"%s", p); num ++; } //第四步： //待所有可变参数都读取完毕以后，调用va_end宏对ap和va_list做必要的清理工作 va_end(ap); return num; } int main(int argc, char* argv[]) { setlocale(LC_ALL, ""); int z = ShowLoveL"我喜欢你！\n"); int y = ShowLove(L"我喜欢你！", L"你喜欢谁？\n"); int l = ShowLove(L"我喜欢你！", L"你喜欢谁？", L"萧雨萌！\n"); printf("可变参数个数依次是：%d\t%d\t%d\n", z, y, l); return 0; } 上述代码的运行结果是：
-...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 不定参数函数实现var_arg系列的宏" href=https://haokiu.com/blog/e3f33300987a43d08044b27dbbc5e9ec/></a></article><article class=post-entry><header class=entry-header><h2>程序员必知必会的网络命令</h2></header><div class=entry-content><p>程序员必知必会的网络命令 利用telnet命令发电子邮件
+...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 不定参数函数实现var_arg系列的宏" href=https://haokiu.com/blog/e3f33300987a43d08044b27dbbc5e9ec/></a></article><article class=post-entry><header class=entry-header><h2>程序员必知必会的网络命令</h2></header><div class=entry-content><p>程序员必知必会的网络命令 利用telnet命令发电子邮件
 做Java或者C++开发都应该知道的lsof命令
 Linux网络故障排查的瑞士军刀nc命令
 Linux tcpdump使用详解
 从抓包的角度分析connect函数的连接过程
-服务器开发中网络数据分析与故障排查经验漫谈</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 程序员必知必会的网络命令" href=https://haokiu.com/blog/2137687badbe411cac56094071bcc338/></a></article><article class=post-entry><header class=entry-header><h2>程序员的烦心事</h2></header><div class=entry-content><p>程序员的烦心事 拒绝了一家公司的offer后，他们的副总和hr总监同时打电话来询问拒绝原因并极力要求加入，我该不该去？
-我是一名程序员，结婚时女友要求我用两年的工资作为彩礼，我该不该答应？</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 程序员的烦心事" href=https://haokiu.com/blog/e11a027d307841d9b515ac4b1670037c/></a></article><article class=post-entry><header class=entry-header><h2>程序员的薪资与年终奖那些事儿</h2></header><div class=entry-content><p>程序员的薪资与年终奖那些事儿 技术面试与HR谈薪资技巧
+服务器开发中网络数据分析与故障排查经验漫谈</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 程序员必知必会的网络命令" href=https://haokiu.com/blog/2137687badbe411cac56094071bcc338/></a></article><article class=post-entry><header class=entry-header><h2>程序员的烦心事</h2></header><div class=entry-content><p>程序员的烦心事 拒绝了一家公司的offer后，他们的副总和hr总监同时打电话来询问拒绝原因并极力要求加入，我该不该去？
+我是一名程序员，结婚时女友要求我用两年的工资作为彩礼，我该不该答应？</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 程序员的烦心事" href=https://haokiu.com/blog/e11a027d307841d9b515ac4b1670037c/></a></article><article class=post-entry><header class=entry-header><h2>程序员的薪资与年终奖那些事儿</h2></header><div class=entry-content><p>程序员的薪资与年终奖那些事儿 技术面试与HR谈薪资技巧
 聊一聊程序员如何增加收入
-谈一谈年终奖</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 程序员的薪资与年终奖那些事儿" href=https://haokiu.com/blog/18d3e73501ef4be092520d6f5991517f/></a></article><article class=post-entry><header class=entry-header><h2>程序员面试题精讲</h2></header><div class=entry-content><p>程序员面试题精讲 腾讯后台开发实习生技能要求
+谈一谈年终奖</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 程序员的薪资与年终奖那些事儿" href=https://haokiu.com/blog/18d3e73501ef4be092520d6f5991517f/></a></article><article class=post-entry><header class=entry-header><h2>程序员面试题精讲</h2></header><div class=entry-content><p>程序员面试题精讲 腾讯后台开发实习生技能要求
 聊聊如何拿大厂的 offer
 网络通信题目集锦
 我面试后端开发经理的经历
-Linux C/C++后端开发面试问哪些问题</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 程序员面试题精讲" href=https://haokiu.com/blog/c092595334ac4b29914e418b3aae0648/></a></article><article class=post-entry><header class=entry-header><h2>程序员如何写简历</h2></header><div class=entry-content><p>程序员如何写简历 笔者工作多年后面试了很多公司，例如 2018 年年初横扫各大互联网公司，也作为面试官面试了很多人，看过不少的简历。现在疫情快过去了，很多小伙伴开始准备简历看新机会了，但是不少小伙伴遇到以下两种情况：
+Linux C/C++后端开发面试问哪些问题</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 程序员面试题精讲" href=https://haokiu.com/blog/c092595334ac4b29914e418b3aae0648/></a></article><article class=post-entry><header class=entry-header><h2>程序员如何写简历</h2></header><div class=entry-content><p>程序员如何写简历 笔者工作多年后面试了很多公司，例如 2018 年年初横扫各大互联网公司，也作为面试官面试了很多人，看过不少的简历。现在疫情快过去了，很多小伙伴开始准备简历看新机会了，但是不少小伙伴遇到以下两种情况：
 投了很多公司，邀请面试的寥寥无几； 面试的时候被面试官问的哑口无言。 造成以上原因很大一部分是因为简历的问题，本文将结合自身的面试和被面试的经历和大家聊一聊简历怎么写。我们先来分析一些简历素材。
 简历一 这是一位毕业生的简历，大家看下这个简历存在什么问题？
 分析：
@@ -92,7 +92,7 @@ Linux C/C++后端开发面试问哪些问题</p></div><footer class=entry-footer
 简历七 分析
 人常说，一份文案的整洁程度可以反映一个人的细致程度。这份简历存在两个问题：
 个人技能这一块分类很混乱，例如“掌握 C++ 应用，理解底层原理,部分 c11 特性”中底层原理和 C++ 应用有什么关系，完全可以分开写嘛，另外 C++11已经目前已经被广泛使用，如果你不熟悉就不要写，写熟悉部分是熟悉多少？是告诉面试官自己这方面掌握的不好吗？原本面试时面试官可能不会问，看到这个可能说不定忍不住问几个 C++11 的东西；“多线程，同步，ipc通信等”中的“同步”难道不是针对多线程讲的吗？“熟悉设计模式、策略模式、单例模式、工厂模式”中策略模式、单例模式、工厂模式难道不是设计模式的一种吗？为何和设计模式一起用顿号并列起来？ 简历中标点符号一会儿中文的逗号，一会儿英文的逗号，像 C++、Linux 这样的专用名词一会儿首字母大写，一会儿小写，导致整个排版脏乱不堪。 总结 成功的方法都差不多，错误的情形千奇百怪。因文章篇幅，就不贴更多的简历了，看完上面七份简历，你是否也有类似的情形呢？下面给大家总结一下投递简历注意事项和如何写技术简历。
-...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 程序员如何写简历" href=https://haokiu.com/blog/9c853d8576774df7ad52d79d740d95f1/></a></article><footer class=page-footer><nav class=pagination><a class=prev href=https://haokiu.com/1/index/13/>«&nbsp;&nbsp;
+...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 程序员如何写简历" href=https://haokiu.com/blog/9c853d8576774df7ad52d79d740d95f1/></a></article><footer class=page-footer><nav class=pagination><a class=prev href=https://haokiu.com/1/index/13/>«&nbsp;&nbsp;
 </a><a class=next href=https://haokiu.com/1/index/15/>&nbsp;&nbsp;»</a></nav></footer></main><footer class=footer><span>haokiu.com</span>
 <span>Powered by
 <a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &

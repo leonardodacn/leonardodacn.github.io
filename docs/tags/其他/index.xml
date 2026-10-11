@@ -1,8 +1,40 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>其他 on haokiu</title><link>https://haokiu.com/tags/%E5%85%B6%E4%BB%96/</link><description>Recent content in 其他 on haokiu</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>haokiu.com</copyright><lastBuildDate>Tue, 08 Jun 2021 10:09:53 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/%E5%85%B6%E4%BB%96/index.xml" rel="self" type="application/rss+xml"/><item><title>lantern 邀请码</title><link>https://haokiu.com/blog/g6ADCM/</link><pubDate>Tue, 08 Jun 2021 10:09:53 +0000</pubDate><guid>https://haokiu.com/blog/g6ADCM/</guid><description>lantern 是一款专业的代理软件，方便更好的使用互联网，输入我的邀请码 46KBX2 来获得三个月的蓝灯专业版！立即下载 https://github.com/getlantern/forum</description><content:encoded>&lt;p>lantern 是一款专业的代理软件，方便更好的使用互联网，输入我的邀请码 46KBX2 来获得三个月的蓝灯专业版！立即下载 &lt;a href="https://github.com/getlantern/forum">https://github.com/getlantern/forum&lt;/a>&lt;/p>
-</content:encoded></item><item><title>Neovide</title><link>https://haokiu.com/blog/neovide/</link><pubDate>Tue, 16 Feb 2021 13:54:58 +0000</pubDate><guid>https://haokiu.com/blog/neovide/</guid><description>neovide 是一个简单的 neovim 用户图像工具，相对于 Neovim 会有一些界面的提升的，但它的功能类似于终端用户界面。 neovide 的官网：https://github.com/Ke…</description><content:encoded><![CDATA[<p>neovide 是一个简单的 neovim 用户图像工具，相对于 Neovim 会有一些界面的提升的，但它的功能类似于终端用户界面。</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>其他 on haokiu</title><link>https://haokiu.com/tags/%E5%85%B6%E4%BB%96/</link><description>Recent content in 其他 on haokiu</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>haokiu.com</copyright><lastBuildDate>Sun, 11 Oct 2026 15:15:14 +0800</lastBuildDate><atom:link href="https://haokiu.com/tags/%E5%85%B6%E4%BB%96/index.xml" rel="self" type="application/rss+xml"/><item><title>jev-trader 简介</title><link>https://haokiu.com/blog/jev-trader/</link><pubDate>Sun, 11 Oct 2026 15:15:14 +0800</pubDate><guid>https://haokiu.com/blog/jev-trader/</guid><description>**jev-trader** 是由 Monad 基金会首席 AI 工程师 Jarrod Watts 开源的 AI 做市 / 高频交易机器人，基于 TypeSafe AI 推出的**Jev（TypeSafe System One）快速决策模型**开发，是 Jev 模型出圈的首个标杆 Demo 项目</description><content:encoded><![CDATA[<p><strong>jev-trader</strong> 是由 Monad 基金会首席AI工程师 Jarrod Watts 开源的AI做市/高频交易机器人，基于 TypeSafe AI 推出的<strong>Jev（TypeSafe System One）快速决策模型</strong>开发，是Jev模型出圈的首个标杆Demo项目。</p>
+<h2 id="基础信息">基础信息</h2>
+<ul>
+<li>GitHub：<code>jarrodwatts/jev-trader</code>，Bun + TypeScript 开发</li>
+<li>交易标的：Monad 链上 Kuru 交易所 <strong>MON/USDC</strong></li>
+<li>演示页面：jev-trader.vercel.app，提供可视化实时仪表盘，展示盘口、模型置信度、成交记录</li>
+</ul>
+<h2 id="核心机制">核心机制</h2>
+<ol>
+<li><strong>决策层：Jev模型</strong>
+Jev 不是大语言模型，主打<strong>低延迟实时决策</strong>，目标适配Monad约300ms的出块间隔；读取订单簿数据后输出：买/卖/持有 + 置信概率，只给出交易判断，不生成文本。</li>
+<li><strong>执行层：做市限价单</strong>
+程序拿到Jev的判断后，在盘口价差内侧挂<strong>仅成交限价单（post-only）</strong>，赚取买卖价差，属于简单链上做市策略。</li>
+<li><strong>两种运行模式</strong>
+<ul>
+<li>Dry-run（默认空跑）：只看盘、做模拟决策，不真实下单，适合调试观察</li>
+<li>实盘模式：导入私钥后才会发链上交易</li>
+</ul>
+</li>
+</ol>
+<h2 id="项目定位重点">项目定位（重点）</h2>
+<p>作者明确强调：<strong>这只是技术演示Demo，不是稳赚交易策略</strong>，目的是证明Jev模型可以跟上Monad的高速出块节奏，适合AI决策+链上交易的学习、二次开发，不适合直接拿来盈利。</p>
+<h2 id="社区情况与风险">社区情况与风险</h2>
+<ul>
+<li>开源后衍生出很多分支版本：比如移植到Hyperliquid的jev-trade，支持BTC/ETH/SOL等合约多空</li>
+<li>社区有实盘测试案例，出现过短时间大额亏损；AI高置信度≠盈利，缺少成熟回测、风控，市场波动下容易反复频繁换向、持续亏损</li>
+</ul>
+<h2 id="简单区分">简单区分</h2>
+<ul>
+<li><strong>Jev</strong>：TypeSafe AI的快速决策模型（System One）</li>
+<li><strong>jev-trader</strong>：用Jev模型写的Monad链上做市机器人Demo</li>
+</ul>
+]]></content:encoded></item><item><title>lantern 邀请码</title><link>https://haokiu.com/blog/g6ADCM/</link><pubDate>Tue, 08 Jun 2021 10:09:53 +0800</pubDate><guid>https://haokiu.com/blog/g6ADCM/</guid><description>lantern 是一款专业的代理软件，方便更好的使用互联网，输入我的邀请码 46KBX2 来获得三个月的蓝灯专业版！立即下载 https://github.com/getlantern/forum</description><content:encoded>&lt;p>lantern 是一款专业的代理软件，方便更好的使用互联网，输入我的邀请码 46KBX2 来获得三个月的蓝灯专业版！立即下载 &lt;a href="https://github.com/getlantern/forum">https://github.com/getlantern/forum&lt;/a>&lt;/p>
+</content:encoded></item><item><title>Neovide</title><link>https://haokiu.com/blog/neovide/</link><pubDate>Tue, 16 Feb 2021 13:54:58 +0800</pubDate><guid>https://haokiu.com/blog/neovide/</guid><description>neovide 是一个简单的 neovim 用户图像工具，相对于 Neovim 会有一些界面的提升的，但它的功能类似于终端用户界面。 neovide 的官网：https://github.com/Ke…</description><content:encoded><![CDATA[<p>neovide 是一个简单的 neovim 用户图像工具，相对于 Neovim 会有一些界面的提升的，但它的功能类似于终端用户界面。</p>
 <p>neovide 的官网：https://github.com/Kethku/neovide。</p>
 <p>gitbhub上有更多关于它的安装及使用教程。</p>
-]]></content:encoded></item><item><title>idea 付费版和免费版的区别</title><link>https://haokiu.com/blog/oqQib8/</link><pubDate>Thu, 24 Sep 2020 11:08:33 +0000</pubDate><guid>https://haokiu.com/blog/oqQib8/</guid><description>idea 付费版和免费版的区别 | | IntelliJ IDEA Ultimate | IntelliJ IDEA Community Edition | | -------------------…</description><content:encoded><![CDATA[<h2 id="idea-付费版和免费版的区别">idea 付费版和免费版的区别</h2>
+]]></content:encoded></item><item><title>idea 付费版和免费版的区别</title><link>https://haokiu.com/blog/oqQib8/</link><pubDate>Thu, 24 Sep 2020 11:08:33 +0800</pubDate><guid>https://haokiu.com/blog/oqQib8/</guid><description>idea 付费版和免费版的区别 | | IntelliJ IDEA Ultimate | IntelliJ IDEA Community Edition | | -------------------…</description><content:encoded><![CDATA[<h2 id="idea-付费版和免费版的区别">idea 付费版和免费版的区别</h2>
 <table>
 	<thead>
 			<tr>
@@ -64,7 +96,7 @@
 			</tr>
 	</tbody>
 </table>
-]]></content:encoded></item><item><title>https 原理简介</title><link>https://haokiu.com/blog/3TSsuC/</link><pubDate>Wed, 23 Sep 2020 13:48:39 +0000</pubDate><guid>https://haokiu.com/blog/3TSsuC/</guid><description>HTTPS 的整个通信过程可以分为两大阶段：证书验证和数据传输阶段，数据传输阶段又可以分为非对称加密和对称加密两个阶段。具体流程按图中的序号讲解。 客户端请求 HTTPS 网址，然后连接到 serve…</description><content:encoded><![CDATA[<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/313440536451cccb2bb81503c908357d.png" alt="https 原理"  />
+]]></content:encoded></item><item><title>https 原理简介</title><link>https://haokiu.com/blog/3TSsuC/</link><pubDate>Wed, 23 Sep 2020 13:48:39 +0800</pubDate><guid>https://haokiu.com/blog/3TSsuC/</guid><description>HTTPS 的整个通信过程可以分为两大阶段：证书验证和数据传输阶段，数据传输阶段又可以分为非对称加密和对称加密两个阶段。具体流程按图中的序号讲解。 客户端请求 HTTPS 网址，然后连接到 serve…</description><content:encoded><![CDATA[<p><img loading="lazy" src="http://haokiu.seaxiang.com/haokiu/313440536451cccb2bb81503c908357d.png" alt="https 原理"  />
 
 HTTPS 的整个通信过程可以分为两大阶段：证书验证和数据传输阶段，数据传输阶段又可以分为非对称加密和对称加密两个阶段。具体流程按图中的序号讲解。</p>
 <ol>
@@ -93,7 +125,7 @@ HTTPS 的整个通信过程可以分为两大阶段：证书验证和数据传�
 <p>双方使用对称加密愉快地传输所有数据。</p>
 </li>
 </ol>
-]]></content:encoded></item><item><title>github 的 master 分支将更改为 main</title><link>https://haokiu.com/blog/LcW9jL/</link><pubDate>Tue, 22 Sep 2020 09:22:43 +0000</pubDate><guid>https://haokiu.com/blog/LcW9jL/</guid><description>从今年 10 月 1 日起，GitHub 在该平台上创建的所有新的源代码仓库将默认被命名为 &amp;#34;main&amp;#34;，而不是原先的&amp;#34;master&amp;#34;。值得注意的是，现有的存储库不会受到此更改影响。 早在今年 6 月…</description><content:encoded><![CDATA[<p>从今年 10 月 1 日起，GitHub 在该平台上创建的所有新的源代码仓库将默认被命名为 &ldquo;main&rdquo;，而不是原先的&quot;master&quot;。值得注意的是，现有的存储库不会受到此更改影响。</p>
+]]></content:encoded></item><item><title>github 的 master 分支将更改为 main</title><link>https://haokiu.com/blog/LcW9jL/</link><pubDate>Tue, 22 Sep 2020 09:22:43 +0800</pubDate><guid>https://haokiu.com/blog/LcW9jL/</guid><description>从今年 10 月 1 日起，GitHub 在该平台上创建的所有新的源代码仓库将默认被命名为 &amp;#34;main&amp;#34;，而不是原先的&amp;#34;master&amp;#34;。值得注意的是，现有的存储库不会受到此更改影响。 早在今年 6 月…</description><content:encoded><![CDATA[<p>从今年 10 月 1 日起，GitHub 在该平台上创建的所有新的源代码仓库将默认被命名为 &ldquo;main&rdquo;，而不是原先的&quot;master&quot;。值得注意的是，现有的存储库不会受到此更改影响。</p>
 <p>早在今年 6 月份，受美国大规模的 “Black Lives Matter”运动影响，为了安抚愈演愈烈的民众情绪，GitHub 就宣布将替换掉 master 等术语，以避免联想奴隶制。现如今，在外界一些声音的催促下，这一举措则终于要正式落地了。</p>
 <p>除 GitHub 外，为了避免带有所谓的“种族歧视色彩”，许多科技巨头或知名软件也都调整了自己的业务和产品，以平息社会舆论。包括有：MySQL 宣布删除 master、黑名单白名单等术语；Linus Torvalds 通过了 Linux 中避免 master/slave 等术语的提案；还有 Twitter 、GitHub、微软、LinkedIn、Ansible、Splunk、OpenZFS、OpenSSL、JP Morgan、 Android 移动操作系统、Go 编程语言、PHPUnit 和 Curl 等宣布要对此类术语进行删除或更改。同时，IBM、亚马逊、微软也都接连调整面部识别平台业务，以防加深歧视或遭受指责。</p>
 <p>且最初在 Git 中写下“master”一词的开发者 Petr Baudis 也于 6 月份在社交网站上表明立场称，自己当年不该使用“master”这个可能给别人造成伤害的词语。并表示，他曾多次希望可以将“master”改成“main”(和“upstream”）。不过直到现在，才由 GitHub 开始主导替换工作。</p>
@@ -101,7 +133,7 @@ HTTPS 的整个通信过程可以分为两大阶段：证书验证和数据传�
 <p>此外，Github 还透露，截至今年年底，他们将使现有存储库无缝重命名其默认分支。当用户重命名分支机构时，他们将重新定位打开的 PR 和草稿版本、移动分支机构保护策略等，且所有的这些都将自动完成。</p>
 <p>事实上，计算机术语政治正确性早已不是新鲜话题。2004 年，“master/slave”曾被全球语言检测机构评为年度最不政治正确的十大词汇之一，时任主席称这是政治渗透到计算机技术控制中的表现。2008 年，开源软件 Drupal 在社区发布消息，高调站队，将“master/slave”重命名为“client/server”。2018年，IETF 也在草案当中指出，要求开源软件更改“master/slave”和“blacklist/whitelist”两项表述。</p>
 <p>但是值得思考的是，在计算机源码领域中，“master/slave”和“blacklist/whitelist”之类的技术用语有错吗？一味的“一刀切”的话，会不会导致所谓的矫枉过正呢</p>
-]]></content:encoded></item><item><title>S3协议</title><link>https://haokiu.com/blog/d0DCeH/</link><pubDate>Fri, 18 Sep 2020 15:17:51 +0000</pubDate><guid>https://haokiu.com/blog/d0DCeH/</guid><description>S3是Simple Storage Service的缩写，即简单存储服务。亚马逊的名词缩写也都遵循这个习惯，例如Elastic Compute Cloud缩写为EC2等等。 S3说的玄乎一点可以叫云存…</description><content:encoded><![CDATA[<p>S3是Simple Storage Service的缩写，即简单存储服务。亚马逊的名词缩写也都遵循这个习惯，例如Elastic Compute Cloud缩写为EC2等等。</p>
+]]></content:encoded></item><item><title>S3协议</title><link>https://haokiu.com/blog/d0DCeH/</link><pubDate>Fri, 18 Sep 2020 15:17:51 +0800</pubDate><guid>https://haokiu.com/blog/d0DCeH/</guid><description>S3是Simple Storage Service的缩写，即简单存储服务。亚马逊的名词缩写也都遵循这个习惯，例如Elastic Compute Cloud缩写为EC2等等。 S3说的玄乎一点可以叫云存…</description><content:encoded><![CDATA[<p>S3是Simple Storage Service的缩写，即简单存储服务。亚马逊的名词缩写也都遵循这个习惯，例如Elastic Compute Cloud缩写为EC2等等。</p>
 <p>S3说的玄乎一点可以叫云存储，通俗一点就是大网盘。其概念类似于分布式文家系统，同Google的GFS应该在一个层面。</p>
 <p>目前的阿里的oss，腾讯的cos，七牛云存储都兼容aws的S3，所以要更换这些服务商之间提供的云存储非常容易，只需要简单的修改Access Key, Secrect Key等就行。</p>
 <h2 id="s3的定义如下">S3的定义如下</h2>
@@ -133,8 +165,8 @@ HTTPS 的整个通信过程可以分为两大阶段：证书验证和数据传�
 <p><a href="http://aws.amazon.com/s3/#functionality">http://aws.amazon.com/s3/#functionality</a></p>
 <p><a href="http://docs.amazonwebservices.com/AmazonS3/2006-03-01/">http://docs.amazonwebservices.com/AmazonS3/2006-03-01/</a></p>
 <p><a href="http://developer.amazonwebservices.com/connect/forum.jspa?forumID=24">http://developer.amazonwebservices.com/connect/forum.jspa?forumID=24</a></p>
-]]></content:encoded></item><item><title>免费的云存储</title><link>https://haokiu.com/blog/0K1gzu/</link><pubDate>Fri, 18 Sep 2020 09:47:06 +0000</pubDate><guid>https://haokiu.com/blog/0K1gzu/</guid><description>七牛云存储 提供了每月10G的免费存储，一般的网站已经够用，如果超额了，费用也很低，可以考虑将网站的图片存在七牛，安全可靠。</description><content:encoded>&lt;p>&lt;a href="https://portal.qiniu.com/signup?code=1h94f2kttyrma">七牛云存储&lt;/a> 提供了每月10G的免费存储，一般的网站已经够用，如果超额了，费用也很低，可以考虑将网站的图片存在七牛，安全可靠。&lt;/p>
-</content:encoded></item><item><title>frp 使用</title><link>https://haokiu.com/blog/HYawYY/</link><pubDate>Tue, 08 Sep 2020 09:50:15 +0000</pubDate><guid>https://haokiu.com/blog/HYawYY/</guid><description>frp 是一个可用于内网穿透的高性能的反向代理应用，支持 tcp, udp, http, https 协议。本文简单的介绍frp的配置使用。 实现内网穿需要有一台公网服务器。本文将公网服务器称为服务端…</description><content:encoded><![CDATA[<p>frp 是一个可用于内网穿透的高性能的反向代理应用，支持 tcp, udp, http, https 协议。本文简单的介绍frp的配置使用。</p>
+]]></content:encoded></item><item><title>免费的云存储</title><link>https://haokiu.com/blog/0K1gzu/</link><pubDate>Fri, 18 Sep 2020 09:47:06 +0800</pubDate><guid>https://haokiu.com/blog/0K1gzu/</guid><description>七牛云存储 提供了每月10G的免费存储，一般的网站已经够用，如果超额了，费用也很低，可以考虑将网站的图片存在七牛，安全可靠。</description><content:encoded>&lt;p>&lt;a href="https://portal.qiniu.com/signup?code=1h94f2kttyrma">七牛云存储&lt;/a> 提供了每月10G的免费存储，一般的网站已经够用，如果超额了，费用也很低，可以考虑将网站的图片存在七牛，安全可靠。&lt;/p>
+</content:encoded></item><item><title>frp 使用</title><link>https://haokiu.com/blog/HYawYY/</link><pubDate>Tue, 08 Sep 2020 09:50:15 +0800</pubDate><guid>https://haokiu.com/blog/HYawYY/</guid><description>frp 是一个可用于内网穿透的高性能的反向代理应用，支持 tcp, udp, http, https 协议。本文简单的介绍frp的配置使用。 实现内网穿需要有一台公网服务器。本文将公网服务器称为服务端…</description><content:encoded><![CDATA[<p>frp 是一个可用于内网穿透的高性能的反向代理应用，支持 tcp, udp, http, https 协议。本文简单的介绍frp的配置使用。</p>
 <p>实现内网穿需要有一台公网服务器。本文将公网服务器称为服务端，内网服务器称为客户端。需要开启相关的端口。相关端口没开通，访问就会失败。</p>
 <p>frp git地址:https://github.com/fatedier/frp
 中文文档：https://github.com/fatedier/frp/blob/master/README_zh.md

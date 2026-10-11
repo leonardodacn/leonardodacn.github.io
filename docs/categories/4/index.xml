@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>4 on haokiu</title><link>https://haokiu.com/categories/4/</link><description>Recent content in 4 on haokiu</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>haokiu.com</copyright><lastBuildDate>Tue, 02 Feb 2021 17:45:01 +0000</lastBuildDate><atom:link href="https://haokiu.com/categories/4/index.xml" rel="self" type="application/rss+xml"/><item><title>CassandraReader 插件文档</title><link>https://haokiu.com/blog/b0b0444d45c74c8f8b1a9fc4d2af738a/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/b0b0444d45c74c8f8b1a9fc4d2af738a/</guid><description>CassandraReader 插件文档 1 快速介绍 CassandraReader插件实现了从Cassandra读取数据。在底层实现上，CassandraReader通过datastax的java…</description><content:encoded><![CDATA[<h1 id="cassandrareader-插件文档">CassandraReader 插件文档</h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>4 on haokiu</title><link>https://haokiu.com/categories/4/</link><description>Recent content in 4 on haokiu</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>haokiu.com</copyright><lastBuildDate>Tue, 02 Feb 2021 17:45:01 +0800</lastBuildDate><atom:link href="https://haokiu.com/categories/4/index.xml" rel="self" type="application/rss+xml"/><item><title>CassandraReader 插件文档</title><link>https://haokiu.com/blog/b0b0444d45c74c8f8b1a9fc4d2af738a/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/b0b0444d45c74c8f8b1a9fc4d2af738a/</guid><description>CassandraReader 插件文档 1 快速介绍 CassandraReader插件实现了从Cassandra读取数据。在底层实现上，CassandraReader通过datastax的java…</description><content:encoded><![CDATA[<h1 id="cassandrareader-插件文档">CassandraReader 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>CassandraReader插件实现了从Cassandra读取数据。在底层实现上，CassandraReader通过datastax的java driver连接Cassandra实例，并执行相应的cql语句将数据从cassandra中SELECT出来。</p>
@@ -270,7 +270,7 @@
 <h3 id="51-主备同步数据恢复问题">5.1 主备同步数据恢复问题</h3>
 <p>略</p>
 <h2 id="6-faq">6 FAQ</h2>
-]]></content:encoded></item><item><title>CassandraWriter 插件文档</title><link>https://haokiu.com/blog/056d47f442c1471da1b62d7062dd00e2/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/056d47f442c1471da1b62d7062dd00e2/</guid><description>CassandraWriter 插件文档 1 快速介绍 CassandraWriter插件实现了向Cassandra写入数据。在底层实现上，CassandraWriter通过datastax的java…</description><content:encoded><![CDATA[<h1 id="cassandrawriter-插件文档">CassandraWriter 插件文档</h1>
+]]></content:encoded></item><item><title>CassandraWriter 插件文档</title><link>https://haokiu.com/blog/056d47f442c1471da1b62d7062dd00e2/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/056d47f442c1471da1b62d7062dd00e2/</guid><description>CassandraWriter 插件文档 1 快速介绍 CassandraWriter插件实现了向Cassandra写入数据。在底层实现上，CassandraWriter通过datastax的java…</description><content:encoded><![CDATA[<h1 id="cassandrawriter-插件文档">CassandraWriter 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>CassandraWriter插件实现了向Cassandra写入数据。在底层实现上，CassandraWriter通过datastax的java driver连接Cassandra实例，并执行相应的cql语句将数据写入cassandra中。</p>
@@ -561,7 +561,7 @@
 <h3 id="51-主备同步数据恢复问题">5.1 主备同步数据恢复问题</h3>
 <p>略</p>
 <h2 id="6-faq">6 FAQ</h2>
-]]></content:encoded></item><item><title>DataX</title><link>https://haokiu.com/blog/dcdba0138c4f45f0a08968ab48edb900/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/dcdba0138c4f45f0a08968ab48edb900/</guid><description>DataX DataX 是阿里巴巴集团内被广泛使用的离线数据同步工具/平台，实现包括 MySQL、Oracle、SqlServer、Postgre、HDFS、Hive、ADS、HBase、TableS…</description><content:encoded><![CDATA[<p><img loading="lazy" src="https://github.com/alibaba/DataX/blob/master/images/DataX-logo.jpg" alt="Datax-logo"  />
+]]></content:encoded></item><item><title>DataX</title><link>https://haokiu.com/blog/dcdba0138c4f45f0a08968ab48edb900/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/dcdba0138c4f45f0a08968ab48edb900/</guid><description>DataX DataX 是阿里巴巴集团内被广泛使用的离线数据同步工具/平台，实现包括 MySQL、Oracle、SqlServer、Postgre、HDFS、Hive、ADS、HBase、TableS…</description><content:encoded><![CDATA[<p><img loading="lazy" src="https://github.com/alibaba/DataX/blob/master/images/DataX-logo.jpg" alt="Datax-logo"  />
 </p>
 <h1 id="datax">DataX</h1>
 <p>DataX 是阿里巴巴集团内被广泛使用的离线数据同步工具/平台，实现包括 MySQL、Oracle、SqlServer、Postgre、HDFS、Hive、ADS、HBase、TableStore(OTS)、MaxCompute(ODPS)、DRDS 等各种异构数据源之间高效的数据同步功能。</p>
@@ -861,7 +861,7 @@
 </ul>
 </li>
 </ul>
-]]></content:encoded></item><item><title>DataX</title><link>https://haokiu.com/blog/f4223fe7c5a64b12ae87c43ed48cc971/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/f4223fe7c5a64b12ae87c43ed48cc971/</guid><description>DataX DataX 是阿里巴巴集团内被广泛使用的离线数据同步工具/平台，实现包括 MySQL、SQL Server、Oracle、PostgreSQL、HDFS、Hive、HBase、OTS、OD…</description><content:encoded><![CDATA[<h1 id="datax">DataX</h1>
+]]></content:encoded></item><item><title>DataX</title><link>https://haokiu.com/blog/f4223fe7c5a64b12ae87c43ed48cc971/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/f4223fe7c5a64b12ae87c43ed48cc971/</guid><description>DataX DataX 是阿里巴巴集团内被广泛使用的离线数据同步工具/平台，实现包括 MySQL、SQL Server、Oracle、PostgreSQL、HDFS、Hive、HBase、OTS、OD…</description><content:encoded><![CDATA[<h1 id="datax">DataX</h1>
 <p>DataX 是阿里巴巴集团内被广泛使用的离线数据同步工具/平台，实现包括 MySQL、SQL Server、Oracle、PostgreSQL、HDFS、Hive、HBase、OTS、ODPS 等各种异构数据源之间高效的数据同步功能。</p>
 <h1 id="features">Features</h1>
 <p>DataX本身作为数据同步框架，将不同数据源的同步抽象为从源头数据源读取数据的Reader插件，以及向目标端写入数据的Writer插件，理论上DataX框架可以支持任意数据源类型的数据同步工作。同时DataX插件体系作为一套生态系统, 每接入一套新数据源该新加入的数据源即可实现和现有的数据源互通。</p>
@@ -1012,8 +1012,8 @@
 </ul>
 <h1 id="contact-us">Contact us</h1>
 <p>Google Groups: <a href="https://github.com/alibaba/DataX">DataX-user</a></p>
-]]></content:encoded></item><item><title>datax 3.0 教程</title><link>https://haokiu.com/blog/bk-4/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/bk-4/</guid><description>DataX DataX ADB PG Writer DataX ADS写入 CassandraReader 插件文档 CassandraWriter 插件文档 Readme.md DataX插件开发宝…</description><content:encoded><![CDATA[<p><a href="http://haokiu.com/blog/dcdba0138c4f45f0a08968ab48edb900">DataX</a><br/><a href="http://haokiu.com/blog/1c4beb639bad47a79445e1bb8ccd68a5">DataX ADB PG Writer</a><br/><a href="http://haokiu.com/blog/5d26f13c5f3e4cda84adc613514cdd53">DataX ADS写入</a><br/><a href="http://haokiu.com/blog/b0b0444d45c74c8f8b1a9fc4d2af738a">CassandraReader 插件文档</a><br/><a href="http://haokiu.com/blog/056d47f442c1471da1b62d7062dd00e2">CassandraWriter 插件文档</a><br/><a href="http://haokiu.com/blog/b007b0bc6dca40458f17c7c1826e9da5">Readme.md</a><br/><a href="http://haokiu.com/blog/7c5af007072741d2a1b8a4578137e185">DataX插件开发宝典</a><br/><a href="http://haokiu.com/blog/20f3c6090e2448838d8be1baca3a5e1c">DrdsReader 插件文档</a><br/><a href="http://haokiu.com/blog/d31c9e889b154a0f96e4eb4be5c50467">DataX DRDSWriter</a><br/><a href="http://haokiu.com/blog/9dbd1273dcb848bbaa69f53c0105d5c4">README.md</a><br/><a href="http://haokiu.com/blog/5e857fe9cf5743dc837f14fbc9f0a876">DataX ElasticSearchWriter</a><br/><a href="http://haokiu.com/blog/0b6970ee252d4875841a98382b04f30b">DataX FtpReader 说明</a><br/><a href="http://haokiu.com/blog/8f4c3b36705842458a8550717b87b66c">DataX FtpWriter 说明</a><br/><a href="http://haokiu.com/blog/ef41ae35929b479db90214d2ebe5ff8a">DataX GDBReader</a><br/><a href="http://haokiu.com/blog/3830a303d3e34cec88b98eab9934006d">DataX GDBWriter</a><br/><a href="http://haokiu.com/blog/7c5fc71d1a124a5396b1a17e8293be71">Hbase094XReader &amp; Hbase11XReader 插件文档</a><br/><a href="http://haokiu.com/blog/0172fbcbd4674f98a8782403fc6a7ca5">Hbase094XWriter &amp; Hbase11XWriter 插件文档</a><br/><a href="http://haokiu.com/blog/34ec6d7caba24a86b7a5e9a2f37d8c46">Hbase094XReader &amp; Hbase11XReader 插件文档</a><br/><a href="http://haokiu.com/blog/283a89fffad54e6f909c2936a1ff08ad">hbase11xsqlreader  插件文档</a><br/><a href="http://haokiu.com/blog/1c329829c22c499d8e684735252966c1">HBase11xsqlwriter插件文档</a><br/><a href="http://haokiu.com/blog/745df21fdbd349ab9a9fc5c94551b336">Hbase094XWriter &amp; Hbase11XWriter 插件文档</a><br/><a href="http://haokiu.com/blog/d74e56a13f78424182e14164c8b4e5e4">hbase20xsqlreader  插件文档</a><br/><a href="http://haokiu.com/blog/28250260969448579bc8cee8c2963319">HBase20xsqlwriter插件文档</a><br/><a href="http://haokiu.com/blog/e123c1afd572427f9fa4d27ba10b1e99">DataX HdfsReader 插件文档</a><br/><a href="http://haokiu.com/blog/dd5ebd2f221f4913ae09f61f3877725e">DataX HdfsWriter 插件文档</a><br/><a href="http://haokiu.com/blog/408be8b90df543789f79c7b43375e5a3">阿里云开源离线同步工具DataX3.0介绍</a><br/><a href="http://haokiu.com/blog/cc7bd03f72154435ae9af2d67a214f6d">KingbaseesReader 插件文档</a><br/><a href="http://haokiu.com/blog/a50c2cb341e14f7d995d470380e24d34">DataX KingbaseesWriter</a><br/><a href="http://haokiu.com/blog/3909c1ec487c48198ae49ab46ba98dcb">datax-kudu-plugin</a><br/><a href="http://haokiu.com/blog/23a56c95c6c4402998fb8bf16e29fc05">datax-kudu-plugins</a><br/><a href="http://haokiu.com/blog/41dfc822f8ca4bca812501f2801fc78e">Datax MongoDBReader</a><br/><a href="http://haokiu.com/blog/1b755458e9fa4e6f89a7d44321cd92ec">Datax MongoDBWriter</a><br/><a href="http://haokiu.com/blog/29875f5b780c46929670f9b8699ed462">MysqlReader 插件文档</a><br/><a href="http://haokiu.com/blog/ee3103b29d5b4fa696cb69e35fefb970">DataX MysqlWriter</a><br/><a href="http://haokiu.com/blog/d4b1e453f8274dda834a305a5e6a38bf">DataX OCSWriter 适用memcached客户端写入ocs</a><br/><a href="http://haokiu.com/blog/5b1b6009df684895ab2ef943e412ee8a">DataX ODPSReader</a><br/><a href="http://haokiu.com/blog/ab33f89c494e47eaae02f9c21465b322">DataX ODPS写入</a><br/><a href="http://haokiu.com/blog/4e39a8595b6247fabfd6f625f053b0b6">OpenTSDBReader 插件文档</a><br/><a href="http://haokiu.com/blog/0ffdd59e828b4bb0a53cef538910db12">OracleReader 插件文档</a><br/><a href="http://haokiu.com/blog/1eb2fdd8968d4f6e8bbc0312c6647246">DataX OracleWriter</a><br/><a href="http://haokiu.com/blog/bf15e9112ab546c9a6d8baab000d9601">DataX OSSReader 说明</a><br/><a href="http://haokiu.com/blog/516202a7c10f4658ad32aa517c141a05">DataX OSSWriter 说明</a><br/><a href="http://haokiu.com/blog/2dc5ba5f4d58498e8453bd2d8efde079">OTSReader 插件文档</a><br/><a href="http://haokiu.com/blog/6851df08c78c4eb1aab41d312b920bf9">TableStore增量数据导出通道：TableStoreStreamReader</a><br/><a href="http://haokiu.com/blog/7d2496e6853044daa824d7a78226b07d">OTSWriter 插件文档</a><br/><a href="http://haokiu.com/blog/0adf103bd70440a1978ecbcc7dd63787">PostgresqlReader 插件文档</a><br/><a href="http://haokiu.com/blog/1c01500e456b4ef6b6c14eb5a072696e">DataX PostgresqlWriter</a><br/><a href="http://haokiu.com/blog/34c79077064f4502a247f840e8b64c46">RDBMSReader 插件文档</a><br/><a href="http://haokiu.com/blog/5d9d57b2e00d4d8ca994dc15ece38148">RDBMSWriter 插件文档</a><br/><a href="http://haokiu.com/blog/e30dc23cda1d465fa0872475e5c976a7">SqlServerReader 插件文档</a><br/><a href="http://haokiu.com/blog/f23fb4346cfa45459b6eaa8537ff5d17">DataX SqlServerWriter</a><br/><a href="http://haokiu.com/blog/760d0498cfcd435bafba3fe96793cd01">DataX Transformer</a><br/><a href="http://haokiu.com/blog/66980d1599cc4aec9a2d6616d1f0c5e7">TSDBReader 插件文档</a><br/><a href="http://haokiu.com/blog/2a52431a701d4468a150a7986b3b4752">TSDBWriter 插件文档</a><br/><a href="http://haokiu.com/blog/cbeab748638041dfa63c78ebe4fa91db">DataX TxtFileReader 说明</a><br/><a href="http://haokiu.com/blog/599f9ae387e54760ab26e177bd423e82">DataX TxtFileWriter 说明</a><br/><a href="http://haokiu.com/blog/f4223fe7c5a64b12ae87c43ed48cc971">DataX</a><br/></p>
-]]></content:encoded></item><item><title>DataX ADB PG Writer</title><link>https://haokiu.com/blog/1c4beb639bad47a79445e1bb8ccd68a5/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/1c4beb639bad47a79445e1bb8ccd68a5/</guid><description>DataX ADB PG Writer --- 1 快速介绍 AdbpgWriter 插件实现了写入数据到 ABD PG版数据库的功能。在底层实现上，AdbpgWriter 插件会先缓存需要写入的数据…</description><content:encoded><![CDATA[<h1 id="datax-adb-pg-writer">DataX ADB PG Writer</h1>
+]]></content:encoded></item><item><title>datax 3.0 教程</title><link>https://haokiu.com/blog/bk-4/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/bk-4/</guid><description>DataX DataX ADB PG Writer DataX ADS写入 CassandraReader 插件文档 CassandraWriter 插件文档 Readme.md DataX插件开发宝…</description><content:encoded><![CDATA[<p><a href="http://haokiu.com/blog/dcdba0138c4f45f0a08968ab48edb900">DataX</a><br/><a href="http://haokiu.com/blog/1c4beb639bad47a79445e1bb8ccd68a5">DataX ADB PG Writer</a><br/><a href="http://haokiu.com/blog/5d26f13c5f3e4cda84adc613514cdd53">DataX ADS写入</a><br/><a href="http://haokiu.com/blog/b0b0444d45c74c8f8b1a9fc4d2af738a">CassandraReader 插件文档</a><br/><a href="http://haokiu.com/blog/056d47f442c1471da1b62d7062dd00e2">CassandraWriter 插件文档</a><br/><a href="http://haokiu.com/blog/b007b0bc6dca40458f17c7c1826e9da5">Readme.md</a><br/><a href="http://haokiu.com/blog/7c5af007072741d2a1b8a4578137e185">DataX插件开发宝典</a><br/><a href="http://haokiu.com/blog/20f3c6090e2448838d8be1baca3a5e1c">DrdsReader 插件文档</a><br/><a href="http://haokiu.com/blog/d31c9e889b154a0f96e4eb4be5c50467">DataX DRDSWriter</a><br/><a href="http://haokiu.com/blog/9dbd1273dcb848bbaa69f53c0105d5c4">README.md</a><br/><a href="http://haokiu.com/blog/5e857fe9cf5743dc837f14fbc9f0a876">DataX ElasticSearchWriter</a><br/><a href="http://haokiu.com/blog/0b6970ee252d4875841a98382b04f30b">DataX FtpReader 说明</a><br/><a href="http://haokiu.com/blog/8f4c3b36705842458a8550717b87b66c">DataX FtpWriter 说明</a><br/><a href="http://haokiu.com/blog/ef41ae35929b479db90214d2ebe5ff8a">DataX GDBReader</a><br/><a href="http://haokiu.com/blog/3830a303d3e34cec88b98eab9934006d">DataX GDBWriter</a><br/><a href="http://haokiu.com/blog/7c5fc71d1a124a5396b1a17e8293be71">Hbase094XReader &amp; Hbase11XReader 插件文档</a><br/><a href="http://haokiu.com/blog/0172fbcbd4674f98a8782403fc6a7ca5">Hbase094XWriter &amp; Hbase11XWriter 插件文档</a><br/><a href="http://haokiu.com/blog/34ec6d7caba24a86b7a5e9a2f37d8c46">Hbase094XReader &amp; Hbase11XReader 插件文档</a><br/><a href="http://haokiu.com/blog/283a89fffad54e6f909c2936a1ff08ad">hbase11xsqlreader  插件文档</a><br/><a href="http://haokiu.com/blog/1c329829c22c499d8e684735252966c1">HBase11xsqlwriter插件文档</a><br/><a href="http://haokiu.com/blog/745df21fdbd349ab9a9fc5c94551b336">Hbase094XWriter &amp; Hbase11XWriter 插件文档</a><br/><a href="http://haokiu.com/blog/d74e56a13f78424182e14164c8b4e5e4">hbase20xsqlreader  插件文档</a><br/><a href="http://haokiu.com/blog/28250260969448579bc8cee8c2963319">HBase20xsqlwriter插件文档</a><br/><a href="http://haokiu.com/blog/e123c1afd572427f9fa4d27ba10b1e99">DataX HdfsReader 插件文档</a><br/><a href="http://haokiu.com/blog/dd5ebd2f221f4913ae09f61f3877725e">DataX HdfsWriter 插件文档</a><br/><a href="http://haokiu.com/blog/408be8b90df543789f79c7b43375e5a3">阿里云开源离线同步工具DataX3.0介绍</a><br/><a href="http://haokiu.com/blog/cc7bd03f72154435ae9af2d67a214f6d">KingbaseesReader 插件文档</a><br/><a href="http://haokiu.com/blog/a50c2cb341e14f7d995d470380e24d34">DataX KingbaseesWriter</a><br/><a href="http://haokiu.com/blog/3909c1ec487c48198ae49ab46ba98dcb">datax-kudu-plugin</a><br/><a href="http://haokiu.com/blog/23a56c95c6c4402998fb8bf16e29fc05">datax-kudu-plugins</a><br/><a href="http://haokiu.com/blog/41dfc822f8ca4bca812501f2801fc78e">Datax MongoDBReader</a><br/><a href="http://haokiu.com/blog/1b755458e9fa4e6f89a7d44321cd92ec">Datax MongoDBWriter</a><br/><a href="http://haokiu.com/blog/29875f5b780c46929670f9b8699ed462">MysqlReader 插件文档</a><br/><a href="http://haokiu.com/blog/ee3103b29d5b4fa696cb69e35fefb970">DataX MysqlWriter</a><br/><a href="http://haokiu.com/blog/d4b1e453f8274dda834a305a5e6a38bf">DataX OCSWriter 适用memcached客户端写入ocs</a><br/><a href="http://haokiu.com/blog/5b1b6009df684895ab2ef943e412ee8a">DataX ODPSReader</a><br/><a href="http://haokiu.com/blog/ab33f89c494e47eaae02f9c21465b322">DataX ODPS写入</a><br/><a href="http://haokiu.com/blog/4e39a8595b6247fabfd6f625f053b0b6">OpenTSDBReader 插件文档</a><br/><a href="http://haokiu.com/blog/0ffdd59e828b4bb0a53cef538910db12">OracleReader 插件文档</a><br/><a href="http://haokiu.com/blog/1eb2fdd8968d4f6e8bbc0312c6647246">DataX OracleWriter</a><br/><a href="http://haokiu.com/blog/bf15e9112ab546c9a6d8baab000d9601">DataX OSSReader 说明</a><br/><a href="http://haokiu.com/blog/516202a7c10f4658ad32aa517c141a05">DataX OSSWriter 说明</a><br/><a href="http://haokiu.com/blog/2dc5ba5f4d58498e8453bd2d8efde079">OTSReader 插件文档</a><br/><a href="http://haokiu.com/blog/6851df08c78c4eb1aab41d312b920bf9">TableStore增量数据导出通道：TableStoreStreamReader</a><br/><a href="http://haokiu.com/blog/7d2496e6853044daa824d7a78226b07d">OTSWriter 插件文档</a><br/><a href="http://haokiu.com/blog/0adf103bd70440a1978ecbcc7dd63787">PostgresqlReader 插件文档</a><br/><a href="http://haokiu.com/blog/1c01500e456b4ef6b6c14eb5a072696e">DataX PostgresqlWriter</a><br/><a href="http://haokiu.com/blog/34c79077064f4502a247f840e8b64c46">RDBMSReader 插件文档</a><br/><a href="http://haokiu.com/blog/5d9d57b2e00d4d8ca994dc15ece38148">RDBMSWriter 插件文档</a><br/><a href="http://haokiu.com/blog/e30dc23cda1d465fa0872475e5c976a7">SqlServerReader 插件文档</a><br/><a href="http://haokiu.com/blog/f23fb4346cfa45459b6eaa8537ff5d17">DataX SqlServerWriter</a><br/><a href="http://haokiu.com/blog/760d0498cfcd435bafba3fe96793cd01">DataX Transformer</a><br/><a href="http://haokiu.com/blog/66980d1599cc4aec9a2d6616d1f0c5e7">TSDBReader 插件文档</a><br/><a href="http://haokiu.com/blog/2a52431a701d4468a150a7986b3b4752">TSDBWriter 插件文档</a><br/><a href="http://haokiu.com/blog/cbeab748638041dfa63c78ebe4fa91db">DataX TxtFileReader 说明</a><br/><a href="http://haokiu.com/blog/599f9ae387e54760ab26e177bd423e82">DataX TxtFileWriter 说明</a><br/><a href="http://haokiu.com/blog/f4223fe7c5a64b12ae87c43ed48cc971">DataX</a><br/></p>
+]]></content:encoded></item><item><title>DataX ADB PG Writer</title><link>https://haokiu.com/blog/1c4beb639bad47a79445e1bb8ccd68a5/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/1c4beb639bad47a79445e1bb8ccd68a5/</guid><description>DataX ADB PG Writer --- 1 快速介绍 AdbpgWriter 插件实现了写入数据到 ABD PG版数据库的功能。在底层实现上，AdbpgWriter 插件会先缓存需要写入的数据…</description><content:encoded><![CDATA[<h1 id="datax-adb-pg-writer">DataX ADB PG Writer</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>AdbpgWriter 插件实现了写入数据到 ABD PG版数据库的功能。在底层实现上，AdbpgWriter 插件会先缓存需要写入的数据，当缓存的
@@ -1381,7 +1381,7 @@ COPY命令将数据写入ADB PG数据库中。</p>
 <li><code>channel数对性能影响很大</code></li>
 <li><code>通常不建议写入数据库时，通道个数 &gt; 32</code></li>
 </ol>
-]]></content:encoded></item><item><title>DataX ADS写入</title><link>https://haokiu.com/blog/5d26f13c5f3e4cda84adc613514cdd53/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/5d26f13c5f3e4cda84adc613514cdd53/</guid><description>DataX ADS写入 --- 1 快速介绍 欢迎ADS加入DataX生态圈！ADSWriter插件实现了其他数据源向ADS写入功能，现有DataX所有的数据源均可以无缝接入ADS，实现数据快速导入A…</description><content:encoded><![CDATA[<h1 id="datax-ads写入">DataX ADS写入</h1>
+]]></content:encoded></item><item><title>DataX ADS写入</title><link>https://haokiu.com/blog/5d26f13c5f3e4cda84adc613514cdd53/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/5d26f13c5f3e4cda84adc613514cdd53/</guid><description>DataX ADS写入 --- 1 快速介绍 欢迎ADS加入DataX生态圈！ADSWriter插件实现了其他数据源向ADS写入功能，现有DataX所有的数据源均可以无缝接入ADS，实现数据快速导入A…</description><content:encoded><![CDATA[<h1 id="datax-ads写入">DataX ADS写入</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <br />
@@ -1771,7 +1771,7 @@ COPY命令将数据写入ADB PG数据库中。</p>
 <h3 id="51-环境准备">5.1 环境准备</h3>
 <h3 id="52-测试报告">5.2 测试报告</h3>
 <h2 id="6-faq">6 FAQ</h2>
-]]></content:encoded></item><item><title>DataX DRDSWriter</title><link>https://haokiu.com/blog/d31c9e889b154a0f96e4eb4be5c50467/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/d31c9e889b154a0f96e4eb4be5c50467/</guid><description>DataX DRDSWriter --- 1 快速介绍 DRDSWriter 插件实现了写入数据到 DRDS 的目的表的功能。在底层实现上， DRDSWriter 通过 JDBC 连接远程 DRDS…</description><content:encoded><![CDATA[<h1 id="datax-drdswriter">DataX DRDSWriter</h1>
+]]></content:encoded></item><item><title>DataX DRDSWriter</title><link>https://haokiu.com/blog/d31c9e889b154a0f96e4eb4be5c50467/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/d31c9e889b154a0f96e4eb4be5c50467/</guid><description>DataX DRDSWriter --- 1 快速介绍 DRDSWriter 插件实现了写入数据到 DRDS 的目的表的功能。在底层实现上， DRDSWriter 通过 JDBC 连接远程 DRDS…</description><content:encoded><![CDATA[<h1 id="datax-drdswriter">DataX DRDSWriter</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>DRDSWriter 插件实现了写入数据到 DRDS 的目的表的功能。在底层实现上， DRDSWriter 通过 JDBC 连接远程 DRDS 数据库的 Proxy，并执行相应的 replace into &hellip; 的 sql 语句将数据写入 DRDS，特别注意执行的 Sql 语句是 replace into，为了避免数据重复写入，需要你的表具备主键或者唯一性索引(Unique Key)。</p>
@@ -2040,7 +2040,7 @@ COPY命令将数据写入ADB PG数据库中。</p>
 <hr>
 <p><strong>Q: 上面第二种方法可以避免对线上数据造成影响，那我具体怎样操作?</strong></p>
 <p>A: 可以配置临时表导入</p>
-]]></content:encoded></item><item><title>DataX ElasticSearchWriter</title><link>https://haokiu.com/blog/5e857fe9cf5743dc837f14fbc9f0a876/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/5e857fe9cf5743dc837f14fbc9f0a876/</guid><description>DataX ElasticSearchWriter --- 1 快速介绍 数据导入elasticsearch的插件 2 实现原理 使用elasticsearch的rest api接口， 批量把从rea…</description><content:encoded><![CDATA[<h1 id="datax-elasticsearchwriter">DataX ElasticSearchWriter</h1>
+]]></content:encoded></item><item><title>DataX ElasticSearchWriter</title><link>https://haokiu.com/blog/5e857fe9cf5743dc837f14fbc9f0a876/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/5e857fe9cf5743dc837f14fbc9f0a876/</guid><description>DataX ElasticSearchWriter --- 1 快速介绍 数据导入elasticsearch的插件 2 实现原理 使用elasticsearch的rest api接口， 批量把从rea…</description><content:encoded><![CDATA[<h1 id="datax-elasticsearchwriter">DataX ElasticSearchWriter</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>数据导入elasticsearch的插件</p>
@@ -2477,7 +2477,7 @@ COPY命令将数据写入ADB PG数据库中。</p>
 <li>如果导入id，这样数据导入失败也会重试，重新导入也仅仅是覆盖，保证数据一致性</li>
 <li>如果不导入id，就是append_only模式，elasticsearch自动生成id，速度会提升20%左右，但数据无法修复，适合日志型数据(对数据精度要求不高的)</li>
 </ul>
-]]></content:encoded></item><item><title>DataX FtpReader 说明</title><link>https://haokiu.com/blog/0b6970ee252d4875841a98382b04f30b/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/0b6970ee252d4875841a98382b04f30b/</guid><description>DataX FtpReader 说明 ------------ 1 快速介绍 FtpReader提供了读取远程FTP文件系统数据存储的能力。在底层实现上，FtpReader获取远程FTP文件数据，并转…</description><content:encoded><![CDATA[<h1 id="datax-ftpreader-说明">DataX FtpReader 说明</h1>
+]]></content:encoded></item><item><title>DataX FtpReader 说明</title><link>https://haokiu.com/blog/0b6970ee252d4875841a98382b04f30b/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/0b6970ee252d4875841a98382b04f30b/</guid><description>DataX FtpReader 说明 ------------ 1 快速介绍 FtpReader提供了读取远程FTP文件系统数据存储的能力。在底层实现上，FtpReader获取远程FTP文件数据，并转…</description><content:encoded><![CDATA[<h1 id="datax-ftpreader-说明">DataX FtpReader 说明</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>FtpReader提供了读取远程FTP文件系统数据存储的能力。在底层实现上，FtpReader获取远程FTP文件数据，并转换为DataX传输协议传递给Writer。</p>
@@ -2888,7 +2888,7 @@ boolean captureRawRecord = true;
 <p>略</p>
 <h2 id="6-faq">6 FAQ</h2>
 <p>略</p>
-]]></content:encoded></item><item><title>DataX FtpWriter 说明</title><link>https://haokiu.com/blog/8f4c3b36705842458a8550717b87b66c/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/8f4c3b36705842458a8550717b87b66c/</guid><description>DataX FtpWriter 说明 ------------ 1 快速介绍 FtpWriter提供了向远程FTP文件写入CSV格式的一个或者多个文件，在底层实现上，FtpWriter将DataX传输…</description><content:encoded><![CDATA[<h1 id="datax-ftpwriter-说明">DataX FtpWriter 说明</h1>
+]]></content:encoded></item><item><title>DataX FtpWriter 说明</title><link>https://haokiu.com/blog/8f4c3b36705842458a8550717b87b66c/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/8f4c3b36705842458a8550717b87b66c/</guid><description>DataX FtpWriter 说明 ------------ 1 快速介绍 FtpWriter提供了向远程FTP文件写入CSV格式的一个或者多个文件，在底层实现上，FtpWriter将DataX传输…</description><content:encoded><![CDATA[<h1 id="datax-ftpwriter-说明">DataX FtpWriter 说明</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>FtpWriter提供了向远程FTP文件写入CSV格式的一个或者多个文件，在底层实现上，FtpWriter将DataX传输协议下的数据转换为csv格式，并使用FTP相关的网络协议写出到远程FTP服务器。</p>
@@ -3247,7 +3247,7 @@ boolean captureRawRecord = true;
 <p>略</p>
 <h2 id="6-faq">6 FAQ</h2>
 <p>略</p>
-]]></content:encoded></item><item><title>DataX GDBReader</title><link>https://haokiu.com/blog/ef41ae35929b479db90214d2ebe5ff8a/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/ef41ae35929b479db90214d2ebe5ff8a/</guid><description>DataX GDBReader 快速介绍 GDBReader插件实现读取GDB实例数据的功能，通过 连接远程GDB实例，按配置提供的 生成查询DSL，遍历点或边数据，包括属性数据，并将数据写入到Rec…</description><content:encoded><![CDATA[<h1 id="datax-gdbreader">DataX GDBReader</h1>
+]]></content:encoded></item><item><title>DataX GDBReader</title><link>https://haokiu.com/blog/ef41ae35929b479db90214d2ebe5ff8a/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/ef41ae35929b479db90214d2ebe5ff8a/</guid><description>DataX GDBReader 快速介绍 GDBReader插件实现读取GDB实例数据的功能，通过 连接远程GDB实例，按配置提供的 生成查询DSL，遍历点或边数据，包括属性数据，并将数据写入到Rec…</description><content:encoded><![CDATA[<h1 id="datax-gdbreader">DataX GDBReader</h1>
 <h2 id="1-快速介绍">1. 快速介绍</h2>
 <p>GDBReader插件实现读取GDB实例数据的功能，通过<code>Gremlin Client</code>连接远程GDB实例，按配置提供的<code>label</code>生成查询DSL，遍历点或边数据，包括属性数据，并将数据写入到Record中给到Writer使用。</p>
 <h2 id="2-实现原理">2. 实现原理</h2>
@@ -3532,7 +3532,7 @@ boolean captureRawRecord = true;
 <p>无</p>
 <h2 id="6-faq">6 FAQ</h2>
 <p>无</p>
-]]></content:encoded></item><item><title>DataX GDBWriter</title><link>https://haokiu.com/blog/3830a303d3e34cec88b98eab9934006d/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/3830a303d3e34cec88b98eab9934006d/</guid><description>DataX GDBWriter 1 快速介绍 GDBWriter插件实现了写入数据到GDB实例的功能。GDBWriter通过 连接远程GDB实例，获取Reader的数据，生成写入DSL语句，将数据写入…</description><content:encoded><![CDATA[<h1 id="datax-gdbwriter">DataX GDBWriter</h1>
+]]></content:encoded></item><item><title>DataX GDBWriter</title><link>https://haokiu.com/blog/3830a303d3e34cec88b98eab9934006d/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/3830a303d3e34cec88b98eab9934006d/</guid><description>DataX GDBWriter 1 快速介绍 GDBWriter插件实现了写入数据到GDB实例的功能。GDBWriter通过 连接远程GDB实例，获取Reader的数据，生成写入DSL语句，将数据写入…</description><content:encoded><![CDATA[<h1 id="datax-gdbwriter">DataX GDBWriter</h1>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>GDBWriter插件实现了写入数据到GDB实例的功能。GDBWriter通过<code>Gremlin Client</code>连接远程GDB实例，获取Reader的数据，生成写入DSL语句，将数据写入到GDB。</p>
 <h2 id="2-实现原理">2 实现原理</h2>
@@ -4025,7 +4025,7 @@ boolean captureRawRecord = true;
 <li>使用SET属性需要升级GDB实例到<code>1.0.20</code>版本及以上。</li>
 <li>边只支持普通单值属性，不能给边写SET属性数据。</li>
 </ol>
-]]></content:encoded></item><item><title>DataX HdfsReader 插件文档</title><link>https://haokiu.com/blog/e123c1afd572427f9fa4d27ba10b1e99/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/e123c1afd572427f9fa4d27ba10b1e99/</guid><description>DataX HdfsReader 插件文档 ------------ 1 快速介绍 HdfsReader提供了读取分布式文件系统数据存储的能力。在底层实现上，HdfsReader获取分布式文件系统上文…</description><content:encoded><![CDATA[<h1 id="datax-hdfsreader-插件文档">DataX HdfsReader 插件文档</h1>
+]]></content:encoded></item><item><title>DataX HdfsReader 插件文档</title><link>https://haokiu.com/blog/e123c1afd572427f9fa4d27ba10b1e99/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/e123c1afd572427f9fa4d27ba10b1e99/</guid><description>DataX HdfsReader 插件文档 ------------ 1 快速介绍 HdfsReader提供了读取分布式文件系统数据存储的能力。在底层实现上，HdfsReader获取分布式文件系统上文…</description><content:encoded><![CDATA[<h1 id="datax-hdfsreader-插件文档">DataX HdfsReader 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>HdfsReader提供了读取分布式文件系统数据存储的能力。在底层实现上，HdfsReader获取分布式文件系统上文件的数据，并转换为DataX传输协议传递给Writer。</p>
@@ -4424,7 +4424,7 @@ boolean captureRawRecord = true;
 </span></span><span style="display:flex;"><span>   <span style="color:#f92672">&#34;useTextQualifier&#34;</span>: <span style="color:#66d9ef">false</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>safetySwitch = false;//单列长度不限制100000字符</p>
-]]></content:encoded></item><item><title>DataX HdfsWriter 插件文档</title><link>https://haokiu.com/blog/dd5ebd2f221f4913ae09f61f3877725e/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/dd5ebd2f221f4913ae09f61f3877725e/</guid><description>DataX HdfsWriter 插件文档 ------------ 1 快速介绍 HdfsWriter提供向HDFS文件系统指定路径中写入TEXTFile文件和ORCFile文件,文件内容可与hiv…</description><content:encoded><![CDATA[<h1 id="datax-hdfswriter-插件文档">DataX HdfsWriter 插件文档</h1>
+]]></content:encoded></item><item><title>DataX HdfsWriter 插件文档</title><link>https://haokiu.com/blog/dd5ebd2f221f4913ae09f61f3877725e/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/dd5ebd2f221f4913ae09f61f3877725e/</guid><description>DataX HdfsWriter 插件文档 ------------ 1 快速介绍 HdfsWriter提供向HDFS文件系统指定路径中写入TEXTFile文件和ORCFile文件,文件内容可与hiv…</description><content:encoded><![CDATA[<h1 id="datax-hdfswriter-插件文档">DataX HdfsWriter 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>HdfsWriter提供向HDFS文件系统指定路径中写入TEXTFile文件和ORCFile文件,文件内容可与hive中表关联。</p>
@@ -4885,7 +4885,7 @@ Hive数据库在HDFS上存储配置,在hive安装目录下 conf/hive-site.xml文
 <p>略</p>
 <h2 id="6-faq">6 FAQ</h2>
 <p>略</p>
-]]></content:encoded></item><item><title>DataX KingbaseesWriter</title><link>https://haokiu.com/blog/a50c2cb341e14f7d995d470380e24d34/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/a50c2cb341e14f7d995d470380e24d34/</guid><description>DataX KingbaseesWriter --- 1 快速介绍 KingbaseesWriter插件实现了写入数据到 KingbaseES主库目的表的功能。在底层实现上，KingbaseesWri…</description><content:encoded><![CDATA[<h1 id="datax-kingbaseeswriter">DataX KingbaseesWriter</h1>
+]]></content:encoded></item><item><title>DataX KingbaseesWriter</title><link>https://haokiu.com/blog/a50c2cb341e14f7d995d470380e24d34/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/a50c2cb341e14f7d995d470380e24d34/</guid><description>DataX KingbaseesWriter --- 1 快速介绍 KingbaseesWriter插件实现了写入数据到 KingbaseES主库目的表的功能。在底层实现上，KingbaseesWri…</description><content:encoded><![CDATA[<h1 id="datax-kingbaseeswriter">DataX KingbaseesWriter</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>KingbaseesWriter插件实现了写入数据到 KingbaseES主库目的表的功能。在底层实现上，KingbaseesWriter通过JDBC连接远程 KingbaseES 数据库，并执行相应的 insert into &hellip; sql 语句将数据写入 KingbaseES，内部会分批次提交入库。</p>
@@ -5136,7 +5136,7 @@ Hive数据库在HDFS上存储配置,在hive安装目录下 conf/hive-site.xml文
 <p>A: 目前有两种解法，第一种配置 pre 语句，该 sql 可以清理当天导入数据， DataX 每次导入时候可以把上次清理干净并导入完整数据。
 第二种，向临时表导入数据，完成后再 rename 到线上表。</p>
 <hr>
-]]></content:encoded></item><item><title>Datax MongoDBReader</title><link>https://haokiu.com/blog/41dfc822f8ca4bca812501f2801fc78e/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/41dfc822f8ca4bca812501f2801fc78e/</guid><description>Datax MongoDBReader 1 快速介绍 MongoDBReader 插件利用 MongoDB 的java客户端MongoClient进行MongoDB的读操作。最新版本的Mongo已经将…</description><content:encoded><![CDATA[<h3 id="datax-mongodbreader">Datax MongoDBReader</h3>
+]]></content:encoded></item><item><title>Datax MongoDBReader</title><link>https://haokiu.com/blog/41dfc822f8ca4bca812501f2801fc78e/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/41dfc822f8ca4bca812501f2801fc78e/</guid><description>Datax MongoDBReader 1 快速介绍 MongoDBReader 插件利用 MongoDB 的java客户端MongoClient进行MongoDB的读操作。最新版本的Mongo已经将…</description><content:encoded><![CDATA[<h3 id="datax-mongodbreader">Datax MongoDBReader</h3>
 <h4 id="1-快速介绍">1 快速介绍</h4>
 <p>MongoDBReader 插件利用 MongoDB 的java客户端MongoClient进行MongoDB的读操作。最新版本的Mongo已经将DB锁的粒度从DB级别降低到document级别，配合上MongoDB强大的索引功能，基本可以达到高性能的读取MongoDB的需求。</p>
 <h4 id="2-实现原理">2 实现原理</h4>
@@ -5309,7 +5309,7 @@ Hive数据库在HDFS上存储配置,在hive安装目录下 conf/hive-site.xml文
 </table>
 <h4 id="6-性能报告">6 性能报告</h4>
 <h4 id="7-测试报告">7 测试报告</h4>
-]]></content:encoded></item><item><title>Datax MongoDBWriter</title><link>https://haokiu.com/blog/1b755458e9fa4e6f89a7d44321cd92ec/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/1b755458e9fa4e6f89a7d44321cd92ec/</guid><description>Datax MongoDBWriter 1 快速介绍 MongoDBWriter 插件利用 MongoDB 的java客户端MongoClient进行MongoDB的写操作。最新版本的Mongo已经将…</description><content:encoded><![CDATA[<h3 id="datax-mongodbwriter">Datax MongoDBWriter</h3>
+]]></content:encoded></item><item><title>Datax MongoDBWriter</title><link>https://haokiu.com/blog/1b755458e9fa4e6f89a7d44321cd92ec/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/1b755458e9fa4e6f89a7d44321cd92ec/</guid><description>Datax MongoDBWriter 1 快速介绍 MongoDBWriter 插件利用 MongoDB 的java客户端MongoClient进行MongoDB的写操作。最新版本的Mongo已经将…</description><content:encoded><![CDATA[<h3 id="datax-mongodbwriter">Datax MongoDBWriter</h3>
 <h4 id="1-快速介绍">1 快速介绍</h4>
 <p>MongoDBWriter 插件利用 MongoDB 的java客户端MongoClient进行MongoDB的写操作。最新版本的Mongo已经将DB锁的粒度从DB级别降低到document级别，配合上MongoDB强大的索引功能，基本可以满足数据源向MongoDB写入数据的需求，针对数据更新的需求，通过配置业务主键的方式也可以实现。</p>
 <h4 id="2-实现原理">2 实现原理</h4>
@@ -5488,7 +5488,7 @@ Hive数据库在HDFS上存储配置,在hive安装目录下 conf/hive-site.xml文
 </table>
 <h4 id="6-性能报告">6 性能报告</h4>
 <h4 id="7-测试报告">7 测试报告</h4>
-]]></content:encoded></item><item><title>DataX MysqlWriter</title><link>https://haokiu.com/blog/ee3103b29d5b4fa696cb69e35fefb970/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/ee3103b29d5b4fa696cb69e35fefb970/</guid><description>DataX MysqlWriter --- 1 快速介绍 MysqlWriter 插件实现了写入数据到 Mysql 主库的目的表的功能。在底层实现上， MysqlWriter 通过 JDBC 连接远程…</description><content:encoded><![CDATA[<h1 id="datax-mysqlwriter">DataX MysqlWriter</h1>
+]]></content:encoded></item><item><title>DataX MysqlWriter</title><link>https://haokiu.com/blog/ee3103b29d5b4fa696cb69e35fefb970/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/ee3103b29d5b4fa696cb69e35fefb970/</guid><description>DataX MysqlWriter --- 1 快速介绍 MysqlWriter 插件实现了写入数据到 Mysql 主库的目的表的功能。在底层实现上， MysqlWriter 通过 JDBC 连接远程…</description><content:encoded><![CDATA[<h1 id="datax-mysqlwriter">DataX MysqlWriter</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>MysqlWriter 插件实现了写入数据到 Mysql 主库的目的表的功能。在底层实现上， MysqlWriter 通过 JDBC 连接远程 Mysql 数据库，并执行相应的 insert into &hellip; 或者 ( replace into &hellip;) 的 sql 语句将数据写入 Mysql，内部会分批次提交入库，需要数据库本身采用 innodb 引擎。</p>
@@ -6242,7 +6242,7 @@ attribute_cc: 1
 <hr>
 <p><strong>Q: 上面第二种方法可以避免对线上数据造成影响，那我具体怎样操作?</strong></p>
 <p>A: 可以配置临时表导入</p>
-]]></content:encoded></item><item><title>DataX OCSWriter 适用memcached客户端写入ocs</title><link>https://haokiu.com/blog/d4b1e453f8274dda834a305a5e6a38bf/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/d4b1e453f8274dda834a305a5e6a38bf/</guid><description>DataX OCSWriter 适用memcached客户端写入ocs --- 1 快速介绍 1.1 OCS简介 开放缓存服务( Open Cache Service，简称OCS）是基于内存的缓存服务…</description><content:encoded><![CDATA[<h1 id="datax-ocswriter-适用memcached客户端写入ocs">DataX OCSWriter 适用memcached客户端写入ocs</h1>
+]]></content:encoded></item><item><title>DataX OCSWriter 适用memcached客户端写入ocs</title><link>https://haokiu.com/blog/d4b1e453f8274dda834a305a5e6a38bf/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/d4b1e453f8274dda834a305a5e6a38bf/</guid><description>DataX OCSWriter 适用memcached客户端写入ocs --- 1 快速介绍 1.1 OCS简介 开放缓存服务( Open Cache Service，简称OCS）是基于内存的缓存服务…</description><content:encoded><![CDATA[<h1 id="datax-ocswriter-适用memcached客户端写入ocs">DataX OCSWriter 适用memcached客户端写入ocs</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <h3 id="11-ocs简介">1.1 OCS简介</h3>
@@ -6513,7 +6513,7 @@ attribute_cc: 1
 <li>单条数据小于10KB时建议开启100并发。</li>
 <li>不建议10KB以上的数据写入ocs。</li>
 </ol>
-]]></content:encoded></item><item><title>DataX ODPSReader</title><link>https://haokiu.com/blog/5b1b6009df684895ab2ef943e412ee8a/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/5b1b6009df684895ab2ef943e412ee8a/</guid><description>DataX ODPSReader --- 1 快速介绍 ODPSReader 实现了从 ODPS读取数据的功能，有关ODPS请参看(https://help.aliyun.com/documentde…</description><content:encoded><![CDATA[<h1 id="datax-odpsreader">DataX ODPSReader</h1>
+]]></content:encoded></item><item><title>DataX ODPSReader</title><link>https://haokiu.com/blog/5b1b6009df684895ab2ef943e412ee8a/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/5b1b6009df684895ab2ef943e412ee8a/</guid><description>DataX ODPSReader --- 1 快速介绍 ODPSReader 实现了从 ODPS读取数据的功能，有关ODPS请参看(https://help.aliyun.com/documentde…</description><content:encoded><![CDATA[<h1 id="datax-odpsreader">DataX ODPSReader</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>ODPSReader 实现了从 ODPS读取数据的功能，有关ODPS请参看(<a href="https://help.aliyun.com/document_detail/27800.html?spm=5176.doc27803.6.101.NxCIgY">https://help.aliyun.com/document_detail/27800.html?spm=5176.doc27803.6.101.NxCIgY</a>)。 在底层实现上，ODPSReader 根据你配置的 源头项目 / 表 / 分区 / 表字段 等信息，通过 <code>Tunnel</code> 从 ODPS 系统中读取数据。</p>
@@ -6988,7 +6988,7 @@ s_9    : 12~!2345100dafdsafdsahofjdpsawifdishaf;dsadsafdsahfdsajf;dsfdsa;fjdsal;
 <p><strong>Q: 你来问</strong></p>
 <p>A: 我来答。</p>
 <hr>
-]]></content:encoded></item><item><title>DataX ODPS写入</title><link>https://haokiu.com/blog/ab33f89c494e47eaae02f9c21465b322/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/ab33f89c494e47eaae02f9c21465b322/</guid><description>DataX ODPS写入 --- 1 快速介绍 ODPSWriter插件用于实现往ODPS插入或者更新数据，主要提供给etl开发同学将业务数据导入odps，适合于TB,GB数量级的数据传输，如果需要传…</description><content:encoded><![CDATA[<h1 id="datax-odps写入">DataX ODPS写入</h1>
+]]></content:encoded></item><item><title>DataX ODPS写入</title><link>https://haokiu.com/blog/ab33f89c494e47eaae02f9c21465b322/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/ab33f89c494e47eaae02f9c21465b322/</guid><description>DataX ODPS写入 --- 1 快速介绍 ODPSWriter插件用于实现往ODPS插入或者更新数据，主要提供给etl开发同学将业务数据导入odps，适合于TB,GB数量级的数据传输，如果需要传…</description><content:encoded><![CDATA[<h1 id="datax-odps写入">DataX ODPS写入</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>ODPSWriter插件用于实现往ODPS插入或者更新数据，主要提供给etl开发同学将业务数据导入odps，适合于TB,GB数量级的数据传输，如果需要传输PB量级的数据，请选择dt task工具 ;</p>
@@ -7494,7 +7494,7 @@ s_9    : 12~!2345100dafdsafdsahofjdpsawifdishaf;dsadsafdsahfdsajf;dsfdsa;fjdsal;
 grant Describe,Select,Alter,Update on table [tableName] to user XXX</p>
 <h4 id="2--可以导入数据到odps的视图吗">2  可以导入数据到odps的视图吗？</h4>
 <p>目前不支持通过视图到数据到odps,视图是ODPS非实体化数据存储对象，技术上无法向视图导入数据。</p>
-]]></content:encoded></item><item><title>DataX OracleWriter</title><link>https://haokiu.com/blog/1eb2fdd8968d4f6e8bbc0312c6647246/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/1eb2fdd8968d4f6e8bbc0312c6647246/</guid><description>DataX OracleWriter --- 1 快速介绍 OracleWriter 插件实现了写入数据到 Oracle 主库的目的表的功能。在底层实现上， OracleWriter 通过 JDBC…</description><content:encoded><![CDATA[<h1 id="datax-oraclewriter">DataX OracleWriter</h1>
+]]></content:encoded></item><item><title>DataX OracleWriter</title><link>https://haokiu.com/blog/1eb2fdd8968d4f6e8bbc0312c6647246/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/1eb2fdd8968d4f6e8bbc0312c6647246/</guid><description>DataX OracleWriter --- 1 快速介绍 OracleWriter 插件实现了写入数据到 Oracle 主库的目的表的功能。在底层实现上， OracleWriter 通过 JDBC…</description><content:encoded><![CDATA[<h1 id="datax-oraclewriter">DataX OracleWriter</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>OracleWriter 插件实现了写入数据到 Oracle 主库的目的表的功能。在底层实现上， OracleWriter 通过 JDBC 连接远程 Oracle 数据库，并执行相应的 insert into &hellip;  sql 语句将数据写入 Oracle，内部会分批次提交入库。</p>
@@ -8150,7 +8150,7 @@ co110:12~!2345100dafdsafdsahofjdpsawifdishaf;dsadsafdsahfdsajf;dsfdsa;fjdsal;112
 <hr>
 <p><strong>Q: 上面第二种方法可以避免对线上数据造成影响，那我具体怎样操作?</strong></p>
 <p>A: 可以配置临时表导入</p>
-]]></content:encoded></item><item><title>DataX OSSReader 说明</title><link>https://haokiu.com/blog/bf15e9112ab546c9a6d8baab000d9601/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/bf15e9112ab546c9a6d8baab000d9601/</guid><description>DataX OSSReader 说明 ------------ 1 快速介绍 OSSReader提供了读取OSS数据存储的能力。在底层实现上，OSSReader使用OSS官方Java SDK获取OSS…</description><content:encoded><![CDATA[<h1 id="datax-ossreader-说明">DataX OSSReader 说明</h1>
+]]></content:encoded></item><item><title>DataX OSSReader 说明</title><link>https://haokiu.com/blog/bf15e9112ab546c9a6d8baab000d9601/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/bf15e9112ab546c9a6d8baab000d9601/</guid><description>DataX OSSReader 说明 ------------ 1 快速介绍 OSSReader提供了读取OSS数据存储的能力。在底层实现上，OSSReader使用OSS官方Java SDK获取OSS…</description><content:encoded><![CDATA[<h1 id="datax-ossreader-说明">DataX OSSReader 说明</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>OSSReader提供了读取OSS数据存储的能力。在底层实现上，OSSReader使用OSS官方Java SDK获取OSS数据，并转换为DataX传输协议传递给Writer。</p>
@@ -8523,7 +8523,7 @@ boolean captureRawRecord = true;
 <p>略</p>
 <h2 id="6-faq">6 FAQ</h2>
 <p>略</p>
-]]></content:encoded></item><item><title>DataX OSSWriter 说明</title><link>https://haokiu.com/blog/516202a7c10f4658ad32aa517c141a05/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/516202a7c10f4658ad32aa517c141a05/</guid><description>DataX OSSWriter 说明 ------------ 1 快速介绍 OSSWriter提供了向OSS写入类CSV格式的一个或者多个表文件。 写入OSS内容存放的是一张逻辑意义上的二维表，例如…</description><content:encoded><![CDATA[<h1 id="datax-osswriter-说明">DataX OSSWriter 说明</h1>
+]]></content:encoded></item><item><title>DataX OSSWriter 说明</title><link>https://haokiu.com/blog/516202a7c10f4658ad32aa517c141a05/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/516202a7c10f4658ad32aa517c141a05/</guid><description>DataX OSSWriter 说明 ------------ 1 快速介绍 OSSWriter提供了向OSS写入类CSV格式的一个或者多个表文件。 写入OSS内容存放的是一张逻辑意义上的二维表，例如…</description><content:encoded><![CDATA[<h1 id="datax-osswriter-说明">DataX OSSWriter 说明</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>OSSWriter提供了向OSS写入类CSV格式的一个或者多个表文件。</p>
@@ -8819,7 +8819,7 @@ boolean captureRawRecord = true;
 <p>略</p>
 <h2 id="6-faq">6 FAQ</h2>
 <p>略</p>
-]]></content:encoded></item><item><title>DataX PostgresqlWriter</title><link>https://haokiu.com/blog/1c01500e456b4ef6b6c14eb5a072696e/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/1c01500e456b4ef6b6c14eb5a072696e/</guid><description>DataX PostgresqlWriter --- 1 快速介绍 PostgresqlWriter插件实现了写入数据到 PostgreSQL主库目的表的功能。在底层实现上，PostgresqlWri…</description><content:encoded><![CDATA[<h1 id="datax-postgresqlwriter">DataX PostgresqlWriter</h1>
+]]></content:encoded></item><item><title>DataX PostgresqlWriter</title><link>https://haokiu.com/blog/1c01500e456b4ef6b6c14eb5a072696e/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/1c01500e456b4ef6b6c14eb5a072696e/</guid><description>DataX PostgresqlWriter --- 1 快速介绍 PostgresqlWriter插件实现了写入数据到 PostgreSQL主库目的表的功能。在底层实现上，PostgresqlWri…</description><content:encoded><![CDATA[<h1 id="datax-postgresqlwriter">DataX PostgresqlWriter</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>PostgresqlWriter插件实现了写入数据到 PostgreSQL主库目的表的功能。在底层实现上，PostgresqlWriter通过JDBC连接远程 PostgreSQL 数据库，并执行相应的 insert into &hellip; sql 语句将数据写入 PostgreSQL，内部会分批次提交入库。</p>
@@ -9223,7 +9223,7 @@ D12 24逻辑核  192G内存 12*480G SSD 阵列</p>
 <p>A: 目前有两种解法，第一种配置 pre 语句，该 sql 可以清理当天导入数据， DataX 每次导入时候可以把上次清理干净并导入完整数据。
 第二种，向临时表导入数据，完成后再 rename 到线上表。</p>
 <hr>
-]]></content:encoded></item><item><title>DataX SqlServerWriter</title><link>https://haokiu.com/blog/f23fb4346cfa45459b6eaa8537ff5d17/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/f23fb4346cfa45459b6eaa8537ff5d17/</guid><description>DataX SqlServerWriter --- 1 快速介绍 SqlServerWriter 插件实现了写入数据到 SqlServer 库的目的表的功能。在底层实现上， SqlServerWrit…</description><content:encoded><![CDATA[<h1 id="datax-sqlserverwriter">DataX SqlServerWriter</h1>
+]]></content:encoded></item><item><title>DataX SqlServerWriter</title><link>https://haokiu.com/blog/f23fb4346cfa45459b6eaa8537ff5d17/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/f23fb4346cfa45459b6eaa8537ff5d17/</guid><description>DataX SqlServerWriter --- 1 快速介绍 SqlServerWriter 插件实现了写入数据到 SqlServer 库的目的表的功能。在底层实现上， SqlServerWrit…</description><content:encoded><![CDATA[<h1 id="datax-sqlserverwriter">DataX SqlServerWriter</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>SqlServerWriter 插件实现了写入数据到 SqlServer 库的目的表的功能。在底层实现上， SqlServerWriter 通过 JDBC 连接远程 SqlServer 数据库，并执行相应的 insert into &hellip;  sql 语句将数据写入 SqlServer，内部会分批次提交入库。</p>
@@ -9496,7 +9496,7 @@ D12 24逻辑核  192G内存 12*480G SSD 阵列</p>
 <hr>
 <p><strong>Q: 上面第二种方法可以避免对线上数据造成影响，那我具体怎样操作?</strong></p>
 <p>A: 可以配置临时表导入</p>
-]]></content:encoded></item><item><title>DataX Transformer</title><link>https://haokiu.com/blog/760d0498cfcd435bafba3fe96793cd01/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/760d0498cfcd435bafba3fe96793cd01/</guid><description>DataX Transformer Transformer定义 在数据同步、传输过程中，存在用户对于数据传输进行特殊定制化的需求场景，包括裁剪列、转换列等工作，可以借助ETL的T过程实现(Transf…</description><content:encoded><![CDATA[<h1 id="datax-transformer">DataX Transformer</h1>
+]]></content:encoded></item><item><title>DataX Transformer</title><link>https://haokiu.com/blog/760d0498cfcd435bafba3fe96793cd01/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/760d0498cfcd435bafba3fe96793cd01/</guid><description>DataX Transformer Transformer定义 在数据同步、传输过程中，存在用户对于数据传输进行特殊定制化的需求场景，包括裁剪列、转换列等工作，可以借助ETL的T过程实现(Transf…</description><content:encoded><![CDATA[<h1 id="datax-transformer">DataX Transformer</h1>
 <h2 id="transformer定义">Transformer定义</h2>
 <p>在数据同步、传输过程中，存在用户对于数据传输进行特殊定制化的需求场景，包括裁剪列、转换列等工作，可以借助ETL的T过程实现(Transformer)。DataX包含了完整的E(Extract)、T(Transformer)、L(Load)支持。</p>
 <h2 id="运行模型">运行模型</h2>
@@ -9739,7 +9739,7 @@ String code3 = &#34;Column column = record.getColumn(1);\n&#34; +
 读出记录总数                    :             1000000
 同步失败总数                    :                   0
 </code></pre><p><strong>注意，这里主要记录转换的输入输出，需要检测数据输入输出的记录数量变化。</strong></p>
-]]></content:encoded></item><item><title>DataX TxtFileReader 说明</title><link>https://haokiu.com/blog/cbeab748638041dfa63c78ebe4fa91db/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/cbeab748638041dfa63c78ebe4fa91db/</guid><description>DataX TxtFileReader 说明 ------------ 1 快速介绍 TxtFileReader提供了读取本地文件系统数据存储的能力。在底层实现上，TxtFileReader获取本地文…</description><content:encoded><![CDATA[<h1 id="datax-txtfilereader-说明">DataX TxtFileReader 说明</h1>
+]]></content:encoded></item><item><title>DataX TxtFileReader 说明</title><link>https://haokiu.com/blog/cbeab748638041dfa63c78ebe4fa91db/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/cbeab748638041dfa63c78ebe4fa91db/</guid><description>DataX TxtFileReader 说明 ------------ 1 快速介绍 TxtFileReader提供了读取本地文件系统数据存储的能力。在底层实现上，TxtFileReader获取本地文…</description><content:encoded><![CDATA[<h1 id="datax-txtfilereader-说明">DataX TxtFileReader 说明</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>TxtFileReader提供了读取本地文件系统数据存储的能力。在底层实现上，TxtFileReader获取本地文件数据，并转换为DataX传输协议传递给Writer。</p>
@@ -10031,7 +10031,7 @@ boolean captureRawRecord = true;
 <p>略</p>
 <h2 id="6-faq">6 FAQ</h2>
 <p>略</p>
-]]></content:encoded></item><item><title>DataX TxtFileWriter 说明</title><link>https://haokiu.com/blog/599f9ae387e54760ab26e177bd423e82/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/599f9ae387e54760ab26e177bd423e82/</guid><description>DataX TxtFileWriter 说明 ------------ 1 快速介绍 TxtFileWriter提供了向本地文件写入类CSV格式的一个或者多个表文件。TxtFileWriter服务的用…</description><content:encoded><![CDATA[<h1 id="datax-txtfilewriter-说明">DataX TxtFileWriter 说明</h1>
+]]></content:encoded></item><item><title>DataX TxtFileWriter 说明</title><link>https://haokiu.com/blog/599f9ae387e54760ab26e177bd423e82/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/599f9ae387e54760ab26e177bd423e82/</guid><description>DataX TxtFileWriter 说明 ------------ 1 快速介绍 TxtFileWriter提供了向本地文件写入类CSV格式的一个或者多个表文件。TxtFileWriter服务的用…</description><content:encoded><![CDATA[<h1 id="datax-txtfilewriter-说明">DataX TxtFileWriter 说明</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>TxtFileWriter提供了向本地文件写入类CSV格式的一个或者多个表文件。TxtFileWriter服务的用户主要在于DataX开发、测试同学。</p>
@@ -10308,10 +10308,10 @@ boolean captureRawRecord = true;
 <p>略</p>
 <h2 id="6-faq">6 FAQ</h2>
 <p>略</p>
-]]></content:encoded></item><item><title>datax-kudu-plugin</title><link>https://haokiu.com/blog/3909c1ec487c48198ae49ab46ba98dcb/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/3909c1ec487c48198ae49ab46ba98dcb/</guid><description>datax-kudu-plugin datax kudu的writer插件 仅在kudu11进行过测试</description><content:encoded><![CDATA[<h1 id="datax-kudu-plugin">datax-kudu-plugin</h1>
+]]></content:encoded></item><item><title>datax-kudu-plugin</title><link>https://haokiu.com/blog/3909c1ec487c48198ae49ab46ba98dcb/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/3909c1ec487c48198ae49ab46ba98dcb/</guid><description>datax-kudu-plugin datax kudu的writer插件 仅在kudu11进行过测试</description><content:encoded><![CDATA[<h1 id="datax-kudu-plugin">datax-kudu-plugin</h1>
 <p>datax kudu的writer插件</p>
 <p>仅在kudu11进行过测试</p>
-]]></content:encoded></item><item><title>datax-kudu-plugins</title><link>https://haokiu.com/blog/23a56c95c6c4402998fb8bf16e29fc05/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/23a56c95c6c4402998fb8bf16e29fc05/</guid><description>datax-kudu-plugins datax kudu的writer插件 eg: 必须参数： 主键列请写到最前面 配置列表 | name | default | description | 是否必…</description><content:encoded><![CDATA[<h1 id="datax-kudu-plugins">datax-kudu-plugins</h1>
+]]></content:encoded></item><item><title>datax-kudu-plugins</title><link>https://haokiu.com/blog/23a56c95c6c4402998fb8bf16e29fc05/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/23a56c95c6c4402998fb8bf16e29fc05/</guid><description>datax-kudu-plugins datax kudu的writer插件 eg: 必须参数： 主键列请写到最前面 配置列表 | name | default | description | 是否必…</description><content:encoded><![CDATA[<h1 id="datax-kudu-plugins">datax-kudu-plugins</h1>
 <p>datax kudu的writer插件</p>
 <p>eg:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
@@ -10556,7 +10556,7 @@ boolean captureRawRecord = true;
 			</tr>
 	</tbody>
 </table>
-]]></content:encoded></item><item><title>DataX插件开发宝典</title><link>https://haokiu.com/blog/7c5af007072741d2a1b8a4578137e185/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/7c5af007072741d2a1b8a4578137e185/</guid><description>DataX插件开发宝典 本文面向DataX插件开发人员，尝试尽可能全面地阐述开发一个DataX插件所经过的历程，力求消除开发者的困惑，让插件开发变得简单。 一、开发之前 路走对了，就不怕远。✓ 路走远…</description><content:encoded><![CDATA[<h1 id="datax插件开发宝典">DataX插件开发宝典</h1>
+]]></content:encoded></item><item><title>DataX插件开发宝典</title><link>https://haokiu.com/blog/7c5af007072741d2a1b8a4578137e185/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/7c5af007072741d2a1b8a4578137e185/</guid><description>DataX插件开发宝典 本文面向DataX插件开发人员，尝试尽可能全面地阐述开发一个DataX插件所经过的历程，力求消除开发者的困惑，让插件开发变得简单。 一、开发之前 路走对了，就不怕远。✓ 路走远…</description><content:encoded><![CDATA[<h1 id="datax插件开发宝典">DataX插件开发宝典</h1>
 <p>本文面向DataX插件开发人员，尝试尽可能全面地阐述开发一个DataX插件所经过的历程，力求消除开发者的困惑，让插件开发变得简单。</p>
 <h2 id="一开发之前">一、开发之前</h2>
 <blockquote>
@@ -11062,7 +11062,7 @@ boolean captureRawRecord = true;
 <li><strong>约束限制</strong>：是否存在其他的使用限制条件。</li>
 <li><strong>FAQ</strong>：用户经常会遇到的问题。</li>
 </ol>
-]]></content:encoded></item><item><title>DrdsReader 插件文档</title><link>https://haokiu.com/blog/20f3c6090e2448838d8be1baca3a5e1c/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/20f3c6090e2448838d8be1baca3a5e1c/</guid><description>DrdsReader 插件文档 1 快速介绍 DrdsReader插件实现了从DRDS(分布式RDS)读取数据。在底层实现上，DrdsReader通过JDBC连接远程DRDS数据库，并执行相应的sql…</description><content:encoded><![CDATA[<h1 id="drdsreader-插件文档">DrdsReader 插件文档</h1>
+]]></content:encoded></item><item><title>DrdsReader 插件文档</title><link>https://haokiu.com/blog/20f3c6090e2448838d8be1baca3a5e1c/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/20f3c6090e2448838d8be1baca3a5e1c/</guid><description>DrdsReader 插件文档 1 快速介绍 DrdsReader插件实现了从DRDS(分布式RDS)读取数据。在底层实现上，DrdsReader通过JDBC连接远程DRDS数据库，并执行相应的sql…</description><content:encoded><![CDATA[<h1 id="drdsreader-插件文档">DrdsReader 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>DrdsReader插件实现了从DRDS(分布式RDS)读取数据。在底层实现上，DrdsReader通过JDBC连接远程DRDS数据库，并执行相应的sql语句将数据从DRDS库中SELECT出来。</p>
@@ -11425,7 +11425,7 @@ attribute_cc: 1
 <p>A: DrdsReader必须业务支持增量字段DataX才能同步增量，例如在淘宝大部分业务表中，通过gmt_modified字段表征这条记录的最新修改时间，那么DataX DrdsReader只需要配置where条件为</p>
 <pre tabindex="0"><code>    &#34;where&#34;: &#34;Date(add_time) = &#39;2014-06-01&#39;&#34;
 </code></pre><hr>
-]]></content:encoded></item><item><title>Hbase094XReader &amp; Hbase11XReader 插件文档</title><link>https://haokiu.com/blog/34ec6d7caba24a86b7a5e9a2f37d8c46/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/34ec6d7caba24a86b7a5e9a2f37d8c46/</guid><description>Hbase094XReader &amp;amp; Hbase11XReader 插件文档 1 快速介绍 HbaseReader 插件实现了从 Hbase中读取数据。在底层实现上，HbaseReader 通过 HBa…</description><content:encoded><![CDATA[<h1 id="hbase094xreader--hbase11xreader-插件文档">Hbase094XReader &amp; Hbase11XReader 插件文档</h1>
+]]></content:encoded></item><item><title>Hbase094XReader &amp; Hbase11XReader 插件文档</title><link>https://haokiu.com/blog/34ec6d7caba24a86b7a5e9a2f37d8c46/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/34ec6d7caba24a86b7a5e9a2f37d8c46/</guid><description>Hbase094XReader &amp;amp; Hbase11XReader 插件文档 1 快速介绍 HbaseReader 插件实现了从 Hbase中读取数据。在底层实现上，HbaseReader 通过 HBa…</description><content:encoded><![CDATA[<h1 id="hbase094xreader--hbase11xreader-插件文档">Hbase094XReader &amp; Hbase11XReader 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>HbaseReader 插件实现了从 Hbase中读取数据。在底层实现上，HbaseReader 通过 HBase 的 Java 客户端连接远程 HBase 服务，并通过 Scan 方式读取你指定 rowkey 范围内的数据，并将读取的数据使用 DataX 自定义的数据类型拼装为抽象的数据集，并传递给下游 Writer 处理。</p>
@@ -11870,7 +11870,7 @@ isBinaryRowkey：指定配置的startRowkey和endRowkey转换为byte[]时的方�
 <p>略</p>
 <h2 id="6-faq">6 FAQ</h2>
 <hr>
-]]></content:encoded></item><item><title>Hbase094XReader &amp; Hbase11XReader 插件文档</title><link>https://haokiu.com/blog/7c5fc71d1a124a5396b1a17e8293be71/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/7c5fc71d1a124a5396b1a17e8293be71/</guid><description>Hbase094XReader &amp;amp; Hbase11XReader 插件文档 1 快速介绍 HbaseReader 插件实现了从 Hbase中读取数据。在底层实现上，HbaseReader 通过 HBa…</description><content:encoded><![CDATA[<h1 id="hbase094xreader--hbase11xreader-插件文档">Hbase094XReader &amp; Hbase11XReader 插件文档</h1>
+]]></content:encoded></item><item><title>Hbase094XReader &amp; Hbase11XReader 插件文档</title><link>https://haokiu.com/blog/7c5fc71d1a124a5396b1a17e8293be71/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/7c5fc71d1a124a5396b1a17e8293be71/</guid><description>Hbase094XReader &amp;amp; Hbase11XReader 插件文档 1 快速介绍 HbaseReader 插件实现了从 Hbase中读取数据。在底层实现上，HbaseReader 通过 HBa…</description><content:encoded><![CDATA[<h1 id="hbase094xreader--hbase11xreader-插件文档">Hbase094XReader &amp; Hbase11XReader 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>HbaseReader 插件实现了从 Hbase中读取数据。在底层实现上，HbaseReader 通过 HBase 的 Java 客户端连接远程 HBase 服务，并通过 Scan 方式读取你指定 rowkey 范围内的数据，并将读取的数据使用 DataX 自定义的数据类型拼装为抽象的数据集，并传递给下游 Writer 处理。</p>
@@ -12341,7 +12341,7 @@ isBinaryRowkey：指定配置的startRowkey和endRowkey转换为byte[]时的方�
 <p>略</p>
 <h2 id="6-faq">6 FAQ</h2>
 <hr>
-]]></content:encoded></item><item><title>Hbase094XWriter &amp; Hbase11XWriter 插件文档</title><link>https://haokiu.com/blog/0172fbcbd4674f98a8782403fc6a7ca5/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/0172fbcbd4674f98a8782403fc6a7ca5/</guid><description>Hbase094XWriter &amp;amp; Hbase11XWriter 插件文档 1 快速介绍 HbaseWriter 插件实现了从向Hbase中写取数据。在底层实现上，HbaseWriter 通过 HBa…</description><content:encoded><![CDATA[<h1 id="hbase094xwriter--hbase11xwriter-插件文档">Hbase094XWriter &amp; Hbase11XWriter 插件文档</h1>
+]]></content:encoded></item><item><title>Hbase094XWriter &amp; Hbase11XWriter 插件文档</title><link>https://haokiu.com/blog/0172fbcbd4674f98a8782403fc6a7ca5/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/0172fbcbd4674f98a8782403fc6a7ca5/</guid><description>Hbase094XWriter &amp;amp; Hbase11XWriter 插件文档 1 快速介绍 HbaseWriter 插件实现了从向Hbase中写取数据。在底层实现上，HbaseWriter 通过 HBa…</description><content:encoded><![CDATA[<h1 id="hbase094xwriter--hbase11xwriter-插件文档">Hbase094XWriter &amp; Hbase11XWriter 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>HbaseWriter 插件实现了从向Hbase中写取数据。在底层实现上，HbaseWriter 通过 HBase 的 Java 客户端连接远程 HBase 服务，并通过 put 方式写入Hbase。</p>
@@ -12706,7 +12706,7 @@ isBinaryRowkey：指定配置的startRowkey和endRowkey转换为byte[]时的方�
 <p>略</p>
 <h2 id="6-faq">6 FAQ</h2>
 <hr>
-]]></content:encoded></item><item><title>Hbase094XWriter &amp; Hbase11XWriter 插件文档</title><link>https://haokiu.com/blog/745df21fdbd349ab9a9fc5c94551b336/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/745df21fdbd349ab9a9fc5c94551b336/</guid><description>Hbase094XWriter &amp;amp; Hbase11XWriter 插件文档 1 快速介绍 HbaseWriter 插件实现了从向Hbase中写取数据。在底层实现上，HbaseWriter 通过 HBa…</description><content:encoded><![CDATA[<h1 id="hbase094xwriter--hbase11xwriter-插件文档">Hbase094XWriter &amp; Hbase11XWriter 插件文档</h1>
+]]></content:encoded></item><item><title>Hbase094XWriter &amp; Hbase11XWriter 插件文档</title><link>https://haokiu.com/blog/745df21fdbd349ab9a9fc5c94551b336/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/745df21fdbd349ab9a9fc5c94551b336/</guid><description>Hbase094XWriter &amp;amp; Hbase11XWriter 插件文档 1 快速介绍 HbaseWriter 插件实现了从向Hbase中写取数据。在底层实现上，HbaseWriter 通过 HBa…</description><content:encoded><![CDATA[<h1 id="hbase094xwriter--hbase11xwriter-插件文档">Hbase094XWriter &amp; Hbase11XWriter 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>HbaseWriter 插件实现了从向Hbase中写取数据。在底层实现上，HbaseWriter 通过 HBase 的 Java 客户端连接远程 HBase 服务，并通过 put 方式写入Hbase。</p>
@@ -13047,7 +13047,7 @@ isBinaryRowkey：指定配置的startRowkey和endRowkey转换为byte[]时的方�
 <p>略</p>
 <h2 id="6-faq">6 FAQ</h2>
 <hr>
-]]></content:encoded></item><item><title>hbase11xsqlreader 插件文档</title><link>https://haokiu.com/blog/283a89fffad54e6f909c2936a1ff08ad/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/283a89fffad54e6f909c2936a1ff08ad/</guid><description>hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader…</description><content:encoded><![CDATA[<h1 id="hbase11xsqlreader--插件文档">hbase11xsqlreader  插件文档</h1>
+]]></content:encoded></item><item><title>hbase11xsqlreader 插件文档</title><link>https://haokiu.com/blog/283a89fffad54e6f909c2936a1ff08ad/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/283a89fffad54e6f909c2936a1ff08ad/</guid><description>hbase11xsqlreader 插件文档 1 快速介绍 hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader…</description><content:encoded><![CDATA[<h1 id="hbase11xsqlreader--插件文档">hbase11xsqlreader  插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实现上，hbase11xsqlreader通过Phoenix客户端去连接远程的HBase集群，并执行相应的sql语句将数据从Phoenix库中SELECT出来。</p>
@@ -13333,7 +13333,7 @@ isBinaryRowkey：指定配置的startRowkey和endRowkey转换为byte[]时的方�
 <p>略</p>
 <h2 id="6-faq-1">6 FAQ</h2>
 <hr>
-]]></content:encoded></item><item><title>HBase11xsqlwriter插件文档</title><link>https://haokiu.com/blog/1c329829c22c499d8e684735252966c1/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/1c329829c22c499d8e684735252966c1/</guid><description>HBase11xsqlwriter插件文档 快速介绍 HBase11xsqlwriter实现了向hbase中的SQL表(phoenix)批量导入数据的功能。Phoenix因为对rowkey做了数据编码…</description><content:encoded><![CDATA[<h1 id="hbase11xsqlwriter插件文档">HBase11xsqlwriter插件文档</h1>
+]]></content:encoded></item><item><title>HBase11xsqlwriter插件文档</title><link>https://haokiu.com/blog/1c329829c22c499d8e684735252966c1/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/1c329829c22c499d8e684735252966c1/</guid><description>HBase11xsqlwriter插件文档 快速介绍 HBase11xsqlwriter实现了向hbase中的SQL表(phoenix)批量导入数据的功能。Phoenix因为对rowkey做了数据编码…</description><content:encoded><![CDATA[<h1 id="hbase11xsqlwriter插件文档">HBase11xsqlwriter插件文档</h1>
 <h2 id="1-快速介绍">1. 快速介绍</h2>
 <p>HBase11xsqlwriter实现了向hbase中的SQL表(phoenix)批量导入数据的功能。Phoenix因为对rowkey做了数据编码，所以，直接使用HBaseAPI进行写入会面临手工数据转换的问题，麻烦且易错。本插件提供了单间的SQL表的数据导入方式。</p>
 <p>在底层实现上，通过Phoenix的JDBC驱动，执行UPSERT语句向hbase写入数据。</p>
@@ -13490,7 +13490,7 @@ isBinaryRowkey：指定配置的startRowkey和endRowkey转换为byte[]时的方�
 默认是256，但应根据每行的大小来计算最合适的batchSize。通常一次操作的数据量在2MB-4MB左右，用这个值除以行大小，即可得到batchSize。</p>
 </li>
 </ol>
-]]></content:encoded></item><item><title>hbase20xsqlreader 插件文档</title><link>https://haokiu.com/blog/d74e56a13f78424182e14164c8b4e5e4/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/d74e56a13f78424182e14164c8b4e5e4/</guid><description>hbase20xsqlreader 插件文档 1 快速介绍 hbase20xsqlreader插件实现了从Phoenix(HBase SQL)读取数据，对应版本为HBase2.X和Phoenix5.X…</description><content:encoded><![CDATA[<h1 id="hbase20xsqlreader--插件文档">hbase20xsqlreader  插件文档</h1>
+]]></content:encoded></item><item><title>hbase20xsqlreader 插件文档</title><link>https://haokiu.com/blog/d74e56a13f78424182e14164c8b4e5e4/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/d74e56a13f78424182e14164c8b4e5e4/</guid><description>hbase20xsqlreader 插件文档 1 快速介绍 hbase20xsqlreader插件实现了从Phoenix(HBase SQL)读取数据，对应版本为HBase2.X和Phoenix5.X…</description><content:encoded><![CDATA[<h1 id="hbase20xsqlreader--插件文档">hbase20xsqlreader  插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>hbase20xsqlreader插件实现了从Phoenix(HBase SQL)读取数据，对应版本为HBase2.X和Phoenix5.X。</p>
@@ -13710,7 +13710,7 @@ isBinaryRowkey：指定配置的startRowkey和endRowkey转换为byte[]时的方�
 </ul>
 <h2 id="6-faq">6 FAQ</h2>
 <hr>
-]]></content:encoded></item><item><title>HBase20xsqlwriter插件文档</title><link>https://haokiu.com/blog/28250260969448579bc8cee8c2963319/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/28250260969448579bc8cee8c2963319/</guid><description>HBase20xsqlwriter插件文档 快速介绍 HBase20xsqlwriter实现了向hbase中的SQL表(phoenix)批量导入数据的功能。Phoenix因为对rowkey做了数据编码…</description><content:encoded><![CDATA[<h1 id="hbase20xsqlwriter插件文档">HBase20xsqlwriter插件文档</h1>
+]]></content:encoded></item><item><title>HBase20xsqlwriter插件文档</title><link>https://haokiu.com/blog/28250260969448579bc8cee8c2963319/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/28250260969448579bc8cee8c2963319/</guid><description>HBase20xsqlwriter插件文档 快速介绍 HBase20xsqlwriter实现了向hbase中的SQL表(phoenix)批量导入数据的功能。Phoenix因为对rowkey做了数据编码…</description><content:encoded><![CDATA[<h1 id="hbase20xsqlwriter插件文档">HBase20xsqlwriter插件文档</h1>
 <h2 id="1-快速介绍">1. 快速介绍</h2>
 <p>HBase20xsqlwriter实现了向hbase中的SQL表(phoenix)批量导入数据的功能。Phoenix因为对rowkey做了数据编码，所以，直接使用HBaseAPI进行写入会面临手工数据转换的问题，麻烦且易错。本插件提供了SQL方式直接向Phoenix表写入数据。</p>
 <p>在底层实现上，通过Phoenix QueryServer的轻客户端驱动，执行UPSERT语句向Phoenix写入数据。</p>
@@ -13890,7 +13890,7 @@ isBinaryRowkey：指定配置的startRowkey和endRowkey转换为byte[]时的方�
 默认是256，但应根据每行的大小来计算最合适的batchSize。通常一次操作的数据量在2MB-4MB左右，用这个值除以行大小，即可得到batchSize。</p>
 </li>
 </ol>
-]]></content:encoded></item><item><title>KingbaseesReader 插件文档</title><link>https://haokiu.com/blog/cc7bd03f72154435ae9af2d67a214f6d/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/cc7bd03f72154435ae9af2d67a214f6d/</guid><description>KingbaseesReader 插件文档 1 快速介绍 KingbaseesReader插件实现了从KingbaseES读取数据。在底层实现上，KingbaseesReader通过JDBC连接远程K…</description><content:encoded><![CDATA[<h1 id="kingbaseesreader-插件文档">KingbaseesReader 插件文档</h1>
+]]></content:encoded></item><item><title>KingbaseesReader 插件文档</title><link>https://haokiu.com/blog/cc7bd03f72154435ae9af2d67a214f6d/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/cc7bd03f72154435ae9af2d67a214f6d/</guid><description>KingbaseesReader 插件文档 1 快速介绍 KingbaseesReader插件实现了从KingbaseES读取数据。在底层实现上，KingbaseesReader通过JDBC连接远程K…</description><content:encoded><![CDATA[<h1 id="kingbaseesreader-插件文档">KingbaseesReader 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>KingbaseesReader插件实现了从KingbaseES读取数据。在底层实现上，KingbaseesReader通过JDBC连接远程KingbaseES数据库，并执行相应的sql语句将数据从KingbaseES库中SELECT出来。</p>
@@ -14178,7 +14178,7 @@ id为普通列名，&lsquo;hello&rsquo;::varchar为字符串常量，true为布�
 <ul>
 <li><code>除上述罗列字段类型外，其他类型均不支持; money,inet,bit需用户使用a_inet::varchar类似的语法转换</code>。</li>
 </ul>
-]]></content:encoded></item><item><title>MysqlReader 插件文档</title><link>https://haokiu.com/blog/29875f5b780c46929670f9b8699ed462/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/29875f5b780c46929670f9b8699ed462/</guid><description>MysqlReader 插件文档 1 快速介绍 MysqlReader插件实现了从Mysql读取数据。在底层实现上，MysqlReader通过JDBC连接远程Mysql数据库，并执行相应的sql语句将…</description><content:encoded><![CDATA[<h1 id="mysqlreader-插件文档">MysqlReader 插件文档</h1>
+]]></content:encoded></item><item><title>MysqlReader 插件文档</title><link>https://haokiu.com/blog/29875f5b780c46929670f9b8699ed462/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/29875f5b780c46929670f9b8699ed462/</guid><description>MysqlReader 插件文档 1 快速介绍 MysqlReader插件实现了从Mysql读取数据。在底层实现上，MysqlReader通过JDBC连接远程Mysql数据库，并执行相应的sql语句将…</description><content:encoded><![CDATA[<h1 id="mysqlreader-插件文档">MysqlReader 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>MysqlReader插件实现了从Mysql读取数据。在底层实现上，MysqlReader通过JDBC连接远程Mysql数据库，并执行相应的sql语句将数据从mysql库中SELECT出来。</p>
@@ -14674,7 +14674,7 @@ attribute_cc: 1
 <pre><code>mysql -u&lt;username&gt; -p&lt;password&gt; -h&lt;ip&gt; -D&lt;database&gt; -e &quot;select * from &lt;表名&gt;&quot;
 </code></pre>
 <p>如果上述命令也报错，那可以证实是环境问题，请联系你的DBA。</p>
-]]></content:encoded></item><item><title>OpenTSDBReader 插件文档</title><link>https://haokiu.com/blog/4e39a8595b6247fabfd6f625f053b0b6/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/4e39a8595b6247fabfd6f625f053b0b6/</guid><description>OpenTSDBReader 插件文档 1 快速介绍 OpenTSDBReader 插件实现了从 OpenTSDB 读取数据。OpenTSDB 是主要由 Yahoo 维护的、可扩展的、分布式时序数据库…</description><content:encoded><![CDATA[<h1 id="opentsdbreader-插件文档">OpenTSDBReader 插件文档</h1>
+]]></content:encoded></item><item><title>OpenTSDBReader 插件文档</title><link>https://haokiu.com/blog/4e39a8595b6247fabfd6f625f053b0b6/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/4e39a8595b6247fabfd6f625f053b0b6/</guid><description>OpenTSDBReader 插件文档 1 快速介绍 OpenTSDBReader 插件实现了从 OpenTSDB 读取数据。OpenTSDB 是主要由 Yahoo 维护的、可扩展的、分布式时序数据库…</description><content:encoded><![CDATA[<h1 id="opentsdbreader-插件文档">OpenTSDBReader 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>OpenTSDBReader 插件实现了从 OpenTSDB 读取数据。OpenTSDB 是主要由 Yahoo 维护的、可扩展的、分布式时序数据库，与阿里巴巴自研 TSDB 的关系与区别详见阿里云官网：《<a href="https://help.aliyun.com/document_detail/113368.html">相比 OpenTSDB 优势</a>》</p>
@@ -14874,7 +14874,7 @@ attribute_cc: 1
 <hr>
 <p><strong>Q：为什么需要连接 OpenTSDB 的底层存储，为什么不直接使用 <code>/api/query</code> 查询获取数据点？</strong></p>
 <p>A：因为通过 OpenTSDB 的 HTTP 接口（<code>/api/query</code>）来读取数据的话，经内部压测发现，在大数据量的情况下，会导致 OpenTSDB 的异步框架会报 CallBack 过多的问题；所以，采用了直连底层 HBase 存储，通过 Scan 的方式来扫描数据点，来避免这个问题。另外，还考虑到，可以通过指定 metric 和时间范围，可以顺序地 Scan HBase 表，提高查询效率。</p>
-]]></content:encoded></item><item><title>OracleReader 插件文档</title><link>https://haokiu.com/blog/0ffdd59e828b4bb0a53cef538910db12/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/0ffdd59e828b4bb0a53cef538910db12/</guid><description>OracleReader 插件文档 1 快速介绍 OracleReader插件实现了从Oracle读取数据。在底层实现上，OracleReader通过JDBC连接远程Oracle数据库，并执行相应的s…</description><content:encoded><![CDATA[<h1 id="oraclereader-插件文档">OracleReader 插件文档</h1>
+]]></content:encoded></item><item><title>OracleReader 插件文档</title><link>https://haokiu.com/blog/0ffdd59e828b4bb0a53cef538910db12/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/0ffdd59e828b4bb0a53cef538910db12/</guid><description>OracleReader 插件文档 1 快速介绍 OracleReader插件实现了从Oracle读取数据。在底层实现上，OracleReader通过JDBC连接远程Oracle数据库，并执行相应的s…</description><content:encoded><![CDATA[<h1 id="oraclereader-插件文档">OracleReader 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>OracleReader插件实现了从Oracle读取数据。在底层实现上，OracleReader通过JDBC连接远程Oracle数据库，并执行相应的sql语句将数据从Oracle库中SELECT出来。</p>
@@ -15268,7 +15268,7 @@ sqlplus username/password@//host:port/sid</p>
 </li>
 <li>抽取sql要简单，尽量不用replace等函数，这个非常消耗cpu，会严重影响抽取速度;</li>
 </ol>
-]]></content:encoded></item><item><title>OTSReader 插件文档</title><link>https://haokiu.com/blog/2dc5ba5f4d58498e8453bd2d8efde079/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/2dc5ba5f4d58498e8453bd2d8efde079/</guid><description>OTSReader 插件文档 1 快速介绍 OTSReader插件实现了从OTS读取数据，并可以通过用户指定抽取数据范围可方便的实现数据增量抽取的需求。目前支持三种抽取方式： 全表抽取 范围抽取 指定…</description><content:encoded><![CDATA[<h1 id="otsreader-插件文档">OTSReader 插件文档</h1>
+]]></content:encoded></item><item><title>OTSReader 插件文档</title><link>https://haokiu.com/blog/2dc5ba5f4d58498e8453bd2d8efde079/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/2dc5ba5f4d58498e8453bd2d8efde079/</guid><description>OTSReader 插件文档 1 快速介绍 OTSReader插件实现了从OTS读取数据，并可以通过用户指定抽取数据范围可方便的实现数据增量抽取的需求。目前支持三种抽取方式： 全表抽取 范围抽取 指定…</description><content:encoded><![CDATA[<h1 id="otsreader-插件文档">OTSReader 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>OTSReader插件实现了从OTS读取数据，并可以通过用户指定抽取数据范围可方便的实现数据增量抽取的需求。目前支持三种抽取方式：</p>
@@ -15663,7 +15663,7 @@ sqlplus username/password@//host:port/sid</p>
 <p>自增ID，OTSReader可以通过记录上次最大的ID信息，通过指定Range范围进行增量抽取。这样使用的前提是OTS中的PrimaryKey必须包含主键自增列(自增主键需要使用OTS应用方生成。)</p>
 <p>时间戳，	OTSReader可以通过PK过滤时间戳，通过制定Range范围进行增量抽取。这样使用的前提是OTS中的PrimaryKey必须包含主键时间列(时间主键需要使用OTS应用方生成。)</p>
 <h2 id="6-faq">6 FAQ</h2>
-]]></content:encoded></item><item><title>OTSWriter 插件文档</title><link>https://haokiu.com/blog/7d2496e6853044daa824d7a78226b07d/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/7d2496e6853044daa824d7a78226b07d/</guid><description>OTSWriter 插件文档 1 快速介绍 OTSWriter插件实现了向OTS写入数据，目前支持三种写入方式： PutRow，对应于OTS API PutRow，插入数据到指定的行，如果该行不存在，…</description><content:encoded><![CDATA[<h1 id="otswriter-插件文档">OTSWriter 插件文档</h1>
+]]></content:encoded></item><item><title>OTSWriter 插件文档</title><link>https://haokiu.com/blog/7d2496e6853044daa824d7a78226b07d/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/7d2496e6853044daa824d7a78226b07d/</guid><description>OTSWriter 插件文档 1 快速介绍 OTSWriter插件实现了向OTS写入数据，目前支持三种写入方式： PutRow，对应于OTS API PutRow，插入数据到指定的行，如果该行不存在，…</description><content:encoded><![CDATA[<h1 id="otswriter-插件文档">OTSWriter 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>OTSWriter插件实现了向OTS写入数据，目前支持三种写入方式：</p>
@@ -15982,7 +15982,7 @@ sqlplus username/password@//host:port/sid</p>
 <h3 id="52-单任务failover">5.2 单任务FailOver</h3>
 <p>由于OTS写入本身是幂等性的，因此可以支持单任务FailOver。即一旦写入Fail，DataX会重新启动相关子任务进行重试。</p>
 <h2 id="6-faq">6 FAQ</h2>
-]]></content:encoded></item><item><title>PostgresqlReader 插件文档</title><link>https://haokiu.com/blog/0adf103bd70440a1978ecbcc7dd63787/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/0adf103bd70440a1978ecbcc7dd63787/</guid><description>PostgresqlReader 插件文档 1 快速介绍 PostgresqlReader插件实现了从PostgreSQL读取数据。在底层实现上，PostgresqlReader通过JDBC连接远程P…</description><content:encoded><![CDATA[<h1 id="postgresqlreader-插件文档">PostgresqlReader 插件文档</h1>
+]]></content:encoded></item><item><title>PostgresqlReader 插件文档</title><link>https://haokiu.com/blog/0adf103bd70440a1978ecbcc7dd63787/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/0adf103bd70440a1978ecbcc7dd63787/</guid><description>PostgresqlReader 插件文档 1 快速介绍 PostgresqlReader插件实现了从PostgreSQL读取数据。在底层实现上，PostgresqlReader通过JDBC连接远程P…</description><content:encoded><![CDATA[<h1 id="postgresqlreader-插件文档">PostgresqlReader 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>PostgresqlReader插件实现了从PostgreSQL读取数据。在底层实现上，PostgresqlReader通过JDBC连接远程PostgreSQL数据库，并执行相应的sql语句将数据从PostgreSQL库中SELECT出来。</p>
@@ -16368,7 +16368,7 @@ D12 24逻辑核  192G内存 12*480G SSD 阵列</p>
 <li>这里的单表，主键类型为 serial，数据分布均匀。</li>
 <li>对单表如果没有按照主键切分，那么配置通道个数不会提升速度，效果与1个通道一样。</li>
 </ol>
-]]></content:encoded></item><item><title>RDBMSReader 插件文档</title><link>https://haokiu.com/blog/34c79077064f4502a247f840e8b64c46/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/34c79077064f4502a247f840e8b64c46/</guid><description>RDBMSReader 插件文档 1 快速介绍 RDBMSReader插件实现了从RDBMS读取数据。在底层实现上，RDBMSReader通过JDBC连接远程RDBMS数据库，并执行相应的sql语句将…</description><content:encoded><![CDATA[<h1 id="rdbmsreader-插件文档">RDBMSReader 插件文档</h1>
+]]></content:encoded></item><item><title>RDBMSReader 插件文档</title><link>https://haokiu.com/blog/34c79077064f4502a247f840e8b64c46/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/34c79077064f4502a247f840e8b64c46/</guid><description>RDBMSReader 插件文档 1 快速介绍 RDBMSReader插件实现了从RDBMS读取数据。在底层实现上，RDBMSReader通过JDBC连接远程RDBMS数据库，并执行相应的sql语句将…</description><content:encoded><![CDATA[<h1 id="rdbmsreader-插件文档">RDBMSReader 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>RDBMSReader插件实现了从RDBMS读取数据。在底层实现上，RDBMSReader通过JDBC连接远程RDBMS数据库，并执行相应的sql语句将数据从RDBMS库中SELECT出来。目前支持达梦、db2、PPAS、Sybase数据库的读取。RDBMSReader是一个通用的关系数据库读插件，您可以通过注册数据库驱动等方式增加任意多样的关系数据库读支持。</p>
@@ -16670,7 +16670,7 @@ id为普通列名，1为整形数字常量，&lsquo;bazhen.csy&rsquo;为字符�
 </ul>
 <h3 id="33-类型转换">3.3 类型转换</h3>
 <p>目前RDBMSReader支持大部分通用得关系数据库类型如数字、字符等，但也存在部分个别类型没有支持的情况，请注意检查你的类型，根据具体的数据库做选择。</p>
-]]></content:encoded></item><item><title>RDBMSWriter 插件文档</title><link>https://haokiu.com/blog/5d9d57b2e00d4d8ca994dc15ece38148/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/5d9d57b2e00d4d8ca994dc15ece38148/</guid><description>RDBMSWriter 插件文档 --- 1 快速介绍 RDBMSWriter 插件实现了写入数据到 RDBMS 主库的目的表的功能。在底层实现上， RDBMSWriter 通过 JDBC 连接远程…</description><content:encoded><![CDATA[<h1 id="rdbmswriter-插件文档">RDBMSWriter 插件文档</h1>
+]]></content:encoded></item><item><title>RDBMSWriter 插件文档</title><link>https://haokiu.com/blog/5d9d57b2e00d4d8ca994dc15ece38148/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/5d9d57b2e00d4d8ca994dc15ece38148/</guid><description>RDBMSWriter 插件文档 --- 1 快速介绍 RDBMSWriter 插件实现了写入数据到 RDBMS 主库的目的表的功能。在底层实现上， RDBMSWriter 通过 JDBC 连接远程…</description><content:encoded><![CDATA[<h1 id="rdbmswriter-插件文档">RDBMSWriter 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>RDBMSWriter 插件实现了写入数据到 RDBMS 主库的目的表的功能。在底层实现上， RDBMSWriter 通过 JDBC 连接远程 RDBMS 数据库，并执行相应的 insert into &hellip; 的 sql 语句将数据写入 RDBMS。 RDBMSWriter是一个通用的关系数据库写插件，您可以通过注册数据库驱动等方式增加任意多样的关系数据库写支持。</p>
@@ -16881,9 +16881,9 @@ id为普通列名，1为整形数字常量，&lsquo;bazhen.csy&rsquo;为字符�
 </ul>
 <h3 id="33-类型转换">3.3 类型转换</h3>
 <p>目前RDBMSReader支持大部分通用得关系数据库类型如数字、字符等，但也存在部分个别类型没有支持的情况，请注意检查你的类型，根据具体的数据库做选择。</p>
-]]></content:encoded></item><item><title>Readme.md</title><link>https://haokiu.com/blog/b007b0bc6dca40458f17c7c1826e9da5/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/b007b0bc6dca40458f17c7c1826e9da5/</guid><description>some script here.</description><content:encoded>&lt;p>some script here.&lt;/p>
-</content:encoded></item><item><title>README.md</title><link>https://haokiu.com/blog/9dbd1273dcb848bbaa69f53c0105d5c4/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/9dbd1273dcb848bbaa69f53c0105d5c4/</guid><description>本插件仅在Elasticsearch 5.x上测试</description><content:encoded>&lt;p>本插件仅在Elasticsearch 5.x上测试&lt;/p>
-</content:encoded></item><item><title>SqlServerReader 插件文档</title><link>https://haokiu.com/blog/e30dc23cda1d465fa0872475e5c976a7/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/e30dc23cda1d465fa0872475e5c976a7/</guid><description>SqlServerReader 插件文档 1 快速介绍 SqlServerReader插件实现了从SqlServer读取数据。在底层实现上，SqlServerReader通过JDBC连接远程SqlSe…</description><content:encoded><![CDATA[<h1 id="sqlserverreader-插件文档">SqlServerReader 插件文档</h1>
+]]></content:encoded></item><item><title>Readme.md</title><link>https://haokiu.com/blog/b007b0bc6dca40458f17c7c1826e9da5/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/b007b0bc6dca40458f17c7c1826e9da5/</guid><description>some script here.</description><content:encoded>&lt;p>some script here.&lt;/p>
+</content:encoded></item><item><title>README.md</title><link>https://haokiu.com/blog/9dbd1273dcb848bbaa69f53c0105d5c4/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/9dbd1273dcb848bbaa69f53c0105d5c4/</guid><description>本插件仅在Elasticsearch 5.x上测试</description><content:encoded>&lt;p>本插件仅在Elasticsearch 5.x上测试&lt;/p>
+</content:encoded></item><item><title>SqlServerReader 插件文档</title><link>https://haokiu.com/blog/e30dc23cda1d465fa0872475e5c976a7/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/e30dc23cda1d465fa0872475e5c976a7/</guid><description>SqlServerReader 插件文档 1 快速介绍 SqlServerReader插件实现了从SqlServer读取数据。在底层实现上，SqlServerReader通过JDBC连接远程SqlSe…</description><content:encoded><![CDATA[<h1 id="sqlserverreader-插件文档">SqlServerReader 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>SqlServerReader插件实现了从SqlServer读取数据。在底层实现上，SqlServerReader通过JDBC连接远程SqlServer数据库，并执行相应的sql语句将数据从SqlServer库中SELECT出来。</p>
@@ -17194,7 +17194,7 @@ id为普通列名，[table]为包含保留在的列名，1为整形数字常量�
 <h3 id="55-sql安全性">5.5 Sql安全性</h3>
 <p>SqlServerReader提供querySql语句交给用户自己实现SELECT抽取语句，SqlServerReader本身对querySql不做任何安全性校验。这块交由DataX用户方自己保证。</p>
 <h2 id="6-faq">6 FAQ</h2>
-]]></content:encoded></item><item><title>TableStore增量数据导出通道：TableStoreStreamReader</title><link>https://haokiu.com/blog/6851df08c78c4eb1aab41d312b920bf9/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/6851df08c78c4eb1aab41d312b920bf9/</guid><description>TableStore增量数据导出通道：TableStoreStreamReader 快速介绍 TableStoreStreamReader插件主要用于TableStore的增量数据导出，增量数据可以看…</description><content:encoded><![CDATA[<h2 id="tablestore增量数据导出通道tablestorestreamreader">TableStore增量数据导出通道：TableStoreStreamReader</h2>
+]]></content:encoded></item><item><title>TableStore增量数据导出通道：TableStoreStreamReader</title><link>https://haokiu.com/blog/6851df08c78c4eb1aab41d312b920bf9/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/6851df08c78c4eb1aab41d312b920bf9/</guid><description>TableStore增量数据导出通道：TableStoreStreamReader 快速介绍 TableStoreStreamReader插件主要用于TableStore的增量数据导出，增量数据可以看…</description><content:encoded><![CDATA[<h2 id="tablestore增量数据导出通道tablestorestreamreader">TableStore增量数据导出通道：TableStoreStreamReader</h2>
 <h3 id="快速介绍">快速介绍</h3>
 <p>TableStoreStreamReader插件主要用于TableStore的增量数据导出，增量数据可以看作操作日志，除了数据本身外还附有操作信息。</p>
 <p>与全量导出插件不同，增量导出插件只有多版本模式，同时不支持指定列。这是与增量导出的原理有关的，导出的格式下面有详细介绍。</p>
@@ -17434,7 +17434,7 @@ TableStore通过记录用户最近对表的一系列写操作（或称为数据�
 <p>对于主键为(pk1_V1, pk2_V1)的一行，包含三个操作，分别是写入col_a列的两个版本和col_b列的一个版本。</p>
 <p>对于主键为(pk1_V2, pk2_V2)的一行，包含两个操作，分别是删除col_a列的一个版本、删除col_b列的全部版本。</p>
 <p>对于主键为(pk1_V3, pk2_V3)的一行，包含两个操作，分别是删除整行、写入col_a列的一个版本。</p>
-]]></content:encoded></item><item><title>TSDBReader 插件文档</title><link>https://haokiu.com/blog/66980d1599cc4aec9a2d6616d1f0c5e7/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/66980d1599cc4aec9a2d6616d1f0c5e7/</guid><description>TSDBReader 插件文档 1 快速介绍 TSDBReader 插件实现了从阿里云 TSDB 读取数据。阿里云时间序列数据库 ( Time Series Database , 简称 TSDB) 是…</description><content:encoded><![CDATA[<h1 id="tsdbreader-插件文档">TSDBReader 插件文档</h1>
+]]></content:encoded></item><item><title>TSDBReader 插件文档</title><link>https://haokiu.com/blog/66980d1599cc4aec9a2d6616d1f0c5e7/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/66980d1599cc4aec9a2d6616d1f0c5e7/</guid><description>TSDBReader 插件文档 1 快速介绍 TSDBReader 插件实现了从阿里云 TSDB 读取数据。阿里云时间序列数据库 ( Time Series Database , 简称 TSDB) 是…</description><content:encoded><![CDATA[<h1 id="tsdbreader-插件文档">TSDBReader 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>TSDBReader 插件实现了从阿里云 TSDB 读取数据。阿里云时间序列数据库 ( <strong>T</strong>ime <strong>S</strong>eries <strong>D</strong>ata<strong>b</strong>ase , 简称 TSDB) 是一种集时序数据高效读写，压缩存储，实时计算能力为一体的数据库服务，可广泛应用于物联网和互联网领域，实现对设备及业务服务的实时监控，实时预测告警。详见 TSDB 的阿里云<a href="https://cn.aliyun.com/product/hitsdb">官网</a>。</p>
@@ -18003,7 +18003,7 @@ TableStore通过记录用户最近对表的一系列写操作（或称为数据�
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span> python datax/bin/datax.py tsdb2stream.json -j <span style="color:#e6db74">&#34;-Xms4096m -Xmx4096m&#34;</span>
 </span></span></code></pre></div><h3 id="43-指定起止时间会自动被转为整点时刻">4.3 指定起止时间会自动被转为整点时刻</h3>
 <p>指定起止时间会自动被转为整点时刻，例如 2019-4-18 的 <code>[3:35, 3:55)</code> 会被转为 <code>[3:00, 4:00)</code></p>
-]]></content:encoded></item><item><title>TSDBWriter 插件文档</title><link>https://haokiu.com/blog/2a52431a701d4468a150a7986b3b4752/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/2a52431a701d4468a150a7986b3b4752/</guid><description>TSDBWriter 插件文档 1 快速介绍 TSDBWriter 插件实现了将数据点写入到阿里巴巴自研 TSDB 数据库中（后续简称 TSDB）。 时间序列数据库（Time Series Datab…</description><content:encoded><![CDATA[<h1 id="tsdbwriter-插件文档">TSDBWriter 插件文档</h1>
+]]></content:encoded></item><item><title>TSDBWriter 插件文档</title><link>https://haokiu.com/blog/2a52431a701d4468a150a7986b3b4752/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/2a52431a701d4468a150a7986b3b4752/</guid><description>TSDBWriter 插件文档 1 快速介绍 TSDBWriter 插件实现了将数据点写入到阿里巴巴自研 TSDB 数据库中（后续简称 TSDB）。 时间序列数据库（Time Series Datab…</description><content:encoded><![CDATA[<h1 id="tsdbwriter-插件文档">TSDBWriter 插件文档</h1>
 <hr>
 <h2 id="1-快速介绍">1 快速介绍</h2>
 <p>TSDBWriter 插件实现了将数据点写入到阿里巴巴自研 TSDB 数据库中（后续简称 TSDB）。</p>
@@ -18189,7 +18189,7 @@ TableStore通过记录用户最近对表的一系列写操作（或称为数据�
 <h3 id="51-目前只支持兼容-tsdb-24x-及以上版本">5.1 目前只支持兼容 TSDB 2.4.x 及以上版本</h3>
 <p>其他版本暂不保证兼容</p>
 <h2 id="6-faq">6 FAQ</h2>
-]]></content:encoded></item><item><title>阿里云开源离线同步工具DataX3.0介绍</title><link>https://haokiu.com/blog/408be8b90df543789f79c7b43375e5a3/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0000</pubDate><guid>https://haokiu.com/blog/408be8b90df543789f79c7b43375e5a3/</guid><description>阿里云开源离线同步工具DataX3.0介绍 一. DataX3.0概览 DataX 是一个异构数据源离线同步工具，致力于实现包括关系型数据库(MySQL、Oracle等)、HDFS、Hive、ODP…</description><content:encoded><![CDATA[<h1 id="阿里云开源离线同步工具datax30介绍">阿里云开源离线同步工具DataX3.0介绍</h1>
+]]></content:encoded></item><item><title>阿里云开源离线同步工具DataX3.0介绍</title><link>https://haokiu.com/blog/408be8b90df543789f79c7b43375e5a3/</link><pubDate>Tue, 02 Feb 2021 17:45:01 +0800</pubDate><guid>https://haokiu.com/blog/408be8b90df543789f79c7b43375e5a3/</guid><description>阿里云开源离线同步工具DataX3.0介绍 一. DataX3.0概览 DataX 是一个异构数据源离线同步工具，致力于实现包括关系型数据库(MySQL、Oracle等)、HDFS、Hive、ODP…</description><content:encoded><![CDATA[<h1 id="阿里云开源离线同步工具datax30介绍">阿里云开源离线同步工具DataX3.0介绍</h1>
 <h2 id="一-datax30概览">一. DataX3.0概览</h2>
 <p>​	DataX 是一个异构数据源离线同步工具，致力于实现包括关系型数据库(MySQL、Oracle等)、HDFS、Hive、ODPS、HBase、FTP等各种异构数据源之间稳定高效的数据同步功能。</p>
 <p><img loading="lazy" src="https://cloud.githubusercontent.com/assets/1067175/17879841/93b7fc1c-6927-11e6-8cda-7cf8420fc65f.png" alt="datax_why_new"  />
@@ -18470,12 +18470,12 @@ TableStore通过记录用户最近对表的一系列写操作（或称为数据�
 </ul>
 </li>
 </ul>
-]]></content:encoded></item><item><title>mysql replace</title><link>https://haokiu.com/blog/nfvw4R/</link><pubDate>Mon, 01 Feb 2021 09:48:42 +0000</pubDate><guid>https://haokiu.com/blog/nfvw4R/</guid><description>mysql replace 可以将字段的字符串内容替换，语法： 使用样例：</description><content:encoded><![CDATA[<p>mysql replace 可以将字段的字符串内容替换，语法：</p>
+]]></content:encoded></item><item><title>mysql replace</title><link>https://haokiu.com/blog/nfvw4R/</link><pubDate>Mon, 01 Feb 2021 09:48:42 +0800</pubDate><guid>https://haokiu.com/blog/nfvw4R/</guid><description>mysql replace 可以将字段的字符串内容替换，语法： 使用样例：</description><content:encoded><![CDATA[<p>mysql replace 可以将字段的字符串内容替换，语法：</p>
 <pre tabindex="0"><code>Update `table_name` SET `field_name` = replace (`field_name`,’from_str’,&#39;to_str’) Where `field_name` LIKE ‘%from_str%’
 </code></pre><p>使用样例：</p>
 <pre tabindex="0"><code># 将 blog 表的字段 coentent 里的 &#34;https://haokiu.com&#34; 替换为 &#34;http://haokiu.com&#34;
 update blog set content = replace(content, &#34;https://haokiu.com&#34;, &#34;http://haokiu.com&#34;) where content like &#39;%https://haokiu.com%&#39;
-</code></pre>]]></content:encoded></item><item><title>OLAP</title><link>https://haokiu.com/blog/OLAP/</link><pubDate>Thu, 05 Nov 2020 10:53:39 +0000</pubDate><guid>https://haokiu.com/blog/OLAP/</guid><description>OLAP 在数据仓库一章中我们讨论了数据仓库及其模型的概念，而数据库与数据仓库的区别实际讲的是 OLTP 与 OLAP 的区别。操作型处理，叫联机事务处理 OLTP（On-Line Transacti…</description><content:encoded><![CDATA[<h1 id="olap">OLAP</h1>
+</code></pre>]]></content:encoded></item><item><title>OLAP</title><link>https://haokiu.com/blog/OLAP/</link><pubDate>Thu, 05 Nov 2020 10:53:39 +0800</pubDate><guid>https://haokiu.com/blog/OLAP/</guid><description>OLAP 在数据仓库一章中我们讨论了数据仓库及其模型的概念，而数据库与数据仓库的区别实际讲的是 OLTP 与 OLAP 的区别。操作型处理，叫联机事务处理 OLTP（On-Line Transacti…</description><content:encoded><![CDATA[<h1 id="olap">OLAP</h1>
 <p>在数据仓库一章中我们讨论了数据仓库及其模型的概念，而数据库与数据仓库的区别实际讲的是 OLTP 与 OLAP 的区别。操作型处理，叫联机事务处理 OLTP（On-Line Transaction Processing），也可以称面向交易的处理系统，它是针对具体业务在数据库联机的日常操作，通常对少数记录进行查询、修改。用户较为关心操作的响应时间、数据的安全性、完整性和并发的支持用户数等问题。传统的数据库系统作为数据管理的主要手段，主要用于操作型处理。分析型处理，叫联机分析处理 OLAP（On-Line Analytical Processing）一般针对某些主题历史数据进行分析，支持管理决策。</p>
 <h1 id="olap-与-oltp">OLAP 与 OLTP</h1>
 <p>在互联网浪潮出现之前，企业的数据量普遍不大，特别是核心的业务数据，通常一个单机的数据库就可以保存。那时候的存储并不需要复杂的架构，所有的线上请求(OLTP, Online Transactional Processing) 和后台分析 (OLAP, Online Analytical Processing) 都跑在同一个数据库实例上。后来渐渐的业务越来越复杂，数据量越来越大，DBA 们再也优化不动 SQL 了。其中一个显著问题是：单机数据库支持线上的 TP 请求已经非常吃力，没办法再跑比较重的 AP 分析型任务。跑起来要么 OOM，要么影响线上业务，要么做了主从分离、分库分表之后很难实现业务需求。</p>
@@ -18485,7 +18485,7 @@ update blog set content = replace(content, &#34;https://haokiu.com&#34;, &#34;ht
 <p>首先是复杂性问题。本身 ETL 过程就是一个很繁琐的过程，一个例证是 ETL 做的好，可以成为一个商业模式。因为是两个系统，必然带来更高的学习成本、维护成本和整合成本。如果你使用的是开源的大数据工具搭建的分析平台，那么肯定会遇到各种工具之间的磨合的问题，还有由于各种工具良莠不齐所导致的质量问题。</p>
 <p>其次是实时性问题。通常我们认为越接近实时的数据，它的价值越大。很多业务场景，对实时性有很高的要求，比如风控系统，它需要对数据不停的分析，并且在险情出现之后尽快响应。而通常的 ETL 是一个周期性的操作，比如一天或者一个小时导一次数据，数据实时性是没有办法保证的。最后是一致性问题。一致性在数据库里面是很重要的概念，数据库的事务就是用来保证一致性的。如果把数据分表存储在两个不同的系统内，那么很难保证一致性，即 AP 系统的查询结果没有办法与线上业务正确对应。那么这两个系统的联动效应就会受到限制，比如用户没办法在一个事务里面，同时访问两个系统的数据。</p>
 <p>由于现有的数据平台存在的以上局限性，我们认为开发一个HTAP（Hybrid Transactional/Analytical Processing）融合型数据库产品可以缓解大家在 TP or AP 抉择上的焦虑，或者说，让数据库的使用者不用考虑过度复杂的架构，在一套数据库中既能满足 OLTP 类需求，也能满足 OLAP 类需求。</p>
-]]></content:encoded></item><item><title>数据中台</title><link>https://haokiu.com/blog/3OKmkr/</link><pubDate>Thu, 05 Nov 2020 10:50:55 +0000</pubDate><guid>https://haokiu.com/blog/3OKmkr/</guid><description>数据中台 阿里在 2018 年提出了所谓“数据中台”的概念：即数据被统一采集，规范数据语义和业务口径形成企业基础数据模型，提供统一的分析查询和新业务的数据对接能力。数据中台并不是新的颠覆式技术，而是一…</description><content:encoded><![CDATA[<h1 id="数据中台">数据中台</h1>
+]]></content:encoded></item><item><title>数据中台</title><link>https://haokiu.com/blog/3OKmkr/</link><pubDate>Thu, 05 Nov 2020 10:50:55 +0800</pubDate><guid>https://haokiu.com/blog/3OKmkr/</guid><description>数据中台 阿里在 2018 年提出了所谓“数据中台”的概念：即数据被统一采集，规范数据语义和业务口径形成企业基础数据模型，提供统一的分析查询和新业务的数据对接能力。数据中台并不是新的颠覆式技术，而是一…</description><content:encoded><![CDATA[<h1 id="数据中台">数据中台</h1>
 <p>阿里在 2018 年提出了所谓“数据中台”的概念：即数据被统一采集，规范数据语义和业务口径形成企业基础数据模型，提供统一的分析查询和新业务的数据对接能力。数据中台并不是新的颠覆式技术，而是一种企业数据资产管理和应用方法学，涵盖了数据集成、数据质量管理、元数据与主数据管理、数仓建模、支持高并发访问的数据服务接口层开发等内容。</p>
 <p>在数据中台建设中，结合企业自身的业务需求特点，架构和功能可能各不相同，但其中一个最基本的需求是数据采集的实时性和完整性。数据从源端产生，到被采集到数据汇集层的时间要尽可能短，至少应做到秒级延迟，这样中台的数据模型更新才可能做到近实时，构建在中台之上依赖实时数据流驱动的应用（例如商品推荐、欺诈检测等）才能够满足业务的需求。</p>
 <p>以阿里双十一为例，在极高的并发情况下，订单产生到大屏统计数据更新延迟不能超过 5s，一般在 2s 内。中台对外提供的数据应该是完整的，源端数据的 Create、Update 和 Delete 都要能够被捕获，不能少也不能多，即数据需要有端到端一致性的能力（Exactly Once Semantic，EOS）。当然，EOS 并非在任何业务场景下都需要，但从平台角度必须具备这种能力，并且允许用户根据业务需求灵活开启和关闭。</p>
@@ -18500,12 +18500,12 @@ update blog set content = replace(content, &#34;https://haokiu.com&#34;, &#34;ht
 <p>中台如果没有考虑通用的业务能力，也会导致无法更专注于对中台技术的深入研究。中台如果不从抽象度、共性等角度出发，很有可能局限于某单一业务，导致中台无法很好地适应其他相关业务的要求，从而不能很好地应对业务的变化。如果中台的抽象程度低、扩展性差，则会导致中台无法满足前台业务需求。这时前台应用又因为业务本身的发展目标和压力不得不自行组织团队完成这部分功能，由此可能发生本应由中台提供的能力却最终实现在业务应用中，失去了中台存在的价值。</p>
 <p><img loading="lazy" src="https://s2.ax1x.com/2019/10/20/Ku7Faj.jpg" alt="中台架构图"  />
 </p>
-]]></content:encoded></item><item><title>presto 官网</title><link>https://haokiu.com/blog/FhpG3z/</link><pubDate>Mon, 28 Sep 2020 14:50:12 +0000</pubDate><guid>https://haokiu.com/blog/FhpG3z/</guid><description>现在 presto 有两个官网： 旧presto官网 新presto官网</description><content:encoded><![CDATA[<p>现在 presto 有两个官网：</p>
+]]></content:encoded></item><item><title>presto 官网</title><link>https://haokiu.com/blog/FhpG3z/</link><pubDate>Mon, 28 Sep 2020 14:50:12 +0800</pubDate><guid>https://haokiu.com/blog/FhpG3z/</guid><description>现在 presto 有两个官网： 旧presto官网 新presto官网</description><content:encoded><![CDATA[<p>现在 presto 有两个官网：</p>
 <ul>
 <li><a href="https://prestodb.io/">旧presto官网</a></li>
 <li><a href="https://trino.io/">新presto官网</a></li>
 </ul>
-]]></content:encoded></item><item><title>presto 支持的数据源</title><link>https://haokiu.com/blog/7mlwkW/</link><pubDate>Mon, 28 Sep 2020 14:40:32 +0000</pubDate><guid>https://haokiu.com/blog/7mlwkW/</guid><description>presto 有很多连接器以支持不同的数据源： Accumulo BigQuery Black Hole Cassandra Druid Elasticsearch Google Sheets Ice…</description><content:encoded><![CDATA[<p>presto 有很多连接器以支持不同的数据源：</p>
+]]></content:encoded></item><item><title>presto 支持的数据源</title><link>https://haokiu.com/blog/7mlwkW/</link><pubDate>Mon, 28 Sep 2020 14:40:32 +0800</pubDate><guid>https://haokiu.com/blog/7mlwkW/</guid><description>presto 有很多连接器以支持不同的数据源： Accumulo BigQuery Black Hole Cassandra Druid Elasticsearch Google Sheets Ice…</description><content:encoded><![CDATA[<p>presto 有很多连接器以支持不同的数据源：</p>
 <ul>
 <li><a href="https://prestosql.io/docs/current/connector/accumulo.html">Accumulo</a></li>
 <li><a href="https://prestosql.io/docs/current/connector/bigquery.html">BigQuery</a></li>
@@ -18538,7 +18538,7 @@ update blog set content = replace(content, &#34;https://haokiu.com&#34;, &#34;ht
 <li><a href="https://prestosql.io/docs/current/connector/tpcds.html">TPCDS</a></li>
 <li><a href="https://prestosql.io/docs/current/connector/tpch.html">TPCH</a></li>
 </ul>
-]]></content:encoded></item><item><title>sql 优化</title><link>https://haokiu.com/blog/XEhpYv/</link><pubDate>Wed, 23 Sep 2020 16:59:17 +0000</pubDate><guid>https://haokiu.com/blog/XEhpYv/</guid><description>SQL 优化已经成为衡量程序猿优秀与否的硬性指标，甚至在各大厂招聘岗位职能上都有明码标注。 有朋友疑问到，SQL 优化真的有这么重要么？如下图所示，SQL 优化在提升系统性能中是：成本最低和优化效果最…</description><content:encoded><![CDATA[<p>SQL 优化已经成为衡量程序猿优秀与否的硬性指标，甚至在各大厂招聘岗位职能上都有明码标注。</p>
+]]></content:encoded></item><item><title>sql 优化</title><link>https://haokiu.com/blog/XEhpYv/</link><pubDate>Wed, 23 Sep 2020 16:59:17 +0800</pubDate><guid>https://haokiu.com/blog/XEhpYv/</guid><description>SQL 优化已经成为衡量程序猿优秀与否的硬性指标，甚至在各大厂招聘岗位职能上都有明码标注。 有朋友疑问到，SQL 优化真的有这么重要么？如下图所示，SQL 优化在提升系统性能中是：成本最低和优化效果最…</description><content:encoded><![CDATA[<p>SQL 优化已经成为衡量程序猿优秀与否的硬性指标，甚至在各大厂招聘岗位职能上都有明码标注。</p>
 <p>有朋友疑问到，SQL 优化真的有这么重要么？如下图所示，SQL 优化在提升系统性能中是：成本最低和优化效果最明显的途径。</p>
 <p>**优化成本：**硬件&gt;系统配置&gt;数据库表结构&gt;SQL 及索引。</p>
 <p>**优化效果：**硬件&lt;系统配置&lt;数据库表结构&lt;SQL 及索引。</p>
@@ -18858,7 +18858,7 @@ Select @now;
 </span></span></code></pre></div><p><strong>④</strong>用 varchar/nvarchar 代替 char/nchar。</p>
 <p>尽可能的使用 varchar/nvarchar 代替 char/nchar ，因为首先变长字段存储空间小，可以节省存储空间，其次对于查询来说，在一个相对较小的字段内搜索效率显然要高些。</p>
 <p>不要以为 NULL 不需要空间，比如：char(100) 型，在字段建立时，空间就固定了， 不管是否插入值（NULL 也包含在内），都是占用 100 个字符的空间的，如果是 varchar 这样的变长字段， null 不占用空间</p>
-]]></content:encoded></item><item><title>elasticsearch</title><link>https://haokiu.com/blog/3XTrh1/</link><pubDate>Wed, 23 Sep 2020 16:53:39 +0000</pubDate><guid>https://haokiu.com/blog/3XTrh1/</guid><description>基本概念 Node 与 Cluster Elastic 本质上是一个分布式数据库，允许多台服务器协同工作，每台服务器可以运行多个 Elastic 实例。 单个 Elastic 实例称为一个节点（nod…</description><content:encoded><![CDATA[<h2 id="基本概念">基本概念</h2>
+]]></content:encoded></item><item><title>elasticsearch</title><link>https://haokiu.com/blog/3XTrh1/</link><pubDate>Wed, 23 Sep 2020 16:53:39 +0800</pubDate><guid>https://haokiu.com/blog/3XTrh1/</guid><description>基本概念 Node 与 Cluster Elastic 本质上是一个分布式数据库，允许多台服务器协同工作，每台服务器可以运行多个 Elastic 实例。 单个 Elastic 实例称为一个节点（nod…</description><content:encoded><![CDATA[<h2 id="基本概念">基本概念</h2>
 <h3 id="node-与-cluster">Node 与 Cluster</h3>
 <p>Elastic 本质上是一个分布式数据库，允许多台服务器协同工作，每台服务器可以运行多个 Elastic 实例。</p>
 <p>单个 Elastic 实例称为一个节点（node）。一组节点构成一个集群（cluster）。</p>

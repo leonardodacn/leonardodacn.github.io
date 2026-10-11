@@ -3,6 +3,8 @@
 > haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他
 ## 后端
 
+- [jev-trader 简介](https://haokiu.com/blog/jev-trader/index.md): **jev-trader** 是由 Monad 基金会首席 AI 工程师 Jarrod Watts 开源的 AI 做市 / 高频交易机器人，基于 TypeSafe AI 推出的**Jev（TypeSafe System One）快速决策模型**开发，是 Jev 模型出圈的首个标杆 Demo 项目
+
 - [java 到底要不要收费](https://haokiu.com/blog/AWAwA5/index.md): 随着JDK 11发布, Oracle同时调整了JDK的授权许可证,里面包含了好几个动作。 首先, Oracle从JDK 11起把以前的商业特性全部开源给OpenJDK,这样OpenJDK 11和Ora…
 
 - [Neovide](https://haokiu.com/blog/neovide/index.md): neovide 是一个简单的 neovim 用户图像工具，相对于 Neovim 会有一些界面的提升的，但它的功能类似于终端用户界面。 neovide 的官网：https://github.com/Ke…

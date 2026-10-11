@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Beego on haokiu</title><link>https://haokiu.com/tags/beego/</link><description>Recent content in Beego on haokiu</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>haokiu.com</copyright><lastBuildDate>Fri, 22 Jan 2021 14:52:21 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/beego/index.xml" rel="self" type="application/rss+xml"/><item><title>beego restful path variable</title><link>https://haokiu.com/blog/RNbgLz/</link><pubDate>Fri, 22 Jan 2021 14:52:21 +0000</pubDate><guid>https://haokiu.com/blog/RNbgLz/</guid><description>beego的url路径有多个变量的设置和获取方法。 在 router.go 注册 url 获取变量</description><content:encoded><![CDATA[<p>beego的url路径有多个变量的设置和获取方法。</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Beego on haokiu</title><link>https://haokiu.com/tags/beego/</link><description>Recent content in Beego on haokiu</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>haokiu.com</copyright><lastBuildDate>Fri, 22 Jan 2021 14:52:21 +0800</lastBuildDate><atom:link href="https://haokiu.com/tags/beego/index.xml" rel="self" type="application/rss+xml"/><item><title>beego restful path variable</title><link>https://haokiu.com/blog/RNbgLz/</link><pubDate>Fri, 22 Jan 2021 14:52:21 +0800</pubDate><guid>https://haokiu.com/blog/RNbgLz/</guid><description>beego的url路径有多个变量的设置和获取方法。 在 router.go 注册 url 获取变量</description><content:encoded><![CDATA[<p>beego的url路径有多个变量的设置和获取方法。</p>
 <h2 id="在-routergo-注册-url">在 router.go 注册 url</h2>
 <pre tabindex="0"><code>beego.Router(&#34;/type/:type/?:page&#34;, &amp;controllers.WebController{}, &#34;get:Type&#34;)
 </code></pre><h2 id="获取变量">获取变量</h2>
@@ -11,7 +11,7 @@ func (c *Controller) GetInt(key string, def ...int) (int, error) {
 	}
 	return strconv.Atoi(strv)
 }
-</code></pre>]]></content:encoded></item><item><title>curl https 地址报异常</title><link>https://haokiu.com/blog/KsbUyb/</link><pubDate>Fri, 23 Oct 2020 15:03:17 +0000</pubDate><guid>https://haokiu.com/blog/KsbUyb/</guid><description>用 acme.sh 生产了 Let&amp;#39;s Encrypt 的https 证书，在浏览器访问没有问题，但在服务器访问出现下面的异常： 网站用了beego，用 acme.sh 生成的证书。配置： 要将 ce…</description><content:encoded><![CDATA[<p>用 acme.sh 生产了 Let&rsquo;s Encrypt 的https 证书，在浏览器访问没有问题，但在服务器访问出现下面的异常：</p>
+</code></pre>]]></content:encoded></item><item><title>curl https 地址报异常</title><link>https://haokiu.com/blog/KsbUyb/</link><pubDate>Fri, 23 Oct 2020 15:03:17 +0800</pubDate><guid>https://haokiu.com/blog/KsbUyb/</guid><description>用 acme.sh 生产了 Let&amp;#39;s Encrypt 的https 证书，在浏览器访问没有问题，但在服务器访问出现下面的异常： 网站用了beego，用 acme.sh 生成的证书。配置： 要将 ce…</description><content:encoded><![CDATA[<p>用 acme.sh 生产了 Let&rsquo;s Encrypt 的https 证书，在浏览器访问没有问题，但在服务器访问出现下面的异常：</p>
 <pre tabindex="0"><code>curl: (60) SSL certificate problem: unable to get local issuer certificate
 More details here: https://curl.haxx.se/docs/sslcerts.html
 
@@ -28,13 +28,13 @@ HTTPSKeyFile = &#34;/home/blog/cert/key.pem&#34;
 HTTPSPort = 443
 HTTPSCertFile = &#34;/home/blog/cert/fullchain.pem&#34;
 HTTPSKeyFile = &#34;/home/blog/cert/key.pem&#34;
-</code></pre>]]></content:encoded></item><item><title>beego 让http请求跳转到 https</title><link>https://haokiu.com/blog/ZSf4yF/</link><pubDate>Tue, 13 Oct 2020 16:33:55 +0000</pubDate><guid>https://haokiu.com/blog/ZSf4yF/</guid><description>如果beego配置了https，那么可以让 让http请求跳转到 https，怎样配置 beego 的https，可以参考beego 通过acms.sh 使用 https</description><content:encoded><![CDATA[<p>如果beego配置了https，那么可以让 让http请求跳转到 https，怎样配置 beego 的https，可以参考<a href="https://haokiu.com/blog/qP3u4V">beego 通过acms.sh 使用 https</a></p>
+</code></pre>]]></content:encoded></item><item><title>beego 让http请求跳转到 https</title><link>https://haokiu.com/blog/ZSf4yF/</link><pubDate>Tue, 13 Oct 2020 16:33:55 +0800</pubDate><guid>https://haokiu.com/blog/ZSf4yF/</guid><description>如果beego配置了https，那么可以让 让http请求跳转到 https，怎样配置 beego 的https，可以参考beego 通过acms.sh 使用 https</description><content:encoded><![CDATA[<p>如果beego配置了https，那么可以让 让http请求跳转到 https，怎样配置 beego 的https，可以参考<a href="https://haokiu.com/blog/qP3u4V">beego 通过acms.sh 使用 https</a></p>
 <pre tabindex="0"><code>//siteUrl 是网站地址，比如:https://haokiu.com
 if &#34;HTTP/1.1&#34; == self.Ctx.Request.Proto &amp;&amp; siteUrl != &#34;&#34; &amp;&amp; strings.HasPrefix(siteUrl, &#34;https&#34;) {
 		//如果支持https，则所有http请求跳转到https
 		self.redirect(siteUrl + self.Ctx.Request.URL.Path)
 }
-</code></pre>]]></content:encoded></item><item><title>beego bee 工具使用简介</title><link>https://haokiu.com/blog/xVaucl/</link><pubDate>Wed, 16 Sep 2020 16:06:47 +0000</pubDate><guid>https://haokiu.com/blog/xVaucl/</guid><description>bee 工具是一个为了协助快速开发 beego 项目而创建的项目，通过 bee 您可以很容易的进行 beego 项目的创建、热编译、开发、测试、和部署。 bee 工具的安装 您可以通过如下的方式安装…</description><content:encoded><![CDATA[<p>bee 工具是一个为了协助快速开发 beego 项目而创建的项目，通过 bee 您可以很容易的进行 beego 项目的创建、热编译、开发、测试、和部署。</p>
+</code></pre>]]></content:encoded></item><item><title>beego bee 工具使用简介</title><link>https://haokiu.com/blog/xVaucl/</link><pubDate>Wed, 16 Sep 2020 16:06:47 +0800</pubDate><guid>https://haokiu.com/blog/xVaucl/</guid><description>bee 工具是一个为了协助快速开发 beego 项目而创建的项目，通过 bee 您可以很容易的进行 beego 项目的创建、热编译、开发、测试、和部署。 bee 工具的安装 您可以通过如下的方式安装…</description><content:encoded><![CDATA[<p>bee 工具是一个为了协助快速开发 beego 项目而创建的项目，通过 bee 您可以很容易的进行 beego 项目的创建、热编译、开发、测试、和部署。</p>
 <h2 id="bee-工具的安装">bee 工具的安装</h2>
 <p>您可以通过如下的方式安装 bee 工具：</p>
 <pre tabindex="0"><code>go get github.com/beego/bee
@@ -280,7 +280,7 @@ ______
 <li><code>&quot;cmd_args&quot;: []</code>：如果您需要在每次启动时加入启动参数，则可以使用该选项。</li>
 <li><code>&quot;envs&quot;: []</code>：如果您需要在每次启动时设置临时环境变量参数，则可以使用该选项。</li>
 </ul>
-]]></content:encoded></item><item><title>beego 日志配置</title><link>https://haokiu.com/blog/gq7FUH/</link><pubDate>Wed, 16 Sep 2020 16:03:29 +0000</pubDate><guid>https://haokiu.com/blog/gq7FUH/</guid><description>beego logs 的设计思路来自于 ，目前支持的引擎有 file、console、net、smtp，可以通过如下方式进行安装： 如何使用 通用方式 首先引入包： 然后添加输出引擎（log 支持同时…</description><content:encoded><![CDATA[<p>beego logs 的设计思路来自于 <code>database/sql</code>，目前支持的引擎有 file、console、net、smtp，可以通过如下方式进行安装：</p>
+]]></content:encoded></item><item><title>beego 日志配置</title><link>https://haokiu.com/blog/gq7FUH/</link><pubDate>Wed, 16 Sep 2020 16:03:29 +0800</pubDate><guid>https://haokiu.com/blog/gq7FUH/</guid><description>beego logs 的设计思路来自于 ，目前支持的引擎有 file、console、net、smtp，可以通过如下方式进行安装： 如何使用 通用方式 首先引入包： 然后添加输出引擎（log 支持同时…</description><content:encoded><![CDATA[<p>beego logs 的设计思路来自于 <code>database/sql</code>，目前支持的引擎有 file、console、net、smtp，可以通过如下方式进行安装：</p>
 <pre tabindex="0"><code>go get github.com/astaxie/beego/logs
 </code></pre><h2 id="如何使用">如何使用</h2>
 <h3 id="通用方式">通用方式</h3>
@@ -426,7 +426,7 @@ logs.SetLogger(logs.AdapterConsole, `{&#34;level&#34;:1,&#34;color&#34;:true}`)
 <pre tabindex="0"><code>logs.SetLogger(logs.AdapterSlack, `{&#34;webhookurl&#34;:&#34;https://slack.com/xxx&#34;,&#34;level&#34;:1}`)
 </code></pre></li>
 </ul>
-]]></content:encoded></item><item><title>beego 日志处理</title><link>https://haokiu.com/blog/YAotkP/</link><pubDate>Wed, 16 Sep 2020 10:17:20 +0000</pubDate><guid>https://haokiu.com/blog/YAotkP/</guid><description>beego 的日志处理是基于 logs 模块搭建的，内置了一个变量 ，默认已经是 类型，初始化了 console，也就是默认输出到 。 使用入门 一般在程序中我们使用如下的方式进行输出： 设置输出 我…</description><content:encoded><![CDATA[<p>beego 的日志处理是基于 logs 模块搭建的，内置了一个变量 <code>BeeLogger</code>，默认已经是 <code>logs.BeeLogger</code> 类型，初始化了 console，也就是默认输出到 <code>console</code>。</p>
+]]></content:encoded></item><item><title>beego 日志处理</title><link>https://haokiu.com/blog/YAotkP/</link><pubDate>Wed, 16 Sep 2020 10:17:20 +0800</pubDate><guid>https://haokiu.com/blog/YAotkP/</guid><description>beego 的日志处理是基于 logs 模块搭建的，内置了一个变量 ，默认已经是 类型，初始化了 console，也就是默认输出到 。 使用入门 一般在程序中我们使用如下的方式进行输出： 设置输出 我…</description><content:encoded><![CDATA[<p>beego 的日志处理是基于 logs 模块搭建的，内置了一个变量 <code>BeeLogger</code>，默认已经是 <code>logs.BeeLogger</code> 类型，初始化了 console，也就是默认输出到 <code>console</code>。</p>
 <h2 id="使用入门">使用入门</h2>
 <p>一般在程序中我们使用如下的方式进行输出：</p>
 <pre tabindex="0"><code>beego.Emergency(&#34;this is emergency&#34;)

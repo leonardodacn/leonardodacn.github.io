@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>5 on haokiu</title><link>https://haokiu.com/5/</link><description>Recent content in 5 on haokiu</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>haokiu.com</copyright><lastBuildDate>Tue, 02 Feb 2021 20:57:44 +0000</lastBuildDate><atom:link href="https://haokiu.com/5/index.xml" rel="self" type="application/rss+xml"/><item><title>linux 复制文件，并创建不存在的目录</title><link>https://haokiu.com/blog/a0lZoj/</link><pubDate>Tue, 02 Feb 2021 20:57:44 +0000</pubDate><guid>https://haokiu.com/blog/a0lZoj/</guid><description>linux复制文件和目录用cp命令， 参数可以确保不存在目录的创建，比如文件 ，如果目录 doc不存在目录：java/doc则会创建。 高级操作：</description><content:encoded><![CDATA[<p>linux复制文件和目录用cp命令，<code>--parents</code> 参数可以确保不存在目录的创建，比如文件 <code>cp --parents java/doc/readme.md ../doc</code> ，如果目录 doc不存在目录：java/doc则会创建。</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>5 on haokiu</title><link>https://haokiu.com/5/</link><description>Recent content in 5 on haokiu</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>haokiu.com</copyright><lastBuildDate>Tue, 02 Feb 2021 20:57:44 +0800</lastBuildDate><atom:link href="https://haokiu.com/5/index.xml" rel="self" type="application/rss+xml"/><item><title>linux 复制文件，并创建不存在的目录</title><link>https://haokiu.com/blog/a0lZoj/</link><pubDate>Tue, 02 Feb 2021 20:57:44 +0800</pubDate><guid>https://haokiu.com/blog/a0lZoj/</guid><description>linux复制文件和目录用cp命令， 参数可以确保不存在目录的创建，比如文件 ，如果目录 doc不存在目录：java/doc则会创建。 高级操作：</description><content:encoded><![CDATA[<p>linux复制文件和目录用cp命令，<code>--parents</code> 参数可以确保不存在目录的创建，比如文件 <code>cp --parents java/doc/readme.md ../doc</code> ，如果目录 doc不存在目录：java/doc则会创建。</p>
 <p>高级操作：</p>
 <pre tabindex="0"><code>#查找当前目录下所有.md文件，并将它们复制到DataxDoc目录，如果目录不存在则双肩
 find . -name &#34;*.md&#34; | xargs -I {} cp --parents {} ../DataxDoc
-</code></pre>]]></content:encoded></item><item><title>Vim 从入门到精通</title><link>https://haokiu.com/blog/fhRygg/</link><pubDate>Thu, 14 Jan 2021 15:20:19 +0000</pubDate><guid>https://haokiu.com/blog/fhRygg/</guid><description>什么是 Vim？ Vim 是一个历史悠久的文本编辑器，可以追溯到 qed&amp;gt;)。 Bram Moolenaar 于 1991 年发布初始版本。 Linux、Mac 用户，可以使用包管理器安装 Vim，对…</description><content:encoded><![CDATA[<h2 id="什么是-vim">什么是 Vim？</h2>
+</code></pre>]]></content:encoded></item><item><title>Vim 从入门到精通</title><link>https://haokiu.com/blog/fhRygg/</link><pubDate>Thu, 14 Jan 2021 15:20:19 +0800</pubDate><guid>https://haokiu.com/blog/fhRygg/</guid><description>什么是 Vim？ Vim 是一个历史悠久的文本编辑器，可以追溯到 qed&amp;gt;)。 Bram Moolenaar 于 1991 年发布初始版本。 Linux、Mac 用户，可以使用包管理器安装 Vim，对…</description><content:encoded><![CDATA[<h2 id="什么是-vim">什么是 Vim？</h2>
 <p><a href="https://github.com/vim/vim">Vim</a> 是一个历史悠久的文本编辑器，可以追溯到
 <a href="https://en.wikipedia.org/wiki/QED_(text_editor)">qed</a>。
 <a href="https://en.wikipedia.org/wiki/Bram_Moolenaar">Bram Moolenaar</a> 于
@@ -1677,7 +1677,7 @@ Vim 并不知道你刚刚是粘贴的文本，它以为你在飞速的输入。
 <li><a href="https://jdhao.github.io/2019/03/28/nifty_nvim_techniques_s1/">Nifty Little Nvim Techniques to Make My Life Easier &ndash; Series 1</a></li>
 </ul>
 <p>整理自：https://github.com/wsdjeg/vim-galore-zh_cn</p>
-]]></content:encoded></item><item><title>docker apt-get</title><link>https://haokiu.com/blog/d5nhvK/</link><pubDate>Tue, 24 Nov 2020 13:56:48 +0000</pubDate><guid>https://haokiu.com/blog/d5nhvK/</guid><description>为了节省空间，docker 容器里面有很多命令是没有安装的，提示： Reading package lists... Done Building dependency tree Reading sta…</description><content:encoded><![CDATA[<p>为了节省空间，docker 容器里面有很多命令是没有安装的，提示：
+]]></content:encoded></item><item><title>docker apt-get</title><link>https://haokiu.com/blog/d5nhvK/</link><pubDate>Tue, 24 Nov 2020 13:56:48 +0800</pubDate><guid>https://haokiu.com/blog/d5nhvK/</guid><description>为了节省空间，docker 容器里面有很多命令是没有安装的，提示： Reading package lists... Done Building dependency tree Reading sta…</description><content:encoded><![CDATA[<p>为了节省空间，docker 容器里面有很多命令是没有安装的，提示：
 Reading package lists&hellip; Done
 Building dependency tree
 Reading state information&hellip; Done
@@ -1691,13 +1691,13 @@ E: Unable to locate package vim</p>
 <p><code>apt-get install  telnet</code></p>
 <h3 id="安装ifconfig">安装ifconfig</h3>
 <p><code>apt-get install net-tools</code></p>
-]]></content:encoded></item><item><title>git 查看远程地址</title><link>https://haokiu.com/blog/ss9sfI/</link><pubDate>Mon, 09 Nov 2020 09:25:45 +0000</pubDate><guid>https://haokiu.com/blog/ss9sfI/</guid><description>有时需要查看本地开发的git项目的远程仓库地址 可以方便的查看远程仓库的地址 -v : verbose，冗余的意思</description><content:encoded><![CDATA[<p>有时需要查看本地开发的git项目的远程仓库地址</p>
+]]></content:encoded></item><item><title>git 查看远程地址</title><link>https://haokiu.com/blog/ss9sfI/</link><pubDate>Mon, 09 Nov 2020 09:25:45 +0800</pubDate><guid>https://haokiu.com/blog/ss9sfI/</guid><description>有时需要查看本地开发的git项目的远程仓库地址 可以方便的查看远程仓库的地址 -v : verbose，冗余的意思</description><content:encoded><![CDATA[<p>有时需要查看本地开发的git项目的远程仓库地址</p>
 <p><code>git remote -v</code> 可以方便的查看远程仓库的地址</p>
 <pre tabindex="0"><code>git remote -v                                                                                        
 origin  https://gitee.com/leonardodacn/pixiublog.git (fetch)
 origin  https://gitee.com/leonardodacn/pixiublog.git (push)
 </code></pre><p>-v : verbose，冗余的意思</p>
-]]></content:encoded></item><item><title>简单脚本实现服务监控</title><link>https://haokiu.com/blog/5XKHkb/</link><pubDate>Fri, 16 Oct 2020 17:10:58 +0000</pubDate><guid>https://haokiu.com/blog/5XKHkb/</guid><description>服务经常会重启失败，写了个简单的shell叫脚本，可以发现服务端口是否起来，没有发现监听端口会重启服务 1.监控脚本 2.系统定时任务</description><content:encoded><![CDATA[<p>服务经常会重启失败，写了个简单的shell叫脚本，可以发现服务端口是否起来，没有发现监听端口会重启服务</p>
+]]></content:encoded></item><item><title>简单脚本实现服务监控</title><link>https://haokiu.com/blog/5XKHkb/</link><pubDate>Fri, 16 Oct 2020 17:10:58 +0800</pubDate><guid>https://haokiu.com/blog/5XKHkb/</guid><description>服务经常会重启失败，写了个简单的shell叫脚本，可以发现服务端口是否起来，没有发现监听端口会重启服务 1.监控脚本 2.系统定时任务</description><content:encoded><![CDATA[<p>服务经常会重启失败，写了个简单的shell叫脚本，可以发现服务端口是否起来，没有发现监听端口会重启服务</p>
 <h3 id="1监控脚本">1.监控脚本</h3>
 <pre tabindex="0"><code>if [ -z &#34;`lsof -i:443 | grep LISTEN`&#34; ];then
     echo -e &#34;restart $(date +&#39;%Y-%m-%d %H:%M:%S&#39;)&#34;
@@ -1705,7 +1705,7 @@ origin  https://gitee.com/leonardodacn/pixiublog.git (push)
 fi
 </code></pre><h3 id="2系统定时任务">2.系统定时任务</h3>
 <pre tabindex="0"><code>*/3 * * * * /usr/local/pixiublog/monitor.sh &gt;&gt; /usr/local/pixiublog/monitor.log 2&gt;&amp;1
-</code></pre>]]></content:encoded></item><item><title>haokiu网站启动脚本</title><link>https://haokiu.com/blog/v3yn45/</link><pubDate>Thu, 15 Oct 2020 17:08:15 +0000</pubDate><guid>https://haokiu.com/blog/v3yn45/</guid><description>haokiu 的启动脚本，配置 https 可以参考beego 通过acms.sh 使用 https</description><content:encoded><![CDATA[<p><a href="https://haokiu.com">haokiu</a> 的启动脚本，配置 https 可以参考<a href="https://haokiu.com/blog/qP3u4V">beego 通过acms.sh 使用 https</a></p>
+</code></pre>]]></content:encoded></item><item><title>haokiu网站启动脚本</title><link>https://haokiu.com/blog/v3yn45/</link><pubDate>Thu, 15 Oct 2020 17:08:15 +0800</pubDate><guid>https://haokiu.com/blog/v3yn45/</guid><description>haokiu 的启动脚本，配置 https 可以参考beego 通过acms.sh 使用 https</description><content:encoded><![CDATA[<p><a href="https://haokiu.com">haokiu</a> 的启动脚本，配置 https 可以参考<a href="https://haokiu.com/blog/qP3u4V">beego 通过acms.sh 使用 https</a></p>
 <pre tabindex="0"><code>#!/bin/sh
 siteDir=&#39;/usr/local/pixiublog&#39;
 
@@ -1723,7 +1723,7 @@ echo &#34;start program&#34;
 cd $siteDir
 
 nohup $siteDir/$appName &gt;&gt; $siteDir/console.log 2&gt;&amp;1 &amp;
-</code></pre>]]></content:encoded></item><item><title>网站部署脚本</title><link>https://haokiu.com/blog/1gTd1h/</link><pubDate>Thu, 17 Sep 2020 21:52:12 +0000</pubDate><guid>https://haokiu.com/blog/1gTd1h/</guid><description>网站的部署脚本</description><content:encoded><![CDATA[<p>网站的部署脚本</p>
+</code></pre>]]></content:encoded></item><item><title>网站部署脚本</title><link>https://haokiu.com/blog/1gTd1h/</link><pubDate>Thu, 17 Sep 2020 21:52:12 +0800</pubDate><guid>https://haokiu.com/blog/1gTd1h/</guid><description>网站的部署脚本</description><content:encoded><![CDATA[<p>网站的部署脚本</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/sh
 </span></span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e">#部署目录</span>

@@ -1,146 +1,158 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
-  <channel>
-    <title>Spring on haokiu</title>
-    <link>https://haokiu.com/tags/spring/</link>
-    <description>Recent content in Spring on haokiu</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>zh-cn</language>
-    <copyright>haokiu.com</copyright>
-    <lastBuildDate>Sun, 27 Sep 2020 10:59:03 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/spring/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>mybatis 增加自定义拦截器</title>
-      <link>https://haokiu.com/blog/bGqNiH/</link>
-      <pubDate>Sun, 27 Sep 2020 10:59:03 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/bGqNiH/</guid>
-      <description>&lt;p&gt;MyBatis 提供的强大机制，使用插件是非常简单的，只需实现 Interceptor 接口，并指定想要拦截的方法签名即可。&lt;/p&gt;
-&lt;h2 id=&#34;拦截器&#34;&gt;拦截器&lt;/h2&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; java.text.DateFormat;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; java.util.Date;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; java.util.List;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; java.util.Locale;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; java.util.Properties;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; org.apache.ibatis.executor.Executor;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; org.apache.ibatis.mapping.BoundSql;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; org.apache.ibatis.mapping.MappedStatement;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; org.apache.ibatis.mapping.ParameterMapping;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; org.apache.ibatis.plugin.Interceptor;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; org.apache.ibatis.plugin.Intercepts;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; org.apache.ibatis.plugin.Invocation;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; org.apache.ibatis.plugin.Plugin;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; org.apache.ibatis.plugin.Signature;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; org.apache.ibatis.reflection.MetaObject;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; org.apache.ibatis.session.Configuration;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; org.apache.ibatis.session.ResultHandler;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; org.apache.ibatis.session.RowBounds;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; org.apache.ibatis.type.TypeHandlerRegistry;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; org.slf4j.Logger;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; org.slf4j.LoggerFactory;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;@Intercepts&lt;/span&gt;({  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;@Signature&lt;/span&gt;(type &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Executor.&lt;span style=&#34;color:#a6e22e&#34;&gt;class&lt;/span&gt;, method &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;update&amp;#34;&lt;/span&gt;, args &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; { MappedStatement.&lt;span style=&#34;color:#a6e22e&#34;&gt;class&lt;/span&gt;, Object.&lt;span style=&#34;color:#a6e22e&#34;&gt;class&lt;/span&gt; }),  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;@Signature&lt;/span&gt;(type &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Executor.&lt;span style=&#34;color:#a6e22e&#34;&gt;class&lt;/span&gt;, method &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;query&amp;#34;&lt;/span&gt;,  args &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; { MappedStatement.&lt;span style=&#34;color:#a6e22e&#34;&gt;class&lt;/span&gt;, Object.&lt;span style=&#34;color:#a6e22e&#34;&gt;class&lt;/span&gt;, RowBounds.&lt;span style=&#34;color:#a6e22e&#34;&gt;class&lt;/span&gt;, ResultHandler.&lt;span style=&#34;color:#a6e22e&#34;&gt;class&lt;/span&gt; }) 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;})  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;MybatisInterceptor&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;implements&lt;/span&gt; Interceptor {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#66d9ef&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;final&lt;/span&gt; Logger log &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; LoggerFactory.&lt;span style=&#34;color:#a6e22e&#34;&gt;getLogger&lt;/span&gt;(MybatisInterceptor.&lt;span style=&#34;color:#a6e22e&#34;&gt;class&lt;/span&gt;);
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;@Override&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; Object &lt;span style=&#34;color:#a6e22e&#34;&gt;intercept&lt;/span&gt;(Invocation invocation) &lt;span style=&#34;color:#66d9ef&#34;&gt;throws&lt;/span&gt; Throwable {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		MappedStatement mappedStatement &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; (MappedStatement) invocation.&lt;span style=&#34;color:#a6e22e&#34;&gt;getArgs&lt;/span&gt;()&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;0&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt;;  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        Object parameter &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;null&lt;/span&gt;;  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (invocation.&lt;span style=&#34;color:#a6e22e&#34;&gt;getArgs&lt;/span&gt;().&lt;span style=&#34;color:#a6e22e&#34;&gt;length&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; 1) {  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            parameter &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; invocation.&lt;span style=&#34;color:#a6e22e&#34;&gt;getArgs&lt;/span&gt;()&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;1&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt;;  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        }  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        BoundSql boundSql &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; mappedStatement.&lt;span style=&#34;color:#a6e22e&#34;&gt;getBoundSql&lt;/span&gt;(parameter);  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	Configuration configuration &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; mappedStatement.&lt;span style=&#34;color:#a6e22e&#34;&gt;getConfiguration&lt;/span&gt;();  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	Object returnVal &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; invocation.&lt;span style=&#34;color:#a6e22e&#34;&gt;proceed&lt;/span&gt;();
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;   
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	&lt;span style=&#34;color:#75715e&#34;&gt;//获取sql语句&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;   	 	String sql &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; getSql(configuration, boundSql);  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	log.&lt;span style=&#34;color:#a6e22e&#34;&gt;info&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Mybatis 拦截器获取SQL:{}&amp;#34;&lt;/span&gt;,sql);
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    	&lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; returnVal;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;@Override&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; Object &lt;span style=&#34;color:#a6e22e&#34;&gt;plugin&lt;/span&gt;(Object target) {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		 &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; Plugin.&lt;span style=&#34;color:#a6e22e&#34;&gt;wrap&lt;/span&gt;(target, &lt;span style=&#34;color:#66d9ef&#34;&gt;this&lt;/span&gt;);
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;@Override&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;setProperties&lt;/span&gt;(Properties arg0) {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#75715e&#34;&gt;/**
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;	 * 获取SQL
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;	 */&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#66d9ef&#34;&gt;private&lt;/span&gt; String &lt;span style=&#34;color:#a6e22e&#34;&gt;getSql&lt;/span&gt;(Configuration configuration, BoundSql boundSql) {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		Object parameterObject &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; boundSql.&lt;span style=&#34;color:#a6e22e&#34;&gt;getParameterObject&lt;/span&gt;();  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	    List&lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;ParameterMapping&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; parameterMappings &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; boundSql.&lt;span style=&#34;color:#a6e22e&#34;&gt;getParameterMappings&lt;/span&gt;();  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	    String sql &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; boundSql.&lt;span style=&#34;color:#a6e22e&#34;&gt;getSql&lt;/span&gt;().&lt;span style=&#34;color:#a6e22e&#34;&gt;replaceAll&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;[\\s]+&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34; &amp;#34;&lt;/span&gt;);  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (parameterObject &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;null&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;||&lt;/span&gt; parameterMappings.&lt;span style=&#34;color:#a6e22e&#34;&gt;size&lt;/span&gt;() &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; 0) {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	    	&lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; sql;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	    }  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        TypeHandlerRegistry typeHandlerRegistry &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; configuration.&lt;span style=&#34;color:#a6e22e&#34;&gt;getTypeHandlerRegistry&lt;/span&gt;();  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (typeHandlerRegistry.&lt;span style=&#34;color:#a6e22e&#34;&gt;hasTypeHandler&lt;/span&gt;(parameterObject.&lt;span style=&#34;color:#a6e22e&#34;&gt;getClass&lt;/span&gt;())) {  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        	sql &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; sql.&lt;span style=&#34;color:#a6e22e&#34;&gt;replaceFirst&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;\\?&amp;#34;&lt;/span&gt;, getParameterValue(parameterObject));  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        } &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; {  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        	MetaObject metaObject &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; configuration.&lt;span style=&#34;color:#a6e22e&#34;&gt;newMetaObject&lt;/span&gt;(parameterObject);  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; (ParameterMapping parameterMapping : parameterMappings) {  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            	String propertyName &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; parameterMapping.&lt;span style=&#34;color:#a6e22e&#34;&gt;getProperty&lt;/span&gt;();  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (metaObject.&lt;span style=&#34;color:#a6e22e&#34;&gt;hasGetter&lt;/span&gt;(propertyName)) {  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                	Object obj &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; metaObject.&lt;span style=&#34;color:#a6e22e&#34;&gt;getValue&lt;/span&gt;(propertyName);  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                    sql &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; sql.&lt;span style=&#34;color:#a6e22e&#34;&gt;replaceFirst&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;\\?&amp;#34;&lt;/span&gt;, getParameterValue(obj));  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                } &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (boundSql.&lt;span style=&#34;color:#a6e22e&#34;&gt;hasAdditionalParameter&lt;/span&gt;(propertyName)) {  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                	Object obj &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; boundSql.&lt;span style=&#34;color:#a6e22e&#34;&gt;getAdditionalParameter&lt;/span&gt;(propertyName);  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                	sql &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; sql.&lt;span style=&#34;color:#a6e22e&#34;&gt;replaceFirst&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;\\?&amp;#34;&lt;/span&gt;, getParameterValue(obj));  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                }  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            }  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        }  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; sql;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#66d9ef&#34;&gt;private&lt;/span&gt; String &lt;span style=&#34;color:#a6e22e&#34;&gt;getParameterValue&lt;/span&gt;(Object obj) {  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		String value &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;null&lt;/span&gt;;  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (obj &lt;span style=&#34;color:#66d9ef&#34;&gt;instanceof&lt;/span&gt; String) {  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;			value &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;#39;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; obj.&lt;span style=&#34;color:#a6e22e&#34;&gt;toString&lt;/span&gt;() &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;#39;&amp;#34;&lt;/span&gt;;  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	    } &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (obj &lt;span style=&#34;color:#66d9ef&#34;&gt;instanceof&lt;/span&gt; Date) {  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	        DateFormat formatter &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; DateFormat.&lt;span style=&#34;color:#a6e22e&#34;&gt;getDateTimeInstance&lt;/span&gt;(DateFormat.&lt;span style=&#34;color:#a6e22e&#34;&gt;DEFAULT&lt;/span&gt;, DateFormat.&lt;span style=&#34;color:#a6e22e&#34;&gt;DEFAULT&lt;/span&gt;, Locale.&lt;span style=&#34;color:#a6e22e&#34;&gt;CHINA&lt;/span&gt;);  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	        value &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;#39;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; formatter.&lt;span style=&#34;color:#a6e22e&#34;&gt;format&lt;/span&gt;(obj) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;#39;&amp;#34;&lt;/span&gt;;  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	    } &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; {  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	        &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (obj &lt;span style=&#34;color:#f92672&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;null&lt;/span&gt;) {  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	            value &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; obj.&lt;span style=&#34;color:#a6e22e&#34;&gt;toString&lt;/span&gt;();  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	        } &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; {  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	            value &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;;  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	        }  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	    }  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; value;  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	}  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;配置&#34;&gt;配置&lt;/h2&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-yml&#34; data-lang=&#34;yml&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;mybatis&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;type-aliases-package&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;me.zingon.pagehelper.model&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;mapper-locations&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;classpath:mapper/*.xml&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;configuration&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;map-underscore-to-camel-case&lt;/span&gt;: &lt;span style=&#34;color:#66d9ef&#34;&gt;true&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;default-fetch-size&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;100&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;default-statement-timeout&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;30&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在springboot中要给mybatis加上这个拦截器，有三种方法，前两种方法在启动项目时不会自动调用自定义拦截器的setProperties方法。&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>在线交互式学习k8s/docker/linux</title>
-      <link>https://haokiu.com/blog/baIB8x/</link>
-      <pubDate>Thu, 17 Sep 2020 13:58:36 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/baIB8x/</guid>
-      <description>&lt;p&gt;&lt;a href=&#34;https://www.katacoda.com/&#34;&gt;katacoda&lt;/a&gt; is Interactive Learning and Training Platform for Software Engineers
-Helping Developers Learn and Companies Increase Adoption&lt;/p&gt;
-&lt;p&gt;可以交互式的学习各种前沿技术：k8s linux docker 机器学习等&lt;/p&gt;</description>
-    </item>
-    
-  </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Spring on haokiu</title><link>https://haokiu.com/tags/spring/</link><description>Recent content in Spring on haokiu</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>haokiu.com</copyright><lastBuildDate>Sun, 27 Sep 2020 10:59:03 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/spring/index.xml" rel="self" type="application/rss+xml"/><item><title>mybatis 增加自定义拦截器</title><link>https://haokiu.com/blog/bGqNiH/</link><pubDate>Sun, 27 Sep 2020 10:59:03 +0000</pubDate><guid>https://haokiu.com/blog/bGqNiH/</guid><description>MyBatis 提供的强大机制，使用插件是非常简单的，只需实现 Interceptor 接口，并指定想要拦截的方法签名即可。 拦截器 配置 在springboot中要给mybatis加上这个拦截器，有…</description><content:encoded><![CDATA[<p>MyBatis 提供的强大机制，使用插件是非常简单的，只需实现 Interceptor 接口，并指定想要拦截的方法签名即可。</p>
+<h2 id="拦截器">拦截器</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#f92672">import</span> java.text.DateFormat;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.Date;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.List;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.Locale;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.Properties;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.ibatis.executor.Executor;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.ibatis.mapping.BoundSql;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.ibatis.mapping.MappedStatement;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.ibatis.mapping.ParameterMapping;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.ibatis.plugin.Interceptor;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.ibatis.plugin.Intercepts;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.ibatis.plugin.Invocation;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.ibatis.plugin.Plugin;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.ibatis.plugin.Signature;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.ibatis.reflection.MetaObject;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.ibatis.session.Configuration;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.ibatis.session.ResultHandler;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.ibatis.session.RowBounds;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.ibatis.type.TypeHandlerRegistry;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.slf4j.Logger;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.slf4j.LoggerFactory;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Intercepts</span>({  
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Signature</span>(type <span style="color:#f92672">=</span> Executor.<span style="color:#a6e22e">class</span>, method <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;update&#34;</span>, args <span style="color:#f92672">=</span> { MappedStatement.<span style="color:#a6e22e">class</span>, Object.<span style="color:#a6e22e">class</span> }),  
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@Signature</span>(type <span style="color:#f92672">=</span> Executor.<span style="color:#a6e22e">class</span>, method <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;query&#34;</span>,  args <span style="color:#f92672">=</span> { MappedStatement.<span style="color:#a6e22e">class</span>, Object.<span style="color:#a6e22e">class</span>, RowBounds.<span style="color:#a6e22e">class</span>, ResultHandler.<span style="color:#a6e22e">class</span> }) 
+</span></span><span style="display:flex;"><span>})  
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MybatisInterceptor</span> <span style="color:#66d9ef">implements</span> Interceptor {
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> Logger log <span style="color:#f92672">=</span> LoggerFactory.<span style="color:#a6e22e">getLogger</span>(MybatisInterceptor.<span style="color:#a6e22e">class</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> Object <span style="color:#a6e22e">intercept</span>(Invocation invocation) <span style="color:#66d9ef">throws</span> Throwable {
+</span></span><span style="display:flex;"><span>		MappedStatement mappedStatement <span style="color:#f92672">=</span> (MappedStatement) invocation.<span style="color:#a6e22e">getArgs</span>()<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>;  
+</span></span><span style="display:flex;"><span>        Object parameter <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span>;  
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (invocation.<span style="color:#a6e22e">getArgs</span>().<span style="color:#a6e22e">length</span> <span style="color:#f92672">&gt;</span> 1) {  
+</span></span><span style="display:flex;"><span>            parameter <span style="color:#f92672">=</span> invocation.<span style="color:#a6e22e">getArgs</span>()<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>;  
+</span></span><span style="display:flex;"><span>        }  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        BoundSql boundSql <span style="color:#f92672">=</span> mappedStatement.<span style="color:#a6e22e">getBoundSql</span>(parameter);  
+</span></span><span style="display:flex;"><span>    	Configuration configuration <span style="color:#f92672">=</span> mappedStatement.<span style="color:#a6e22e">getConfiguration</span>();  
+</span></span><span style="display:flex;"><span>    	Object returnVal <span style="color:#f92672">=</span> invocation.<span style="color:#a6e22e">proceed</span>();
+</span></span><span style="display:flex;"><span>   
+</span></span><span style="display:flex;"><span>    	<span style="color:#75715e">//获取sql语句</span>
+</span></span><span style="display:flex;"><span>   	 	String sql <span style="color:#f92672">=</span> getSql(configuration, boundSql);  
+</span></span><span style="display:flex;"><span>    	log.<span style="color:#a6e22e">info</span>(<span style="color:#e6db74">&#34;Mybatis 拦截器获取SQL:{}&#34;</span>,sql);
+</span></span><span style="display:flex;"><span>    	<span style="color:#66d9ef">return</span> returnVal;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> Object <span style="color:#a6e22e">plugin</span>(Object target) {
+</span></span><span style="display:flex;"><span>		 <span style="color:#66d9ef">return</span> Plugin.<span style="color:#a6e22e">wrap</span>(target, <span style="color:#66d9ef">this</span>);
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setProperties</span>(Properties arg0) {
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 * 获取SQL
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> String <span style="color:#a6e22e">getSql</span>(Configuration configuration, BoundSql boundSql) {
+</span></span><span style="display:flex;"><span>		Object parameterObject <span style="color:#f92672">=</span> boundSql.<span style="color:#a6e22e">getParameterObject</span>();  
+</span></span><span style="display:flex;"><span>	    List<span style="color:#f92672">&lt;</span>ParameterMapping<span style="color:#f92672">&gt;</span> parameterMappings <span style="color:#f92672">=</span> boundSql.<span style="color:#a6e22e">getParameterMappings</span>();  
+</span></span><span style="display:flex;"><span>	    String sql <span style="color:#f92672">=</span> boundSql.<span style="color:#a6e22e">getSql</span>().<span style="color:#a6e22e">replaceAll</span>(<span style="color:#e6db74">&#34;[\\s]+&#34;</span>, <span style="color:#e6db74">&#34; &#34;</span>);  
+</span></span><span style="display:flex;"><span>	    <span style="color:#66d9ef">if</span> (parameterObject <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">||</span> parameterMappings.<span style="color:#a6e22e">size</span>() <span style="color:#f92672">==</span> 0) {
+</span></span><span style="display:flex;"><span>	    	<span style="color:#66d9ef">return</span> sql;
+</span></span><span style="display:flex;"><span>	    }  
+</span></span><span style="display:flex;"><span>        TypeHandlerRegistry typeHandlerRegistry <span style="color:#f92672">=</span> configuration.<span style="color:#a6e22e">getTypeHandlerRegistry</span>();  
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (typeHandlerRegistry.<span style="color:#a6e22e">hasTypeHandler</span>(parameterObject.<span style="color:#a6e22e">getClass</span>())) {  
+</span></span><span style="display:flex;"><span>        	sql <span style="color:#f92672">=</span> sql.<span style="color:#a6e22e">replaceFirst</span>(<span style="color:#e6db74">&#34;\\?&#34;</span>, getParameterValue(parameterObject));  
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> {  
+</span></span><span style="display:flex;"><span>        	MetaObject metaObject <span style="color:#f92672">=</span> configuration.<span style="color:#a6e22e">newMetaObject</span>(parameterObject);  
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (ParameterMapping parameterMapping : parameterMappings) {  
+</span></span><span style="display:flex;"><span>            	String propertyName <span style="color:#f92672">=</span> parameterMapping.<span style="color:#a6e22e">getProperty</span>();  
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (metaObject.<span style="color:#a6e22e">hasGetter</span>(propertyName)) {  
+</span></span><span style="display:flex;"><span>                	Object obj <span style="color:#f92672">=</span> metaObject.<span style="color:#a6e22e">getValue</span>(propertyName);  
+</span></span><span style="display:flex;"><span>                    sql <span style="color:#f92672">=</span> sql.<span style="color:#a6e22e">replaceFirst</span>(<span style="color:#e6db74">&#34;\\?&#34;</span>, getParameterValue(obj));  
+</span></span><span style="display:flex;"><span>                } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (boundSql.<span style="color:#a6e22e">hasAdditionalParameter</span>(propertyName)) {  
+</span></span><span style="display:flex;"><span>                	Object obj <span style="color:#f92672">=</span> boundSql.<span style="color:#a6e22e">getAdditionalParameter</span>(propertyName);  
+</span></span><span style="display:flex;"><span>                	sql <span style="color:#f92672">=</span> sql.<span style="color:#a6e22e">replaceFirst</span>(<span style="color:#e6db74">&#34;\\?&#34;</span>, getParameterValue(obj));  
+</span></span><span style="display:flex;"><span>                }  
+</span></span><span style="display:flex;"><span>            }  
+</span></span><span style="display:flex;"><span>        }  
+</span></span><span style="display:flex;"><span>	    <span style="color:#66d9ef">return</span> sql;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">private</span> String <span style="color:#a6e22e">getParameterValue</span>(Object obj) {  
+</span></span><span style="display:flex;"><span>		String value <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span>;  
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> (obj <span style="color:#66d9ef">instanceof</span> String) {  
+</span></span><span style="display:flex;"><span>			value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#39;&#34;</span> <span style="color:#f92672">+</span> obj.<span style="color:#a6e22e">toString</span>() <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;&#39;&#34;</span>;  
+</span></span><span style="display:flex;"><span>	    } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (obj <span style="color:#66d9ef">instanceof</span> Date) {  
+</span></span><span style="display:flex;"><span>	        DateFormat formatter <span style="color:#f92672">=</span> DateFormat.<span style="color:#a6e22e">getDateTimeInstance</span>(DateFormat.<span style="color:#a6e22e">DEFAULT</span>, DateFormat.<span style="color:#a6e22e">DEFAULT</span>, Locale.<span style="color:#a6e22e">CHINA</span>);  
+</span></span><span style="display:flex;"><span>	        value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#39;&#34;</span> <span style="color:#f92672">+</span> formatter.<span style="color:#a6e22e">format</span>(obj) <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;&#39;&#34;</span>;  
+</span></span><span style="display:flex;"><span>	    } <span style="color:#66d9ef">else</span> {  
+</span></span><span style="display:flex;"><span>	        <span style="color:#66d9ef">if</span> (obj <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {  
+</span></span><span style="display:flex;"><span>	            value <span style="color:#f92672">=</span> obj.<span style="color:#a6e22e">toString</span>();  
+</span></span><span style="display:flex;"><span>	        } <span style="color:#66d9ef">else</span> {  
+</span></span><span style="display:flex;"><span>	            value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>;  
+</span></span><span style="display:flex;"><span>	        }  
+</span></span><span style="display:flex;"><span>	    }  
+</span></span><span style="display:flex;"><span>	    <span style="color:#66d9ef">return</span> value;  
+</span></span><span style="display:flex;"><span>	}  
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="配置">配置</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span><span style="color:#f92672">mybatis</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">type-aliases-package</span>: <span style="color:#ae81ff">me.zingon.pagehelper.model</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">mapper-locations</span>: <span style="color:#ae81ff">classpath:mapper/*.xml</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">configuration</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">map-underscore-to-camel-case</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">default-fetch-size</span>: <span style="color:#ae81ff">100</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">default-statement-timeout</span>: <span style="color:#ae81ff">30</span>
+</span></span></code></pre></div><p>在springboot中要给mybatis加上这个拦截器，有三种方法，前两种方法在启动项目时不会自动调用自定义拦截器的setProperties方法。</p>
+<h3 id="第一种">第一种</h3>
+<p>直接给自定义拦截器添加一个 @Component注解，当调用sql时结果如下，可以看到拦截器生效了，但是启动时候并没有自动调用setProperties方法。</p>
+<h3 id="第二种">第二种</h3>
+<p>在配置类里添加拦截器，这种方法结果同上，也不会自动调用setProperties方法。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Configuration</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MybatisConfig</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@Bean</span>
+</span></span><span style="display:flex;"><span>    ConfigurationCustomizer <span style="color:#a6e22e">mybatisConfigurationCustomizer</span>() {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> ConfigurationCustomizer() {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">customize</span>(org.<span style="color:#a6e22e">apache</span>.<span style="color:#a6e22e">ibatis</span>.<span style="color:#a6e22e">session</span>.<span style="color:#a6e22e">Configuration</span> configuration) {
+</span></span><span style="display:flex;"><span>                configuration.<span style="color:#a6e22e">addInterceptor</span>(<span style="color:#66d9ef">new</span> MyPageInterceptor());
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        };
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="第三种">第三种</h3>
+<p>这种方法就是跟以前的配置方法类似，在yml配置文件中指定mybatis的xml配置文件,注意config-location属性和configuration属性不能同时指定</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yml" data-lang="yml"><span style="display:flex;"><span><span style="color:#f92672">mybatis</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">config-location</span>: <span style="color:#ae81ff">classpath:mybatis.xml</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">type-aliases-package</span>: <span style="color:#ae81ff">com.haokiu.model</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">mapper-locations</span>: <span style="color:#ae81ff">classpath:mapper/*.xml</span>
+</span></span></code></pre></div><p>mybatis.xml</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-xml" data-lang="xml"><span style="display:flex;"><span><span style="color:#75715e">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34; ?&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">&lt;!DOCTYPE configuration PUBLIC &#34;-//mybatis.org//DTD Config 3.0//EN&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">        &#34;http://mybatis.org/dtd/mybatis-3-config.dtd&#34;&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;configuration&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;typeAliases&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;package</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;com.haokiu.model&#34;</span><span style="color:#f92672">/&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;/typeAliases&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;plugins&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;plugin</span> <span style="color:#a6e22e">interceptor=</span><span style="color:#e6db74">&#34;com.haokiu.interceptor.MyInterceptor&#34;</span><span style="color:#f92672">&gt;</span> 
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;dialect&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;oracle&#34;</span><span style="color:#f92672">/&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;/plugin&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;/plugins&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;/configuration&gt;</span>
+</span></span></code></pre></div><p>可以看到，在启动项目的时候setProperties被自动调用了</p>
+<h2 id="总结">总结</h2>
+<p>前两种方法可以在初始化自定义拦截器的时候通过 @Value 注解直接初始化需要的参数。</p>
+]]></content:encoded></item><item><title>在线交互式学习k8s/docker/linux</title><link>https://haokiu.com/blog/baIB8x/</link><pubDate>Thu, 17 Sep 2020 13:58:36 +0000</pubDate><guid>https://haokiu.com/blog/baIB8x/</guid><description>katacoda is Interactive Learning and Training Platform for Software Engineers Helping Developers Lea…</description><content:encoded><![CDATA[<p><a href="https://www.katacoda.com/">katacoda</a> is Interactive Learning and Training Platform for Software Engineers
+Helping Developers Learn and Companies Increase Adoption</p>
+<p>可以交互式的学习各种前沿技术：k8s linux docker 机器学习等</p>
+]]></content:encoded></item></channel></rss>

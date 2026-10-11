@@ -1,98 +1,55 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
-  <channel>
-    <title>Beego on haokiu</title>
-    <link>https://haokiu.com/tags/beego/</link>
-    <description>Recent content in Beego on haokiu</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>zh-cn</language>
-    <copyright>haokiu.com</copyright>
-    <lastBuildDate>Fri, 22 Jan 2021 14:52:21 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/beego/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>beego restful path variable</title>
-      <link>https://haokiu.com/blog/RNbgLz/</link>
-      <pubDate>Fri, 22 Jan 2021 14:52:21 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/RNbgLz/</guid>
-      <description>&lt;p&gt;beego的url路径有多个变量的设置和获取方法。&lt;/p&gt;
-&lt;h2 id=&#34;在-routergo-注册-url&#34;&gt;在 router.go 注册 url&lt;/h2&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;beego.Router(&amp;#34;/type/:type/?:page&amp;#34;, &amp;amp;controllers.WebController{}, &amp;#34;get:Type&amp;#34;)
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;获取变量&#34;&gt;获取变量&lt;/h2&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;typeID, err := self.GetInt(&amp;#34;:type&amp;#34;)
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Beego on haokiu</title><link>https://haokiu.com/tags/beego/</link><description>Recent content in Beego on haokiu</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>haokiu.com</copyright><lastBuildDate>Fri, 22 Jan 2021 14:52:21 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/beego/index.xml" rel="self" type="application/rss+xml"/><item><title>beego restful path variable</title><link>https://haokiu.com/blog/RNbgLz/</link><pubDate>Fri, 22 Jan 2021 14:52:21 +0000</pubDate><guid>https://haokiu.com/blog/RNbgLz/</guid><description>beego的url路径有多个变量的设置和获取方法。 在 router.go 注册 url 获取变量</description><content:encoded><![CDATA[<p>beego的url路径有多个变量的设置和获取方法。</p>
+<h2 id="在-routergo-注册-url">在 router.go 注册 url</h2>
+<pre tabindex="0"><code>beego.Router(&#34;/type/:type/?:page&#34;, &amp;controllers.WebController{}, &#34;get:Type&#34;)
+</code></pre><h2 id="获取变量">获取变量</h2>
+<pre tabindex="0"><code>typeID, err := self.GetInt(&#34;:type&#34;)
 
 func (c *Controller) GetInt(key string, def ...int) (int, error) {
 	strv := c.Ctx.Input.Query(key)
-	if len(strv) == 0 &amp;amp;&amp;amp; len(def) &amp;gt; 0 {
+	if len(strv) == 0 &amp;&amp; len(def) &gt; 0 {
 		return def[0], nil
 	}
 	return strconv.Atoi(strv)
 }
-&lt;/code&gt;&lt;/pre&gt;</description>
-    </item>
-    
-    <item>
-      <title>curl https 地址报异常</title>
-      <link>https://haokiu.com/blog/KsbUyb/</link>
-      <pubDate>Fri, 23 Oct 2020 15:03:17 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/KsbUyb/</guid>
-      <description>&lt;p&gt;用 acme.sh 生产了 Let&amp;rsquo;s Encrypt 的https 证书，在浏览器访问没有问题，但在服务器访问出现下面的异常：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl: (60) SSL certificate problem: unable to get local issuer certificate
+</code></pre>]]></content:encoded></item><item><title>curl https 地址报异常</title><link>https://haokiu.com/blog/KsbUyb/</link><pubDate>Fri, 23 Oct 2020 15:03:17 +0000</pubDate><guid>https://haokiu.com/blog/KsbUyb/</guid><description>用 acme.sh 生产了 Let&amp;#39;s Encrypt 的https 证书，在浏览器访问没有问题，但在服务器访问出现下面的异常： 网站用了beego，用 acme.sh 生成的证书。配置： 要将 ce…</description><content:encoded><![CDATA[<p>用 acme.sh 生产了 Let&rsquo;s Encrypt 的https 证书，在浏览器访问没有问题，但在服务器访问出现下面的异常：</p>
+<pre tabindex="0"><code>curl: (60) SSL certificate problem: unable to get local issuer certificate
 More details here: https://curl.haxx.se/docs/sslcerts.html
 
 curl failed to verify the legitimacy of the server and therefore could not
 establish a secure connection to it. To learn more about this situation and
 how to fix it, please visit the web page mentioned above.
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;网站用了beego，用 acme.sh 生成的证书。配置：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;EnableHTTPS = true
+</code></pre><p>网站用了beego，用 acme.sh 生成的证书。配置：</p>
+<pre tabindex="0"><code>EnableHTTPS = true
 HTTPSPort = 443
-HTTPSCertFile = &amp;#34;/home/blog/cert/cert.pem&amp;#34;
-HTTPSKeyFile = &amp;#34;/home/blog/cert/key.pem&amp;#34;
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;要将 cert.pem 替换为：fullchain.pem&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;EnableHTTPS = true
+HTTPSCertFile = &#34;/home/blog/cert/cert.pem&#34;
+HTTPSKeyFile = &#34;/home/blog/cert/key.pem&#34;
+</code></pre><p>要将 cert.pem 替换为：fullchain.pem</p>
+<pre tabindex="0"><code>EnableHTTPS = true
 HTTPSPort = 443
-HTTPSCertFile = &amp;#34;/home/blog/cert/fullchain.pem&amp;#34;
-HTTPSKeyFile = &amp;#34;/home/blog/cert/key.pem&amp;#34;
-&lt;/code&gt;&lt;/pre&gt;</description>
-    </item>
-    
-    <item>
-      <title>beego 让http请求跳转到 https</title>
-      <link>https://haokiu.com/blog/ZSf4yF/</link>
-      <pubDate>Tue, 13 Oct 2020 16:33:55 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/ZSf4yF/</guid>
-      <description>&lt;p&gt;如果beego配置了https，那么可以让 让http请求跳转到 https，怎样配置 beego 的https，可以参考&lt;a href=&#34;https://haokiu.com/blog/qP3u4V&#34;&gt;beego 通过acms.sh 使用 https&lt;/a&gt;&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;//siteUrl 是网站地址，比如:https://haokiu.com
-if &amp;#34;HTTP/1.1&amp;#34; == self.Ctx.Request.Proto &amp;amp;&amp;amp; siteUrl != &amp;#34;&amp;#34; &amp;amp;&amp;amp; strings.HasPrefix(siteUrl, &amp;#34;https&amp;#34;) {
+HTTPSCertFile = &#34;/home/blog/cert/fullchain.pem&#34;
+HTTPSKeyFile = &#34;/home/blog/cert/key.pem&#34;
+</code></pre>]]></content:encoded></item><item><title>beego 让http请求跳转到 https</title><link>https://haokiu.com/blog/ZSf4yF/</link><pubDate>Tue, 13 Oct 2020 16:33:55 +0000</pubDate><guid>https://haokiu.com/blog/ZSf4yF/</guid><description>如果beego配置了https，那么可以让 让http请求跳转到 https，怎样配置 beego 的https，可以参考beego 通过acms.sh 使用 https</description><content:encoded><![CDATA[<p>如果beego配置了https，那么可以让 让http请求跳转到 https，怎样配置 beego 的https，可以参考<a href="https://haokiu.com/blog/qP3u4V">beego 通过acms.sh 使用 https</a></p>
+<pre tabindex="0"><code>//siteUrl 是网站地址，比如:https://haokiu.com
+if &#34;HTTP/1.1&#34; == self.Ctx.Request.Proto &amp;&amp; siteUrl != &#34;&#34; &amp;&amp; strings.HasPrefix(siteUrl, &#34;https&#34;) {
 		//如果支持https，则所有http请求跳转到https
 		self.redirect(siteUrl + self.Ctx.Request.URL.Path)
 }
-&lt;/code&gt;&lt;/pre&gt;</description>
-    </item>
-    
-    <item>
-      <title>beego bee 工具使用简介</title>
-      <link>https://haokiu.com/blog/xVaucl/</link>
-      <pubDate>Wed, 16 Sep 2020 16:06:47 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/xVaucl/</guid>
-      <description>&lt;p&gt;bee 工具是一个为了协助快速开发 beego 项目而创建的项目，通过 bee 您可以很容易的进行 beego 项目的创建、热编译、开发、测试、和部署。&lt;/p&gt;
-&lt;h2 id=&#34;bee-工具的安装&#34;&gt;bee 工具的安装&lt;/h2&gt;
-&lt;p&gt;您可以通过如下的方式安装 bee 工具：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;go get github.com/beego/bee
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;安装完之后，&lt;code&gt;bee&lt;/code&gt; 可执行文件默认存放在 &lt;code&gt;$GOPATH/bin&lt;/code&gt; 里面，所以您需要把 &lt;code&gt;$GOPATH/bin&lt;/code&gt; 添加到您的环境变量中，才可以进行下一步。&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;blockquote&gt;
-&lt;blockquote&gt;
-&lt;p&gt;如何添加环境变量，请自行搜索
-如果你本机设置了 &lt;code&gt;GOBIN&lt;/code&gt;，那么上面的命令就会安装到 &lt;code&gt;GOBIN&lt;/code&gt; 下，请添加 GOBIN 到你的环境变量中&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;/blockquote&gt;
-&lt;/blockquote&gt;
-&lt;h2 id=&#34;bee-工具命令详解&#34;&gt;bee 工具命令详解&lt;/h2&gt;
-&lt;p&gt;我们在命令行输入 &lt;code&gt;bee&lt;/code&gt;，可以看到如下的信息：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;Bee is a Fast and Flexible tool for managing your Beego Web Application.
+</code></pre>]]></content:encoded></item><item><title>beego bee 工具使用简介</title><link>https://haokiu.com/blog/xVaucl/</link><pubDate>Wed, 16 Sep 2020 16:06:47 +0000</pubDate><guid>https://haokiu.com/blog/xVaucl/</guid><description>bee 工具是一个为了协助快速开发 beego 项目而创建的项目，通过 bee 您可以很容易的进行 beego 项目的创建、热编译、开发、测试、和部署。 bee 工具的安装 您可以通过如下的方式安装…</description><content:encoded><![CDATA[<p>bee 工具是一个为了协助快速开发 beego 项目而创建的项目，通过 bee 您可以很容易的进行 beego 项目的创建、热编译、开发、测试、和部署。</p>
+<h2 id="bee-工具的安装">bee 工具的安装</h2>
+<p>您可以通过如下的方式安装 bee 工具：</p>
+<pre tabindex="0"><code>go get github.com/beego/bee
+</code></pre><p>安装完之后，<code>bee</code> 可执行文件默认存放在 <code>$GOPATH/bin</code> 里面，所以您需要把 <code>$GOPATH/bin</code> 添加到您的环境变量中，才可以进行下一步。</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>如何添加环境变量，请自行搜索
+如果你本机设置了 <code>GOBIN</code>，那么上面的命令就会安装到 <code>GOBIN</code> 下，请添加 GOBIN 到你的环境变量中</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<h2 id="bee-工具命令详解">bee 工具命令详解</h2>
+<p>我们在命令行输入 <code>bee</code>，可以看到如下的信息：</p>
+<pre tabindex="0"><code>Bee is a Fast and Flexible tool for managing your Beego Web Application.
 
 Usage:
 
@@ -100,7 +57,7 @@ Usage:
 
 The commands are:
 
-    version     show the bee &amp;amp; beego version
+    version     show the bee &amp; beego version
     migrate     run database migrations
     api         create an api application base on beego framework
     bale        packs non-Go files to Go source files    
@@ -119,91 +76,376 @@ The commands are:
     
 Use bee help [command] for more information about a command.
     
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;new-命令&#34;&gt;&lt;code&gt;new&lt;/code&gt; 命令&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;new&lt;/code&gt; 命令是新建一个 Web 项目，我们在命令行下执行 &lt;code&gt;bee new &amp;lt;项目名&amp;gt;&lt;/code&gt; 就可以创建一个新的项目。但是注意该命令必须在 &lt;code&gt;$GOPATH/src&lt;/code&gt; 下执行。最后会在 &lt;code&gt;$GOPATH/src&lt;/code&gt; 相应目录下生成如下目录结构的项目：&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>beego 日志配置</title>
-      <link>https://haokiu.com/blog/gq7FUH/</link>
-      <pubDate>Wed, 16 Sep 2020 16:03:29 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/gq7FUH/</guid>
-      <description>&lt;p&gt;beego logs 的设计思路来自于 &lt;code&gt;database/sql&lt;/code&gt;，目前支持的引擎有 file、console、net、smtp，可以通过如下方式进行安装：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;go get github.com/astaxie/beego/logs
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;如何使用&#34;&gt;如何使用&lt;/h2&gt;
-&lt;h3 id=&#34;通用方式&#34;&gt;通用方式&lt;/h3&gt;
-&lt;p&gt;首先引入包：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;import (
-    &amp;#34;github.com/astaxie/beego/logs&amp;#34;
+</code></pre><h3 id="new-命令"><code>new</code> 命令</h3>
+<p><code>new</code> 命令是新建一个 Web 项目，我们在命令行下执行 <code>bee new &lt;项目名&gt;</code> 就可以创建一个新的项目。但是注意该命令必须在 <code>$GOPATH/src</code> 下执行。最后会在 <code>$GOPATH/src</code> 相应目录下生成如下目录结构的项目：</p>
+<pre tabindex="0"><code>bee new myproject
+[INFO] Creating application...
+/gopath/src/myproject/
+/gopath/src/myproject/conf/
+/gopath/src/myproject/controllers/
+/gopath/src/myproject/models/
+/gopath/src/myproject/static/
+/gopath/src/myproject/static/js/
+/gopath/src/myproject/static/css/
+/gopath/src/myproject/static/img/
+/gopath/src/myproject/views/
+/gopath/src/myproject/conf/app.conf
+/gopath/src/myproject/controllers/default.go
+/gopath/src/myproject/views/index.tpl
+/gopath/src/myproject/main.go
+13-11-25 09:50:39 [SUCC] New application successfully created!
+myproject
+├── conf
+│   └── app.conf
+├── controllers
+│   └── default.go
+├── main.go
+├── models
+├── routers
+│   └── router.go
+├── static
+│   ├── css
+│   ├── img
+│   └── js
+├── tests
+│   └── default_test.go
+└── views
+    └── index.tpl
+
+8 directories, 4 files
+</code></pre><h3 id="api-命令"><code>api</code> 命令</h3>
+<p>上面的 <code>new</code> 命令是用来新建 Web 项目，不过很多用户使用 beego 来开发 API 应用。所以这个 <code>api</code> 命令就是用来创建 API 应用的，执行命令之后如下所示：</p>
+<pre tabindex="0"><code>bee api apiproject
+create app folder: /gopath/src/apiproject
+create conf: /gopath/src/apiproject/conf
+create controllers: /gopath/src/apiproject/controllers
+create models: /gopath/src/apiproject/models
+create tests: /gopath/src/apiproject/tests
+create conf app.conf: /gopath/src/apiproject/conf/app.conf
+create controllers default.go: /gopath/src/apiproject/controllers/default.go
+create tests default.go: /gopath/src/apiproject/tests/default_test.go
+create models object.go: /gopath/src/apiproject/models/object.go
+create main.go: /gopath/src/apiproject/main.go
+</code></pre><p>这个项目的目录结构如下：</p>
+<pre tabindex="0"><code>apiproject
+├── conf
+│   └── app.conf
+├── controllers
+│   └── object.go
+│   └── user.go
+├── docs
+│   └── doc.go
+├── main.go
+├── models
+│   └── object.go
+│   └── user.go
+├── routers
+│   └── router.go
+└── tests
+    └── default_test.go
+</code></pre><p>从上面的目录我们可以看到和 Web 项目相比，少了 static 和 views 目录，多了一个 test 模块，用来做单元测试的。</p>
+<p>同时，该命令还支持一些自定义参数自动连接数据库创建相关 model 和 controller:
+<code>bee api [appname] [-tables=&quot;&quot;] [-driver=mysql] [-conn=&quot;root:&lt;password&gt;@tcp(127.0.0.1:3306)/test&quot;]</code>
+如果 conn 参数为空则创建一个示例项目，否则将基于链接信息链接数据库创建项目。</p>
+<h3 id="run-命令"><code>run</code> 命令</h3>
+<p>我们在开发 Go 项目的时候最大的问题是经常需要自己手动去编译再运行，<code>bee run</code> 命令是监控 beego 的项目，通过 <a href="https://github.com/howeyc/fsnotify">fsnotify</a>监控文件系统。但是注意该命令必须在 <code>$GOPATH/src/appname</code> 下执行。
+这样我们在开发过程中就可以实时的看到项目修改之后的效果：</p>
+<pre tabindex="0"><code>bee run
+13-11-25 09:53:04 [INFO] Uses &#39;myproject&#39; as &#39;appname&#39;
+13-11-25 09:53:04 [INFO] Initializing watcher...
+13-11-25 09:53:04 [TRAC] Directory(/gopath/src/myproject/controllers)
+13-11-25 09:53:04 [TRAC] Directory(/gopath/src/myproject/models)
+13-11-25 09:53:04 [TRAC] Directory(/gopath/src/myproject)
+13-11-25 09:53:04 [INFO] Start building...
+13-11-25 09:53:16 [SUCC] Build was successful
+13-11-25 09:53:16 [INFO] Restarting myproject ...
+13-11-25 09:53:16 [INFO] ./myproject is running...
+</code></pre><p>我们打开浏览器就可以看到效果 <code>http://localhost:8080/</code>:</p>
+<p><img loading="lazy" src="https://beego.me/docs/images/beerun.png" alt="img"  />
+</p>
+<p>如果我们修改了 <code>Controller</code> 下面的 <code>default.go</code> 文件，我们就可以看到命令行输出：</p>
+<pre tabindex="0"><code>13-11-25 10:11:20 [EVEN] &#34;/gopath/src/myproject/controllers/default.go&#34;: DELETE|MODIFY
+13-11-25 10:11:20 [INFO] Start building...
+13-11-25 10:11:20 [SKIP] &#34;/gopath/src/myproject/controllers/default.go&#34;: CREATE
+13-11-25 10:11:23 [SKIP] &#34;/gopath/src/myproject/controllers/default.go&#34;: MODIFY
+13-11-25 10:11:23 [SUCC] Build was successful
+13-11-25 10:11:23 [INFO] Restarting myproject ...
+13-11-25 10:11:23 [INFO] ./myproject is running...
+</code></pre><p>刷新浏览器我们看到新的修改内容已经输出。</p>
+<h3 id="pack-命令"><code>pack</code> 命令</h3>
+<p><code>pack</code> 目录用来发布应用的时候打包，会把项目打包成 zip 包，这样我们部署的时候直接把打包之后的项目上传，解压就可以部署了：</p>
+<pre tabindex="0"><code>bee pack
+app path: /gopath/src/apiproject
+GOOS darwin GOARCH amd64
+build apiproject
+build success
+exclude prefix:
+exclude suffix: .go:.DS_Store:.tmp
+file write to `/gopath/src/apiproject/apiproject.tar.gz`
+</code></pre><p>我们可以看到目录下有如下的压缩文件：</p>
+<pre tabindex="0"><code>rwxr-xr-x  1 astaxie  staff  8995376 11 25 22:46 apiproject
+-rw-r--r--  1 astaxie  staff  2240288 11 25 22:58 apiproject.tar.gz
+drwxr-xr-x  3 astaxie  staff      102 11 25 22:31 conf
+drwxr-xr-x  3 astaxie  staff      102 11 25 22:31 controllers
+-rw-r--r--  1 astaxie  staff      509 11 25 22:31 main.go
+drwxr-xr-x  3 astaxie  staff      102 11 25 22:31 models
+drwxr-xr-x  3 astaxie  staff      102 11 25 22:31 tests
+</code></pre><h3 id="bale-命令"><code>bale</code> 命令</h3>
+<p>这个命令目前仅限内部使用，具体实现方案未完善，主要用来压缩所有的静态文件变成一个变量申明文件，全部编译到二进制文件里面，用户发布的时候携带静态文件，包括 js、css、img 和 views。最后在启动运行时进行非覆盖式的自解压。</p>
+<h3 id="version-命令"><code>version</code> 命令</h3>
+<p>这个命令是动态获取 bee、beego 和 Go 的版本，这样一旦用户出现错误，可以通过该命令来查看当前的版本</p>
+<pre tabindex="0"><code>$ bee version
+bee   :1.2.2
+beego :1.4.2
+Go    :go version go1.3.3 darwin/amd64
+</code></pre><h3 id="generate-命令"><code>generate</code> 命令</h3>
+<p>这个命令是用来自动化的生成代码的，包含了从数据库一键生成 model，还包含了 scaffold 的，通过这个命令，让大家开发代码不再慢</p>
+<pre tabindex="0"><code>bee generate scaffold [scaffoldname] [-fields=&#34;&#34;] [-driver=mysql] [-conn=&#34;root:@tcp(127.0.0.1:3306)/test&#34;]
+    The generate scaffold command will do a number of things for you.
+    -fields: a list of table fields. Format: field:type, ...
+    -driver: [mysql | postgres | sqlite], the default is mysql
+    -conn:   the connection string used by the driver, the default is root:@tcp(127.0.0.1:3306)/test
+    example: bee generate scaffold post -fields=&#34;title:string,body:text&#34;
+
+bee generate model [modelname] [-fields=&#34;&#34;]
+    generate RESTful model based on fields
+    -fields: a list of table fields. Format: field:type, ...
+
+bee generate controller [controllerfile]
+    generate RESTful controllers
+
+bee generate view [viewpath]
+    generate CRUD view in viewpath
+
+bee generate migration [migrationfile] [-fields=&#34;&#34;]
+    generate migration file for making database schema update
+    -fields: a list of table fields. Format: field:type, ...
+
+bee generate docs
+    generate swagger doc file
+
+bee generate test [routerfile]
+    generate testcase
+
+bee generate appcode [-tables=&#34;&#34;] [-driver=mysql] [-conn=&#34;root:@tcp(127.0.0.1:3306)/test&#34;] [-level=3]
+    generate appcode based on an existing database
+    -tables: a list of table names separated by &#39;,&#39;, default is empty, indicating all tables
+    -driver: [mysql | postgres | sqlite], the default is mysql
+    -conn:   the connection string used by the driver.
+             default for mysql:    root:@tcp(127.0.0.1:3306)/test
+             default for postgres: postgres://postgres:postgres@127.0.0.1:5432/postgres
+    -level:  [1 | 2 | 3], 1 = models; 2 = models,controllers; 3 = models,controllers,router
+</code></pre><h3 id="migrate-命令"><code>migrate</code> 命令</h3>
+<p>这个命令是应用的数据库迁移命令，主要是用来每次应用升级，降级的SQL管理。</p>
+<pre tabindex="0"><code>bee migrate [-driver=mysql] [-conn=&#34;root:@tcp(127.0.0.1:3306)/test&#34;]
+    run all outstanding migrations
+    -driver: [mysql | postgresql | sqlite], the default is mysql
+    -conn:   the connection string used by the driver, the default is root:@tcp(127.0.0.1:3306)/test
+
+bee migrate rollback [-driver=mysql] [-conn=&#34;root:@tcp(127.0.0.1:3306)/test&#34;]
+    rollback the last migration operation
+    -driver: [mysql | postgresql | sqlite], the default is mysql
+    -conn:   the connection string used by the driver, the default is root:@tcp(127.0.0.1:3306)/test
+
+bee migrate reset [-driver=mysql] [-conn=&#34;root:@tcp(127.0.0.1:3306)/test&#34;]
+    rollback all migrations
+    -driver: [mysql | postgresql | sqlite], the default is mysql
+    -conn:   the connection string used by the driver, the default is root:@tcp(127.0.0.1:3306)/test
+
+bee migrate refresh [-driver=mysql] [-conn=&#34;root:@tcp(127.0.0.1:3306)/test&#34;]
+    rollback all migrations and run them all again
+    -driver: [mysql | postgresql | sqlite], the default is mysql
+    -conn:   the connection string used by the driver, the default is root:@tcp(127.0.0.1:3306)/test
+</code></pre><h3 id="dockerize-命令"><code>dockerize</code> 命令</h3>
+<p>这个命令可以通过生成Dockerfile文件来实现docker化你的应用。</p>
+<p>例子:
+生成一个以1.6.4版本Go环境为基础镜像的Dockerfile,并暴露9000端口:</p>
+<pre tabindex="0"><code>$ bee dockerize -image=&#34;library/golang:1.6.4&#34; -expose=9000
+______
+| ___ \
+| |_/ /  ___   ___
+| ___ \ / _ \ / _ \
+| |_/ /|  __/|  __/
+\____/  \___| \___| v1.6.2
+2016/12/26 22:34:54 INFO     ▶ 0001 Generating Dockerfile...
+2016/12/26 22:34:54 SUCCESS  ▶ 0002 Dockerfile generated.
+</code></pre><p>更多帮助信息可执行<code>bee help dockerize</code>.</p>
+<h2 id="bee-工具配置文件">bee 工具配置文件</h2>
+<p>您可能已经注意到，在 bee 工具的源码目录下有一个 <code>bee.json</code> 文件，这个文件是针对 bee 工具的一些行为进行配置。该功能还未完全开发完成，不过其中的一些选项已经可以使用：</p>
+<ul>
+<li><code>&quot;version&quot;: 0</code>：配置文件版本，用于对比是否发生不兼容的配置格式版本。</li>
+<li><code>&quot;go_install&quot;: false</code>：如果您的包均使用完整的导入路径（例如：<code>github.com/user/repo/subpkg</code>）,则可以启用该选项来进行 <code>go install</code> 操作，加快构建操作。</li>
+<li><code>&quot;watch_ext&quot;: []</code>：用于监控其它类型的文件（默认只监控后缀为 <code>.go</code> 的文件）。</li>
+<li><code>&quot;dir_structure&quot;:{}</code>：如果您的目录名与默认的 MVC 架构的不同，则可以使用该选项进行修改。</li>
+<li><code>&quot;cmd_args&quot;: []</code>：如果您需要在每次启动时加入启动参数，则可以使用该选项。</li>
+<li><code>&quot;envs&quot;: []</code>：如果您需要在每次启动时设置临时环境变量参数，则可以使用该选项。</li>
+</ul>
+]]></content:encoded></item><item><title>beego 日志配置</title><link>https://haokiu.com/blog/gq7FUH/</link><pubDate>Wed, 16 Sep 2020 16:03:29 +0000</pubDate><guid>https://haokiu.com/blog/gq7FUH/</guid><description>beego logs 的设计思路来自于 ，目前支持的引擎有 file、console、net、smtp，可以通过如下方式进行安装： 如何使用 通用方式 首先引入包： 然后添加输出引擎（log 支持同时…</description><content:encoded><![CDATA[<p>beego logs 的设计思路来自于 <code>database/sql</code>，目前支持的引擎有 file、console、net、smtp，可以通过如下方式进行安装：</p>
+<pre tabindex="0"><code>go get github.com/astaxie/beego/logs
+</code></pre><h2 id="如何使用">如何使用</h2>
+<h3 id="通用方式">通用方式</h3>
+<p>首先引入包：</p>
+<pre tabindex="0"><code>import (
+    &#34;github.com/astaxie/beego/logs&#34;
 )
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;然后添加输出引擎（log 支持同时输出到多个引擎），这里我们以 console 为例，第一个参数是引擎名（包括：console、file、conn、smtp、es、multifile）&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;logs.SetLogger(&amp;#34;console&amp;#34;)
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;添加输出引擎也支持第二个参数,用来表示配置信息，详细的配置请看下面介绍：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;logs.SetLogger(logs.AdapterFile,`{&amp;#34;filename&amp;#34;:&amp;#34;project.log&amp;#34;,&amp;#34;level&amp;#34;:7,&amp;#34;maxlines&amp;#34;:0,&amp;#34;maxsize&amp;#34;:0,&amp;#34;daily&amp;#34;:true,&amp;#34;maxdays&amp;#34;:10,&amp;#34;color&amp;#34;:true}`)
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;然后我们就可以在我们的逻辑中开始任意的使用了：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;package main
+</code></pre><p>然后添加输出引擎（log 支持同时输出到多个引擎），这里我们以 console 为例，第一个参数是引擎名（包括：console、file、conn、smtp、es、multifile）</p>
+<pre tabindex="0"><code>logs.SetLogger(&#34;console&#34;)
+</code></pre><p>添加输出引擎也支持第二个参数,用来表示配置信息，详细的配置请看下面介绍：</p>
+<pre tabindex="0"><code>logs.SetLogger(logs.AdapterFile,`{&#34;filename&#34;:&#34;project.log&#34;,&#34;level&#34;:7,&#34;maxlines&#34;:0,&#34;maxsize&#34;:0,&#34;daily&#34;:true,&#34;maxdays&#34;:10,&#34;color&#34;:true}`)
+</code></pre><p>然后我们就可以在我们的逻辑中开始任意的使用了：</p>
+<pre tabindex="0"><code>package main
 
 import (
-    &amp;#34;github.com/astaxie/beego/logs&amp;#34;
+    &#34;github.com/astaxie/beego/logs&#34;
 )
 
 func main() {
     //an official log.Logger
     l := logs.GetLogger()
-    l.Println(&amp;#34;this is a message of http&amp;#34;)
+    l.Println(&#34;this is a message of http&#34;)
     //an official log.Logger with prefix ORM
-    logs.GetLogger(&amp;#34;ORM&amp;#34;).Println(&amp;#34;this is a message of orm&amp;#34;)
+    logs.GetLogger(&#34;ORM&#34;).Println(&#34;this is a message of orm&#34;)
 
-    logs.Debug(&amp;#34;my book is bought in the year of &amp;#34;, 2016)
-    logs.Info(&amp;#34;this %s cat is %v years old&amp;#34;, &amp;#34;yellow&amp;#34;, 3)
-    logs.Warn(&amp;#34;json is a type of kv like&amp;#34;, map[string]int{&amp;#34;key&amp;#34;: 2016})
-    logs.Error(1024, &amp;#34;is a very&amp;#34;, &amp;#34;good game&amp;#34;)
-    logs.Critical(&amp;#34;oh,crash&amp;#34;)
+    logs.Debug(&#34;my book is bought in the year of &#34;, 2016)
+    logs.Info(&#34;this %s cat is %v years old&#34;, &#34;yellow&#34;, 3)
+    logs.Warn(&#34;json is a type of kv like&#34;, map[string]int{&#34;key&#34;: 2016})
+    logs.Error(1024, &#34;is a very&#34;, &#34;good game&#34;)
+    logs.Critical(&#34;oh,crash&#34;)
 }
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;多个实例&#34;&gt;多个实例&lt;/h3&gt;
-&lt;p&gt;一般推荐使用通用方式进行日志，但依然支持单独声明来使用独立的日志&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;    package main
+</code></pre><h3 id="多个实例">多个实例</h3>
+<p>一般推荐使用通用方式进行日志，但依然支持单独声明来使用独立的日志</p>
+<pre tabindex="0"><code>    package main
 
     import (
-        &amp;#34;github.com/astaxie/beego/logs&amp;#34;
+        &#34;github.com/astaxie/beego/logs&#34;
     )
 
     func main() {
         log := logs.NewLogger()
         log.SetLogger(logs.AdapterConsole)
-        log.Debug(&amp;#34;this is a debug message&amp;#34;)
+        log.Debug(&#34;this is a debug message&#34;)
     }
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;输出文件名和行号&#34;&gt;输出文件名和行号&lt;/h2&gt;
-&lt;p&gt;日志默认不输出调用的文件名和文件行号,如果你期望输出调用的文件名和文件行号,可以如下设置&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>beego 日志处理</title>
-      <link>https://haokiu.com/blog/YAotkP/</link>
-      <pubDate>Wed, 16 Sep 2020 10:17:20 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/YAotkP/</guid>
-      <description>&lt;p&gt;beego 的日志处理是基于 logs 模块搭建的，内置了一个变量 &lt;code&gt;BeeLogger&lt;/code&gt;，默认已经是 &lt;code&gt;logs.BeeLogger&lt;/code&gt; 类型，初始化了 console，也就是默认输出到 &lt;code&gt;console&lt;/code&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;使用入门&#34;&gt;使用入门&lt;/h2&gt;
-&lt;p&gt;一般在程序中我们使用如下的方式进行输出：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;beego.Emergency(&amp;#34;this is emergency&amp;#34;)
-beego.Alert(&amp;#34;this is alert&amp;#34;)
-beego.Critical(&amp;#34;this is critical&amp;#34;)
-beego.Error(&amp;#34;this is error&amp;#34;)
-beego.Warning(&amp;#34;this is warning&amp;#34;)
-beego.Notice(&amp;#34;this is notice&amp;#34;)
-beego.Informational(&amp;#34;this is informational&amp;#34;)
-beego.Debug(&amp;#34;this is debug&amp;#34;)
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;设置输出&#34;&gt;设置输出&lt;/h2&gt;
-&lt;p&gt;我们的程序往往期望把信息输出到 log 中，现在设置输出到文件很方便，如下所示：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;beego.SetLogger(&amp;#34;file&amp;#34;, `{&amp;#34;filename&amp;#34;:&amp;#34;logs/test.log&amp;#34;}`)
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;更多详细的日志配置请查看 &lt;a href=&#34;http://haokiu.com/blog/gq7FUH&#34;&gt;beego 日志配置&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;这个默认情况就会同时输出到两个地方，一个 console，一个 file，如果只想输出到文件，就需要调用删除操作：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;beego.BeeLogger.DelLogger(&amp;#34;console&amp;#34;)
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;设置级别&#34;&gt;设置级别&lt;/h2&gt;
-&lt;p&gt;日志的级别如上所示的代码这样分为八个级别：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;LevelEmergency
+</code></pre><h2 id="输出文件名和行号">输出文件名和行号</h2>
+<p>日志默认不输出调用的文件名和文件行号,如果你期望输出调用的文件名和文件行号,可以如下设置</p>
+<pre tabindex="0"><code>logs.EnableFuncCallDepth(true)
+</code></pre><p>开启传入参数 true,关闭传入参数 false,默认是关闭的.</p>
+<p>如果你的应用自己封装了调用 log 包,那么需要设置 SetLogFuncCallDepth,默认是 2,也就是直接调用的层级,如果你封装了多层,那么需要根据自己的需求进行调整.</p>
+<pre tabindex="0"><code>logs.SetLogFuncCallDepth(3)
+</code></pre><h2 id="异步输出日志">异步输出日志</h2>
+<p>为了提升性能, 可以设置异步输出:</p>
+<pre tabindex="0"><code>logs.Async()
+</code></pre><p>异步输出允许设置缓冲 chan 的大小</p>
+<pre tabindex="0"><code>logs.Async(1e3)
+</code></pre><h2 id="引擎配置设置">引擎配置设置</h2>
+<ul>
+<li>
+<p>console</p>
+<pre tabindex="0"><code>命令行输出，默认输出到`os.Stdout`：
+
+
+logs.SetLogger(logs.AdapterConsole, `{&#34;level&#34;:1,&#34;color&#34;:true}`)
+</code></pre><p>主要的参数如下说明：</p>
+<ul>
+<li>level 输出的日志级别</li>
+<li>color 是否开启打印日志彩色打印(需环境支持彩色输出)</li>
+</ul>
+</li>
+<li>
+<p>file</p>
+<p>设置的例子如下所示：</p>
+<pre tabindex="0"><code>logs.SetLogger(logs.AdapterFile, `{&#34;filename&#34;:&#34;test.log&#34;}`)
+</code></pre><p>主要的参数如下说明：</p>
+<ul>
+<li>filename 保存的文件名</li>
+<li>maxlines 每个文件保存的最大行数，默认值 1000000</li>
+<li>maxsize 每个文件保存的最大尺寸，默认值是 1 &laquo; 28, //256 MB</li>
+<li>daily 是否按照每天 logrotate，默认是 true</li>
+<li>maxdays 文件最多保存多少天，默认保存 7 天</li>
+<li>rotate 是否开启 logrotate，默认是 true</li>
+<li>level 日志保存的时候的级别，默认是 Trace 级别</li>
+<li>perm 日志文件权限</li>
+</ul>
+</li>
+<li>
+<p>multifile</p>
+<p>设置的例子如下所示：</p>
+<pre tabindex="0"><code>logs.SetLogger(logs.AdapterMultiFile, `{&#34;filename&#34;:&#34;test.log&#34;,&#34;separate&#34;:[&#34;emergency&#34;, &#34;alert&#34;, &#34;critical&#34;, &#34;error&#34;, &#34;warning&#34;, &#34;notice&#34;, &#34;info&#34;, &#34;debug&#34;]}`)
+</code></pre><p>主要的参数如下说明(除 separate 外,均与file相同)：</p>
+<ul>
+<li>filename 保存的文件名</li>
+<li>maxlines 每个文件保存的最大行数，默认值 1000000</li>
+<li>maxsize 每个文件保存的最大尺寸，默认值是 1 &laquo; 28, //256 MB</li>
+<li>daily 是否按照每天 logrotate，默认是 true</li>
+<li>maxdays 文件最多保存多少天，默认保存 7 天</li>
+<li>rotate 是否开启 logrotate，默认是 true</li>
+<li>level 日志保存的时候的级别，默认是 Trace 级别</li>
+<li>perm 日志文件权限</li>
+<li>separate 需要单独写入文件的日志级别,设置后命名类似 test.error.log</li>
+</ul>
+</li>
+<li>
+<p>conn</p>
+<p>网络输出，设置的例子如下所示：</p>
+<pre tabindex="0"><code>logs.SetLogger(logs.AdapterConn, `{&#34;net&#34;:&#34;tcp&#34;,&#34;addr&#34;:&#34;:7020&#34;}`)
+</code></pre><p>主要的参数说明如下：</p>
+<ul>
+<li>reconnectOnMsg 是否每次链接都重新打开链接，默认是 false</li>
+<li>reconnect 是否自动重新链接地址，默认是 false</li>
+<li>net 发开网络链接的方式，可以使用 tcp、unix、udp 等</li>
+<li>addr 网络链接的地址</li>
+<li>level 日志保存的时候的级别，默认是 Trace 级别</li>
+</ul>
+</li>
+<li>
+<p>smtp</p>
+<p>邮件发送，设置的例子如下所示：</p>
+<pre tabindex="0"><code>logs.SetLogger(logs.AdapterMail, `{&#34;username&#34;:&#34;beegotest@gmail.com&#34;,&#34;password&#34;:&#34;xxxxxxxx&#34;,&#34;host&#34;:&#34;smtp.gmail.com:587&#34;,&#34;sendTos&#34;:[&#34;xiemengjun@gmail.com&#34;]}`)
+</code></pre><p>主要的参数说明如下：</p>
+<ul>
+<li>username smtp 验证的用户名</li>
+<li>password smtp 验证密码</li>
+<li>host 发送的邮箱地址</li>
+<li>sendTos 邮件需要发送的人，支持多个</li>
+<li>subject 发送邮件的标题，默认是 <code>Diagnostic message from server</code></li>
+<li>level 日志发送的级别，默认是 Trace 级别</li>
+</ul>
+</li>
+<li>
+<p>ElasticSearch</p>
+<p>输出到 ElasticSearch:</p>
+<pre tabindex="0"><code>logs.SetLogger(logs.AdapterEs, `{&#34;dsn&#34;:&#34;http://localhost:9200/&#34;,&#34;level&#34;:1}`)
+</code></pre></li>
+<li>
+<p>简聊</p>
+<p>输出到简聊：</p>
+<pre tabindex="0"><code>logs.SetLogger(logs.AdapterJianLiao, `{&#34;authorname&#34;:&#34;xxx&#34;,&#34;title&#34;:&#34;beego&#34;, &#34;webhookurl&#34;:&#34;https://jianliao.com/xxx&#34;, &#34;redirecturl&#34;:&#34;https://jianliao.com/xxx&#34;,&#34;imageurl&#34;:&#34;https://jianliao.com/xxx&#34;,&#34;level&#34;:1}`)
+</code></pre></li>
+<li>
+<p>slack</p>
+<p>输出到slack:</p>
+<pre tabindex="0"><code>logs.SetLogger(logs.AdapterSlack, `{&#34;webhookurl&#34;:&#34;https://slack.com/xxx&#34;,&#34;level&#34;:1}`)
+</code></pre></li>
+</ul>
+]]></content:encoded></item><item><title>beego 日志处理</title><link>https://haokiu.com/blog/YAotkP/</link><pubDate>Wed, 16 Sep 2020 10:17:20 +0000</pubDate><guid>https://haokiu.com/blog/YAotkP/</guid><description>beego 的日志处理是基于 logs 模块搭建的，内置了一个变量 ，默认已经是 类型，初始化了 console，也就是默认输出到 。 使用入门 一般在程序中我们使用如下的方式进行输出： 设置输出 我…</description><content:encoded><![CDATA[<p>beego 的日志处理是基于 logs 模块搭建的，内置了一个变量 <code>BeeLogger</code>，默认已经是 <code>logs.BeeLogger</code> 类型，初始化了 console，也就是默认输出到 <code>console</code>。</p>
+<h2 id="使用入门">使用入门</h2>
+<p>一般在程序中我们使用如下的方式进行输出：</p>
+<pre tabindex="0"><code>beego.Emergency(&#34;this is emergency&#34;)
+beego.Alert(&#34;this is alert&#34;)
+beego.Critical(&#34;this is critical&#34;)
+beego.Error(&#34;this is error&#34;)
+beego.Warning(&#34;this is warning&#34;)
+beego.Notice(&#34;this is notice&#34;)
+beego.Informational(&#34;this is informational&#34;)
+beego.Debug(&#34;this is debug&#34;)
+</code></pre><h2 id="设置输出">设置输出</h2>
+<p>我们的程序往往期望把信息输出到 log 中，现在设置输出到文件很方便，如下所示：</p>
+<pre tabindex="0"><code>beego.SetLogger(&#34;file&#34;, `{&#34;filename&#34;:&#34;logs/test.log&#34;}`)
+</code></pre><p>更多详细的日志配置请查看 <a href="http://haokiu.com/blog/gq7FUH">beego 日志配置</a></p>
+<p>这个默认情况就会同时输出到两个地方，一个 console，一个 file，如果只想输出到文件，就需要调用删除操作：</p>
+<pre tabindex="0"><code>beego.BeeLogger.DelLogger(&#34;console&#34;)
+</code></pre><h2 id="设置级别">设置级别</h2>
+<p>日志的级别如上所示的代码这样分为八个级别：</p>
+<pre tabindex="0"><code>LevelEmergency
 LevelAlert
 LevelCritical
 LevelError
@@ -211,32 +453,32 @@ LevelWarning
 LevelNotice
 LevelInformational
 LevelDebug
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;级别依次降低，默认全部打印，但是一般我们在部署环境，可以通过设置级别设置日志级别：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;beego.SetLevel(beego.LevelInformational)
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;输出文件名和行号&#34;&gt;输出文件名和行号&lt;/h2&gt;
-&lt;p&gt;日志默认不输出调用的文件名和文件行号,如果你期望输出调用的文件名和文件行号,可以如下设置&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;beego.SetLogFuncCall(true)
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;开启传入参数 true, 关闭传入参数 false, 默认是关闭的.&lt;/p&gt;
-&lt;h2 id=&#34;完整示例&#34;&gt;完整示例&lt;/h2&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;func internalCalculationFunc(x, y int) (result int, err error) {
-    beego.Debug(&amp;#34;calculating z. x:&amp;#34;, x, &amp;#34; y:&amp;#34;, y)
+</code></pre><p>级别依次降低，默认全部打印，但是一般我们在部署环境，可以通过设置级别设置日志级别：</p>
+<pre tabindex="0"><code>beego.SetLevel(beego.LevelInformational)
+</code></pre><h2 id="输出文件名和行号">输出文件名和行号</h2>
+<p>日志默认不输出调用的文件名和文件行号,如果你期望输出调用的文件名和文件行号,可以如下设置</p>
+<pre tabindex="0"><code>beego.SetLogFuncCall(true)
+</code></pre><p>开启传入参数 true, 关闭传入参数 false, 默认是关闭的.</p>
+<h2 id="完整示例">完整示例</h2>
+<pre tabindex="0"><code>func internalCalculationFunc(x, y int) (result int, err error) {
+    beego.Debug(&#34;calculating z. x:&#34;, x, &#34; y:&#34;, y)
     z := y
     switch {
     case x == 3:
-        beego.Debug(&amp;#34;x == 3&amp;#34;)
-        panic(&amp;#34;Failure.&amp;#34;)
+        beego.Debug(&#34;x == 3&#34;)
+        panic(&#34;Failure.&#34;)
     case y == 1:
-        beego.Debug(&amp;#34;y == 1&amp;#34;)
-        return 0, errors.New(&amp;#34;Error!&amp;#34;)
+        beego.Debug(&#34;y == 1&#34;)
+        return 0, errors.New(&#34;Error!&#34;)
     case y == 2:
-        beego.Debug(&amp;#34;y == 2&amp;#34;)
+        beego.Debug(&#34;y == 2&#34;)
         z = x
     default:
-        beego.Debug(&amp;#34;default&amp;#34;)
+        beego.Debug(&#34;default&#34;)
         z += x
     }
     retVal := z - 3
-    beego.Debug(&amp;#34;Returning &amp;#34;, retVal)
+    beego.Debug(&#34;Returning &#34;, retVal)
 
     return retVal, nil
 }
@@ -244,46 +486,43 @@ LevelDebug
 func processInput(input inputData) {
     defer func() {
         if r := recover(); r != nil {
-            beego.Error(&amp;#34;Unexpected error occurred: &amp;#34;, r)
-            outputs &amp;lt;- outputData{result: 0, error: true}
+            beego.Error(&#34;Unexpected error occurred: &#34;, r)
+            outputs &lt;- outputData{result: 0, error: true}
         }
     }()
-    beego.Informational(&amp;#34;Received input signal. x:&amp;#34;, input.x, &amp;#34; y:&amp;#34;, input.y)
+    beego.Informational(&#34;Received input signal. x:&#34;, input.x, &#34; y:&#34;, input.y)
 
     res, err := internalCalculationFunc(input.x, input.y)
     if err != nil {
-        beego.Warning(&amp;#34;Error in calculation:&amp;#34;, err.Error())
+        beego.Warning(&#34;Error in calculation:&#34;, err.Error())
     }
 
-    beego.Informational(&amp;#34;Returning result: &amp;#34;, res, &amp;#34; error: &amp;#34;, err)
-    outputs &amp;lt;- outputData{result: res, error: err != nil}
+    beego.Informational(&#34;Returning result: &#34;, res, &#34; error: &#34;, err)
+    outputs &lt;- outputData{result: res, error: err != nil}
 }
 
 func main() {
     inputs = make(chan inputData)
     outputs = make(chan outputData)
     criticalChan = make(chan int)
-    beego.Informational(&amp;#34;App started.&amp;#34;)
+    beego.Informational(&#34;App started.&#34;)
 
     go consumeResults(outputs)
-    beego.Informational(&amp;#34;Started receiving results.&amp;#34;)
+    beego.Informational(&#34;Started receiving results.&#34;)
 
     go generateInputs(inputs)
-    beego.Informational(&amp;#34;Started sending signals.&amp;#34;)
+    beego.Informational(&#34;Started sending signals.&#34;)
 
     for {
         select {
-        case input := &amp;lt;-inputs:
+        case input := &lt;-inputs:
             processInput(input)
-        case &amp;lt;-criticalChan:
-            beego.Critical(&amp;#34;Caught value from criticalChan: Go shut down.&amp;#34;)
-            panic(&amp;#34;Shut down due to critical fault.&amp;#34;)
+        case &lt;-criticalChan:
+            beego.Critical(&#34;Caught value from criticalChan: Go shut down.&#34;)
+            panic(&#34;Shut down due to critical fault.&#34;)
         }
     }
 }
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;日志级别&#34;&gt;日志级别&lt;/h2&gt;
-&lt;p&gt;beego 日志级别对应的数值可参考：&lt;a href=&#34;http://haokiu.com/blog/RAhBfF&#34;&gt;beego 的日志级别&lt;/a&gt;&lt;/p&gt;</description>
-    </item>
-    
-  </channel>
-</rss>
+</code></pre><h2 id="日志级别">日志级别</h2>
+<p>beego 日志级别对应的数值可参考：<a href="http://haokiu.com/blog/RAhBfF">beego 的日志级别</a></p>
+]]></content:encoded></item></channel></rss>

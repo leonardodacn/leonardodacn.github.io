@@ -1,423 +1,1269 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
-  <channel>
-    <title>Bigdata on haokiu</title>
-    <link>https://haokiu.com/tags/bigdata/</link>
-    <description>Recent content in Bigdata on haokiu</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>zh-cn</language>
-    <copyright>haokiu.com</copyright>
-    <lastBuildDate>Tue, 08 Jun 2021 17:51:46 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/bigdata/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Hobert读书笔记</title>
-      <link>https://haokiu.com/blog/bk-5/</link>
-      <pubDate>Tue, 08 Jun 2021 17:51:46 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/bk-5/</guid>
-      <description>&lt;p&gt;&lt;a href=&#34;http://haokiu.com/blog/f6ad1487667e4880973e3b21505810be&#34;&gt;第一章 并发编程的挑战&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/232f08ac38d0478dab889420f809c20e&#34;&gt;第2章 InnoDB存储引擎&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/e15796699f1a419ba85731d159eba322&#34;&gt;第1章 Java的I/O演进之路&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/567c6d054f1d4d53a29e9d24f213165a&#34;&gt;第1章 Spring框架的由来&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/a9dcb2a7a21d49dea965eedc7e169c79&#34;&gt;第2章 Tomcat总体架构&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/3426588a7834499f8a9a1b7e46817c0c&#34;&gt;三、Paxos的工程实践&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/cffcc67d768246fd8624b3e5b98854f5&#34;&gt;序&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/b221a7f05b774f7ab4305cff0f244d52&#34;&gt;第1章 概述&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/eec901917e884002a43f917c02f47dd9&#34;&gt;第6章 深入分析ClassLoader工作机制&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/499b1754f0844c299d9bf24652161845&#34;&gt;第8章 虚拟机字节码执行系统&lt;/a&gt;&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>mysql replace </title>
-      <link>https://haokiu.com/blog/nfvw4R/</link>
-      <pubDate>Mon, 01 Feb 2021 09:48:42 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/nfvw4R/</guid>
-      <description>&lt;p&gt;mysql replace 可以将字段的字符串内容替换，语法：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;Update `table_name` SET `field_name` = replace (`field_name`,’from_str’,&amp;#39;to_str’) Where `field_name` LIKE ‘%from_str%’
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;使用样例：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;# 将 blog 表的字段 coentent 里的 &amp;#34;https://haokiu.com&amp;#34; 替换为 &amp;#34;http://haokiu.com&amp;#34;
-update blog set content = replace(content, &amp;#34;https://haokiu.com&amp;#34;, &amp;#34;http://haokiu.com&amp;#34;) where content like &amp;#39;%https://haokiu.com%&amp;#39;
-&lt;/code&gt;&lt;/pre&gt;</description>
-    </item>
-    
-    <item>
-      <title>OLAP</title>
-      <link>https://haokiu.com/blog/OLAP/</link>
-      <pubDate>Thu, 05 Nov 2020 10:53:39 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/OLAP/</guid>
-      <description>&lt;h1 id=&#34;olap&#34;&gt;OLAP&lt;/h1&gt;
-&lt;p&gt;在数据仓库一章中我们讨论了数据仓库及其模型的概念，而数据库与数据仓库的区别实际讲的是 OLTP 与 OLAP 的区别。操作型处理，叫联机事务处理 OLTP（On-Line Transaction Processing），也可以称面向交易的处理系统，它是针对具体业务在数据库联机的日常操作，通常对少数记录进行查询、修改。用户较为关心操作的响应时间、数据的安全性、完整性和并发的支持用户数等问题。传统的数据库系统作为数据管理的主要手段，主要用于操作型处理。分析型处理，叫联机分析处理 OLAP（On-Line Analytical Processing）一般针对某些主题历史数据进行分析，支持管理决策。&lt;/p&gt;
-&lt;h1 id=&#34;olap-与-oltp&#34;&gt;OLAP 与 OLTP&lt;/h1&gt;
-&lt;p&gt;在互联网浪潮出现之前，企业的数据量普遍不大，特别是核心的业务数据，通常一个单机的数据库就可以保存。那时候的存储并不需要复杂的架构，所有的线上请求(OLTP, Online Transactional Processing) 和后台分析 (OLAP, Online Analytical Processing) 都跑在同一个数据库实例上。后来渐渐的业务越来越复杂，数据量越来越大，DBA 们再也优化不动 SQL 了。其中一个显著问题是：单机数据库支持线上的 TP 请求已经非常吃力，没办法再跑比较重的 AP 分析型任务。跑起来要么 OOM，要么影响线上业务，要么做了主从分离、分库分表之后很难实现业务需求。&lt;/p&gt;
-&lt;p&gt;在这样的背景下，以 Hadoop 为代表的大数据技术开始蓬勃发展，它用许多相对廉价的 x86 机器构建了一个数据分析平台，用并行的能力破解大数据集的计算问题。所以从某种程度上说，大数据技术可以算是传统关系型数据库技术发展过程的一个分支。当然在过程中大数据领域也发展出了属于自己的全新场景，诞生了许多新的技术，这个不深入提了。&lt;/p&gt;
-&lt;p&gt;由此，架构师把存储划分成线上业务和数据分析两个模块。如下图所示，业务库的数据通过 ETL 工具抽取出来，导入专用的分析平台。业务数据库专注提供 TP 能力，分析平台提供 AP 能力，各施其职，看起来已经很完美了。但其实这个架构也有自己的不足。&lt;/p&gt;
-&lt;h1 id=&#34;htap&#34;&gt;HTAP&lt;/h1&gt;
-&lt;p&gt;首先是复杂性问题。本身 ETL 过程就是一个很繁琐的过程，一个例证是 ETL 做的好，可以成为一个商业模式。因为是两个系统，必然带来更高的学习成本、维护成本和整合成本。如果你使用的是开源的大数据工具搭建的分析平台，那么肯定会遇到各种工具之间的磨合的问题，还有由于各种工具良莠不齐所导致的质量问题。&lt;/p&gt;
-&lt;p&gt;其次是实时性问题。通常我们认为越接近实时的数据，它的价值越大。很多业务场景，对实时性有很高的要求，比如风控系统，它需要对数据不停的分析，并且在险情出现之后尽快响应。而通常的 ETL 是一个周期性的操作，比如一天或者一个小时导一次数据，数据实时性是没有办法保证的。最后是一致性问题。一致性在数据库里面是很重要的概念，数据库的事务就是用来保证一致性的。如果把数据分表存储在两个不同的系统内，那么很难保证一致性，即 AP 系统的查询结果没有办法与线上业务正确对应。那么这两个系统的联动效应就会受到限制，比如用户没办法在一个事务里面，同时访问两个系统的数据。&lt;/p&gt;
-&lt;p&gt;由于现有的数据平台存在的以上局限性，我们认为开发一个HTAP（Hybrid Transactional/Analytical Processing）融合型数据库产品可以缓解大家在 TP or AP 抉择上的焦虑，或者说，让数据库的使用者不用考虑过度复杂的架构，在一套数据库中既能满足 OLTP 类需求，也能满足 OLAP 类需求。&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>数据中台</title>
-      <link>https://haokiu.com/blog/3OKmkr/</link>
-      <pubDate>Thu, 05 Nov 2020 10:50:55 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/3OKmkr/</guid>
-      <description>&lt;h1 id=&#34;数据中台&#34;&gt;数据中台&lt;/h1&gt;
-&lt;p&gt;阿里在 2018 年提出了所谓“数据中台”的概念：即数据被统一采集，规范数据语义和业务口径形成企业基础数据模型，提供统一的分析查询和新业务的数据对接能力。数据中台并不是新的颠覆式技术，而是一种企业数据资产管理和应用方法学，涵盖了数据集成、数据质量管理、元数据与主数据管理、数仓建模、支持高并发访问的数据服务接口层开发等内容。&lt;/p&gt;
-&lt;p&gt;在数据中台建设中，结合企业自身的业务需求特点，架构和功能可能各不相同，但其中一个最基本的需求是数据采集的实时性和完整性。数据从源端产生，到被采集到数据汇集层的时间要尽可能短，至少应做到秒级延迟，这样中台的数据模型更新才可能做到近实时，构建在中台之上依赖实时数据流驱动的应用（例如商品推荐、欺诈检测等）才能够满足业务的需求。&lt;/p&gt;
-&lt;p&gt;以阿里双十一为例，在极高的并发情况下，订单产生到大屏统计数据更新延迟不能超过 5s，一般在 2s 内。中台对外提供的数据应该是完整的，源端数据的 Create、Update 和 Delete 都要能够被捕获，不能少也不能多，即数据需要有端到端一致性的能力（Exactly Once Semantic，EOS）。当然，EOS 并非在任何业务场景下都需要，但从平台角度必须具备这种能力，并且允许用户根据业务需求灵活开启和关闭。&lt;/p&gt;
-&lt;h1 id=&#34;数据中台的产生背景&#34;&gt;数据中台的产生背景&lt;/h1&gt;
-&lt;p&gt;起初，企业只有一个主营业务，比如电商，但随着公司战略和发展需要，会新增多支业务线，由于存在负责业务线开发的团队不一致，随之而来的就是风格迥异的代码风格和数据烟囱问题。&lt;/p&gt;
-&lt;p&gt;数据中台的产生就是为了解决数据烟囱的问题，打通数据孤岛，让数据活起来，让数据产生价值，结合前台能力，达到快速响应用户的目标。&lt;/p&gt;
-&lt;p&gt;中台只会同步能服务于超过两个业务线的数据，如果仅仅带有自身业务属性(不存在共性)的数据，不在中台的考虑范围内。例如:电商的产品产地信息，对于金融业务来说，其实是没有价值的，但电商的用户收货地址对金融业务来说是有价值的。所以不要简单的认为数据中台会汇集企业的所有数据，还是有侧重点的。导致这个结果的原因还包括数据中台建设本身是一个长周期的事，如果数据仅仅作用于一方，由业务方(前台)自行开发，更符合敏捷开发的特性。&lt;/p&gt;
-&lt;p&gt;关于何时应该建立数据中台这个问题，我的思考是这样的。复杂的业务线、丰富的数据维度和公司上层领导主推。三者缺一，都没有实行的必要。
-一只手都能数的过来的业务线量，跨多个项目的需求相对还是比较少的，取数也比较方便，直接走接口方式基本就能满足。反而，通过数据中台流转，将问题复杂化了。&lt;/p&gt;
-&lt;p&gt;数据的维度越丰富，数据的价值越大。只知道性别数据，与知道性别和年龄，所得到的用户画像，肯定是维度丰富的准确性高。维度不丰富的情况下，没有计算的价值。&lt;/p&gt;
-&lt;p&gt;可能会很奇怪为什么一定需要公司上层的同意。这里就可能涉及到动了谁的奶酪的问题，数据是每个业务线最重要的资源，在推行中台过程中，势必会遇到阻力，只有成为全公司的战略任务，才有可能把事情做好。&lt;/p&gt;
-&lt;p&gt;中台如果没有考虑通用的业务能力，也会导致无法更专注于对中台技术的深入研究。中台如果不从抽象度、共性等角度出发，很有可能局限于某单一业务，导致中台无法很好地适应其他相关业务的要求，从而不能很好地应对业务的变化。如果中台的抽象程度低、扩展性差，则会导致中台无法满足前台业务需求。这时前台应用又因为业务本身的发展目标和压力不得不自行组织团队完成这部分功能，由此可能发生本应由中台提供的能力却最终实现在业务应用中，失去了中台存在的价值。&lt;/p&gt;
-&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://s2.ax1x.com/2019/10/20/Ku7Faj.jpg&#34; alt=&#34;中台架构图&#34;  /&gt;
-&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>presto 官网</title>
-      <link>https://haokiu.com/blog/FhpG3z/</link>
-      <pubDate>Mon, 28 Sep 2020 14:50:12 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/FhpG3z/</guid>
-      <description>&lt;p&gt;现在 presto 有两个官网：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestodb.io/&#34;&gt;旧presto官网&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://trino.io/&#34;&gt;新presto官网&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</description>
-    </item>
-    
-    <item>
-      <title>presto 支持的数据源</title>
-      <link>https://haokiu.com/blog/7mlwkW/</link>
-      <pubDate>Mon, 28 Sep 2020 14:40:32 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/7mlwkW/</guid>
-      <description>&lt;p&gt;presto 有很多连接器以支持不同的数据源：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/accumulo.html&#34;&gt;Accumulo&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/bigquery.html&#34;&gt;BigQuery&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/blackhole.html&#34;&gt;Black Hole&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/cassandra.html&#34;&gt;Cassandra&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/druid.html&#34;&gt;Druid&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/elasticsearch.html&#34;&gt;Elasticsearch&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/googlesheets.html&#34;&gt;Google Sheets&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/iceberg.html&#34;&gt;Iceberg&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/hive.html&#34;&gt;Hive&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/jmx.html&#34;&gt;JMX&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/kafka.html&#34;&gt;Kafka&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/kinesis.html&#34;&gt;Kinesis&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/kudu.html&#34;&gt;Kudu&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/localfile.html&#34;&gt;Local File&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/memory.html&#34;&gt;Memory&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/memsql.html&#34;&gt;MemSQL&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/mongodb.html&#34;&gt;MongoDB&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/mysql.html&#34;&gt;MySQL&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/oracle.html&#34;&gt;Oracle&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/phoenix.html&#34;&gt;Phoenix&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/pinot.html&#34;&gt;Pinot&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/postgresql.html&#34;&gt;PostgreSQL&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/prometheus.html&#34;&gt;Prometheus&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/redis.html&#34;&gt;Redis&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/redshift.html&#34;&gt;Redshift&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/sqlserver.html&#34;&gt;SQL Server&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/system.html&#34;&gt;System&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/thrift.html&#34;&gt;Thrift&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/tpcds.html&#34;&gt;TPCDS&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://prestosql.io/docs/current/connector/tpch.html&#34;&gt;TPCH&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</description>
-    </item>
-    
-    <item>
-      <title>sql 优化</title>
-      <link>https://haokiu.com/blog/XEhpYv/</link>
-      <pubDate>Wed, 23 Sep 2020 16:59:17 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/XEhpYv/</guid>
-      <description>&lt;p&gt;SQL 优化已经成为衡量程序猿优秀与否的硬性指标，甚至在各大厂招聘岗位职能上都有明码标注。&lt;/p&gt;
-&lt;p&gt;有朋友疑问到，SQL 优化真的有这么重要么？如下图所示，SQL 优化在提升系统性能中是：成本最低和优化效果最明显的途径。&lt;/p&gt;
-&lt;p&gt;**优化成本：**硬件&amp;gt;系统配置&amp;gt;数据库表结构&amp;gt;SQL 及索引。&lt;/p&gt;
-&lt;p&gt;**优化效果：**硬件&amp;lt;系统配置&amp;lt;数据库表结构&amp;lt;SQL 及索引。&lt;/p&gt;
-&lt;p&gt;对于MySQL层优化我一般遵从五个原则：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;**减少数据访问：**设置合理的字段类型，启用压缩，通过索引访问等减少磁盘 IO。&lt;/li&gt;
-&lt;li&gt;**返回更少的数据：**只返回需要的字段和数据分页处理，减少磁盘 IO 及网络 IO。&lt;/li&gt;
-&lt;li&gt;**减少交互次数：**批量 DML 操作，函数存储等减少数据连接次数。&lt;/li&gt;
-&lt;li&gt;**减少服务器 CPU 开销：**尽量减少数据库排序操作以及全表查询，减少 CPU 内存占用。&lt;/li&gt;
-&lt;li&gt;**利用更多资源：**使用表分区，可以增加并行操作，更大限度利用 CPU 资源。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;总结到 SQL 优化中，就如下三点：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;最大化利用索引。&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;尽可能避免全表扫描。&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;减少无效数据的查询。&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;理解 SQL 优化原理 ，首先要搞清楚 SQL 执行顺序。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;SELECT 语句，语法顺序如下：&lt;/strong&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;. &lt;span style=&#34;color:#66d9ef&#34;&gt;SELECT&lt;/span&gt; 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;. &lt;span style=&#34;color:#66d9ef&#34;&gt;DISTINCT&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;select_list&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#ae81ff&#34;&gt;3&lt;/span&gt;. &lt;span style=&#34;color:#66d9ef&#34;&gt;FROM&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;left_table&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;. &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;join_type&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;JOIN&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;right_table&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#ae81ff&#34;&gt;5&lt;/span&gt;. &lt;span style=&#34;color:#66d9ef&#34;&gt;ON&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;join_condition&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#ae81ff&#34;&gt;6&lt;/span&gt;. &lt;span style=&#34;color:#66d9ef&#34;&gt;WHERE&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;where_condition&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#ae81ff&#34;&gt;7&lt;/span&gt;. &lt;span style=&#34;color:#66d9ef&#34;&gt;GROUP&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;BY&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;group_by_list&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#ae81ff&#34;&gt;8&lt;/span&gt;. &lt;span style=&#34;color:#66d9ef&#34;&gt;HAVING&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;having_condition&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#ae81ff&#34;&gt;9&lt;/span&gt;. &lt;span style=&#34;color:#66d9ef&#34;&gt;ORDER&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;BY&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;order_by_condition&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#ae81ff&#34;&gt;10&lt;/span&gt;.&lt;span style=&#34;color:#66d9ef&#34;&gt;LIMIT&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;limit_number&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;SELECT 语句，执行顺序如下：&lt;/strong&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;FROM&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;表名&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;#&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;选取表，将多个表数据通过笛卡尔积变成一个表。&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;ON&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;筛选条件&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;#&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;对笛卡尔积的虚表进行筛选&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;JOIN&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;join&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;left&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;join&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;right&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;join&lt;/span&gt;...&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; 
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;join表&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;#&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;指定&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;join&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;，用于添加数据到&lt;/span&gt;on之后的虚表中&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;，例如&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;left&lt;/span&gt; join会将左表的剩余数据添加到虚表中
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;WHERE&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;where条件&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;#&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;对上述虚表进行筛选&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;GROUP&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;BY&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;分组条件&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;#&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;分组&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;SUM&lt;/span&gt;()&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;等聚合函数&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;#&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;用于&lt;/span&gt;having子句进行判断&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;，在书写上这类聚合函数是写在&lt;/span&gt;having判断里面的
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;HAVING&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;分组筛选&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;#&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;对分组后的结果进行聚合筛选&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;SELECT&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;返回数据列表&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;#&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;返回的单列必须在&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;group&lt;/span&gt; by子句中&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;，聚合函数除外&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;DISTINCT&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;#&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;数据除重&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;ORDER&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;BY&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;排序条件&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;#&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;排序&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;LIMIT&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;行数限制&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;以下 SQL 优化策略适用于数据量较大的场景下，如果数据量较小，没必要以此为准，以免画蛇添足。&lt;/p&gt;
-&lt;p&gt;避免不走索引的场景&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;①尽量避免在字段开头模糊查询，会导致数据库引擎放弃索引进行全表扫描&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;如下：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;SELECT&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;FROM&lt;/span&gt; t &lt;span style=&#34;color:#66d9ef&#34;&gt;WHERE&lt;/span&gt; username &lt;span style=&#34;color:#66d9ef&#34;&gt;LIKE&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;%陈%&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;**优化方式：**尽量在字段后面使用模糊查询。&lt;/p&gt;
-&lt;p&gt;如下：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;SELECT&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;FROM&lt;/span&gt; t &lt;span style=&#34;color:#66d9ef&#34;&gt;WHERE&lt;/span&gt; username &lt;span style=&#34;color:#66d9ef&#34;&gt;LIKE&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;陈%&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如果需求是要在前面使用模糊查询：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;使用 MySQL 内置函数 INSTR（str，substr）来匹配，作用类似于 Java 中的 indexOf()，查询字符串出现的角标位置。&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;使用 FullText 全文索引，用 match against 检索。&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;数据量较大的情况，建议引用 ElasticSearch、Solr，亿级数据量检索速度秒级。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;当表数据量较少（几千条儿那种），别整花里胡哨的，直接用 like &amp;lsquo;%xx%&amp;rsquo;。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;②尽量避免使用 in 和 not in，会导致引擎走全表扫描&lt;/strong&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;</description>
-    </item>
-    
-    <item>
-      <title>elasticsearch</title>
-      <link>https://haokiu.com/blog/3XTrh1/</link>
-      <pubDate>Wed, 23 Sep 2020 16:53:39 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/3XTrh1/</guid>
-      <description>&lt;h2 id=&#34;基本概念&#34;&gt;基本概念&lt;/h2&gt;
-&lt;h3 id=&#34;node-与-cluster&#34;&gt;Node 与 Cluster&lt;/h3&gt;
-&lt;p&gt;Elastic 本质上是一个分布式数据库，允许多台服务器协同工作，每台服务器可以运行多个 Elastic 实例。&lt;/p&gt;
-&lt;p&gt;单个 Elastic 实例称为一个节点（node）。一组节点构成一个集群（cluster）。&lt;/p&gt;
-&lt;h3 id=&#34;index&#34;&gt;Index&lt;/h3&gt;
-&lt;p&gt;Elastic 会索引所有字段，经过处理后写入一个反向索引（Inverted Index）。查找数据的时候，直接查找该索引。&lt;/p&gt;
-&lt;p&gt;所以，Elastic 数据管理的顶层单位就叫做 Index（索引）。它是单个数据库的同义词。每个 Index （即数据库）的名字必须是小写。&lt;/p&gt;
-&lt;h3 id=&#34;document&#34;&gt;Document&lt;/h3&gt;
-&lt;p&gt;Index 里面单条的记录称为 Document（文档）。许多条 Document 构成了一个 Index。Document 使用 JSON 格式表示。同一个 Index 里面的 Document，不要求有相同的结构（scheme），但是最好保持相同，这样有利于提高搜索效率。&lt;/p&gt;
-&lt;h3 id=&#34;type&#34;&gt;Type&lt;/h3&gt;
-&lt;p&gt;Document 可以分组，比如weather这个 Index 里面，可以按城市分组（北京和上海），也可以按气候分组（晴天和雨天）。这种分组就叫做 Type，它是虚拟的逻辑分组，用来过滤 Document。&lt;/p&gt;
-&lt;p&gt;不同的 Type 应该有相似的结构（schema），举例来说，id字段不能在这个组是字符串，在另一个组是数值。这是与关系型数据库的表的一个区别。性质完全不同的数据（比如products和logs）应该存成两个 Index，而不是一个 Index 里面的两个 Type（虽然可以做到）。&lt;/p&gt;
-&lt;p&gt;在6.0之前的版本，一个ElasticSearch索引中，可以有多个类型；从6.0版本开始，，一个ElasticSearch索引中，只有1个类型。一个类型是索引的一个逻辑上的分类，通常具有一组相同字段的文档组成。ElasticSearch的类型概念相当于关系数据库的数据表。&lt;/p&gt;
-&lt;h3 id=&#34;shard&#34;&gt;shard&lt;/h3&gt;
-&lt;p&gt;当数据量较大时，索引的存储空间需求超出单个节点磁盘容量的限制，或者出现单个节点处理速度较慢。为了解决这些问题，ElasticSearch将索引中的数据进行切分成多个分片（shard），每个分片存储这个索引的一部分数据，分布在不同节点上。当需要查询索引时，ElasticSearch将查询发送到每个相关分片，之后将查询结果合并，这个过程对ElasticSearch应用来说是透明的，用户感知不到分片的存在。 一个索引的分片一旦指定，不再修改。&lt;/p&gt;
-&lt;h3 id=&#34;副本&#34;&gt;副本&lt;/h3&gt;
-&lt;p&gt;其实，分片全称是主分片，简称为分片。主分片是相对于副本来说的，副本是对主分片的一个或多个复制版本（或称拷贝），这些复制版本（拷贝）可以称为复制分片，可以直接称之为副本。当主分片丢失时，集群可以将一个副本升级为新的主分片。&lt;/p&gt;
-&lt;h2 id=&#34;对比&#34;&gt;对比&lt;/h2&gt;
-&lt;table&gt;
-	&lt;thead&gt;
-			&lt;tr&gt;
-					&lt;th&gt;ElasticSearch&lt;/th&gt;
-					&lt;th&gt;RDBMS&lt;/th&gt;
-			&lt;/tr&gt;
-	&lt;/thead&gt;
-	&lt;tbody&gt;
-			&lt;tr&gt;
-					&lt;td&gt;索引（index）&lt;/td&gt;
-					&lt;td&gt;数据库（database）&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td&gt;类型（type）&lt;/td&gt;
-					&lt;td&gt;表（table）&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td&gt;文档（document）&lt;/td&gt;
-					&lt;td&gt;行（row）&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td&gt;字段（field）&lt;/td&gt;
-					&lt;td&gt;列（column）&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td&gt;映射（mapping）&lt;/td&gt;
-					&lt;td&gt;表结构（schema）&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td&gt;全文索引&lt;/td&gt;
-					&lt;td&gt;索引&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td&gt;查询DSL&lt;/td&gt;
-					&lt;td&gt;SQL&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td&gt;GET&lt;/td&gt;
-					&lt;td&gt;select&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td&gt;PUT/POST&lt;/td&gt;
-					&lt;td&gt;update&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td&gt;DELETE&lt;/td&gt;
-					&lt;td&gt;delete&lt;/td&gt;
-			&lt;/tr&gt;
-	&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;h2 id=&#34;节点信息&#34;&gt;节点信息&lt;/h2&gt;
-&lt;h3 id=&#34;查看节点信息&#34;&gt;查看节点信息&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl localhost:9200
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;查看节点健康度&#34;&gt;查看节点健康度&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl localhost:9200/_cat/health?v&amp;amp;pretty&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;true
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;查看集群状况&#34;&gt;查看集群状况&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl localhost:9200/_cat/nodes?v&amp;amp;pretty&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;true
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;index索引操作&#34;&gt;index(索引)操作&lt;/h2&gt;
-&lt;h3 id=&#34;查看当前节点的所有-index&#34;&gt;查看当前节点的所有 Index。&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -X GET &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;http://localhost:9200/_cat/indices?v&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;可以列出每个-index-所包含的-type&#34;&gt;可以列出每个 Index 所包含的 Type&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;localhost:9200/_mapping?pretty=true&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;新建一个名叫weather的-index&#34;&gt;新建一个名叫weather的 Index。&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -X PUT &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;localhost:9200/weather&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;删除这个-index&#34;&gt;删除这个 Index。&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -X DELETE &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;localhost:9200/weather&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;文档操作&#34;&gt;文档操作&lt;/h2&gt;
-&lt;h3 id=&#34;获取&#34;&gt;获取&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;GET /website/blog/123?pretty
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;_index&amp;#34;&lt;/span&gt; :   &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;website&amp;#34;&lt;/span&gt;,
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;_type&amp;#34;&lt;/span&gt; :    &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;blog&amp;#34;&lt;/span&gt;,
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;_id&amp;#34;&lt;/span&gt; :      &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;123&amp;#34;&lt;/span&gt;,
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;_version&amp;#34;&lt;/span&gt; : 1,
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;found&amp;#34;&lt;/span&gt; :    true,
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;_source&amp;#34;&lt;/span&gt; :  &lt;span style=&#34;color:#f92672&#34;&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;title&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;My first blog entry&amp;#34;&lt;/span&gt;,
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;text&amp;#34;&lt;/span&gt;:  &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Just trying this out...&amp;#34;&lt;/span&gt;,
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;date&amp;#34;&lt;/span&gt;:  &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;2014/01/01&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;检索文档的一部分&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>搜索引擎 及 elastic search </title>
-      <link>https://haokiu.com/blog/oaXyUa/</link>
-      <pubDate>Wed, 23 Sep 2020 14:29:39 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/oaXyUa/</guid>
-      <description>&lt;p&gt;搜索引擎是对数据的检索，所以我们先从生活中的数据说起。我们生活中的数据总体分为两种：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;结构化数据&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;非结构化数据&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;**结构化数据：**也称作行数据，是由二维表结构来逻辑表达和实现的数据，严格地遵循数据格式与长度规范，主要通过关系型数据库进行存储和管理。指具有固定格式或有限长度的数据，如数据库，元数据等。&lt;/p&gt;
-&lt;p&gt;**非结构化数据：**又可称为全文数据，不定长或无固定格式，不适于由数据库二维表来表现，包括所有格式的办公文档、XML、HTML、Word 文档，邮件，各类报表、图片和咅频、视频信息等。&lt;/p&gt;
-&lt;p&gt;**说明：**如果要更细致的区分的话，XML、HTML 可划分为半结构化数据。因为它们也具有自己特定的标签格式，所以既可以根据需要按结构化数据来处理，也可抽取出纯文本按非结构化数据来处理。&lt;/p&gt;
-&lt;p&gt;根据两种数据分类，搜索也相应的分为两种：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;结构化数据搜索&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;非结构化数据搜索&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;**对于结构化数据，**因为它们具有特定的结构，所以我们一般都是可以通过关系型数据库（MySQL，Oracle 等）的二维表（Table）的方式存储和搜索，也可以建立索引。&lt;/p&gt;
-&lt;p&gt;对于非结构化数据，也即对全文数据的搜索主要有两种方法：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;顺序扫描&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;全文检索&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;**顺序扫描：**通过文字名称也可了解到它的大概搜索方式，即按照顺序扫描的方式查询特定的关键字。&lt;/p&gt;
-&lt;p&gt;例如给你一张报纸，让你找到该报纸中“平安”的文字在哪些地方出现过。你肯定需要从头到尾把报纸阅读扫描一遍然后标记出关键字在哪些版块出现过以及它的出现位置。&lt;/p&gt;
-&lt;p&gt;这种方式无疑是最耗时的最低效的，如果报纸排版字体小，而且版块较多甚至有多份报纸，等你扫描完你的眼睛也差不多了。&lt;/p&gt;
-&lt;p&gt;**全文搜索：**对非结构化数据顺序扫描很慢，我们是否可以进行优化？把我们的非结构化数据想办法弄得有一定结构不就行了吗？&lt;/p&gt;
-&lt;p&gt;将非结构化数据中的一部分信息提取出来，重新组织，使其变得有一定结构，然后对此有一定结构的数据进行搜索，从而达到搜索相对较快的目的。&lt;/p&gt;
-&lt;p&gt;这种方式就构成了全文检索的基本思路。这部分从非结构化数据中提取出的然后重新组织的信息，我们称之为索引。&lt;/p&gt;
-&lt;p&gt;这种方式的主要工作量在前期索引的创建，但是对于后期搜索却是快速高效的。&lt;/p&gt;
-&lt;p&gt;先说说 Lucene&lt;/p&gt;
-&lt;p&gt;通过对生活中数据的类型作了一个简短了解之后，我们知道关系型数据库的 SQL 检索是处理不了这种非结构化数据的。&lt;/p&gt;
-&lt;p&gt;这种非结构化数据的处理需要依赖全文搜索，而目前市场上开放源代码的最好全文检索引擎工具包就属于 Apache 的 Lucene了。&lt;/p&gt;
-&lt;p&gt;但是 Lucene 只是一个工具包，它不是一个完整的全文检索引擎。Lucene 的目的是为软件开发人员提供一个简单易用的工具包，以方便的在目标系统中实现全文检索的功能，或者是以此为基础建立起完整的全文检索引擎。&lt;/p&gt;
-&lt;p&gt;目前以 Lucene 为基础建立的开源可用全文搜索引擎主要是 Solr 和 Elasticsearch。&lt;/p&gt;
-&lt;p&gt;Solr 和 Elasticsearch 都是比较成熟的全文搜索引擎，能完成的功能和性能也基本一样。&lt;/p&gt;
-&lt;p&gt;但是 ES 本身就具有分布式的特性和易安装使用的特点，而 Solr 的分布式需要借助第三方来实现，例如通过使用 ZooKeeper 来达到分布式协调管理。&lt;/p&gt;
-&lt;p&gt;不管是 Solr 还是 Elasticsearch 底层都是依赖于 Lucene，而 Lucene 能实现全文搜索主要是因为它实现了倒排索引的查询结构。&lt;/p&gt;
-&lt;p&gt;如何理解倒排索引呢？假如现有三份数据文档，文档的内容如下分别是：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Java is the best programming language.&lt;/li&gt;
-&lt;li&gt;PHP is the best programming language.&lt;/li&gt;
-&lt;li&gt;Javascript is the best programming language.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;为了创建倒排索引，我们通过分词器将每个文档的内容域拆分成单独的词（我们称它为词条或 Term），创建一个包含所有不重复词条的排序列表，然后列出每个词条出现在哪个文档。&lt;/p&gt;
-&lt;p&gt;结果如下所示：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;Term&lt;/span&gt;          &lt;span style=&#34;color:#a6e22e&#34;&gt;Doc_1&lt;/span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;Doc_2&lt;/span&gt;   &lt;span style=&#34;color:#a6e22e&#34;&gt;Doc_3&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-------------------------------------&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;Java&lt;/span&gt;        |   &lt;span style=&#34;color:#a6e22e&#34;&gt;X&lt;/span&gt;   |        |
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;is&lt;/span&gt;          |   &lt;span style=&#34;color:#a6e22e&#34;&gt;X&lt;/span&gt;   |   &lt;span style=&#34;color:#a6e22e&#34;&gt;X&lt;/span&gt;    |   &lt;span style=&#34;color:#a6e22e&#34;&gt;X&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;the&lt;/span&gt;         |   &lt;span style=&#34;color:#a6e22e&#34;&gt;X&lt;/span&gt;   |   &lt;span style=&#34;color:#a6e22e&#34;&gt;X&lt;/span&gt;    |   &lt;span style=&#34;color:#a6e22e&#34;&gt;X&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;best&lt;/span&gt;        |   &lt;span style=&#34;color:#a6e22e&#34;&gt;X&lt;/span&gt;   |   &lt;span style=&#34;color:#a6e22e&#34;&gt;X&lt;/span&gt;    |   &lt;span style=&#34;color:#a6e22e&#34;&gt;X&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;programming&lt;/span&gt; |   &lt;span style=&#34;color:#a6e22e&#34;&gt;x&lt;/span&gt;   |   &lt;span style=&#34;color:#a6e22e&#34;&gt;X&lt;/span&gt;    |   &lt;span style=&#34;color:#a6e22e&#34;&gt;X&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;language&lt;/span&gt;    |   &lt;span style=&#34;color:#a6e22e&#34;&gt;X&lt;/span&gt;   |   &lt;span style=&#34;color:#a6e22e&#34;&gt;X&lt;/span&gt;    |   &lt;span style=&#34;color:#a6e22e&#34;&gt;X&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;PHP&lt;/span&gt;         |       |   &lt;span style=&#34;color:#a6e22e&#34;&gt;X&lt;/span&gt;    |
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;Javascript&lt;/span&gt;  |       |        |   &lt;span style=&#34;color:#a6e22e&#34;&gt;X&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-------------------------------------&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这种结构由文档中所有不重复词的列表构成，对于其中每个词都有一个文档列表与之关联。&lt;/p&gt;</description>
-    </item>
-    
-  </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Bigdata on haokiu</title><link>https://haokiu.com/tags/bigdata/</link><description>Recent content in Bigdata on haokiu</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>haokiu.com</copyright><lastBuildDate>Tue, 08 Jun 2021 17:51:46 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/bigdata/index.xml" rel="self" type="application/rss+xml"/><item><title>Hobert读书笔记</title><link>https://haokiu.com/blog/bk-5/</link><pubDate>Tue, 08 Jun 2021 17:51:46 +0000</pubDate><guid>https://haokiu.com/blog/bk-5/</guid><description>第一章 并发编程的挑战 第2章 InnoDB存储引擎 第1章 Java的I/O演进之路 第1章 Spring框架的由来 第2章 Tomcat总体架构 三、Paxos的工程实践 序 第1章 概述 第6章…</description><content:encoded><![CDATA[<p><a href="http://haokiu.com/blog/f6ad1487667e4880973e3b21505810be">第一章 并发编程的挑战</a><br/><a href="http://haokiu.com/blog/232f08ac38d0478dab889420f809c20e">第2章 InnoDB存储引擎</a><br/><a href="http://haokiu.com/blog/e15796699f1a419ba85731d159eba322">第1章 Java的I/O演进之路</a><br/><a href="http://haokiu.com/blog/567c6d054f1d4d53a29e9d24f213165a">第1章 Spring框架的由来</a><br/><a href="http://haokiu.com/blog/a9dcb2a7a21d49dea965eedc7e169c79">第2章 Tomcat总体架构</a><br/><a href="http://haokiu.com/blog/3426588a7834499f8a9a1b7e46817c0c">三、Paxos的工程实践</a><br/><a href="http://haokiu.com/blog/cffcc67d768246fd8624b3e5b98854f5">序</a><br/><a href="http://haokiu.com/blog/b221a7f05b774f7ab4305cff0f244d52">第1章 概述</a><br/><a href="http://haokiu.com/blog/eec901917e884002a43f917c02f47dd9">第6章 深入分析ClassLoader工作机制</a><br/><a href="http://haokiu.com/blog/499b1754f0844c299d9bf24652161845">第8章 虚拟机字节码执行系统</a></p>
+]]></content:encoded></item><item><title>mysql replace</title><link>https://haokiu.com/blog/nfvw4R/</link><pubDate>Mon, 01 Feb 2021 09:48:42 +0000</pubDate><guid>https://haokiu.com/blog/nfvw4R/</guid><description>mysql replace 可以将字段的字符串内容替换，语法： 使用样例：</description><content:encoded><![CDATA[<p>mysql replace 可以将字段的字符串内容替换，语法：</p>
+<pre tabindex="0"><code>Update `table_name` SET `field_name` = replace (`field_name`,’from_str’,&#39;to_str’) Where `field_name` LIKE ‘%from_str%’
+</code></pre><p>使用样例：</p>
+<pre tabindex="0"><code># 将 blog 表的字段 coentent 里的 &#34;https://haokiu.com&#34; 替换为 &#34;http://haokiu.com&#34;
+update blog set content = replace(content, &#34;https://haokiu.com&#34;, &#34;http://haokiu.com&#34;) where content like &#39;%https://haokiu.com%&#39;
+</code></pre>]]></content:encoded></item><item><title>OLAP</title><link>https://haokiu.com/blog/OLAP/</link><pubDate>Thu, 05 Nov 2020 10:53:39 +0000</pubDate><guid>https://haokiu.com/blog/OLAP/</guid><description>OLAP 在数据仓库一章中我们讨论了数据仓库及其模型的概念，而数据库与数据仓库的区别实际讲的是 OLTP 与 OLAP 的区别。操作型处理，叫联机事务处理 OLTP（On-Line Transacti…</description><content:encoded><![CDATA[<h1 id="olap">OLAP</h1>
+<p>在数据仓库一章中我们讨论了数据仓库及其模型的概念，而数据库与数据仓库的区别实际讲的是 OLTP 与 OLAP 的区别。操作型处理，叫联机事务处理 OLTP（On-Line Transaction Processing），也可以称面向交易的处理系统，它是针对具体业务在数据库联机的日常操作，通常对少数记录进行查询、修改。用户较为关心操作的响应时间、数据的安全性、完整性和并发的支持用户数等问题。传统的数据库系统作为数据管理的主要手段，主要用于操作型处理。分析型处理，叫联机分析处理 OLAP（On-Line Analytical Processing）一般针对某些主题历史数据进行分析，支持管理决策。</p>
+<h1 id="olap-与-oltp">OLAP 与 OLTP</h1>
+<p>在互联网浪潮出现之前，企业的数据量普遍不大，特别是核心的业务数据，通常一个单机的数据库就可以保存。那时候的存储并不需要复杂的架构，所有的线上请求(OLTP, Online Transactional Processing) 和后台分析 (OLAP, Online Analytical Processing) 都跑在同一个数据库实例上。后来渐渐的业务越来越复杂，数据量越来越大，DBA 们再也优化不动 SQL 了。其中一个显著问题是：单机数据库支持线上的 TP 请求已经非常吃力，没办法再跑比较重的 AP 分析型任务。跑起来要么 OOM，要么影响线上业务，要么做了主从分离、分库分表之后很难实现业务需求。</p>
+<p>在这样的背景下，以 Hadoop 为代表的大数据技术开始蓬勃发展，它用许多相对廉价的 x86 机器构建了一个数据分析平台，用并行的能力破解大数据集的计算问题。所以从某种程度上说，大数据技术可以算是传统关系型数据库技术发展过程的一个分支。当然在过程中大数据领域也发展出了属于自己的全新场景，诞生了许多新的技术，这个不深入提了。</p>
+<p>由此，架构师把存储划分成线上业务和数据分析两个模块。如下图所示，业务库的数据通过 ETL 工具抽取出来，导入专用的分析平台。业务数据库专注提供 TP 能力，分析平台提供 AP 能力，各施其职，看起来已经很完美了。但其实这个架构也有自己的不足。</p>
+<h1 id="htap">HTAP</h1>
+<p>首先是复杂性问题。本身 ETL 过程就是一个很繁琐的过程，一个例证是 ETL 做的好，可以成为一个商业模式。因为是两个系统，必然带来更高的学习成本、维护成本和整合成本。如果你使用的是开源的大数据工具搭建的分析平台，那么肯定会遇到各种工具之间的磨合的问题，还有由于各种工具良莠不齐所导致的质量问题。</p>
+<p>其次是实时性问题。通常我们认为越接近实时的数据，它的价值越大。很多业务场景，对实时性有很高的要求，比如风控系统，它需要对数据不停的分析，并且在险情出现之后尽快响应。而通常的 ETL 是一个周期性的操作，比如一天或者一个小时导一次数据，数据实时性是没有办法保证的。最后是一致性问题。一致性在数据库里面是很重要的概念，数据库的事务就是用来保证一致性的。如果把数据分表存储在两个不同的系统内，那么很难保证一致性，即 AP 系统的查询结果没有办法与线上业务正确对应。那么这两个系统的联动效应就会受到限制，比如用户没办法在一个事务里面，同时访问两个系统的数据。</p>
+<p>由于现有的数据平台存在的以上局限性，我们认为开发一个HTAP（Hybrid Transactional/Analytical Processing）融合型数据库产品可以缓解大家在 TP or AP 抉择上的焦虑，或者说，让数据库的使用者不用考虑过度复杂的架构，在一套数据库中既能满足 OLTP 类需求，也能满足 OLAP 类需求。</p>
+]]></content:encoded></item><item><title>数据中台</title><link>https://haokiu.com/blog/3OKmkr/</link><pubDate>Thu, 05 Nov 2020 10:50:55 +0000</pubDate><guid>https://haokiu.com/blog/3OKmkr/</guid><description>数据中台 阿里在 2018 年提出了所谓“数据中台”的概念：即数据被统一采集，规范数据语义和业务口径形成企业基础数据模型，提供统一的分析查询和新业务的数据对接能力。数据中台并不是新的颠覆式技术，而是一…</description><content:encoded><![CDATA[<h1 id="数据中台">数据中台</h1>
+<p>阿里在 2018 年提出了所谓“数据中台”的概念：即数据被统一采集，规范数据语义和业务口径形成企业基础数据模型，提供统一的分析查询和新业务的数据对接能力。数据中台并不是新的颠覆式技术，而是一种企业数据资产管理和应用方法学，涵盖了数据集成、数据质量管理、元数据与主数据管理、数仓建模、支持高并发访问的数据服务接口层开发等内容。</p>
+<p>在数据中台建设中，结合企业自身的业务需求特点，架构和功能可能各不相同，但其中一个最基本的需求是数据采集的实时性和完整性。数据从源端产生，到被采集到数据汇集层的时间要尽可能短，至少应做到秒级延迟，这样中台的数据模型更新才可能做到近实时，构建在中台之上依赖实时数据流驱动的应用（例如商品推荐、欺诈检测等）才能够满足业务的需求。</p>
+<p>以阿里双十一为例，在极高的并发情况下，订单产生到大屏统计数据更新延迟不能超过 5s，一般在 2s 内。中台对外提供的数据应该是完整的，源端数据的 Create、Update 和 Delete 都要能够被捕获，不能少也不能多，即数据需要有端到端一致性的能力（Exactly Once Semantic，EOS）。当然，EOS 并非在任何业务场景下都需要，但从平台角度必须具备这种能力，并且允许用户根据业务需求灵活开启和关闭。</p>
+<h1 id="数据中台的产生背景">数据中台的产生背景</h1>
+<p>起初，企业只有一个主营业务，比如电商，但随着公司战略和发展需要，会新增多支业务线，由于存在负责业务线开发的团队不一致，随之而来的就是风格迥异的代码风格和数据烟囱问题。</p>
+<p>数据中台的产生就是为了解决数据烟囱的问题，打通数据孤岛，让数据活起来，让数据产生价值，结合前台能力，达到快速响应用户的目标。</p>
+<p>中台只会同步能服务于超过两个业务线的数据，如果仅仅带有自身业务属性(不存在共性)的数据，不在中台的考虑范围内。例如:电商的产品产地信息，对于金融业务来说，其实是没有价值的，但电商的用户收货地址对金融业务来说是有价值的。所以不要简单的认为数据中台会汇集企业的所有数据，还是有侧重点的。导致这个结果的原因还包括数据中台建设本身是一个长周期的事，如果数据仅仅作用于一方，由业务方(前台)自行开发，更符合敏捷开发的特性。</p>
+<p>关于何时应该建立数据中台这个问题，我的思考是这样的。复杂的业务线、丰富的数据维度和公司上层领导主推。三者缺一，都没有实行的必要。
+一只手都能数的过来的业务线量，跨多个项目的需求相对还是比较少的，取数也比较方便，直接走接口方式基本就能满足。反而，通过数据中台流转，将问题复杂化了。</p>
+<p>数据的维度越丰富，数据的价值越大。只知道性别数据，与知道性别和年龄，所得到的用户画像，肯定是维度丰富的准确性高。维度不丰富的情况下，没有计算的价值。</p>
+<p>可能会很奇怪为什么一定需要公司上层的同意。这里就可能涉及到动了谁的奶酪的问题，数据是每个业务线最重要的资源，在推行中台过程中，势必会遇到阻力，只有成为全公司的战略任务，才有可能把事情做好。</p>
+<p>中台如果没有考虑通用的业务能力，也会导致无法更专注于对中台技术的深入研究。中台如果不从抽象度、共性等角度出发，很有可能局限于某单一业务，导致中台无法很好地适应其他相关业务的要求，从而不能很好地应对业务的变化。如果中台的抽象程度低、扩展性差，则会导致中台无法满足前台业务需求。这时前台应用又因为业务本身的发展目标和压力不得不自行组织团队完成这部分功能，由此可能发生本应由中台提供的能力却最终实现在业务应用中，失去了中台存在的价值。</p>
+<p><img loading="lazy" src="https://s2.ax1x.com/2019/10/20/Ku7Faj.jpg" alt="中台架构图"  />
+</p>
+]]></content:encoded></item><item><title>presto 官网</title><link>https://haokiu.com/blog/FhpG3z/</link><pubDate>Mon, 28 Sep 2020 14:50:12 +0000</pubDate><guid>https://haokiu.com/blog/FhpG3z/</guid><description>现在 presto 有两个官网： 旧presto官网 新presto官网</description><content:encoded><![CDATA[<p>现在 presto 有两个官网：</p>
+<ul>
+<li><a href="https://prestodb.io/">旧presto官网</a></li>
+<li><a href="https://trino.io/">新presto官网</a></li>
+</ul>
+]]></content:encoded></item><item><title>presto 支持的数据源</title><link>https://haokiu.com/blog/7mlwkW/</link><pubDate>Mon, 28 Sep 2020 14:40:32 +0000</pubDate><guid>https://haokiu.com/blog/7mlwkW/</guid><description>presto 有很多连接器以支持不同的数据源： Accumulo BigQuery Black Hole Cassandra Druid Elasticsearch Google Sheets Ice…</description><content:encoded><![CDATA[<p>presto 有很多连接器以支持不同的数据源：</p>
+<ul>
+<li><a href="https://prestosql.io/docs/current/connector/accumulo.html">Accumulo</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/bigquery.html">BigQuery</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/blackhole.html">Black Hole</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/cassandra.html">Cassandra</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/druid.html">Druid</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/elasticsearch.html">Elasticsearch</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/googlesheets.html">Google Sheets</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/iceberg.html">Iceberg</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/hive.html">Hive</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/jmx.html">JMX</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/kafka.html">Kafka</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/kinesis.html">Kinesis</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/kudu.html">Kudu</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/localfile.html">Local File</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/memory.html">Memory</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/memsql.html">MemSQL</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/mongodb.html">MongoDB</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/mysql.html">MySQL</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/oracle.html">Oracle</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/phoenix.html">Phoenix</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/pinot.html">Pinot</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/postgresql.html">PostgreSQL</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/prometheus.html">Prometheus</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/redis.html">Redis</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/redshift.html">Redshift</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/sqlserver.html">SQL Server</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/system.html">System</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/thrift.html">Thrift</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/tpcds.html">TPCDS</a></li>
+<li><a href="https://prestosql.io/docs/current/connector/tpch.html">TPCH</a></li>
+</ul>
+]]></content:encoded></item><item><title>sql 优化</title><link>https://haokiu.com/blog/XEhpYv/</link><pubDate>Wed, 23 Sep 2020 16:59:17 +0000</pubDate><guid>https://haokiu.com/blog/XEhpYv/</guid><description>SQL 优化已经成为衡量程序猿优秀与否的硬性指标，甚至在各大厂招聘岗位职能上都有明码标注。 有朋友疑问到，SQL 优化真的有这么重要么？如下图所示，SQL 优化在提升系统性能中是：成本最低和优化效果最…</description><content:encoded><![CDATA[<p>SQL 优化已经成为衡量程序猿优秀与否的硬性指标，甚至在各大厂招聘岗位职能上都有明码标注。</p>
+<p>有朋友疑问到，SQL 优化真的有这么重要么？如下图所示，SQL 优化在提升系统性能中是：成本最低和优化效果最明显的途径。</p>
+<p>**优化成本：**硬件&gt;系统配置&gt;数据库表结构&gt;SQL 及索引。</p>
+<p>**优化效果：**硬件&lt;系统配置&lt;数据库表结构&lt;SQL 及索引。</p>
+<p>对于MySQL层优化我一般遵从五个原则：</p>
+<ul>
+<li>**减少数据访问：**设置合理的字段类型，启用压缩，通过索引访问等减少磁盘 IO。</li>
+<li>**返回更少的数据：**只返回需要的字段和数据分页处理，减少磁盘 IO 及网络 IO。</li>
+<li>**减少交互次数：**批量 DML 操作，函数存储等减少数据连接次数。</li>
+<li>**减少服务器 CPU 开销：**尽量减少数据库排序操作以及全表查询，减少 CPU 内存占用。</li>
+<li>**利用更多资源：**使用表分区，可以增加并行操作，更大限度利用 CPU 资源。</li>
+</ul>
+<p>总结到 SQL 优化中，就如下三点：</p>
+<ul>
+<li><strong>最大化利用索引。</strong></li>
+<li><strong>尽可能避免全表扫描。</strong></li>
+<li><strong>减少无效数据的查询。</strong></li>
+</ul>
+<p>理解 SQL 优化原理 ，首先要搞清楚 SQL 执行顺序。</p>
+<p><strong>SELECT 语句，语法顺序如下：</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span>  <span style="color:#ae81ff">1</span>. <span style="color:#66d9ef">SELECT</span> 
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">2</span>. <span style="color:#66d9ef">DISTINCT</span> <span style="color:#f92672">&lt;</span>select_list<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">3</span>. <span style="color:#66d9ef">FROM</span> <span style="color:#f92672">&lt;</span>left_table<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">4</span>. <span style="color:#f92672">&lt;</span>join_type<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">JOIN</span> <span style="color:#f92672">&lt;</span>right_table<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">5</span>. <span style="color:#66d9ef">ON</span> <span style="color:#f92672">&lt;</span>join_condition<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">6</span>. <span style="color:#66d9ef">WHERE</span> <span style="color:#f92672">&lt;</span>where_condition<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">7</span>. <span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> <span style="color:#f92672">&lt;</span>group_by_list<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">8</span>. <span style="color:#66d9ef">HAVING</span> <span style="color:#f92672">&lt;</span>having_condition<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">9</span>. <span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> <span style="color:#f92672">&lt;</span>order_by_condition<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#ae81ff">10</span>.<span style="color:#66d9ef">LIMIT</span> <span style="color:#f92672">&lt;</span>limit_number<span style="color:#f92672">&gt;</span>
+</span></span></code></pre></div><p><strong>SELECT 语句，执行顺序如下：</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">表名</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">#</span> <span style="color:#960050;background-color:#1e0010">选取表，将多个表数据通过笛卡尔积变成一个表。</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ON</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">筛选条件</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">#</span> <span style="color:#960050;background-color:#1e0010">对笛卡尔积的虚表进行筛选</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">JOIN</span> <span style="color:#f92672">&lt;</span><span style="color:#66d9ef">join</span>, <span style="color:#66d9ef">left</span> <span style="color:#66d9ef">join</span>, <span style="color:#66d9ef">right</span> <span style="color:#66d9ef">join</span>...<span style="color:#f92672">&gt;</span> 
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;</span>join表<span style="color:#f92672">&gt;</span> <span style="color:#f92672">#</span> <span style="color:#960050;background-color:#1e0010">指定</span><span style="color:#66d9ef">join</span><span style="color:#960050;background-color:#1e0010">，用于添加数据到</span>on之后的虚表中<span style="color:#960050;background-color:#1e0010">，例如</span><span style="color:#66d9ef">left</span> join会将左表的剩余数据添加到虚表中
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;</span>where条件<span style="color:#f92672">&gt;</span> <span style="color:#f92672">#</span> <span style="color:#960050;background-color:#1e0010">对上述虚表进行筛选</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">分组条件</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">#</span> <span style="color:#960050;background-color:#1e0010">分组</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">SUM</span>()<span style="color:#960050;background-color:#1e0010">等聚合函数</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">#</span> <span style="color:#960050;background-color:#1e0010">用于</span>having子句进行判断<span style="color:#960050;background-color:#1e0010">，在书写上这类聚合函数是写在</span>having判断里面的
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">HAVING</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">分组筛选</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">#</span> <span style="color:#960050;background-color:#1e0010">对分组后的结果进行聚合筛选</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">返回数据列表</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">#</span> <span style="color:#960050;background-color:#1e0010">返回的单列必须在</span><span style="color:#66d9ef">group</span> by子句中<span style="color:#960050;background-color:#1e0010">，聚合函数除外</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">DISTINCT</span> <span style="color:#f92672">#</span> <span style="color:#960050;background-color:#1e0010">数据除重</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">排序条件</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">#</span> <span style="color:#960050;background-color:#1e0010">排序</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">LIMIT</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">行数限制</span><span style="color:#f92672">&gt;</span>
+</span></span></code></pre></div><p>以下 SQL 优化策略适用于数据量较大的场景下，如果数据量较小，没必要以此为准，以免画蛇添足。</p>
+<p>避免不走索引的场景</p>
+<p><strong>①尽量避免在字段开头模糊查询，会导致数据库引擎放弃索引进行全表扫描</strong></p>
+<p>如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> username <span style="color:#66d9ef">LIKE</span> <span style="color:#e6db74">&#39;%陈%&#39;</span>
+</span></span></code></pre></div><p>**优化方式：**尽量在字段后面使用模糊查询。</p>
+<p>如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> username <span style="color:#66d9ef">LIKE</span> <span style="color:#e6db74">&#39;陈%&#39;</span>
+</span></span></code></pre></div><p>如果需求是要在前面使用模糊查询：</p>
+<ul>
+<li>
+<p>使用 MySQL 内置函数 INSTR（str，substr）来匹配，作用类似于 Java 中的 indexOf()，查询字符串出现的角标位置。</p>
+</li>
+<li>
+<p>使用 FullText 全文索引，用 match against 检索。</p>
+<ul>
+<li>数据量较大的情况，建议引用 ElasticSearch、Solr，亿级数据量检索速度秒级。</li>
+</ul>
+</li>
+<li>
+<p>当表数据量较少（几千条儿那种），别整花里胡哨的，直接用 like &lsquo;%xx%&rsquo;。</p>
+<p><strong>②尽量避免使用 in 和 not in，会导致引擎走全表扫描</strong></p>
+</li>
+</ul>
+<p>如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> id <span style="color:#66d9ef">IN</span> (<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">3</span>)
+</span></span></code></pre></div><p>**优化方式：**如果是连续数值，可以用 between 代替。</p>
+<p>如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> id <span style="color:#66d9ef">BETWEEN</span> <span style="color:#ae81ff">2</span> <span style="color:#66d9ef">AND</span> <span style="color:#ae81ff">3</span>
+</span></span></code></pre></div><p>如果是子查询，可以用 exists 代替。</p>
+<p>如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 不走索引
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> A <span style="color:#66d9ef">where</span> A.id <span style="color:#66d9ef">in</span> (<span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> B);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 走索引 
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> A <span style="color:#66d9ef">where</span> <span style="color:#66d9ef">exists</span> (<span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> B <span style="color:#66d9ef">where</span> B.id <span style="color:#f92672">=</span> A.id);
+</span></span></code></pre></div><p><strong>③尽量避免使用 or，会导致数据库引擎放弃索引进行全表扫描</strong></p>
+<p>如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> id <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">OR</span> id <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>
+</span></span></code></pre></div><p>**优化方式：**可以用 union 代替 or。</p>
+<p>如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> id <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#66d9ef">UNION</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> id <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>
+</span></span></code></pre></div><p><strong>④尽量避免进行 null 值的判断，会导致数据库引擎放弃索引进行全表扫描</strong></p>
+<p>如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> score <span style="color:#66d9ef">IS</span> <span style="color:#66d9ef">NULL</span>
+</span></span></code></pre></div><p>**优化方式：**可以给字段添加默认值 0，对 0 值进行判断。</p>
+<p>如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">WHERE</span> score <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span></code></pre></div><p><strong>⑤尽量避免在 where 条件中等号的左侧进行表达式、函数操作，会导致数据库引擎放弃索引进行全表扫描</strong></p>
+<p>可以将表达式、函数操作移动到等号右侧，如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 全表扫描 
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> T <span style="color:#66d9ef">WHERE</span> score<span style="color:#f92672">/</span><span style="color:#ae81ff">10</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">9</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 走索引
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> T <span style="color:#66d9ef">WHERE</span> score <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span><span style="color:#f92672">*</span><span style="color:#ae81ff">9</span>
+</span></span></code></pre></div><p><strong>⑥当数据量大时，避免使用 where 1=1 的条件</strong></p>
+<p>通常为了方便拼装查询条件，我们会默认使用该条件，数据库引擎会放弃索引进行全表扫描。</p>
+<p>如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> username, age, sex <span style="color:#66d9ef">FROM</span> T <span style="color:#66d9ef">WHERE</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>
+</span></span></code></pre></div><p>**优化方式：**用代码拼装 SQL 时进行判断，没 where 条件就去掉 where，有 where 条件就加 and。</p>
+<p><strong>⑦查询条件不能用 &lt;&gt; 或者 !=</strong></p>
+<p>使用索引列作为条件进行查询时，需要避免使用&lt;&gt;或者!=等判断条件。</p>
+<p>如确实业务需要，使用到不等于符号，需要在重新评估索引建立，避免在此字段上建立索引，改由查询条件中其他索引字段代替。</p>
+<p><strong>⑧where 条件仅包含复合索引非前置列</strong></p>
+<p>如下：复合（联合）索引包含 key_part1，key_part2，key_part3 三列，但 SQL 语句没有包含索引前置列&quot;key_part1&quot;，按照 MySQL 联合索引的最左匹配原则，不会走联合索引。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> col1 <span style="color:#66d9ef">from</span> <span style="color:#66d9ef">table</span> <span style="color:#66d9ef">where</span> key_part2<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> <span style="color:#66d9ef">and</span> key_part3<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>
+</span></span></code></pre></div><p><strong>⑨隐式类型转换造成不使用索引</strong></p>
+<p>如下 SQL 语句由于索引对列类型为 varchar，但给定的值为数值，涉及隐式类型转换，造成不能正确走索引。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> col1 <span style="color:#66d9ef">from</span> <span style="color:#66d9ef">table</span> <span style="color:#66d9ef">where</span> col_varchar<span style="color:#f92672">=</span><span style="color:#ae81ff">123</span>; 
+</span></span></code></pre></div><p><strong>⑩order by 条件要与 where 中条件一致，否则 order by 不会利用索引进行排序</strong></p>
+<p>如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#75715e">-- 不走age索引
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">order</span> <span style="color:#66d9ef">by</span> age;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- 走age索引
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> t <span style="color:#66d9ef">where</span> age <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#66d9ef">order</span> <span style="color:#66d9ef">by</span> age;
+</span></span></code></pre></div><p>对于上面的语句，数据库的处理顺序是：</p>
+<ul>
+<li>**第一步：**根据 where 条件和统计信息生成执行计划，得到数据。</li>
+<li>**第二步：**将得到的数据排序。当执行处理数据（order by）时，数据库会先查看第一步的执行计划，看 order by 的字段是否在执行计划中利用了索引。如果是，则可以利用索引顺序而直接取得已经排好序的数据。如果不是，则重新进行排序操作。</li>
+<li>**第三步：**返回排序后的数据。</li>
+</ul>
+<p>当 order by 中的字段出现在 where 条件中时，才会利用索引而不再二次排序，更准确的说，order by 中的字段在执行计划中利用了索引时，不用排序操作。</p>
+<p>这个结论不仅对 order by 有效，对其他需要排序的操作也有效。比如 group by 、union 、distinct 等。</p>
+<p><strong>⑪正确使用 hint 优化语句</strong></p>
+<p>MySQL 中可以使用 hint 指定优化器在执行时选择或忽略特定的索引。</p>
+<p>一般而言，处于版本变更带来的表结构索引变化，更建议避免使用 hint，而是通过 Analyze table 多收集统计信息。</p>
+<p>但在特定场合下，指定 hint 可以排除其他索引干扰而指定更优的执行计划：</p>
+<ul>
+<li>
+<p>USE INDEX 在你查询语句中表名的后面，添加 USE INDEX 来提供希望 MySQL 去参考的索引列表，就可以让 MySQL 不再考虑其他可用的索引。</p>
+<p>例子: SELECT col1 FROM table USE INDEX (mod_time, name)&hellip;</p>
+</li>
+<li>
+<p>IGNORE INDEX 如果只是单纯的想让 MySQL 忽略一个或者多个索引，可以使用 IGNORE INDEX 作为 Hint。</p>
+<p>例子: SELECT col1 FROM table IGNORE INDEX (priority) &hellip;</p>
+</li>
+<li>
+<p>FORCE INDEX 为强制 MySQL 使用一个特定的索引，可在查询中使用FORCE INDEX 作为 Hint。</p>
+<p>例子: SELECT col1 FROM table FORCE INDEX (mod_time) &hellip;</p>
+</li>
+</ul>
+<p>在查询的时候，数据库系统会自动分析查询语句，并选择一个最合适的索引。但是很多时候，数据库系统的查询优化器并不一定总是能使用最优索引。</p>
+<p>如果我们知道如何选择索引，可以使用 FORCE INDEX 强制查询使用指定的索引。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> students <span style="color:#66d9ef">FORCE</span> <span style="color:#66d9ef">INDEX</span> (idx_class_id) <span style="color:#66d9ef">WHERE</span> class_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> id <span style="color:#66d9ef">DESC</span>;
+</span></span></code></pre></div><p>SELECT 语句其他优化</p>
+<p><strong>①避免出现 select *</strong></p>
+<p>首先，select * 操作在任何类型数据库中都不是一个好的 SQL 编写习惯。</p>
+<p>使用 select * 取出全部列，会让优化器无法完成索引覆盖扫描这类优化，会影响优化器对执行计划的选择，也会增加网络带宽消耗，更会带来额外的 I/O，内存和 CPU 消耗。</p>
+<p>建议提出业务实际需要的列数，将指定列名以取代 select *。具体详情见《<a href="http://mp.weixin.qq.com/s?__biz=MjM5ODI5Njc2MA%3D%3D&amp;chksm=bd7486018a030f17bd0c159937b8a028eb75bfbc85a05a08bb5659bab3d13960ad6b9391c047&amp;idx=1&amp;mid=2655833046&amp;scene=21&amp;sn=c7637d556ef9d444d72ae864a26a0a0a#wechat_redirect">为什么大家都说SELECT * 效率低</a>》</p>
+<p><strong>②避免出现不确定结果的函数</strong></p>
+<p>特定针对主从复制这类业务场景。由于原理上从库复制的是主库执行的语句，使用如 now()、rand()、sysdate()、current_user() 等不确定结果的函数很容易导致主库与从库相应的数据不一致。</p>
+<p>另外不确定值的函数，产生的 SQL 语句无法利用 query cache。</p>
+<p><strong>③多表关联查询时，小表在前，大表在后</strong></p>
+<p>在 MySQL 中，执行 from 后的表关联查询是从左往右执行的（Oracle 相反），第一张表会涉及到全表扫描。</p>
+<p>所以将小表放在前面，先扫小表，扫描快效率较高，在扫描后面的大表，或许只扫描大表的前 100 行就符合返回条件并 return 了。</p>
+<p>例如：表 1 有 50 条数据，表 2 有 30 亿条数据；如果全表扫描表 2，你品，那就先去吃个饭再说吧是吧。</p>
+<p><strong>④使用表的别名</strong></p>
+<p>当在 SQL 语句中连接多个表时，请使用表的别名并把别名前缀于每个列名上。这样就可以减少解析的时间并减少哪些友列名歧义引起的语法错误。</p>
+<p><strong>⑤用 where 字句替换 HAVING 字句</strong></p>
+<p>避免使用 HAVING 字句，因为 HAVING 只会在检索出所有记录之后才对结果集进行过滤，而 where 则是在聚合前刷选记录，如果能通过 where 字句限制记录的数目，那就能减少这方面的开销。</p>
+<p>HAVING 中的条件一般用于聚合函数的过滤，除此之外，应该将条件写在 where 字句中。</p>
+<p>where 和 having 的区别：where 后面不能使用组函数。</p>
+<p><strong>⑥调整 Where 字句中的连接顺序</strong></p>
+<p>MySQL 采用从左往右，自上而下的顺序解析 where 子句。根据这个原理，应将过滤数据多的条件往前放，最快速度缩小结果集。</p>
+<p>增删改 DML 语句优化</p>
+<p><strong>①大批量插入数据</strong></p>
+<p>如果同时执行大量的插入，建议使用多个值的 INSERT 语句（方法二）。这比使用分开 INSERT 语句快（方法一），一般情况下批量插入效率有几倍的差别。</p>
+<p>方法一：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">insert</span> <span style="color:#66d9ef">into</span> T <span style="color:#66d9ef">values</span>(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>); 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">insert</span> <span style="color:#66d9ef">into</span> T <span style="color:#66d9ef">values</span>(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">3</span>); 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">insert</span> <span style="color:#66d9ef">into</span> T <span style="color:#66d9ef">values</span>(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">4</span>);
+</span></span></code></pre></div><p>方法二：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">Insert</span> <span style="color:#66d9ef">into</span> T <span style="color:#66d9ef">values</span>(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>),(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">3</span>),(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">4</span>); 
+</span></span></code></pre></div><p>选择后一种方法的原因有三：</p>
+<ul>
+<li>减少 SQL 语句解析的操作，MySQL 没有类似 Oracle 的 share pool，采用方法二，只需要解析一次就能进行数据的插入操作。</li>
+<li>在特定场景可以减少对 DB 连接次数。</li>
+<li>SQL 语句较短，可以减少网络传输的 IO。</li>
+</ul>
+<p><strong>②适当使用 commit</strong></p>
+<p>适当使用 commit 可以释放事务占用的资源而减少消耗，commit 后能释放的资源如下：</p>
+<ul>
+<li>
+<p>事务占用的 undo 数据块。</p>
+</li>
+<li>
+<p>事务在 redo log 中记录的数据块。</p>
+<ul>
+<li>释放事务施加的，减少锁争用影响性能。特别是在需要使用 delete 删除大量数据的时候，必须分解删除量并定期 commit。</li>
+</ul>
+<p><strong>③避免重复查询更新的数据</strong></p>
+<p>针对业务中经常出现的更新行同时又希望获得改行信息的需求，MySQL 并不支持 PostgreSQL 那样的 UPDATE RETURNING 语法，在 MySQL 中可以通过变量实现。</p>
+<p>例如，更新一行记录的时间戳，同时希望查询当前记录中存放的时间戳是什么？</p>
+<p>简单方法实现：</p>
+</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">Update</span> t1 <span style="color:#66d9ef">set</span> time<span style="color:#f92672">=</span>now() <span style="color:#66d9ef">where</span> col1<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>; 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">Select</span> time <span style="color:#66d9ef">from</span> t1 <span style="color:#66d9ef">where</span> id <span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>;
+</span></span></code></pre></div><p>使用变量，可以重写为以下方式：</p>
+<pre tabindex="0"><code>Update t1 set time=now () where col1=1 and @now: = now (); 
+Select @now; 
+</code></pre><p>前后二者都需要两次网络来回，但使用变量避免了再次访问数据表，特别是当 t1 表数据量较大时，后者比前者快很多。</p>
+<p><strong>④查询优先还是更新（insert、update、delete）优先</strong></p>
+<p>MySQL 还允许改变语句调度的优先级，它可以使来自多个客户端的查询更好地协作，这样单个客户端就不会由于锁定而等待很长时间。改变优先级还可以确保特定类型的查询被处理得更快。</p>
+<p>我们首先应该确定应用的类型，判断应用是以查询为主还是以更新为主的，是确保查询效率还是确保更新的效率，决定是查询优先还是更新优先。</p>
+<p>下面我们提到的改变调度策略的方法主要是针对只存在表锁的存储引擎，比如  MyISAM 、MEMROY、MERGE，对于 Innodb 存储引擎，语句的执行是由获得行锁的顺序决定的。</p>
+<p>MySQL 的默认的调度策略可用总结如下：</p>
+<ul>
+<li>写入操作优先于读取操作。</li>
+<li>对某张数据表的写入操作某一时刻只能发生一次，写入请求按照它们到达的次序来处理。</li>
+<li>对某张数据表的多个读取操作可以同时地进行。</li>
+</ul>
+<p>MySQL 提供了几个语句调节符，允许你修改它的调度策略：</p>
+<ul>
+<li>
+<p>LOW_PRIORITY 关键字应用于 DELETE、INSERT、LOAD DATA、REPLACE 和 UPDATE。</p>
+</li>
+<li>
+<p>HIGH_PRIORITY 关键字应用于 SELECT 和 INSERT 语句。</p>
+<ul>
+<li>DELAYED 关键字应用于 INSERT 和 REPLACE 语句。</li>
+</ul>
+<p>如果写入操作是一个 LOW_PRIORITY（低优先级）请求，那么系统就不会认为它的优先级高于读取操作。</p>
+<p>在这种情况下，如果写入者在等待的时候，第二个读取者到达了，那么就允许第二个读取者插到写入者之前。</p>
+<p>只有在没有其它的读取者的时候，才允许写入者开始操作。这种调度修改可能存在 LOW_PRIORITY 写入操作永远被阻塞的情况。</p>
+</li>
+</ul>
+<p>SELECT 查询的 HIGH_PRIORITY（高优先级）关键字也类似。它允许 SELECT 插入正在等待的写入操作之前，即使在正常情况下写入操作的优先级更高。</p>
+<p>另外一种影响是，高优先级的 SELECT 在正常的 SELECT 语句之前执行，因为这些语句会被写入操作阻塞。</p>
+<p>如果希望所有支持 LOW_PRIORITY 选项的语句都默认地按照低优先级来处理，那么请使用&ndash;low-priority-updates 选项来启动服务器。</p>
+<p>通过使用 INSERTHIGH_PRIORITY 来把 INSERT 语句提高到正常的写入优先级，可以消除该选项对单个 INSERT 语句的影响。</p>
+<p>查询条件优化</p>
+<p><strong>①对于复杂的查询，可以使用中间临时表暂存数据</strong></p>
+<p><strong>②优化 group by 语句</strong></p>
+<p>默认情况下，MySQL 会对 GROUP BY 分组的所有值进行排序，如 “GROUP BY col1，col2，&hellip;.;” 查询的方法如同在查询中指定 “ORDER BY col1，col2，&hellip;;” 。</p>
+<p>如果显式包括一个包含相同的列的 ORDER BY 子句，MySQL 可以毫不减速地对它进行优化，尽管仍然进行排序。</p>
+<p>因此，如果查询包括 GROUP BY 但你并不想对分组的值进行排序，你可以指定 ORDER BY NULL 禁止排序。</p>
+<p>例如：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> col1, col2, <span style="color:#66d9ef">COUNT</span>(<span style="color:#f92672">*</span>) <span style="color:#66d9ef">FROM</span> <span style="color:#66d9ef">table</span> <span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> col1, col2 <span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> <span style="color:#66d9ef">NULL</span> ;
+</span></span></code></pre></div><p><strong>③优化 join 语句</strong></p>
+<p>MySQL 中可以通过子查询来使用 SELECT 语句来创建一个单列的查询结果，然后把这个结果作为过滤条件用在另一个查询中。</p>
+<p>使用子查询可以一次性的完成很多逻辑上需要多个步骤才能完成的 SQL 操作，同时也可以避免事务或者表锁死，并且写起来也很容易。但是，有些情况下，子查询可以被更有效率的连接（JOIN）..替代。</p>
+<p>例子：假设要将所有没有订单记录的用户取出来，可以用下面这个查询完成：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> col1 <span style="color:#66d9ef">FROM</span> customerinfo <span style="color:#66d9ef">WHERE</span> CustomerID <span style="color:#66d9ef">NOT</span> <span style="color:#66d9ef">in</span> (<span style="color:#66d9ef">SELECT</span> CustomerID <span style="color:#66d9ef">FROM</span> salesinfo )
+</span></span></code></pre></div><p>如果使用连接（JOIN）..来完成这个查询工作，速度将会有所提升。</p>
+<p>尤其是当 salesinfo 表中对 CustomerID 建有索引的话，性能将会更好，查询如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> col1 <span style="color:#66d9ef">FROM</span> customerinfo 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">LEFT</span> <span style="color:#66d9ef">JOIN</span> salesinfoON customerinfo.CustomerID<span style="color:#f92672">=</span>salesinfo.CustomerID 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> salesinfo.CustomerID <span style="color:#66d9ef">IS</span> <span style="color:#66d9ef">NULL</span>
+</span></span></code></pre></div><p>连接（JOIN）..之所以更有效率一些，是因为 MySQL 不需要在内存中创建临时表来完成这个逻辑上的需要两个步骤的查询工作。</p>
+<p><strong>④优化 union 查询</strong></p>
+<p>MySQL 通过创建并填充临时表的方式来执行 union 查询。除非确实要消除重复的行，否则建议使用 union all。</p>
+<p>原因在于如果没有 all 这个关键词，MySQL 会给临时表加上 distinct 选项，这会导致对整个临时表的数据做唯一性校验，这样做的消耗相当高。</p>
+<p>高效：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> COL1, COL2, COL3 <span style="color:#66d9ef">FROM</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">WHERE</span> COL1 <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">UNION</span> <span style="color:#66d9ef">ALL</span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> COL1, COL2, COL3 <span style="color:#66d9ef">FROM</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">WHERE</span> COL3<span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;TEST&#39;</span>;
+</span></span></code></pre></div><p>低效：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> COL1, COL2, COL3 <span style="color:#66d9ef">FROM</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">WHERE</span> COL1 <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">UNION</span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> COL1, COL2, COL3 <span style="color:#66d9ef">FROM</span> <span style="color:#66d9ef">TABLE</span> <span style="color:#66d9ef">WHERE</span> COL3<span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;TEST&#39;</span>;
+</span></span></code></pre></div><p><strong>⑤拆分复杂 SQL 为多个小 SQL，避免大事务</strong></p>
+<p>如下：</p>
+<ul>
+<li>简单的 SQL 容易使用到 MySQL 的 QUERY CACHE。</li>
+<li>减少锁表时间特别是使用 MyISAM 存储引擎的表。</li>
+<li>可以使用多核 CPU。</li>
+</ul>
+<p><strong>⑥使用 truncate 代替 delete</strong></p>
+<p>当删除全表中记录时，使用 delete 语句的操作会被记录到 undo 块中，删除记录也记录 binlog。</p>
+<p>当确认需要删除全表时，会产生很大量的 binlog 并占用大量的 undo 数据块，此时既没有很好的效率也占用了大量的资源。</p>
+<p>使用 truncate 替代，不会记录可恢复的信息，数据不能被恢复。也因此使用 truncate 操作有其极少的资源占用与极快的时间。另外，使用 truncate 可以回收表的水位，使自增字段值归零。</p>
+<p><strong>⑦使用合理的分页方式以提高分页效率</strong></p>
+<p>使用合理的分页方式以提高分页效率 针对展现等分页需求，合适的分页方式能够提高分页的效率。</p>
+<p>案例 1：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> thread_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">10000</span> <span style="color:#66d9ef">and</span> deleted <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">order</span> <span style="color:#66d9ef">by</span> gmt_create <span style="color:#66d9ef">asc</span> <span style="color:#66d9ef">limit</span> <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">15</span>;
+</span></span></code></pre></div><p>上述例子通过一次性根据过滤条件取出所有字段进行排序返回。数据访问开销=索引 IO+索引全部记录结果对应的表数据 IO。</p>
+<p>因此，该种写法越翻到后面执行效率越差，时间越长，尤其表数据量很大的时候。</p>
+<p>适用场景：当中间结果集很小（10000 行以下）或者查询条件复杂（指涉及多个不同查询字段或者多表连接）时适用。</p>
+<p>案例 2：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> t.<span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> (<span style="color:#66d9ef">select</span> id <span style="color:#66d9ef">from</span> t <span style="color:#66d9ef">where</span> thread_id <span style="color:#f92672">=</span> <span style="color:#ae81ff">10000</span> <span style="color:#66d9ef">and</span> deleted <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">order</span> <span style="color:#66d9ef">by</span> gmt_create <span style="color:#66d9ef">asc</span> <span style="color:#66d9ef">limit</span> <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">15</span>) a, t 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">where</span> a.id <span style="color:#f92672">=</span> t.id;
+</span></span></code></pre></div><p>上述例子必须满足 t 表主键是 id 列，且有覆盖索引 secondary key：（thread_id, deleted, gmt_create）。</p>
+<p>通过先根据过滤条件利用覆盖索引取出主键 id 进行排序，再进行 join 操作取出其他字段。</p>
+<p>数据访问开销=索引 IO+索引分页后结果（例子中是 15 行）对应的表数据 IO。因此，该写法每次翻页消耗的资源和时间都基本相同，就像翻第一页一样。</p>
+<p>**适用场景：**当查询和排序字段（即 where 子句和 order by 子句涉及的字段）有对应覆盖索引时，且中间结果集很大的情况时适用。</p>
+<p>建表优化</p>
+<p><strong>①</strong>在表中建立索引，优先考虑 where、order by 使用到的字段。</p>
+<p><strong>②</strong>尽量使用数字型字段（如性别，男：1 女：2），若只含数值信息的字段尽量不要设计为字符型，这会降低查询和连接的性能，并会增加存储开销。</p>
+<p>这是因为引擎在处理查询和连接时会 逐个比较字符串中每一个字符，而对于数字型而言只需要比较一次就够了。</p>
+<p><strong>③</strong>查询数据量大的表 会造成查询缓慢。主要的原因是扫描行数过多。这个时候可以通过程序，分段分页进行查询，循环遍历，将结果合并处理进行展示。</p>
+<p>要查询 100000 到 100050 的数据，如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> (<span style="color:#66d9ef">SELECT</span> ROW_NUMBER() OVER(<span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> ID <span style="color:#66d9ef">ASC</span>) <span style="color:#66d9ef">AS</span> rowid,<span style="color:#f92672">*</span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FROM</span> infoTab)t <span style="color:#66d9ef">WHERE</span> t.rowid <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">100000</span> <span style="color:#66d9ef">AND</span> t.rowid <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">100050</span>
+</span></span></code></pre></div><p><strong>④</strong>用 varchar/nvarchar 代替 char/nchar。</p>
+<p>尽可能的使用 varchar/nvarchar 代替 char/nchar ，因为首先变长字段存储空间小，可以节省存储空间，其次对于查询来说，在一个相对较小的字段内搜索效率显然要高些。</p>
+<p>不要以为 NULL 不需要空间，比如：char(100) 型，在字段建立时，空间就固定了， 不管是否插入值（NULL 也包含在内），都是占用 100 个字符的空间的，如果是 varchar 这样的变长字段， null 不占用空间</p>
+]]></content:encoded></item><item><title>elasticsearch</title><link>https://haokiu.com/blog/3XTrh1/</link><pubDate>Wed, 23 Sep 2020 16:53:39 +0000</pubDate><guid>https://haokiu.com/blog/3XTrh1/</guid><description>基本概念 Node 与 Cluster Elastic 本质上是一个分布式数据库，允许多台服务器协同工作，每台服务器可以运行多个 Elastic 实例。 单个 Elastic 实例称为一个节点（nod…</description><content:encoded><![CDATA[<h2 id="基本概念">基本概念</h2>
+<h3 id="node-与-cluster">Node 与 Cluster</h3>
+<p>Elastic 本质上是一个分布式数据库，允许多台服务器协同工作，每台服务器可以运行多个 Elastic 实例。</p>
+<p>单个 Elastic 实例称为一个节点（node）。一组节点构成一个集群（cluster）。</p>
+<h3 id="index">Index</h3>
+<p>Elastic 会索引所有字段，经过处理后写入一个反向索引（Inverted Index）。查找数据的时候，直接查找该索引。</p>
+<p>所以，Elastic 数据管理的顶层单位就叫做 Index（索引）。它是单个数据库的同义词。每个 Index （即数据库）的名字必须是小写。</p>
+<h3 id="document">Document</h3>
+<p>Index 里面单条的记录称为 Document（文档）。许多条 Document 构成了一个 Index。Document 使用 JSON 格式表示。同一个 Index 里面的 Document，不要求有相同的结构（scheme），但是最好保持相同，这样有利于提高搜索效率。</p>
+<h3 id="type">Type</h3>
+<p>Document 可以分组，比如weather这个 Index 里面，可以按城市分组（北京和上海），也可以按气候分组（晴天和雨天）。这种分组就叫做 Type，它是虚拟的逻辑分组，用来过滤 Document。</p>
+<p>不同的 Type 应该有相似的结构（schema），举例来说，id字段不能在这个组是字符串，在另一个组是数值。这是与关系型数据库的表的一个区别。性质完全不同的数据（比如products和logs）应该存成两个 Index，而不是一个 Index 里面的两个 Type（虽然可以做到）。</p>
+<p>在6.0之前的版本，一个ElasticSearch索引中，可以有多个类型；从6.0版本开始，，一个ElasticSearch索引中，只有1个类型。一个类型是索引的一个逻辑上的分类，通常具有一组相同字段的文档组成。ElasticSearch的类型概念相当于关系数据库的数据表。</p>
+<h3 id="shard">shard</h3>
+<p>当数据量较大时，索引的存储空间需求超出单个节点磁盘容量的限制，或者出现单个节点处理速度较慢。为了解决这些问题，ElasticSearch将索引中的数据进行切分成多个分片（shard），每个分片存储这个索引的一部分数据，分布在不同节点上。当需要查询索引时，ElasticSearch将查询发送到每个相关分片，之后将查询结果合并，这个过程对ElasticSearch应用来说是透明的，用户感知不到分片的存在。 一个索引的分片一旦指定，不再修改。</p>
+<h3 id="副本">副本</h3>
+<p>其实，分片全称是主分片，简称为分片。主分片是相对于副本来说的，副本是对主分片的一个或多个复制版本（或称拷贝），这些复制版本（拷贝）可以称为复制分片，可以直接称之为副本。当主分片丢失时，集群可以将一个副本升级为新的主分片。</p>
+<h2 id="对比">对比</h2>
+<table>
+	<thead>
+			<tr>
+					<th>ElasticSearch</th>
+					<th>RDBMS</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>索引（index）</td>
+					<td>数据库（database）</td>
+			</tr>
+			<tr>
+					<td>类型（type）</td>
+					<td>表（table）</td>
+			</tr>
+			<tr>
+					<td>文档（document）</td>
+					<td>行（row）</td>
+			</tr>
+			<tr>
+					<td>字段（field）</td>
+					<td>列（column）</td>
+			</tr>
+			<tr>
+					<td>映射（mapping）</td>
+					<td>表结构（schema）</td>
+			</tr>
+			<tr>
+					<td>全文索引</td>
+					<td>索引</td>
+			</tr>
+			<tr>
+					<td>查询DSL</td>
+					<td>SQL</td>
+			</tr>
+			<tr>
+					<td>GET</td>
+					<td>select</td>
+			</tr>
+			<tr>
+					<td>PUT/POST</td>
+					<td>update</td>
+			</tr>
+			<tr>
+					<td>DELETE</td>
+					<td>delete</td>
+			</tr>
+	</tbody>
+</table>
+<h2 id="节点信息">节点信息</h2>
+<h3 id="查看节点信息">查看节点信息</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl localhost:9200
+</span></span></code></pre></div><h3 id="查看节点健康度">查看节点健康度</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl localhost:9200/_cat/health?v&amp;pretty<span style="color:#f92672">=</span>true
+</span></span></code></pre></div><h3 id="查看集群状况">查看集群状况</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl localhost:9200/_cat/nodes?v&amp;pretty<span style="color:#f92672">=</span>true
+</span></span></code></pre></div><h2 id="index索引操作">index(索引)操作</h2>
+<h3 id="查看当前节点的所有-index">查看当前节点的所有 Index。</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl -X GET <span style="color:#e6db74">&#39;http://localhost:9200/_cat/indices?v&#39;</span>
+</span></span></code></pre></div><h3 id="可以列出每个-index-所包含的-type">可以列出每个 Index 所包含的 Type</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl <span style="color:#e6db74">&#39;localhost:9200/_mapping?pretty=true&#39;</span>
+</span></span></code></pre></div><h3 id="新建一个名叫weather的-index">新建一个名叫weather的 Index。</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl -X PUT <span style="color:#e6db74">&#39;localhost:9200/weather&#39;</span>
+</span></span></code></pre></div><h3 id="删除这个-index">删除这个 Index。</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl -X DELETE <span style="color:#e6db74">&#39;localhost:9200/weather&#39;</span>
+</span></span></code></pre></div><h2 id="文档操作">文档操作</h2>
+<h3 id="获取">获取</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>GET /website/blog/123?pretty
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;_index&#34;</span> :   <span style="color:#e6db74">&#34;website&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;_type&#34;</span> :    <span style="color:#e6db74">&#34;blog&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;_id&#34;</span> :      <span style="color:#e6db74">&#34;123&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;_version&#34;</span> : 1,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;found&#34;</span> :    true,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;_source&#34;</span> :  <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;title&#34;</span>: <span style="color:#e6db74">&#34;My first blog entry&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;text&#34;</span>:  <span style="color:#e6db74">&#34;Just trying this out...&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;date&#34;</span>:  <span style="color:#e6db74">&#34;2014/01/01&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>检索文档的一部分</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>GET /website/blog/123?_source<span style="color:#f92672">=</span>title,text
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;_index&#34;</span> :   <span style="color:#e6db74">&#34;website&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;_type&#34;</span> :    <span style="color:#e6db74">&#34;blog&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;_id&#34;</span> :      <span style="color:#e6db74">&#34;123&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;_version&#34;</span> : 1,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;exists&#34;</span> :   true,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;_source&#34;</span> : <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;title&#34;</span>: <span style="color:#e6db74">&#34;My first blog entry&#34;</span> ,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;text&#34;</span>:  <span style="color:#e6db74">&#34;Just trying this out...&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>只想得到_source字段而不要其他的元数据</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>GET /website/blog/123/_source
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#e6db74">&#34;title&#34;</span>: <span style="color:#e6db74">&#34;My first blog entry&#34;</span>,
+</span></span><span style="display:flex;"><span>   <span style="color:#e6db74">&#34;text&#34;</span>:  <span style="color:#e6db74">&#34;Just trying this out...&#34;</span>,
+</span></span><span style="display:flex;"><span>   <span style="color:#e6db74">&#34;date&#34;</span>:  <span style="color:#e6db74">&#34;2014/01/01&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h3 id="存在">存在</h3>
+<p>如果你想做的只是检查文档是否存在——你对内容完全不感兴趣——使用HEAD方法来代替GET。HEAD请求不会返回响应体，只有HTTP头：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl -i -XHEAD http://localhost:9200/website/blog/123
+</span></span></code></pre></div><p>Elasticsearch将会返回200 OK状态如果你的文档存在：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>HTTP/1.1 <span style="color:#ae81ff">200</span> OK
+</span></span><span style="display:flex;"><span>Content-Type: text/plain; charset<span style="color:#f92672">=</span>UTF-8
+</span></span><span style="display:flex;"><span>Content-Length: <span style="color:#ae81ff">0</span>
+</span></span></code></pre></div><p>如果不存在返回404 Not Found：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>HTTP/1.1 <span style="color:#ae81ff">404</span> Not Found
+</span></span><span style="display:flex;"><span>Content-Type: text/plain; charset<span style="color:#f92672">=</span>UTF-8
+</span></span><span style="display:flex;"><span>Content-Length: <span style="color:#ae81ff">0</span>
+</span></span></code></pre></div><h3 id="更新整个文档">更新整个文档</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>PUT /website/blog/123
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;title&#34;</span>: <span style="color:#e6db74">&#34;My first blog entry&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;text&#34;</span>:  <span style="color:#e6db74">&#34;I am starting to get the hang of this...&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;date&#34;</span>:  <span style="color:#e6db74">&#34;2014/01/02&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h3 id="新建文档">新建文档</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>PUT /website/blog/123
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span> ... <span style="color:#f92672">}</span>
+</span></span></code></pre></div><h3 id="删除文档">删除文档</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>DELETE /website/blog/123
+</span></span></code></pre></div><h2 id="配置">配置</h2>
+<p>elasticsearch的config文件夹里面有两个配置文件：elasticsearch.yml和log4j2.properties，第一个是es的基本配置文件，第二个是日志配置文件，es也是使用log4j2来记录日志的，所以log4j2.properties里的设置按普通log4j2配置文件来设置就行了。</p>
+<h3 id="clustername">cluster.name</h3>
+<p>Elasticsearch 默认启动的集群名字叫 elasticsearch 。 你最好给你的生产环境的集群改个名字，改名字的目的很简单， 就是防止某人的笔记本电脑加入了集群这种意外。简单修改成 elasticsearch_production 会很省心。</p>
+<p>你可以在你的 elasticsearch.yml 文件中修改：</p>
+<p><code>cluster.name: elasticsearch_production</code></p>
+<h3 id="nodename">node.name</h3>
+<p>建议给每个节点设置一个有意义的、清楚的、描述性的名字，同样你可以在 elasticsearch.yml 中配置：</p>
+<p><code>node.name: elasticsearch_005_data</code></p>
+<h3 id="master节点-主节点">Master节点 （主节点）</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>node.master: true
+</span></span><span style="display:flex;"><span>node.data: false
+</span></span></code></pre></div><p>这样配置的节点为master节点。主节点的主要职责是和集群操作相关的内容，如创建或删除索引，跟踪哪些节点是群集的一部分，并决定哪些分片分配给相关的节点。稳定的主节点对集群的健康是非常重要的。</p>
+<h4 id="discoveryzenminimum_master_nodes">discovery.zen.minimum_master_nodes</h4>
+<p>为了防止数据丢失，配置discovery.zen.minimum_master_nodes设置是至关重要的（默认为1），每个主节点应该知道形成一个集群的最小数量的主资格节点的数量。</p>
+<p>假设我们有一个集群。有3个主资格节点，当网络发生故障的时候，有可能其中一个节点不能和其他节点进行通信了。这个时候，当discovery.zen.minimum_master_nodes设置为1的时候，就会分成两个小的独立集群，当网络好的时候，就会出现数据错误或者丢失数据的情况。当discovery.zen.minimum_master_nodes设置为2的时候，一个网络中有两个主资格节点，可以继续工作，另一部分，由于只有一个主资格节点，则不会形成一个独立的集群，这个时候当网络回复的时候，节点又会从新加入集群。</p>
+<p>设置这个值的原则是：（master_eligible_nodes / 2）+ 1</p>
+<h4 id="discoveryzenpingunicasthosts">discovery.zen.ping.unicast.hosts</h4>
+<p>Elasticsearch 默认被配置为使用单播发现，以防止节点无意中加入集群。只有在同一台机器上运行的节点才会自动组成集群。</p>
+<p>虽然组播仍然作为插件提供， 但它应该永远不被使用在生产环境了，否则你得到的结果就是一个节点意外的加入到了你的生产环境，仅仅是因为他们收到了一个错误的组播信号。 对于组播本身并没有错，组播会导致一些愚蠢的问题，并且导致集群变的脆弱（比如，一个网络工程师正在捣鼓网络，而没有告诉你，你会发现所有的节点突然发现不了对方了）。</p>
+<p>使用单播，你可以为 Elasticsearch 提供一些它应该去尝试连接的节点列表。 当一个节点联系到单播列表中的成员时，它就会得到整个集群所有节点的状态，然后它会联系 master 节点，并加入集群。</p>
+<p>这意味着你的单播列表不需要包含你的集群中的所有节点， 它只是需要足够的节点，当一个新节点联系上其中一个并且说上话就可以了。如果你使用 master 候选节点作为单播列表，你只要列出三个就可以了。 这个配置在 elasticsearch.yml 文件中：</p>
+<p><code>discovery.zen.ping.unicast.hosts: [&quot;host1&quot;, &quot;host2:port&quot;]</code></p>
+<p>注：端口非9200的节点， ip后需加端口号， 因 es 默认识别端口是9200</p>
+<h3 id="data节点数据节点">Data节点（数据节点）</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>node.master: false
+</span></span><span style="display:flex;"><span>node.data: true
+</span></span></code></pre></div><p>数据节点主要是存储索引数据的节点，主要对文档进行增删改查操作，聚合操作等。数据节点对cpu，内存，io要求较高，在优化的时候需要监控数据节点的状态，当资源不够的时候，需要在集群中添加新的节点。</p>
+<h3 id="client节点-客户端节点">Client节点 (客户端节点)</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>node.master: false
+</span></span><span style="display:flex;"><span>node.data: false
+</span></span></code></pre></div><p>当主节点和数据节点配置都设置为false的时候，该节点只能处理路由请求，处理搜索，分发索引操作等，从本质上来说该客户节点表现为智能负载平衡器。独立的客户端节点在一个比较大的集群中是非常有用的，他协调主节点和数据节点，客户端节点加入集群可以得到集群的状态，根据集群的状态可以直接路由请求。
+警告：添加太多的客户端节点对集群是一种负担，因为主节点必须等待每一个节点集群状态的更新确认！客户节点的作用不应被夸大，数据节点也可以起到类似的作用。</p>
+<h2 id="安全">安全</h2>
+<p>search-guard是elastcisearch的一款插件，提供加密，身份验证和授权，基于search guard SSL，另外提供可插入的身份验证/授权模块，search-guard是shield的替代品，可免费提供所有的基本安全功能。</p>
+<h2 id="参考">参考</h2>
+<p><a href="http://www.ruanyifeng.com/blog/2017/08/elasticsearch.html">阮一蜂的博客</a></p>
+]]></content:encoded></item><item><title>搜索引擎 及 elastic search</title><link>https://haokiu.com/blog/oaXyUa/</link><pubDate>Wed, 23 Sep 2020 14:29:39 +0000</pubDate><guid>https://haokiu.com/blog/oaXyUa/</guid><description>搜索引擎是对数据的检索，所以我们先从生活中的数据说起。我们生活中的数据总体分为两种： 结构化数据 非结构化数据 结构化数据：也称作行数据，是由二维表结构来逻辑表达和实现的数据，严格地遵循数据格式与长度…</description><content:encoded><![CDATA[<p>搜索引擎是对数据的检索，所以我们先从生活中的数据说起。我们生活中的数据总体分为两种：</p>
+<ul>
+<li><strong>结构化数据</strong></li>
+<li><strong>非结构化数据</strong></li>
+</ul>
+<p>**结构化数据：**也称作行数据，是由二维表结构来逻辑表达和实现的数据，严格地遵循数据格式与长度规范，主要通过关系型数据库进行存储和管理。指具有固定格式或有限长度的数据，如数据库，元数据等。</p>
+<p>**非结构化数据：**又可称为全文数据，不定长或无固定格式，不适于由数据库二维表来表现，包括所有格式的办公文档、XML、HTML、Word 文档，邮件，各类报表、图片和咅频、视频信息等。</p>
+<p>**说明：**如果要更细致的区分的话，XML、HTML 可划分为半结构化数据。因为它们也具有自己特定的标签格式，所以既可以根据需要按结构化数据来处理，也可抽取出纯文本按非结构化数据来处理。</p>
+<p>根据两种数据分类，搜索也相应的分为两种：</p>
+<ul>
+<li><strong>结构化数据搜索</strong></li>
+<li><strong>非结构化数据搜索</strong></li>
+</ul>
+<p>**对于结构化数据，**因为它们具有特定的结构，所以我们一般都是可以通过关系型数据库（MySQL，Oracle 等）的二维表（Table）的方式存储和搜索，也可以建立索引。</p>
+<p>对于非结构化数据，也即对全文数据的搜索主要有两种方法：</p>
+<ul>
+<li><strong>顺序扫描</strong></li>
+<li><strong>全文检索</strong></li>
+</ul>
+<p>**顺序扫描：**通过文字名称也可了解到它的大概搜索方式，即按照顺序扫描的方式查询特定的关键字。</p>
+<p>例如给你一张报纸，让你找到该报纸中“平安”的文字在哪些地方出现过。你肯定需要从头到尾把报纸阅读扫描一遍然后标记出关键字在哪些版块出现过以及它的出现位置。</p>
+<p>这种方式无疑是最耗时的最低效的，如果报纸排版字体小，而且版块较多甚至有多份报纸，等你扫描完你的眼睛也差不多了。</p>
+<p>**全文搜索：**对非结构化数据顺序扫描很慢，我们是否可以进行优化？把我们的非结构化数据想办法弄得有一定结构不就行了吗？</p>
+<p>将非结构化数据中的一部分信息提取出来，重新组织，使其变得有一定结构，然后对此有一定结构的数据进行搜索，从而达到搜索相对较快的目的。</p>
+<p>这种方式就构成了全文检索的基本思路。这部分从非结构化数据中提取出的然后重新组织的信息，我们称之为索引。</p>
+<p>这种方式的主要工作量在前期索引的创建，但是对于后期搜索却是快速高效的。</p>
+<p>先说说 Lucene</p>
+<p>通过对生活中数据的类型作了一个简短了解之后，我们知道关系型数据库的 SQL 检索是处理不了这种非结构化数据的。</p>
+<p>这种非结构化数据的处理需要依赖全文搜索，而目前市场上开放源代码的最好全文检索引擎工具包就属于 Apache 的 Lucene了。</p>
+<p>但是 Lucene 只是一个工具包，它不是一个完整的全文检索引擎。Lucene 的目的是为软件开发人员提供一个简单易用的工具包，以方便的在目标系统中实现全文检索的功能，或者是以此为基础建立起完整的全文检索引擎。</p>
+<p>目前以 Lucene 为基础建立的开源可用全文搜索引擎主要是 Solr 和 Elasticsearch。</p>
+<p>Solr 和 Elasticsearch 都是比较成熟的全文搜索引擎，能完成的功能和性能也基本一样。</p>
+<p>但是 ES 本身就具有分布式的特性和易安装使用的特点，而 Solr 的分布式需要借助第三方来实现，例如通过使用 ZooKeeper 来达到分布式协调管理。</p>
+<p>不管是 Solr 还是 Elasticsearch 底层都是依赖于 Lucene，而 Lucene 能实现全文搜索主要是因为它实现了倒排索引的查询结构。</p>
+<p>如何理解倒排索引呢？假如现有三份数据文档，文档的内容如下分别是：</p>
+<ul>
+<li>Java is the best programming language.</li>
+<li>PHP is the best programming language.</li>
+<li>Javascript is the best programming language.</li>
+</ul>
+<p>为了创建倒排索引，我们通过分词器将每个文档的内容域拆分成单独的词（我们称它为词条或 Term），创建一个包含所有不重复词条的排序列表，然后列出每个词条出现在哪个文档。</p>
+<p>结果如下所示：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a6e22e">Term</span>          <span style="color:#a6e22e">Doc_1</span>    <span style="color:#a6e22e">Doc_2</span>   <span style="color:#a6e22e">Doc_3</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">-------------------------------------</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">Java</span>        |   <span style="color:#a6e22e">X</span>   |        |
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">is</span>          |   <span style="color:#a6e22e">X</span>   |   <span style="color:#a6e22e">X</span>    |   <span style="color:#a6e22e">X</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">the</span>         |   <span style="color:#a6e22e">X</span>   |   <span style="color:#a6e22e">X</span>    |   <span style="color:#a6e22e">X</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">best</span>        |   <span style="color:#a6e22e">X</span>   |   <span style="color:#a6e22e">X</span>    |   <span style="color:#a6e22e">X</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">programming</span> |   <span style="color:#a6e22e">x</span>   |   <span style="color:#a6e22e">X</span>    |   <span style="color:#a6e22e">X</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">language</span>    |   <span style="color:#a6e22e">X</span>   |   <span style="color:#a6e22e">X</span>    |   <span style="color:#a6e22e">X</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">PHP</span>         |       |   <span style="color:#a6e22e">X</span>    |
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">Javascript</span>  |       |        |   <span style="color:#a6e22e">X</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">-------------------------------------</span>
+</span></span></code></pre></div><p>这种结构由文档中所有不重复词的列表构成，对于其中每个词都有一个文档列表与之关联。</p>
+<p>这种由属性值来确定记录的位置的结构就是倒排索引。带有倒排索引的文件我们称为倒排文件。</p>
+<p>我们将上面的内容转换为图的形式来说明倒排索引的结构信息，如下图所示：</p>
+<p><img loading="lazy" src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9tbWJpei5xcGljLmNuL21tYml6X3BuZy9NT3dsTzBJTmZRb0RqMVZFeVlQUkJSWWE2TTJWdnNobDFDYkJ4VVN2VUJhYldWTDFlMERWR1dYdlhpY0VnRlZNOTBnZU9ZMnBTOWZIdWlid09XYmliYVY5dy82NDA?x-oss-process=image/format,png" alt="img"  />
+</p>
+<p>其中主要有如下几个核心术语需要理解：</p>
+<ul>
+<li>
+<p>**词条（Term）：**索引里面最小的存储和查询单元，对于英文来说是一个单词，对于中文来说一般指分词后的一个词。</p>
+</li>
+<li>
+<p>**词典（Term Dictionary）：**或字典，是词条 Term 的集合。搜索引擎的通常索引单位是单词，单词词典是由文档集合中出现过的所有单词构成的字符串集合，单词词典内每条索引项记载单词本身的一些信息以及指向“倒排列表”的指针。</p>
+</li>
+<li>
+<p>**倒排表（Post list）：**一个文档通常由多个词组成，倒排表记录的是某个词在哪些文档里出现过以及出现的位置。</p>
+<p>每条记录称为一个倒排项（Posting）。倒排表记录的不单是文档编号，还存储了词频等信息。</p>
+</li>
+<li>
+<p>**倒排文件（Inverted File）：**所有单词的倒排列表往往顺序地存储在磁盘的某个文件里，这个文件被称之为倒排文件，倒排文件是存储倒排索引的物理文件。</p>
+</li>
+</ul>
+<p>从上图我们可以了解到倒排索引主要由两个部分组成：</p>
+<ul>
+<li><strong>词典</strong></li>
+<li><strong>倒排文件</strong></li>
+</ul>
+<p>词典和倒排表是 Lucene 中很重要的两种数据结构，是实现快速检索的重要基石。词典和倒排文件是分两部分存储的，词典在内存中而倒排文件存储在磁盘上。</p>
+<p>ES 核心概念</p>
+<p>一些基础知识的铺垫之后我们正式进入今天的主角 Elasticsearch 的介绍。</p>
+<p>ES 是使用 Java 编写的一种开源搜索引擎，它在内部使用 Lucene 做索引与搜索，通过对 Lucene 的封装，隐藏了 Lucene 的复杂性，取而代之的提供一套简单一致的 RESTful API。</p>
+<p>然而，Elasticsearch 不仅仅是 Lucene，并且也不仅仅只是一个全文搜索引擎。</p>
+<p>它可以被下面这样准确的形容：</p>
+<ul>
+<li>一个分布式的实时文档存储，每个字段可以被索引与搜索。</li>
+<li>一个分布式实时分析搜索引擎。</li>
+<li>能胜任上百个服务节点的扩展，并支持 PB 级别的结构化或者非结构化数据。</li>
+</ul>
+<p>官网对 Elasticsearch 的介绍是 Elasticsearch 是一个分布式、可扩展、近实时的搜索与数据分析引擎。</p>
+<p>我们通过一些核心概念来看下 Elasticsearch 是如何做到分布式，可扩展和近实时搜索的。</p>
+<p><strong>集群（Cluster）</strong></p>
+<p>ES 的集群搭建很简单，不需要依赖第三方协调管理组件，自身内部就实现了集群的管理功能。</p>
+<p>ES 集群由一个或多个 Elasticsearch 节点组成，每个节点配置相同的 cluster.name 即可加入集群，默认值为 “elasticsearch”。</p>
+<p>确保不同的环境中使用不同的集群名称，否则最终会导致节点加入错误的集群。</p>
+<p>一个 Elasticsearch 服务启动实例就是一个节点（Node）。节点通过 node.name 来设置节点名称，如果不设置则在启动时给节点分配一个随机通用唯一标识符作为名称。</p>
+<h3 id="发现机制"><strong>①发现机制</strong></h3>
+<p>那么有一个问题，ES 内部是如何通过一个相同的设置 cluster.name 就能将不同的节点连接到同一个集群的？答案是 Zen Discovery。</p>
+<p>Zen Discovery 是 Elasticsearch 的内置默认发现模块（发现模块的职责是发现集群中的节点以及选举 Master 节点）。</p>
+<p>它提供单播和基于文件的发现，并且可以扩展为通过插件支持云环境和其他形式的发现。</p>
+<p>Zen Discovery 与其他模块集成，例如，节点之间的所有通信都使用 Transport 模块完成。节点使用发现机制通过 Ping 的方式查找其他节点。</p>
+<p>Elasticsearch 默认被配置为使用单播发现，以防止节点无意中加入集群。只有在同一台机器上运行的节点才会自动组成集群。</p>
+<p>如果集群的节点运行在不同的机器上，使用单播，你可以为 Elasticsearch 提供一些它应该去尝试连接的节点列表。</p>
+<p>当一个节点联系到单播列表中的成员时，它就会得到整个集群所有节点的状态，然后它会联系 Master 节点，并加入集群。</p>
+<p>这意味着单播列表不需要包含集群中的所有节点， 它只是需要足够的节点，当一个新节点联系上其中一个并且说上话就可以了。</p>
+<p>如果你使用 Master 候选节点作为单播列表，你只要列出三个就可以了。这个配置在 elasticsearch.yml 文件中：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a6e22e">discovery</span>.<span style="color:#a6e22e">zen</span>.<span style="color:#a6e22e">ping</span>.<span style="color:#a6e22e">unicast</span>.<span style="color:#a6e22e">hosts</span>: [<span style="color:#e6db74">&#34;host1&#34;</span>, <span style="color:#e6db74">&#34;host2:port&#34;</span>]
+</span></span></code></pre></div><p>节点启动后先 Ping ，如果 discovery.zen.ping.unicast.hosts 有设置，则 Ping 设置中的 Host ，否则尝试 ping localhost 的几个端口。</p>
+<p>Elasticsearch 支持同一个主机启动多个节点，Ping 的 Response 会包含该节点的基本信息以及该节点认为的 Master 节点。</p>
+<p>选举开始，先从各节点认为的 Master 中选，规则很简单，按照 ID 的字典序排序，取第一个。如果各节点都没有认为的 Master ，则从所有节点中选择，规则同上。</p>
+<p>这里有个限制条件就是 discovery.zen.minimum_master_nodes ，如果节点数达不到最小值的限制，则循环上述过程，直到节点数足够可以开始选举。</p>
+<p>最后选举结果是肯定能选举出一个 Master ，如果只有一个 Local 节点那就选出的是自己。</p>
+<p>如果当前节点是 Master ，则开始等待节点数达到 discovery.zen.minimum_master_nodes，然后提供服务。</p>
+<p>如果当前节点不是 Master ，则尝试加入 Master 。Elasticsearch 将以上服务发现以及选主的流程叫做 Zen Discovery 。</p>
+<p>由于它支持任意数目的集群（ 1- N ），所以不能像 Zookeeper 那样限制节点必须是奇数，也就无法用投票的机制来选主，而是通过一个规则。</p>
+<p>只要所有的节点都遵循同样的规则，得到的信息都是对等的，选出来的主节点肯定是一致的。</p>
+<p>但分布式系统的问题就出在信息不对等的情况，这时候很容易出现脑裂（Split-Brain）的问题。</p>
+<p>大多数解决方案就是设置一个 Quorum 值，要求可用节点必须大于 Quorum（一般是超过半数节点），才能对外提供服务。</p>
+<p>而 Elasticsearch 中，这个 Quorum 的配置就是 discovery.zen.minimum_master_nodes 。</p>
+<h3 id="节点的角色"><strong>②节点的角色</strong></h3>
+<p>每个节点既可以是候选主节点也可以是数据节点，通过在配置文件 ../config/elasticsearch.yml 中设置即可，默认都为 true。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">master</span>: <span style="color:#66d9ef">true</span>  <span style="color:#75715e">//是否候选主节点</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">node</span>.<span style="color:#a6e22e">data</span>: <span style="color:#66d9ef">true</span>    <span style="color:#75715e">//是否数据节点</span>
+</span></span></code></pre></div><p>数据节点负责数据的存储和相关的操作，例如对数据进行增、删、改、查和聚合等操作，所以数据节点（Data 节点）对机器配置要求比较高，对 CPU、内存和 I/O 的消耗很大。</p>
+<p>通常随着集群的扩大，需要增加更多的数据节点来提高性能和可用性。</p>
+<p>候选主节点可以被选举为主节点（Master 节点），集群中只有候选主节点才有选举权和被选举权，其他节点不参与选举的工作。</p>
+<p>主节点负责创建索引、删除索引、跟踪哪些节点是群集的一部分，并决定哪些分片分配给相关的节点、追踪集群中节点的状态等，稳定的主节点对集群的健康是非常重要的。</p>
+<p><img loading="lazy" src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9tbWJpei5xcGljLmNuL21tYml6X3BuZy9NT3dsTzBJTmZRb0RqMVZFeVlQUkJSWWE2TTJWdnNobGtZcElkbVVlWXRjWGJvMUh5YWxrSDlRUUxlaWFKNVpJQXlraWNUbWtLcjZ4NW8xNDVJNzJ1TTdRLzY0MA?x-oss-process=image/format,png" alt="img"  />
+</p>
+<p>一个节点既可以是候选主节点也可以是数据节点，但是由于数据节点对 CPU、内存核 I/O 消耗都很大。</p>
+<p>所以如果某个节点既是数据节点又是主节点，那么可能会对主节点产生影响从而对整个集群的状态产生影响。</p>
+<p>因此为了提高集群的健康性，我们应该对 Elasticsearch 集群中的节点做好角色上的划分和隔离。可以使用几个配置较低的机器群作为候选主节点群。</p>
+<p>主节点和其他节点之间通过 Ping 的方式互检查，主节点负责 Ping 所有其他节点，判断是否有节点已经挂掉。其他节点也通过 Ping 的方式判断主节点是否处于可用状态。</p>
+<p>虽然对节点做了角色区分，但是用户的请求可以发往任何一个节点，并由该节点负责分发请求、收集结果等操作，而不需要主节点转发。</p>
+<p>这种节点可称之为协调节点，协调节点是不需要指定和配置的，集群中的任何节点都可以充当协调节点的角色。</p>
+<h3 id="脑裂现象"><strong>③脑裂现象</strong></h3>
+<p>同时如果由于网络或其他原因导致集群中选举出多个 Master 节点，使得数据更新时出现不一致，这种现象称之为脑裂，即集群中不同的节点对于 Master 的选择出现了分歧，出现了多个 Master 竞争。</p>
+<p>“脑裂”问题可能有以下几个原因造成：</p>
+<ul>
+<li>**网络问题：**集群间的网络延迟导致一些节点访问不到 Master，认为 Master 挂掉了从而选举出新的 Master，并对 Master 上的分片和副本标红，分配新的主分片。</li>
+<li>**节点负载：**主节点的角色既为 Master 又为 Data，访问量较大时可能会导致 ES 停止响应（假死状态）造成大面积延迟，此时其他节点得不到主节点的响应认为主节点挂掉了，会重新选取主节点。</li>
+<li>**内存回收：**主节点的角色既为 Master 又为 Data，当 Data 节点上的 ES 进程占用的内存较大，引发 JVM 的大规模内存回收，造成 ES 进程失去响应。</li>
+</ul>
+<p>为了避免脑裂现象的发生，我们可以从原因着手通过以下几个方面来做出优化措施：</p>
+<ul>
+<li>
+<p>**适当调大响应时间，减少误判。**通过参数 discovery.zen.ping_timeout 设置节点状态的响应时间，默认为 3s，可以适当调大。</p>
+<p>如果 Master 在该响应时间的范围内没有做出响应应答，判断该节点已经挂掉了。调大参数（如 6s，discovery.zen.ping_timeout:6），可适当减少误判。</p>
+</li>
+<li>
+<p>**选举触发。**我们需要在候选集群中的节点的配置文件中设置参数 discovery.zen.munimum_master_nodes 的值。</p>
+<p>这个参数表示在选举主节点时需要参与选举的候选主节点的节点数，默认值是 1，官方建议取值(master_eligibel_nodes/2)+1，其中 master_eligibel_nodes 为候选主节点的个数。</p>
+<p>这样做既能防止脑裂现象的发生，也能最大限度地提升集群的高可用性，因为只要不少于 discovery.zen.munimum_master_nodes 个候选节点存活，选举工作就能正常进行。</p>
+<p>当小于这个值的时候，无法触发选举行为，集群无法使用，不会造成分片混乱的情况。</p>
+</li>
+<li>
+<p>**角色分离。**即是上面我们提到的候选主节点和数据节点进行角色分离，这样可以减轻主节点的负担，防止主节点的假死状态发生，减少对主节点“已死”的误判。</p>
+</li>
+</ul>
+<p><strong>分片（Shards）</strong></p>
+<p>ES 支持 PB 级全文搜索，当索引上的数据量太大的时候，ES 通过水平拆分的方式将一个索引上的数据拆分出来分配到不同的数据块上，拆分出来的数据库块称之为一个分片。</p>
+<p>这类似于 MySQL 的分库分表，只不过 MySQL 分库分表需要借助第三方组件而 ES 内部自身实现了此功能。</p>
+<p>在一个多分片的索引中写入数据时，通过路由来确定具体写入哪一个分片中，所以在创建索引的时候需要指定分片的数量，并且分片的数量一旦确定就不能修改。</p>
+<p>分片的数量和下面介绍的副本数量都是可以通过创建索引时的 Settings 来配置，ES 默认为一个索引创建 5 个主分片, 并分别为每个分片创建一个副本。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a6e22e">PUT</span> <span style="color:#f92672">/</span><span style="color:#a6e22e">myIndex</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>   <span style="color:#e6db74">&#34;settings&#34;</span> : {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;number_of_shards&#34;</span> : <span style="color:#ae81ff">5</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;number_of_replicas&#34;</span> : <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>   }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>ES 通过分片的功能使得索引在规模上和性能上都得到提升，每个分片都是 Lucene 中的一个索引文件，每个分片必须有一个主分片和零到多个副本。</p>
+<p><strong>副本（Replicas）</strong></p>
+<p>副本就是对分片的 Copy，每个主分片都有一个或多个副本分片，当主分片异常时，副本可以提供数据的查询等操作。</p>
+<p>主分片和对应的副本分片是不会在同一个节点上的，所以副本分片数的最大值是 N-1（其中 N 为节点数）。</p>
+<p>对文档的新建、索引和删除请求都是写操作，必须在主分片上面完成之后才能被复制到相关的副本分片。</p>
+<p>ES 为了提高写入的能力这个过程是并发写的，同时为了解决并发写的过程中数据冲突的问题，ES 通过乐观锁的方式控制，每个文档都有一个 _version （版本）号，当文档被修改时版本号递增。</p>
+<p>一旦所有的副本分片都报告写成功才会向协调节点报告成功，协调节点向客户端报告成功。</p>
+<p><img loading="lazy" src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9tbWJpei5xcGljLmNuL21tYml6X3BuZy9NT3dsTzBJTmZRb0RqMVZFeVlQUkJSWWE2TTJWdnNobG1OV01oZUQzZG1kUG40S1lRZHZxWDFiamxlcUZURmpwQlM4NndmMnBjbGRzNTJ2Z1ZsQ1pFZy82NDA?x-oss-process=image/format,png" alt="img"  />
+</p>
+<p>从上图可以看出为了达到高可用，Master 节点会避免将主分片和副本分片放在同一个节点上。</p>
+<p>假设这时节点 Node1 服务宕机了或者网络不可用了，那么主节点上主分片 S0 也就不可用了。</p>
+<p>幸运的是还存在另外两个节点能正常工作，这时 ES 会重新选举新的主节点，而且这两个节点上存在我们所需要的 S0 的所有数据。</p>
+<p>我们会将 S0 的副本分片提升为主分片，这个提升主分片的过程是瞬间发生的。此时集群的状态将会为  Yellow。</p>
+<p>为什么我们集群状态是 Yellow 而不是 Green 呢？虽然我们拥有所有的 2 个主分片，但是同时设置了每个主分片需要对应两份副本分片，而此时只存在一份副本分片。所以集群不能为 Green 的状态。</p>
+<p>如果我们同样关闭了 Node2 ，我们的程序依然可以保持在不丢失任何数据的情况下运行，因为 Node3 为每一个分片都保留着一份副本。</p>
+<p>如果我们重新启动 Node1 ，集群可以将缺失的副本分片再次进行分配，那么集群的状态又将恢复到原来的正常状态。</p>
+<p>如果 Node1 依然拥有着之前的分片，它将尝试去重用它们，只不过这时 Node1 节点上的分片不再是主分片而是副本分片了，如果期间有更改的数据只需要从主分片上复制修改的数据文件即可。</p>
+<p>小结：</p>
+<ul>
+<li>
+<p>将数据分片是为了提高可处理数据的容量和易于进行水平扩展，为分片做副本是为了提高集群的稳定性和提高并发量。</p>
+</li>
+<li>
+<p>副本是乘法，越多消耗越大，但也越保险。分片是除法，分片越多，单分片数据就越少也越分散。</p>
+</li>
+<li>
+<p>副本越多，集群的可用性就越高，但是由于每个分片都相当于一个 Lucene 的索引文件，会占用一定的文件句柄、内存及 CPU。</p>
+<p>并且分片间的数据同步也会占用一定的网络带宽，所以索引的分片数和副本数也不是越多越好。</p>
+</li>
+</ul>
+<p><strong>映射（Mapping）</strong></p>
+<p>映射是用于定义 ES 对索引中字段的存储类型、分词方式和是否存储等信息，就像数据库中的 Schema ，描述了文档可能具有的字段或属性、每个字段的数据类型。</p>
+<p>只不过关系型数据库建表时必须指定字段类型，而 ES 对于字段类型可以不指定然后动态对字段类型猜测，也可以在创建索引时具体指定字段的类型。</p>
+<p>对字段类型根据数据格式自动识别的映射称之为动态映射（Dynamic Mapping），我们创建索引时具体定义字段类型的映射称之为静态映射或显示映射（Explicit Mapping）。</p>
+<p>在讲解动态映射和静态映射的使用前，我们先来了解下 ES 中的数据有哪些字段类型？之后我们再讲解为什么我们创建索引时需要建立静态映射而不使用动态映射。</p>
+<p>ES（v6.8）中字段数据类型主要有以下几类：</p>
+<p><img loading="lazy" src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9tbWJpei5xcGljLmNuL21tYml6X3BuZy9NT3dsTzBJTmZRb0RqMVZFeVlQUkJSWWE2TTJWdnNobGVEZ1pEcklIUGVkYVZocHZDbU5raWNpYUFoNTgzamljTUhNTGNUeExZTTVYTmI0Z0RpY2liTzg0RjdBLzY0MA?x-oss-process=image/format,png" alt="img"  />
+</p>
+<p>Text 用于索引全文值的字段，例如电子邮件正文或产品说明。这些字段是被分词的，它们通过分词器传递 ，以在被索引之前将字符串转换为单个术语的列表。</p>
+<p>分析过程允许 Elasticsearch 搜索单个单词中每个完整的文本字段。文本字段不用于排序，很少用于聚合。</p>
+<p>Keyword 用于索引结构化内容的字段，例如电子邮件地址，主机名，状态代码，邮政编码或标签。它们通常用于过滤，排序，和聚合。Keyword 字段只能按其确切值进行搜索。</p>
+<p>通过对字段类型的了解我们知道有些字段需要明确定义的，例如某个字段是 Text 类型还是 Keyword 类型差别是很大的，时间字段也许我们需要指定它的时间格式，还有一些字段我们需要指定特定的分词器等等。</p>
+<p>如果采用动态映射是不能精确做到这些的，自动识别常常会与我们期望的有些差异。</p>
+<p>所以创建索引的时候一个完整的格式应该是指定分片和副本数以及 Mapping 的定义，如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a6e22e">PUT</span> <span style="color:#a6e22e">my_index</span> 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>   <span style="color:#e6db74">&#34;settings&#34;</span> : {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;number_of_shards&#34;</span> : <span style="color:#ae81ff">5</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;number_of_replicas&#34;</span> : <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>   }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;mappings&#34;</span>: {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;_doc&#34;</span>: { 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;properties&#34;</span>: { 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;title&#34;</span>:    { <span style="color:#e6db74">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;text&#34;</span>  }, 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;name&#34;</span>:     { <span style="color:#e6db74">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;text&#34;</span>  }, 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;age&#34;</span>:      { <span style="color:#e6db74">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;integer&#34;</span> },  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;created&#34;</span>:  {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>          <span style="color:#e6db74">&#34;type&#34;</span>:   <span style="color:#e6db74">&#34;date&#34;</span>, 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>          <span style="color:#e6db74">&#34;format&#34;</span>: <span style="color:#e6db74">&#34;strict_date_optional_time||epoch_millis&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>ES 的基本使用</p>
+<p>在决定使用 Elasticsearch 的时候首先要考虑的是版本问题，Elasticsearch （排除 0.x 和 1.x）目前有如下常用的稳定的主版本：2.x，5.x，6.x，7.x（current）。</p>
+<p>你可能会发现没有 3.x 和 4.x，ES 从 2.4.6 直接跳到了 5.0.0。其实是为了 ELK（ElasticSearch，Logstash，Kibana）技术栈的版本统一，免的给用户带来混乱。</p>
+<p>在 Elasticsearch 是 2.x （2.x 的最后一版 2.4.6 的发布时间是 July 25, 2017） 的情况下，Kibana 已经是 4.x（Kibana 4.6.5 的发布时间是 July 25, 2017）。</p>
+<p>那么在 Kibana 的下一主版本肯定是 5.x 了，所以 Elasticsearch 直接将自己的主版本发布为 5.0.0 了。</p>
+<p>统一之后，我们选版本就不会犹豫困惑了，我们选定 Elasticsearch 的版本后再选择相同版本的 Kibana 就行了，不用担忧版本不兼容的问题。</p>
+<p>Elasticsearch 是使用 Java 构建，所以除了注意 ELK 技术的版本统一，我们在选择 Elasticsearch 的版本的时候还需要注意 JDK 的版本。</p>
+<p>因为每个大版本所依赖的 JDK 版本也不同，目前 7.2 版本已经可以支持 JDK11。</p>
+<p><strong>安装使用</strong></p>
+<p><img loading="lazy" src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9tbWJpei5xcGljLmNuL21tYml6X3BuZy9NT3dsTzBJTmZRb0RqMVZFeVlQUkJSWWE2TTJWdnNobGFpYXJDb2ljaWFweXdTdnZKRzM1TFUyZk1LR3ZUTHQ0d2c3MzlHSjI4Qnc3d0YxMDBBR2NUWk9MZy82NDA?x-oss-process=image/format,png" alt="img"  />
+</p>
+<p>①下载和解压 Elasticsearch，无需安装解压后即可用，解压后目录如上图：</p>
+<ul>
+<li>**bin：**二进制系统指令目录，包含启动命令和安装插件命令等。</li>
+<li>**config：**配置文件目录。</li>
+<li>**data：**数据存储目录。</li>
+<li>**lib：**依赖包目录。</li>
+<li>**logs：**日志文件目录。</li>
+<li>**modules：**模块库，例如 x-pack 的模块。</li>
+<li>**plugins：**插件目录。</li>
+</ul>
+<p>②安装目录下运行 bin/elasticsearch 来启动 ES。</p>
+<p>③默认在 9200 端口运行，请求 curl http://localhost:9200/ 或者浏览器输入 http://localhost:9200，得到一个 JSON 对象，其中包含当前节点、集群、版本等信息。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;name&#34;</span> : <span style="color:#e6db74">&#34;U7fp3O9&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;cluster_name&#34;</span> : <span style="color:#e6db74">&#34;elasticsearch&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;cluster_uuid&#34;</span> : <span style="color:#e6db74">&#34;-Rj8jGQvRIelGd9ckicUOA&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;version&#34;</span> : {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;number&#34;</span> : <span style="color:#e6db74">&#34;6.8.1&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;build_flavor&#34;</span> : <span style="color:#e6db74">&#34;default&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;build_type&#34;</span> : <span style="color:#e6db74">&#34;zip&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;build_hash&#34;</span> : <span style="color:#e6db74">&#34;1fad4e1&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;build_date&#34;</span> : <span style="color:#e6db74">&#34;2019-06-18T13:16:52.517138Z&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;build_snapshot&#34;</span> : <span style="color:#66d9ef">false</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;lucene_version&#34;</span> : <span style="color:#e6db74">&#34;7.7.0&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;minimum_wire_compatibility_version&#34;</span> : <span style="color:#e6db74">&#34;5.6.0&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;minimum_index_compatibility_version&#34;</span> : <span style="color:#e6db74">&#34;5.0.0&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;tagline&#34;</span> : <span style="color:#e6db74">&#34;You Know, for Search&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>集群健康状态</strong></p>
+<p>要检查群集运行状况，我们可以在 Kibana 控制台中运行以下命令 GET /_cluster/health，得到如下信息：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;cluster_name&#34;</span> : <span style="color:#e6db74">&#34;wujiajian&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;status&#34;</span> : <span style="color:#e6db74">&#34;yellow&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;timed_out&#34;</span> : <span style="color:#66d9ef">false</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;number_of_nodes&#34;</span> : <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;number_of_data_nodes&#34;</span> : <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;active_primary_shards&#34;</span> : <span style="color:#ae81ff">9</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;active_shards&#34;</span> : <span style="color:#ae81ff">9</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;relocating_shards&#34;</span> : <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;initializing_shards&#34;</span> : <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;unassigned_shards&#34;</span> : <span style="color:#ae81ff">5</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;delayed_unassigned_shards&#34;</span> : <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;number_of_pending_tasks&#34;</span> : <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;number_of_in_flight_fetch&#34;</span> : <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;task_max_waiting_in_queue_millis&#34;</span> : <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;active_shards_percent_as_number&#34;</span> : <span style="color:#ae81ff">64.28571428571429</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>集群状态通过 绿，黄，红 来标识：</p>
+<ul>
+<li>**绿色：**集群健康完好，一切功能齐全正常，所有分片和副本都可以正常工作。</li>
+<li>**黄色：**预警状态，所有主分片功能正常，但至少有一个副本是不能正常工作的。此时集群是可以正常工作的，但是高可用性在某种程度上会受影响。</li>
+<li>**红色：**集群不可正常使用。某个或某些分片及其副本异常不可用，这时集群的查询操作还能执行，但是返回的结果会不准确。对于分配到这个分片的写入请求将会报错，最终会导致数据的丢失。</li>
+</ul>
+<p>当集群状态为红色时，它将会继续从可用的分片提供搜索请求服务，但是你需要尽快修复那些未分配的分片。</p>
+<p>ES 机制原理</p>
+<p>ES 的基本概念和基本操作介绍完了之后，我们可能还有很多疑惑：</p>
+<ul>
+<li>它们内部是如何运行的？</li>
+<li>主分片和副本分片是如何同步的？</li>
+<li>创建索引的流程是什么样的？</li>
+<li>ES 如何将索引数据分配到不同的分片上的？以及这些索引数据是如何存储的？</li>
+<li>为什么说 ES 是近实时搜索引擎而文档的 CRUD (创建-读取-更新-删除) 操作是实时的？</li>
+<li>以及 Elasticsearch 是怎样保证更新被持久化在断电时也不丢失数据？</li>
+<li>还有为什么删除文档不会立刻释放空间？</li>
+</ul>
+<p>带着这些疑问我们进入接下来的内容。</p>
+<p><strong>写索引原理</strong></p>
+<p>下图描述了 3 个节点的集群，共拥有 12 个分片，其中有 4 个主分片（S0、S1、S2、S3）和 8 个副本分片（R0、R1、R2、R3），每个主分片对应两个副本分片，节点 1 是主节点（Master 节点）负责整个集群的状态。</p>
+<p><img loading="lazy" src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9tbWJpei5xcGljLmNuL21tYml6X3BuZy9NT3dsTzBJTmZRb0RqMVZFeVlQUkJSWWE2TTJWdnNobHF0eXp0MFZ3QVNkUmhPRlVqOGx4anpRTEVQSXVGdXIwaFN5RWliMWhYVVU4cGV0c0k4NW9FTlEvNjQw?x-oss-process=image/format,png" alt="img"  />
+</p>
+<p>写索引是只能写在主分片上，然后同步到副本分片。这里有四个主分片，一条数据 ES 是根据什么规则写到特定分片上的呢？</p>
+<p>这条索引数据为什么被写到 S0 上而不写到 S1 或 S2 上？那条数据为什么又被写到 S3 上而不写到 S0 上了？</p>
+<p>首先这肯定不会是随机的，否则将来要获取文档的时候我们就不知道从何处寻找了。</p>
+<p>实际上，这个过程是根据下面这个公式决定的：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a6e22e">shard</span> = <span style="color:#a6e22e">hash</span>(<span style="color:#a6e22e">routing</span>) <span style="color:#f92672">%</span> <span style="color:#a6e22e">number_of_primary_shards</span>
+</span></span></code></pre></div><p>Routing 是一个可变值，默认是文档的 _id ，也可以设置成一个自定义的值。</p>
+<p>Routing 通过 Hash 函数生成一个数字，然后这个数字再除以 number_of_primary_shards （主分片的数量）后得到余数。</p>
+<p>这个在 0 到 number_of_primary_shards-1 之间的余数，就是我们所寻求的文档所在分片的位置。</p>
+<p>这就解释了为什么我们要在创建索引的时候就确定好主分片的数量并且永远不会改变这个数量：因为如果数量变化了，那么所有之前路由的值都会无效，文档也再也找不到了。</p>
+<p>由于在 ES 集群中每个节点通过上面的计算公式都知道集群中的文档的存放位置，所以每个节点都有处理读写请求的能力。</p>
+<p>在一个写请求被发送到某个节点后，该节点即为前面说过的协调节点，协调节点会根据路由公式计算出需要写到哪个分片上，再将请求转发到该分片的主分片节点上。</p>
+<p><img loading="lazy" src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9tbWJpei5xcGljLmNuL21tYml6X3BuZy9NT3dsTzBJTmZRb0RqMVZFeVlQUkJSWWE2TTJWdnNobENnRUIzOVFnQ0hIMXBvdUhTdlZyeHFVTGt1RGpzMENsS0tieEx0bVl4djAxNmIzbXZackxsdy82NDA?x-oss-process=image/format,png" alt="img"  />
+</p>
+<p>假如此时数据通过路由计算公式取余后得到的值是 shard=hash(routing)%4=0。</p>
+<p>则具体流程如下：</p>
+<ul>
+<li>客户端向 ES1 节点（协调节点）发送写请求，通过路由计算公式得到值为 0，则当前数据应被写到主分片 S0 上。</li>
+<li>ES1 节点将请求转发到 S0 主分片所在的节点 ES3，ES3 接受请求并写入到磁盘。</li>
+<li>并发将数据复制到两个副本分片 R0 上，其中通过乐观并发控制数据的冲突。一旦所有的副本分片都报告成功，则节点 ES3 将向协调节点报告成功，协调节点向客户端报告成功。</li>
+</ul>
+<h2></h2>
+<p><strong>存储原理</strong></p>
+<p>上面介绍了在 ES 内部索引的写处理流程，这个流程是在 ES 的内存中执行的，数据被分配到特定的分片和副本上之后，最终是存储到磁盘上的，这样在断电的时候就不会丢失数据。</p>
+<p>具体的存储路径可在配置文件 ../config/elasticsearch.yml 中进行设置，默认存储在安装目录的 Data 文件夹下。</p>
+<p>建议不要使用默认值，因为若 ES 进行了升级，则有可能导致数据全部丢失：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a6e22e">path</span>.<span style="color:#a6e22e">data</span>: <span style="color:#f92672">/</span><span style="color:#a6e22e">path</span><span style="color:#f92672">/</span><span style="color:#a6e22e">to</span><span style="color:#f92672">/</span><span style="color:#a6e22e">data</span>  <span style="color:#75715e">//索引数据</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">path</span>.<span style="color:#a6e22e">logs</span>: <span style="color:#f92672">/</span><span style="color:#a6e22e">path</span><span style="color:#f92672">/</span><span style="color:#a6e22e">to</span><span style="color:#f92672">/</span><span style="color:#a6e22e">logs</span>  <span style="color:#75715e">//日志记录</span>
+</span></span></code></pre></div><h3 id="分段存储"><strong>①分段存储</strong></h3>
+<p>索引文档以段的形式存储在磁盘上，何为段？索引文件被拆分为多个子文件，则每个子文件叫作段，每一个段本身都是一个倒排索引，并且段具有不变性，一旦索引的数据被写入硬盘，就不可再修改。</p>
+<p>在底层采用了分段的存储模式，使它在读写时几乎完全避免了锁的出现，大大提升了读写性能。</p>
+<p>段被写入到磁盘后会生成一个提交点，提交点是一个用来记录所有提交后段信息的文件。</p>
+<p>一个段一旦拥有了提交点，就说明这个段只有读的权限，失去了写的权限。相反，当段在内存中时，就只有写的权限，而不具备读数据的权限，意味着不能被检索。</p>
+<p>段的概念提出主要是因为：在早期全文检索中为整个文档集合建立了一个很大的倒排索引，并将其写入磁盘中。</p>
+<p>如果索引有更新，就需要重新全量创建一个索引来替换原来的索引。这种方式在数据量很大时效率很低，并且由于创建一次索引的成本很高，所以对数据的更新不能过于频繁，也就不能保证时效性。</p>
+<p>索引文件分段存储并且不可修改，那么新增、更新和删除如何处理呢？</p>
+<ul>
+<li>
+<p>**新增，**新增很好处理，由于数据是新的，所以只需要对当前文档新增一个段就可以了。</p>
+</li>
+<li>
+<p>**删除，**由于不可修改，所以对于删除操作，不会把文档从旧的段中移除而是通过新增一个 .del 文件，文件中会列出这些被删除文档的段信息。</p>
+<p>这个被标记删除的文档仍然可以被查询匹配到， 但它会在最终结果被返回前从结果集中移除。</p>
+</li>
+<li>
+<p>**更新，**不能修改旧的段来进行反映文档的更新，其实更新相当于是删除和新增这两个动作组成。会将旧的文档在 .del 文件中标记删除，然后文档的新版本被索引到一个新的段中。</p>
+<p>可能两个版本的文档都会被一个查询匹配到，但被删除的那个旧版本文档在结果集返回前就会被移除。</p>
+</li>
+</ul>
+<p>段被设定为不可修改具有一定的优势也有一定的缺点，优势主要表现在：</p>
+<ul>
+<li>不需要锁。如果你从来不更新索引，你就不需要担心多进程同时修改数据的问题。</li>
+<li>一旦索引被读入内核的文件系统缓存，便会留在哪里，由于其不变性。只要文件系统缓存中还有足够的空间，那么大部分读请求会直接请求内存，而不会命中磁盘。这提供了很大的性能提升。</li>
+<li>其它缓存(像 Filter 缓存)，在索引的生命周期内始终有效。它们不需要在每次数据改变时被重建，因为数据不会变化。</li>
+<li>写入单个大的倒排索引允许数据被压缩，减少磁盘 I/O 和需要被缓存到内存的索引的使用量。</li>
+</ul>
+<p>段的不变性的缺点如下：</p>
+<ul>
+<li>当对旧数据进行删除时，旧数据不会马上被删除，而是在 .del 文件中被标记为删除。而旧数据只能等到段更新时才能被移除，这样会造成大量的空间浪费。</li>
+<li>若有一条数据频繁的更新，每次更新都是新增新的标记旧的，则会有大量的空间浪费。</li>
+<li>每次新增数据时都需要新增一个段来存储数据。当段的数量太多时，对服务器的资源例如文件句柄的消耗会非常大。</li>
+<li>在查询的结果中包含所有的结果集，需要排除被标记删除的旧数据，这增加了查询的负担。</li>
+</ul>
+<h3></h3>
+<h3 id="延迟写策略"><strong>②延迟写策略</strong></h3>
+<p>介绍完了存储的形式，那么索引写入到磁盘的过程是怎样的？是否是直接调 Fsync 物理性地写入磁盘？</p>
+<p>答案是显而易见的，如果是直接写入到磁盘上，磁盘的 I/O 消耗上会严重影响性能。</p>
+<p>那么当写数据量大的时候会造成 ES 停顿卡死，查询也无法做到快速响应。如果真是这样 ES 也就不会称之为近实时全文搜索引擎了。</p>
+<p>为了提升写的性能，ES 并没有每新增一条数据就增加一个段到磁盘上，而是采用延迟写的策略。</p>
+<p>每当有新增的数据时，就将其先写入到内存中，在内存和磁盘之间是文件系统缓存。</p>
+<p>当达到默认的时间（1 秒钟）或者内存的数据达到一定量时，会触发一次刷新（Refresh），将内存中的数据生成到一个新的段上并缓存到文件缓存系统 上，稍后再被刷新到磁盘中并生成提交点。</p>
+<p>这里的内存使用的是 ES 的 JVM 内存，而文件缓存系统使用的是操作系统的内存。</p>
+<p>新的数据会继续的被写入内存，但内存中的数据并不是以段的形式存储的，因此不能提供检索功能。</p>
+<p>由内存刷新到文件缓存系统的时候会生成新的段，并将段打开以供搜索使用，而不需要等到被刷新到磁盘。</p>
+<p>在 Elasticsearch 中，写入和打开一个新段的轻量的过程叫做 Refresh （即内存刷新到文件缓存系统）。</p>
+<p>默认情况下每个分片会每秒自动刷新一次。这就是为什么我们说 Elasticsearch 是近实时搜索，因为文档的变化并不是立即对搜索可见，但会在一秒之内变为可见。</p>
+<p>我们也可以手动触发 Refresh，POST /_refresh 刷新所有索引，POST /nba/_refresh 刷新指定的索引。</p>
+<p>**Tips：**尽管刷新是比提交轻量很多的操作，它还是会有性能开销。当写测试的时候， 手动刷新很有用，但是不要在生产&gt;环境下每次索引一个文档都去手动刷新。而且并不是所有的情况都需要每秒刷新。</p>
+<p>可能你正在使用 Elasticsearch 索引大量的日志文件， 你可能想优化索引速度而不是&gt;近实时搜索。</p>
+<p>这时可以在创建索引时在 Settings 中通过调大 refresh_interval = &ldquo;30s&rdquo; 的值 ， 降低每个索引的刷新频率，设值时需要注意后面带上时间单位，否则默认是毫秒。当 refresh_interval=-1 时表示关闭索引的自动刷新。</p>
+<p>虽然通过延时写的策略可以减少数据往磁盘上写的次数提升了整体的写入能力，但是我们知道文件缓存系统也是内存空间，属于操作系统的内存，只要是内存都存在断电或异常情况下丢失数据的危险。</p>
+<p>为了避免丢失数据，Elasticsearch 添加了事务日志（Translog），事务日志记录了所有还没有持久化到磁盘的数据。</p>
+<p><img loading="lazy" src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9tbWJpei5xcGljLmNuL21tYml6X3BuZy9NT3dsTzBJTmZRb0RqMVZFeVlQUkJSWWE2TTJWdnNobFVuYktubjg1amR0eEFFTGpkdmlicmNzbjJ1VzBiMXNMZHY0ZmpqRUh2UWdSRmFZNEh0M0lvUWcvNjQw?x-oss-process=image/format,png" alt="img"  />
+</p>
+<p>添加了事务日志后整个写索引的流程如上图所示：</p>
+<ul>
+<li>
+<p>一个新文档被索引之后，先被写入到内存中，但是为了防止数据的丢失，会追加一份数据到事务日志中。</p>
+<p>不断有新的文档被写入到内存，同时也都会记录到事务日志中。这时新数据还不能被检索和查询。</p>
+</li>
+<li>
+<p>当达到默认的刷新时间或内存中的数据达到一定量后，会触发一次  Refresh，将内存中的数据以一个新段形式刷新到文件缓存系统中并清空内存。这时虽然新段未被提交到磁盘，但是可以提供文档的检索功能且不能被修改。</p>
+</li>
+<li>
+<p>随着新文档索引不断被写入，当日志数据大小超过 512M 或者时间超过 30 分钟时，会触发一次 Flush。</p>
+<p>内存中的数据被写入到一个新段同时被写入到文件缓存系统，文件系统缓存中数据通过 Fsync 刷新到磁盘中，生成提交点，日志文件被删除，创建一个空的新日志。</p>
+</li>
+</ul>
+<p>通过这种方式当断电或需要重启时，ES 不仅要根据提交点去加载已经持久化过的段，还需要工具 Translog 里的记录，把未持久化的数据重新持久化到磁盘上，避免了数据丢失的可能。</p>
+<h3 id="段合并"><strong>③段合并</strong></h3>
+<p>由于自动刷新流程每秒会创建一个新的段 ，这样会导致短时间内的段数量暴增。而段数目太多会带来较大的麻烦。</p>
+<p>每一个段都会消耗文件句柄、内存和 CPU 运行周期。更重要的是，每个搜索请求都必须轮流检查每个段然后合并查询结果，所以段越多，搜索也就越慢。</p>
+<p>Elasticsearch 通过在后台定期进行段合并来解决这个问题。小的段被合并到大的段，然后这些大的段再被合并到更大的段。</p>
+<p>段合并的时候会将那些旧的已删除文档从文件系统中清除。被删除的文档不会被拷贝到新的大段中。合并的过程中不会中断索引和搜索。</p>
+<p><img loading="lazy" src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9tbWJpei5xcGljLmNuL21tYml6X3BuZy9NT3dsTzBJTmZRb0RqMVZFeVlQUkJSWWE2TTJWdnNobHRYWWNZS3lFSm5ZZmdzV2FZQXdISlBPUWNXdVlkQVlBaWFxQ0FCaG9INDRoNlRZbFRUS1gwbWcvNjQw?x-oss-process=image/format,png" alt="img"  />
+</p>
+<p>段合并在进行索引和搜索时会自动进行，合并进程选择一小部分大小相似的段，并且在后台将它们合并到更大的段中，这些段既可以是未提交的也可以是已提交的。</p>
+<p>合并结束后老的段会被删除，新的段被 Flush 到磁盘，同时写入一个包含新段且排除旧的和较小的段的新提交点，新的段被打开可以用来搜索。</p>
+<p>段合并的计算量庞大， 而且还要吃掉大量磁盘 I/O，段合并会拖累写入速率，如果任其发展会影响搜索性能。</p>
+<p>Elasticsearch 在默认情况下会对合并流程进行资源限制，所以搜索仍然有足够的资源很好地执行。</p>
+<p>性能优化</p>
+<p><strong>存储设备</strong></p>
+<p>磁盘在现代服务器上通常都是瓶颈。Elasticsearch 重度使用磁盘，你的磁盘能处理的吞吐量越大，你的节点就越稳定。</p>
+<p>这里有一些优化磁盘 I/O 的技巧：</p>
+<ul>
+<li>**使用 SSD。**就像其他地方提过的， 他们比机械磁盘优秀多了。</li>
+<li>**使用 RAID 0。**条带化 RAID 会提高磁盘 I/O，代价显然就是当一块硬盘故障时整个就故障了。不要使用镜像或者奇偶校验 RAID 因为副本已经提供了这个功能。</li>
+<li>**另外，使用多块硬盘，**并允许 Elasticsearch 通过多个 path.data 目录配置把数据条带化分配到它们上面。</li>
+<li>**不要使用远程挂载的存储，**比如 NFS 或者 SMB/CIFS。这个引入的延迟对性能来说完全是背道而驰的。</li>
+<li>**如果你用的是 EC2，当心 EBS。**即便是基于 SSD 的 EBS，通常也比本地实例的存储要慢。</li>
+</ul>
+<h2></h2>
+<p><strong>内部索引优化</strong></p>
+<p><img loading="lazy" src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9tbWJpei5xcGljLmNuL21tYml6X3BuZy9NT3dsTzBJTmZRb0RqMVZFeVlQUkJSWWE2TTJWdnNobG9ZcFZ0d1V1aWFmQ0NORFVXb0UybmhBQnd5N0VNOWljV0daU0dYOXdVNmVVenZwQ3dxM3dmYmliQS82NDA?x-oss-process=image/format,png" alt="img"  />
+</p>
+<p>Elasticsearch 为了能快速找到某个 Term，先将所有的 Term 排个序，然后根据二分法查找 Term，时间复杂度为 logN，就像通过字典查找一样，这就是 Term Dictionary。</p>
+<p>现在再看起来，似乎和传统数据库通过 B-Tree 的方式类似。但是如果 Term 太多，Term Dictionary 也会很大，放内存不现实，于是有了 Term Index。</p>
+<p>就像字典里的索引页一样，A 开头的有哪些 Term，分别在哪页，可以理解 Term Index是一棵树。</p>
+<p>这棵树不会包含所有的 Term，它包含的是 Term 的一些前缀。通过 Term Index 可以快速地定位到 Term Dictionary 的某个 Offset，然后从这个位置再往后顺序查找。</p>
+<p>在内存中用 FST 方式压缩 Term Index，FST 以字节的方式存储所有的 Term，这种压缩方式可以有效的缩减存储空间，使得 Term Index 足以放进内存，但这种方式也会导致查找时需要更多的 CPU 资源。</p>
+<p>对于存储在磁盘上的倒排表同样也采用了压缩技术减少存储所占用的空间。</p>
+<p><strong>调整配置参数</strong></p>
+<p>调整配置参数建议如下：</p>
+<ul>
+<li>
+<p>给每个文档指定有序的具有压缩良好的序列模式 ID，避免随机的 UUID-4 这样的 ID，这样的 ID 压缩比很低，会明显拖慢 Lucene。</p>
+</li>
+<li>
+<p>对于那些不需要聚合和排序的索引字段禁用 Doc values。Doc Values 是有序的基于 document=&gt;field value 的映射列表。</p>
+</li>
+<li>
+<p>不需要做模糊检索的字段使用 Keyword 类型代替 Text 类型，这样可以避免在建立索引前对这些文本进行分词。</p>
+</li>
+<li>
+<p>如果你的搜索结果不需要近实时的准确度，考虑把每个索引的 index.refresh_interval 改到 30s 。</p>
+<p>如果你是在做大批量导入，导入期间你可以通过设置这个值为 -1 关掉刷新，还可以通过设置 index.number_of_replicas: 0 关闭副本。别忘记在完工的时候重新开启它。</p>
+</li>
+<li>
+<p>避免深度分页查询建议使用 Scroll 进行分页查询。普通分页查询时，会创建一个 from+size 的空优先队列，每个分片会返回 from+size 条数据，默认只包含文档 ID 和得分 Score 给协调节点。</p>
+<p>如果有 N 个分片，则协调节点再对（from+size）×n 条数据进行二次排序，然后选择需要被取回的文档。当 from 很大时，排序过程会变得很沉重，占用 CPU 资源严重。</p>
+</li>
+<li>
+<p>减少映射字段，只提供需要检索，聚合或排序的字段。其他字段可存在其他存储设备上，例如 Hbase，在 ES 中得到结果后再去 Hbase 查询这些字段。</p>
+</li>
+<li>
+<p>创建索引和查询时指定路由 Routing 值，这样可以精确到具体的分片查询，提升查询效率。路由的选择需要注意数据的分布均衡。</p>
+</li>
+</ul>
+<h2></h2>
+<p><strong>JVM 调优</strong></p>
+<p>JVM 调优建议如下：</p>
+<ul>
+<li>
+<p>确保堆内存最小值（ Xms ）与最大值（ Xmx ）的大小是相同的，防止程序在运行时改变堆内存大小。</p>
+<p>Elasticsearch 默认安装后设置的堆内存是 1GB。可通过 ../config/jvm.option 文件进行配置，但是最好不要超过物理内存的50%和超过 32GB。</p>
+</li>
+<li>
+<p>GC 默认采用 CMS 的方式，并发但是有 STW 的问题，可以考虑使用 G1 收集器。</p>
+</li>
+<li>
+<p>ES 非常依赖文件系统缓存（Filesystem Cache），快速搜索。一般来说，应该至少确保物理上有一半的可用内存分配到文件系统缓存。</p>
+</li>
+</ul>
+]]></content:encoded></item></channel></rss>

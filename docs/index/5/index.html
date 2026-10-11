@@ -1,222 +1,17 @@
-<!DOCTYPE html>
-<html lang="zh-cn" dir="auto">
-
-<head>
-	<meta name="generator" content="Hugo 0.167.0"><meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="robots" content="index, follow">
-<title>haokiu</title>
-
-<meta name="description" content="">
-<meta name="author" content="">
-<link rel="canonical" href="https://haokiu.com/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
-<link rel="icon" href="https://haokiu.com/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
-<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
-<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
-<meta name="theme-color" content="#2e2e33">
-<meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" type="application/rss+xml" href="https://haokiu.com/index.xml">
-<link rel="alternate" type="application/json" href="https://haokiu.com/index.json">
-<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/">
-<noscript>
-    <style>
-        #theme-toggle,
-        .top-link {
-            display: none;
-        }
-
-    </style>
-    <style>
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --theme: rgb(29, 30, 32);
-                --entry: rgb(46, 46, 51);
-                --primary: rgb(218, 218, 219);
-                --secondary: rgb(155, 156, 157);
-                --tertiary: rgb(65, 66, 68);
-                --content: rgb(196, 196, 197);
-                --hljs-bg: rgb(46, 46, 51);
-                --code-bg: rgb(55, 56, 62);
-                --border: rgb(51, 51, 51);
-            }
-
-            .list {
-                background: var(--theme);
-            }
-
-            .list:not(.dark)::-webkit-scrollbar-track {
-                background: 0 0;
-            }
-
-            .list:not(.dark)::-webkit-scrollbar-thumb {
-                border-color: var(--theme);
-            }
-        }
-
-    </style>
-</noscript><meta property="og:title" content="haokiu" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://haokiu.com/" />
-
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="haokiu"/>
-<meta name="twitter:description" content=""/>
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "haokiu",
-  "url": "https://haokiu.com/",
-  "description": "",
-  "thumbnailUrl": "https://haokiu.com/favicon.ico",
-  "sameAs": [
-      
-  ]
-}
-</script>
-</head>
-
-<body class="list" id="top">
-<script>
-    if (localStorage.getItem("pref-theme") === "dark") {
-        document.body.classList.add('dark');
-    } else if (localStorage.getItem("pref-theme") === "light") {
-        document.body.classList.remove('dark')
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.classList.add('dark');
-    }
-
-</script>
-
-<header class="header">
-    <nav class="nav">
-        <div class="logo">
-            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
-            <div class="logo-switches">
-                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
-                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="5"></circle>
-                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                    </svg>
-                </button>
-                <ul class="lang-switch"><li>|</li>
-                </ul>
-            </div>
-        </div>
-        <ul id="menu">
-            <li>
-                <a href="https://haokiu.com/" title="haokiu">
-                    <span class="active">Home</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/1/" title="1">
-                    <span>后端</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/2/" title="2">
-                    <span>前端</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/3/" title="3">
-                    <span>区块链</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/4/" title="4">
-                    <span>大数据</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/5/" title="5">
-                    <span>linux</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/6/" title="6">
-                    <span>其他</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/tags/" title="Tags">
-                    <span>tags</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/categories/" title="Categories">
-                    <span>categories</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-</header>
-<main class="main"> 
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>01 TeamTalk介绍
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>01 TeamTalk介绍 TeamTalk是蘑菇街开源的一款企业内部用的即时通讯软件（Enterprise IM），类似腾讯的RTX。网上也有很多的介绍，我这里也有写几遍关于这款产品的“流水账”，一方面对自己这段时间的阅读其代码做个总结，尽量做个既能宏观上从全局来介绍，又不缺少很多有价值的微观细节，另一方面如果对于作为读者的您有些许帮助，那就善莫大焉了。
+<!doctype html><html lang=zh-cn dir=auto><head><meta name=generator content="Hugo 0.167.0"><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>haokiu</title><meta name=description content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><meta name=author content><link rel=canonical href=https://haokiu.com/><link crossorigin=anonymous href=/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as=style><link rel=icon href=https://haokiu.com/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://haokiu.com/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://haokiu.com/favicon-32x32.png><link rel=apple-touch-icon href=https://haokiu.com/apple-touch-icon.png><link rel=mask-icon href=https://haokiu.com/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate type=application/rss+xml href=https://haokiu.com/index.xml><link rel=alternate type=application/json href=https://haokiu.com/index.json><link rel=alternate type=text/plain href=https://haokiu.com/llms.txt><link rel=alternate hreflang=zh-cn href=https://haokiu.com/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><link rel=describedby href=https://haokiu.com/llms.txt type=text/markdown><script type=application/ld+json>{"@context":"https://schema.org","@type":"WebSite","name":"haokiu","url":"https://haokiu.com/","inLanguage":"zh-cn","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https:\/\/haokiu.com\/search\/?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script><meta property="og:title" content="haokiu"><meta property="og:description" content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><meta property="og:type" content="website"><meta property="og:url" content="https://haokiu.com/"><meta name=twitter:card content="summary"><meta name=twitter:title content="haokiu"><meta name=twitter:description content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><script type=application/ld+json>{"@context":"https://schema.org","@type":"Organization","name":"haokiu","url":"https://haokiu.com/","description":"haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他","thumbnailUrl":"https://haokiu.com/favicon.ico","sameAs":[]}</script></head><body class=list id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://haokiu.com/ accesskey=h title="haokiu (Alt + H)">haokiu</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)">
+<svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button><ul class=lang-switch><li>|</li></ul></div></div><ul id=menu><li><a href=https://haokiu.com/ title=haokiu><span class=active>Home</span></a></li><li><a href=https://haokiu.com/1/ title=1><span>后端</span></a></li><li><a href=https://haokiu.com/2/ title=2><span>前端</span></a></li><li><a href=https://haokiu.com/3/ title=3><span>区块链</span></a></li><li><a href=https://haokiu.com/4/ title=4><span>大数据</span></a></li><li><a href=https://haokiu.com/5/ title=5><span>linux</span></a></li><li><a href=https://haokiu.com/6/ title=6><span>其他</span></a></li><li><a href=https://haokiu.com/tags/ title=Tags><span>tags</span></a></li><li><a href=https://haokiu.com/categories/ title=Categories><span>categories</span></a></li></ul></nav></header><main class=main><article class=post-entry><header class=entry-header><h2>01 TeamTalk介绍</h2></header><div class=entry-content><p>01 TeamTalk介绍 TeamTalk是蘑菇街开源的一款企业内部用的即时通讯软件（Enterprise IM），类似腾讯的RTX。网上也有很多的介绍，我这里也有写几遍关于这款产品的“流水账”，一方面对自己这段时间的阅读其代码做个总结，尽量做个既能宏观上从全局来介绍，又不缺少很多有价值的微观细节，另一方面如果对于作为读者的您有些许帮助，那就善莫大焉了。
 项目地址github：https://github.com/baloonwj/TeamTalk
 如果您打不开github，请移步至百度网盘下载：http://pan.baidu.com/s/1slbJVf3
 关于即时通讯软件本身，我相信使用过QQ的都知道是啥。
 下载项目解压后目录结构是这样的：
 这款即时通讯软件分为服务器端（linux）、pc端、web端、mac端和两个移动端（ios和安卓），源码中使用了大量的开源技术（用项目作者的话说，就是“拿来主义”）。例如通信协议使用了google protobuf，服务器端使用了内存数据库redis，pc端界面库使用的duilib，pc端的日志系统使用的是YAOLOG库、cximage、jsoncpp库等等。在接下来各个端的源码分析中，我们将会深入和细致地介绍。
-下一篇我将介绍首先介绍服务器端的程序的编译与部署。
-</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 01 TeamTalk介绍" href="https://haokiu.com/blog/8c53924ed21041948dff215384cdb81d/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>02 服务器端的程序的编译与部署
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>02 服务器端的程序的编译与部署 这篇我们来介绍下TeamTalk服务器端的编译与部署，部署文档在auto_setup下，这里我们只介绍下服务器程序的编译与部署，不包括管理后台的部署，其部署方法在auto_setup\im_server文件夹，其实按官方介绍只要找一台干净的linux系统运行一下auto_setup\im_server\setup.sh程序就可以了，会自动安装mysql（maridb，mysql被oracle收购后，分为两个分支，继续开源的分支改名叫maridb）、nginx和redis。我们暂且不部署web端，所以不需要安装nginx。我这里是手动安装了mysql和redis。然后启动mysql和redis，并手动建立如下库和表。库名叫teamtalk，需要建立以下这些表：
---后台管理员表 --password 密码,规则md5(md5(passwd)&#43;salt) CREATE TABLE `IMAdmin` ( `id` mediumint(6) unsigned NOT NULL AUTO_INCREMENT, `uname` varchar(40) NOT NULL COMMENT &#39;用户名&#39;, `pwd` char(32) NOT NULL COMMENT &#39;经过md5加密的密码&#39;, `status` tinyint(2) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;用户状态 0 :正常 1:删除 可扩展&#39;, `created` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;创建时间&#39;, `updated` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;更新时间&#39;, PRIMARY KEY (`id`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8 --存储语音地址 CREATE TABLE `IMAudio` ( `id` int(11) NOT NULL AUTO_INCREMENT, `fromId` int(11) unsigned NOT NULL COMMENT &#39;发送者Id&#39;, `toId` int(11) unsigned NOT NULL COMMENT &#39;接收者Id&#39;, `path` varchar(255) COLLATE utf8mb4_bin DEFAULT &#39;&#39; COMMENT &#39;语音存储的地址&#39;, `size` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;文件大小&#39;, `duration` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;语音时长&#39;, `created` int(11) unsigned NOT NULL COMMENT &#39;创建时间&#39;, PRIMARY KEY (`id`), KEY `idx_fromId_toId` (`fromId`,`toId`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin --存储部门信息 CREATE TABLE `IMDepart` ( `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT &#39;部门id&#39;, `departName` varchar(64) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;部门名称&#39;, `priority` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;显示优先级,相同优先级按拼音顺序排列&#39;, `parentId` int(11) unsigned NOT NULL COMMENT &#39;上级部门id&#39;, `status` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;状态&#39;, `created` int(11) unsigned NOT NULL COMMENT &#39;创建时间&#39;, `updated` int(11) unsigned NOT NULL COMMENT &#39;更新时间&#39;, PRIMARY KEY (`id`), KEY `idx_departName` (`departName`), KEY `idx_priority_status` (`priority`,`status`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin --发现配置表 CREATE TABLE `IMDiscovery` ( `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT &#39;id&#39;, `itemName` varchar(64) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;名称&#39;, `itemUrl` varchar(64) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;URL&#39;, `itemPriority` int(11) unsigned NOT NULL COMMENT &#39;显示优先级&#39;, `status` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;状态&#39;, `created` int(11) unsigned NOT NULL COMMENT &#39;创建时间&#39;, `updated` int(11) unsigned NOT NULL COMMENT &#39;更新时间&#39;, PRIMARY KEY (`id`), KEY `idx_itemName` (`itemName`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin --群组表 CREATE TABLE `IMGroup` ( `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(256) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;群名称&#39;, `avatar` varchar(256) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;群头像&#39;, `creator` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;创建者用户id&#39;, `type` tinyint(3) unsigned NOT NULL DEFAULT &#39;1&#39; COMMENT &#39;群组类型，1-固定;2-临时群&#39;, `userCnt` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;成员人数&#39;, `status` tinyint(3) unsigned NOT NULL DEFAULT &#39;1&#39; COMMENT &#39;是否删除,0-正常，1-删除&#39;, `version` int(11) unsigned NOT NULL DEFAULT &#39;1&#39; COMMENT &#39;群版本号&#39;, `lastChated` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;最后聊天时间&#39;, `created` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;创建时间&#39;, `updated` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;更新时间&#39;, PRIMARY KEY (`id`), KEY `idx_name` (`name`(191)), KEY `idx_creator` (`creator`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT=&#39;IM群信息&#39; --群成员表 CREATE TABLE `IMGroupMember` ( `id` int(11) NOT NULL AUTO_INCREMENT, `groupId` int(11) unsigned NOT NULL COMMENT &#39;群Id&#39;, `userId` int(11) unsigned NOT NULL COMMENT &#39;用户id&#39;, `status` tinyint(4) unsigned NOT NULL DEFAULT &#39;1&#39; COMMENT &#39;是否退出群，0-正常，1-已退出&#39;, `created` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;创建时间&#39;, `updated` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;更新时间&#39;, PRIMARY KEY (`id`), KEY `idx_groupId_userId_status` (`groupId`,`userId`,`status`), KEY `idx_userId_status_updated` (`userId`,`status`,`updated`), KEY `idx_groupId_updated` (`groupId`,`updated`) ) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8 COMMENT=&#39;用户和群的关系表&#39; --群消息表,x代表第几张表，目前做了分表有8张:0-7.消息具体在哪张表中，是groupId%IMGroupMessage表的数目 CREATE TABLE `IMGroupMessage_(x)` ( `id` int(11) NOT NULL AUTO_INCREMENT, `groupId` int(11) unsigned NOT NULL COMMENT &#39;用户的关系id&#39;, `userId` int(11) unsigned NOT NULL COMMENT &#39;发送用户的id&#39;, `msgId` int(11) unsigned NOT NULL COMMENT &#39;消息ID&#39;, `content` varchar(4096) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;消息内容&#39;, `type` tinyint(3) unsigned NOT NULL DEFAULT &#39;2&#39; COMMENT &#39;群消息类型,101为群语音,2为文本&#39;, `status` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;消息状态&#39;, `created` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;创建时间&#39;, `updated` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;更新时间&#39;, PRIMARY KEY (`id`), KEY `idx_groupId_status_created` (`groupId`,`status`,`created`), KEY `idx_groupId_msgId_status_created` (`groupId`,`msgId`,`status`,`created`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT=&#39;IM群消息表&#39; --消息表，x代表第几张表，目前做了分表有8张:0-7.具体在那张表，是relateId%IMMessage表数目. CREATE TABLE `IMMessage_0` ( `id` int(11) NOT NULL AUTO_INCREMENT, `relateId` int(11) unsigned NOT NULL COMMENT &#39;用户的关系id&#39;, `fromId` int(11) unsigned NOT NULL COMMENT &#39;发送用户的id&#39;, `toId` int(11) unsigned NOT NULL COMMENT &#39;接收用户的id&#39;, `msgId` int(11) unsigned NOT NULL COMMENT &#39;消息ID&#39;, `content` varchar(4096) COLLATE utf8mb4_bin DEFAULT &#39;&#39; COMMENT &#39;消息内容&#39;, `type` tinyint(2) unsigned NOT NULL DEFAULT &#39;1&#39; COMMENT &#39;消息类型&#39;, `status` tinyint(1) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;0正常 1被删除&#39;, `created` int(11) unsigned NOT NULL COMMENT &#39;创建时间&#39;, `updated` int(11) unsigned NOT NULL COMMENT &#39;更新时间&#39;, PRIMARY KEY (`id`), KEY `idx_relateId_status_created` (`relateId`,`status`,`created`), KEY `idx_relateId_status_msgId_created` (`relateId`,`status`,`msgId`,`created`), KEY `idx_fromId_toId_created` (`fromId`,`toId`,`status`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin --最近联系人(会话)表。 CREATE TABLE `IMRecentSession` ( `id` int(11) NOT NULL AUTO_INCREMENT, `userId` int(11) unsigned NOT NULL COMMENT &#39;用户id&#39;, `peerId` int(11) unsigned NOT NULL COMMENT &#39;对方id&#39;, `type` tinyint(1) unsigned DEFAULT &#39;0&#39; COMMENT &#39;类型，1-用户,2-群组&#39;, `status` tinyint(1) unsigned DEFAULT &#39;0&#39; COMMENT &#39;用户:0-正常, 1-用户A删除,群组:0-正常, 1-被删除&#39;, `created` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;创建时间&#39;, `updated` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;更新时间&#39;, PRIMARY KEY (`id`), KEY `idx_userId_peerId_status_updated` (`userId`,`peerId`,`status`,`updated`), KEY `idx_userId_peerId_type` (`userId`,`peerId`,`type`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8 --用户关系表，标识两个用户之间的唯一关系id，用于消息分表。relationId % 消息表数目。 CREATE TABLE `IMRelationShip` ( `id` int(11) NOT NULL AUTO_INCREMENT, `smallId` int(11) unsigned NOT NULL COMMENT &#39;用户A的id&#39;, `bigId` int(11) unsigned NOT NULL COMMENT &#39;用户B的id&#39;, `status` tinyint(1) unsigned DEFAULT &#39;0&#39; COMMENT &#39;用户:0-正常, 1-用户A删除,群组:0-正常, 1-被删除&#39;, `created` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;创建时间&#39;, `updated` int(11) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;更新时间&#39;, PRIMARY KEY (`id`), KEY `idx_smallId_bigId_status_updated` (`smallId`,`bigId`,`status`,`updated`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8 --用户表 --password 密码,规则md5(md5(passwd)&#43;salt) CREATE TABLE `IMUser` ( `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT &#39;用户id&#39;, `sex` tinyint(1) unsigned NOT NULL DEFAULT &#39;0&#39; COMMENT &#39;1男2女0未知&#39;, `name` varchar(32) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;用户名&#39;, `domain` varchar(32) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;拼音&#39;, `nick` varchar(32) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;花名,绰号等&#39;, `password` varchar(32) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;密码&#39;, `salt` varchar(4) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;混淆码&#39;, `phone` varchar(11) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;手机号码&#39;, `email` varchar(64) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;email&#39;, `avatar` varchar(255) COLLATE utf8mb4_bin DEFAULT &#39;&#39; COMMENT &#39;自定义用户头像&#39;, `departId` int(11) unsigned NOT NULL COMMENT &#39;所属部门Id&#39;, `status` tinyint(2) unsigned DEFAULT &#39;0&#39; COMMENT &#39;1. 试用期 2. 正式 3. 离职 4.实习&#39;, `sign_info` varchar(32) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;个性签名&#39;, `created` int(11) unsigned NOT NULL COMMENT &#39;创建时间&#39;, `updated` int(11) unsigned NOT NULL COMMENT &#39;更新时间&#39;, PRIMARY KEY (`id`), KEY `idx_domain` (`domain`), KEY `idx_name` (`name`), KEY `idx_phone` (`phone`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin --离线文件传输表（同事建议的，待考证） CREATE TABLE `IMTransmitFile` ( `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT &#39;id&#39;, `fromId` int(11) unsigned NOT NULL COMMENT &#39;发送用户的id&#39;, `toId` int(11) unsigned NOT NULL COMMENT &#39;接收用户的id&#39;, `fileName` varchar(32) COLLATE utf8mb4_bin DEFAULT &#39;&#39; COMMENT &#39;文件名字&#39;, `size` int(11) unsigned NOT NULL COMMENT &#39;文件大小&#39;, `taskId` varchar(256) COLLATE utf8mb4_bin NOT NULL DEFAULT &#39;&#39; COMMENT &#39;任务id&#39;, `status` tinyint(1) unsigned DEFAULT &#39;0&#39; COMMENT &#39;状态&#39;, `created` int(11) unsigned NOT NULL COMMENT &#39;创建时间&#39;, `updated` int(11) unsigned NOT NULL COMMENT &#39;更新时间&#39;, PRIMARY KEY (`id`), KEY `idx_taskId` (`taskId`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin; 因为这个企业内部的即时通讯软件，所以客户端不提供注册功能，要想增加新用户，必须通过在管理后台界面手动添加，这里由于我们目前没有部署管理后台界面（需要先安装nginx），所以我们就直接先在用户表IMUser里面添加几个测试用户吧。这个就是基本的sql语句了。但是由于这里用户密码的生成规则是：md5(md5(passwd)&#43;salt)，而我们不知道salt到底是什么，这个现在不急，我们后面分析服务器代码时会介绍它。所以，我们就暂且在数据库里面随便写的密码，然后在程序里面修改代码，暂且不校验密码。修改的地方在这里：server\src\db_proxy_server\business\InterLogin.cpp的51行（CInterLoginStrategy::doLogin函数里面），将这个if语句注释掉：
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 02 服务器端的程序的编译与部署" href="https://haokiu.com/blog/23af895a60264bfe949c3636689d3f83/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>03 服务器端的程序架构介绍
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>03 服务器端的程序架构介绍 通过上一节的编译与部署，我们会得到TeamTalk服务器端以下部署程序：
+下一篇我将介绍首先介绍服务器端的程序的编译与部署。</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 01 TeamTalk介绍" href=https://haokiu.com/blog/8c53924ed21041948dff215384cdb81d/></a></article><article class=post-entry><header class=entry-header><h2>02 服务器端的程序的编译与部署</h2></header><div class=entry-content><p>02 服务器端的程序的编译与部署 这篇我们来介绍下TeamTalk服务器端的编译与部署，部署文档在auto_setup下，这里我们只介绍下服务器程序的编译与部署，不包括管理后台的部署，其部署方法在auto_setup\im_server文件夹，其实按官方介绍只要找一台干净的linux系统运行一下auto_setup\im_server\setup.sh程序就可以了，会自动安装mysql（maridb，mysql被oracle收购后，分为两个分支，继续开源的分支改名叫maridb）、nginx和redis。我们暂且不部署web端，所以不需要安装nginx。我这里是手动安装了mysql和redis。然后启动mysql和redis，并手动建立如下库和表。库名叫teamtalk，需要建立以下这些表：
+--后台管理员表 --password 密码,规则md5(md5(passwd)+salt) CREATE TABLE `IMAdmin` ( `id` mediumint(6) unsigned NOT NULL AUTO_INCREMENT, `uname` varchar(40) NOT NULL COMMENT '用户名', `pwd` char(32) NOT NULL COMMENT '经过md5加密的密码', `status` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '用户状态 0 :正常 1:删除 可扩展', `created` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间', `updated` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间', PRIMARY KEY (`id`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8 --存储语音地址 CREATE TABLE `IMAudio` ( `id` int(11) NOT NULL AUTO_INCREMENT, `fromId` int(11) unsigned NOT NULL COMMENT '发送者Id', `toId` int(11) unsigned NOT NULL COMMENT '接收者Id', `path` varchar(255) COLLATE utf8mb4_bin DEFAULT '' COMMENT '语音存储的地址', `size` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '文件大小', `duration` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '语音时长', `created` int(11) unsigned NOT NULL COMMENT '创建时间', PRIMARY KEY (`id`), KEY `idx_fromId_toId` (`fromId`,`toId`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin --存储部门信息 CREATE TABLE `IMDepart` ( `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '部门id', `departName` varchar(64) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '部门名称', `priority` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '显示优先级,相同优先级按拼音顺序排列', `parentId` int(11) unsigned NOT NULL COMMENT '上级部门id', `status` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '状态', `created` int(11) unsigned NOT NULL COMMENT '创建时间', `updated` int(11) unsigned NOT NULL COMMENT '更新时间', PRIMARY KEY (`id`), KEY `idx_departName` (`departName`), KEY `idx_priority_status` (`priority`,`status`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin --发现配置表 CREATE TABLE `IMDiscovery` ( `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id', `itemName` varchar(64) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '名称', `itemUrl` varchar(64) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT 'URL', `itemPriority` int(11) unsigned NOT NULL COMMENT '显示优先级', `status` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '状态', `created` int(11) unsigned NOT NULL COMMENT '创建时间', `updated` int(11) unsigned NOT NULL COMMENT '更新时间', PRIMARY KEY (`id`), KEY `idx_itemName` (`itemName`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin --群组表 CREATE TABLE `IMGroup` ( `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(256) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '群名称', `avatar` varchar(256) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '群头像', `creator` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建者用户id', `type` tinyint(3) unsigned NOT NULL DEFAULT '1' COMMENT '群组类型，1-固定;2-临时群', `userCnt` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '成员人数', `status` tinyint(3) unsigned NOT NULL DEFAULT '1' COMMENT '是否删除,0-正常，1-删除', `version` int(11) unsigned NOT NULL DEFAULT '1' COMMENT '群版本号', `lastChated` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '最后聊天时间', `created` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间', `updated` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间', PRIMARY KEY (`id`), KEY `idx_name` (`name`(191)), KEY `idx_creator` (`creator`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='IM群信息' --群成员表 CREATE TABLE `IMGroupMember` ( `id` int(11) NOT NULL AUTO_INCREMENT, `groupId` int(11) unsigned NOT NULL COMMENT '群Id', `userId` int(11) unsigned NOT NULL COMMENT '用户id', `status` tinyint(4) unsigned NOT NULL DEFAULT '1' COMMENT '是否退出群，0-正常，1-已退出', `created` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间', `updated` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间', PRIMARY KEY (`id`), KEY `idx_groupId_userId_status` (`groupId`,`userId`,`status`), KEY `idx_userId_status_updated` (`userId`,`status`,`updated`), KEY `idx_groupId_updated` (`groupId`,`updated`) ) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8 COMMENT='用户和群的关系表' --群消息表,x代表第几张表，目前做了分表有8张:0-7.消息具体在哪张表中，是groupId%IMGroupMessage表的数目 CREATE TABLE `IMGroupMessage_(x)` ( `id` int(11) NOT NULL AUTO_INCREMENT, `groupId` int(11) unsigned NOT NULL COMMENT '用户的关系id', `userId` int(11) unsigned NOT NULL COMMENT '发送用户的id', `msgId` int(11) unsigned NOT NULL COMMENT '消息ID', `content` varchar(4096) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '消息内容', `type` tinyint(3) unsigned NOT NULL DEFAULT '2' COMMENT '群消息类型,101为群语音,2为文本', `status` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '消息状态', `created` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间', `updated` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间', PRIMARY KEY (`id`), KEY `idx_groupId_status_created` (`groupId`,`status`,`created`), KEY `idx_groupId_msgId_status_created` (`groupId`,`msgId`,`status`,`created`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='IM群消息表' --消息表，x代表第几张表，目前做了分表有8张:0-7.具体在那张表，是relateId%IMMessage表数目. CREATE TABLE `IMMessage_0` ( `id` int(11) NOT NULL AUTO_INCREMENT, `relateId` int(11) unsigned NOT NULL COMMENT '用户的关系id', `fromId` int(11) unsigned NOT NULL COMMENT '发送用户的id', `toId` int(11) unsigned NOT NULL COMMENT '接收用户的id', `msgId` int(11) unsigned NOT NULL COMMENT '消息ID', `content` varchar(4096) COLLATE utf8mb4_bin DEFAULT '' COMMENT '消息内容', `type` tinyint(2) unsigned NOT NULL DEFAULT '1' COMMENT '消息类型', `status` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '0正常 1被删除', `created` int(11) unsigned NOT NULL COMMENT '创建时间', `updated` int(11) unsigned NOT NULL COMMENT '更新时间', PRIMARY KEY (`id`), KEY `idx_relateId_status_created` (`relateId`,`status`,`created`), KEY `idx_relateId_status_msgId_created` (`relateId`,`status`,`msgId`,`created`), KEY `idx_fromId_toId_created` (`fromId`,`toId`,`status`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin --最近联系人(会话)表。 CREATE TABLE `IMRecentSession` ( `id` int(11) NOT NULL AUTO_INCREMENT, `userId` int(11) unsigned NOT NULL COMMENT '用户id', `peerId` int(11) unsigned NOT NULL COMMENT '对方id', `type` tinyint(1) unsigned DEFAULT '0' COMMENT '类型，1-用户,2-群组', `status` tinyint(1) unsigned DEFAULT '0' COMMENT '用户:0-正常, 1-用户A删除,群组:0-正常, 1-被删除', `created` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间', `updated` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间', PRIMARY KEY (`id`), KEY `idx_userId_peerId_status_updated` (`userId`,`peerId`,`status`,`updated`), KEY `idx_userId_peerId_type` (`userId`,`peerId`,`type`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8 --用户关系表，标识两个用户之间的唯一关系id，用于消息分表。relationId % 消息表数目。 CREATE TABLE `IMRelationShip` ( `id` int(11) NOT NULL AUTO_INCREMENT, `smallId` int(11) unsigned NOT NULL COMMENT '用户A的id', `bigId` int(11) unsigned NOT NULL COMMENT '用户B的id', `status` tinyint(1) unsigned DEFAULT '0' COMMENT '用户:0-正常, 1-用户A删除,群组:0-正常, 1-被删除', `created` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间', `updated` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间', PRIMARY KEY (`id`), KEY `idx_smallId_bigId_status_updated` (`smallId`,`bigId`,`status`,`updated`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8 --用户表 --password 密码,规则md5(md5(passwd)+salt) CREATE TABLE `IMUser` ( `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '用户id', `sex` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '1男2女0未知', `name` varchar(32) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '用户名', `domain` varchar(32) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '拼音', `nick` varchar(32) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '花名,绰号等', `password` varchar(32) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '密码', `salt` varchar(4) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '混淆码', `phone` varchar(11) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '手机号码', `email` varchar(64) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT 'email', `avatar` varchar(255) COLLATE utf8mb4_bin DEFAULT '' COMMENT '自定义用户头像', `departId` int(11) unsigned NOT NULL COMMENT '所属部门Id', `status` tinyint(2) unsigned DEFAULT '0' COMMENT '1. 试用期 2. 正式 3. 离职 4.实习', `sign_info` varchar(32) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '个性签名', `created` int(11) unsigned NOT NULL COMMENT '创建时间', `updated` int(11) unsigned NOT NULL COMMENT '更新时间', PRIMARY KEY (`id`), KEY `idx_domain` (`domain`), KEY `idx_name` (`name`), KEY `idx_phone` (`phone`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin --离线文件传输表（同事建议的，待考证） CREATE TABLE `IMTransmitFile` ( `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id', `fromId` int(11) unsigned NOT NULL COMMENT '发送用户的id', `toId` int(11) unsigned NOT NULL COMMENT '接收用户的id', `fileName` varchar(32) COLLATE utf8mb4_bin DEFAULT '' COMMENT '文件名字', `size` int(11) unsigned NOT NULL COMMENT '文件大小', `taskId` varchar(256) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '任务id', `status` tinyint(1) unsigned DEFAULT '0' COMMENT '状态', `created` int(11) unsigned NOT NULL COMMENT '创建时间', `updated` int(11) unsigned NOT NULL COMMENT '更新时间', PRIMARY KEY (`id`), KEY `idx_taskId` (`taskId`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin; 因为这个企业内部的即时通讯软件，所以客户端不提供注册功能，要想增加新用户，必须通过在管理后台界面手动添加，这里由于我们目前没有部署管理后台界面（需要先安装nginx），所以我们就直接先在用户表IMUser里面添加几个测试用户吧。这个就是基本的sql语句了。但是由于这里用户密码的生成规则是：md5(md5(passwd)+salt)，而我们不知道salt到底是什么，这个现在不急，我们后面分析服务器代码时会介绍它。所以，我们就暂且在数据库里面随便写的密码，然后在程序里面修改代码，暂且不校验密码。修改的地方在这里：server\src\db_proxy_server\business\InterLogin.cpp的51行（CInterLoginStrategy::doLogin函数里面），将这个if语句注释掉：
+...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 02 服务器端的程序的编译与部署" href=https://haokiu.com/blog/23af895a60264bfe949c3636689d3f83/></a></article><article class=post-entry><header class=entry-header><h2>03 服务器端的程序架构介绍</h2></header><div class=entry-content><p>03 服务器端的程序架构介绍 通过上一节的编译与部署，我们会得到TeamTalk服务器端以下部署程序：
 db_proxy_server file_server http_msg_server login_server msfs msg_server push_server router_server 这些服务构成的拓扑图如下：
 各个服务程序的作用描述如下：
-LoginServer (C&#43;&#43;): 负载均衡服务器，分配一个负载小的MsgServer给客户端使用 MsgServer (C&#43;&#43;): 消息服务器，提供客户端大部分信令处理功能，包括私人聊天、群组聊天等 RouteServer (C&#43;&#43;): 路由服务器，为登录在不同MsgServer的用户提供消息转发功能 FileServer (C&#43;&#43;): 文件服务器，提供客户端之间得文件传输服务，支持在线以及离线文件传输 MsfsServer (C&#43;&#43;): 图片存储服务器，提供头像，图片传输中的图片存储服务 DBProxy (C&#43;&#43;): 数据库代理服务器，提供mysql以及redis的访问服务，屏蔽其他服务器与mysql与redis的直接交互 HttpMsgServer(C&#43;&#43;) :对外接口服务器，提供对外接口功能。（目前只是框架） PushServer(C&#43;&#43;): 消息推送服务器，提供IOS系统消息推送。（IOS消息推送必须走apns） 注意：上图中并没有push_server和http_push_server。如果你不调试ios版本的客户端，可以暂且不启动push_server，另外http_push_server也可以暂不启动。
+LoginServer (C++): 负载均衡服务器，分配一个负载小的MsgServer给客户端使用 MsgServer (C++): 消息服务器，提供客户端大部分信令处理功能，包括私人聊天、群组聊天等 RouteServer (C++): 路由服务器，为登录在不同MsgServer的用户提供消息转发功能 FileServer (C++): 文件服务器，提供客户端之间得文件传输服务，支持在线以及离线文件传输 MsfsServer (C++): 图片存储服务器，提供头像，图片传输中的图片存储服务 DBProxy (C++): 数据库代理服务器，提供mysql以及redis的访问服务，屏蔽其他服务器与mysql与redis的直接交互 HttpMsgServer(C++) :对外接口服务器，提供对外接口功能。（目前只是框架） PushServer(C++): 消息推送服务器，提供IOS系统消息推送。（IOS消息推送必须走apns） 注意：上图中并没有push_server和http_push_server。如果你不调试ios版本的客户端，可以暂且不启动push_server，另外http_push_server也可以暂不启动。
 启动顺序：
 一般来说，前端的服务会依赖后端的服务，所以一般先启动后端服务，再启动前端服务。建议按以下顺序启动服务：
 1、启动db_proxy。 2、启动route_server，file_server，msfs 3、启动login_server 4、启动msg_server 那么我就按照服务端的启动顺序去讲解服务端的一个流程概述。 第一步:启动db_proxy后，db_proxy会去根据配置文件连接相应的MySQL实例，以及redis实例。 第二步:启动route_server,file_server,msfs后，各个服务端都会开始监听相应的端口。 第三步:启动login_server,login_server就开始监听相应的端口(8080)，等待客户端的连接，而分配一个负载相对较小的msg_server给客户端。 第四步:启动msg_server(端口8000)，msg_server启动后，会去主动连接route_server，login_server，db_proxy_server，会将自己的监听的端口信息注册到login_server去，同时在用户上线，下线的时候会将自己的负载情况汇报给login_server.
@@ -227,85 +22,37 @@ LoginServer (C&#43;&#43;): 负载均衡服务器，分配一个负载小的MsgSe
 对分离出来的网络IO进行操作，分为socket句柄可读、可写和出错三种情况。
 当然再加上定时器事件，即检测一个定时器事件列表，如果有定时器到期，则执行该定时器事件。
 整个框架的伪码大致如下：
-while (running) { //处理定时器事件 _CheckTimer(); //IO multiplexing int n = select(socket集合, ...); //事件处理 **if** (某些socket可读) { pSocket-&gt;OnRead(); } **if** (某些socket可写) { pSocket-&gt;OnWrite(); } **if** (某些socket出错) { pSocket-&gt;OnClose(); } } 处理定时器事件的代码如下：
-void CEventDispatch::_CheckTimer() { uint64_t curr_tick = get_tick_count(); list&lt;TimerItem*&gt;::iterator it; for (it = m_timer_list.begin(); it != m_timer_list.end(); ) { TimerItem* pItem = *it; // iterator maybe deleted in the callback, so we should increment it before callback it&#43;&#43;; if(curr_tick &gt;= pItem-&gt;next_tick) { pItem-&gt;next_tick &#43;= pItem-&gt;interval; pItem-&gt;callback(pItem-&gt;user_data, NETLIB_MSG_TIMER, 0, NULL); } } } 即遍历一个定时器列表，将定时器对象与当前时间（curr_tick）做比较，如果当前时间已经大于或等于定时器设置的时间，则表明定时器时间已经到了，执行定时器对象对应的回调函数。
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 03 服务器端的程序架构介绍" href="https://haokiu.com/blog/74f8790b79af42ab856a668b8927b38a/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>04 服务器端db_proxy_server源码分析
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>04 服务器端db_proxy_server源码分析 从这篇文章开始，我将详细地分析TeamTalk服务器端每一个服务的源码和架构设计。
+while (running) { //处理定时器事件 _CheckTimer(); //IO multiplexing int n = select(socket集合, ...); //事件处理 **if** (某些socket可读) { pSocket->OnRead(); } **if** (某些socket可写) { pSocket->OnWrite(); } **if** (某些socket出错) { pSocket->OnClose(); } } 处理定时器事件的代码如下：
+void CEventDispatch::_CheckTimer() { uint64_t curr_tick = get_tick_count(); list&lt;TimerItem*>::iterator it; for (it = m_timer_list.begin(); it != m_timer_list.end(); ) { TimerItem* pItem = *it; // iterator maybe deleted in the callback, so we should increment it before callback it++; if(curr_tick >= pItem->next_tick) { pItem->next_tick += pItem->interval; pItem->callback(pItem->user_data, NETLIB_MSG_TIMER, 0, NULL); } } } 即遍历一个定时器列表，将定时器对象与当前时间（curr_tick）做比较，如果当前时间已经大于或等于定时器设置的时间，则表明定时器时间已经到了，执行定时器对象对应的回调函数。
+...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 03 服务器端的程序架构介绍" href=https://haokiu.com/blog/74f8790b79af42ab856a668b8927b38a/></a></article><article class=post-entry><header class=entry-header><h2>04 服务器端db_proxy_server源码分析</h2></header><div class=entry-content><p>04 服务器端db_proxy_server源码分析 从这篇文章开始，我将详细地分析TeamTalk服务器端每一个服务的源码和架构设计。
 这篇从db_proxy_server开始。db_proxy_server是TeamTalk服务器端最后端的程序，它连接着关系型数据库mysql和nosql内存数据库redis。其位置在整个服务架构中如图所示：
 我们从db_proxy_server的main()函数开始，main()函数其实就是做了以下初始化工作，我整理成如下伪码：
 int main() { //1. 初始化redis连接 //2. 初始化mysql连接 //3. 启动任务队列，用于处理任务 //4. 启动从mysql同步数据到redis工作 //5. 在端口10600上启动侦听，监听新连接 //6. 主线程进入循环，监听新连接的到来以及出来新连接上的数据收发 } 下面，我们将一一介绍以上步骤。
-一、初始化redis连接 CacheManager* pCacheManager = CacheManager::getInstance(); CacheManager* CacheManager::getInstance() { if (!s_cache_manager) { s_cache_manager = new CacheManager(); if (s_cache_manager-&gt;Init()) { delete s_cache_manager; s_cache_manager = NULL; } } return s_cache_manager; } int CacheManager::Init() { CConfigFileReader config_file(&#34;dbproxyserver.conf&#34;); //CacheInstances=unread,group_set,token,sync,group_member char* cache_instances = config_file.GetConfigName(&#34;CacheInstances&#34;); if (!cache_instances) { log(&#34;not configure CacheIntance&#34;); return 1; } char host[64]; char port[64]; char db[64]; char maxconncnt[64]; CStrExplode instances_name(cache_instances, &#39;,&#39;); for (uint32_t i = 0; i &lt; instances_name.GetItemCnt(); i&#43;&#43;) { char* pool_name = instances_name.GetItem(i); //printf(&#34;%s&#34;, pool_name); snprintf(host, 64, &#34;%s_host&#34;, pool_name); snprintf(port, 64, &#34;%s_port&#34;, pool_name); snprintf(db, 64, &#34;%s_db&#34;, pool_name); snprintf(maxconncnt, 64, &#34;%s_maxconncnt&#34;, pool_name); char* cache_host = config_file.GetConfigName(host); char* str_cache_port = config_file.GetConfigName(port); char* str_cache_db = config_file.GetConfigName(db); char* str_max_conn_cnt = config_file.GetConfigName(maxconncnt); if (!cache_host || !str_cache_port || !str_cache_db || !str_max_conn_cnt) { log(&#34;not configure cache instance: %s&#34;, pool_name); return 2; } CachePool* pCachePool = new CachePool(pool_name, cache_host, atoi(str_cache_port), atoi(str_cache_db), atoi(str_max_conn_cnt)); if (pCachePool-&gt;Init()) { log(&#34;Init cache pool failed&#34;); return 3; } m_cache_pool_map.insert(make_pair(pool_name, pCachePool)); } return 0; } 在pCachePool-&gt;Init()中是实际连接redis的动作：
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 04 服务器端db_proxy_server源码分析" href="https://haokiu.com/blog/5481b95ce7c64f8c99c98e3c59d74314/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>05 服务器端msg_server源码分析
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>05 服务器端msg_server源码分析 在分析msg_server的源码之前，我们先简单地回顾一下msg_server在整个服务器系统中的位置和作用：
+一、初始化redis连接 CacheManager* pCacheManager = CacheManager::getInstance(); CacheManager* CacheManager::getInstance() { if (!s_cache_manager) { s_cache_manager = new CacheManager(); if (s_cache_manager->Init()) { delete s_cache_manager; s_cache_manager = NULL; } } return s_cache_manager; } int CacheManager::Init() { CConfigFileReader config_file("dbproxyserver.conf"); //CacheInstances=unread,group_set,token,sync,group_member char* cache_instances = config_file.GetConfigName("CacheInstances"); if (!cache_instances) { log("not configure CacheIntance"); return 1; } char host[64]; char port[64]; char db[64]; char maxconncnt[64]; CStrExplode instances_name(cache_instances, ','); for (uint32_t i = 0; i &lt; instances_name.GetItemCnt(); i++) { char* pool_name = instances_name.GetItem(i); //printf("%s", pool_name); snprintf(host, 64, "%s_host", pool_name); snprintf(port, 64, "%s_port", pool_name); snprintf(db, 64, "%s_db", pool_name); snprintf(maxconncnt, 64, "%s_maxconncnt", pool_name); char* cache_host = config_file.GetConfigName(host); char* str_cache_port = config_file.GetConfigName(port); char* str_cache_db = config_file.GetConfigName(db); char* str_max_conn_cnt = config_file.GetConfigName(maxconncnt); if (!cache_host || !str_cache_port || !str_cache_db || !str_max_conn_cnt) { log("not configure cache instance: %s", pool_name); return 2; } CachePool* pCachePool = new CachePool(pool_name, cache_host, atoi(str_cache_port), atoi(str_cache_db), atoi(str_max_conn_cnt)); if (pCachePool->Init()) { log("Init cache pool failed"); return 3; } m_cache_pool_map.insert(make_pair(pool_name, pCachePool)); } return 0; } 在pCachePool->Init()中是实际连接redis的动作：
+...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 04 服务器端db_proxy_server源码分析" href=https://haokiu.com/blog/5481b95ce7c64f8c99c98e3c59d74314/></a></article><article class=post-entry><header class=entry-header><h2>05 服务器端msg_server源码分析</h2></header><div class=entry-content><p>05 服务器端msg_server源码分析 在分析msg_server的源码之前，我们先简单地回顾一下msg_server在整个服务器系统中的位置和作用：
 各个服务程序的作用描述如下：
-LoginServer (C&#43;&#43;): 负载均衡服务器，分配一个负载小的MsgServer给客户端使用 MsgServer (C&#43;&#43;): 消息服务器，提供客户端大部分信令处理功能，包括私人聊天、群组聊天等 RouteServer (C&#43;&#43;): 路由服务器，为登录在不同MsgServer的用户提供消息转发功能 FileServer (C&#43;&#43;): 文件服务器，提供客户端之间得文件传输服务，支持在线以及离线文件传输 MsfsServer (C&#43;&#43;): 图片存储服务器，提供头像，图片传输中的图片存储服务 DBProxy (C&#43;&#43;): 数据库代理服务器，提供mysql以及redis的访问服务，屏蔽其他服务器与mysql与redis的直接交互 HttpMsgServer(C&#43;&#43;) :对外接口服务器，提供对外接口功能。（目前只是框架） PushServer(C&#43;&#43;): 消息推送服务器，提供IOS系统消息推送。（IOS消息推送必须走apns） 从上面的介绍中，我们可以看出TeamTalk是支持分布式部署的一套聊天服务器程序，通过分布式部署可以实现分流和支持高数量的用户同时在线。msg_server是整个服务体系的核心系统，可以部署多个，不同的用户可以登录不同的msg_server。这套体系有如下几大亮点：
+LoginServer (C++): 负载均衡服务器，分配一个负载小的MsgServer给客户端使用 MsgServer (C++): 消息服务器，提供客户端大部分信令处理功能，包括私人聊天、群组聊天等 RouteServer (C++): 路由服务器，为登录在不同MsgServer的用户提供消息转发功能 FileServer (C++): 文件服务器，提供客户端之间得文件传输服务，支持在线以及离线文件传输 MsfsServer (C++): 图片存储服务器，提供头像，图片传输中的图片存储服务 DBProxy (C++): 数据库代理服务器，提供mysql以及redis的访问服务，屏蔽其他服务器与mysql与redis的直接交互 HttpMsgServer(C++) :对外接口服务器，提供对外接口功能。（目前只是框架） PushServer(C++): 消息推送服务器，提供IOS系统消息推送。（IOS消息推送必须走apns） 从上面的介绍中，我们可以看出TeamTalk是支持分布式部署的一套聊天服务器程序，通过分布式部署可以实现分流和支持高数量的用户同时在线。msg_server是整个服务体系的核心系统，可以部署多个，不同的用户可以登录不同的msg_server。这套体系有如下几大亮点：
 login_server可以根据当前各个msg_server上在线用户数量，来决定一个新用户登录到哪个msg_server，从而实现了负载平衡；
 route_server可以将登录在不同的msg_server上的用户的聊天消息发给目标用户；
 通过单独的一个数据库操作服务器db_proxy_server，避免了msg_server直接操作数据库，将数据库操作的入口封装起来。
 在前一篇文章《服务器端db_proxy_server源码分析》中，我介绍了每个服务如何接收连接、读取数据并解包、以及组装数据包发包的操作，这篇文章我将介绍作为客户端，一个服务如何连接另外一个服务。这里msg_server在启动时会同时连接db_proxy_server，login_server，file_server，route_server，push_server。在msg_server服务main函数里面有如下初始化调用：
 //连接file_server init_file_serv_conn(file_server_list, file_server_count); //连接db_proxy_server init_db_serv_conn(db_server_list2, db_server_count2, concurrent_db_conn_cnt); //连接login_server init_login_serv_conn(login_server_list, login_server_count, ip_addr1, ip_addr2, listen_port, max_conn_cnt); //连接push_server init_route_serv_conn(route_server_list, route_server_count); //连接push_server init_push_serv_conn(push_server_list, push_server_count); 其中每个连接服务的流程都是一样的。我们这里以第一个连接file_server为例：
-void init_file_serv_conn(serv_info_t* server_list, uint32_t server_count) { g_file_server_list = server_list; g_file_server_count = server_count; serv_init&lt;CFileServConn&gt;(g_file_server_list, g_file_server_count); netlib_register_timer(file_server_conn_timer_callback, NULL, 1000); s_file_handler = CFileHandler::getInstance(); } template &lt;class T&gt; void serv_init(serv_info_t* server_list, uint32_t server_count) { for (uint32_t i = 0; i &lt; server_count; i&#43;&#43;) { T* pConn = new T(); pConn-&gt;Connect(server_list[i].server_ip.c_str(), server_list[i].server_port, i); server_list[i].serv_conn = pConn; server_list[i].idle_cnt = 0; server_list[i].reconnect_cnt = MIN_RECONNECT_CNT / 2; } } 模板函数serv_init展开参数后实际上是调用CFileServConn-&gt;Connect()，我们看这个函数的调用：
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 05 服务器端msg_server源码分析" href="https://haokiu.com/blog/27deab1b64f24c839058b60bd3826f79/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>06 服务器端login_server源码分析
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>06 服务器端login_server源码分析 login_server从严格意义上来说，是一个登录分流器，所以名字起的有点名不符实。该服务根据已知的msg_server上的在线用户数量来返回告诉一个即将登录的用户登录哪个msg_server比较合适。关于其程序框架的非业务代码我们已经在前面的两篇文章《服务器端db_proxy_server源码分析》和《服务器端msg_server源码分析》中介绍过了。这篇文章主要介绍下其业务代码。
+void init_file_serv_conn(serv_info_t* server_list, uint32_t server_count) { g_file_server_list = server_list; g_file_server_count = server_count; serv_init&lt;CFileServConn>(g_file_server_list, g_file_server_count); netlib_register_timer(file_server_conn_timer_callback, NULL, 1000); s_file_handler = CFileHandler::getInstance(); } template &lt;class T> void serv_init(serv_info_t* server_list, uint32_t server_count) { for (uint32_t i = 0; i &lt; server_count; i++) { T* pConn = new T(); pConn->Connect(server_list[i].server_ip.c_str(), server_list[i].server_port, i); server_list[i].serv_conn = pConn; server_list[i].idle_cnt = 0; server_list[i].reconnect_cnt = MIN_RECONNECT_CNT / 2; } } 模板函数serv_init展开参数后实际上是调用CFileServConn->Connect()，我们看这个函数的调用：
+...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 05 服务器端msg_server源码分析" href=https://haokiu.com/blog/27deab1b64f24c839058b60bd3826f79/></a></article><article class=post-entry><header class=entry-header><h2>06 服务器端login_server源码分析</h2></header><div class=entry-content><p>06 服务器端login_server源码分析 login_server从严格意义上来说，是一个登录分流器，所以名字起的有点名不符实。该服务根据已知的msg_server上的在线用户数量来返回告诉一个即将登录的用户登录哪个msg_server比较合适。关于其程序框架的非业务代码我们已经在前面的两篇文章《服务器端db_proxy_server源码分析》和《服务器端msg_server源码分析》中介绍过了。这篇文章主要介绍下其业务代码。
 首先，程序初始化的时候，会初始化如下功能：
 //1. 在8008端口监听客户端连接 //2. 在8100端口上监听msg_server的连接 //3. 在8080端口上监听客户端http连接 其中连接对象CLoginConn代表着login_server与msg_server之间的连接；而CHttpConn代表着与客户端的http连接。我们先来看CLoginConn对象，上一篇文章中也介绍了其业务代码主要在其HandlePdu()函数中，可以看到这路连接主要处理哪些数据包：
-void CLoginConn::HandlePdu(CImPdu* pPdu) { switch (pPdu-&gt;GetCommandId()) { case CID_OTHER_HEARTBEAT: break; case CID_OTHER_MSG_SERV_INFO: _HandleMsgServInfo(pPdu); break; case CID_OTHER_USER_CNT_UPDATE: _HandleUserCntUpdate(pPdu); break; case CID_LOGIN_REQ_MSGSERVER: _HandleMsgServRequest(pPdu); break; default: log(&#34;wrong msg, cmd id=%d &#34;, pPdu-&gt;GetCommandId()); break; } } 命令号CID_OTHER_HEARTBEAT是与msg_server的心跳包。上一篇文章《服务器端msg_server源码分析》中介绍过，msg_server连上login_server后会立刻给login_server发一个数据包，该数据包里面含有该msg_server上的用户数量、最大可容纳的用户数量、自己的ip地址和端口号。
-list&lt;user_conn_t&gt; user_conn_list; CImUserManager::GetInstance()-&gt;GetUserConnCnt(&amp;user_conn_list, cur_conn_cnt); char hostname[256] = {0}; gethostname(hostname, 256); IM::Server::IMMsgServInfo msg; msg.set_ip1(g_msg_server_ip_addr1); msg.set_ip2(g_msg_server_ip_addr2); msg.set_port(g_msg_server_port); msg.set_max_conn_cnt(g_max_conn_cnt); msg.set_cur_conn_cnt(cur_conn_cnt); msg.set_host_name(hostname); CImPdu pdu; pdu.SetPBMsg(&amp;msg); pdu.SetServiceId(SID_OTHER); pdu.SetCommandId(CID_OTHER_MSG_SERV_INFO); SendPdu(&amp;pdu); 命令号是CID_OTHER_MSG_SERV_INFO。我们来看下login_server如何处理这个命令的：
-void CLoginConn::_HandleMsgServInfo(CImPdu* pPdu) { msg_serv_info_t* pMsgServInfo = new msg_serv_info_t; IM::Server::IMMsgServInfo msg; msg.ParseFromArray(pPdu-&gt;GetBodyData(), pPdu-&gt;GetBodyLength()); pMsgServInfo-&gt;ip_addr1 = msg.ip1(); pMsgServInfo-&gt;ip_addr2 = msg.ip2(); pMsgServInfo-&gt;port = msg.port(); pMsgServInfo-&gt;max_conn_cnt = msg.max_conn_cnt(); pMsgServInfo-&gt;cur_conn_cnt = msg.cur_conn_cnt(); pMsgServInfo-&gt;hostname = msg.host_name(); g_msg_serv_info.insert(make_pair(m_handle, pMsgServInfo)); g_total_online_user_cnt &#43;= pMsgServInfo-&gt;cur_conn_cnt; log(&#34;MsgServInfo, ip_addr1=%s, ip_addr2=%s, port=%d, max_conn_cnt=%d, cur_conn_cnt=%d, &#34;\ &#34;hostname: %s. &#34;, pMsgServInfo-&gt;ip_addr1.c_str(), pMsgServInfo-&gt;ip_addr2.c_str(), pMsgServInfo-&gt;port,pMsgServInfo-&gt;max_conn_cnt, pMsgServInfo-&gt;cur_conn_cnt, pMsgServInfo-&gt;hostname.c_str()); } 其实所做的工作无非就是记录下的该msg_server上的ip、端口号、在线用户数量和最大可容纳用户数量等信息而已。存在一个全局map里面：
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 06 服务器端login_server源码分析" href="https://haokiu.com/blog/1866caff3acc4baeb8666ea706d7ba7d/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>07 服务器端msfs源码分析
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>07 服务器端msfs源码分析 这篇文章是对TeamTalk服务程序msfs的源码和架构设计分析。msfs作用是用来接受teamtalk聊天中产生的聊天图片的上传和下载。还是老规矩，把该服务在整个架构中的位置图贴一下吧。
+void CLoginConn::HandlePdu(CImPdu* pPdu) { switch (pPdu->GetCommandId()) { case CID_OTHER_HEARTBEAT: break; case CID_OTHER_MSG_SERV_INFO: _HandleMsgServInfo(pPdu); break; case CID_OTHER_USER_CNT_UPDATE: _HandleUserCntUpdate(pPdu); break; case CID_LOGIN_REQ_MSGSERVER: _HandleMsgServRequest(pPdu); break; default: log("wrong msg, cmd id=%d ", pPdu->GetCommandId()); break; } } 命令号CID_OTHER_HEARTBEAT是与msg_server的心跳包。上一篇文章《服务器端msg_server源码分析》中介绍过，msg_server连上login_server后会立刻给login_server发一个数据包，该数据包里面含有该msg_server上的用户数量、最大可容纳的用户数量、自己的ip地址和端口号。
+list&lt;user_conn_t> user_conn_list; CImUserManager::GetInstance()->GetUserConnCnt(&amp;user_conn_list, cur_conn_cnt); char hostname[256] = {0}; gethostname(hostname, 256); IM::Server::IMMsgServInfo msg; msg.set_ip1(g_msg_server_ip_addr1); msg.set_ip2(g_msg_server_ip_addr2); msg.set_port(g_msg_server_port); msg.set_max_conn_cnt(g_max_conn_cnt); msg.set_cur_conn_cnt(cur_conn_cnt); msg.set_host_name(hostname); CImPdu pdu; pdu.SetPBMsg(&amp;msg); pdu.SetServiceId(SID_OTHER); pdu.SetCommandId(CID_OTHER_MSG_SERV_INFO); SendPdu(&amp;pdu); 命令号是CID_OTHER_MSG_SERV_INFO。我们来看下login_server如何处理这个命令的：
+void CLoginConn::_HandleMsgServInfo(CImPdu* pPdu) { msg_serv_info_t* pMsgServInfo = new msg_serv_info_t; IM::Server::IMMsgServInfo msg; msg.ParseFromArray(pPdu->GetBodyData(), pPdu->GetBodyLength()); pMsgServInfo->ip_addr1 = msg.ip1(); pMsgServInfo->ip_addr2 = msg.ip2(); pMsgServInfo->port = msg.port(); pMsgServInfo->max_conn_cnt = msg.max_conn_cnt(); pMsgServInfo->cur_conn_cnt = msg.cur_conn_cnt(); pMsgServInfo->hostname = msg.host_name(); g_msg_serv_info.insert(make_pair(m_handle, pMsgServInfo)); g_total_online_user_cnt += pMsgServInfo->cur_conn_cnt; log("MsgServInfo, ip_addr1=%s, ip_addr2=%s, port=%d, max_conn_cnt=%d, cur_conn_cnt=%d, "\ "hostname: %s. ", pMsgServInfo->ip_addr1.c_str(), pMsgServInfo->ip_addr2.c_str(), pMsgServInfo->port,pMsgServInfo->max_conn_cnt, pMsgServInfo->cur_conn_cnt, pMsgServInfo->hostname.c_str()); } 其实所做的工作无非就是记录下的该msg_server上的ip、端口号、在线用户数量和最大可容纳用户数量等信息而已。存在一个全局map里面：
+...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 06 服务器端login_server源码分析" href=https://haokiu.com/blog/1866caff3acc4baeb8666ea706d7ba7d/></a></article><article class=post-entry><header class=entry-header><h2>07 服务器端msfs源码分析</h2></header><div class=entry-content><p>07 服务器端msfs源码分析 这篇文章是对TeamTalk服务程序msfs的源码和架构设计分析。msfs作用是用来接受teamtalk聊天中产生的聊天图片的上传和下载。还是老规矩，把该服务在整个架构中的位置图贴一下吧。
 可以看到，msfs仅被客户端连接，客户端以http的方式来上传和下载聊天图片。
 可能很多同学对http协议不是很熟悉，或者说一知半解。这里大致介绍一下http协议，http协议其实也是一种应用层协议，建立在tcp/ip层之上，其由包头和包体两部分组成（不一定要有包体），看个例子：
 比如当我们用浏览器请求一个网址http://www.hootina.org/index.php，实际是浏览器给特定的服务器发送如下数据包，包头部分如下：
-GET /index.php HTTP/1.1\r\n Host: www.hootina.org\r\n Connection: keep-alive\r\n Cache-Control: max-age=0\r\n Accept: text/html,application/xhtml&#43;xml,application/xml;q=0.9,image/webp,/;q=0.8\r\n User-Agent: Mozilla/5.0\r\n \r\n 这个包没有包体。
+GET /index.php HTTP/1.1\r\n Host: www.hootina.org\r\n Connection: keep-alive\r\n Cache-Control: max-age=0\r\n Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,/;q=0.8\r\n User-Agent: Mozilla/5.0\r\n \r\n 这个包没有包体。
 从上面我们可以看出一个http协议大致格式可以描述如下：
 GET或Post请求方法 请求的资源路径 http协议版本号\r\n 字段名1：值1\r\n 字段名2：值2\r\n 字段名3：值3\r\n 字段名4：值4\r\n 字段名5：值5\r\n 字段名6：值6\r\n \r\n 也就是是http协议的头部是一行一行的，每一行以\r\n表示该行结束，最后多出一个空行以\r\n结束表示头部的结束。接下来就是包体的大小了（如果有的话，上文的例子没有包体）。一般get方法会将参数放在请求的资源路径后面，像这样
-http://wwww.hootina.org/index.php?变量1=值1&amp;变量2=值2&amp;变量3=值3&amp;变量4=值4
-网址后面的问号表示参数开始，每一个参数与参数之间用&amp;隔开
+http://wwww.hootina.org/index.php?变量1=值1&变量2=值2&变量3=值3&变量4=值4
+网址后面的问号表示参数开始，每一个参数与参数之间用&隔开
 还有一种post的请求方法，这种数据就是将数据放在包体里面了，例如：
 POST /otn/login/loginAysnSuggest HTTP/1.1\r\n Host: kyfw.12306.cn\r\n Connection: keep-alive\r\n Content-Length: 96\r\n Accept: */*\r\n Origin: https://kyfw.12306.cn\r\n X-Requested-With: XMLHttpRequest\r\n User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.75\r\n Content-Type: application/x-www-form-urlencoded; charset=UTF-8\r\n Referer: https://kyfw.12306.cn/otn/login/init\r\n Accept-Encoding: gzip, deflate, br\r\n Accept-Language: zh-CN,zh;q=0.8\r\n \r\n loginUserDTO.user_name=balloonwj%40qq.com&amp;userDTO.password=xxxxgjqf&amp;randCode=184%2C55%2C37%2C117 上述报文中loginUserDTO.user_name=balloonwj%40qq.com&amp;userDTO.password=2032_scsgjqf&amp;randCode=184%2C55%2C37%2C117 其实包体内容，这个包是我的一个12306买票软件发给12306服务器的报文。这里拿来做个例子。
 因为对方收到http报文的时候，如果包体有内容，那么必须告诉对方包体有多大。这个最常用的就是通过包头的Content-Length字段来指定大小。上面的例子中Content-Length等于96，正好就是字符串 loginUserDTO.user_name=balloonwj%40qq.com&amp;userDTO.password=xxxxgjqf&amp;randCode=184%2C55%2C37%2C117 的长度，也就是包体的大小。
@@ -317,57 +64,21 @@ html文档的头就是http的头 这种认识是错误的，html文档的头部�
 好了，http协议就暂且介绍这么多，下面回到正题上来说msfs的源码。
 msfs在main函数里面做了如下初始化工作，伪码如下：
 //1. 建立一个两个任务队列，分别处理http get请求和post请求 //2. 创建名称为000～255的文件夹，每个文件夹里面会有000～255个子目录，这些目录用于存放聊天图片 //3. 在8700端口上监听客户端连接 //4. 启动程序消息泵 第1点，建立任务队列我们前面系列的文章已经介绍过了。
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 07 服务器端msfs源码分析" href="https://haokiu.com/blog/0055f7fa607b4b2180cd0eb3924eff5c/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>08 服务器端file_server源码分析
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>08 服务器端file_server源码分析 这篇文章我们来介绍file_server服务的功能和源码实现。TeamTalk支持离线在线文件和离线文件两种传送文件的方式。单纯地研究file_server的程序结构没多大意义，因为其程序结构和其他几个服务结构基本上一模一样，前面几篇文章已经介绍过了。 我们研究teamtalk的file_server是为了学习和借鉴teamtalk的文件传输功能实现思路，以内化为自己的知识，并加以应用。
+...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 07 服务器端msfs源码分析" href=https://haokiu.com/blog/0055f7fa607b4b2180cd0eb3924eff5c/></a></article><article class=post-entry><header class=entry-header><h2>08 服务器端file_server源码分析</h2></header><div class=entry-content><p>08 服务器端file_server源码分析 这篇文章我们来介绍file_server服务的功能和源码实现。TeamTalk支持离线在线文件和离线文件两种传送文件的方式。单纯地研究file_server的程序结构没多大意义，因为其程序结构和其他几个服务结构基本上一模一样，前面几篇文章已经介绍过了。 我们研究teamtalk的file_server是为了学习和借鉴teamtalk的文件传输功能实现思路，以内化为自己的知识，并加以应用。
 所以这篇文章，我们将pc客户端的文件传输功能、msg_server转发消息、file_server处理文件数据三个方面结合起来一起介绍。
 下面开始啦。
 一、连接状况介绍
 fileserver开始并不是和客户端连接的，客户端是按需连接file_server的。但是file_server与msg_server却是长连接。先启动file_server，再启动msg_server。msg_server初始化的时候，会去尝试连接file_server的8601端口。连接成功以后，会给file_server发送一个发包询问file_server侦听客户端连接的ip和端口号信息：
-void CFileServConn::OnConfirm() { log(&#34;connect to file server success &#34;); m_bOpen = true; m_connect_time = get_tick_count(); g_file_server_list[m_serv_idx].reconnect_cnt = MIN_RECONNECT_CNT / 2; //连上file_server以后，给file_server发送获取ip地址的数据包 IM::Server::IMFileServerIPReq msg; CImPdu pdu; pdu.SetPBMsg(&amp;msg); pdu.SetServiceId(SID_OTHER); pdu.SetCommandId(CID_OTHER_FILE_SERVER_IP_REQ); SendPdu(&amp;pdu); } file_server收到该数据包后，将自己的侦听客户端连接的ip地址和端口号发包告诉msg_server：
-void FileMsgServerConn::_HandleGetServerAddressReq(CImPdu* pPdu) { IM::Server::IMFileServerIPRsp msg; const std::list&lt;IM::BaseDefine::IpAddr&gt;&amp; addrs = ConfigUtil::GetInstance()-&gt;GetAddressList(); for (std::list&lt;IM::BaseDefine::IpAddr&gt;::const_iterator it=addrs.begin(); it!=addrs.end(); &#43;&#43;it) { IM::BaseDefine::IpAddr* addr = msg.add_ip_addr_list(); *addr = *it; log(&#34;Upload file_client_conn addr info, ip=%s, port=%d&#34;, addr-&gt;ip().c_str(), addr-&gt;port()); } SendMessageLite(this, SID_OTHER, CID_OTHER_FILE_SERVER_IP_RSP, pPdu-&gt;GetSeqNum(), &amp;msg); } 得到的信息是file_server侦听的ip地址和端口号，默认配置的端口号是8600。也就是说file_server的8600用于客户端连接，8601端口用于msg_server连接。这样，客户端需要传输文件（注意：不是聊天图片，聊天图片使用另外一个服务msfs进行传输），会先告诉msg_server它需要进行文件传输，msg_server收到消息后告诉客户端，你连file_server来传输文件吧，并把file_server的地址和端口号告诉客户端。客户端这个时候连接file_server进行文件传输。我们来具体看一看这个流程的细节信息：
+void CFileServConn::OnConfirm() { log("connect to file server success "); m_bOpen = true; m_connect_time = get_tick_count(); g_file_server_list[m_serv_idx].reconnect_cnt = MIN_RECONNECT_CNT / 2; //连上file_server以后，给file_server发送获取ip地址的数据包 IM::Server::IMFileServerIPReq msg; CImPdu pdu; pdu.SetPBMsg(&amp;msg); pdu.SetServiceId(SID_OTHER); pdu.SetCommandId(CID_OTHER_FILE_SERVER_IP_REQ); SendPdu(&amp;pdu); } file_server收到该数据包后，将自己的侦听客户端连接的ip地址和端口号发包告诉msg_server：
+void FileMsgServerConn::_HandleGetServerAddressReq(CImPdu* pPdu) { IM::Server::IMFileServerIPRsp msg; const std::list&lt;IM::BaseDefine::IpAddr>& addrs = ConfigUtil::GetInstance()->GetAddressList(); for (std::list&lt;IM::BaseDefine::IpAddr>::const_iterator it=addrs.begin(); it!=addrs.end(); ++it) { IM::BaseDefine::IpAddr* addr = msg.add_ip_addr_list(); *addr = *it; log("Upload file_client_conn addr info, ip=%s, port=%d", addr->ip().c_str(), addr->port()); } SendMessageLite(this, SID_OTHER, CID_OTHER_FILE_SERVER_IP_RSP, pPdu->GetSeqNum(), &amp;msg); } 得到的信息是file_server侦听的ip地址和端口号，默认配置的端口号是8600。也就是说file_server的8600用于客户端连接，8601端口用于msg_server连接。这样，客户端需要传输文件（注意：不是聊天图片，聊天图片使用另外一个服务msfs进行传输），会先告诉msg_server它需要进行文件传输，msg_server收到消息后告诉客户端，你连file_server来传输文件吧，并把file_server的地址和端口号告诉客户端。客户端这个时候连接file_server进行文件传输。我们来具体看一看这个流程的细节信息：
 客户端发包给msg_server说要进行文件发送 然后选择一个文件：
 pc客户端发送文件逻辑：
-//pc客户端代码(Modules工程SessionLayout.cpp) void SessionLayout::Notify(TNotifyUI&amp; msg) { ... //省略无关代码 else if (msg.pSender == m_pBtnsendfile) //文件传输 { module::UserInfoEntity userInfo; if (!module::getUserListModule()-&gt;getUserInfoBySId(m_sId, userInfo)) { LOG__(ERR, _T(&#34;SendFile can&#39;t find the sid&#34;)); return; } CFileDialog	fileDlg(TRUE, NULL, NULL, OFN_HIDEREADONLY | OFN_FILEMUSTEXIST , _T(&#34;文件|*.*||&#34;), AfxGetMainWnd()); fileDlg.m_ofn.Flags |= OFN_NOCHANGEDIR; fileDlg.DoModal(); CString sPathName; POSITION nPos = fileDlg.GetStartPosition(); if (nPos != NULL) { sPathName = fileDlg.GetNextPathName(nPos); } if (sPathName.IsEmpty()) return; module::getFileTransferModule()-&gt;sendFile(sPathName, m_sId, userInfo.isOnlne()); } ... //省略无关代码 } sPathName是文件的全饰路径；m_sId是收取文件的用户id，userInfo.isOnlne()判断m_sId代表的用户是否在线，以此来决定这次文件传输是在线文件还是离线文件模式。
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 08 服务器端file_server源码分析" href="https://haokiu.com/blog/c5f5c9828a6f472d9768cffc2f548784/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>09 服务器端route_server源码分析
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>09 服务器端route_server源码分析 route_server的作用主要是用户不同msg_server之间消息路由，其框架部分和前面的服务类似，没有什么好说的。我们这里重点介绍下它的业务代码，也就是其路由细节：
-void CRouteConn::HandlePdu(CImPdu* pPdu) { switch (pPdu-&gt;GetCommandId()) { case CID_OTHER_HEARTBEAT: // do not take any action, heart beat only update m_last_recv_tick break; case CID_OTHER_ONLINE_USER_INFO: _HandleOnlineUserInfo( pPdu ); break; case CID_OTHER_USER_STATUS_UPDATE: _HandleUserStatusUpdate( pPdu ); break; case CID_OTHER_ROLE_SET: _HandleRoleSet( pPdu ); break; case CID_BUDDY_LIST_USERS_STATUS_REQUEST: _HandleUsersStatusRequest( pPdu ); break; case CID_MSG_DATA: case CID_SWITCH_P2P_CMD: case CID_MSG_READ_NOTIFY: case CID_OTHER_SERVER_KICK_USER: case CID_GROUP_CHANGE_MEMBER_NOTIFY: case CID_FILE_NOTIFY: case CID_BUDDY_LIST_REMOVE_SESSION_NOTIFY: _BroadcastMsg(pPdu, this); break; case CID_BUDDY_LIST_SIGN_INFO_CHANGED_NOTIFY: _BroadcastMsg(pPdu); break; default: log(&#34;CRouteConn::HandlePdu, wrong cmd id: %d &#34;, pPdu-&gt;GetCommandId()); break; } } 上面是route_server处理的消息类型，我们逐一来介绍：
+//pc客户端代码(Modules工程SessionLayout.cpp) void SessionLayout::Notify(TNotifyUI& msg) { ... //省略无关代码 else if (msg.pSender == m_pBtnsendfile) //文件传输 { module::UserInfoEntity userInfo; if (!module::getUserListModule()->getUserInfoBySId(m_sId, userInfo)) { LOG__(ERR, _T("SendFile can't find the sid")); return; } CFileDialog fileDlg(TRUE, NULL, NULL, OFN_HIDEREADONLY | OFN_FILEMUSTEXIST , _T("文件|*.*||"), AfxGetMainWnd()); fileDlg.m_ofn.Flags |= OFN_NOCHANGEDIR; fileDlg.DoModal(); CString sPathName; POSITION nPos = fileDlg.GetStartPosition(); if (nPos != NULL) { sPathName = fileDlg.GetNextPathName(nPos); } if (sPathName.IsEmpty()) return; module::getFileTransferModule()->sendFile(sPathName, m_sId, userInfo.isOnlne()); } ... //省略无关代码 } sPathName是文件的全饰路径；m_sId是收取文件的用户id，userInfo.isOnlne()判断m_sId代表的用户是否在线，以此来决定这次文件传输是在线文件还是离线文件模式。
+...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 08 服务器端file_server源码分析" href=https://haokiu.com/blog/c5f5c9828a6f472d9768cffc2f548784/></a></article><article class=post-entry><header class=entry-header><h2>09 服务器端route_server源码分析</h2></header><div class=entry-content><p>09 服务器端route_server源码分析 route_server的作用主要是用户不同msg_server之间消息路由，其框架部分和前面的服务类似，没有什么好说的。我们这里重点介绍下它的业务代码，也就是其路由细节：
+void CRouteConn::HandlePdu(CImPdu* pPdu) { switch (pPdu->GetCommandId()) { case CID_OTHER_HEARTBEAT: // do not take any action, heart beat only update m_last_recv_tick break; case CID_OTHER_ONLINE_USER_INFO: _HandleOnlineUserInfo( pPdu ); break; case CID_OTHER_USER_STATUS_UPDATE: _HandleUserStatusUpdate( pPdu ); break; case CID_OTHER_ROLE_SET: _HandleRoleSet( pPdu ); break; case CID_BUDDY_LIST_USERS_STATUS_REQUEST: _HandleUsersStatusRequest( pPdu ); break; case CID_MSG_DATA: case CID_SWITCH_P2P_CMD: case CID_MSG_READ_NOTIFY: case CID_OTHER_SERVER_KICK_USER: case CID_GROUP_CHANGE_MEMBER_NOTIFY: case CID_FILE_NOTIFY: case CID_BUDDY_LIST_REMOVE_SESSION_NOTIFY: _BroadcastMsg(pPdu, this); break; case CID_BUDDY_LIST_SIGN_INFO_CHANGED_NOTIFY: _BroadcastMsg(pPdu); break; default: log("CRouteConn::HandlePdu, wrong cmd id: %d ", pPdu->GetCommandId()); break; } } 上面是route_server处理的消息类型，我们逐一来介绍：
 CID_OTHER_ONLINE_USER_INFO 这个消息是msg_server连接上route_server后告知route_server自己上面的用户登录情况。route_server处理后，只是简单地记录一下每个msg_server上的用户数量和用户id：
-void CRouteConn::_HandleOnlineUserInfo(CImPdu* pPdu) { IM::Server::IMOnlineUserInfo msg; CHECK_PB_PARSE_MSG(msg.ParseFromArray(pPdu-&gt;GetBodyData(), pPdu-&gt;GetBodyLength())); uint32_t user_count = msg.user_stat_list_size(); log(&#34;HandleOnlineUserInfo, user_cnt=%u &#34;, user_count); for (uint32_t i = 0; i &lt; user_count; i&#43;&#43;) { IM::BaseDefine::ServerUserStat server_user_stat = msg.user_stat_list(i); _UpdateUserStatus(server_user_stat.user_id(), server_user_stat.status(), server_user_stat.client_type()); } } CID_OTHER_USER_STATUS_UPDATE 这个消息是当某个msg_server上有用户上下线时，msg_server会给route_server发送自己最近的用户数量和在线用户id信息，route_server的处理也就是更新下记录的该msg_server上的用户数量和用户id。
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 09 服务器端route_server源码分析" href="https://haokiu.com/blog/d337b00514f346dcb055e1a411da83d8/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>1 游戏服务器开发的基本体系与服务器端开发的一些建议
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>1 游戏服务器开发的基本体系与服务器端开发的一些建议 近年来，我身边的朋友有很多都从web转向了游戏开发。他们以前都没有做过游戏服务器开发，更谈不上什么经验，而从网上找的例子或游戏方面的知识，又是那么的少，那么的零散。当他们进入游戏公司时，显得一脸茫然。如果是大公司还好点，起码有人带带，能学点经验，但是有些人是直接进入了小公司，甚至这些小公司只有他一个后台。他们一肩扛起了公司的游戏后端的研发，也扛起了公司的成败。他们也非常尽力，他们也想把游戏的后端做好。可是就是因为没什么经验，刚开始时以为做游戏服务器和做web差不多，但是经过一段时间之后，才发现代码太多，太乱了，一看代码都想重构，都是踩着坑往前走。
+void CRouteConn::_HandleOnlineUserInfo(CImPdu* pPdu) { IM::Server::IMOnlineUserInfo msg; CHECK_PB_PARSE_MSG(msg.ParseFromArray(pPdu->GetBodyData(), pPdu->GetBodyLength())); uint32_t user_count = msg.user_stat_list_size(); log("HandleOnlineUserInfo, user_cnt=%u ", user_count); for (uint32_t i = 0; i &lt; user_count; i++) { IM::BaseDefine::ServerUserStat server_user_stat = msg.user_stat_list(i); _UpdateUserStatus(server_user_stat.user_id(), server_user_stat.status(), server_user_stat.client_type()); } } CID_OTHER_USER_STATUS_UPDATE 这个消息是当某个msg_server上有用户上下线时，msg_server会给route_server发送自己最近的用户数量和在线用户id信息，route_server的处理也就是更新下记录的该msg_server上的用户数量和用户id。
+...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 09 服务器端route_server源码分析" href=https://haokiu.com/blog/d337b00514f346dcb055e1a411da83d8/></a></article><article class=post-entry><header class=entry-header><h2>1 游戏服务器开发的基本体系与服务器端开发的一些建议</h2></header><div class=entry-content><p>1 游戏服务器开发的基本体系与服务器端开发的一些建议 近年来，我身边的朋友有很多都从web转向了游戏开发。他们以前都没有做过游戏服务器开发，更谈不上什么经验，而从网上找的例子或游戏方面的知识，又是那么的少，那么的零散。当他们进入游戏公司时，显得一脸茫然。如果是大公司还好点，起码有人带带，能学点经验，但是有些人是直接进入了小公司，甚至这些小公司只有他一个后台。他们一肩扛起了公司的游戏后端的研发，也扛起了公司的成败。他们也非常尽力，他们也想把游戏的后端做好。可是就是因为没什么经验，刚开始时以为做游戏服务器和做web差不多，但是经过一段时间之后，才发现代码太多，太乱了，一看代码都想重构，都是踩着坑往前走。
 这里我把一些游戏开发方面的东西整理一下，希望能对那些想做游戏服务器开发的朋友有所帮助。
 首先，要明确一点，做游戏服务器开发和做传统的web开发有着本质的区别。游戏服务器开发，如果没有经验，一开始根本没有一个明确清析的目标，不像web那样，有些明确的MVC架构，往往就是为了尽快满足策划的需求，尽快的实现功能，尽快能让游戏跑起来。但是随着功能越来越多，在老代码上面修改的越来越频繁，游戏测试时暴露出来的一堆bug，更让人觉得束手无策，这个时候我们想到了重构，想到了架构的设计。 游戏的构架设计非常重要，好的构架代码清析，责任明确，扩展性强，易调试。这些会为我们的开发省去不少时间。**那要怎么样设计游戏的构架呢？可能每个游戏都不一样，但是本质上还是差不多的。 对于游戏服务器的构架设计，我们首先要了解游戏的服务器构架都有什么组成的？**一款游戏到上线，**需要具备哪些功能？**有些人可能会说，只要让游戏跑起来，访问服务器不出问题不就行了吗？答案是不行的，游戏构架本身代表的是一个体系，它包括：
 系统初始化 游戏逻辑 数据库系统 缓存系统 游戏日志 游戏管理工具 公共服务组件 这一系统的东西都是不可少的，它们共同服务于游戏的整个运营过程。我们一点点来介绍各个系统的功能。
@@ -394,91 +105,10 @@ void CRouteConn::_HandleOnlineUserInfo(CImPdu* pPdu) { IM::Server::IMOnlineUserI
 服务器端开发的一些建议 本文作为游戏服务器端开发的基本大纲，是游戏实践开发中的总结。
 第一部分 —— 专业基础，用于指导招聘和实习考核； 第二部分 —— 游戏入门，讲述游戏服务器端开发的基本要点； 第三部分 —— 服务端架构，介绍架构设计中的一些基本原则。 希望能帮到大家！
 一、专业基础 1.1网络 1.1.1理解TCP/IP协议 网络传输模型 滑动窗口技术 建立连接的三次握手与断开连接的四次握手 连接建立与断开过程中的各种状态 TCP/IP协议的传输效率 思考：
-请解释DOS攻击与DRDOS攻击的基本原理 一个100Byte数据包，精简到50Byte, 其传输效率提高了50% TIMEWAIT状态怎么解释？ 1.1.2掌握常用的网络通信模型 Select Epoll，边缘触发与平台出发点区别与应用 Select与Epoll的区别及应用 1.2存储 计算机系统存储体系 程序运行时的内存结构 计算机文件系统，页表结构 内存池与对象池的实现原理，应用场景与区别 关系数据库MySQL的使用（本公众号内有系列文章，详情见【菜单】-【 共享内存 1.3程序 对C/C&#43;&#43;语言有较深的理解 深刻理解接口，封装与多态，并且有实践经验 深刻理解常用的数据结构：数组，链表，二叉树，哈希表 熟悉常用的算法及相关复杂度：冒泡排序，快速排序 二、游戏开发入门 2.1防御式编程 不要相信客户端数据，一定要检验。作为服务器端你无法确定你的客户端是谁，你也不能假定它是善意的，请做好自我保护。(这是判断一个服务器端程序员是否入门的基本标准) **务必对于函数的传人参数和返回值进行合法性判断，**内部子系统，功能模块之间不要太过信任，要求低耦合，高内聚。 插件式的模块设计，模块功能的健壮性应该是内建的，尽量减少模块间耦合。
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 1 游戏服务器开发的基本体系与服务器端开发的一些建议" href="https://haokiu.com/blog/867310d7f5a74f758c1745b3083cfcc8/"></a>
-</article>
-<footer class="page-footer">
-  <nav class="pagination">
-    <a class="prev" href="https://haokiu.com/index/4/">
-      «&nbsp;&nbsp;
-    </a>
-    <a class="next" href="https://haokiu.com/index/6/">&nbsp;&nbsp;»
-    </a>
-  </nav>
-</footer>
-    </main>
-    
-<footer class="footer">
-    <span>haokiu.com</span>
-    <span>
-        Powered by
-        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
-        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
-    </span>
-</footer>
-<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
-        <path d="M12 6H0l6-6z" />
-    </svg>
-</a>
-
-<script>
-    let menu = document.getElementById('menu')
-    if (menu) {
-        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
-        menu.onscroll = function () {
-            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
-        }
-    }
-
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener("click", function (e) {
-            e.preventDefault();
-            var id = this.getAttribute("href").substr(1);
-            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
-                    behavior: "smooth"
-                });
-            } else {
-                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
-            }
-            if (id === "top") {
-                history.replaceState(null, null, " ");
-            } else {
-                history.pushState(null, null, `#${id}`);
-            }
-        });
-    });
-
-</script>
-<script>
-    var mybutton = document.getElementById("top-link");
-    window.onscroll = function () {
-        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
-            mybutton.style.visibility = "visible";
-            mybutton.style.opacity = "1";
-        } else {
-            mybutton.style.visibility = "hidden";
-            mybutton.style.opacity = "0";
-        }
-    };
-
-</script>
-<script>
-    document.getElementById("theme-toggle").addEventListener("click", () => {
-        if (document.body.className.includes("dark")) {
-            document.body.classList.remove('dark');
-            localStorage.setItem("pref-theme", 'light');
-        } else {
-            document.body.classList.add('dark');
-            localStorage.setItem("pref-theme", 'dark');
-        }
-    })
-
-</script>
-</body>
-
-</html>
+请解释DOS攻击与DRDOS攻击的基本原理 一个100Byte数据包，精简到50Byte, 其传输效率提高了50% TIMEWAIT状态怎么解释？ 1.1.2掌握常用的网络通信模型 Select Epoll，边缘触发与平台出发点区别与应用 Select与Epoll的区别及应用 1.2存储 计算机系统存储体系 程序运行时的内存结构 计算机文件系统，页表结构 内存池与对象池的实现原理，应用场景与区别 关系数据库MySQL的使用（本公众号内有系列文章，详情见【菜单】-【 共享内存 1.3程序 对C/C++语言有较深的理解 深刻理解接口，封装与多态，并且有实践经验 深刻理解常用的数据结构：数组，链表，二叉树，哈希表 熟悉常用的算法及相关复杂度：冒泡排序，快速排序 二、游戏开发入门 2.1防御式编程 不要相信客户端数据，一定要检验。作为服务器端你无法确定你的客户端是谁，你也不能假定它是善意的，请做好自我保护。(这是判断一个服务器端程序员是否入门的基本标准) **务必对于函数的传人参数和返回值进行合法性判断，**内部子系统，功能模块之间不要太过信任，要求低耦合，高内聚。 插件式的模块设计，模块功能的健壮性应该是内建的，尽量减少模块间耦合。
+...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 1 游戏服务器开发的基本体系与服务器端开发的一些建议" href=https://haokiu.com/blog/867310d7f5a74f758c1745b3083cfcc8/></a></article><footer class=page-footer><nav class=pagination><a class=prev href=https://haokiu.com/index/4/>«&nbsp;&nbsp;
+</a><a class=next href=https://haokiu.com/index/6/>&nbsp;&nbsp;»</a></nav></footer></main><footer class=footer><span>haokiu.com</span>
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>
+</a><script>let menu=document.getElementById("menu");menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove("dark"),localStorage.setItem("pref-theme","light")):(document.body.classList.add("dark"),localStorage.setItem("pref-theme","dark"))})</script></body></html>

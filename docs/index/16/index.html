@@ -1,241 +1,23 @@
-<!DOCTYPE html>
-<html lang="zh-cn" dir="auto">
-
-<head>
-	<meta name="generator" content="Hugo 0.167.0"><meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="robots" content="index, follow">
-<title>haokiu</title>
-
-<meta name="description" content="">
-<meta name="author" content="">
-<link rel="canonical" href="https://haokiu.com/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
-<link rel="icon" href="https://haokiu.com/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
-<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
-<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
-<meta name="theme-color" content="#2e2e33">
-<meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" type="application/rss+xml" href="https://haokiu.com/index.xml">
-<link rel="alternate" type="application/json" href="https://haokiu.com/index.json">
-<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/">
-<noscript>
-    <style>
-        #theme-toggle,
-        .top-link {
-            display: none;
-        }
-
-    </style>
-    <style>
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --theme: rgb(29, 30, 32);
-                --entry: rgb(46, 46, 51);
-                --primary: rgb(218, 218, 219);
-                --secondary: rgb(155, 156, 157);
-                --tertiary: rgb(65, 66, 68);
-                --content: rgb(196, 196, 197);
-                --hljs-bg: rgb(46, 46, 51);
-                --code-bg: rgb(55, 56, 62);
-                --border: rgb(51, 51, 51);
-            }
-
-            .list {
-                background: var(--theme);
-            }
-
-            .list:not(.dark)::-webkit-scrollbar-track {
-                background: 0 0;
-            }
-
-            .list:not(.dark)::-webkit-scrollbar-thumb {
-                border-color: var(--theme);
-            }
-        }
-
-    </style>
-</noscript><meta property="og:title" content="haokiu" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://haokiu.com/" />
-
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="haokiu"/>
-<meta name="twitter:description" content=""/>
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "haokiu",
-  "url": "https://haokiu.com/",
-  "description": "",
-  "thumbnailUrl": "https://haokiu.com/favicon.ico",
-  "sameAs": [
-      
-  ]
-}
-</script>
-</head>
-
-<body class="list" id="top">
-<script>
-    if (localStorage.getItem("pref-theme") === "dark") {
-        document.body.classList.add('dark');
-    } else if (localStorage.getItem("pref-theme") === "light") {
-        document.body.classList.remove('dark')
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.classList.add('dark');
-    }
-
-</script>
-
-<header class="header">
-    <nav class="nav">
-        <div class="logo">
-            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
-            <div class="logo-switches">
-                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
-                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="5"></circle>
-                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                    </svg>
-                </button>
-                <ul class="lang-switch"><li>|</li>
-                </ul>
-            </div>
-        </div>
-        <ul id="menu">
-            <li>
-                <a href="https://haokiu.com/" title="haokiu">
-                    <span class="active">Home</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/1/" title="1">
-                    <span>后端</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/2/" title="2">
-                    <span>前端</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/3/" title="3">
-                    <span>区块链</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/4/" title="4">
-                    <span>大数据</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/5/" title="5">
-                    <span>linux</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/6/" title="6">
-                    <span>其他</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/tags/" title="Tags">
-                    <span>tags</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/categories/" title="Categories">
-                    <span>categories</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-</header>
-<main class="main"> 
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>服务器端发数据时，如果对端一直不收，怎么办？
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>服务器端发数据时，如果对端一直不收，怎么办？ 这类问题一般出现在跨部门尤其是与外部开发人员合作的时候。假设现在有这样一种情况，我们的服务器提供对外的服务，指定好了协议，然后对外提供服务，客户端由外部人员去开发，由于存在太多的不确定性，如果我们在给对端（客户端）发送数据时，对端因为一些问题（可能是逻辑 bug 或者其他的一些问题）一直不从 socket 系统缓冲区中收取数据，而服务器端可能定期产生一些数据需要发送给客户端，再发了一段时间后，由于 TCP 窗口太小，导致数据发送不出去，这样待发送的数据会在服务器端对应的连接的发送缓冲区中积压，如果我们不做任何处理，很快系统就会因为缓冲区过大内存耗尽，导致服务被系统杀死。
+<!doctype html><html lang=zh-cn dir=auto><head><meta name=generator content="Hugo 0.167.0"><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>haokiu</title><meta name=description content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><meta name=author content><link rel=canonical href=https://haokiu.com/><link crossorigin=anonymous href=/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as=style><link rel=icon href=https://haokiu.com/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://haokiu.com/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://haokiu.com/favicon-32x32.png><link rel=apple-touch-icon href=https://haokiu.com/apple-touch-icon.png><link rel=mask-icon href=https://haokiu.com/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate type=application/rss+xml href=https://haokiu.com/index.xml><link rel=alternate type=application/json href=https://haokiu.com/index.json><link rel=alternate type=text/plain href=https://haokiu.com/llms.txt><link rel=alternate hreflang=zh-cn href=https://haokiu.com/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><link rel=describedby href=https://haokiu.com/llms.txt type=text/markdown><script type=application/ld+json>{"@context":"https://schema.org","@type":"WebSite","name":"haokiu","url":"https://haokiu.com/","inLanguage":"zh-cn","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https:\/\/haokiu.com\/search\/?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script><meta property="og:title" content="haokiu"><meta property="og:description" content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><meta property="og:type" content="website"><meta property="og:url" content="https://haokiu.com/"><meta name=twitter:card content="summary"><meta name=twitter:title content="haokiu"><meta name=twitter:description content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><script type=application/ld+json>{"@context":"https://schema.org","@type":"Organization","name":"haokiu","url":"https://haokiu.com/","description":"haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他","thumbnailUrl":"https://haokiu.com/favicon.ico","sameAs":[]}</script></head><body class=list id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://haokiu.com/ accesskey=h title="haokiu (Alt + H)">haokiu</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)">
+<svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button><ul class=lang-switch><li>|</li></ul></div></div><ul id=menu><li><a href=https://haokiu.com/ title=haokiu><span class=active>Home</span></a></li><li><a href=https://haokiu.com/1/ title=1><span>后端</span></a></li><li><a href=https://haokiu.com/2/ title=2><span>前端</span></a></li><li><a href=https://haokiu.com/3/ title=3><span>区块链</span></a></li><li><a href=https://haokiu.com/4/ title=4><span>大数据</span></a></li><li><a href=https://haokiu.com/5/ title=5><span>linux</span></a></li><li><a href=https://haokiu.com/6/ title=6><span>其他</span></a></li><li><a href=https://haokiu.com/tags/ title=Tags><span>tags</span></a></li><li><a href=https://haokiu.com/categories/ title=Categories><span>categories</span></a></li></ul></nav></header><main class=main><article class=post-entry><header class=entry-header><h2>服务器端发数据时，如果对端一直不收，怎么办？</h2></header><div class=entry-content><p>服务器端发数据时，如果对端一直不收，怎么办？ 这类问题一般出现在跨部门尤其是与外部开发人员合作的时候。假设现在有这样一种情况，我们的服务器提供对外的服务，指定好了协议，然后对外提供服务，客户端由外部人员去开发，由于存在太多的不确定性，如果我们在给对端（客户端）发送数据时，对端因为一些问题（可能是逻辑 bug 或者其他的一些问题）一直不从 socket 系统缓冲区中收取数据，而服务器端可能定期产生一些数据需要发送给客户端，再发了一段时间后，由于 TCP 窗口太小，导致数据发送不出去，这样待发送的数据会在服务器端对应的连接的发送缓冲区中积压，如果我们不做任何处理，很快系统就会因为缓冲区过大内存耗尽，导致服务被系统杀死。
 对于这种情况，我们一般建议从以下几个方面来增加一些防御措施：
 设置每路发送连接的发送缓冲区大小上限（如 2 M，或者小于这个值），当某路连接上的数据发送不出去的时候，即将数据存入发送缓冲区时，先判断一下缓冲区最大剩余空间，如果剩余空间已经小于我们要放入的数据大小，也就是说缓冲区中数据大小会超过了我们规定的上限，则认为该连接出现了问题，关闭该路连接并回收相应的资源（如清空缓冲区、回收套接字资源等）。示例代码如下：
-//outputBuffer_为发送缓冲区对象 size_t remainingLen = outputBuffer_.remainingBytes(); //如果加入到缓冲区中的数据长度超出了发送缓冲区最大剩余量 if (remainingLen &lt; dataToAppend.length()) { forceClose() return } outputBuffer_.append(static_cast&lt;const char*&gt;(dataToAppend.c_str()), dataToAppend.length()); 还有另外一种场景，当有一部分数据已经积压在发送缓冲区了，此后服务器端未产生新的待发送的数据，此时如果不做任何处理，发送缓冲区的数据会一直积压，但是发送缓冲区的数据容量也不会超过上限。如果不做任何处理的话，该数据会一直在缓冲区中积压，白白浪费系统资源。对于这种情况一般我们会设置一个定时器，每隔一段时间（如 3 秒）去检查一下各路连接的发送缓冲区中是否还有数据未发送出去，也就是说如果一个连接超过一定时间内还存在未发送出去的数据，我们也认为该连接出现了问题，我们可以关闭该路连接并回收相应的资源（如清空缓冲区、回收套接字资源等）。示例代码如下：
-//每3秒检测一次 const int SESSION_CHECK_INTERVAL = 3000; SetTimer(SESSION_CHECK_TIMER_ID, SESSION_CHECK_INTERVAL); void CSessionManager::OnTimer() { for (auto iter = m_mapSession.begin(); iter != m_mapSession.end(); &#43;&#43;iter) { if (!CheckSession(iter-&gt;value)) { //关闭session，回收相关的资源 iter-&gt;value-&gt;ForceClose(); iter = m_mapSession.erase(iter); } } } void CSessionManager::CheckSession(CSession* pSession) { if (!pSession-&gt;GetConnection().OutputBuffer.IsEmpty()) return false; return true; } 上述代码，每隔 3 秒检测所有的 Session 的对应的 Connection 对象，如果发现发送缓冲区非空，说明该连接中发送缓冲区中数据已经驻留 3 秒了，将该连接关闭并清理资源。
-</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 服务器端发数据时，如果对端一直不收，怎么办？" href="https://haokiu.com/blog/bb7da7e0bc524808b2a072fb43da3a8e/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>服务器开发案例实战
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>服务器开发案例实战 从零实现一个http服务器
+//outputBuffer_为发送缓冲区对象 size_t remainingLen = outputBuffer_.remainingBytes(); //如果加入到缓冲区中的数据长度超出了发送缓冲区最大剩余量 if (remainingLen &lt; dataToAppend.length()) { forceClose() return } outputBuffer_.append(static_cast&lt;const char*>(dataToAppend.c_str()), dataToAppend.length()); 还有另外一种场景，当有一部分数据已经积压在发送缓冲区了，此后服务器端未产生新的待发送的数据，此时如果不做任何处理，发送缓冲区的数据会一直积压，但是发送缓冲区的数据容量也不会超过上限。如果不做任何处理的话，该数据会一直在缓冲区中积压，白白浪费系统资源。对于这种情况一般我们会设置一个定时器，每隔一段时间（如 3 秒）去检查一下各路连接的发送缓冲区中是否还有数据未发送出去，也就是说如果一个连接超过一定时间内还存在未发送出去的数据，我们也认为该连接出现了问题，我们可以关闭该路连接并回收相应的资源（如清空缓冲区、回收套接字资源等）。示例代码如下：
+//每3秒检测一次 const int SESSION_CHECK_INTERVAL = 3000; SetTimer(SESSION_CHECK_TIMER_ID, SESSION_CHECK_INTERVAL); void CSessionManager::OnTimer() { for (auto iter = m_mapSession.begin(); iter != m_mapSession.end(); ++iter) { if (!CheckSession(iter->value)) { //关闭session，回收相关的资源 iter->value->ForceClose(); iter = m_mapSession.erase(iter); } } } void CSessionManager::CheckSession(CSession* pSession) { if (!pSession->GetConnection().OutputBuffer.IsEmpty()) return false; return true; } 上述代码，每隔 3 秒检测所有的 Session 的对应的 Connection 对象，如果发现发送缓冲区非空，说明该连接中发送缓冲区中数据已经驻留 3 秒了，将该连接关闭并清理资源。</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 服务器端发数据时，如果对端一直不收，怎么办？" href=https://haokiu.com/blog/bb7da7e0bc524808b2a072fb43da3a8e/></a></article><article class=post-entry><header class=entry-header><h2>服务器开发案例实战</h2></header><div class=entry-content><p>服务器开发案例实战 从零实现一个http服务器
 从零实现一款12306刷票软件
 从零实现一个邮件收发客户端
 从零开发一个WebSocket服务器
 从零学习开源项目系列（一） 从一款多人联机实时对战游戏开始
 从零学习开源项目系列（二） 最后一战概况
 从零学习开源项目系列（三） CSBattleMgr服务源码研究
-从零学习开源项目系列（四）LogServer源码探究
-</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 服务器开发案例实战" href="https://haokiu.com/blog/5d978400ccba478eaaa6a166b4ffba8d/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>服务器开发通信协议设计介绍
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>服务器开发通信协议设计介绍 一、选择TCP还是UDP协议 由于我们的即时通讯软件的用户存在用户状态问题，即用户登录成功以后可以在他的好友列表中看到哪些好友在线，所以客户端和服务器需要保持长连接状态。另外即时通讯软件一般要求信息准确、有序、完整地到达对端，而这也是TCP协议的特点之一。综合这两个所以这里我们选择TCP协议，而不是UDP协议。
+从零学习开源项目系列（四）LogServer源码探究</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 服务器开发案例实战" href=https://haokiu.com/blog/5d978400ccba478eaaa6a166b4ffba8d/></a></article><article class=post-entry><header class=entry-header><h2>服务器开发通信协议设计介绍</h2></header><div class=entry-content><p>服务器开发通信协议设计介绍 一、选择TCP还是UDP协议 由于我们的即时通讯软件的用户存在用户状态问题，即用户登录成功以后可以在他的好友列表中看到哪些好友在线，所以客户端和服务器需要保持长连接状态。另外即时通讯软件一般要求信息准确、有序、完整地到达对端，而这也是TCP协议的特点之一。综合这两个所以这里我们选择TCP协议，而不是UDP协议。
 二、协议的结构 由于TCP协议是流式协议，所谓流式协议即通讯的内容是无边界的字节流：如A给B连续发送了三个数据包，每个包的大小都是100个字节，那么B可能会一次性收到300个字节；也可能先收到100个字节，再收到200个字节；也可能先收到100个字节，再收到50个字节，再收到150个字节；或者先收到50个字节，再收到50个字节，再收到50个字节，最后收到150个字节。也就是说，B可能以任何组合形式收到这300个字节。即像水流一样无明确的边界。为了能让对端知道如何给包分界，目前一般有三种做法：
-以固定大小字节数目来分界，上文所说的就是属于这种类型，如每个包100个字节，对端每收齐100个字节，就当成一个包来解析； 以特定符号来分界，如每个包都以特定的字符来结尾（如\n），当在字节流中读取到该字符时，则表明上一个包到此为止。 固定包头&#43;包体结构，这种结构中一般包头部分是一个固定字节长度的结构，并且包头中会有一个特定的字段指定包体的大小。这是目前各种网络应用用的最多的一种包格式。 上面三种分包方式各有优缺点，方法1和方法2简单易操作，但是缺点也很明显，就是很不灵活，如方法一当包数据不足指定长度，只能使用占位符如0来凑，比较浪费；方法2中包中不能有包界定符，否则就会引起歧义，也就是要求包内容中不能有某些特殊符号。而方法3虽然解决了方法1和方法2的缺点，但是操作起来就比较麻烦。我们的即时通讯协议就采用第三种分包方式。所以我们的协议包的包头看起来像这样：
+以固定大小字节数目来分界，上文所说的就是属于这种类型，如每个包100个字节，对端每收齐100个字节，就当成一个包来解析； 以特定符号来分界，如每个包都以特定的字符来结尾（如\n），当在字节流中读取到该字符时，则表明上一个包到此为止。 固定包头+包体结构，这种结构中一般包头部分是一个固定字节长度的结构，并且包头中会有一个特定的字段指定包体的大小。这是目前各种网络应用用的最多的一种包格式。 上面三种分包方式各有优缺点，方法1和方法2简单易操作，但是缺点也很明显，就是很不灵活，如方法一当包数据不足指定长度，只能使用占位符如0来凑，比较浪费；方法2中包中不能有包界定符，否则就会引起歧义，也就是要求包内容中不能有某些特殊符号。而方法3虽然解决了方法1和方法2的缺点，但是操作起来就比较麻烦。我们的即时通讯协议就采用第三种分包方式。所以我们的协议包的包头看起来像这样：
 struct package_header { int32_t bodysize; }; 一个应用中，有许多的应用数据，拿我们这里的即时通讯来说，有注册、登录、获取好友列表、好友消息等各种各样的协议数据包，而每个包因为业务内容不一样可能数据内容也不一样，所以各个包可能看起来像下面这样：
 struct package_header { int32_t bodysize; }; //登录数据包 struct register_package { package_header header; //命令号 int32_t cmd; //注册用户名 char username[16]; //注册密码 char password[16]; //注册昵称 char nickname[16]; //注册手机号 char mobileno[16]; }; //登录数据包 struct login_package { package_header header; //命令号 int32_t cmd; //登录用户名 char username[16]; //密码 char password[16]; //客户端类型 int32_t clienttype; //上线类型，如在线、隐身、忙碌、离开等 int32_t onlinetype; }; //获取好友列表 struct getfriend_package { package_header header; //命令号 int32_t cmd; }; //聊天内容 struct chat_package { package_header header; //命令号 int32_t cmd; //发送人userid int32_t senderid; //接收人userid int32_t targetid; //消息内容 char chatcontent[8192]; }; 看到没有？由于每一个业务的内容不一样，定义的结构体也不一样。如果业务比较多的话，我们需要定义各种各样的这种结构体，这简直是一场噩梦。那么有没有什么方法可以避免这个问题呢？有，我受jdk中的流对象的WriteInt32、WriteByte、WriteInt64、WriteString，这样的接口的启发，也发明了一套这样的协议，而且这套协议基本上是通用协议，可用于任何场景。我们的包还是分为包头和包体两部分，包头和上文所说的一样，包体是一个不固定大小的二进制流，其长度由包头中的指定包体长度的字段决定。
-struct package_protocol { int32_t bodysize; //注意：C/C&#43;&#43;语法不能这么定义结构体， //这里只是为了说明含义的伪代码 //bodycontent即为一个不固定大小的二进制流 char binarystream[bodysize]; }; 接下来的核心部分就是如何操作这个二进制流，我们将流分为二进制读和二进制写两种流，下面给出接口定义：
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 服务器开发通信协议设计介绍" href="https://haokiu.com/blog/27166845330344e4bf4f9a385e69fc94/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>服务器开发中网络数据分析与故障排查经验漫谈
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>服务器开发中网络数据分析与故障排查经验漫谈 ​
+struct package_protocol { int32_t bodysize; //注意：C/C++语法不能这么定义结构体， //这里只是为了说明含义的伪代码 //bodycontent即为一个不固定大小的二进制流 char binarystream[bodysize]; }; 接下来的核心部分就是如何操作这个二进制流，我们将流分为二进制读和二进制写两种流，下面给出接口定义：
+...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 服务器开发通信协议设计介绍" href=https://haokiu.com/blog/27166845330344e4bf4f9a385e69fc94/></a></article><article class=post-entry><header class=entry-header><h2>服务器开发中网络数据分析与故障排查经验漫谈</h2></header><div class=entry-content><p>服务器开发中网络数据分析与故障排查经验漫谈 ​
 一、 操作系统提供的网络接口
 为了能更好的排查网络通信问题，我们需要熟悉操作系统提供的以下网络接口函数，列表如下：
 接口函数名称 接口函数描述 接口函数签名 socket 创建套接字 int socket(int domain, int type, int protocol); connect 连接一个服务器地址 int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen); send 发送数据 ssize_t send(int sockfd, const void *buf, size_t len, int flags); recv 收取数据 ssize_t recv(int sockfd, void *buf, size_t len, int flags); accept 接收连接 int accept4(int sockfd, struct sockaddr *addr, socklen_t *addrlen, int flags); shutdown 关闭收发链路 int shutdown(int sockfd, int how); close 关闭套接字 int close(int fd); setsockopt 设置套接字选项 int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen); 注意：这里以bekeley提供的标准为例，不包括特定操作系统上特有的接口函数（如Windows平台的WSASend，linux的accept4），也不包括实际与网络数据来往不相关的函数（如select、linux的epoll），这里只讨论与tcp相关的接口函数，像与udp相关的函数sendto/recvfrom等函数与此类似。
@@ -247,56 +29,20 @@ struct package_protocol { int32_t bodysize; //注意：C/C&#43;&#43;语法不能
 非阻塞套接字模式下，如果由于对端tcp窗口太小，不足以将数据发出去，它将立刻返回，不会阻塞执行流，此时返回值为-1，错误码是EAGAIN或EWOULDBLOCK，表示当前数据发不出去，希望你下次再试。但是返回值如果是-1，也可能是真正的出错了，也可能得到错误码EINTR，表示被linux信号中断了，这点需要注意一下。recv函数与send函数情形一样。
 3 send函数虽然名称叫“send”，但是其并不是将数据发送到网络上去，只是将数据从应用层缓冲区中拷贝到协议栈内核缓冲区中，具体什么时候发送到网络上去，与协议栈本身行为有关系（socket选项nagle算法与这个有关系，下文介绍常见套接字选项时会介绍），这点需要特别注意，所以即使send函数返回一个大于0的值n，也不能表明已经有n个字节发送到网络上去了。同样的道理，recv函数也不是从网络上收取数据，只是从协议栈内核缓冲区拷贝数据至应用层缓冲区，并不是真正地从网络上收数据，所以，调用recv时，操作系统的协议栈已经将数据从网络上收到自己的内核缓冲区中了，recv仅仅是一次数据拷贝操作而已。
 4 由于套接字实现是收发全双工的，收和发通道相互独立，不会相互影响，shutdown函数是用来选择关闭socket收发通道中某一路（当然，也可以两路都关闭），其how参数取值一般有三个：SHUT_RD/SHUT_WR/SHUT_RDWR，SHUT_RD表示关闭收消息链路，即该套接字不能再收取数据，同理SHUT_WR表示关闭套接字发消息链路，但是这里有个问题，有时候我们需要等待缓冲区中数据发送完后再关闭连接怎么办？这里就要用到套接字选项LINGER，关于这个选项请参考下文常见的套接字选项介绍。最后，SHUT_RDWR同时关闭收消息链路和发消息链路。通过上面的分析，我们得出结论，shutdown函数并不会要求操作系统底层回收套接字等资源，真正会回收资源是close函数，这个函数会要求操作系统回收相关套接字资源，并释放对ip地址与端口号二元组的占用，但是由于tcp四次挥手最后一个阶段有个TIME_WAIT状态（关于这个状态下文介绍tcp三次握手和四次回收时会详细介绍），导致与该socket相关的端口号资源不会被立即释放，有时候为了达到释放端口用来复用，我们会设置套接字选项SOL_REUSEPORT（关于这个选项，下文会介绍）。综合起来，我们关闭一个套接字，一般会先调用shutdown函数再调用close函数，这就是所谓的优雅关闭：
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 服务器开发中网络数据分析与故障排查经验漫谈" href="https://haokiu.com/blog/b7d459605e1d4d46adba41bdb0c66b78/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>后端开发相关的书籍
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>后端开发相关的书籍 后台开发应该读的书 </p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 后端开发相关的书籍" href="https://haokiu.com/blog/624d2104f4a54c50940f5de425c06ab0/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>后台C&#43;&#43;开发你一定要知道的条件变量
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>后台C&#43;&#43;开发你一定要知道的条件变量 今天因为工作需要，需要帮同事用C语言（不是C&#43;&#43;）写一个生产者消费者的任务队列工具库，考虑到不能使用任何第三库和C&#43;&#43;的任何特性，所以我将任务队列做成一个链表，生产者在队列尾部加入任务，消费者在队列头部取出任务。很快就写好了，代码如下：
-/*** 线程池工具, ctrip_thread_pool.h* zhangyl 2018.03.23*/#ifndef __CTRIP_THREAD_POOL_H__#define __CTRIP_THREAD_POOL_H__#include &lt;pthread.h&gt;#ifndef NULL#define NULL 0#endif#define PUBLIC PUBLIC struct ctrip_task{struct ctrip_task* pNext;int value;};struct ctrip_thread_info{//线程退出标志int thread_running;int thread_num;int tasknum;struct ctrip_task* tasks;pthread_t* threadid;pthread_mutex_t mutex;pthread_cond_t cond;};/* 初始化线程池线程数目* @param thread_num 线程数目, 默认为8个*/PUBLIC void ctrip_init_thread_pool(int thread_num);/* 销毁线程池*/PUBLIC void ctrip_destroy_thread_pool();/**向任务池中增加一个任务* @param t 需要增加的任务*/PUBLIC void ctrip_thread_pool_add_task(struct ctrip_task* t);/**从任务池中取出一个任务* @return 返回得到的任务*/struct ctrip_task* ctrip_thread_pool_retrieve_task();/**执行任务池中的任务* @param t 需要执行的任务*/PUBLIC void ctrip_thread_pool_do_task(struct ctrip_task* t);/**线程函数* @param thread_param 线程参数*/void* ctrip_thread_routine(void* thread_param);#endif //!__CTRIP_THREAD_POOL_H__/*** 线程池工具, ctrip_thread_pool.c* zhangyl 2018.03.23*/#include &#34;ctrip_thread_pool.h&#34;#include &lt;stdio.h&gt;#include &lt;stdlib.h&gt;struct ctrip_thread_info g_threadinfo;int thread_running = 0;void ctrip_init_thread_pool(int thread_num){if (thread_num &lt;= 0)thread_num = 5;pthread_mutex_init(&amp;g_threadinfo.mutex, NULL);pthread_cond_init(&amp;g_threadinfo.cond, NULL);g_threadinfo.thread_num = thread_num;g_threadinfo.thread_running = 1;g_threadinfo.tasknum = 0;g_threadinfo.tasks = NULL;thread_running = 1;g_threadinfo.threadid = (pthread_t*)malloc(sizeof(pthread_t) * thread_num);int i;for (i = 0; i &lt; thread_num; &#43;&#43;i){pthread_create(&amp;g_threadinfo.threadid[i], NULL, ctrip_thread_routine, NULL);}}void ctrip_destroy_thread_pool(){g_threadinfo.thread_running = 0;thread_running = 0;pthread_cond_broadcast(&amp;g_threadinfo.cond);int i;for (i = 0; i &lt; g_threadinfo.thread_num; &#43;&#43;i){pthread_join(g_threadinfo.threadid[i], NULL);}free(g_threadinfo.threadid);pthread_mutex_destroy(&amp;g_threadinfo.mutex);pthread_cond_destroy(&amp;g_threadinfo.cond);}void ctrip_thread_pool_add_task(struct ctrip_task* t){if (t == NULL)return;pthread_mutex_lock(&amp;g_threadinfo.mutex);struct ctrip_task* head = g_threadinfo.tasks;if (head == NULL)g_threadinfo.tasks = t;else{while (head-&gt;pNext != NULL){head = head-&gt;pNext;}head-&gt;pNext = t;}&#43;&#43;g_threadinfo.tasknum;//当有变化后，使用signal通知wait函数pthread_cond_signal(&amp;g_threadinfo.cond);pthread_mutex_unlock(&amp;g_threadinfo.mutex);}struct ctrip_task* ctrip_thread_pool_retrieve_task(){struct ctrip_task* head = g_threadinfo.tasks;if (head != NULL){g_threadinfo.tasks = head-&gt;pNext;--g_threadinfo.tasknum;printf(&#34;retrieve a task, task value is [%d]\n&#34;, head-&gt;value);return head;}printf(&#34;no task\n&#34;);return NULL;}void* ctrip_thread_routine(void* thread_param){printf(&#34;thread NO.%d start.\n&#34;, (int)pthread_self());while (thread_running/*g_threadinfo.thread_running*/){struct ctrip_task* current = NULL;pthread_mutex_lock(&amp;g_threadinfo.mutex);while (g_threadinfo.tasknum &lt;= 0){//如果获得了互斥锁，但是条件不合适的话，wait会释放锁，不往下执行。//当变化后，条件合适，将直接获得锁。pthread_cond_wait(&amp;g_threadinfo.cond, &amp;g_threadinfo.mutex);if (!g_threadinfo.thread_running)break;current = ctrip_thread_pool_retrieve_task();if (current != NULL)break;}// end inner-while-looppthread_mutex_unlock(&amp;g_threadinfo.mutex);ctrip_thread_pool_do_task(current);}// end outer-while-loopprintf(&#34;thread NO.%d exit.\n&#34;, (int)pthread_self());}void ctrip_thread_pool_do_task(struct ctrip_task* t){if (t == NULL)return;//TODO: do your work hereprintf(&#34;task value is [%d]\n&#34;, t-&gt;value);//TODO：如果t需要释放，记得在这里释放} 测试代码如下：
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 后台C&#43;&#43;开发你一定要知道的条件变量" href="https://haokiu.com/blog/3418f291fe18455999e74a1f1dbad72a/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>后台开发应该读的书
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>后台开发应该读的书 根据我的经验来谈一谈，先介绍一下我的情况，坐标上海，后台开发（也带团队了），某知名互联网公司。
-目前主流的有C&#43;&#43;和JAVA，C&#43;&#43;我的经验稍微多一点。我就说说我关于C&#43;&#43;方面的学习经验。如果您是学生，临近毕业，没有那么多时间读许多书，可以按下面列举的重要程度来参考。
+...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 服务器开发中网络数据分析与故障排查经验漫谈" href=https://haokiu.com/blog/b7d459605e1d4d46adba41bdb0c66b78/></a></article><article class=post-entry><header class=entry-header><h2>后端开发相关的书籍</h2></header><div class=entry-content><p>后端开发相关的书籍 后台开发应该读的书</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 后端开发相关的书籍" href=https://haokiu.com/blog/624d2104f4a54c50940f5de425c06ab0/></a></article><article class=post-entry><header class=entry-header><h2>后台C++开发你一定要知道的条件变量</h2></header><div class=entry-content><p>后台C++开发你一定要知道的条件变量 今天因为工作需要，需要帮同事用C语言（不是C++）写一个生产者消费者的任务队列工具库，考虑到不能使用任何第三库和C++的任何特性，所以我将任务队列做成一个链表，生产者在队列尾部加入任务，消费者在队列头部取出任务。很快就写好了，代码如下：
+/** * 线程池工具, ctrip_thread_pool.h * zhangyl 2018.03.23 */ #ifndef __CTRIP_THREAD_POOL_H__ #define __CTRIP_THREAD_POOL_H__ #include &lt;pthread.h> #ifndef NULL #define NULL 0 #endif #define PUBLIC PUBLIC struct ctrip_task { struct ctrip_task* pNext; int value; }; struct ctrip_thread_info { //线程退出标志 int thread_running; int thread_num; int tasknum; struct ctrip_task* tasks; pthread_t* threadid; pthread_mutex_t mutex; pthread_cond_t cond; }; /* 初始化线程池线程数目 * @param thread_num 线程数目, 默认为8个 */ PUBLIC void ctrip_init_thread_pool(int thread_num); /* 销毁线程池 */ PUBLIC void ctrip_destroy_thread_pool(); /**向任务池中增加一个任务 * @param t 需要增加的任务 */ PUBLIC void ctrip_thread_pool_add_task(struct ctrip_task* t); /**从任务池中取出一个任务 * @return 返回得到的任务 */ struct ctrip_task* ctrip_thread_pool_retrieve_task(); /**执行任务池中的任务 * @param t 需要执行的任务 */ PUBLIC void ctrip_thread_pool_do_task(struct ctrip_task* t); /**线程函数 * @param thread_param 线程参数 */ void* ctrip_thread_routine(void* thread_param); #endif //!__CTRIP_THREAD_POOL_H__ /** * 线程池工具, ctrip_thread_pool.c * zhangyl 2018.03.23 */ #include "ctrip_thread_pool.h" #include &lt;stdio.h> #include &lt;stdlib.h> struct ctrip_thread_info g_threadinfo; int thread_running = 0; void ctrip_init_thread_pool(int thread_num) { if (thread_num &lt;= 0) thread_num = 5; pthread_mutex_init(&amp;g_threadinfo.mutex, NULL); pthread_cond_init(&amp;g_threadinfo.cond, NULL); g_threadinfo.thread_num = thread_num; g_threadinfo.thread_running = 1; g_threadinfo.tasknum = 0; g_threadinfo.tasks = NULL; thread_running = 1; g_threadinfo.threadid = (pthread_t*)malloc(sizeof(pthread_t) * thread_num); int i; for (i = 0; i &lt; thread_num; ++i) { pthread_create(&amp;g_threadinfo.threadid[i], NULL, ctrip_thread_routine, NULL); } } void ctrip_destroy_thread_pool() { g_threadinfo.thread_running = 0; thread_running = 0; pthread_cond_broadcast(&amp;g_threadinfo.cond); int i; for (i = 0; i &lt; g_threadinfo.thread_num; ++i) { pthread_join(g_threadinfo.threadid[i], NULL); } free(g_threadinfo.threadid); pthread_mutex_destroy(&amp;g_threadinfo.mutex); pthread_cond_destroy(&amp;g_threadinfo.cond); } void ctrip_thread_pool_add_task(struct ctrip_task* t) { if (t == NULL) return; pthread_mutex_lock(&amp;g_threadinfo.mutex); struct ctrip_task* head = g_threadinfo.tasks; if (head == NULL) g_threadinfo.tasks = t; else { while (head->pNext != NULL) { head = head->pNext; } head->pNext = t; } ++g_threadinfo.tasknum; //当有变化后，使用signal通知wait函数 pthread_cond_signal(&amp;g_threadinfo.cond); pthread_mutex_unlock(&amp;g_threadinfo.mutex); } struct ctrip_task* ctrip_thread_pool_retrieve_task() { struct ctrip_task* head = g_threadinfo.tasks; if (head != NULL) { g_threadinfo.tasks = head->pNext; --g_threadinfo.tasknum; printf("retrieve a task, task value is [%d]\n", head->value); return head; } printf("no task\n"); return NULL; } void* ctrip_thread_routine(void* thread_param) { printf("thread NO.%d start.\n", (int)pthread_self()); while (thread_running/*g_threadinfo.thread_running*/) { struct ctrip_task* current = NULL; pthread_mutex_lock(&amp;g_threadinfo.mutex); while (g_threadinfo.tasknum &lt;= 0) { //如果获得了互斥锁，但是条件不合适的话，wait会释放锁，不往下执行。 //当变化后，条件合适，将直接获得锁。 pthread_cond_wait(&amp;g_threadinfo.cond, &amp;g_threadinfo.mutex); if (!g_threadinfo.thread_running) break; current = ctrip_thread_pool_retrieve_task(); if (current != NULL) break; }// end inner-while-loop pthread_mutex_unlock(&amp;g_threadinfo.mutex); ctrip_thread_pool_do_task(current); }// end outer-while-loop printf("thread NO.%d exit.\n", (int)pthread_self()); } void ctrip_thread_pool_do_task(struct ctrip_task* t) { if (t == NULL) return; //TODO: do your work here printf("task value is [%d]\n", t->value); //TODO：如果t需要释放，记得在这里释放 } 测试代码如下：
+...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 后台C++开发你一定要知道的条件变量" href=https://haokiu.com/blog/3418f291fe18455999e74a1f1dbad72a/></a></article><article class=post-entry><header class=entry-header><h2>后台开发应该读的书</h2></header><div class=entry-content><p>后台开发应该读的书 根据我的经验来谈一谈，先介绍一下我的情况，坐标上海，后台开发（也带团队了），某知名互联网公司。
+目前主流的有C++和JAVA，C++我的经验稍微多一点。我就说说我关于C++方面的学习经验。如果您是学生，临近毕业，没有那么多时间读许多书，可以按下面列举的重要程度来参考。
 首先，我觉得你应该好好准备算法和数据结构，做到常见的算法和数据结构知识点都能非常熟悉，这样的话你毕业求职的时候可以轻松拿一些大厂（BAT等）的offer。我本人非科班出身，一毕业之后各种摸爬滚打。一毕业去大厂个人觉得有两个好处，第一，你的收入会比一般的的小公司高很多，小公司招人要求相对低一些，薪资给的也少很多，它们是实实在在招能干本职工作活儿的人。第二，你的起点也会比一般进入小厂的同学高。我这里并不是歧视小厂，只是说一种普遍的情况。我本人也是从小厂一路过来的。这里我是强调算法和数据结构的重要性。尤其是应届生求职，更应该去好好准备一下这个，因为这个东西是原理性的基础。企业在面试应届生时不会过分要求项目经验和各种操作系统原理、网络通信原理之类的东西，而唯一能考察一个人的基本功的就是这个了。我是社招进大厂，基本上算法和数据结构这类问题问的比项目经验本身要多许多。但是社招又不太一样，因为除了要准备算法和数据结构以外，还得准备有项目经验、了解操作系统原理、熟悉网络通信、了解数据库、熟悉要求的各种开源框架和技术等等，实在太多了，即使再怎么准备也不一定能一举拿下。相反，应届生基本上只要好好准备算法和数据结构的东西，大学其他专业课学的不是太差，这基本上就是进大厂的捷径。图书方面，你可以使用你们计算机专业的相关教材，也可以使用《数据结构与算法分析:C语言描述》《算法导论》这一类严谨的教材，当然，平心而论我是不敢推荐《算法导论》的，因为这一本书实在是太大部头了，没有好的数学知识，真的很难啃。如果想看一下比较幽默轻松类的书，可以看看程杰的《大话数据结构》。
 其次，如果你学有余力，可以看看操作系统原理方面的书籍，当然也可以使用你们的教材，我这里推荐一本我看过的吧，Tanenbaum.A.S《现代操作系统》，Tanenbaum是荷兰人，也是Linux之父Linus Torvalds操作系统方面的启蒙老师。当然，我的建议是这种书毕竟流于理论知识，也不一定要看完，但**一定将一些基础概念，如进程线程内存模式等基础概念看懂理解。**你如果还有时间强烈推荐看看俞甲子的《程序员的自我修养:链接、装载与库》，这本书同时涉及到了Windows和linux两个操作系统平台，用各种辅助工具剖析了程序从源码到二进制文件再到装载到进程地址空间里面的各个细节，甚至连进程地址空间中的堆结构、栈结构也分析得清清楚楚，同时也分析了C Runtime（CRT）、glibc这样的操作系统接口库的原理和执行逻辑，是一本实实在在难得的帮你实战操作系统原理的一本好书。我特别喜欢这个书中序言的一段话：
-“CPU体系结构、汇编、C语言（包括C&#43;&#43;）和操作系统，永远都是编程大师们的护身法宝，就如同少林寺的《易筋经》，是最为上乘的武功；学会了《易筋经》，你将无所不能，任你创造武功；学会了编程“易筋经”，大师们可以任意开发操作系统、编译器，甚至是开发一种新的程序设计语言！”
-再次，你学这些东西是为了将来实践并有产出的，而落实这个产出的东西就是编程语言，如果是入门，我首推C/C&#43;&#43;。你只有熟练使用一门编程语言，你才能将你的想法变成现实。注意这里我把C和C&#43;&#43;放在一起，但是严格意义上说，C和C&#43;&#43;还是有点区别的，但是除了语法上的一些细节差异，基本上可以认为是相通的。个人觉得C语言是所有想成为高手最应该使用的入门语言，不要和我说现在很火的python、go这类语言，“玄都观里桃千树，尽是刘郎去后栽”。我这里也推荐一本C语言方面的图书吧，有兴趣的可以参考一下：《C语言程序设计:现代方法》。至于谭浩强的书就不要提了，还有就是大部头的《C&#43;&#43; Primer》，它虽然是一本好书，但实在是太大部头了。语法层面的东西学会很快，stl库的东西需要实战，也不是翻这类字典一样的书就能很好地掌握的。当然，如果你想掌握好C&#43;&#43;，《深度探索C&#43;&#43;对象模型》是一定要看的。C&#43;&#43;实际编码技巧还有另外一本非常好的书，介绍了常见的C&#43;&#43;编码技巧《提高C&#43;&#43;性能的编程技术》，建议C&#43;&#43;开发的把书中说的技巧全部掌握。
+“CPU体系结构、汇编、C语言（包括C++）和操作系统，永远都是编程大师们的护身法宝，就如同少林寺的《易筋经》，是最为上乘的武功；学会了《易筋经》，你将无所不能，任你创造武功；学会了编程“易筋经”，大师们可以任意开发操作系统、编译器，甚至是开发一种新的程序设计语言！”
+再次，你学这些东西是为了将来实践并有产出的，而落实这个产出的东西就是编程语言，如果是入门，我首推C/C++。你只有熟练使用一门编程语言，你才能将你的想法变成现实。注意这里我把C和C++放在一起，但是严格意义上说，C和C++还是有点区别的，但是除了语法上的一些细节差异，基本上可以认为是相通的。个人觉得C语言是所有想成为高手最应该使用的入门语言，不要和我说现在很火的python、go这类语言，“玄都观里桃千树，尽是刘郎去后栽”。我这里也推荐一本C语言方面的图书吧，有兴趣的可以参考一下：《C语言程序设计:现代方法》。至于谭浩强的书就不要提了，还有就是大部头的《C++ Primer》，它虽然是一本好书，但实在是太大部头了。语法层面的东西学会很快，stl库的东西需要实战，也不是翻这类字典一样的书就能很好地掌握的。当然，如果你想掌握好C++，《深度探索C++对象模型》是一定要看的。C++实际编码技巧还有另外一本非常好的书，介绍了常见的C++编码技巧《提高C++性能的编程技术》，建议C++开发的把书中说的技巧全部掌握。
 接着说，我们再说说网络方面的，首先网络基础方面的书籍，我就没啥推荐了，现在很多计算机学院也开始使用《计算机网络:自顶向下方法》这本不错的教材，如果没有看过的可以看下。当然还是那句话你一定要看懂而不是看完。比如三次握手和四次挥手的细节，你一定要很清楚。然后你就可以找一本网络编程的实战书来看下，如果你没有使用任何socket api编程的经验，你可以看看韩国人尹圣雨写的这本《TCP/IP网络编程》，这本书从基础的socket api介绍到比较高级的io复用技术，有非常详细和生动的例子。如果你是初级水平，强烈建议看看这本书。网络编程的细节需要注意的地方实在太多了，这本书上都有介绍。很多人尤其是一些学生，写了一些可以相互聊天的小程序就觉得自己熟悉网络通信了，但是这类程序拿到互联网上或者离开局域网，不是连接出错，就是数据总是收发不全。我当年也是这么过来的，看看这本书，你就能明白许多网络故障的原因。等你有了一定的网络编程以后（熟练使用常见socket API），你可以看看游双的《Linux高性能服务器编程》，这本书给没有基础的人或者基础不扎实的人的感觉是，尤其是书的前三章，这书怎么这么垃圾，又把网络理论书上面的东西搬过来凑字数，但是如果你有基础再按照书上的步骤在机器上实践一遍，你会发现，真是一本难得的、良心的书，桃李不言下自成蹊吧。如果你掌握了这本说上说的这些知识，你再看陈硕老师的《Linux多线程服务端编程》或者去看像libevent这样的开源网络库，你会进一步的得到提升。这也是我学习网络编程的一些经验和经历吧。注意这里有必要提一下：像UNP、APUE、还有《TCP/IP详解》这一类书，如果你将来不是专门做网络方面的工作或研究，其实是非常不建议抱着他们看的，因为部头太大，其次太多理论和Unix的东西，花的时间产出投入比很低的。
 接着说，以上说的都是一些基础的东西。其实不管是什么开发，后台开发也不例外，你都是需要基于特定的操作系统的，这里不提Windows系统，单单拿linux操作系统来说，既然你选择做这个方面的开发，你需要熟悉这个操作系统平台提供的一些常用的API函数，网络通信方面上文已经说过，除了网络通信还有如操作文件、操作内存、字符串操作、进程线程系列、线程同步系列（如互斥体、条件变量、信号量）、管道等常用的各种API接口函数。这里的意思是，不是要你背诵记忆每一个接口函数的签名，而是你要知道何时该用哪个接口，如何用，有什么注意事项。我入门的时候看的是Robert Love的《Linux系统编程》，熟悉这个人的应该知道，google的工程师，他还有另外一本非常有名的书《Linux内核设计与实现》。
 最后，我强调一下，如果你是快毕业的学生，面临着找工作的压力，应该以算法和数据结构为主。如果你是大一大二或研一这个阶段的学生，我上面推荐的书，你还是可以考虑好好咀嚼一下。标准是看懂而不是看完。
-再补充一些我觉得要成为高手应该要掌握的东西，先说汇编。虽然第三代第四代语言越来越多，硬件性能越来越好。但是如果你熟练掌握汇编，你就比其他人多很多优势，你会能透彻地知道你写的每一行C/C&#43;&#43;代码背后的机器指令的效率。无论是做安全工程还是自己技术提升上都是非常不错的。这里推荐一本王爽老师的《汇编语言(第3版)》，这本书不厚，语言通俗易懂，你也不用刻意去记忆，基本上当小说书看一下就能很快看完了。汇编实战类图书还有另外一本《老&#34;码&#34;识途:从机器码到框架的系统观逆向修炼之路》。我个人是非常喜欢这本书的。当年读这本书的时候，真的有一种“笑看妻子愁何在？漫卷诗书喜欲狂”的感觉。尽管那个时候连女朋友都没有——！
+再补充一些我觉得要成为高手应该要掌握的东西，先说汇编。虽然第三代第四代语言越来越多，硬件性能越来越好。但是如果你熟练掌握汇编，你就比其他人多很多优势，你会能透彻地知道你写的每一行C/C++代码背后的机器指令的效率。无论是做安全工程还是自己技术提升上都是非常不错的。这里推荐一本王爽老师的《汇编语言(第3版)》，这本书不厚，语言通俗易懂，你也不用刻意去记忆，基本上当小说书看一下就能很快看完了。汇编实战类图书还有另外一本《老"码"识途:从机器码到框架的系统观逆向修炼之路》。我个人是非常喜欢这本书的。当年读这本书的时候，真的有一种“笑看妻子愁何在？漫卷诗书喜欲狂”的感觉。尽管那个时候连女朋友都没有——！
 另外补充一些我学生时代看过的书吧，我本人是熟悉Windows和linux两个平台的开发，这也归功于我学生时代看过的一些经典书籍，可能有点跑题了，如果不介意，我可以和你说说：
-《Windows程序设计》第五版（第六版以后，这个不再是用Windows Native API写C程序了，而是转到C#平台上了），这本书是中国第一代程序的windows启蒙书籍，你所看到的大多数桌面软件，如QQ，的开发者可能都是通过阅读这本书启蒙起来的。 《Windows核心编程》，这本书搞Windows开发的一定都知道这本书的分量。 《linux内核情景分析》毛德操老师的书，非常的实在，另外他写了一套关于Windows源码分析的书，这本书是基于开源的“Windows”ReactOS，书名叫《Windows内核情景分析》。 《编译系统透视：图解编译原理》，编译原理方面的实践书。 《编程之美》，关于面试的，主要是一些算法和逻辑思维题实战。 《重构：改善既有代码设计》，没有实际写代码经验不推荐看。 《程序员的修炼之道——从小工到专家》这本书特别推荐学生看一下，能大幅度地提高你实际编码的技巧和编码风格。 《代码整洁之道》同上 《大话设计模式》 《Windows PE文件权威指南》 《Java编程思想》 《Effective C&#43;&#43;》系列 《80x86汇编语言程序设计教程》 总的来看，我学生时代主要是侧重基础知识来读书的。本科四年、硕士三年，多谢这些书帮助我成长，记得大学毕业的时候，我光读书笔记就有满满十个笔记本。
+《Windows程序设计》第五版（第六版以后，这个不再是用Windows Native API写C程序了，而是转到C#平台上了），这本书是中国第一代程序的windows启蒙书籍，你所看到的大多数桌面软件，如QQ，的开发者可能都是通过阅读这本书启蒙起来的。 《Windows核心编程》，这本书搞Windows开发的一定都知道这本书的分量。 《linux内核情景分析》毛德操老师的书，非常的实在，另外他写了一套关于Windows源码分析的书，这本书是基于开源的“Windows”ReactOS，书名叫《Windows内核情景分析》。 《编译系统透视：图解编译原理》，编译原理方面的实践书。 《编程之美》，关于面试的，主要是一些算法和逻辑思维题实战。 《重构：改善既有代码设计》，没有实际写代码经验不推荐看。 《程序员的修炼之道——从小工到专家》这本书特别推荐学生看一下，能大幅度地提高你实际编码的技巧和编码风格。 《代码整洁之道》同上 《大话设计模式》 《Windows PE文件权威指南》 《Java编程思想》 《Effective C++》系列 《80x86汇编语言程序设计教程》 总的来看，我学生时代主要是侧重基础知识来读书的。本科四年、硕士三年，多谢这些书帮助我成长，记得大学毕业的时候，我光读书笔记就有满满十个笔记本。
 工作以后，也读了像redis、netty、分布式这一类书。但是那都是工作需要吧。由于我扎实的基础，当然也可能是因为运气成分吧吧，所以得到一些注重扎实的技术基础公司的青睐，给了目前这个阶段看起来还不错的薪资（当然可能还有人比我更厉害，那我这里就贻笑大方了，所以请不喜勿喷）。同时非常感谢我一路上遇到的公司和同事给我的技术上和生活上的帮助。薪资本身不能说明一个人是否成功，我码这么多字，**希望广大的开发者注重基础，勿在浮沙筑高台。尤其是学生，你有大把读书的机会，一定要珍惜大学时光。毕竟工作以后，尤其是毕业后，面临着工作、家庭等各种问题，你可能再也没有心思和完整的时间去学习和提升了。**所以前期的积累很重要，毕竟选择技术这条路，提高技术是升职加薪改善生活水平最直接的方法。最后用我学生时代看到一个技术前辈写的一首诗来结束吧：
 仗鼠红尘已是癫，
 有网平步上青天。
@@ -304,23 +50,10 @@ struct package_protocol { int32_t bodysize; //注意：C/C&#43;&#43;语法不能
 醉卧云端笑人间。
 七载寻梦像扑火，
 九州谁共我疯癫？
-以上是我的经历，我也曾迷惘和无助过。也有很多朋友找到我，希望我做一些经验分享和职业规划指导，有需要的小伙伴可以加我微信 easy_coder。
-</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 后台开发应该读的书" href="https://haokiu.com/blog/b46f16d0f9f8415e94eb76455deea0f0/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>技术面试与HR谈薪资技巧
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>技术面试与HR谈薪资技巧 作为“生在红旗下，长在春风里”的“四有新人”（现在90后00后还有知道这个词的吗？^_^），张小方同志从毕业至今，与各路HR、HRD斗智斗勇，再加上自己的不懈努力，历尽千辛万苦终于将毕业时的1500每月的薪资提高了二十几倍。本文就和大家唠唠这些年风里来雨里去无数次铩羽而归、兢兢业业、如履薄冰、诚惶诚恐、夜不能寐、枕戈待旦、惴惴不安、临盆一脚，最终守得云开见月明的谈薪经历。当然，本文说的主要是技术面试中谈薪的经历，主要针对的是一些社会人士求职，当然一些通用的原则同样适用于应届生求职。
-面试官的级别 一般技术面试的模式是 n &#43; 1 或者是 1 &#43; n &#43; 1，什么意思呢？其中 n 指的是你见到的不同级别的面试官的个数，1 指的你见到的hr。
-两种模式 模式一：一般技术面试有两种情形，你进入公司以后，会让你填写一些个人资料，如果有笔试题，也会做一些笔试题，接着HR会先找你简单地聊几句了解一下你的情况，然后通知技术面试官过来面试，如果一轮或者多轮技术面试后，面试官觉得你还不错，HR会接着详细地了解一下你的情况，如之前做什么工作的、是否已经离职、是否成家有小孩，当然最最关键的是询问你期望的薪资。这就是所谓的“1 &#43; n &#43; 1”模式，即开始由HR面试，中间是技术面试，最后还是HR面试。
-模式二： 在登记个人信息和笔试（如果有的话）完以后，直接就是技术面试，技术面试结束后如果面试官觉得你还不错，HR会接着进行人事面试。这就是所谓的“n &#43; 1”模式，即开始是技术面试，最后由HR面试。
+以上是我的经历，我也曾迷惘和无助过。也有很多朋友找到我，希望我做一些经验分享和职业规划指导，有需要的小伙伴可以加我微信 easy_coder。</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 后台开发应该读的书" href=https://haokiu.com/blog/b46f16d0f9f8415e94eb76455deea0f0/></a></article><article class=post-entry><header class=entry-header><h2>技术面试与HR谈薪资技巧</h2></header><div class=entry-content><p>技术面试与HR谈薪资技巧 作为“生在红旗下，长在春风里”的“四有新人”（现在90后00后还有知道这个词的吗？^_^），张小方同志从毕业至今，与各路HR、HRD斗智斗勇，再加上自己的不懈努力，历尽千辛万苦终于将毕业时的1500每月的薪资提高了二十几倍。本文就和大家唠唠这些年风里来雨里去无数次铩羽而归、兢兢业业、如履薄冰、诚惶诚恐、夜不能寐、枕戈待旦、惴惴不安、临盆一脚，最终守得云开见月明的谈薪经历。当然，本文说的主要是技术面试中谈薪的经历，主要针对的是一些社会人士求职，当然一些通用的原则同样适用于应届生求职。
+面试官的级别 一般技术面试的模式是 n + 1 或者是 1 + n + 1，什么意思呢？其中 n 指的是你见到的不同级别的面试官的个数，1 指的你见到的hr。
+两种模式 模式一：一般技术面试有两种情形，你进入公司以后，会让你填写一些个人资料，如果有笔试题，也会做一些笔试题，接着HR会先找你简单地聊几句了解一下你的情况，然后通知技术面试官过来面试，如果一轮或者多轮技术面试后，面试官觉得你还不错，HR会接着详细地了解一下你的情况，如之前做什么工作的、是否已经离职、是否成家有小孩，当然最最关键的是询问你期望的薪资。这就是所谓的“1 + n + 1”模式，即开始由HR面试，中间是技术面试，最后还是HR面试。
+模式二： 在登记个人信息和笔试（如果有的话）完以后，直接就是技术面试，技术面试结束后如果面试官觉得你还不错，HR会接着进行人事面试。这就是所谓的“n + 1”模式，即开始是技术面试，最后由HR面试。
 当然，可能在你去公司现场面试之前，会有一些电话或者远程视频的面试的形式，这类基本上也属于技术面试的范畴。这里就不再赘述了。
 面试官的级别和面试轮次 一般公司的的级别是按如下方式划分的：普通员工上面是部门经理（或技术主管），部分经理（或技术主管）上面是总监（即所谓的大领导）（规模小的公司或者扁平化的公司上面就是CTO、副总或者CEO了，因此到这一层就没有了），总监（大领导）上面一般是公司的CTO、副总或者老板了。
 如果是应聘初、中级的岗位，第一轮面试官一般是你的职位所在的部门的经理。一般经理觉得没问题，接着就是HR面试了，也就是说就这么两类人来面试你。
@@ -336,28 +69,16 @@ struct package_protocol { int32_t bodysize; //注意：C/C&#43;&#43;语法不能
 谈薪的基本要点与脱坑技巧 谈薪是一个与HR斗智斗勇的过程，在谈薪的过程中有很多坑。一般HR会问你期望的薪资，然后就你的报价（请原谅我用这个词，谈好薪确实就等于把自己卖了 - -！）进行讨价还价，当然不和你讨价还价的HR也有，一般有两种：第一种，你的报价实在太高，已经远远超过公司的预算，HR觉得没有谈下去的必要；第二种，天使。第二种，我反正是从来没遇到过。除了总监及以上职位，一般你求职的JD上都会有一个薪资范围，你报价时可以参考一下这个。其次就是，除非你能力特别优秀，面试效果特别好，否则 IT 行业一般的涨薪最大幅度是你前一份工作的百分之三十，也就是说如果你前一份工作月薪是20K，那么你这份工作你最多可以报价27K。
 一般与HR谈薪的过程中，即要展示自己对求职的职位有很大的兴趣，但又不要暴露自己想尽快找到工作的想法，尤其是在你手头上没有offer 、且已经离职的情况下，这样会让自己很被动，你迫切需要一份工作，而现在又无多余的选择，这样HR就会使劲压制你的薪资。
 HR与你谈论薪资经常有如下套路：
-HR: 您期望的薪资是多少？你: 25K。 OK，你已经被HR成功套路。这个时候你的最高价就是25K了，然后HR会顺着这个价往下砍，所以你最终的薪资一般都会低于25K。等你接到offer，你的心里肯定充满了各种“悔恨”：其实当时报价26、27甚至28、29也是可以的。
+HR: 您期望的薪资是多少？ 你: 25K。 OK，你已经被HR成功套路。这个时候你的最高价就是25K了，然后HR会顺着这个价往下砍，所以你最终的薪资一般都会低于25K。等你接到offer，你的心里肯定充满了各种“悔恨”：其实当时报价26、27甚至28、29也是可以的。
 正确的回答可以这样，并且还能够反套路一下HR：
-HR: 您期望的薪资是多少？你: 就我的面试表现，贵公司最高可以给多少薪水？ 哈哈，如果经验不够老道的HR可能就真会说出一个报价（如25K）来，然后，你就可以很开心地顺着这个价慢慢地往上谈了。所以这种情况下，你最终的薪资肯定是大于25K的。当然，经验老道的HR会给你一句很官方的套话：
-HR: 您期望的薪资是多少？你: 就我的面试表现，贵公司最高可以给多少薪水？HR: 这个暂且没法确定，要结合您几轮面试结果和用人部门的意见来综合评定。 如果HR这么回答你，我的建议是这样的：
+HR: 您期望的薪资是多少？ 你: 就我的面试表现，贵公司最高可以给多少薪水？ 哈哈，如果经验不够老道的HR可能就真会说出一个报价（如25K）来，然后，你就可以很开心地顺着这个价慢慢地往上谈了。所以这种情况下，你最终的薪资肯定是大于25K的。当然，经验老道的HR会给你一句很官方的套话：
+HR: 您期望的薪资是多少？ 你: 就我的面试表现，贵公司最高可以给多少薪水？ HR: 这个暂且没法确定，要结合您几轮面试结果和用人部门的意见来综合评定。 如果HR这么回答你，我的建议是这样的：
 虽然薪资很重要，但是我个人觉得这不是最重要的。我有以下建议：
 如果你觉得你技术面试效果很好，可以报一个高一点的薪资，这样如果HR想要你，会找你商量的。 如果你觉得技术面试效果一般，但是你比较想进这家公司，可以报一个折中的薪资。 如果你觉得面试效果很好，但是你不想进这家公司，你可以适当“漫天要价”一下。 如果你觉得面试效果不好，但是你想进这家公司，你可以开一个稍微低一点的工资。 需要注意的是，面试求职是一个双向选择的过程。面试应该做到不卑不亢，千万不要因为面试结果不好，就低声下气地乞求工作，每个人的工作经历和经验都是不一样的，技术面试不好，知道自己的短板针对性地补缺补差就行，而不是在人事关系上动歪脑筋。当然也不要盲目自信，把自己的无知当理所当然，谦虚一点。笔者曾经面试Intel时，因为单词“cache”的读音和面试官争论了很久，面试官读“cash”，我坚持认为读“cake”，这里就闹了一个笑话。
 除了和HR谈薪有陷阱，和技术面试官谈薪也一般存在一些陷阱。大多数公司都要求总监级别以下的面试官不得询问面试者期望薪资，但是也不排除一些面试官的个人好奇心，”无意中“向面试者询问该问题。除了级别高的领导，一般面试官是无权询问薪资的，此时面试者就要留心了。如果被问到，可以委婉地回答一下，如可以说：现在还不确定，会按招聘信息的薪资范围和结合自己的面试结果来提出一个期望薪资。如果实在绕不过去这个问题，可以把薪资说的低一点（口头上只是说说而已），实际薪资还是由高层领导决定并最终和HR谈的。原因是因为，在信息不对称的情况下，如果你报的薪资过高，超过当前面试官的薪资，很可能引起当前面试官的不愉快，造成对自己非技术上的差评，造成失去入职该公司的机会。
 谈薪资还有一个坑，你一定要搞清楚公司的薪资构成，就是尽量把月薪或者基础薪资谈高一点。说说我之前的两段经历：
-经历一：我之前有份工作，HR和我谈的时候，说是月薪14K。但是我实际进去以后，发现14K分为基础工资和绩效工资，这其中6K是基本工资，剩下的8K是绩效工资，而每个月会有一个绩效系数，系数范围是从0.8～1.5，也就是说当你某个月绩效系数是1时，你拿到完整的8K；如果你系数是0.8时，你只能拿到6400，也就是辛辛苦苦干了一个月实际拿到手的只有6000 &#43; 6400 = 12400，平白无故地少了1600。而公司对外宣称你的月薪是14K，还有就是基本上绩效系数在1以上的都没有。
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 技术面试与HR谈薪资技巧" href="https://haokiu.com/blog/d949dd8f005d45c7b6c71ea9a87a0712/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>拒绝了一家公司的offer后，他们的副总和hr总监同时打电话来询问拒绝原因并极力要求加入，我该不该去？
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>拒绝了一家公司的offer后，他们的副总和hr总监同时打电话来询问拒绝原因并极力要求加入，我该不该去？ 网友提问：
+经历一：我之前有份工作，HR和我谈的时候，说是月薪14K。但是我实际进去以后，发现14K分为基础工资和绩效工资，这其中6K是基本工资，剩下的8K是绩效工资，而每个月会有一个绩效系数，系数范围是从0.8～1.5，也就是说当你某个月绩效系数是1时，你拿到完整的8K；如果你系数是0.8时，你只能拿到6400，也就是辛辛苦苦干了一个月实际拿到手的只有6000 + 6400 = 12400，平白无故地少了1600。而公司对外宣称你的月薪是14K，还有就是基本上绩效系数在1以上的都没有。
+...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 技术面试与HR谈薪资技巧" href=https://haokiu.com/blog/d949dd8f005d45c7b6c71ea9a87a0712/></a></article><article class=post-entry><header class=entry-header><h2>拒绝了一家公司的offer后，他们的副总和hr总监同时打电话来询问拒绝原因并极力要求加入，我该不该去？</h2></header><div class=entry-content><p>拒绝了一家公司的offer后，他们的副总和hr总监同时打电话来询问拒绝原因并极力要求加入，我该不该去？ 网友提问：
 拒绝了一家公司的offer后，他们的副总和hr总监同时打电话来询问拒绝原因并极力要求加入，我该不该去？
 面试的时候双方都感觉还可以，一面后hr开始压价，比预期低了3K，我拒绝。
 然后邀请我去复试，跟经理交流后，觉得我可以，然而hr又压价，比预期低了1K，我拒绝，因为我对他们提出的期望薪资是我的最低底线。
@@ -369,23 +90,10 @@ HR: 您期望的薪资是多少？你: 就我的面试表现，贵公司最高�
 小方老师建议：
 先说结论：现在拿到offer的话，如果比较纠结就都不去，哪怕一家公司都去不了。再找就是了。
 说两段我的经验吧，第一段，几年前，在A公司和B公司之间两家公司的offer纠结，A公司离我住的地方太远不想去，B公司感觉氛围不太喜欢，最后在各种纠结中去了B公司，没干三个月受不了离职了。
-某年年底找工作时，有个猎头，给我推荐了一个公司，我开始不太想去，因为这家公司我并不了解，所以我和猎头说，除非月薪可以给到30k，否则我不想去，后来猎头反复和对方公司沟通，最终满足了我的要求，但是，猎头说由于对方公司有一定的涨薪限制，所以不能给到月薪30k，但是由于我要求的是30k*13薪，对方公司换了种方式，给26k*15薪，这样一年下来也是39万。我开始是很不愿意这种所谓的变通方法，于是猎头就和他的领导那段时间反复做我的思想工作。我当时也非常纠结要不要去，因为相对于我当前的薪资确实翻了一番，但是我隐约觉得当初面试我的面试官(也就是我进去后我的直系领导)是个&#34;不好相处&#34;的人。后来猎头又反复和我说，面试我的面试官是和乐于传道受业解惑的和蔼可亲的技术大神最终在各种纠结中我还是去入职了。但是没过多久，我就干的很不开心。那个领导的代码风格稀烂，例如写C&#43;&#43;代码，没有任何注释文档，甚至所有的实现文件都写在*.h文件中;其次，与人交流非常没耐心，下面的同事问他问题说不到三句可能就不耐烦，所以隔壁组的同事也都不太喜欢他，但是由于这个项目一直是他一个人做也没商业化，所以公司也没多管他。等到他带团队，与其他同事打交道时就暴露各种问题了。更让人受不了的是，他经常在项目要发版本时修改代码，也不通知其他同事，直到我们发现不对劲，排查很久发现问题，他才说。最让我们受不了的是，有次周六周日加了两天班，周六晚上到夜里十二点，周日到凌晨三点，他还冲团队成员发火。所以那天夜里，我四点钟半到家，直接给CTO写了封投诉他的信。
+某年年底找工作时，有个猎头，给我推荐了一个公司，我开始不太想去，因为这家公司我并不了解，所以我和猎头说，除非月薪可以给到30k，否则我不想去，后来猎头反复和对方公司沟通，最终满足了我的要求，但是，猎头说由于对方公司有一定的涨薪限制，所以不能给到月薪30k，但是由于我要求的是30k*13薪，对方公司换了种方式，给26k*15薪，这样一年下来也是39万。我开始是很不愿意这种所谓的变通方法，于是猎头就和他的领导那段时间反复做我的思想工作。我当时也非常纠结要不要去，因为相对于我当前的薪资确实翻了一番，但是我隐约觉得当初面试我的面试官(也就是我进去后我的直系领导)是个"不好相处"的人。后来猎头又反复和我说，面试我的面试官是和乐于传道受业解惑的和蔼可亲的技术大神最终在各种纠结中我还是去入职了。但是没过多久，我就干的很不开心。那个领导的代码风格稀烂，例如写C++代码，没有任何注释文档，甚至所有的实现文件都写在*.h文件中;其次，与人交流非常没耐心，下面的同事问他问题说不到三句可能就不耐烦，所以隔壁组的同事也都不太喜欢他，但是由于这个项目一直是他一个人做也没商业化，所以公司也没多管他。等到他带团队，与其他同事打交道时就暴露各种问题了。更让人受不了的是，他经常在项目要发版本时修改代码，也不通知其他同事，直到我们发现不对劲，排查很久发现问题，他才说。最让我们受不了的是，有次周六周日加了两天班，周六晚上到夜里十二点，周日到凌晨三点，他还冲团队成员发火。所以那天夜里，我四点钟半到家，直接给CTO写了封投诉他的信。
 后来的情况不用说了，我当初面试的时顾虑都一一应验了，和我一起来的几个同事，年后都陆续离职了。
 我想说的是，不管是薪资还是公司面试的时候面试官和人事的种种举动，如果你有顾虑或者觉得不适合你，千万不要为了钱本身就去了。
-小方老师联系方式：微信 easy_coder。
-</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 拒绝了一家公司的offer后，他们的副总和hr总监同时打电话来询问拒绝原因并极力要求加入，我该不该去？" href="https://haokiu.com/blog/40c71c6aa54540abb1c141d82ca0cd49/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>利用 cmake 工具生成 Visual Studio 工程文件
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>利用 cmake 工具生成 Visual Studio 工程文件 对于习惯了 Visual Studio 强大的管理项目、编码和调试功能的读者来说，在 Linux 下使用 gcc/g&#43;&#43; 编译、使用 gdb 调试是一件何其痛苦的事情，对于大多数的开源 C/C&#43;&#43; 项目，如果我们不在意 Windows 和 Linux 在一些底层 API 接口上的使用差别，想熟悉该项目的执行脉络和原理，在 Windows 上使用 Visual Studio 调试该项目也未尝不可。凡是可以使用 CMake 工具编译的 Linux 程序（即提供了 CMakeLists.txt 文件），我们同样也可以利用 CMake 工具生成 Windows 上的 Visual Studio 工程文件。
+小方老师联系方式：微信 easy_coder。</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 拒绝了一家公司的offer后，他们的副总和hr总监同时打电话来询问拒绝原因并极力要求加入，我该不该去？" href=https://haokiu.com/blog/40c71c6aa54540abb1c141d82ca0cd49/></a></article><article class=post-entry><header class=entry-header><h2>利用 cmake 工具生成 Visual Studio 工程文件</h2></header><div class=entry-content><p>利用 cmake 工具生成 Visual Studio 工程文件 对于习惯了 Visual Studio 强大的管理项目、编码和调试功能的读者来说，在 Linux 下使用 gcc/g++ 编译、使用 gdb 调试是一件何其痛苦的事情，对于大多数的开源 C/C++ 项目，如果我们不在意 Windows 和 Linux 在一些底层 API 接口上的使用差别，想熟悉该项目的执行脉络和原理，在 Windows 上使用 Visual Studio 调试该项目也未尝不可。凡是可以使用 CMake 工具编译的 Linux 程序（即提供了 CMakeLists.txt 文件），我们同样也可以利用 CMake 工具生成 Windows 上的 Visual Studio 工程文件。
 这里我们以著名的开源网络库 libuv 为例。
 从 libuv 的官方地址提供的下载链接：https://dist.libuv.org/dist/ 下载最新的 libuv 的源码得到文件 libuv-v1.31.0.tar.gz（笔者写作此书时，libuv 最新版本是 1.31.0），解压该文件。作者的机器上我将代码解压至 *F:\mycode\libuv-v1.31.0* ，解压后的目录中确实存在一个 CMakeLists.txt 文件，如下图所示：
 启动 Windows 上的 CMake 图形化工具（cmake-gui），按下图进行设置：
@@ -393,90 +101,9 @@ HR: 您期望的薪资是多少？你: 就我的面试表现，贵公司最高�
 如果您的机器上安装了多个版本的Visual Studio，接下来会弹窗对话框让我们选择要生成的工程文件对应的 Visual Studio 版本号。读者可以根据自己的实际情况按需选择。我这里选择 Visual Studio 2019。
 点击 Finish 按钮后开始启动 CMake 的检测和配置工作。等待一会儿，CMake 底部的输出框中提示 “Configuring Done” 表示配置工作已经完成。
 接下来点击 Generate 按钮即可生成所选版本的 Visual Studio 工程文件，生成的文件位于 vsprojects 目录。
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to 利用 cmake 工具生成 Visual Studio 工程文件" href="https://haokiu.com/blog/cf3a65cd7c2a40d1a4dbfd708c471c01/"></a>
-</article>
-<footer class="page-footer">
-  <nav class="pagination">
-    <a class="prev" href="https://haokiu.com/index/15/">
-      «&nbsp;&nbsp;
-    </a>
-    <a class="next" href="https://haokiu.com/index/17/">&nbsp;&nbsp;»
-    </a>
-  </nav>
-</footer>
-    </main>
-    
-<footer class="footer">
-    <span>haokiu.com</span>
-    <span>
-        Powered by
-        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
-        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
-    </span>
-</footer>
-<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
-        <path d="M12 6H0l6-6z" />
-    </svg>
-</a>
-
-<script>
-    let menu = document.getElementById('menu')
-    if (menu) {
-        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
-        menu.onscroll = function () {
-            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
-        }
-    }
-
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener("click", function (e) {
-            e.preventDefault();
-            var id = this.getAttribute("href").substr(1);
-            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
-                    behavior: "smooth"
-                });
-            } else {
-                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
-            }
-            if (id === "top") {
-                history.replaceState(null, null, " ");
-            } else {
-                history.pushState(null, null, `#${id}`);
-            }
-        });
-    });
-
-</script>
-<script>
-    var mybutton = document.getElementById("top-link");
-    window.onscroll = function () {
-        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
-            mybutton.style.visibility = "visible";
-            mybutton.style.opacity = "1";
-        } else {
-            mybutton.style.visibility = "hidden";
-            mybutton.style.opacity = "0";
-        }
-    };
-
-</script>
-<script>
-    document.getElementById("theme-toggle").addEventListener("click", () => {
-        if (document.body.className.includes("dark")) {
-            document.body.classList.remove('dark');
-            localStorage.setItem("pref-theme", 'light');
-        } else {
-            document.body.classList.add('dark');
-            localStorage.setItem("pref-theme", 'dark');
-        }
-    })
-
-</script>
-</body>
-
-</html>
+...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to 利用 cmake 工具生成 Visual Studio 工程文件" href=https://haokiu.com/blog/cf3a65cd7c2a40d1a4dbfd708c471c01/></a></article><footer class=page-footer><nav class=pagination><a class=prev href=https://haokiu.com/index/15/>«&nbsp;&nbsp;
+</a><a class=next href=https://haokiu.com/index/17/>&nbsp;&nbsp;»</a></nav></footer></main><footer class=footer><span>haokiu.com</span>
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>
+</a><script>let menu=document.getElementById("menu");menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove("dark"),localStorage.setItem("pref-theme","light")):(document.body.classList.add("dark"),localStorage.setItem("pref-theme","dark"))})</script></body></html>

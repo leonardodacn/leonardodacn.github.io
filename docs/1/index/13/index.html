@@ -1,418 +1,47 @@
-<!DOCTYPE html>
-<html lang="zh-cn" dir="auto">
-
-<head><meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="robots" content="index, follow">
-<title>1 | haokiu</title>
-<meta name="keywords" content="">
-<meta name="description" content="1 - haokiu">
-<meta name="author" content="">
-<link rel="canonical" href="https://haokiu.com/1/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css" integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as="style">
-<link rel="icon" href="https://haokiu.com/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="https://haokiu.com/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="https://haokiu.com/favicon-32x32.png">
-<link rel="apple-touch-icon" href="https://haokiu.com/apple-touch-icon.png">
-<link rel="mask-icon" href="https://haokiu.com/safari-pinned-tab.svg">
-<meta name="theme-color" content="#2e2e33">
-<meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" type="application/rss+xml" href="https://haokiu.com/1/index.xml">
-<link rel="alternate" hreflang="zh-cn" href="https://haokiu.com/1/">
-<noscript>
-    <style>
-        #theme-toggle,
-        .top-link {
-            display: none;
-        }
-
-    </style>
-    <style>
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --theme: rgb(29, 30, 32);
-                --entry: rgb(46, 46, 51);
-                --primary: rgb(218, 218, 219);
-                --secondary: rgb(155, 156, 157);
-                --tertiary: rgb(65, 66, 68);
-                --content: rgb(196, 196, 197);
-                --hljs-bg: rgb(46, 46, 51);
-                --code-bg: rgb(55, 56, 62);
-                --border: rgb(51, 51, 51);
-            }
-
-            .list {
-                background: var(--theme);
-            }
-
-            .list:not(.dark)::-webkit-scrollbar-track {
-                background: 0 0;
-            }
-
-            .list:not(.dark)::-webkit-scrollbar-thumb {
-                border-color: var(--theme);
-            }
-        }
-
-    </style>
-</noscript><meta property="og:title" content="1" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://haokiu.com/1/" />
-
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="1"/>
-<meta name="twitter:description" content=""/>
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position":  1 ,
-      "name": "1",
-      "item": "https://haokiu.com/1/"
-    }
-  ]
-}
-</script>
-</head>
-
-<body class="list" id="top">
-<script>
-    if (localStorage.getItem("pref-theme") === "dark") {
-        document.body.classList.add('dark');
-    } else if (localStorage.getItem("pref-theme") === "light") {
-        document.body.classList.remove('dark')
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.classList.add('dark');
-    }
-
-</script>
-
-<header class="header">
-    <nav class="nav">
-        <div class="logo">
-            <a href="https://haokiu.com/" accesskey="h" title="haokiu (Alt + H)">haokiu</a>
-            <div class="logo-switches">
-                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
-                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="5"></circle>
-                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                    </svg>
-                </button>
-                <ul class="lang-switch"><li>|</li>
-                </ul>
-            </div>
-        </div>
-        <ul id="menu">
-            <li>
-                <a href="https://haokiu.com/" title="haokiu">
-                    <span>Home</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/1/" title="1">
-                    <span class="active">后端</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/2/" title="2">
-                    <span>前端</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/3/" title="3">
-                    <span>区块链</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/4/" title="4">
-                    <span>大数据</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/5/" title="5">
-                    <span>linux</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/6/" title="6">
-                    <span>其他</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/tags/" title="Tags">
-                    <span>tags</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://haokiu.com/categories/" title="Categories">
-                    <span>categories</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-</header>
-<main class="main"> 
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>Memcached源码阅读十三 do_item_alloc操作
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>Memcached源码阅读十三 do_item_alloc操作 前面我们分析了Memcached的set操作，其set操作在经过所有的数据有效性检查之后，如果需要存储item，则会执行item的实际存储操作，我们下面分析下其过程。
-//执行item的存储操作,该操作会将item挂载到LRU表和slabcalss中 item *do_item_alloc(char *key, const size_t nkey, const int flags, const rel_time_t exptime, const int nbytes, const uint32_t cur_hv) { uint8_t nsuffix; item *it = NULL; char suffix[40]; //计算item的总大小(空间) size_t ntotal = item_make_header(nkey &#43; 1, flags, nbytes, suffix, &amp;nsuffix); //如果使用了cas if (settings.use_cas) { //增加cas的空间 ntotal &#43;= sizeof(uint64_t); } unsigned int id = slabs_clsid(ntotal); //那大小选择合适的slab if (id == 0) return 0; //执行LRU锁 mutex_lock(&amp;cache_lock); //存储时，会尝试从LRU中选择合适的空间的空间 int tries = 5; //如果LRU中尝试5次还没合适的空间，则执行申请空间的操作 int tried_alloc = 0; item *search; void *hold_lock = NULL; //初始化时选择的过期时间 rel_time_t oldest_live = settings.oldest_live; search = tails[id];//第id个LRU表的尾部 for (; tries &gt; 0 &amp;&amp; search != NULL; tries--, search=search-&gt;prev) { uint32_t hv = hash(ITEM_key(search), search-&gt;nkey, 0);//获取分段锁 //尝试执行锁操作，这里执行的乐观锁 if (hv != cur_hv &amp;&amp; (hold_lock = item_trylock(hv)) == NULL) continue; //判断item是否被锁住，item的引用次数其实充当的也是一种锁 if (refcount_incr(&amp;search-&gt;refcount) != 2) { refcount_decr(&amp;search-&gt;refcount);//更新it的引用次数 //如果it的添加时间比当前时间小于3*3600 if (search-&gt;time &#43; TAIL_REPAIR_TIME &lt; current_time) { itemstats[id].tailrepairs&#43;&#43;;//更新统计信息 search-&gt;refcount = 1; do_item_unlink_nolock(search, hv);//执行分段解锁操作 } if (hold_lock) item_trylock_unlock(hold_lock);//执行分段解锁操作 continue; } //过期时间判断 if ((search-&gt;exptime != 0 &amp;&amp; search-&gt;exptime &lt; current_time) || (search-&gt;time &lt;= oldest_live &amp;&amp; oldest_live &lt;= current_time)) { //过期时间的判断 itemstats[id].reclaimed&#43;&#43;; if ((search-&gt;it_flags &amp; ITEM_FETCHED) == 0) { itemstats[id].expired_unfetched&#43;&#43;;//更新统计信息 } it = search; //slabclass申请合适的空间 slabs_adjust_mem_requested(it-&gt;slabs_clsid, ITEM_ntotal(it), ntotal); //执行的Hash表的分段解锁操作 do_item_unlink_nolock(it, hv); it-&gt;slabs_clsid = 0; } else if ((it = slabs_alloc(ntotal, id)) == NULL) { //申请失败一次 tried_alloc = 1; //关闭了LRU的 if (settings.evict_to_free == 0) { itemstats[id].outofmemory&#43;&#43;; //统计信息更新 } else { itemstats[id].evicted&#43;&#43;; //更新统计信息 itemstats[id].evicted_time = current_time - search-&gt;time; if (search-&gt;exptime != 0) itemstats[id].evicted_nonzero&#43;&#43;; if ((search-&gt;it_flags &amp; ITEM_FETCHED) == 0) { itemstats[id].evicted_unfetched&#43;&#43;; } it = search; slabs_adjust_mem_requested(it-&gt;slabs_clsid, ITEM_ntotal(it), ntotal);//选择合适的slabclass空间 do_item_unlink_nolock(it, hv);//执行it的分段解锁操作 it-&gt;slabs_clsid = 0; if (settings.slab_automove == 2)//如果打开了slab调整 slabs_reassign(-1, id);//唤醒调整线程 } } //更新引用次数 refcount_decr(&amp;search-&gt;refcount); if (hold_lock) item_trylock_unlock(hold_lock);//解分段锁 break; } //5次循环查找，未找到合适的空间 if (!tried_alloc &amp;&amp; (tries == 0 || search == NULL)) //则从内存池申请新的空间 it = slabs_alloc(ntotal, id); //内存池申请失败 if (it == NULL) { itemstats[id].outofmemory&#43;&#43;;//更新统计信息 mutex_unlock(&amp;cache_lock);//释放LRU锁 return NULL; } assert(it-&gt;slabs_clsid == 0); assert(it != heads[id]); it-&gt;refcount = 1;//更新it的引用次数 mutex_unlock(&amp;cache_lock); it-&gt;next = it-&gt;prev = it-&gt;h_next = 0;//执行初始化操作 it-&gt;slabs_clsid = id;//it所属的slabclass为第id个 DEBUG_REFCNT(it, &#39;*&#39;); it-&gt;it_flags = settings.use_cas ? ITEM_CAS : 0; it-&gt;nkey = nkey;//it的key it-&gt;nbytes = nbytes;//it的缓冲区的数据 memcpy(ITEM_key(it), key, nkey);//it的数据信息 it-&gt;exptime = exptime;//it的过期时间 memcpy(ITEM_suffix(it), suffix, (size_t)nsuffix);//it的前缀信息 it-&gt;nsuffix = nsuffix;//it的一些前缀信息 return it; } //计算item的大小 static size_t item_make_header(const uint8_t nkey, const int flags, const int nbytes, char *suffix, uint8_t *nsuffix) { //suffix限定了40个字节 *nsuffix = (uint8_t) snprintf(suffix, 40, &#34; %d %d\r\n&#34;, flags, nbytes - 2); //返回item的长度 return sizeof(item) &#43; nkey &#43; *nsuffix &#43; nbytes; } //选择合适的slabclass unsigned int slabs_clsid(const size_t size) { int res = POWER_SMALLEST; if (size == 0) return 0; //按slabclass的size的选择 while (size &gt; slabclass[res].size) //如果大于最大的slab的，则直接返回错误，按默认的，大于1M的申请空间失败 if (res&#43;&#43; == power_largest) return 0; return res; } //从内存池申请合适的空间 void slabs_adjust_mem_requested(unsigned int id, size_t old, size_t ntotal) { //slabclass加锁，保持同步 pthread_mutex_lock(&amp;slabs_lock); slabclass_t *p; //判断数据合法性 if (id &lt; POWER_SMALLEST || id &gt; power_largest) { fprintf(stderr, &#34;Internal error! Invalid slab class\n&#34;); abort(); } p = &amp;slabclass[id]; //调整request信息，request表示的是old所在的slab申请空间大小 p-&gt;requested = p-&gt;requested - old &#43; ntotal; pthread_mutex_unlock(&amp;slabs_lock); } </p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Memcached源码阅读十三 do_item_alloc操作" href="https://haokiu.com/blog/50d829bedab44857aaf08cfd61e6c952/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>Memcached源码阅读十四 item结构
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>Memcached源码阅读十四 item结构 item是Memcached中抽象实际数据的结构，我们分析下item的一些特性，便于后续Memcached的其他特性分析。
+<!doctype html><html lang=zh-cn dir=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>1 | haokiu</title><meta name=keywords content><meta name=description content="1 - haokiu"><meta name=author content><link rel=canonical href=https://haokiu.com/1/><link crossorigin=anonymous href=/assets/css/stylesheet.69e3646de046f6f8ff7bceabbda257831de1d527867b5c6a2d4d3fd609c205df.css integrity="sha256-aeNkbeBG9vj/e86rvaJXgx3h1SeGe1xqLU0/1gnCBd8=" rel="preload stylesheet" as=style><link rel=icon href=https://haokiu.com/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://haokiu.com/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://haokiu.com/favicon-32x32.png><link rel=apple-touch-icon href=https://haokiu.com/apple-touch-icon.png><link rel=mask-icon href=https://haokiu.com/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate type=application/rss+xml href=https://haokiu.com/1/index.xml><link rel=alternate hreflang=zh-cn href=https://haokiu.com/1/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><link rel=describedby href=https://haokiu.com/llms.txt type=text/markdown><meta property="og:title" content="1"><meta property="og:description" content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><meta property="og:type" content="website"><meta property="og:url" content="https://haokiu.com/1/"><meta name=twitter:card content="summary"><meta name=twitter:title content="1"><meta name=twitter:description content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"1","item":"https://haokiu.com/1/"}]}</script></head><body class=list id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://haokiu.com/ accesskey=h title="haokiu (Alt + H)">haokiu</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)">
+<svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button><ul class=lang-switch><li>|</li></ul></div></div><ul id=menu><li><a href=https://haokiu.com/ title=haokiu><span>Home</span></a></li><li><a href=https://haokiu.com/1/ title=1><span class=active>后端</span></a></li><li><a href=https://haokiu.com/2/ title=2><span>前端</span></a></li><li><a href=https://haokiu.com/3/ title=3><span>区块链</span></a></li><li><a href=https://haokiu.com/4/ title=4><span>大数据</span></a></li><li><a href=https://haokiu.com/5/ title=5><span>linux</span></a></li><li><a href=https://haokiu.com/6/ title=6><span>其他</span></a></li><li><a href=https://haokiu.com/tags/ title=Tags><span>tags</span></a></li><li><a href=https://haokiu.com/categories/ title=Categories><span>categories</span></a></li></ul></nav></header><main class=main><article class=post-entry><header class=entry-header><h2>Memcached源码阅读十三 do_item_alloc操作</h2></header><div class=entry-content><p>Memcached源码阅读十三 do_item_alloc操作 前面我们分析了Memcached的set操作，其set操作在经过所有的数据有效性检查之后，如果需要存储item，则会执行item的实际存储操作，我们下面分析下其过程。
+//执行item的存储操作,该操作会将item挂载到LRU表和slabcalss中 item *do_item_alloc(char *key, const size_t nkey, const int flags, const rel_time_t exptime, const int nbytes, const uint32_t cur_hv) { uint8_t nsuffix; item *it = NULL; char suffix[40]; //计算item的总大小(空间) size_t ntotal = item_make_header(nkey + 1, flags, nbytes, suffix, &amp;nsuffix); //如果使用了cas if (settings.use_cas) { //增加cas的空间 ntotal += sizeof(uint64_t); } unsigned int id = slabs_clsid(ntotal); //那大小选择合适的slab if (id == 0) return 0; //执行LRU锁 mutex_lock(&amp;cache_lock); //存储时，会尝试从LRU中选择合适的空间的空间 int tries = 5; //如果LRU中尝试5次还没合适的空间，则执行申请空间的操作 int tried_alloc = 0; item *search; void *hold_lock = NULL; //初始化时选择的过期时间 rel_time_t oldest_live = settings.oldest_live; search = tails[id];//第id个LRU表的尾部 for (; tries > 0 && search != NULL; tries--, search=search->prev) { uint32_t hv = hash(ITEM_key(search), search->nkey, 0);//获取分段锁 //尝试执行锁操作，这里执行的乐观锁 if (hv != cur_hv && (hold_lock = item_trylock(hv)) == NULL) continue; //判断item是否被锁住，item的引用次数其实充当的也是一种锁 if (refcount_incr(&amp;search->refcount) != 2) { refcount_decr(&amp;search->refcount);//更新it的引用次数 //如果it的添加时间比当前时间小于3*3600 if (search->time + TAIL_REPAIR_TIME &lt; current_time) { itemstats[id].tailrepairs++;//更新统计信息 search->refcount = 1; do_item_unlink_nolock(search, hv);//执行分段解锁操作 } if (hold_lock) item_trylock_unlock(hold_lock);//执行分段解锁操作 continue; } //过期时间判断 if ((search->exptime != 0 && search->exptime &lt; current_time) || (search->time &lt;= oldest_live && oldest_live &lt;= current_time)) { //过期时间的判断 itemstats[id].reclaimed++; if ((search->it_flags & ITEM_FETCHED) == 0) { itemstats[id].expired_unfetched++;//更新统计信息 } it = search; //slabclass申请合适的空间 slabs_adjust_mem_requested(it->slabs_clsid, ITEM_ntotal(it), ntotal); //执行的Hash表的分段解锁操作 do_item_unlink_nolock(it, hv); it->slabs_clsid = 0; } else if ((it = slabs_alloc(ntotal, id)) == NULL) { //申请失败一次 tried_alloc = 1; //关闭了LRU的 if (settings.evict_to_free == 0) { itemstats[id].outofmemory++; //统计信息更新 } else { itemstats[id].evicted++; //更新统计信息 itemstats[id].evicted_time = current_time - search->time; if (search->exptime != 0) itemstats[id].evicted_nonzero++; if ((search->it_flags & ITEM_FETCHED) == 0) { itemstats[id].evicted_unfetched++; } it = search; slabs_adjust_mem_requested(it->slabs_clsid, ITEM_ntotal(it), ntotal);//选择合适的slabclass空间 do_item_unlink_nolock(it, hv);//执行it的分段解锁操作 it->slabs_clsid = 0; if (settings.slab_automove == 2)//如果打开了slab调整 slabs_reassign(-1, id);//唤醒调整线程 } } //更新引用次数 refcount_decr(&amp;search->refcount); if (hold_lock) item_trylock_unlock(hold_lock);//解分段锁 break; } //5次循环查找，未找到合适的空间 if (!tried_alloc && (tries == 0 || search == NULL)) //则从内存池申请新的空间 it = slabs_alloc(ntotal, id); //内存池申请失败 if (it == NULL) { itemstats[id].outofmemory++;//更新统计信息 mutex_unlock(&amp;cache_lock);//释放LRU锁 return NULL; } assert(it->slabs_clsid == 0); assert(it != heads[id]); it->refcount = 1;//更新it的引用次数 mutex_unlock(&amp;cache_lock); it->next = it->prev = it->h_next = 0;//执行初始化操作 it->slabs_clsid = id;//it所属的slabclass为第id个 DEBUG_REFCNT(it, '*'); it->it_flags = settings.use_cas ? ITEM_CAS : 0; it->nkey = nkey;//it的key it->nbytes = nbytes;//it的缓冲区的数据 memcpy(ITEM_key(it), key, nkey);//it的数据信息 it->exptime = exptime;//it的过期时间 memcpy(ITEM_suffix(it), suffix, (size_t)nsuffix);//it的前缀信息 it->nsuffix = nsuffix;//it的一些前缀信息 return it; } //计算item的大小 static size_t item_make_header(const uint8_t nkey, const int flags, const int nbytes, char *suffix, uint8_t *nsuffix) { //suffix限定了40个字节 *nsuffix = (uint8_t) snprintf(suffix, 40, " %d %d\r\n", flags, nbytes - 2); //返回item的长度 return sizeof(item) + nkey + *nsuffix + nbytes; } //选择合适的slabclass unsigned int slabs_clsid(const size_t size) { int res = POWER_SMALLEST; if (size == 0) return 0; //按slabclass的size的选择 while (size > slabclass[res].size) //如果大于最大的slab的，则直接返回错误，按默认的，大于1M的申请空间失败 if (res++ == power_largest) return 0; return res; } //从内存池申请合适的空间 void slabs_adjust_mem_requested(unsigned int id, size_t old, size_t ntotal) { //slabclass加锁，保持同步 pthread_mutex_lock(&amp;slabs_lock); slabclass_t *p; //判断数据合法性 if (id &lt; POWER_SMALLEST || id > power_largest) { fprintf(stderr, "Internal error! Invalid slab class\n"); abort(); } p = &amp;slabclass[id]; //调整request信息，request表示的是old所在的slab申请空间大小 p->requested = p->requested - old + ntotal; pthread_mutex_unlock(&amp;slabs_lock); }</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to Memcached源码阅读十三 do_item_alloc操作" href=https://haokiu.com/blog/50d829bedab44857aaf08cfd61e6c952/></a></article><article class=post-entry><header class=entry-header><h2>Memcached源码阅读十四 item结构</h2></header><div class=entry-content><p>Memcached源码阅读十四 item结构 item是Memcached中抽象实际数据的结构，我们分析下item的一些特性，便于后续Memcached的其他特性分析。
 typedef struct _stritem { struct _stritem *next;//item在slab中存储时，是以双链表的形式存储的,next即后向指针 struct _stritem *prev;//prev为前向指针 struct _stritem *h_next;//Hash桶中元素的链接指针 rel_time_t time;//最近访问时间 rel_time_t exptime;//过期时间 int nbytes;//数据大小 unsigned short refcount;//引用次数 uint8_t nsuffix;//不清楚什么意思? uint8_t it_flags;//不清楚什么意思? uint8_t slabs_clsid;//标记item属于哪个slabclass下 uint8_t nkey;//key的长度 union { uint64_t cas; char end; } data[];//真实的数据信息 } item; 其结构图如下所示：
 Item由两部分组成，item的属性信息和item的数据部分，属性信息解释如上，数据部分包括cas，key和真实的value信息，item在内存中的存储形式如下：
 这个图画出了部分结构，还有Hash表的结构没有画出。
-这里大概介绍了item的一些信息，后面我们会分析item插入Hash表等信息。
-</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Memcached源码阅读十四 item结构" href="https://haokiu.com/blog/3fee4e4314af42ee9fa58cda4aa0b839/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>Memcached源码阅读十一 LRU操作
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>Memcached源码阅读十一 LRU操作 LRU是最近最少使用的简称，该技术经常用来实现cache数据更新，Memcached使用LRU技术来淘汰老的数据，Memcached默认是启用LRU操作的，在这种情况下所有的set操作都会成功，如果Memcached的内存池已经使用完，则会淘汰老数据来存放新数据，如果关闭了Memcached的LRU，则当Memcached没有多余的内存空间时，Memcached之间返回错误，下面我们分析下LRU的相关操作。
+这里大概介绍了item的一些信息，后面我们会分析item插入Hash表等信息。</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to Memcached源码阅读十四 item结构" href=https://haokiu.com/blog/3fee4e4314af42ee9fa58cda4aa0b839/></a></article><article class=post-entry><header class=entry-header><h2>Memcached源码阅读十一 LRU操作</h2></header><div class=entry-content><p>Memcached源码阅读十一 LRU操作 LRU是最近最少使用的简称，该技术经常用来实现cache数据更新，Memcached使用LRU技术来淘汰老的数据，Memcached默认是启用LRU操作的，在这种情况下所有的set操作都会成功，如果Memcached的内存池已经使用完，则会淘汰老数据来存放新数据，如果关闭了Memcached的LRU，则当Memcached没有多余的内存空间时，Memcached之间返回错误，下面我们分析下LRU的相关操作。
 里面再附一张Memcached的内存结构图，从图中可以看到LRU队列保持这已经分配出去的item的结构（图中指针为单链表，这里画的有误，其实是双向链表），同时每个slabclass由两个指针来维护该表，即heads和tails指针，分别指向最老的数据和最新的数据，这样便于LRU链表的操作。
-//每个slabclass各有一个指针 static item *heads[LARGEST_ID]; static item *tails[LARGEST_ID]; //将item加入到对应classid的LRU链的head，这里是item加入到LRU链表中 static void item_link_q(item *it) { /* item is the new head */ item **head, **tail; assert(it-&gt;slabs_clsid &lt; LARGEST_ID); assert((it-&gt;it_flags &amp; ITEM_SLABBED) == 0); head = &amp;heads[it-&gt;slabs_clsid]; tail = &amp;tails[it-&gt;slabs_clsid]; assert(it != *head); assert((*head &amp;&amp; *tail) || (*head == 0 &amp;&amp; *tail == 0)); it-&gt;prev = 0; it-&gt;next = *head; if (it-&gt;next) it-&gt;next-&gt;prev = it;//执行插入数据操作 *head = it; if (*tail == 0) *tail = it; sizes[it-&gt;slabs_clsid]&#43;&#43;; return; } //将item从对应classid的LRU链上移除，这里是item从LRU链表中删除 static void item_unlink_q(item *it) { item **head, **tail; assert(it-&gt;slabs_clsid &lt; LARGEST_ID); head = &amp;heads[it-&gt;slabs_clsid]; tail = &amp;tails[it-&gt;slabs_clsid]; if (*head == it) { assert(it-&gt;prev == 0); *head = it-&gt;next; } if (*tail == it) { assert(it-&gt;next == 0); *tail = it-&gt;prev; } assert(it-&gt;next != it); assert(it-&gt;prev != it); if (it-&gt;next) it-&gt;next-&gt;prev = it-&gt;prev;//断开连接 if (it-&gt;prev) it-&gt;prev-&gt;next = it-&gt;next; sizes[it-&gt;slabs_clsid]--; return; } 注：图片链接自 http://kenby.iteye.com/blog/1423989
-</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Memcached源码阅读十一 LRU操作" href="https://haokiu.com/blog/1e01253c10f9435e84a4106aa149ab68/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>Memcached源码阅读四 内存初始化
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>Memcached源码阅读四 内存初始化 Memcached作为内存cache服务器，内存高效管理是其最重要的任务之一，Memcached使用SLAB管理其内存，SLAB内存管理直观的解释就是分配一块大的内存，之后按不同的块（48byte, 64byte, … 1M）等切分这些内存，存储业务数据时，按需选择合适的内存空间存储数据。
+//每个slabclass各有一个指针 static item *heads[LARGEST_ID]; static item *tails[LARGEST_ID]; //将item加入到对应classid的LRU链的head，这里是item加入到LRU链表中 static void item_link_q(item *it) { /* item is the new head */ item **head, **tail; assert(it->slabs_clsid &lt; LARGEST_ID); assert((it->it_flags & ITEM_SLABBED) == 0); head = &amp;heads[it->slabs_clsid]; tail = &amp;tails[it->slabs_clsid]; assert(it != *head); assert((*head && *tail) || (*head == 0 && *tail == 0)); it->prev = 0; it->next = *head; if (it->next) it->next->prev = it;//执行插入数据操作 *head = it; if (*tail == 0) *tail = it; sizes[it->slabs_clsid]++; return; } //将item从对应classid的LRU链上移除，这里是item从LRU链表中删除 static void item_unlink_q(item *it) { item **head, **tail; assert(it->slabs_clsid &lt; LARGEST_ID); head = &amp;heads[it->slabs_clsid]; tail = &amp;tails[it->slabs_clsid]; if (*head == it) { assert(it->prev == 0); *head = it->next; } if (*tail == it) { assert(it->next == 0); *tail = it->prev; } assert(it->next != it); assert(it->prev != it); if (it->next) it->next->prev = it->prev;//断开连接 if (it->prev) it->prev->next = it->next; sizes[it->slabs_clsid]--; return; } 注：图片链接自 http://kenby.iteye.com/blog/1423989</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to Memcached源码阅读十一 LRU操作" href=https://haokiu.com/blog/1e01253c10f9435e84a4106aa149ab68/></a></article><article class=post-entry><header class=entry-header><h2>Memcached源码阅读四 内存初始化</h2></header><div class=entry-content><p>Memcached源码阅读四 内存初始化 Memcached作为内存cache服务器，内存高效管理是其最重要的任务之一，Memcached使用SLAB管理其内存，SLAB内存管理直观的解释就是分配一块大的内存，之后按不同的块（48byte, 64byte, … 1M）等切分这些内存，存储业务数据时，按需选择合适的内存空间存储数据。
 Memcached首次默认分配64M的内存，之后所有的数据都是在这64M空间进行存储，在Memcached启动之后，不会对这些内存执行释放操作，这些内存只有到Memcached进程退出之后会被系统回收，下面分析下Memcached的内存初始化过程。
-//内存初始化，settings.maxbytes是Memcached初始启动参数指定的内存值大小,settings.factor是内存增长因子 slabs_init(settings.maxbytes, settings.factor, preallocate); #define POWER_SMALLEST 1 //最小slab编号 #define POWER_LARGEST 200 //首次初始化200个slab //实现内存池管理相关的静态全局变量 static size_t mem_limit = 0;//总的内存大小 static size_t mem_malloced = 0;//初始化内存的大小，这个貌似没什么用 static void *mem_base = NULL;//指向总的内存的首地址 static void *mem_current = NULL;//当前分配到的内存地址 static size_t mem_avail = 0;//当前可用的内存大小 static slabclass_t slabclass[MAX_NUMBER_OF_SLAB_CLASSES];//定义slab结合，总共200个 void slabs_init(const size_t limit, const double factor, const bool prealloc) { int i = POWER_SMALLEST - 1; //size表示申请空间的大小，其值由配置的chunk_size和单个item的大小来指定 unsigned int size = sizeof(item) &#43; settings.chunk_size; mem_limit = limit;//mem_limit是全局变量 if (prealloc) { //支持预分配 mem_base = malloc(mem_limit);//申请地址，mem_base指向申请的地址 if (mem_base != NULL) { //mem_current指向当前地址 mem_current = mem_base; //可用内存大小为mem_limit mem_avail = mem_limit; } else { //支持预分配失败 fprintf(stderr, &#34;Warning: Failed to allocate requested memory in&#34; &#34; one large chunk.\nWill allocate in smaller chunks\n&#34;); } } //置空slabclass数组 memset(slabclass, 0, sizeof(slabclass)); //开始分配，i&lt;200 &amp;&amp; 单个chunk的size&lt;单个item最大大小/内存增长因子 while (&#43;&#43;i &lt; POWER_LARGEST &amp;&amp; size &lt;= settings.item_size_max / factor) { //size执行8byte对齐 if (size % CHUNK_ALIGN_BYTES) size &#43;= CHUNK_ALIGN_BYTES - (size % CHUNK_ALIGN_BYTES); slabclass[i].size = size; //slab对应chunk的大小 slabclass[i].perslab = settings.item_size_max / slabclass[i].size; //slab对应的chunk的个数 size *= factor; //size下一个值为按增长因子的倍数增长 if (settings.verbose &gt; 1) { //如果有打开调试信息，则输出调试信息 fprintf(stderr, &#34;slab class %3d: chunk size %9u perslab %7u\n&#34;, i, slabclass[i].size, slabclass[i].perslab); } } //循环结束时，size已经增长到1M power_largest = i;//再增加一个slab slabclass[power_largest].size = settings.item_size_max; //slab的size为item_size_max slabclass[power_largest].perslab = 1;//chunk个数为1 //打印调试信息 if (settings.verbose &gt; 1) { fprintf(stderr, &#34;slab class %3d: chunk size %9u perslab %7u\n&#34;, i, slabclass[i].size, slabclass[i].perslab); } //读取环境变量T_MEMD_INITIAL_MALLOC的值 { char *t_initial_malloc = getenv(&#34;T_MEMD_INITIAL_MALLOC&#34;); if (t_initial_malloc) { mem_malloced = (size_t)atol(t_initial_malloc); } } if (prealloc) { //分配每个slab的内存空间，传入最大已经初始化的最大slab编号 slabs_preallocate(power_largest); } } //分配每个slab的内存空间 static void slabs_preallocate (const unsigned int maxslabs) { int i; unsigned int prealloc = 0; for (i = POWER_SMALLEST; i &lt;= POWER_LARGEST; i&#43;&#43;) { if (&#43;&#43;prealloc &gt; maxslabs) return; //执行分配操作，对第i个slabclass执行分配操作 if (do_slabs_newslab(i) == 0) { fprintf(stderr, &#34;Error while preallocating slab memory!\n&#34; &#34;If using -L or other prealloc options, max memory must be &#34; &#34;at least %d megabytes.\n&#34;, power_largest); exit(1); } } } //执行分配操作 static int do_slabs_newslab(const unsigned int id) { slabclass_t *p = &amp;slabclass[id];//p指向第i个slabclass int len = settings.slab_reassign ? settings.item_size_max:p-&gt;size*p-&gt;perslab; char *ptr; //grow_slab_list初始化slabclass的slab_list，而slab_list中的指针指向每个slab //memory_allocate从内存池申请1M的空间 if ((mem_limit &amp;&amp; mem_malloced &#43; len &gt; mem_limit &amp;&amp; p-&gt;slabs &gt; 0) || (grow_slab_list(id) == 0) || ((ptr = memory_allocate((size_t)len)) == 0)) { MEMCACHED_SLABS_SLABCLASS_ALLOCATE_FAILED(id); return 0; } memset(ptr, 0, (size_t)len); //将申请的1M空间按slabclass的size进行切分 split_slab_page_into_freelist(ptr, id); p-&gt;slab_list[p-&gt;slabs&#43;&#43;] = ptr;//循环分配 mem_malloced &#43;= len;//增加已经分配出去的内存数 MEMCACHED_SLABS_SLABCLASS_ALLOCATE(id); return 1; } //初始化slabclass的slab_class,而slab_list中的指针指向每个slab,id为slabclass的序号 static int grow_slab_list (const unsigned int id) { slabclass_t *p = &amp;slabclass[id]; //p指向第id个slabclass; if (p-&gt;slabs == p-&gt;list_size) { size_t new_size = (p-&gt;list_size != 0) ? p-&gt;list_size * 2 : 16;//new_size如果是首次分配，则取16，否则按旧值的2倍扩容 void *new_list = realloc(p-&gt;slab_list, new_size * sizeof(void *));//申请空间，这个空间是从系统分配，不是从内存池分配 if (new_list == 0) return 0; p-&gt;list_size = new_size;//修改第id个slabclass的值 p-&gt;slab_list = new_list; } return 1; } //从内存池分配size个空间 static void *memory_allocate(size_t size) { void *ret; if (mem_base == NULL) {//如果内存池没创建，则从系统分配 ret = malloc(size); } else { ret = mem_current; //size大于剩余的空间 if (size &gt; mem_avail) { return NULL; } //按8字节对齐 if (size % CHUNK_ALIGN_BYTES) { size &#43;= CHUNK_ALIGN_BYTES - (size % CHUNK_ALIGN_BYTES); } //扣除size个空间 mem_current = ((char*)mem_current) &#43; size; if (size &lt; mem_avail) { mem_avail -= size;//更新剩余空间大小 } else { mem_avail = 0; } } return ret; } //将ptr指向的内存空间按第id个slabclass的size进行切分 static void split_slab_page_into_freelist(char *ptr, const unsigned int id) { slabclass_t *p = &amp;slabclass[id]; int x; //每个slabclass有多个slab,对每个slab按slabclass对应的size进行切分 for (x = 0; x &lt; p-&gt;perslab; x&#43;&#43;) { do_slabs_free(ptr, 0, id);//创建空闲item ptr &#43;= p-&gt;size; } } //创建空闲item static void do_slabs_free(void *ptr, const size_t size, unsigned int id) { slabclass_t *p; item *it; assert(((item *)ptr)-&gt;slabs_clsid == 0); assert(id &gt;= POWER_SMALLEST &amp;&amp; id &lt;= power_largest);//判断id有效性 if (id &lt; POWER_SMALLEST || id &gt; power_largest) return; MEMCACHED_SLABS_FREE(size, id, ptr); p = &amp;slabclass[id]; it = (item *)ptr; it-&gt;it_flags |= ITEM_SLABBED; it-&gt;prev = 0; it-&gt;next = p-&gt;slots;//挂载到slabclass的空闲链表中 if (it-&gt;next) it-&gt;next-&gt;prev = it; p-&gt;slots = it; p-&gt;sl_curr&#43;&#43;;//空闲item个数&#43;1 p-&gt;requested -= size;//已经申请到的空间数量更新 return; } </p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Memcached源码阅读四 内存初始化" href="https://haokiu.com/blog/c82fe349df914fb8943e4aa3231c9cad/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>Memcached源码阅读五 资源初始化
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>Memcached源码阅读五 资源初始化 Memcached内部有hash表，各种统计信息，工作线程，网络，连接，内存结构等，在memcached启动时(执行main函数)，会对这些资源进行初始化的，网络和内存的初始化操作放到后续分析，这次分析hash表，统计信息，工作线程，网络连接的初始化过程。
+//内存初始化，settings.maxbytes是Memcached初始启动参数指定的内存值大小,settings.factor是内存增长因子 slabs_init(settings.maxbytes, settings.factor, preallocate); #define POWER_SMALLEST 1 //最小slab编号 #define POWER_LARGEST 200 //首次初始化200个slab //实现内存池管理相关的静态全局变量 static size_t mem_limit = 0;//总的内存大小 static size_t mem_malloced = 0;//初始化内存的大小，这个貌似没什么用 static void *mem_base = NULL;//指向总的内存的首地址 static void *mem_current = NULL;//当前分配到的内存地址 static size_t mem_avail = 0;//当前可用的内存大小 static slabclass_t slabclass[MAX_NUMBER_OF_SLAB_CLASSES];//定义slab结合，总共200个 void slabs_init(const size_t limit, const double factor, const bool prealloc) { int i = POWER_SMALLEST - 1; //size表示申请空间的大小，其值由配置的chunk_size和单个item的大小来指定 unsigned int size = sizeof(item) + settings.chunk_size; mem_limit = limit;//mem_limit是全局变量 if (prealloc) { //支持预分配 mem_base = malloc(mem_limit);//申请地址，mem_base指向申请的地址 if (mem_base != NULL) { //mem_current指向当前地址 mem_current = mem_base; //可用内存大小为mem_limit mem_avail = mem_limit; } else { //支持预分配失败 fprintf(stderr, "Warning: Failed to allocate requested memory in" " one large chunk.\nWill allocate in smaller chunks\n"); } } //置空slabclass数组 memset(slabclass, 0, sizeof(slabclass)); //开始分配，i&lt;200 && 单个chunk的size&lt;单个item最大大小/内存增长因子 while (++i &lt; POWER_LARGEST && size &lt;= settings.item_size_max / factor) { //size执行8byte对齐 if (size % CHUNK_ALIGN_BYTES) size += CHUNK_ALIGN_BYTES - (size % CHUNK_ALIGN_BYTES); slabclass[i].size = size; //slab对应chunk的大小 slabclass[i].perslab = settings.item_size_max / slabclass[i].size; //slab对应的chunk的个数 size *= factor; //size下一个值为按增长因子的倍数增长 if (settings.verbose > 1) { //如果有打开调试信息，则输出调试信息 fprintf(stderr, "slab class %3d: chunk size %9u perslab %7u\n", i, slabclass[i].size, slabclass[i].perslab); } } //循环结束时，size已经增长到1M power_largest = i;//再增加一个slab slabclass[power_largest].size = settings.item_size_max; //slab的size为item_size_max slabclass[power_largest].perslab = 1;//chunk个数为1 //打印调试信息 if (settings.verbose > 1) { fprintf(stderr, "slab class %3d: chunk size %9u perslab %7u\n", i, slabclass[i].size, slabclass[i].perslab); } //读取环境变量T_MEMD_INITIAL_MALLOC的值 { char *t_initial_malloc = getenv("T_MEMD_INITIAL_MALLOC"); if (t_initial_malloc) { mem_malloced = (size_t)atol(t_initial_malloc); } } if (prealloc) { //分配每个slab的内存空间，传入最大已经初始化的最大slab编号 slabs_preallocate(power_largest); } } //分配每个slab的内存空间 static void slabs_preallocate (const unsigned int maxslabs) { int i; unsigned int prealloc = 0; for (i = POWER_SMALLEST; i &lt;= POWER_LARGEST; i++) { if (++prealloc > maxslabs) return; //执行分配操作，对第i个slabclass执行分配操作 if (do_slabs_newslab(i) == 0) { fprintf(stderr, "Error while preallocating slab memory!\n" "If using -L or other prealloc options, max memory must be " "at least %d megabytes.\n", power_largest); exit(1); } } } //执行分配操作 static int do_slabs_newslab(const unsigned int id) { slabclass_t *p = &amp;slabclass[id];//p指向第i个slabclass int len = settings.slab_reassign ? settings.item_size_max:p->size*p->perslab; char *ptr; //grow_slab_list初始化slabclass的slab_list，而slab_list中的指针指向每个slab //memory_allocate从内存池申请1M的空间 if ((mem_limit && mem_malloced + len > mem_limit && p->slabs > 0) || (grow_slab_list(id) == 0) || ((ptr = memory_allocate((size_t)len)) == 0)) { MEMCACHED_SLABS_SLABCLASS_ALLOCATE_FAILED(id); return 0; } memset(ptr, 0, (size_t)len); //将申请的1M空间按slabclass的size进行切分 split_slab_page_into_freelist(ptr, id); p->slab_list[p->slabs++] = ptr;//循环分配 mem_malloced += len;//增加已经分配出去的内存数 MEMCACHED_SLABS_SLABCLASS_ALLOCATE(id); return 1; } //初始化slabclass的slab_class,而slab_list中的指针指向每个slab,id为slabclass的序号 static int grow_slab_list (const unsigned int id) { slabclass_t *p = &amp;slabclass[id]; //p指向第id个slabclass; if (p->slabs == p->list_size) { size_t new_size = (p->list_size != 0) ? p->list_size * 2 : 16;//new_size如果是首次分配，则取16，否则按旧值的2倍扩容 void *new_list = realloc(p->slab_list, new_size * sizeof(void *));//申请空间，这个空间是从系统分配，不是从内存池分配 if (new_list == 0) return 0; p->list_size = new_size;//修改第id个slabclass的值 p->slab_list = new_list; } return 1; } //从内存池分配size个空间 static void *memory_allocate(size_t size) { void *ret; if (mem_base == NULL) {//如果内存池没创建，则从系统分配 ret = malloc(size); } else { ret = mem_current; //size大于剩余的空间 if (size > mem_avail) { return NULL; } //按8字节对齐 if (size % CHUNK_ALIGN_BYTES) { size += CHUNK_ALIGN_BYTES - (size % CHUNK_ALIGN_BYTES); } //扣除size个空间 mem_current = ((char*)mem_current) + size; if (size &lt; mem_avail) { mem_avail -= size;//更新剩余空间大小 } else { mem_avail = 0; } } return ret; } //将ptr指向的内存空间按第id个slabclass的size进行切分 static void split_slab_page_into_freelist(char *ptr, const unsigned int id) { slabclass_t *p = &amp;slabclass[id]; int x; //每个slabclass有多个slab,对每个slab按slabclass对应的size进行切分 for (x = 0; x &lt; p->perslab; x++) { do_slabs_free(ptr, 0, id);//创建空闲item ptr += p->size; } } //创建空闲item static void do_slabs_free(void *ptr, const size_t size, unsigned int id) { slabclass_t *p; item *it; assert(((item *)ptr)->slabs_clsid == 0); assert(id >= POWER_SMALLEST && id &lt;= power_largest);//判断id有效性 if (id &lt; POWER_SMALLEST || id > power_largest) return; MEMCACHED_SLABS_FREE(size, id, ptr); p = &amp;slabclass[id]; it = (item *)ptr; it->it_flags |= ITEM_SLABBED; it->prev = 0; it->next = p->slots;//挂载到slabclass的空闲链表中 if (it->next) it->next->prev = it; p->slots = it; p->sl_curr++;//空闲item个数+1 p->requested -= size;//已经申请到的空间数量更新 return; }</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to Memcached源码阅读四 内存初始化" href=https://haokiu.com/blog/c82fe349df914fb8943e4aa3231c9cad/></a></article><article class=post-entry><header class=entry-header><h2>Memcached源码阅读五 资源初始化</h2></header><div class=entry-content><p>Memcached源码阅读五 资源初始化 Memcached内部有hash表，各种统计信息，工作线程，网络，连接，内存结构等，在memcached启动时(执行main函数)，会对这些资源进行初始化的，网络和内存的初始化操作放到后续分析，这次分析hash表，统计信息，工作线程，网络连接的初始化过程。
 1 hash表的初始化
-//hash表的初始化，传入的参数是启动时传入的 assoc_init(settings.hashpower_init); //hashsize的实现 #define hashsize(n) ((ub4)1&lt;&lt;(n)) //主hash表结构定义，在hash表扩容时，会有次hash表，所以有主次hash表区分，该结构是指针的指针，也即相当于数组指针 static item** primary_hashtable = 0; void assoc_init(const int hashtable_init) { if (hashtable_init) { //如果设置了初始化参数，则按设置的参数进行初始化 hashpower = hashtable_init; } //hashpower的默认值为16,如果未设置新值，则按默认值进行初始化 primary_hashtable = calloc(hashsize(hashpower), sizeof(void *)); if (! primary_hashtable) { fprintf(stderr, &#34;Failed to init hashtable.\n&#34;); exit(EXIT_FAILURE); } STATS_LOCK();//全局统计信息加锁，保证数据同步 stats.hash_power_level = hashpower; stats.hash_bytes = hashsize(hashpower) * sizeof(void *); STATS_UNLOCK(); } 2 统计信息的初始化
+//hash表的初始化，传入的参数是启动时传入的 assoc_init(settings.hashpower_init); //hashsize的实现 #define hashsize(n) ((ub4)1&lt;&lt;(n)) //主hash表结构定义，在hash表扩容时，会有次hash表，所以有主次hash表区分，该结构是指针的指针，也即相当于数组指针 static item** primary_hashtable = 0; void assoc_init(const int hashtable_init) { if (hashtable_init) { //如果设置了初始化参数，则按设置的参数进行初始化 hashpower = hashtable_init; } //hashpower的默认值为16,如果未设置新值，则按默认值进行初始化 primary_hashtable = calloc(hashsize(hashpower), sizeof(void *)); if (! primary_hashtable) { fprintf(stderr, "Failed to init hashtable.\n"); exit(EXIT_FAILURE); } STATS_LOCK();//全局统计信息加锁，保证数据同步 stats.hash_power_level = hashpower; stats.hash_bytes = hashsize(hashpower) * sizeof(void *); STATS_UNLOCK(); } 2 统计信息的初始化
 Memcached内部有很多全局的统计信息，用于实时获取各个资源的使用情况，后面将会看到，所有对统计信息的更新都需要加锁，而这些信息的更新是和Memcached的操作次数同数量级的，所以，在一定程度来说，这些统计信息对性能有影响。
 stats结构是对统计信息的一个抽象，各个字段都比较好理解，不做解释。
-struct stats { pthread_mutex_t mutex; unsigned int curr_items; unsigned int total_items; uint64_t curr_bytes; unsigned int curr_conns; unsigned int total_conns; uint64_t rejected_conns; unsigned int reserved_fds; unsigned int conn_structs; uint64_t get_cmds; uint64_t set_cmds; uint64_t touch_cmds; uint64_t get_hits; uint64_t get_misses; uint64_t touch_hits; uint64_t touch_misses; uint64_t evictions; uint64_t reclaimed; time_t started; /* when the process was started */ bool accepting_conns; /* whether we are currently accepting */ uint64_t listen_disabled_num; unsigned int hash_power_level; /* Better hope it&#39;s not over 9000 */ uint64_t hash_bytes; /* size used for hash tables */ bool hash_is_expanding; /* If the hash table is being expanded */ uint64_t expired_unfetched; /* items reclaimed but never touched */ uint64_t evicted_unfetched; /* items evicted but never touched */ bool slab_reassign_running; /* slab reassign in progress */ uint64_t slabs_moved; /* times slabs were moved around */ }; 统计信息的初始化也就是对stats变量的一个初始化。
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Memcached源码阅读五 资源初始化" href="https://haokiu.com/blog/f56b1e30eede4a21b7fd293a33a1e47a/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>Memcached源码阅读序 服务器资源调整
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>Memcached源码阅读序 服务器资源调整 本篇作为Memcached源码分析的开篇，这次阅读的源码版本为: 1.4.15，开源软件各个版本之间差异比较大，同学们学习时，记得核对版本。
+struct stats { pthread_mutex_t mutex; unsigned int curr_items; unsigned int total_items; uint64_t curr_bytes; unsigned int curr_conns; unsigned int total_conns; uint64_t rejected_conns; unsigned int reserved_fds; unsigned int conn_structs; uint64_t get_cmds; uint64_t set_cmds; uint64_t touch_cmds; uint64_t get_hits; uint64_t get_misses; uint64_t touch_hits; uint64_t touch_misses; uint64_t evictions; uint64_t reclaimed; time_t started; /* when the process was started */ bool accepting_conns; /* whether we are currently accepting */ uint64_t listen_disabled_num; unsigned int hash_power_level; /* Better hope it's not over 9000 */ uint64_t hash_bytes; /* size used for hash tables */ bool hash_is_expanding; /* If the hash table is being expanded */ uint64_t expired_unfetched; /* items reclaimed but never touched */ uint64_t evicted_unfetched; /* items evicted but never touched */ bool slab_reassign_running; /* slab reassign in progress */ uint64_t slabs_moved; /* times slabs were moved around */ }; 统计信息的初始化也就是对stats变量的一个初始化。
+...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to Memcached源码阅读五 资源初始化" href=https://haokiu.com/blog/f56b1e30eede4a21b7fd293a33a1e47a/></a></article><article class=post-entry><header class=entry-header><h2>Memcached源码阅读序 服务器资源调整</h2></header><div class=entry-content><p>Memcached源码阅读序 服务器资源调整 本篇作为Memcached源码分析的开篇，这次阅读的源码版本为: 1.4.15，开源软件各个版本之间差异比较大，同学们学习时，记得核对版本。
 memcached的main函数位于memcached.c文件中，从main函数启动之后，会初始化一些资源和申请一些服务器资源，如下面所示：
 1 Core文件大小和进程打开文件个数限制的调整。
-if (maxcore != 0) { struct rlimit rlim_new; //获取当前Core文件大小的配置值 if (getrlimit(RLIMIT_CORE, &amp;rlim) == 0) { //变量初始化为无限制 rlim_new.rlim_cur = rlim_new.rlim_max = RLIM_INFINITY; if (setrlimit(RLIMIT_CORE, &amp;rlim_new) != 0)//如果设置失败 { //变量初始化为当前值的最大值 rlim_new.rlim_cur = rlim_new.rlim_max = rlim.rlim_max; (void) setrlimit(RLIMIT_CORE, &amp;rlim_new);//重新进行设置 } } //再次确认Core文件允许的大小，如果当前的Core文件的大小为0，则不允许Core文件产生，和maxcore!=0不符，程序结束 if ((getrlimit(RLIMIT_CORE, &amp;rlim) != 0) || rlim.rlim_cur == 0) { fprintf(stderr, &#34;failed to ensure corefile creation\n&#34;); exit(EX_OSERR); } } //读取进程允许打开的文件数信息，读取失败，程序退出 if (getrlimit(RLIMIT_NOFILE, &amp;rlim) != 0) { fprintf(stderr, &#34;failed to getrlimit number of files\n&#34;); exit(EX_OSERR); } else { //按memcached启动时的指定的最大连接数进行设置 rlim.rlim_cur = settings.maxconns; rlim.rlim_max = settings.maxconns; if (setrlimit(RLIMIT_NOFILE, &amp;rlim) != 0) { fprintf(stderr, &#34;failed to set rlimit for open files. Try starting as root or requesting smaller maxconns value.\n&#34;); exit(EX_OSERR); } } 2 启动用户的选择。
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Memcached源码阅读序 服务器资源调整" href="https://haokiu.com/blog/8f65d01cc42d4c8782d95eed02dd4eb5/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>Memcached源码阅读一 初始化参数解析
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>Memcached源码阅读一 初始化参数解析 Memcached启动时，有很多配置参数可以选择，这些配置参数严重影响着Memcached的使用，下面分析下这些参数的意义，开源软件版本之间差异比较大，我这次分析是基于1.4.15进行分析的，大家学习时记得核对版本。
-&#34;a:&#34; //unix socket的权限位信息，unix socket的权限位信息和普通文件的权限位信息一样 &#34;p:&#34; //memcached监听的TCP端口值，默认是11211 &#34;s:&#34; //unix socket监听的socket文件路径 &#34;U:&#34; //memcached监听的UDP端口值，默认是11211 &#34;m:&#34; //memcached使用的最大内存值，默认是64M &#34;M&#34; //当memcached的内存使用完时，不进行LRU淘汰数据，直接返回错误，该选项就是关闭LRU &#34;c:&#34; //memcached的最大连接数,如果不指定，按系统的最大值进行 &#34;k&#34; //是否锁定memcached所持有的内存，如果锁定了内存，其他业务持有的内存就会减小 &#34;hi&#34; //帮助信息 &#34;r&#34; //core文件的大小，如果不指定，按系统的最大值进行 &#34;v&#34; //调试信息 &#34;d&#34; //设定以daemon方式运行 &#34;l:&#34; //绑定的ip信息，如果服务器有多个ip，可以在多个ip上面启动多个Memcached实例，注意：这个不是可接收的IP地址 &#34;u:&#34; //memcached运行的用户，如果以root启动，需要指定用户，否则程序错误，退出。 &#34;P:&#34; //memcached以daemon方式运行时，保存pid的文件路径信息 &#34;f:&#34; //内存的扩容因子，这个关系到Memcached内部初始化空间时的一个变化，后面详细说明 &#34;n:&#34; //chunk的最小大小(byte)，后续的增长都是该值*factor来进行增长的 &#34;t:&#34; //内部worker线程的个数，默认是4个，最大值推荐不超过64个 &#34;D:&#34; //内部数据存储时的分割符 &#34;L&#34; //指定内存页的大小，默认内存页大小为4K，页最大不超过2M，调大页的大小，可有效减小页表的大小,提高内存访问的效率 &#34;R:&#34; //单个worker的最大请求个数 &#34;C&#34; //禁用业务的cas,即compare and set &#34;b:&#34; //listen操作缓存连接个数 &#34;B:&#34; //memcached内部使用的协议，支持二进制协议和文本协议，早期只有文本协议，二进制协议是后续加上的 &#34;I:&#34; //单个item的最大值，默认是1M,可以修改，修改的最小值为1k,最大值不能超过128M &#34;S&#34; //打开sasl安全协议 &#34;o:&#34; /** *有四个参数项可以设置: *maxconns_fast(如果连接数超过最大连接数，立即关闭新的连接) *hashpower(hash表的大小的指数值，是按1&lt;&lt;hashpower来创建hash表的，默认的hashpower为16，配置值建议不超过64) *slab_reassign（是否调整/平衡各个slab所占的内存） *slab_automove（是否自动移动各个slab，如果该选项打开，会有专门的线程来进行slab的调整） */ Memcached内部是通过settings来抽象上面的这些初始化参数。
-struct settings { size_t maxbytes; int maxconns; int port; int udpport; char* inter; int verbose; rel_time_t oldest_live; /* ignore existing items older than this */ int evict_to_free; char* socketpath; /* path to unix socket if using local socket */ int access; /* access mask (a la chmod) for unix domain socket */ double factor; /* chunk size growth factor */ int chunk_size; int num_threads; /* number of worker (without dispatcher) libevent threads to run */ int num_threads_per_udp; /* number of worker threads serving each udp socket */ char prefix_delimiter; /* character that marks a key prefix (for stats) */ int detail_enabled; /* nonzero if we&#39;re collecting detailed stats */ int reqs_per_event; /* Maximum number of io to process on each io-event.*/ bool use_cas; enum protocol binding_protocol; int backlog; int item_size_max; /* Maximum item size, and upper end for slabs */ bool sasl; /* SASL on/off */ bool maxconns_fast; /* Whether or not to early close connections */ bool slab_reassign; /* Whether or not slab reassignment is allowed */ int slab_automove; /* Whether or not to automatically move slabs */ int hashpower_init; /* Starting hash power level */ }; 改结构的初始化：
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Memcached源码阅读一 初始化参数解析" href="https://haokiu.com/blog/778cf564240e4d19ad39e0e271d66b3d/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>Memcached阅读十五 Hash表扩容
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>Memcached阅读十五 Hash表扩容 Hash表是Memcached里面最重要的结构之一，其采用链接法来处理Hash冲突，当Hash表中的项太多时，也就是Hash冲突比较高的时候，Hash表的遍历就脱变成单链表，此时为了提供Hash的性能，Hash表需要扩容，Memcached的扩容条件是当表中元素个数超过Hash容量的1.5倍时就进行扩容，扩容过程由独立的线程来完成，扩容过程中会采用2个Hash表，将老表中的数据通过Hash算法映射到新表中，每次移动的桶的数目可以配置，默认是每次移动老表中的1个桶。
-//hash表中增加元素 int assoc_insert(item *it, const uint32_t hv) { unsigned int oldbucket; //如果已经进行扩容且目前进行扩容还没到需要插入元素的桶，则将元素添加到旧桶中 if (expanding &amp;&amp;(oldbucket = (hv &amp; hashmask(hashpower - 1))) &gt;= expand_bucket) { //添加元素 it-&gt;h_next = old_hashtable[oldbucket]; old_hashtable[oldbucket] = it; } else { //如果没扩容，或者扩容已经到了新的桶中，则添加元素到新表中 it-&gt;h_next = primary_hashtable[hv &amp; hashmask(hashpower)];//添加元素 primary_hashtable[hv &amp; hashmask(hashpower)] = it; } hash_items&#43;&#43;;//元素数目&#43;1 //还没开始扩容，且表中元素个数已经超过Hash表容量的1.5倍 if (! expanding &amp;&amp; hash_items &gt; (hashsize(hashpower) * 3) / 2) { //唤醒扩容线程 assoc_start_expand(); } MEMCACHED_ASSOC_INSERT(ITEM_key(it), it-&gt;nkey, hash_items); return 1; } //唤醒扩容线程 static void assoc_start_expand(void) { if (started_expanding) return; started_expanding = true; //唤醒信号量 pthread_cond_signal(&amp;maintenance_cond); } //启动扩容线程，扩容线程在main函数中会启动，启动运行一遍之后会阻塞在条件变量maintenance_cond上面，插入元素超过规定，唤醒条件变量 static void *assoc_maintenance_thread(void *arg) { //do_run_maintenance_thread的值为1，即该线程持续运行 while (do_run_maintenance_thread) { int ii = 0; item_lock_global();//加Hash表的全局锁 mutex_lock(&amp;cache_lock);//加cache_lock锁 //执行扩容时，每次按hash_bulk_move个桶来扩容 for (ii = 0; ii &lt; hash_bulk_move &amp;&amp; expanding; &#43;&#43;ii) { item *it, *next; int bucket; //老表每次移动一个桶中的一个元素 for (it = old_hashtable[expand_bucket]; NULL != it; it = next) { //要移动的下一个元素 next = it-&gt;h_next; //按新的Hash规则进行定位 bucket = hash(ITEM_key(it), it-&gt;nkey, 0) &amp; hashmask(hashpower); it-&gt;h_next = primary_hashtable[bucket];//挂载到新的Hash表中 primary_hashtable[bucket] = it; } //旧表中的这个Hash桶已经按新规则完成了扩容 old_hashtable[expand_bucket] = NULL; //老表中的桶计数&#43;1 expand_bucket&#43;&#43;; //hash表扩容结束,expand_bucket从0开始,一直递增 if (expand_bucket == hashsize(hashpower - 1)) { //修改扩容标志 expanding = false; //释放老的表结构 free(old_hashtable); //更新一些统计信息 STATS_LOCK(); stats.hash_bytes -= hashsize(hashpower - 1) * sizeof(void *); stats.hash_is_expanding = 0; STATS_UNLOCK(); if (settings.verbose &gt; 1) fprintf(stderr, &#34;Hash table expansion done\n&#34;); } } mutex_unlock(&amp;cache_lock);//释放cache_lock锁 item_unlock_global();//释放Hash表的全局锁 //完成扩容 if (!expanding) { //修改Hash表的锁类型，此时锁类型更新为分段锁，默认是分段锁，在进行扩容时，改为全局锁 switch_item_lock_type(ITEM_LOCK_GRANULAR); //释放用于扩容的锁 slabs_rebalancer_resume(); /* We are done expanding.. just wait for next invocation */ mutex_lock(&amp;cache_lock); //加cache_lock锁，保护条件变量 started_expanding = false; //修改扩容标识 pthread_cond_wait(&amp;maintenance_cond, &amp;cache_lock); //阻塞扩容线程 mutex_unlock(&amp;cache_lock); slabs_rebalancer_pause(); //加用于扩容的锁 switch_item_lock_type(ITEM_LOCK_GLOBAL); //修改锁类型为全局锁 mutex_lock(&amp;cache_lock); //临时用来实现临界区 assoc_expand();//执行扩容 mutex_unlock(&amp;cache_lock); } } return NULL; } //按2倍容量扩容Hash表 static void assoc_expand(void) { //old_hashtable指向主Hash表 old_hashtable = primary_hashtable; //申请新的空间 primary_hashtable = calloc(hashsize(hashpower &#43; 1), sizeof(void *)); //空间申请成功 if (primary_hashtable) { if (settings.verbose &gt; 1) fprintf(stderr, &#34;Hash table expansion starting\n&#34;); hashpower&#43;&#43;; //hash等级&#43;1 expanding = true; //扩容标识打开 expand_bucket = 0; STATS_LOCK(); //更新全局统计信息 stats.hash_power_level = hashpower; stats.hash_bytes &#43;= hashsize(hashpower) * sizeof(void *); stats.hash_is_expanding = 1; STATS_UNLOCK(); } else { primary_hashtable = old_hashtable; } } </p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Memcached阅读十五 Hash表扩容" href="https://haokiu.com/blog/3ba1e9453dcc49edb8ee1597bb133cdd/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>Part I
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>此仓库是公众号【高性能服务器开发】文章汇总，如需下载全部文章，可以在公众号回复关键字“文章下载”即可得到下载链接。分享和转发文章时请保留作者信息，部分文章来源于网络，侵权请联系删除。
+if (maxcore != 0) { struct rlimit rlim_new; //获取当前Core文件大小的配置值 if (getrlimit(RLIMIT_CORE, &amp;rlim) == 0) { //变量初始化为无限制 rlim_new.rlim_cur = rlim_new.rlim_max = RLIM_INFINITY; if (setrlimit(RLIMIT_CORE, &amp;rlim_new) != 0)//如果设置失败 { //变量初始化为当前值的最大值 rlim_new.rlim_cur = rlim_new.rlim_max = rlim.rlim_max; (void) setrlimit(RLIMIT_CORE, &amp;rlim_new);//重新进行设置 } } //再次确认Core文件允许的大小，如果当前的Core文件的大小为0，则不允许Core文件产生，和maxcore!=0不符，程序结束 if ((getrlimit(RLIMIT_CORE, &amp;rlim) != 0) || rlim.rlim_cur == 0) { fprintf(stderr, "failed to ensure corefile creation\n"); exit(EX_OSERR); } } //读取进程允许打开的文件数信息，读取失败，程序退出 if (getrlimit(RLIMIT_NOFILE, &amp;rlim) != 0) { fprintf(stderr, "failed to getrlimit number of files\n"); exit(EX_OSERR); } else { //按memcached启动时的指定的最大连接数进行设置 rlim.rlim_cur = settings.maxconns; rlim.rlim_max = settings.maxconns; if (setrlimit(RLIMIT_NOFILE, &amp;rlim) != 0) { fprintf(stderr, "failed to set rlimit for open files. Try starting as root or requesting smaller maxconns value.\n"); exit(EX_OSERR); } } 2 启动用户的选择。
+...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to Memcached源码阅读序 服务器资源调整" href=https://haokiu.com/blog/8f65d01cc42d4c8782d95eed02dd4eb5/></a></article><article class=post-entry><header class=entry-header><h2>Memcached源码阅读一 初始化参数解析</h2></header><div class=entry-content><p>Memcached源码阅读一 初始化参数解析 Memcached启动时，有很多配置参数可以选择，这些配置参数严重影响着Memcached的使用，下面分析下这些参数的意义，开源软件版本之间差异比较大，我这次分析是基于1.4.15进行分析的，大家学习时记得核对版本。
+"a:" //unix socket的权限位信息，unix socket的权限位信息和普通文件的权限位信息一样 "p:" //memcached监听的TCP端口值，默认是11211 "s:" //unix socket监听的socket文件路径 "U:" //memcached监听的UDP端口值，默认是11211 "m:" //memcached使用的最大内存值，默认是64M "M" //当memcached的内存使用完时，不进行LRU淘汰数据，直接返回错误，该选项就是关闭LRU "c:" //memcached的最大连接数,如果不指定，按系统的最大值进行 "k" //是否锁定memcached所持有的内存，如果锁定了内存，其他业务持有的内存就会减小 "hi" //帮助信息 "r" //core文件的大小，如果不指定，按系统的最大值进行 "v" //调试信息 "d" //设定以daemon方式运行 "l:" //绑定的ip信息，如果服务器有多个ip，可以在多个ip上面启动多个Memcached实例，注意：这个不是可接收的IP地址 "u:" //memcached运行的用户，如果以root启动，需要指定用户，否则程序错误，退出。 "P:" //memcached以daemon方式运行时，保存pid的文件路径信息 "f:" //内存的扩容因子，这个关系到Memcached内部初始化空间时的一个变化，后面详细说明 "n:" //chunk的最小大小(byte)，后续的增长都是该值*factor来进行增长的 "t:" //内部worker线程的个数，默认是4个，最大值推荐不超过64个 "D:" //内部数据存储时的分割符 "L" //指定内存页的大小，默认内存页大小为4K，页最大不超过2M，调大页的大小，可有效减小页表的大小,提高内存访问的效率 "R:" //单个worker的最大请求个数 "C" //禁用业务的cas,即compare and set "b:" //listen操作缓存连接个数 "B:" //memcached内部使用的协议，支持二进制协议和文本协议，早期只有文本协议，二进制协议是后续加上的 "I:" //单个item的最大值，默认是1M,可以修改，修改的最小值为1k,最大值不能超过128M "S" //打开sasl安全协议 "o:" /** *有四个参数项可以设置: *maxconns_fast(如果连接数超过最大连接数，立即关闭新的连接) *hashpower(hash表的大小的指数值，是按1&lt;&lt;hashpower来创建hash表的，默认的hashpower为16，配置值建议不超过64) *slab_reassign（是否调整/平衡各个slab所占的内存） *slab_automove（是否自动移动各个slab，如果该选项打开，会有专门的线程来进行slab的调整） */ Memcached内部是通过settings来抽象上面的这些初始化参数。
+struct settings { size_t maxbytes; int maxconns; int port; int udpport; char* inter; int verbose; rel_time_t oldest_live; /* ignore existing items older than this */ int evict_to_free; char* socketpath; /* path to unix socket if using local socket */ int access; /* access mask (a la chmod) for unix domain socket */ double factor; /* chunk size growth factor */ int chunk_size; int num_threads; /* number of worker (without dispatcher) libevent threads to run */ int num_threads_per_udp; /* number of worker threads serving each udp socket */ char prefix_delimiter; /* character that marks a key prefix (for stats) */ int detail_enabled; /* nonzero if we're collecting detailed stats */ int reqs_per_event; /* Maximum number of io to process on each io-event.*/ bool use_cas; enum protocol binding_protocol; int backlog; int item_size_max; /* Maximum item size, and upper end for slabs */ bool sasl; /* SASL on/off */ bool maxconns_fast; /* Whether or not to early close connections */ bool slab_reassign; /* Whether or not slab reassignment is allowed */ int slab_automove; /* Whether or not to automatically move slabs */ int hashpower_init; /* Starting hash power level */ }; 改结构的初始化：
+...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to Memcached源码阅读一 初始化参数解析" href=https://haokiu.com/blog/778cf564240e4d19ad39e0e271d66b3d/></a></article><article class=post-entry><header class=entry-header><h2>Memcached阅读十五 Hash表扩容</h2></header><div class=entry-content><p>Memcached阅读十五 Hash表扩容 Hash表是Memcached里面最重要的结构之一，其采用链接法来处理Hash冲突，当Hash表中的项太多时，也就是Hash冲突比较高的时候，Hash表的遍历就脱变成单链表，此时为了提供Hash的性能，Hash表需要扩容，Memcached的扩容条件是当表中元素个数超过Hash容量的1.5倍时就进行扩容，扩容过程由独立的线程来完成，扩容过程中会采用2个Hash表，将老表中的数据通过Hash算法映射到新表中，每次移动的桶的数目可以配置，默认是每次移动老表中的1个桶。
+//hash表中增加元素 int assoc_insert(item *it, const uint32_t hv) { unsigned int oldbucket; //如果已经进行扩容且目前进行扩容还没到需要插入元素的桶，则将元素添加到旧桶中 if (expanding &&(oldbucket = (hv & hashmask(hashpower - 1))) >= expand_bucket) { //添加元素 it->h_next = old_hashtable[oldbucket]; old_hashtable[oldbucket] = it; } else { //如果没扩容，或者扩容已经到了新的桶中，则添加元素到新表中 it->h_next = primary_hashtable[hv & hashmask(hashpower)];//添加元素 primary_hashtable[hv & hashmask(hashpower)] = it; } hash_items++;//元素数目+1 //还没开始扩容，且表中元素个数已经超过Hash表容量的1.5倍 if (! expanding && hash_items > (hashsize(hashpower) * 3) / 2) { //唤醒扩容线程 assoc_start_expand(); } MEMCACHED_ASSOC_INSERT(ITEM_key(it), it->nkey, hash_items); return 1; } //唤醒扩容线程 static void assoc_start_expand(void) { if (started_expanding) return; started_expanding = true; //唤醒信号量 pthread_cond_signal(&amp;maintenance_cond); } //启动扩容线程，扩容线程在main函数中会启动，启动运行一遍之后会阻塞在条件变量maintenance_cond上面，插入元素超过规定，唤醒条件变量 static void *assoc_maintenance_thread(void *arg) { //do_run_maintenance_thread的值为1，即该线程持续运行 while (do_run_maintenance_thread) { int ii = 0; item_lock_global();//加Hash表的全局锁 mutex_lock(&amp;cache_lock);//加cache_lock锁 //执行扩容时，每次按hash_bulk_move个桶来扩容 for (ii = 0; ii &lt; hash_bulk_move && expanding; ++ii) { item *it, *next; int bucket; //老表每次移动一个桶中的一个元素 for (it = old_hashtable[expand_bucket]; NULL != it; it = next) { //要移动的下一个元素 next = it->h_next; //按新的Hash规则进行定位 bucket = hash(ITEM_key(it), it->nkey, 0) & hashmask(hashpower); it->h_next = primary_hashtable[bucket];//挂载到新的Hash表中 primary_hashtable[bucket] = it; } //旧表中的这个Hash桶已经按新规则完成了扩容 old_hashtable[expand_bucket] = NULL; //老表中的桶计数+1 expand_bucket++; //hash表扩容结束,expand_bucket从0开始,一直递增 if (expand_bucket == hashsize(hashpower - 1)) { //修改扩容标志 expanding = false; //释放老的表结构 free(old_hashtable); //更新一些统计信息 STATS_LOCK(); stats.hash_bytes -= hashsize(hashpower - 1) * sizeof(void *); stats.hash_is_expanding = 0; STATS_UNLOCK(); if (settings.verbose > 1) fprintf(stderr, "Hash table expansion done\n"); } } mutex_unlock(&amp;cache_lock);//释放cache_lock锁 item_unlock_global();//释放Hash表的全局锁 //完成扩容 if (!expanding) { //修改Hash表的锁类型，此时锁类型更新为分段锁，默认是分段锁，在进行扩容时，改为全局锁 switch_item_lock_type(ITEM_LOCK_GRANULAR); //释放用于扩容的锁 slabs_rebalancer_resume(); /* We are done expanding.. just wait for next invocation */ mutex_lock(&amp;cache_lock); //加cache_lock锁，保护条件变量 started_expanding = false; //修改扩容标识 pthread_cond_wait(&amp;maintenance_cond, &amp;cache_lock); //阻塞扩容线程 mutex_unlock(&amp;cache_lock); slabs_rebalancer_pause(); //加用于扩容的锁 switch_item_lock_type(ITEM_LOCK_GLOBAL); //修改锁类型为全局锁 mutex_lock(&amp;cache_lock); //临时用来实现临界区 assoc_expand();//执行扩容 mutex_unlock(&amp;cache_lock); } } return NULL; } //按2倍容量扩容Hash表 static void assoc_expand(void) { //old_hashtable指向主Hash表 old_hashtable = primary_hashtable; //申请新的空间 primary_hashtable = calloc(hashsize(hashpower + 1), sizeof(void *)); //空间申请成功 if (primary_hashtable) { if (settings.verbose > 1) fprintf(stderr, "Hash table expansion starting\n"); hashpower++; //hash等级+1 expanding = true; //扩容标识打开 expand_bucket = 0; STATS_LOCK(); //更新全局统计信息 stats.hash_power_level = hashpower; stats.hash_bytes += hashsize(hashpower) * sizeof(void *); stats.hash_is_expanding = 1; STATS_UNLOCK(); } else { primary_hashtable = old_hashtable; } }</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to Memcached阅读十五 Hash表扩容" href=https://haokiu.com/blog/3ba1e9453dcc49edb8ee1597bb133cdd/></a></article><article class=post-entry><header class=entry-header><h2>Part I</h2></header><div class=entry-content><p>此仓库是公众号【高性能服务器开发】文章汇总，如需下载全部文章，可以在公众号回复关键字“文章下载”即可得到下载链接。分享和转发文章时请保留作者信息，部分文章来源于网络，侵权请联系删除。
 我也专门建立了读者交流群，想加群的读者可以加我微信easy_coder
 在线阅读站点1：https://balloonwj.github.io/cpp-guide-web/
 在线阅读站点2: http://balloonwj.gitee.io/cpp-guide-web/
 备份站点：http://101.37.25.166/blog/
 如需下载该站点源码用于自己搭建站点，可以在【高性能服务器开发】微信公众号后台回复关键字“站点下载”即可得到下载链接。
-Part I C&#43;&#43;必知必会的知识点
-如何成为一名合格的C/C&#43;&#43;开发者？ 不定参数函数实现var_arg系列的宏 你一定要搞明白的C函数调用方式与栈原理 深入理解C/C&#43;&#43;中的指针 详解C&#43;&#43;11中的智能指针 C&#43;&#43;17结构化绑定 C&#43;&#43;必须掌握的pimpl惯用法 用Visual Studio调试Linux程序 如何使用Visual Studio管理和阅读开源项目代码 利用cmake工具生成Visual Studio工程文件 多线程
-后台C&#43;&#43;开发你一定要知道的条件变量 整型变量赋值是原子操作吗？ 网络编程
+Part I C++必知必会的知识点
+如何成为一名合格的C/C++开发者？ 不定参数函数实现var_arg系列的宏 你一定要搞明白的C函数调用方式与栈原理 深入理解C/C++中的指针 详解C++11中的智能指针 C++17结构化绑定 C++必须掌握的pimpl惯用法 用Visual Studio调试Linux程序 如何使用Visual Studio管理和阅读开源项目代码 利用cmake工具生成Visual Studio工程文件 多线程
+后台C++开发你一定要知道的条件变量 整型变量赋值是原子操作吗？ 网络编程
 bind 函数重难点解析 connect 函数在阻塞和非阻塞模式下的行为 select 函数重难点解析 Linux epoll 模型（含LT 模式和 ET 模式详解） socket 的阻塞模式和非阻塞模式 非阻塞模式下 send 和 recv 函数的返回值 服务器开发通信协议设计介绍 TCP 协议如何解决粘包、半包问题 网络通信中收发数据的正确姿势 服务器端发数据时，如果对端一直不收，怎么办？ 程序员必知必会的网络命令
-利用telnet命令发电子邮件 做Java或者C&#43;&#43;开发都应该知道的lsof命令 Linux网络故障排查的瑞士军刀nc命令 Linux tcpdump使用详解 从抓包的角度分析connect函数的连接过程 服务器开发中网络数据分析与故障排查经验漫谈 Part II 高性能服务器框架设计
-主线程与工作线程的分工 Reactor模式 实例：一个服务器程序的架构介绍 错误码系统的设计 日志系统的设计 如何设计断线自动重连机制 心跳包机制设计详解 业务数据处理一定要单独开线程吗 C&#43;&#43; 高性能服务器网络框架设计细节 服务器开发案例实战
+利用telnet命令发电子邮件 做Java或者C++开发都应该知道的lsof命令 Linux网络故障排查的瑞士军刀nc命令 Linux tcpdump使用详解 从抓包的角度分析connect函数的连接过程 服务器开发中网络数据分析与故障排查经验漫谈 Part II 高性能服务器框架设计
+主线程与工作线程的分工 Reactor模式 实例：一个服务器程序的架构介绍 错误码系统的设计 日志系统的设计 如何设计断线自动重连机制 心跳包机制设计详解 业务数据处理一定要单独开线程吗 C++ 高性能服务器网络框架设计细节 服务器开发案例实战
 从零实现一个http服务器 从零实现一款12306刷票软件 从零实现一个邮件收发客户端 从零开发一个WebSocket服务器 从零学习开源项目系列（一）从一款多人联机实时对战游戏开始 从零学习开源项目系列（二）最后一战概况 从零学习开源项目系列（三） CSBattleMgr服务源码研究 从零学习开源项目系列（四）LogServer源码探究 Part III TeamTalk IM源码分析
 01 TeamTalk介绍 02 服务器端的程序的编译与部署 03 服务器端的程序架构介绍 04 服务器端db_proxy_server源码分析 05 服务器端msg_server源码分析 06 服务器端login_server源码分析 07 服务器端msfs源码分析 08 服务器端file_server源码分析 09 服务器端route_server源码分析 10 开放一个TeamTalk测试服务器地址和几个测试账号 11 pc客户端源码分析 libevent源码深度剖析
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Part I" href="https://haokiu.com/blog/184a1ba071384d75b2da68fa7be54511/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>pimpl 惯用法
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>pimpl 惯用法 现在这里有一个名为 CSocketClient 的网络通信类，定义如下：
-/** * 网络通信的基础类, SocketClient.h * zhangyl 2017.07.11 */ class CSocketClient { public: CSocketClient(); ~CSocketClient(); public: void SetProxyWnd(HWND hProxyWnd); bool Init(CNetProxy* pNetProxy); bool Uninit(); int Register(const char* pszUser, const char* pszPassword); void GuestLogin(); BOOL IsClosed(); BOOL	Connect(int timeout = 3); void AddData(int cmd, const std::string&amp; strBuffer); void AddData(int cmd, const char* pszBuff, int nBuffLen); void Close(); BOOL ConnectServer(int timeout = 3); BOOL SendLoginMsg(); BOOL RecvLoginMsg(int&amp; nRet); BOOL Login(int&amp; nRet); private: void LoadConfig(); static UINT CALLBACK SendDataThreadProc(LPVOID lpParam); static UINT CALLBACK RecvDataThreadProc(LPVOID lpParam); bool Send(); bool Recv(); bool CheckReceivedData(); void SendHeartbeatPackage(); private: SOCKET m_hSocket; short m_nPort; char m_szServer[64]; long m_nLastDataTime; //最近一次收发数据的时间 long m_nHeartbeatInterval; //心跳包时间间隔，单位秒 CRITICAL_SECTION m_csLastDataTime; //保护m_nLastDataTime的互斥体 HANDLE m_hSendDataThread; //发送数据线程 HANDLE m_hRecvDataThread; //接收数据线程 std::string m_strSendBuf; std::string m_strRecvBuf; HANDLE m_hExitEvent; bool m_bConnected; CRITICAL_SECTION m_csSendBuf; HANDLE m_hSemaphoreSendBuf; HWND m_hProxyWnd; CNetProxy* m_pNetProxy; int m_nReconnectTimeInterval; //重连时间间隔 time_t m_nLastReconnectTime; //上次重连时刻 CFlowStatistics* m_pFlowStatistics; }; 这段代码来源于笔者实际项目中开发的一个股票客户端的软件。
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to pimpl 惯用法" href="https://haokiu.com/blog/4a2f5d00bb404b68a468bd72dfe357f8/"></a>
-</article>
-<footer class="page-footer">
-  <nav class="pagination">
-    <a class="prev" href="https://haokiu.com/1/index/12/">
-      «&nbsp;&nbsp;
-    </a>
-    <a class="next" href="https://haokiu.com/1/index/14/">&nbsp;&nbsp;»
-    </a>
-  </nav>
-</footer>
-    </main>
-    
-<footer class="footer">
-    <span>haokiu.com</span>
-    <span>
-        Powered by
-        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
-        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
-    </span>
-</footer>
-<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
-        <path d="M12 6H0l6-6z" />
-    </svg>
-</a>
-
-<script>
-    let menu = document.getElementById('menu')
-    if (menu) {
-        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
-        menu.onscroll = function () {
-            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
-        }
-    }
-
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener("click", function (e) {
-            e.preventDefault();
-            var id = this.getAttribute("href").substr(1);
-            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
-                    behavior: "smooth"
-                });
-            } else {
-                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
-            }
-            if (id === "top") {
-                history.replaceState(null, null, " ");
-            } else {
-                history.pushState(null, null, `#${id}`);
-            }
-        });
-    });
-
-</script>
-<script>
-    var mybutton = document.getElementById("top-link");
-    window.onscroll = function () {
-        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
-            mybutton.style.visibility = "visible";
-            mybutton.style.opacity = "1";
-        } else {
-            mybutton.style.visibility = "hidden";
-            mybutton.style.opacity = "0";
-        }
-    };
-
-</script>
-<script>
-    document.getElementById("theme-toggle").addEventListener("click", () => {
-        if (document.body.className.includes("dark")) {
-            document.body.classList.remove('dark');
-            localStorage.setItem("pref-theme", 'light');
-        } else {
-            document.body.classList.add('dark');
-            localStorage.setItem("pref-theme", 'dark');
-        }
-    })
-
-</script>
-</body>
-
-</html>
+...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to Part I" href=https://haokiu.com/blog/184a1ba071384d75b2da68fa7be54511/></a></article><article class=post-entry><header class=entry-header><h2>pimpl 惯用法</h2></header><div class=entry-content><p>pimpl 惯用法 现在这里有一个名为 CSocketClient 的网络通信类，定义如下：
+/** * 网络通信的基础类, SocketClient.h * zhangyl 2017.07.11 */ class CSocketClient { public: CSocketClient(); ~CSocketClient(); public: void SetProxyWnd(HWND hProxyWnd); bool Init(CNetProxy* pNetProxy); bool Uninit(); int Register(const char* pszUser, const char* pszPassword); void GuestLogin(); BOOL IsClosed(); BOOL Connect(int timeout = 3); void AddData(int cmd, const std::string& strBuffer); void AddData(int cmd, const char* pszBuff, int nBuffLen); void Close(); BOOL ConnectServer(int timeout = 3); BOOL SendLoginMsg(); BOOL RecvLoginMsg(int& nRet); BOOL Login(int& nRet); private: void LoadConfig(); static UINT CALLBACK SendDataThreadProc(LPVOID lpParam); static UINT CALLBACK RecvDataThreadProc(LPVOID lpParam); bool Send(); bool Recv(); bool CheckReceivedData(); void SendHeartbeatPackage(); private: SOCKET m_hSocket; short m_nPort; char m_szServer[64]; long m_nLastDataTime; //最近一次收发数据的时间 long m_nHeartbeatInterval; //心跳包时间间隔，单位秒 CRITICAL_SECTION m_csLastDataTime; //保护m_nLastDataTime的互斥体 HANDLE m_hSendDataThread; //发送数据线程 HANDLE m_hRecvDataThread; //接收数据线程 std::string m_strSendBuf; std::string m_strRecvBuf; HANDLE m_hExitEvent; bool m_bConnected; CRITICAL_SECTION m_csSendBuf; HANDLE m_hSemaphoreSendBuf; HWND m_hProxyWnd; CNetProxy* m_pNetProxy; int m_nReconnectTimeInterval; //重连时间间隔 time_t m_nLastReconnectTime; //上次重连时刻 CFlowStatistics* m_pFlowStatistics; }; 这段代码来源于笔者实际项目中开发的一个股票客户端的软件。
+...</p></div><footer class=entry-footer><span title='2021-01-11 09:20:42 +0000 UTC'>January 11, 2021</span></footer><a class=entry-link aria-label="post link to pimpl 惯用法" href=https://haokiu.com/blog/4a2f5d00bb404b68a468bd72dfe357f8/></a></article><footer class=page-footer><nav class=pagination><a class=prev href=https://haokiu.com/1/index/12/>«&nbsp;&nbsp;
+</a><a class=next href=https://haokiu.com/1/index/14/>&nbsp;&nbsp;»</a></nav></footer></main><footer class=footer><span>haokiu.com</span>
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>
+</a><script>let menu=document.getElementById("menu");menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove("dark"),localStorage.setItem("pref-theme","light")):(document.body.classList.add("dark"),localStorage.setItem("pref-theme","dark"))})</script></body></html>

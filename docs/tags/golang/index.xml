@@ -1,102 +1,168 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
-  <channel>
-    <title>Golang on haokiu</title>
-    <link>https://haokiu.com/tags/golang/</link>
-    <description>Recent content in Golang on haokiu</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>zh-cn</language>
-    <copyright>haokiu.com</copyright>
-    <lastBuildDate>Fri, 22 Jan 2021 15:40:43 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/golang/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Go2编程指南</title>
-      <link>https://haokiu.com/blog/bk-3/</link>
-      <pubDate>Fri, 22 Jan 2021 15:40:43 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/bk-3/</guid>
-      <description>&lt;p&gt;&lt;a href=&#34;http://haokiu.com/blog/1f4511a4eff2422184945a24e32887e2&#34;&gt;目录&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/3edad2cabde0428f9098185e6d62c870&#34;&gt;1.1 Go1的诺言&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/7ec2e79995ed4c9f8b883cc07c8d78f9&#34;&gt;1.2 Go1到Go1.10&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/2756df043ed74a91bd57f134270e6cbc&#34;&gt;1.3 Go1.10过渡到Go2&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/4f9267cc85a647979aa3803c5c435407&#34;&gt;1.4 Go2诞生&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/c3984397f8e5480f81aaaeaf1b82ac23&#34;&gt;第1章 语法变迁&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/e07062bd3a82483893b16c9a014f22dc&#34;&gt;2.1 Go1的包机制&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/ba3f4751a98a484f995283b9377b90d1&#34;&gt;2.2 基于vendor的版本管理&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/0ade9d480b954dbc96381d011208c5f1&#34;&gt;2.3 模块的设计⽬标&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/99154ed6163e4a40bcfdc5e7d5956c7d&#34;&gt;2.4 模块快速⼊⻔&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/c868302e70ab472280a428d5583e15d2&#34;&gt;2.5 子模块和多版本共存&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/3681abb2d5e34af2be2ea2f170c6226f&#34;&gt;2.6 镜像和私有仓库&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/1fbab86b16734c59b0bff743e512dfb2&#34;&gt;2.7 模块化实践中的一些问题&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/8ef2da522892434187a81439c5d1dc2d&#34;&gt;第2章 模块化&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/615b0dd45d2e4323805039e0ffb41808&#34;&gt;第3章 错误处理&lt;/a&gt;&lt;br/&gt;&lt;a href=&#34;http://haokiu.com/blog/5c22f69800184d7a8705059ee3773333&#34;&gt;Go2编程指南&lt;/a&gt;&lt;br/&gt;&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>golang 数组与切片的区别</title>
-      <link>https://haokiu.com/blog/gnNp9N/</link>
-      <pubDate>Thu, 19 Nov 2020 17:09:23 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/gnNp9N/</guid>
-      <description>&lt;p&gt;golang 的数组与切片有两大区别：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;初始化：数组需要明确指定大小，切片不需要&lt;/li&gt;
-&lt;li&gt;函数传递：数组是值传递，切片是地址传递&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;初始化&#34;&gt;初始化&lt;/h2&gt;
-&lt;h3 id=&#34;数组&#34;&gt;数组&lt;/h3&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;a := [...]int{1,2,3}   
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Golang on haokiu</title><link>https://haokiu.com/tags/golang/</link><description>Recent content in Golang on haokiu</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>haokiu.com</copyright><lastBuildDate>Fri, 22 Jan 2021 15:40:43 +0000</lastBuildDate><atom:link href="https://haokiu.com/tags/golang/index.xml" rel="self" type="application/rss+xml"/><item><title>Go2编程指南</title><link>https://haokiu.com/blog/bk-3/</link><pubDate>Fri, 22 Jan 2021 15:40:43 +0000</pubDate><guid>https://haokiu.com/blog/bk-3/</guid><description>目录 1.1 Go1的诺言 1.2 Go1到Go1.10 1.3 Go1.10过渡到Go2 1.4 Go2诞生 第1章 语法变迁 2.1 Go1的包机制 2.2 基于vendor的版本管理 2.3 模…</description><content:encoded><![CDATA[<p><a href="http://haokiu.com/blog/1f4511a4eff2422184945a24e32887e2">目录</a><br/><a href="http://haokiu.com/blog/3edad2cabde0428f9098185e6d62c870">1.1 Go1的诺言</a><br/><a href="http://haokiu.com/blog/7ec2e79995ed4c9f8b883cc07c8d78f9">1.2 Go1到Go1.10</a><br/><a href="http://haokiu.com/blog/2756df043ed74a91bd57f134270e6cbc">1.3 Go1.10过渡到Go2</a><br/><a href="http://haokiu.com/blog/4f9267cc85a647979aa3803c5c435407">1.4 Go2诞生</a><br/><a href="http://haokiu.com/blog/c3984397f8e5480f81aaaeaf1b82ac23">第1章 语法变迁</a><br/><a href="http://haokiu.com/blog/e07062bd3a82483893b16c9a014f22dc">2.1 Go1的包机制</a><br/><a href="http://haokiu.com/blog/ba3f4751a98a484f995283b9377b90d1">2.2 基于vendor的版本管理</a><br/><a href="http://haokiu.com/blog/0ade9d480b954dbc96381d011208c5f1">2.3 模块的设计⽬标</a><br/><a href="http://haokiu.com/blog/99154ed6163e4a40bcfdc5e7d5956c7d">2.4 模块快速⼊⻔</a><br/><a href="http://haokiu.com/blog/c868302e70ab472280a428d5583e15d2">2.5 子模块和多版本共存</a><br/><a href="http://haokiu.com/blog/3681abb2d5e34af2be2ea2f170c6226f">2.6 镜像和私有仓库</a><br/><a href="http://haokiu.com/blog/1fbab86b16734c59b0bff743e512dfb2">2.7 模块化实践中的一些问题</a><br/><a href="http://haokiu.com/blog/8ef2da522892434187a81439c5d1dc2d">第2章 模块化</a><br/><a href="http://haokiu.com/blog/615b0dd45d2e4323805039e0ffb41808">第3章 错误处理</a><br/><a href="http://haokiu.com/blog/5c22f69800184d7a8705059ee3773333">Go2编程指南</a><br/></p>
+]]></content:encoded></item><item><title>golang 数组与切片的区别</title><link>https://haokiu.com/blog/gnNp9N/</link><pubDate>Thu, 19 Nov 2020 17:09:23 +0000</pubDate><guid>https://haokiu.com/blog/gnNp9N/</guid><description>golang 的数组与切片有两大区别： 初始化：数组需要明确指定大小，切片不需要 函数传递：数组是值传递，切片是地址传递 初始化 数组 切片 slice的数据结构： go源码slice的数据结构定义：…</description><content:encoded><![CDATA[<p>golang 的数组与切片有两大区别：</p>
+<ul>
+<li>初始化：数组需要明确指定大小，切片不需要</li>
+<li>函数传递：数组是值传递，切片是地址传递</li>
+</ul>
+<h2 id="初始化">初始化</h2>
+<h3 id="数组">数组</h3>
+<pre tabindex="0"><code>a := [...]int{1,2,3}   
 a := [3]int{1,2,3}
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;切片&#34;&gt;切片&lt;/h3&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;a:= []int{1,2,3}  
+</code></pre><h3 id="切片">切片</h3>
+<pre tabindex="0"><code>a:= []int{1,2,3}  
 a := make([]int, 5) 
 a := make([]int, 5, 10)
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;slice的数据结构&#34;&gt;slice的数据结构：&lt;/h2&gt;
-&lt;p&gt;go源码slice的数据结构定义：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;type slice struct {
+</code></pre><h2 id="slice的数据结构">slice的数据结构：</h2>
+<p>go源码slice的数据结构定义：</p>
+<pre tabindex="0"><code>type slice struct {
     array unsafe.Pointer
     len   int
     cap   int
 }
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;slice 有三个字段：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;指向真实 &lt;em&gt;array&lt;/em&gt; 地址的指针 &lt;em&gt;ptr&lt;/em&gt;&lt;/li&gt;
-&lt;li&gt;&lt;em&gt;slice&lt;/em&gt; 的长度 &lt;em&gt;len&lt;/em&gt;&lt;/li&gt;
-&lt;li&gt;容量 &lt;em&gt;cap&lt;/em&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;特性&#34;&gt;特性&lt;/h2&gt;
-&lt;p&gt;通过例子说明 slice 和 array 的一些特性。&lt;/p&gt;
-&lt;h3 id=&#34;函数传递&#34;&gt;函数传递&lt;/h3&gt;
-&lt;p&gt;数组需要明确指定大小，切片不需要。数组是值传递，切片是地址传递&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;	a := [...]int{1, 2, 3, 4, 5, 6}
-	fmt.Println(&amp;#34;star deal array, orginal data is:&amp;#34;)
+</code></pre><p>slice 有三个字段：</p>
+<ul>
+<li>指向真实 <em>array</em> 地址的指针 <em>ptr</em></li>
+<li><em>slice</em> 的长度 <em>len</em></li>
+<li>容量 <em>cap</em></li>
+</ul>
+<h2 id="特性">特性</h2>
+<p>通过例子说明 slice 和 array 的一些特性。</p>
+<h3 id="函数传递">函数传递</h3>
+<p>数组需要明确指定大小，切片不需要。数组是值传递，切片是地址传递</p>
+<pre tabindex="0"><code>	a := [...]int{1, 2, 3, 4, 5, 6}
+	fmt.Println(&#34;star deal array, orginal data is:&#34;)
 	fmt.Println(a)
 	aMaxIndex := len(a) - 1
-	fmt.Printf(&amp;#34;aMaxIndex:%d\r&amp;#34;, aMaxIndex)
+	fmt.Printf(&#34;aMaxIndex:%d\r&#34;, aMaxIndex)
 	for i, e := range a {
 		if i == aMaxIndex {
 			a[0] += e
-			fmt.Printf(&amp;#34;index is 0, val is :%d\r&amp;#34;, a[0])
+			fmt.Printf(&#34;index is 0, val is :%d\r&#34;, a[0])
 		} else {
 			a[i+1] += e
-			fmt.Printf(&amp;#34;index is:%d ,val is :%d\r&amp;#34;, i+1, a[i+1])
+			fmt.Printf(&#34;index is:%d ,val is :%d\r&#34;, i+1, a[i+1])
 		}
 	}
-	fmt.Println(&amp;#34;deal result is:&amp;#34;)
+	fmt.Println(&#34;deal result is:&#34;)
 	fmt.Println(a)
 
 	s := []int{1, 2, 3, 4, 5, 6}
-	fmt.Println(&amp;#34;star deal slice, orginal data is:&amp;#34;)
+	fmt.Println(&#34;star deal slice, orginal data is:&#34;)
 	fmt.Println(s)
 	sMaxIndex := len(s) - 1
-	fmt.Printf(&amp;#34;aMaxIndex:%d\r&amp;#34;, sMaxIndex)
+	fmt.Printf(&#34;aMaxIndex:%d\r&#34;, sMaxIndex)
 	for i, e := range s {
 		if i == sMaxIndex {
 			s[0] += e
-			fmt.Printf(&amp;#34;index is 0, val is :%d\r&amp;#34;, s[0])
+			fmt.Printf(&#34;index is 0, val is :%d\r&#34;, s[0])
 		} else {
 			s[i+1] += e
-			fmt.Printf(&amp;#34;index is:%d ,val is :%d\r&amp;#34;, i+1, s[i+1])
+			fmt.Printf(&#34;index is:%d ,val is :%d\r&#34;, i+1, s[i+1])
 		}
 	}
-	fmt.Println(&amp;#34;deal result is:&amp;#34;)
+	fmt.Println(&#34;deal result is:&#34;)
 	fmt.Println(s)
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;输出：&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>go 匿名结构体 数组 示例</title>
-      <link>https://haokiu.com/blog/XVVOUE/</link>
-      <pubDate>Mon, 09 Nov 2020 10:54:29 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/XVVOUE/</guid>
-      <description>&lt;p&gt;在用 vscode 生成测试用例的时候，生成了测试的匿名数组，没怎么用过，这里展示了 go 匿名结构体数组示例&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;import &amp;#34;testing&amp;#34;
+</code></pre><p>输出：</p>
+<pre tabindex="0"><code>star deal array, orginal data is:
+[1 2 3 4 5 6]
+aMaxIndex:5
+index is:1 ,val is :3
+index is:2 ,val is :5
+index is:3 ,val is :7
+index is:4 ,val is :9
+index is:5 ,val is :11
+index is 0, val is :7
+deal result is:
+[7 3 5 7 9 11]
+star deal slice, orginal data is:
+[1 2 3 4 5 6]
+aMaxIndex:5
+index is:1 ,val is :3
+index is:2 ,val is :6
+index is:3 ,val is :10
+index is:4 ,val is :15
+index is:5 ,val is :21
+index is 0, val is :22
+deal result is:
+[22 3 6 10 15 21]
+</code></pre><p>这个是比较复杂的值传递和地址传递的例子，可以看到：</p>
+<ul>
+<li>array在循环时每次拿到的值（<em>e</em>）是传递数组的值</li>
+<li>slice在循环时每次拿到的值（<em>e</em>）是传递地址的值</li>
+</ul>
+<p>所以最后a 和 s 的值会不一样。</p>
+<h3 id="slice-append的时候内存地址的改变情况">slice append的时候内存地址的改变情况</h3>
+<p>通过一个例子：</p>
+<pre tabindex="0"><code>package main
+
+import (
+   &#34;fmt&#34;
+   &#34;unsafe&#34;
+)
+
+func main() {
+   //说先定义一个切片，只限定长度为1
+   s := make([]int, 1)
+
+   //打印出slice的长度，容量以及内存地址
+   fmt.Printf(&#34;len :%d cap:%d array ptr :%v \n&#34;, len(s), cap(s), *(*unsafe.Pointer)(unsafe.Pointer(&amp;s)))
+
+   for i := 0; i &lt; 5; i++ {
+      s = append(s, i)
+      fmt.Printf(&#34;len :%d cap:%d array ptr :%v \n&#34;, len(s), cap(s), *(*unsafe.Pointer)(unsafe.Pointer(&amp;s)))
+   }
+   //打印出slice
+   fmt.Println(&#34;array:&#34;, s)
+}
+</code></pre><p>输出：</p>
+<pre tabindex="0"><code>len :1 cap:1 array ptr :0xc042062080 
+len :2 cap:2 array ptr :0xc0420620c0 
+len :3 cap:4 array ptr :0xc0420600e0 
+len :4 cap:4 array ptr :0xc0420600e0 
+len :5 cap:8 array ptr :0xc0420880c0 
+len :6 cap:8 array ptr :0xc0420880c0 
+array: [0 0 1 2 3 4]
+</code></pre><p>可以看出来在append的过程中，内存地址有些是一样的，有些是不一样的，容量也是如此。</p>
+<p>每次cap改变的时候指向array内存的指针都在变化。因为当在使用 <em>append</em> 的时候，如果 <em>cap==len</em> ，这个时候就会新开辟一块更大内存，然后把之前的数据复制过去。</p>
+<p>最后一句输出slice元素的时候为什么会多了一个0呢？是因为make初始化时，都会初始化成对应数据类型的原值。</p>
+<h3 id="cap的扩大规律">cap的扩大规律</h3>
+<p>go 在 append 的时候放大 cap 是有规律的。在 cap 小于1024的情况下是每次扩大到 <code>2 * cap</code> ，当大于1024之后就每次扩大到 <code>1.25 * cap</code> 。</p>
+<pre tabindex="0"><code>package main
+
+import (
+    &#34;fmt&#34;
+    &#34;unsafe&#34;
+)
+
+func main() {
+    //说先定义一个切片，只限定长度为1
+    s := make([]int, 1)
+
+    //打印出slice的长度，容量以及内存地址
+    fmt.Printf(&#34;len :%d cap:%d array ptr :%v \n&#34;, len(s), cap(s), *(*unsafe.Pointer)(unsafe.Pointer(&amp;s)))
+
+    for i := 1; i &lt; 1024*2; i++ {
+        s = append(s, i)
+        fmt.Printf(&#34;len :%d cap:%d array ptr :%v \n&#34;, len(s), cap(s), *(*unsafe.Pointer)(unsafe.Pointer(&amp;s)))
+    }
+    //打印出slice
+    fmt.Println(&#34;array:&#34;, s)
+}
+</code></pre><p>输出太多，截一部分：</p>
+<pre tabindex="0"><code>...
+len :1019 cap:1024 array ptr :0xc000184000 
+len :1020 cap:1024 array ptr :0xc000184000 
+len :1021 cap:1024 array ptr :0xc000184000 
+len :1022 cap:1024 array ptr :0xc000184000 
+len :1023 cap:1024 array ptr :0xc000184000 
+len :1024 cap:1024 array ptr :0xc000184000 
+len :1025 cap:1280 array ptr :0xc000188000 
+len :1026 cap:1280 array ptr :0xc000188000 
+len :1027 cap:1280 array ptr :0xc000188000 
+len :1028 cap:1280 array ptr :0xc000188000
+...
+</code></pre>]]></content:encoded></item><item><title>go 匿名结构体 数组 示例</title><link>https://haokiu.com/blog/XVVOUE/</link><pubDate>Mon, 09 Nov 2020 10:54:29 +0000</pubDate><guid>https://haokiu.com/blog/XVVOUE/</guid><description>在用 vscode 生成测试用例的时候，生成了测试的匿名数组，没怎么用过，这里展示了 go 匿名结构体数组示例 需要注意的是各个结构体后面有个逗号。</description><content:encoded><![CDATA[<p>在用 vscode 生成测试用例的时候，生成了测试的匿名数组，没怎么用过，这里展示了 go 匿名结构体数组示例</p>
+<pre tabindex="0"><code>import &#34;testing&#34;
 
 func TestGetRandomString(t *testing.T) {
 	type args struct {
@@ -108,50 +174,42 @@ func TestGetRandomString(t *testing.T) {
 		want string
 	}{
 		{
-			name: &amp;#34;test&amp;#34;,
+			name: &#34;test&#34;,
 			args: args{
 				lens: 6,
 			},
-			want: &amp;#34;hi&amp;#34;,
+			want: &#34;hi&#34;,
 		},
 		{
-			name: &amp;#34;test&amp;#34;,
+			name: &#34;test&#34;,
 			args: args{
 				lens: 6,
 			},
-			want: &amp;#34;hi&amp;#34;,
+			want: &#34;hi&#34;,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := GetRandomString(tt.args.lens); got != tt.want {
-				t.Logf(&amp;#34;GetRandomString() = %v, want %v&amp;#34;, got, tt.want)
+				t.Logf(&#34;GetRandomString() = %v, want %v&#34;, got, tt.want)
 			}
 		})
 	}
 }
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;需要注意的是各个结构体后面有个逗号。&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>beego 通过acme.sh 使用 https</title>
-      <link>https://haokiu.com/blog/qP3u4V/</link>
-      <pubDate>Tue, 13 Oct 2020 15:20:09 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/qP3u4V/</guid>
-      <description>&lt;p&gt;beego 通过 acme.sh 使用 https&lt;/p&gt;
-&lt;h2 id=&#34;安装acmssh&#34;&gt;安装acms.sh&lt;/h2&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;curl  https://get.acme.sh | sh
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;生成证书&#34;&gt;生成证书&lt;/h2&gt;
-&lt;p&gt;如果使用的是 beego 框架，需添加可访问的静态文件目录：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;//acme.sh 自动验证网站目录，不使用https可以忽略
-beego.SetStaticPath(&amp;#34;/.well-known&amp;#34;, &amp;#34;.well-known&amp;#34;)
-&lt;/code&gt;&lt;/pre&gt;&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;acme.sh  --issue  -d haokiu.com -d www.haokiu.com  --webroot  /usr/local/pixiublog/
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;设置pixiublog开机启动&#34;&gt;设置pixiublog开机启动&lt;/h2&gt;
-&lt;h3 id=&#34;1-编写开机启动脚本&#34;&gt;1. 编写开机启动脚本&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;vim /usr/lib/systemd/system/pixiublog.service&lt;/code&gt;&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;[Unit]
+</code></pre><p>需要注意的是各个结构体后面有个逗号。</p>
+]]></content:encoded></item><item><title>beego 通过acme.sh 使用 https</title><link>https://haokiu.com/blog/qP3u4V/</link><pubDate>Tue, 13 Oct 2020 15:20:09 +0000</pubDate><guid>https://haokiu.com/blog/qP3u4V/</guid><description>beego 通过 acme.sh 使用 https 安装acms.sh 生成证书 如果使用的是 beego 框架，需添加可访问的静态文件目录： 设置pixiublog开机启动 编写开机启动脚本 设置开…</description><content:encoded><![CDATA[<p>beego 通过 acme.sh 使用 https</p>
+<h2 id="安装acmssh">安装acms.sh</h2>
+<pre tabindex="0"><code>curl  https://get.acme.sh | sh
+</code></pre><h2 id="生成证书">生成证书</h2>
+<p>如果使用的是 beego 框架，需添加可访问的静态文件目录：</p>
+<pre tabindex="0"><code>//acme.sh 自动验证网站目录，不使用https可以忽略
+beego.SetStaticPath(&#34;/.well-known&#34;, &#34;.well-known&#34;)
+</code></pre><pre tabindex="0"><code>acme.sh  --issue  -d haokiu.com -d www.haokiu.com  --webroot  /usr/local/pixiublog/
+</code></pre><h2 id="设置pixiublog开机启动">设置pixiublog开机启动</h2>
+<h3 id="1-编写开机启动脚本">1. 编写开机启动脚本</h3>
+<p><code>vim /usr/lib/systemd/system/pixiublog.service</code></p>
+<pre tabindex="0"><code>[Unit]
 Description=The pixiublog Process Manager
 After=syslog.target network.target
 
@@ -163,38 +221,30 @@ ExecStop=/bin/kill -SIGINT $MAINPID
 
 [Install]
 WantedBy=multi-user.target
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;2-设置开机启动&#34;&gt;2. 设置开机启动&lt;/h3&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;systemctl enable pixiublog
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;安装证书&#34;&gt;安装证书&lt;/h2&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;acme.sh --install-cert -d haokiu.com \
+</code></pre><h3 id="2-设置开机启动">2. 设置开机启动</h3>
+<pre tabindex="0"><code>systemctl enable pixiublog
+</code></pre><h2 id="安装证书">安装证书</h2>
+<pre tabindex="0"><code>acme.sh --install-cert -d haokiu.com \
 --cert-file      /home/blog/cert/cert.pem  \
 --key-file       /home/blog/cert/key.pem  \
 --fullchain-file /home/blog/cert/fullchain.pem \
---reloadcmd     &amp;#34;systemctl restart pixiublog&amp;#34;
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;beego-appconf-配置&#34;&gt;beego app.conf 配置&lt;/h2&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;EnableHTTPS = true
+--reloadcmd     &#34;systemctl restart pixiublog&#34;
+</code></pre><h2 id="beego-appconf-配置">beego app.conf 配置</h2>
+<pre tabindex="0"><code>EnableHTTPS = true
 HTTPSPort = 443
-HTTPSCertFile = &amp;#34;/home/blog/cert/fullchain.pem&amp;#34;
-HTTPSKeyFile = &amp;#34;/home/blog/cert/key.pem&amp;#34;
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
-&lt;p&gt;&lt;a href=&#34;https://haokiu.com/blog/6D0DBH&#34;&gt;acme.sh 使用&lt;/a&gt;&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>go ... 作用</title>
-      <link>https://haokiu.com/blog/hiUuGO/</link>
-      <pubDate>Mon, 12 Oct 2020 17:12:09 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/hiUuGO/</guid>
-      <description>&lt;p&gt;&lt;code&gt;…&lt;/code&gt;  是go的一种语法糖。&lt;/p&gt;
-&lt;h2 id=&#34;作用&#34;&gt;作用&lt;/h2&gt;
-&lt;ol&gt;
-&lt;li&gt;用于函数有多个不定参数的情况，可以接受多个不确定数量的参数&lt;/li&gt;
-&lt;li&gt;打散slice进行传递&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h2 id=&#34;例子&#34;&gt;例子&lt;/h2&gt;
-&lt;h3 id=&#34;一接受多个不确定数量的参数&#34;&gt;一、接受多个不确定数量的参数&lt;/h3&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;func println(args ...string) { //可以接受任意个string参数
+HTTPSCertFile = &#34;/home/blog/cert/fullchain.pem&#34;
+HTTPSKeyFile = &#34;/home/blog/cert/key.pem&#34;
+</code></pre><h2 id="参考">参考</h2>
+<p><a href="https://haokiu.com/blog/6D0DBH">acme.sh 使用</a></p>
+]]></content:encoded></item><item><title>go ... 作用</title><link>https://haokiu.com/blog/hiUuGO/</link><pubDate>Mon, 12 Oct 2020 17:12:09 +0000</pubDate><guid>https://haokiu.com/blog/hiUuGO/</guid><description>是go的一种语法糖。 作用 用于函数有多个不定参数的情况，可以接受多个不确定数量的参数 打散slice进行传递 例子 一、接受多个不确定数量的参数 结果： 二、打散slice进行传递 结果： 最后 如…</description><content:encoded><![CDATA[<p><code>…</code>  是go的一种语法糖。</p>
+<h2 id="作用">作用</h2>
+<ol>
+<li>用于函数有多个不定参数的情况，可以接受多个不确定数量的参数</li>
+<li>打散slice进行传递</li>
+</ol>
+<h2 id="例子">例子</h2>
+<h3 id="一接受多个不确定数量的参数">一、接受多个不确定数量的参数</h3>
+<pre tabindex="0"><code>func println(args ...string) { //可以接受任意个string参数
     for _, v:= range args{
         fmt.Println(v)
     }
@@ -202,94 +252,86 @@ HTTPSKeyFile = &amp;#34;/home/blog/cert/key.pem&amp;#34;
 
 func main(){
 		var strss= []string{
-        &amp;#34;qwr&amp;#34;,
-        &amp;#34;234&amp;#34;,
-        &amp;#34;yui&amp;#34;,
-        &amp;#34;cvbc&amp;#34;,
+        &#34;qwr&#34;,
+        &#34;234&#34;,
+        &#34;yui&#34;,
+        &#34;cvbc&#34;,
     }
     println(strss...) //切片被打散传入
 }
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;结果：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;qwr
+</code></pre><p>结果：</p>
+<pre tabindex="0"><code>qwr
 234
 yui
 cvbc
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;二打散slice进行传递&#34;&gt;二、打散slice进行传递&lt;/h3&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;var strss= []string{
-  &amp;#34;qwr&amp;#34;,
-  &amp;#34;234&amp;#34;,
-	&amp;#34;yui&amp;#34;,
+</code></pre><h3 id="二打散slice进行传递">二、打散slice进行传递</h3>
+<pre tabindex="0"><code>var strss= []string{
+  &#34;qwr&#34;,
+  &#34;234&#34;,
+	&#34;yui&#34;,
 }
 var strss2= []string{
-  &amp;#34;qqq&amp;#34;,
-  &amp;#34;aaa&amp;#34;,
-  &amp;#34;zzz&amp;#34;,
-  &amp;#34;zzz&amp;#34;,
+  &#34;qqq&#34;,
+  &#34;aaa&#34;,
+  &#34;zzz&#34;,
+  &#34;zzz&#34;,
 }
 strss=append(strss,strss2...) //strss2的元素被打散一个个append进strss
 fmt.Println(strss)
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;结果：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;[qwr 234 yui qqq aaa zzz zzz]
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;最后&#34;&gt;最后&lt;/h2&gt;
-&lt;p&gt;如果没有’…’，面对上面的情况，无疑会增加代码量。&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>golang 常用函数</title>
-      <link>https://haokiu.com/blog/XtwuYL/</link>
-      <pubDate>Sat, 10 Oct 2020 10:23:10 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/XtwuYL/</guid>
-      <description>&lt;h3 id=&#34;1-获取当前时间&#34;&gt;1. 获取当前时间&lt;/h3&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;时间戳(秒)：time.Now().Unix
+</code></pre><p>结果：</p>
+<pre tabindex="0"><code>[qwr 234 yui qqq aaa zzz zzz]
+</code></pre><h2 id="最后">最后</h2>
+<p>如果没有’…’，面对上面的情况，无疑会增加代码量。</p>
+]]></content:encoded></item><item><title>golang 常用函数</title><link>https://haokiu.com/blog/XtwuYL/</link><pubDate>Sat, 10 Oct 2020 10:23:10 +0000</pubDate><guid>https://haokiu.com/blog/XtwuYL/</guid><description>获取当前时间 字符串与int转换 3.结构体json序列化 4.删除切片元素 url encode/decode base64编码 获取字符串长度 SubString 结构体类型断言 类型断言变量一定…</description><content:encoded><![CDATA[<h3 id="1-获取当前时间">1. 获取当前时间</h3>
+<pre tabindex="0"><code>时间戳(秒)：time.Now().Unix
 
-日期：time.Now().Format(&amp;#34;2006-01-02 15:04:05&amp;#34;)
+日期：time.Now().Format(&#34;2006-01-02 15:04:05&#34;)
 
 注意：参数必须是 2006-01-02 15:04:05 而不能是自定义的年月日时间
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;2-字符串与int转换&#34;&gt;2. 字符串与int转换&lt;/h3&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;i,_ := strconv.Atoi(&amp;#34;3&amp;#34;)
+</code></pre><h3 id="2-字符串与int转换">2. 字符串与int转换</h3>
+<pre tabindex="0"><code>i,_ := strconv.Atoi(&#34;3&#34;)
 
 a := strconv.Itoa(32) 
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;3结构体json序列化&#34;&gt;3.结构体json序列化&lt;/h3&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;chatMsg := &amp;amp;ChatMsg{}
+</code></pre><h3 id="3结构体json序列化">3.结构体json序列化</h3>
+<pre tabindex="0"><code>chatMsg := &amp;ChatMsg{}
 
 err := json.Unmarshal([]byte(msg), chatMsg) //json转结构体
 
 buf, _ := json.Marshal(chatMsg) //结构体转json
 
 return string(buf)
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;4删除切片元素&#34;&gt;4.删除切片元素&lt;/h3&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;mySlice := make([]int, 5) //创建一个初始元素个数为5的数组切片，元素初始值为0
+</code></pre><h3 id="4删除切片元素">4.删除切片元素</h3>
+<pre tabindex="0"><code>mySlice := make([]int, 5) //创建一个初始元素个数为5的数组切片，元素初始值为0
 
 mySlice = append(mySlice[:i], mySlice[i+1:]...) //删除下标为i的元素
 
 mySlice = append(mySlice[:0], mySlice[1:]...) //删除第1个元素
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;5-url-encodedecode&#34;&gt;5. url encode/decode&lt;/h3&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;encodeUrl:= url.QueryEscape(urltest)
+</code></pre><h3 id="5-url-encodedecode">5. url encode/decode</h3>
+<pre tabindex="0"><code>encodeUrl:= url.QueryEscape(urltest)
 
 decodeUrl,err := url.QueryUnescape(encodeUrl) 
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;6-base64编码&#34;&gt;6. base64编码&lt;/h3&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;encodeString := base64.StdEncoding.EncodeToString(input)
+</code></pre><h3 id="6-base64编码">6. base64编码</h3>
+<pre tabindex="0"><code>encodeString := base64.StdEncoding.EncodeToString(input)
 
 decodeBytes, err := base64.StdEncoding.DecodeString(encodeString)
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;7-获取字符串长度&#34;&gt;7. 获取字符串长度&lt;/h3&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;tips := &amp;#34;忍者&amp;#34;
+</code></pre><h3 id="7-获取字符串长度">7. 获取字符串长度</h3>
+<pre tabindex="0"><code>tips := &#34;忍者&#34;
 
 len := len(tips) //len=6
 
 len := utf8.RuneCountInString(tips) //len=2
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;8-substring&#34;&gt;8. SubString&lt;/h3&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;func SubString(str string, start int32, end int32) string {
+</code></pre><h3 id="8-substring">8. SubString</h3>
+<pre tabindex="0"><code>func SubString(str string, start int32, end int32) string {
 
   result := []rune(str)
 
   length := int32(len(result))
 
-  if start &amp;lt; 0 || start &amp;gt; length {
+  if start &lt; 0 || start &gt; length {
     return str
   } 
 
-  if end &amp;lt; 0 || end &amp;gt; length {
+  if end &lt; 0 || end &gt; length {
     return str
   } 
 
@@ -298,80 +340,283 @@ len := utf8.RuneCountInString(tips) //len=2
   }
 
 result = SubString(result, 0, int32(len([]rune(result)))-1)//注意end参数的取值
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;9-结构体类型断言&#34;&gt;9. 结构体类型断言&lt;/h3&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;logger := &amp;amp;log.Logger{}
+</code></pre><h3 id="9-结构体类型断言">9. 结构体类型断言</h3>
+<pre tabindex="0"><code>logger := &amp;log.Logger{}
 
 fl, ok := interface{}(logger).(*FileLogger)
-&lt;/code&gt;&lt;/pre&gt;&lt;ol&gt;
-&lt;li&gt;
-&lt;p&gt;类型断言变量一定要是一个接口变量，否则报错 &lt;code&gt;invalid type assertion: xxx (non-interface type xxx on left)&lt;/code&gt;;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;使用类型断言的思路，应该是接收到一个接口值，但不确定这个值具体的类型，然后通过类型断言来判断。&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;</description>
-    </item>
-    
-    <item>
-      <title>golang 计算文件和字符串的 md5 值</title>
-      <link>https://haokiu.com/blog/dpoeTs/</link>
-      <pubDate>Sat, 19 Sep 2020 11:10:59 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/dpoeTs/</guid>
-      <description>&lt;p&gt;go MD5 所需要的包在”crypto/md5”包中，需要先实例化一个MD5对象，然后在此基础上调用sum方法即可&lt;/p&gt;
-&lt;h2 id=&#34;文件的md5&#34;&gt;文件的MD5&lt;/h2&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;md5&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;md5&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;New&lt;/span&gt;()
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;io&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Copy&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;md5&lt;/span&gt;,&lt;span style=&#34;color:#a6e22e&#34;&gt;file&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;MD5Str&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;:=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;hex&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;EncodeToString&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;md5&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Sum&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;nil&lt;/span&gt;))
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;上面的代码实现了计算了文件MD5，其中file是multipart.File类型的，也可以是其他的已打开的其他文件类型。
-当然也可以不使用io.copy，而是直接使用sum函数来计算：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;md5 := md5.New()
+</code></pre><ol>
+<li>
+<p>类型断言变量一定要是一个接口变量，否则报错 <code>invalid type assertion: xxx (non-interface type xxx on left)</code>;</p>
+</li>
+<li>
+<p>使用类型断言的思路，应该是接收到一个接口值，但不确定这个值具体的类型，然后通过类型断言来判断。</p>
+</li>
+</ol>
+<h3 id="10-os常用函数">10. os常用函数</h3>
+<pre tabindex="0"><code>import (
+    &#34;os&#34;
+    &#34;fmt&#34;
+    &#34;time&#34;
+    &#34;strings&#34;
+)
+  
+//os包中的一些常用函数
+  
+func main() {
+  
+    //获取主机名
+    fmt.Println(os.Hostname());
+  
+    //获取当前目录
+    fmt.Println(os.Getwd());
+  
+    //获取用户ID
+    fmt.Println(os.Getuid());
+  
+    //获取有效用户ID
+    fmt.Println(os.Geteuid());
+  
+    //获取组ID
+    fmt.Println(os.Getgid());
+  
+    //获取有效组ID
+    fmt.Println(os.Getegid());
+  
+    //获取进程ID
+    fmt.Println(os.Getpid());
+  
+    //获取父进程ID
+    fmt.Println(os.Getppid());
+  
+    //获取环境变量的值
+    fmt.Println(os.Getenv(&#34;GOPATH&#34;));
+  
+    //设置环境变量的值
+    os.Setenv(&#34;TEST&#34;, &#34;test&#34;);
+  
+    //改变当前工作目录
+    os.Chdir(&#34;C:/&#34;);
+    fmt.Println(os.Getwd());
+  
+    //创建文件
+    f1, _ := os.Create(&#34;./1.txt&#34;);
+    defer f1.Close();
+  
+    //修改文件权限
+    if err := os.Chmod(&#34;./1.txt&#34;, 0777); err != nil {
+        fmt.Println(err);
+    }
+  
+    //修改文件所有者
+    if err := os.Chown(&#34;./1.txt&#34;, 0, 0); err != nil {
+        fmt.Println(err);
+    }
+  
+    //修改文件的访问时间和修改时间
+    os.Chtimes(&#34;./1.txt&#34;, time.Now().Add(time.Hour), time.Now().Add(time.Hour));
+  
+    //获取所有环境变量
+    fmt.Println(strings.Join(os.Environ(), &#34;\r\n&#34;));
+  
+    //把字符串中带NULL或$var替换成指定指符串
+    fmt.Println(os.Expand(&#34;NULL NULL NULL&#34;, func(k string) string {
+        mapp := map[string]string{
+            &#34;1&#34;: &#34;111&#34;,
+            &#34;2&#34;: &#34;222&#34;,
+            &#34;3&#34;: &#34;333&#34;,
+        };
+        return mapp[k];
+    }));
+  
+    //创建目录
+    os.Mkdir(&#34;abc&#34;, os.ModePerm);
+  
+    //创建多级目录
+    os.MkdirAll(&#34;abc/d/e/f&#34;, os.ModePerm);
+  
+    //删除文件或目录
+    os.Remove(&#34;abc/d/e/f&#34;);
+  
+    //删除指定目录下所有文件
+    os.RemoveAll(&#34;abc&#34;);
+  
+    //重命名文件
+    os.Rename(&#34;./2.txt&#34;, &#34;./2_new.txt&#34;);
+  
+    //判断是否为同一文件
+    //unix下通过底层结构的设备和索引节点是否相同来判断
+    //其他系统可能是通过文件绝对路径来判断
+    fs1, _ := f1.Stat();
+    f2, _ := os.Open(&#34;./1.txt&#34;);
+    fs2, _ := f2.Stat();
+    fmt.Println(os.SameFile(fs1, fs2));
+  
+    //返回临时目录
+    fmt.Println(os.TempDir());
+}
+</code></pre><h3 id="11-文件常用函数">11. 文件常用函数</h3>
+<pre tabindex="0"><code>import (
+    &#34;os&#34;
+    &#34;fmt&#34;
+    &#34;strconv&#34;
+)
+
+//os包中关于文件的操作函数
+  
+func main() {
+    //创建文件，返回一个文件指针
+    f3, _ := os.Create(&#34;./3.txt&#34;);
+    defer f3.Close();
+  
+    //以读写方式打开文件，如果不存在则创建文件，等同于上面os.Create
+    f4, _ := os.OpenFile(&#34;./4.txt&#34;, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666);
+    defer f4.Close();
+  
+    //打开文件，返回文件指针
+    f1, _ := os.Open(&#34;./1.txt&#34;);
+    defer f1.Close();
+  
+    //修改文件权限，类似os.chmod
+    f1.Chmod(0777);
+  
+    //修改文件所有者，类似os.chown
+    f1.Chown(0, 0);
+  
+    //返回文件的句柄，通过NewFile创建文件需要文件句柄
+    fmt.Println(f1.Fd());
+  
+    //从文件中读取数据
+    buf := make([]byte, 128);
+    //read每次读取数据到buf中
+    for n, _ := f1.Read(buf); n != 0; n, _ = f1.Read(buf) {
+        fmt.Println(string(buf[:n]));
+    }
+  
+    //向文件中写入数据
+    for i := 0; i &lt; 5; i++ {
+        f3.Write([]byte(&#34;写入数据&#34; + strconv.Itoa(i) + &#34;\r\n&#34;));
+    }
+  
+    //返回一对关联的文件对象
+    //从r中可以读取到从w写入的数据
+    r, w, _ := os.Pipe();
+    //向w中写入字符串
+    w.WriteString(&#34;写入w&#34;);
+    buf2 := make([]byte, 128);
+    //从r中读取数据
+    n, _ := r.Read(buf);
+    fmt.Println(string(buf2[:n]));
+  
+    //改变工作目录
+    os.Mkdir(&#34;a&#34;, os.ModePerm);
+    dir, _ := os.Open(&#34;a&#34;);
+    //改变工作目录到dir，dir必须为一个目录
+    dir.Chdir();
+    fmt.Println(os.Getwd());
+  
+    //读取目录的内容，返回一个FileInfo的slice
+    //参数大于0，最多返回n个FileInfo
+    //参数小于等于0，返回所有FileInfo
+    fi, _ := dir.Readdir(-1);
+    for _, v := range fi {
+        fmt.Println(v.Name());
+    }
+  
+    //读取目录中文件对象的名字
+    names, _ := dir.Readdirnames(-1);
+    fmt.Println(names);
+  
+    //获取文件的详细信息，返回FileInfo结构
+    fi3, _ := f3.Stat();
+    //文件名
+    fmt.Println(fi3.Name());
+    //文件大小
+    fmt.Println(fi3.Size());
+    //文件权限
+    fmt.Println(fi3.Mode());
+    //文件修改时间
+    fmt.Println(fi3.ModTime());
+    //是否是目录
+    fmt.Println(fi3.IsDir());
+}
+</code></pre><h3 id="12-os中关于进程的操作">12. os中关于进程的操作</h3>
+<pre tabindex="0"><code>import (
+    &#34;os&#34;
+    &#34;fmt&#34;
+    &#34;time&#34;
+)
+  
+//os包中关于进程的操作函数
+  
+func main() {
+    //设置新进程的属性
+    attr := &amp;os.ProcAttr{
+        //files指定新进程继承的活动文件对象
+        //前三个分别为，标准输入、标准输出、标准错误输出
+        Files: []*os.File{os.Stdin, os.Stdout, os.Stderr},
+        //新进程的环境变量
+        Env: os.Environ(),
+    }
+  
+    //win下通过记事本打开1.txt
+    //开始一个新进程
+    p, err := os.StartProcess(&#34;C:\\Windows\\System32\\notepad.exe&#34;, []string{&#34;C:\\Windows\\System32\\notepad.exe&#34;, &#34;D:\\1.txt&#34;}, attr);
+    if err != nil {
+        fmt.Println(err);
+    }
+    fmt.Println(p);
+    fmt.Println(&#34;进程ID：&#34;, p.Pid);
+  
+    //通过进程ID查找进程
+    p2, _ := os.FindProcess(p.Pid);
+    fmt.Println(p2);
+  
+    //等待10秒，执行函数
+    time.AfterFunc(time.Second*10, func() {
+        //向p进程发送退出信号
+        p.Signal(os.Kill);
+    });
+  
+    //等待进程p的退出，返回进程状态
+    ps, _ := p.Wait();
+    fmt.Println(ps.String());
+}
+</code></pre>]]></content:encoded></item><item><title>golang 计算文件和字符串的 md5 值</title><link>https://haokiu.com/blog/dpoeTs/</link><pubDate>Sat, 19 Sep 2020 11:10:59 +0000</pubDate><guid>https://haokiu.com/blog/dpoeTs/</guid><description>go MD5 所需要的包在”crypto/md5”包中，需要先实例化一个MD5对象，然后在此基础上调用sum方法即可 文件的MD5 上面的代码实现了计算了文件MD5，其中file是multipart.…</description><content:encoded><![CDATA[<p>go MD5 所需要的包在”crypto/md5”包中，需要先实例化一个MD5对象，然后在此基础上调用sum方法即可</p>
+<h2 id="文件的md5">文件的MD5</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a6e22e">md5</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">md5</span>.<span style="color:#a6e22e">New</span>()
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">Copy</span>(<span style="color:#a6e22e">md5</span>,<span style="color:#a6e22e">file</span>)
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">MD5Str</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">hex</span>.<span style="color:#a6e22e">EncodeToString</span>(<span style="color:#a6e22e">md5</span>.<span style="color:#a6e22e">Sum</span>(<span style="color:#66d9ef">nil</span>))
+</span></span></code></pre></div><p>上面的代码实现了计算了文件MD5，其中file是multipart.File类型的，也可以是其他的已打开的其他文件类型。
+当然也可以不使用io.copy，而是直接使用sum函数来计算：</p>
+<pre tabindex="0"><code>md5 := md5.New()
 MD5Str := hex.EncodeToString(md5.Sum(file))
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;这样是直接调用了sum函数来计算文件的值可能要比io.copy稍微慢一些。&lt;/p&gt;
-&lt;h2 id=&#34;字符串的md5&#34;&gt;字符串的MD5&lt;/h2&gt;
-&lt;p&gt;有时候需要将已知的一段字符串加密，其实和文件加密大概是类似的，只需要调用write方法将字符串写入hash中：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;md5 := md5.New()
-md5.Write([]byte(&amp;#34;hello,world!&amp;#34;))
+</code></pre><p>这样是直接调用了sum函数来计算文件的值可能要比io.copy稍微慢一些。</p>
+<h2 id="字符串的md5">字符串的MD5</h2>
+<p>有时候需要将已知的一段字符串加密，其实和文件加密大概是类似的，只需要调用write方法将字符串写入hash中：</p>
+<pre tabindex="0"><code>md5 := md5.New()
+md5.Write([]byte(&#34;hello,world!&#34;))
 MD5Str := hex.EncodeToString(md5.Sum(nil))
-&lt;/code&gt;&lt;/pre&gt;</description>
-    </item>
-    
-    <item>
-      <title>golang 判断目录或文件是否存在</title>
-      <link>https://haokiu.com/blog/Cd6WaZ/</link>
-      <pubDate>Thu, 17 Sep 2020 15:05:46 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/Cd6WaZ/</guid>
-      <description>&lt;p&gt;golang 判断目录或文件是否存在：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;func Exist(path string) bool {
+</code></pre>]]></content:encoded></item><item><title>golang 判断目录或文件是否存在</title><link>https://haokiu.com/blog/Cd6WaZ/</link><pubDate>Thu, 17 Sep 2020 15:05:46 +0000</pubDate><guid>https://haokiu.com/blog/Cd6WaZ/</guid><description>golang 判断目录或文件是否存在：</description><content:encoded><![CDATA[<p>golang 判断目录或文件是否存在：</p>
+<pre tabindex="0"><code>func Exist(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil || os.IsExist(err)
 }
-&lt;/code&gt;&lt;/pre&gt;</description>
-    </item>
-    
-    <item>
-      <title>beego bee 工具使用简介</title>
-      <link>https://haokiu.com/blog/xVaucl/</link>
-      <pubDate>Wed, 16 Sep 2020 16:06:47 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/xVaucl/</guid>
-      <description>&lt;p&gt;bee 工具是一个为了协助快速开发 beego 项目而创建的项目，通过 bee 您可以很容易的进行 beego 项目的创建、热编译、开发、测试、和部署。&lt;/p&gt;
-&lt;h2 id=&#34;bee-工具的安装&#34;&gt;bee 工具的安装&lt;/h2&gt;
-&lt;p&gt;您可以通过如下的方式安装 bee 工具：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;go get github.com/beego/bee
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;安装完之后，&lt;code&gt;bee&lt;/code&gt; 可执行文件默认存放在 &lt;code&gt;$GOPATH/bin&lt;/code&gt; 里面，所以您需要把 &lt;code&gt;$GOPATH/bin&lt;/code&gt; 添加到您的环境变量中，才可以进行下一步。&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;blockquote&gt;
-&lt;blockquote&gt;
-&lt;p&gt;如何添加环境变量，请自行搜索
-如果你本机设置了 &lt;code&gt;GOBIN&lt;/code&gt;，那么上面的命令就会安装到 &lt;code&gt;GOBIN&lt;/code&gt; 下，请添加 GOBIN 到你的环境变量中&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;/blockquote&gt;
-&lt;/blockquote&gt;
-&lt;h2 id=&#34;bee-工具命令详解&#34;&gt;bee 工具命令详解&lt;/h2&gt;
-&lt;p&gt;我们在命令行输入 &lt;code&gt;bee&lt;/code&gt;，可以看到如下的信息：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;Bee is a Fast and Flexible tool for managing your Beego Web Application.
+</code></pre>]]></content:encoded></item><item><title>beego bee 工具使用简介</title><link>https://haokiu.com/blog/xVaucl/</link><pubDate>Wed, 16 Sep 2020 16:06:47 +0000</pubDate><guid>https://haokiu.com/blog/xVaucl/</guid><description>bee 工具是一个为了协助快速开发 beego 项目而创建的项目，通过 bee 您可以很容易的进行 beego 项目的创建、热编译、开发、测试、和部署。 bee 工具的安装 您可以通过如下的方式安装…</description><content:encoded><![CDATA[<p>bee 工具是一个为了协助快速开发 beego 项目而创建的项目，通过 bee 您可以很容易的进行 beego 项目的创建、热编译、开发、测试、和部署。</p>
+<h2 id="bee-工具的安装">bee 工具的安装</h2>
+<p>您可以通过如下的方式安装 bee 工具：</p>
+<pre tabindex="0"><code>go get github.com/beego/bee
+</code></pre><p>安装完之后，<code>bee</code> 可执行文件默认存放在 <code>$GOPATH/bin</code> 里面，所以您需要把 <code>$GOPATH/bin</code> 添加到您的环境变量中，才可以进行下一步。</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>如何添加环境变量，请自行搜索
+如果你本机设置了 <code>GOBIN</code>，那么上面的命令就会安装到 <code>GOBIN</code> 下，请添加 GOBIN 到你的环境变量中</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<h2 id="bee-工具命令详解">bee 工具命令详解</h2>
+<p>我们在命令行输入 <code>bee</code>，可以看到如下的信息：</p>
+<pre tabindex="0"><code>Bee is a Fast and Flexible tool for managing your Beego Web Application.
 
 Usage:
 
@@ -379,7 +624,7 @@ Usage:
 
 The commands are:
 
-    version     show the bee &amp;amp; beego version
+    version     show the bee &amp; beego version
     migrate     run database migrations
     api         create an api application base on beego framework
     bale        packs non-Go files to Go source files    
@@ -398,91 +643,376 @@ The commands are:
     
 Use bee help [command] for more information about a command.
     
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;new-命令&#34;&gt;&lt;code&gt;new&lt;/code&gt; 命令&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;new&lt;/code&gt; 命令是新建一个 Web 项目，我们在命令行下执行 &lt;code&gt;bee new &amp;lt;项目名&amp;gt;&lt;/code&gt; 就可以创建一个新的项目。但是注意该命令必须在 &lt;code&gt;$GOPATH/src&lt;/code&gt; 下执行。最后会在 &lt;code&gt;$GOPATH/src&lt;/code&gt; 相应目录下生成如下目录结构的项目：&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>beego 日志配置</title>
-      <link>https://haokiu.com/blog/gq7FUH/</link>
-      <pubDate>Wed, 16 Sep 2020 16:03:29 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/gq7FUH/</guid>
-      <description>&lt;p&gt;beego logs 的设计思路来自于 &lt;code&gt;database/sql&lt;/code&gt;，目前支持的引擎有 file、console、net、smtp，可以通过如下方式进行安装：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;go get github.com/astaxie/beego/logs
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;如何使用&#34;&gt;如何使用&lt;/h2&gt;
-&lt;h3 id=&#34;通用方式&#34;&gt;通用方式&lt;/h3&gt;
-&lt;p&gt;首先引入包：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;import (
-    &amp;#34;github.com/astaxie/beego/logs&amp;#34;
+</code></pre><h3 id="new-命令"><code>new</code> 命令</h3>
+<p><code>new</code> 命令是新建一个 Web 项目，我们在命令行下执行 <code>bee new &lt;项目名&gt;</code> 就可以创建一个新的项目。但是注意该命令必须在 <code>$GOPATH/src</code> 下执行。最后会在 <code>$GOPATH/src</code> 相应目录下生成如下目录结构的项目：</p>
+<pre tabindex="0"><code>bee new myproject
+[INFO] Creating application...
+/gopath/src/myproject/
+/gopath/src/myproject/conf/
+/gopath/src/myproject/controllers/
+/gopath/src/myproject/models/
+/gopath/src/myproject/static/
+/gopath/src/myproject/static/js/
+/gopath/src/myproject/static/css/
+/gopath/src/myproject/static/img/
+/gopath/src/myproject/views/
+/gopath/src/myproject/conf/app.conf
+/gopath/src/myproject/controllers/default.go
+/gopath/src/myproject/views/index.tpl
+/gopath/src/myproject/main.go
+13-11-25 09:50:39 [SUCC] New application successfully created!
+myproject
+├── conf
+│   └── app.conf
+├── controllers
+│   └── default.go
+├── main.go
+├── models
+├── routers
+│   └── router.go
+├── static
+│   ├── css
+│   ├── img
+│   └── js
+├── tests
+│   └── default_test.go
+└── views
+    └── index.tpl
+
+8 directories, 4 files
+</code></pre><h3 id="api-命令"><code>api</code> 命令</h3>
+<p>上面的 <code>new</code> 命令是用来新建 Web 项目，不过很多用户使用 beego 来开发 API 应用。所以这个 <code>api</code> 命令就是用来创建 API 应用的，执行命令之后如下所示：</p>
+<pre tabindex="0"><code>bee api apiproject
+create app folder: /gopath/src/apiproject
+create conf: /gopath/src/apiproject/conf
+create controllers: /gopath/src/apiproject/controllers
+create models: /gopath/src/apiproject/models
+create tests: /gopath/src/apiproject/tests
+create conf app.conf: /gopath/src/apiproject/conf/app.conf
+create controllers default.go: /gopath/src/apiproject/controllers/default.go
+create tests default.go: /gopath/src/apiproject/tests/default_test.go
+create models object.go: /gopath/src/apiproject/models/object.go
+create main.go: /gopath/src/apiproject/main.go
+</code></pre><p>这个项目的目录结构如下：</p>
+<pre tabindex="0"><code>apiproject
+├── conf
+│   └── app.conf
+├── controllers
+│   └── object.go
+│   └── user.go
+├── docs
+│   └── doc.go
+├── main.go
+├── models
+│   └── object.go
+│   └── user.go
+├── routers
+│   └── router.go
+└── tests
+    └── default_test.go
+</code></pre><p>从上面的目录我们可以看到和 Web 项目相比，少了 static 和 views 目录，多了一个 test 模块，用来做单元测试的。</p>
+<p>同时，该命令还支持一些自定义参数自动连接数据库创建相关 model 和 controller:
+<code>bee api [appname] [-tables=&quot;&quot;] [-driver=mysql] [-conn=&quot;root:&lt;password&gt;@tcp(127.0.0.1:3306)/test&quot;]</code>
+如果 conn 参数为空则创建一个示例项目，否则将基于链接信息链接数据库创建项目。</p>
+<h3 id="run-命令"><code>run</code> 命令</h3>
+<p>我们在开发 Go 项目的时候最大的问题是经常需要自己手动去编译再运行，<code>bee run</code> 命令是监控 beego 的项目，通过 <a href="https://github.com/howeyc/fsnotify">fsnotify</a>监控文件系统。但是注意该命令必须在 <code>$GOPATH/src/appname</code> 下执行。
+这样我们在开发过程中就可以实时的看到项目修改之后的效果：</p>
+<pre tabindex="0"><code>bee run
+13-11-25 09:53:04 [INFO] Uses &#39;myproject&#39; as &#39;appname&#39;
+13-11-25 09:53:04 [INFO] Initializing watcher...
+13-11-25 09:53:04 [TRAC] Directory(/gopath/src/myproject/controllers)
+13-11-25 09:53:04 [TRAC] Directory(/gopath/src/myproject/models)
+13-11-25 09:53:04 [TRAC] Directory(/gopath/src/myproject)
+13-11-25 09:53:04 [INFO] Start building...
+13-11-25 09:53:16 [SUCC] Build was successful
+13-11-25 09:53:16 [INFO] Restarting myproject ...
+13-11-25 09:53:16 [INFO] ./myproject is running...
+</code></pre><p>我们打开浏览器就可以看到效果 <code>http://localhost:8080/</code>:</p>
+<p><img loading="lazy" src="https://beego.me/docs/images/beerun.png" alt="img"  />
+</p>
+<p>如果我们修改了 <code>Controller</code> 下面的 <code>default.go</code> 文件，我们就可以看到命令行输出：</p>
+<pre tabindex="0"><code>13-11-25 10:11:20 [EVEN] &#34;/gopath/src/myproject/controllers/default.go&#34;: DELETE|MODIFY
+13-11-25 10:11:20 [INFO] Start building...
+13-11-25 10:11:20 [SKIP] &#34;/gopath/src/myproject/controllers/default.go&#34;: CREATE
+13-11-25 10:11:23 [SKIP] &#34;/gopath/src/myproject/controllers/default.go&#34;: MODIFY
+13-11-25 10:11:23 [SUCC] Build was successful
+13-11-25 10:11:23 [INFO] Restarting myproject ...
+13-11-25 10:11:23 [INFO] ./myproject is running...
+</code></pre><p>刷新浏览器我们看到新的修改内容已经输出。</p>
+<h3 id="pack-命令"><code>pack</code> 命令</h3>
+<p><code>pack</code> 目录用来发布应用的时候打包，会把项目打包成 zip 包，这样我们部署的时候直接把打包之后的项目上传，解压就可以部署了：</p>
+<pre tabindex="0"><code>bee pack
+app path: /gopath/src/apiproject
+GOOS darwin GOARCH amd64
+build apiproject
+build success
+exclude prefix:
+exclude suffix: .go:.DS_Store:.tmp
+file write to `/gopath/src/apiproject/apiproject.tar.gz`
+</code></pre><p>我们可以看到目录下有如下的压缩文件：</p>
+<pre tabindex="0"><code>rwxr-xr-x  1 astaxie  staff  8995376 11 25 22:46 apiproject
+-rw-r--r--  1 astaxie  staff  2240288 11 25 22:58 apiproject.tar.gz
+drwxr-xr-x  3 astaxie  staff      102 11 25 22:31 conf
+drwxr-xr-x  3 astaxie  staff      102 11 25 22:31 controllers
+-rw-r--r--  1 astaxie  staff      509 11 25 22:31 main.go
+drwxr-xr-x  3 astaxie  staff      102 11 25 22:31 models
+drwxr-xr-x  3 astaxie  staff      102 11 25 22:31 tests
+</code></pre><h3 id="bale-命令"><code>bale</code> 命令</h3>
+<p>这个命令目前仅限内部使用，具体实现方案未完善，主要用来压缩所有的静态文件变成一个变量申明文件，全部编译到二进制文件里面，用户发布的时候携带静态文件，包括 js、css、img 和 views。最后在启动运行时进行非覆盖式的自解压。</p>
+<h3 id="version-命令"><code>version</code> 命令</h3>
+<p>这个命令是动态获取 bee、beego 和 Go 的版本，这样一旦用户出现错误，可以通过该命令来查看当前的版本</p>
+<pre tabindex="0"><code>$ bee version
+bee   :1.2.2
+beego :1.4.2
+Go    :go version go1.3.3 darwin/amd64
+</code></pre><h3 id="generate-命令"><code>generate</code> 命令</h3>
+<p>这个命令是用来自动化的生成代码的，包含了从数据库一键生成 model，还包含了 scaffold 的，通过这个命令，让大家开发代码不再慢</p>
+<pre tabindex="0"><code>bee generate scaffold [scaffoldname] [-fields=&#34;&#34;] [-driver=mysql] [-conn=&#34;root:@tcp(127.0.0.1:3306)/test&#34;]
+    The generate scaffold command will do a number of things for you.
+    -fields: a list of table fields. Format: field:type, ...
+    -driver: [mysql | postgres | sqlite], the default is mysql
+    -conn:   the connection string used by the driver, the default is root:@tcp(127.0.0.1:3306)/test
+    example: bee generate scaffold post -fields=&#34;title:string,body:text&#34;
+
+bee generate model [modelname] [-fields=&#34;&#34;]
+    generate RESTful model based on fields
+    -fields: a list of table fields. Format: field:type, ...
+
+bee generate controller [controllerfile]
+    generate RESTful controllers
+
+bee generate view [viewpath]
+    generate CRUD view in viewpath
+
+bee generate migration [migrationfile] [-fields=&#34;&#34;]
+    generate migration file for making database schema update
+    -fields: a list of table fields. Format: field:type, ...
+
+bee generate docs
+    generate swagger doc file
+
+bee generate test [routerfile]
+    generate testcase
+
+bee generate appcode [-tables=&#34;&#34;] [-driver=mysql] [-conn=&#34;root:@tcp(127.0.0.1:3306)/test&#34;] [-level=3]
+    generate appcode based on an existing database
+    -tables: a list of table names separated by &#39;,&#39;, default is empty, indicating all tables
+    -driver: [mysql | postgres | sqlite], the default is mysql
+    -conn:   the connection string used by the driver.
+             default for mysql:    root:@tcp(127.0.0.1:3306)/test
+             default for postgres: postgres://postgres:postgres@127.0.0.1:5432/postgres
+    -level:  [1 | 2 | 3], 1 = models; 2 = models,controllers; 3 = models,controllers,router
+</code></pre><h3 id="migrate-命令"><code>migrate</code> 命令</h3>
+<p>这个命令是应用的数据库迁移命令，主要是用来每次应用升级，降级的SQL管理。</p>
+<pre tabindex="0"><code>bee migrate [-driver=mysql] [-conn=&#34;root:@tcp(127.0.0.1:3306)/test&#34;]
+    run all outstanding migrations
+    -driver: [mysql | postgresql | sqlite], the default is mysql
+    -conn:   the connection string used by the driver, the default is root:@tcp(127.0.0.1:3306)/test
+
+bee migrate rollback [-driver=mysql] [-conn=&#34;root:@tcp(127.0.0.1:3306)/test&#34;]
+    rollback the last migration operation
+    -driver: [mysql | postgresql | sqlite], the default is mysql
+    -conn:   the connection string used by the driver, the default is root:@tcp(127.0.0.1:3306)/test
+
+bee migrate reset [-driver=mysql] [-conn=&#34;root:@tcp(127.0.0.1:3306)/test&#34;]
+    rollback all migrations
+    -driver: [mysql | postgresql | sqlite], the default is mysql
+    -conn:   the connection string used by the driver, the default is root:@tcp(127.0.0.1:3306)/test
+
+bee migrate refresh [-driver=mysql] [-conn=&#34;root:@tcp(127.0.0.1:3306)/test&#34;]
+    rollback all migrations and run them all again
+    -driver: [mysql | postgresql | sqlite], the default is mysql
+    -conn:   the connection string used by the driver, the default is root:@tcp(127.0.0.1:3306)/test
+</code></pre><h3 id="dockerize-命令"><code>dockerize</code> 命令</h3>
+<p>这个命令可以通过生成Dockerfile文件来实现docker化你的应用。</p>
+<p>例子:
+生成一个以1.6.4版本Go环境为基础镜像的Dockerfile,并暴露9000端口:</p>
+<pre tabindex="0"><code>$ bee dockerize -image=&#34;library/golang:1.6.4&#34; -expose=9000
+______
+| ___ \
+| |_/ /  ___   ___
+| ___ \ / _ \ / _ \
+| |_/ /|  __/|  __/
+\____/  \___| \___| v1.6.2
+2016/12/26 22:34:54 INFO     ▶ 0001 Generating Dockerfile...
+2016/12/26 22:34:54 SUCCESS  ▶ 0002 Dockerfile generated.
+</code></pre><p>更多帮助信息可执行<code>bee help dockerize</code>.</p>
+<h2 id="bee-工具配置文件">bee 工具配置文件</h2>
+<p>您可能已经注意到，在 bee 工具的源码目录下有一个 <code>bee.json</code> 文件，这个文件是针对 bee 工具的一些行为进行配置。该功能还未完全开发完成，不过其中的一些选项已经可以使用：</p>
+<ul>
+<li><code>&quot;version&quot;: 0</code>：配置文件版本，用于对比是否发生不兼容的配置格式版本。</li>
+<li><code>&quot;go_install&quot;: false</code>：如果您的包均使用完整的导入路径（例如：<code>github.com/user/repo/subpkg</code>）,则可以启用该选项来进行 <code>go install</code> 操作，加快构建操作。</li>
+<li><code>&quot;watch_ext&quot;: []</code>：用于监控其它类型的文件（默认只监控后缀为 <code>.go</code> 的文件）。</li>
+<li><code>&quot;dir_structure&quot;:{}</code>：如果您的目录名与默认的 MVC 架构的不同，则可以使用该选项进行修改。</li>
+<li><code>&quot;cmd_args&quot;: []</code>：如果您需要在每次启动时加入启动参数，则可以使用该选项。</li>
+<li><code>&quot;envs&quot;: []</code>：如果您需要在每次启动时设置临时环境变量参数，则可以使用该选项。</li>
+</ul>
+]]></content:encoded></item><item><title>beego 日志配置</title><link>https://haokiu.com/blog/gq7FUH/</link><pubDate>Wed, 16 Sep 2020 16:03:29 +0000</pubDate><guid>https://haokiu.com/blog/gq7FUH/</guid><description>beego logs 的设计思路来自于 ，目前支持的引擎有 file、console、net、smtp，可以通过如下方式进行安装： 如何使用 通用方式 首先引入包： 然后添加输出引擎（log 支持同时…</description><content:encoded><![CDATA[<p>beego logs 的设计思路来自于 <code>database/sql</code>，目前支持的引擎有 file、console、net、smtp，可以通过如下方式进行安装：</p>
+<pre tabindex="0"><code>go get github.com/astaxie/beego/logs
+</code></pre><h2 id="如何使用">如何使用</h2>
+<h3 id="通用方式">通用方式</h3>
+<p>首先引入包：</p>
+<pre tabindex="0"><code>import (
+    &#34;github.com/astaxie/beego/logs&#34;
 )
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;然后添加输出引擎（log 支持同时输出到多个引擎），这里我们以 console 为例，第一个参数是引擎名（包括：console、file、conn、smtp、es、multifile）&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;logs.SetLogger(&amp;#34;console&amp;#34;)
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;添加输出引擎也支持第二个参数,用来表示配置信息，详细的配置请看下面介绍：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;logs.SetLogger(logs.AdapterFile,`{&amp;#34;filename&amp;#34;:&amp;#34;project.log&amp;#34;,&amp;#34;level&amp;#34;:7,&amp;#34;maxlines&amp;#34;:0,&amp;#34;maxsize&amp;#34;:0,&amp;#34;daily&amp;#34;:true,&amp;#34;maxdays&amp;#34;:10,&amp;#34;color&amp;#34;:true}`)
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;然后我们就可以在我们的逻辑中开始任意的使用了：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;package main
+</code></pre><p>然后添加输出引擎（log 支持同时输出到多个引擎），这里我们以 console 为例，第一个参数是引擎名（包括：console、file、conn、smtp、es、multifile）</p>
+<pre tabindex="0"><code>logs.SetLogger(&#34;console&#34;)
+</code></pre><p>添加输出引擎也支持第二个参数,用来表示配置信息，详细的配置请看下面介绍：</p>
+<pre tabindex="0"><code>logs.SetLogger(logs.AdapterFile,`{&#34;filename&#34;:&#34;project.log&#34;,&#34;level&#34;:7,&#34;maxlines&#34;:0,&#34;maxsize&#34;:0,&#34;daily&#34;:true,&#34;maxdays&#34;:10,&#34;color&#34;:true}`)
+</code></pre><p>然后我们就可以在我们的逻辑中开始任意的使用了：</p>
+<pre tabindex="0"><code>package main
 
 import (
-    &amp;#34;github.com/astaxie/beego/logs&amp;#34;
+    &#34;github.com/astaxie/beego/logs&#34;
 )
 
 func main() {
     //an official log.Logger
     l := logs.GetLogger()
-    l.Println(&amp;#34;this is a message of http&amp;#34;)
+    l.Println(&#34;this is a message of http&#34;)
     //an official log.Logger with prefix ORM
-    logs.GetLogger(&amp;#34;ORM&amp;#34;).Println(&amp;#34;this is a message of orm&amp;#34;)
+    logs.GetLogger(&#34;ORM&#34;).Println(&#34;this is a message of orm&#34;)
 
-    logs.Debug(&amp;#34;my book is bought in the year of &amp;#34;, 2016)
-    logs.Info(&amp;#34;this %s cat is %v years old&amp;#34;, &amp;#34;yellow&amp;#34;, 3)
-    logs.Warn(&amp;#34;json is a type of kv like&amp;#34;, map[string]int{&amp;#34;key&amp;#34;: 2016})
-    logs.Error(1024, &amp;#34;is a very&amp;#34;, &amp;#34;good game&amp;#34;)
-    logs.Critical(&amp;#34;oh,crash&amp;#34;)
+    logs.Debug(&#34;my book is bought in the year of &#34;, 2016)
+    logs.Info(&#34;this %s cat is %v years old&#34;, &#34;yellow&#34;, 3)
+    logs.Warn(&#34;json is a type of kv like&#34;, map[string]int{&#34;key&#34;: 2016})
+    logs.Error(1024, &#34;is a very&#34;, &#34;good game&#34;)
+    logs.Critical(&#34;oh,crash&#34;)
 }
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;多个实例&#34;&gt;多个实例&lt;/h3&gt;
-&lt;p&gt;一般推荐使用通用方式进行日志，但依然支持单独声明来使用独立的日志&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;    package main
+</code></pre><h3 id="多个实例">多个实例</h3>
+<p>一般推荐使用通用方式进行日志，但依然支持单独声明来使用独立的日志</p>
+<pre tabindex="0"><code>    package main
 
     import (
-        &amp;#34;github.com/astaxie/beego/logs&amp;#34;
+        &#34;github.com/astaxie/beego/logs&#34;
     )
 
     func main() {
         log := logs.NewLogger()
         log.SetLogger(logs.AdapterConsole)
-        log.Debug(&amp;#34;this is a debug message&amp;#34;)
+        log.Debug(&#34;this is a debug message&#34;)
     }
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;输出文件名和行号&#34;&gt;输出文件名和行号&lt;/h2&gt;
-&lt;p&gt;日志默认不输出调用的文件名和文件行号,如果你期望输出调用的文件名和文件行号,可以如下设置&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>beego 日志处理</title>
-      <link>https://haokiu.com/blog/YAotkP/</link>
-      <pubDate>Wed, 16 Sep 2020 10:17:20 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/YAotkP/</guid>
-      <description>&lt;p&gt;beego 的日志处理是基于 logs 模块搭建的，内置了一个变量 &lt;code&gt;BeeLogger&lt;/code&gt;，默认已经是 &lt;code&gt;logs.BeeLogger&lt;/code&gt; 类型，初始化了 console，也就是默认输出到 &lt;code&gt;console&lt;/code&gt;。&lt;/p&gt;
-&lt;h2 id=&#34;使用入门&#34;&gt;使用入门&lt;/h2&gt;
-&lt;p&gt;一般在程序中我们使用如下的方式进行输出：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;beego.Emergency(&amp;#34;this is emergency&amp;#34;)
-beego.Alert(&amp;#34;this is alert&amp;#34;)
-beego.Critical(&amp;#34;this is critical&amp;#34;)
-beego.Error(&amp;#34;this is error&amp;#34;)
-beego.Warning(&amp;#34;this is warning&amp;#34;)
-beego.Notice(&amp;#34;this is notice&amp;#34;)
-beego.Informational(&amp;#34;this is informational&amp;#34;)
-beego.Debug(&amp;#34;this is debug&amp;#34;)
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;设置输出&#34;&gt;设置输出&lt;/h2&gt;
-&lt;p&gt;我们的程序往往期望把信息输出到 log 中，现在设置输出到文件很方便，如下所示：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;beego.SetLogger(&amp;#34;file&amp;#34;, `{&amp;#34;filename&amp;#34;:&amp;#34;logs/test.log&amp;#34;}`)
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;更多详细的日志配置请查看 &lt;a href=&#34;http://haokiu.com/blog/gq7FUH&#34;&gt;beego 日志配置&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;这个默认情况就会同时输出到两个地方，一个 console，一个 file，如果只想输出到文件，就需要调用删除操作：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;beego.BeeLogger.DelLogger(&amp;#34;console&amp;#34;)
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;设置级别&#34;&gt;设置级别&lt;/h2&gt;
-&lt;p&gt;日志的级别如上所示的代码这样分为八个级别：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;LevelEmergency
+</code></pre><h2 id="输出文件名和行号">输出文件名和行号</h2>
+<p>日志默认不输出调用的文件名和文件行号,如果你期望输出调用的文件名和文件行号,可以如下设置</p>
+<pre tabindex="0"><code>logs.EnableFuncCallDepth(true)
+</code></pre><p>开启传入参数 true,关闭传入参数 false,默认是关闭的.</p>
+<p>如果你的应用自己封装了调用 log 包,那么需要设置 SetLogFuncCallDepth,默认是 2,也就是直接调用的层级,如果你封装了多层,那么需要根据自己的需求进行调整.</p>
+<pre tabindex="0"><code>logs.SetLogFuncCallDepth(3)
+</code></pre><h2 id="异步输出日志">异步输出日志</h2>
+<p>为了提升性能, 可以设置异步输出:</p>
+<pre tabindex="0"><code>logs.Async()
+</code></pre><p>异步输出允许设置缓冲 chan 的大小</p>
+<pre tabindex="0"><code>logs.Async(1e3)
+</code></pre><h2 id="引擎配置设置">引擎配置设置</h2>
+<ul>
+<li>
+<p>console</p>
+<pre tabindex="0"><code>命令行输出，默认输出到`os.Stdout`：
+
+
+logs.SetLogger(logs.AdapterConsole, `{&#34;level&#34;:1,&#34;color&#34;:true}`)
+</code></pre><p>主要的参数如下说明：</p>
+<ul>
+<li>level 输出的日志级别</li>
+<li>color 是否开启打印日志彩色打印(需环境支持彩色输出)</li>
+</ul>
+</li>
+<li>
+<p>file</p>
+<p>设置的例子如下所示：</p>
+<pre tabindex="0"><code>logs.SetLogger(logs.AdapterFile, `{&#34;filename&#34;:&#34;test.log&#34;}`)
+</code></pre><p>主要的参数如下说明：</p>
+<ul>
+<li>filename 保存的文件名</li>
+<li>maxlines 每个文件保存的最大行数，默认值 1000000</li>
+<li>maxsize 每个文件保存的最大尺寸，默认值是 1 &laquo; 28, //256 MB</li>
+<li>daily 是否按照每天 logrotate，默认是 true</li>
+<li>maxdays 文件最多保存多少天，默认保存 7 天</li>
+<li>rotate 是否开启 logrotate，默认是 true</li>
+<li>level 日志保存的时候的级别，默认是 Trace 级别</li>
+<li>perm 日志文件权限</li>
+</ul>
+</li>
+<li>
+<p>multifile</p>
+<p>设置的例子如下所示：</p>
+<pre tabindex="0"><code>logs.SetLogger(logs.AdapterMultiFile, `{&#34;filename&#34;:&#34;test.log&#34;,&#34;separate&#34;:[&#34;emergency&#34;, &#34;alert&#34;, &#34;critical&#34;, &#34;error&#34;, &#34;warning&#34;, &#34;notice&#34;, &#34;info&#34;, &#34;debug&#34;]}`)
+</code></pre><p>主要的参数如下说明(除 separate 外,均与file相同)：</p>
+<ul>
+<li>filename 保存的文件名</li>
+<li>maxlines 每个文件保存的最大行数，默认值 1000000</li>
+<li>maxsize 每个文件保存的最大尺寸，默认值是 1 &laquo; 28, //256 MB</li>
+<li>daily 是否按照每天 logrotate，默认是 true</li>
+<li>maxdays 文件最多保存多少天，默认保存 7 天</li>
+<li>rotate 是否开启 logrotate，默认是 true</li>
+<li>level 日志保存的时候的级别，默认是 Trace 级别</li>
+<li>perm 日志文件权限</li>
+<li>separate 需要单独写入文件的日志级别,设置后命名类似 test.error.log</li>
+</ul>
+</li>
+<li>
+<p>conn</p>
+<p>网络输出，设置的例子如下所示：</p>
+<pre tabindex="0"><code>logs.SetLogger(logs.AdapterConn, `{&#34;net&#34;:&#34;tcp&#34;,&#34;addr&#34;:&#34;:7020&#34;}`)
+</code></pre><p>主要的参数说明如下：</p>
+<ul>
+<li>reconnectOnMsg 是否每次链接都重新打开链接，默认是 false</li>
+<li>reconnect 是否自动重新链接地址，默认是 false</li>
+<li>net 发开网络链接的方式，可以使用 tcp、unix、udp 等</li>
+<li>addr 网络链接的地址</li>
+<li>level 日志保存的时候的级别，默认是 Trace 级别</li>
+</ul>
+</li>
+<li>
+<p>smtp</p>
+<p>邮件发送，设置的例子如下所示：</p>
+<pre tabindex="0"><code>logs.SetLogger(logs.AdapterMail, `{&#34;username&#34;:&#34;beegotest@gmail.com&#34;,&#34;password&#34;:&#34;xxxxxxxx&#34;,&#34;host&#34;:&#34;smtp.gmail.com:587&#34;,&#34;sendTos&#34;:[&#34;xiemengjun@gmail.com&#34;]}`)
+</code></pre><p>主要的参数说明如下：</p>
+<ul>
+<li>username smtp 验证的用户名</li>
+<li>password smtp 验证密码</li>
+<li>host 发送的邮箱地址</li>
+<li>sendTos 邮件需要发送的人，支持多个</li>
+<li>subject 发送邮件的标题，默认是 <code>Diagnostic message from server</code></li>
+<li>level 日志发送的级别，默认是 Trace 级别</li>
+</ul>
+</li>
+<li>
+<p>ElasticSearch</p>
+<p>输出到 ElasticSearch:</p>
+<pre tabindex="0"><code>logs.SetLogger(logs.AdapterEs, `{&#34;dsn&#34;:&#34;http://localhost:9200/&#34;,&#34;level&#34;:1}`)
+</code></pre></li>
+<li>
+<p>简聊</p>
+<p>输出到简聊：</p>
+<pre tabindex="0"><code>logs.SetLogger(logs.AdapterJianLiao, `{&#34;authorname&#34;:&#34;xxx&#34;,&#34;title&#34;:&#34;beego&#34;, &#34;webhookurl&#34;:&#34;https://jianliao.com/xxx&#34;, &#34;redirecturl&#34;:&#34;https://jianliao.com/xxx&#34;,&#34;imageurl&#34;:&#34;https://jianliao.com/xxx&#34;,&#34;level&#34;:1}`)
+</code></pre></li>
+<li>
+<p>slack</p>
+<p>输出到slack:</p>
+<pre tabindex="0"><code>logs.SetLogger(logs.AdapterSlack, `{&#34;webhookurl&#34;:&#34;https://slack.com/xxx&#34;,&#34;level&#34;:1}`)
+</code></pre></li>
+</ul>
+]]></content:encoded></item><item><title>beego 日志处理</title><link>https://haokiu.com/blog/YAotkP/</link><pubDate>Wed, 16 Sep 2020 10:17:20 +0000</pubDate><guid>https://haokiu.com/blog/YAotkP/</guid><description>beego 的日志处理是基于 logs 模块搭建的，内置了一个变量 ，默认已经是 类型，初始化了 console，也就是默认输出到 。 使用入门 一般在程序中我们使用如下的方式进行输出： 设置输出 我…</description><content:encoded><![CDATA[<p>beego 的日志处理是基于 logs 模块搭建的，内置了一个变量 <code>BeeLogger</code>，默认已经是 <code>logs.BeeLogger</code> 类型，初始化了 console，也就是默认输出到 <code>console</code>。</p>
+<h2 id="使用入门">使用入门</h2>
+<p>一般在程序中我们使用如下的方式进行输出：</p>
+<pre tabindex="0"><code>beego.Emergency(&#34;this is emergency&#34;)
+beego.Alert(&#34;this is alert&#34;)
+beego.Critical(&#34;this is critical&#34;)
+beego.Error(&#34;this is error&#34;)
+beego.Warning(&#34;this is warning&#34;)
+beego.Notice(&#34;this is notice&#34;)
+beego.Informational(&#34;this is informational&#34;)
+beego.Debug(&#34;this is debug&#34;)
+</code></pre><h2 id="设置输出">设置输出</h2>
+<p>我们的程序往往期望把信息输出到 log 中，现在设置输出到文件很方便，如下所示：</p>
+<pre tabindex="0"><code>beego.SetLogger(&#34;file&#34;, `{&#34;filename&#34;:&#34;logs/test.log&#34;}`)
+</code></pre><p>更多详细的日志配置请查看 <a href="http://haokiu.com/blog/gq7FUH">beego 日志配置</a></p>
+<p>这个默认情况就会同时输出到两个地方，一个 console，一个 file，如果只想输出到文件，就需要调用删除操作：</p>
+<pre tabindex="0"><code>beego.BeeLogger.DelLogger(&#34;console&#34;)
+</code></pre><h2 id="设置级别">设置级别</h2>
+<p>日志的级别如上所示的代码这样分为八个级别：</p>
+<pre tabindex="0"><code>LevelEmergency
 LevelAlert
 LevelCritical
 LevelError
@@ -490,32 +1020,32 @@ LevelWarning
 LevelNotice
 LevelInformational
 LevelDebug
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;级别依次降低，默认全部打印，但是一般我们在部署环境，可以通过设置级别设置日志级别：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;beego.SetLevel(beego.LevelInformational)
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;输出文件名和行号&#34;&gt;输出文件名和行号&lt;/h2&gt;
-&lt;p&gt;日志默认不输出调用的文件名和文件行号,如果你期望输出调用的文件名和文件行号,可以如下设置&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;beego.SetLogFuncCall(true)
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;开启传入参数 true, 关闭传入参数 false, 默认是关闭的.&lt;/p&gt;
-&lt;h2 id=&#34;完整示例&#34;&gt;完整示例&lt;/h2&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;func internalCalculationFunc(x, y int) (result int, err error) {
-    beego.Debug(&amp;#34;calculating z. x:&amp;#34;, x, &amp;#34; y:&amp;#34;, y)
+</code></pre><p>级别依次降低，默认全部打印，但是一般我们在部署环境，可以通过设置级别设置日志级别：</p>
+<pre tabindex="0"><code>beego.SetLevel(beego.LevelInformational)
+</code></pre><h2 id="输出文件名和行号">输出文件名和行号</h2>
+<p>日志默认不输出调用的文件名和文件行号,如果你期望输出调用的文件名和文件行号,可以如下设置</p>
+<pre tabindex="0"><code>beego.SetLogFuncCall(true)
+</code></pre><p>开启传入参数 true, 关闭传入参数 false, 默认是关闭的.</p>
+<h2 id="完整示例">完整示例</h2>
+<pre tabindex="0"><code>func internalCalculationFunc(x, y int) (result int, err error) {
+    beego.Debug(&#34;calculating z. x:&#34;, x, &#34; y:&#34;, y)
     z := y
     switch {
     case x == 3:
-        beego.Debug(&amp;#34;x == 3&amp;#34;)
-        panic(&amp;#34;Failure.&amp;#34;)
+        beego.Debug(&#34;x == 3&#34;)
+        panic(&#34;Failure.&#34;)
     case y == 1:
-        beego.Debug(&amp;#34;y == 1&amp;#34;)
-        return 0, errors.New(&amp;#34;Error!&amp;#34;)
+        beego.Debug(&#34;y == 1&#34;)
+        return 0, errors.New(&#34;Error!&#34;)
     case y == 2:
-        beego.Debug(&amp;#34;y == 2&amp;#34;)
+        beego.Debug(&#34;y == 2&#34;)
         z = x
     default:
-        beego.Debug(&amp;#34;default&amp;#34;)
+        beego.Debug(&#34;default&#34;)
         z += x
     }
     retVal := z - 3
-    beego.Debug(&amp;#34;Returning &amp;#34;, retVal)
+    beego.Debug(&#34;Returning &#34;, retVal)
 
     return retVal, nil
 }
@@ -523,142 +1053,413 @@ LevelDebug
 func processInput(input inputData) {
     defer func() {
         if r := recover(); r != nil {
-            beego.Error(&amp;#34;Unexpected error occurred: &amp;#34;, r)
-            outputs &amp;lt;- outputData{result: 0, error: true}
+            beego.Error(&#34;Unexpected error occurred: &#34;, r)
+            outputs &lt;- outputData{result: 0, error: true}
         }
     }()
-    beego.Informational(&amp;#34;Received input signal. x:&amp;#34;, input.x, &amp;#34; y:&amp;#34;, input.y)
+    beego.Informational(&#34;Received input signal. x:&#34;, input.x, &#34; y:&#34;, input.y)
 
     res, err := internalCalculationFunc(input.x, input.y)
     if err != nil {
-        beego.Warning(&amp;#34;Error in calculation:&amp;#34;, err.Error())
+        beego.Warning(&#34;Error in calculation:&#34;, err.Error())
     }
 
-    beego.Informational(&amp;#34;Returning result: &amp;#34;, res, &amp;#34; error: &amp;#34;, err)
-    outputs &amp;lt;- outputData{result: res, error: err != nil}
+    beego.Informational(&#34;Returning result: &#34;, res, &#34; error: &#34;, err)
+    outputs &lt;- outputData{result: res, error: err != nil}
 }
 
 func main() {
     inputs = make(chan inputData)
     outputs = make(chan outputData)
     criticalChan = make(chan int)
-    beego.Informational(&amp;#34;App started.&amp;#34;)
+    beego.Informational(&#34;App started.&#34;)
 
     go consumeResults(outputs)
-    beego.Informational(&amp;#34;Started receiving results.&amp;#34;)
+    beego.Informational(&#34;Started receiving results.&#34;)
 
     go generateInputs(inputs)
-    beego.Informational(&amp;#34;Started sending signals.&amp;#34;)
+    beego.Informational(&#34;Started sending signals.&#34;)
 
     for {
         select {
-        case input := &amp;lt;-inputs:
+        case input := &lt;-inputs:
             processInput(input)
-        case &amp;lt;-criticalChan:
-            beego.Critical(&amp;#34;Caught value from criticalChan: Go shut down.&amp;#34;)
-            panic(&amp;#34;Shut down due to critical fault.&amp;#34;)
+        case &lt;-criticalChan:
+            beego.Critical(&#34;Caught value from criticalChan: Go shut down.&#34;)
+            panic(&#34;Shut down due to critical fault.&#34;)
         }
     }
 }
-&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;日志级别&#34;&gt;日志级别&lt;/h2&gt;
-&lt;p&gt;beego 日志级别对应的数值可参考：&lt;a href=&#34;http://haokiu.com/blog/RAhBfF&#34;&gt;beego 的日志级别&lt;/a&gt;&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>golang interface</title>
-      <link>https://haokiu.com/blog/BmxATZ/</link>
-      <pubDate>Thu, 10 Sep 2020 09:38:43 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/BmxATZ/</guid>
-      <description>&lt;h2 id=&#34;interface&#34;&gt;interface&lt;/h2&gt;
-&lt;p&gt;Go语言里面设计最精妙的应该算interface，它让面向对象，内容组织实现非常的方便，当你看完这一章，你就会被interface的巧妙设计所折服。&lt;/p&gt;
-&lt;h3 id=&#34;什么是interface&#34;&gt;什么是interface&lt;/h3&gt;
-&lt;p&gt;简单的说，interface是一组method签名的组合，我们通过interface来定义对象的一组行为。&lt;/p&gt;
-&lt;p&gt;我们前面一章最后一个例子中Student和Employee都能SayHi，虽然他们的内部实现不一样，但是那不重要，重要的是他们都能&lt;code&gt;say hi&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;让我们来继续做更多的扩展，Student和Employee实现另一个方法&lt;code&gt;Sing&lt;/code&gt;，然后Student实现方法BorrowMoney而Employee实现SpendSalary。&lt;/p&gt;
-&lt;p&gt;这样Student实现了三个方法：SayHi、Sing、BorrowMoney；而Employee实现了SayHi、Sing、SpendSalary。&lt;/p&gt;
-&lt;p&gt;上面这些方法的组合称为interface(被对象Student和Employee实现)。例如Student和Employee都实现了interface：SayHi和Sing，也就是这两个对象是该interface类型。而Employee没有实现这个interface：SayHi、Sing和BorrowMoney，因为Employee没有实现BorrowMoney这个方法。&lt;/p&gt;
-&lt;h3 id=&#34;interface类型&#34;&gt;interface类型&lt;/h3&gt;
-&lt;p&gt;interface类型定义了一组方法，如果某个对象实现了某个接口的所有方法，则此对象就实现了此接口。详细的语法参考下面这个例子&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-Go&#34; data-lang=&#34;Go&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;type&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Human&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;struct&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;name&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;string&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;age&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;phone&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;string&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;type&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Student&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;struct&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;Human&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;//匿名字段Human&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;school&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;string&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;loan&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;float32&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;type&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Employee&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;struct&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;Human&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;//匿名字段Human&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;company&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;string&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;money&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;float32&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;//Human对象实现Sayhi方法&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;func&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;h&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;Human&lt;/span&gt;) &lt;span style=&#34;color:#a6e22e&#34;&gt;SayHi&lt;/span&gt;() {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;fmt&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Printf&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Hi, I am %s you can call me on %s\n&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;h&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;name&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;h&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;phone&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// Human对象实现Sing方法&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;func&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;h&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;Human&lt;/span&gt;) &lt;span style=&#34;color:#a6e22e&#34;&gt;Sing&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;lyrics&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;string&lt;/span&gt;) {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;fmt&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Println&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;La la, la la la, la la la la la...&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;lyrics&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;//Human对象实现Guzzle方法&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;func&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;h&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;Human&lt;/span&gt;) &lt;span style=&#34;color:#a6e22e&#34;&gt;Guzzle&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;beerStein&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;string&lt;/span&gt;) {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;fmt&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Println&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Guzzle Guzzle Guzzle...&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;beerStein&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// Employee重载Human的Sayhi方法&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;func&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;e&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;Employee&lt;/span&gt;) &lt;span style=&#34;color:#a6e22e&#34;&gt;SayHi&lt;/span&gt;() {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;fmt&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;Printf&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Hi, I am %s, I work at %s. Call me on %s\n&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;e&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;name&lt;/span&gt;,
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		&lt;span style=&#34;color:#a6e22e&#34;&gt;e&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;company&lt;/span&gt;, &lt;span style=&#34;color:#a6e22e&#34;&gt;e&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;phone&lt;/span&gt;) &lt;span style=&#34;color:#75715e&#34;&gt;//此句可以分成多行&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;//Student实现BorrowMoney方法&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;func&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;s&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;Student&lt;/span&gt;) &lt;span style=&#34;color:#a6e22e&#34;&gt;BorrowMoney&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;amount&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;float32&lt;/span&gt;) {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;s&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;loan&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;amount&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;// (again and again and...)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;//Employee实现SpendSalary方法&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;func&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;e&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;Employee&lt;/span&gt;) &lt;span style=&#34;color:#a6e22e&#34;&gt;SpendSalary&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;amount&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;float32&lt;/span&gt;) {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;e&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;money&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;-=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;amount&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;// More vodka please!!! Get me through the day!&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// 定义interface&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;type&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Men&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;interface&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;SayHi&lt;/span&gt;()
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;Sing&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;lyrics&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;string&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;Guzzle&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;beerStein&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;string&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;type&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;YoungChap&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;interface&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;SayHi&lt;/span&gt;()
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;Sing&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;song&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;string&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;BorrowMoney&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;amount&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;float32&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;type&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;ElderlyGent&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;interface&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;SayHi&lt;/span&gt;()
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;Sing&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;song&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;string&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;SpendSalary&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;amount&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;float32&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;通过上面的代码我们可以知道，interface可以被任意的对象实现。我们看到上面的Men interface被Human、Student和Employee实现。同理，一个对象可以实现任意多个interface，例如上面的Student实现了Men和YoungChap两个interface。&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>beego 的日志级别</title>
-      <link>https://haokiu.com/blog/RAhBfF/</link>
-      <pubDate>Wed, 09 Sep 2020 11:10:43 +0000</pubDate>
-      
-      <guid>https://haokiu.com/blog/RAhBfF/</guid>
-      <description>&lt;p&gt;看 beego 的源码，beego 的日志分为7个级别：&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;const (
+</code></pre><h2 id="日志级别">日志级别</h2>
+<p>beego 日志级别对应的数值可参考：<a href="http://haokiu.com/blog/RAhBfF">beego 的日志级别</a></p>
+]]></content:encoded></item><item><title>golang interface</title><link>https://haokiu.com/blog/BmxATZ/</link><pubDate>Thu, 10 Sep 2020 09:38:43 +0000</pubDate><guid>https://haokiu.com/blog/BmxATZ/</guid><description>interface Go语言里面设计最精妙的应该算interface，它让面向对象，内容组织实现非常的方便，当你看完这一章，你就会被interface的巧妙设计所折服。 什么是interface 简单…</description><content:encoded><![CDATA[<h2 id="interface">interface</h2>
+<p>Go语言里面设计最精妙的应该算interface，它让面向对象，内容组织实现非常的方便，当你看完这一章，你就会被interface的巧妙设计所折服。</p>
+<h3 id="什么是interface">什么是interface</h3>
+<p>简单的说，interface是一组method签名的组合，我们通过interface来定义对象的一组行为。</p>
+<p>我们前面一章最后一个例子中Student和Employee都能SayHi，虽然他们的内部实现不一样，但是那不重要，重要的是他们都能<code>say hi</code></p>
+<p>让我们来继续做更多的扩展，Student和Employee实现另一个方法<code>Sing</code>，然后Student实现方法BorrowMoney而Employee实现SpendSalary。</p>
+<p>这样Student实现了三个方法：SayHi、Sing、BorrowMoney；而Employee实现了SayHi、Sing、SpendSalary。</p>
+<p>上面这些方法的组合称为interface(被对象Student和Employee实现)。例如Student和Employee都实现了interface：SayHi和Sing，也就是这两个对象是该interface类型。而Employee没有实现这个interface：SayHi、Sing和BorrowMoney，因为Employee没有实现BorrowMoney这个方法。</p>
+<h3 id="interface类型">interface类型</h3>
+<p>interface类型定义了一组方法，如果某个对象实现了某个接口的所有方法，则此对象就实现了此接口。详细的语法参考下面这个例子</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Human</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">name</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">age</span> <span style="color:#66d9ef">int</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">phone</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Student</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">Human</span> <span style="color:#75715e">//匿名字段Human</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">school</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">loan</span> <span style="color:#66d9ef">float32</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Employee</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">Human</span> <span style="color:#75715e">//匿名字段Human</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">company</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">money</span> <span style="color:#66d9ef">float32</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//Human对象实现Sayhi方法</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">h</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Human</span>) <span style="color:#a6e22e">SayHi</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Hi, I am %s you can call me on %s\n&#34;</span>, <span style="color:#a6e22e">h</span>.<span style="color:#a6e22e">name</span>, <span style="color:#a6e22e">h</span>.<span style="color:#a6e22e">phone</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Human对象实现Sing方法</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">h</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Human</span>) <span style="color:#a6e22e">Sing</span>(<span style="color:#a6e22e">lyrics</span> <span style="color:#66d9ef">string</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;La la, la la la, la la la la la...&#34;</span>, <span style="color:#a6e22e">lyrics</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//Human对象实现Guzzle方法</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">h</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Human</span>) <span style="color:#a6e22e">Guzzle</span>(<span style="color:#a6e22e">beerStein</span> <span style="color:#66d9ef">string</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Guzzle Guzzle Guzzle...&#34;</span>, <span style="color:#a6e22e">beerStein</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Employee重载Human的Sayhi方法</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">e</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Employee</span>) <span style="color:#a6e22e">SayHi</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Hi, I am %s, I work at %s. Call me on %s\n&#34;</span>, <span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">name</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">company</span>, <span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">phone</span>) <span style="color:#75715e">//此句可以分成多行</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//Student实现BorrowMoney方法</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">s</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Student</span>) <span style="color:#a6e22e">BorrowMoney</span>(<span style="color:#a6e22e">amount</span> <span style="color:#66d9ef">float32</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">loan</span> <span style="color:#f92672">+=</span> <span style="color:#a6e22e">amount</span> <span style="color:#75715e">// (again and again and...)</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//Employee实现SpendSalary方法</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">e</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Employee</span>) <span style="color:#a6e22e">SpendSalary</span>(<span style="color:#a6e22e">amount</span> <span style="color:#66d9ef">float32</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">money</span> <span style="color:#f92672">-=</span> <span style="color:#a6e22e">amount</span> <span style="color:#75715e">// More vodka please!!! Get me through the day!</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 定义interface</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Men</span> <span style="color:#66d9ef">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">SayHi</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">Sing</span>(<span style="color:#a6e22e">lyrics</span> <span style="color:#66d9ef">string</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">Guzzle</span>(<span style="color:#a6e22e">beerStein</span> <span style="color:#66d9ef">string</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">YoungChap</span> <span style="color:#66d9ef">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">SayHi</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">Sing</span>(<span style="color:#a6e22e">song</span> <span style="color:#66d9ef">string</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">BorrowMoney</span>(<span style="color:#a6e22e">amount</span> <span style="color:#66d9ef">float32</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">ElderlyGent</span> <span style="color:#66d9ef">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">SayHi</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">Sing</span>(<span style="color:#a6e22e">song</span> <span style="color:#66d9ef">string</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">SpendSalary</span>(<span style="color:#a6e22e">amount</span> <span style="color:#66d9ef">float32</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>通过上面的代码我们可以知道，interface可以被任意的对象实现。我们看到上面的Men interface被Human、Student和Employee实现。同理，一个对象可以实现任意多个interface，例如上面的Student实现了Men和YoungChap两个interface。</p>
+<p>最后，任意的类型都实现了空interface(我们这样定义：interface{})，也就是包含0个method的interface。</p>
+<h3 id="interface值">interface值</h3>
+<p>那么interface里面到底能存什么值呢？如果我们定义了一个interface的变量，那么这个变量里面可以存实现这个interface的任意类型的对象。例如上面例子中，我们定义了一个Men interface类型的变量m，那么m里面可以存Human、Student或者Employee值。</p>
+<p>因为m能够持有这三种类型的对象，所以我们可以定义一个包含Men类型元素的slice，这个slice可以被赋予实现了Men接口的任意结构的对象，这个和我们传统意义上面的slice有所不同。</p>
+<p>让我们来看一下下面这个例子:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;fmt&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Human</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">name</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">age</span> <span style="color:#66d9ef">int</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">phone</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Student</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">Human</span> <span style="color:#75715e">//匿名字段</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">school</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">loan</span> <span style="color:#66d9ef">float32</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Employee</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">Human</span> <span style="color:#75715e">//匿名字段</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">company</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">money</span> <span style="color:#66d9ef">float32</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//Human实现SayHi方法</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">h</span> <span style="color:#a6e22e">Human</span>) <span style="color:#a6e22e">SayHi</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Hi, I am %s you can call me on %s\n&#34;</span>, <span style="color:#a6e22e">h</span>.<span style="color:#a6e22e">name</span>, <span style="color:#a6e22e">h</span>.<span style="color:#a6e22e">phone</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//Human实现Sing方法</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">h</span> <span style="color:#a6e22e">Human</span>) <span style="color:#a6e22e">Sing</span>(<span style="color:#a6e22e">lyrics</span> <span style="color:#66d9ef">string</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;La la la la...&#34;</span>, <span style="color:#a6e22e">lyrics</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//Employee重载Human的SayHi方法</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">e</span> <span style="color:#a6e22e">Employee</span>) <span style="color:#a6e22e">SayHi</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Hi, I am %s, I work at %s. Call me on %s\n&#34;</span>, <span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">name</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">company</span>, <span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">phone</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Interface Men被Human,Student和Employee实现</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 因为这三个类型都实现了这两个方法</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Men</span> <span style="color:#66d9ef">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">SayHi</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">Sing</span>(<span style="color:#a6e22e">lyrics</span> <span style="color:#66d9ef">string</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">mike</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">Student</span>{<span style="color:#a6e22e">Human</span>{<span style="color:#e6db74">&#34;Mike&#34;</span>, <span style="color:#ae81ff">25</span>, <span style="color:#e6db74">&#34;222-222-XXX&#34;</span>}, <span style="color:#e6db74">&#34;MIT&#34;</span>, <span style="color:#ae81ff">0.00</span>}
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">paul</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">Student</span>{<span style="color:#a6e22e">Human</span>{<span style="color:#e6db74">&#34;Paul&#34;</span>, <span style="color:#ae81ff">26</span>, <span style="color:#e6db74">&#34;111-222-XXX&#34;</span>}, <span style="color:#e6db74">&#34;Harvard&#34;</span>, <span style="color:#ae81ff">100</span>}
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">sam</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">Employee</span>{<span style="color:#a6e22e">Human</span>{<span style="color:#e6db74">&#34;Sam&#34;</span>, <span style="color:#ae81ff">36</span>, <span style="color:#e6db74">&#34;444-222-XXX&#34;</span>}, <span style="color:#e6db74">&#34;Golang Inc.&#34;</span>, <span style="color:#ae81ff">1000</span>}
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">tom</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">Employee</span>{<span style="color:#a6e22e">Human</span>{<span style="color:#e6db74">&#34;Tom&#34;</span>, <span style="color:#ae81ff">37</span>, <span style="color:#e6db74">&#34;222-444-XXX&#34;</span>}, <span style="color:#e6db74">&#34;Things Ltd.&#34;</span>, <span style="color:#ae81ff">5000</span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">//定义Men类型的变量i</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">i</span> <span style="color:#a6e22e">Men</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">//i能存储Student</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">i</span> = <span style="color:#a6e22e">mike</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;This is Mike, a Student:&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">i</span>.<span style="color:#a6e22e">SayHi</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">i</span>.<span style="color:#a6e22e">Sing</span>(<span style="color:#e6db74">&#34;November rain&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">//i也能存储Employee</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">i</span> = <span style="color:#a6e22e">tom</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;This is tom, an Employee:&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">i</span>.<span style="color:#a6e22e">SayHi</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">i</span>.<span style="color:#a6e22e">Sing</span>(<span style="color:#e6db74">&#34;Born to be wild&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">//定义了slice Men</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;Let&#39;s use a slice of Men and see what happens&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">x</span> <span style="color:#f92672">:=</span> make([]<span style="color:#a6e22e">Men</span>, <span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">//这三个都是不同类型的元素，但是他们实现了interface同一个接口</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">x</span>[<span style="color:#ae81ff">0</span>], <span style="color:#a6e22e">x</span>[<span style="color:#ae81ff">1</span>], <span style="color:#a6e22e">x</span>[<span style="color:#ae81ff">2</span>] = <span style="color:#a6e22e">paul</span>, <span style="color:#a6e22e">sam</span>, <span style="color:#a6e22e">mike</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">value</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">x</span>{
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">value</span>.<span style="color:#a6e22e">SayHi</span>()
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>通过上面的代码，你会发现interface就是一组抽象方法的集合，它必须由其他非interface类型实现，而不能自我实现， Go通过interface实现了duck-typing:即&quot;当看到一只鸟走起来像鸭子、游泳起来像鸭子、叫起来也像鸭子，那么这只鸟就可以被称为鸭子&quot;。</p>
+<h3 id="空interface">空interface</h3>
+<p>空interface(interface{})不包含任何的method，正因为如此，所有的类型都实现了空interface。空interface对于描述起不到任何的作用(因为它不包含任何的method），但是空interface在我们需要存储任意类型的数值的时候相当有用，因为它可以存储任意类型的数值。它有点类似于C语言的void*类型。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 定义a为空接口</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">a</span> <span style="color:#66d9ef">interface</span>{}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">i</span> <span style="color:#66d9ef">int</span> = <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">s</span> <span style="color:#f92672">:=</span> <span style="color:#e6db74">&#34;Hello world&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// a可以存储任意类型的数值</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">a</span> = <span style="color:#a6e22e">i</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">a</span> = <span style="color:#a6e22e">s</span>
+</span></span></code></pre></div><p>一个函数把interface{}作为参数，那么他可以接受任意类型的值作为参数，如果一个函数返回interface{},那么也就可以返回任意类型的值。是不是很有用啊！</p>
+<h3 id="interface函数参数">interface函数参数</h3>
+<p>interface的变量可以持有任意实现该interface类型的对象，这给我们编写函数(包括method)提供了一些额外的思考，我们是不是可以通过定义interface参数，让函数接受各种类型的参数。</p>
+<p>举个例子：fmt.Println是我们常用的一个函数，但是你是否注意到它可以接受任意类型的数据。打开fmt的源码文件，你会看到这样一个定义:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Stringer</span> <span style="color:#66d9ef">interface</span> {
+</span></span><span style="display:flex;"><span>	 <span style="color:#a6e22e">String</span>() <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>也就是说，任何实现了String方法的类型都能作为参数被fmt.Println调用,让我们来试一试</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> (
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#34;fmt&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#e6db74">&#34;strconv&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Human</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">name</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">age</span> <span style="color:#66d9ef">int</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">phone</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 通过这个方法 Human 实现了 fmt.Stringer</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">h</span> <span style="color:#a6e22e">Human</span>) <span style="color:#a6e22e">String</span>() <span style="color:#66d9ef">string</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;❰&#34;</span><span style="color:#f92672">+</span><span style="color:#a6e22e">h</span>.<span style="color:#a6e22e">name</span><span style="color:#f92672">+</span><span style="color:#e6db74">&#34; - &#34;</span><span style="color:#f92672">+</span><span style="color:#a6e22e">strconv</span>.<span style="color:#a6e22e">Itoa</span>(<span style="color:#a6e22e">h</span>.<span style="color:#a6e22e">age</span>)<span style="color:#f92672">+</span><span style="color:#e6db74">&#34; years -  ✆ &#34;</span> <span style="color:#f92672">+</span><span style="color:#a6e22e">h</span>.<span style="color:#a6e22e">phone</span><span style="color:#f92672">+</span><span style="color:#e6db74">&#34;❱&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">Bob</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">Human</span>{<span style="color:#e6db74">&#34;Bob&#34;</span>, <span style="color:#ae81ff">39</span>, <span style="color:#e6db74">&#34;000-7777-XXX&#34;</span>}
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;This Human is : &#34;</span>, <span style="color:#a6e22e">Bob</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>现在我们再回顾一下前面的Box示例，你会发现Color结构也定义了一个method：String。其实这也是实现了fmt.Stringer这个interface，即如果需要某个类型能被fmt包以特殊的格式输出，你就必须实现Stringer这个接口。如果没有实现这个接口，fmt将以默认的方式输出。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//实现同样的功能</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;The biggest one is&#34;</span>, <span style="color:#a6e22e">boxes</span>.<span style="color:#a6e22e">BiggestsColor</span>().<span style="color:#a6e22e">String</span>())
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;The biggest one is&#34;</span>, <span style="color:#a6e22e">boxes</span>.<span style="color:#a6e22e">BiggestsColor</span>())
+</span></span></code></pre></div><p>注：实现了error接口的对象（即实现了Error() string的对象），使用fmt输出时，会调用Error()方法，因此不必再定义String()方法了。</p>
+<h3 id="interface变量存储的类型">interface变量存储的类型</h3>
+<p>我们知道interface的变量里面可以存储任意类型的数值(该类型实现了interface)。那么我们怎么反向知道这个变量里面实际保存了的是哪个类型的对象呢？目前常用的有两种方法：</p>
+<ul>
+<li>
+<p>Comma-ok断言</p>
+<p>Go语言里面有一个语法，可以直接判断是否是该类型的变量： value, ok = element.(T)，这里value就是变量的值，ok是一个bool类型，element是interface变量，T是断言的类型。</p>
+<p>如果element里面确实存储了T类型的数值，那么ok返回true，否则返回false。</p>
+<p>让我们通过一个例子来更加深入的理解。</p>
+</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">import</span> (
+</span></span><span style="display:flex;"><span>		<span style="color:#e6db74">&#34;fmt&#34;</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#e6db74">&#34;strconv&#34;</span>
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Element</span> <span style="color:#66d9ef">interface</span>{}
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">List</span> [] <span style="color:#a6e22e">Element</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Person</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">name</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">age</span> <span style="color:#66d9ef">int</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">//定义了String方法，实现了fmt.Stringer</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">p</span> <span style="color:#a6e22e">Person</span>) <span style="color:#a6e22e">String</span>() <span style="color:#66d9ef">string</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;(name: &#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">p</span>.<span style="color:#a6e22e">name</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; - age: &#34;</span><span style="color:#f92672">+</span><span style="color:#a6e22e">strconv</span>.<span style="color:#a6e22e">Itoa</span>(<span style="color:#a6e22e">p</span>.<span style="color:#a6e22e">age</span>)<span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; years)&#34;</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">list</span> <span style="color:#f92672">:=</span> make(<span style="color:#a6e22e">List</span>, <span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">list</span>[<span style="color:#ae81ff">0</span>] = <span style="color:#ae81ff">1</span> <span style="color:#75715e">// an int</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">list</span>[<span style="color:#ae81ff">1</span>] = <span style="color:#e6db74">&#34;Hello&#34;</span> <span style="color:#75715e">// a string</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">list</span>[<span style="color:#ae81ff">2</span>] = <span style="color:#a6e22e">Person</span>{<span style="color:#e6db74">&#34;Dennis&#34;</span>, <span style="color:#ae81ff">70</span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">index</span>, <span style="color:#a6e22e">element</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">list</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">value</span>, <span style="color:#a6e22e">ok</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">element</span>.(<span style="color:#66d9ef">int</span>); <span style="color:#a6e22e">ok</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;list[%d] is an int and its value is %d\n&#34;</span>, <span style="color:#a6e22e">index</span>, <span style="color:#a6e22e">value</span>)
+</span></span><span style="display:flex;"><span>			} <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">value</span>, <span style="color:#a6e22e">ok</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">element</span>.(<span style="color:#66d9ef">string</span>); <span style="color:#a6e22e">ok</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;list[%d] is a string and its value is %s\n&#34;</span>, <span style="color:#a6e22e">index</span>, <span style="color:#a6e22e">value</span>)
+</span></span><span style="display:flex;"><span>			} <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">value</span>, <span style="color:#a6e22e">ok</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">element</span>.(<span style="color:#a6e22e">Person</span>); <span style="color:#a6e22e">ok</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;list[%d] is a Person and its value is %s\n&#34;</span>, <span style="color:#a6e22e">index</span>, <span style="color:#a6e22e">value</span>)
+</span></span><span style="display:flex;"><span>			} <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;list[%d] is of a different type\n&#34;</span>, <span style="color:#a6e22e">index</span>)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span></code></pre></div><pre><code>是不是很简单啊，同时你是否注意到了多个if里面，还记得我前面介绍流程时讲过，if里面允许初始化变量。
+
+也许你注意到了，我们断言的类型越多，那么if else也就越多，所以才引出了下面要介绍的switch。
+</code></pre>
+<ul>
+<li>
+<p>switch测试</p>
+<p>最好的讲解就是代码例子，现在让我们重写上面的这个实现</p>
+</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">import</span> (
+</span></span><span style="display:flex;"><span>		<span style="color:#e6db74">&#34;fmt&#34;</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#e6db74">&#34;strconv&#34;</span>
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Element</span> <span style="color:#66d9ef">interface</span>{}
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">List</span> [] <span style="color:#a6e22e">Element</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Person</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">name</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">age</span> <span style="color:#66d9ef">int</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">//打印</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">p</span> <span style="color:#a6e22e">Person</span>) <span style="color:#a6e22e">String</span>() <span style="color:#66d9ef">string</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;(name: &#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">p</span>.<span style="color:#a6e22e">name</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; - age: &#34;</span><span style="color:#f92672">+</span><span style="color:#a6e22e">strconv</span>.<span style="color:#a6e22e">Itoa</span>(<span style="color:#a6e22e">p</span>.<span style="color:#a6e22e">age</span>)<span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; years)&#34;</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">list</span> <span style="color:#f92672">:=</span> make(<span style="color:#a6e22e">List</span>, <span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">list</span>[<span style="color:#ae81ff">0</span>] = <span style="color:#ae81ff">1</span> <span style="color:#75715e">//an int</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">list</span>[<span style="color:#ae81ff">1</span>] = <span style="color:#e6db74">&#34;Hello&#34;</span> <span style="color:#75715e">//a string</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">list</span>[<span style="color:#ae81ff">2</span>] = <span style="color:#a6e22e">Person</span>{<span style="color:#e6db74">&#34;Dennis&#34;</span>, <span style="color:#ae81ff">70</span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">index</span>, <span style="color:#a6e22e">element</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">list</span>{
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">switch</span> <span style="color:#a6e22e">value</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">element</span>.(<span style="color:#66d9ef">type</span>) {
+</span></span><span style="display:flex;"><span>				<span style="color:#66d9ef">case</span> <span style="color:#66d9ef">int</span>:
+</span></span><span style="display:flex;"><span>					<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;list[%d] is an int and its value is %d\n&#34;</span>, <span style="color:#a6e22e">index</span>, <span style="color:#a6e22e">value</span>)
+</span></span><span style="display:flex;"><span>				<span style="color:#66d9ef">case</span> <span style="color:#66d9ef">string</span>:
+</span></span><span style="display:flex;"><span>					<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;list[%d] is a string and its value is %s\n&#34;</span>, <span style="color:#a6e22e">index</span>, <span style="color:#a6e22e">value</span>)
+</span></span><span style="display:flex;"><span>				<span style="color:#66d9ef">case</span> <span style="color:#a6e22e">Person</span>:
+</span></span><span style="display:flex;"><span>					<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;list[%d] is a Person and its value is %s\n&#34;</span>, <span style="color:#a6e22e">index</span>, <span style="color:#a6e22e">value</span>)
+</span></span><span style="display:flex;"><span>				<span style="color:#66d9ef">default</span>:
+</span></span><span style="display:flex;"><span>					<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;list[%d] is of a different type&#34;</span>, <span style="color:#a6e22e">index</span>)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span></code></pre></div><pre><code>这里有一点需要强调的是：`element.(type)`语法不能在switch外的任何逻辑里面使用，如果你要在switch外面判断一个类型就使用`comma-ok`。
+</code></pre>
+<h3 id="嵌入interface">嵌入interface</h3>
+<p>Go里面真正吸引人的是它内置的逻辑语法，就像我们在学习Struct时学习的匿名字段，多么的优雅啊，那么相同的逻辑引入到interface里面，那不是更加完美了。如果一个interface1作为interface2的一个嵌入字段，那么interface2隐式的包含了interface1里面的method。</p>
+<p>我们可以看到源码包container/heap里面有这样的一个定义</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Interface</span> <span style="color:#66d9ef">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">sort</span>.<span style="color:#a6e22e">Interface</span> <span style="color:#75715e">//嵌入字段sort.Interface</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">Push</span>(<span style="color:#a6e22e">x</span> <span style="color:#66d9ef">interface</span>{}) <span style="color:#75715e">//a Push method to push elements into the heap</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">Pop</span>() <span style="color:#66d9ef">interface</span>{} <span style="color:#75715e">//a Pop elements that pops elements from the heap</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>我们看到sort.Interface其实就是嵌入字段，把sort.Interface的所有method给隐式的包含进来了。也就是下面三个方法：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Interface</span> <span style="color:#66d9ef">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// Len is the number of elements in the collection.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">Len</span>() <span style="color:#66d9ef">int</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// Less returns whether the element with index i should sort</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// before the element with index j.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">Less</span>(<span style="color:#a6e22e">i</span>, <span style="color:#a6e22e">j</span> <span style="color:#66d9ef">int</span>) <span style="color:#66d9ef">bool</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// Swap swaps the elements with indexes i and j.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">Swap</span>(<span style="color:#a6e22e">i</span>, <span style="color:#a6e22e">j</span> <span style="color:#66d9ef">int</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>另一个例子就是io包下面的 io.ReadWriter ，它包含了io包下面的Reader和Writer两个interface：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// io.ReadWriter</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">ReadWriter</span> <span style="color:#66d9ef">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">Reader</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">Writer</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="反射">反射</h3>
+<p>Go语言实现了反射，所谓反射就是能检查程序在运行时的状态。我们一般用到的包是reflect包。如何运用reflect包，官方的这篇文章详细的讲解了reflect包的实现原理，<a href="http://golang.org/doc/articles/laws_of_reflection.html">laws of reflection</a></p>
+<p>使用reflect一般分成三步，下面简要的讲解一下：要去反射是一个类型的值(这些值都实现了空interface)，首先需要把它转化成reflect对象(reflect.Type或者reflect.Value，根据不同的情况调用不同的函数)。这两种获取方式如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">t</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">TypeOf</span>(<span style="color:#a6e22e">i</span>)    <span style="color:#75715e">//得到类型的元数据,通过t我们能获取类型定义里面的所有元素</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">v</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">ValueOf</span>(<span style="color:#a6e22e">i</span>)   <span style="color:#75715e">//得到实际的值，通过v我们获取存储在里面的值，还可以去改变值</span>
+</span></span></code></pre></div><p>转化为reflect对象之后我们就可以进行一些操作了，也就是将reflect对象转化成相应的值，例如</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">tag</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">t</span>.<span style="color:#a6e22e">Elem</span>().<span style="color:#a6e22e">Field</span>(<span style="color:#ae81ff">0</span>).<span style="color:#a6e22e">Tag</span>  <span style="color:#75715e">//获取定义在struct里面的标签</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">name</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">v</span>.<span style="color:#a6e22e">Elem</span>().<span style="color:#a6e22e">Field</span>(<span style="color:#ae81ff">0</span>).<span style="color:#a6e22e">String</span>()  <span style="color:#75715e">//获取存储在第一个字段里面的值</span>
+</span></span></code></pre></div><p>获取反射值能返回相应的类型和数值</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">x</span> <span style="color:#66d9ef">float64</span> = <span style="color:#ae81ff">3.4</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">v</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">ValueOf</span>(<span style="color:#a6e22e">x</span>)
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;type:&#34;</span>, <span style="color:#a6e22e">v</span>.<span style="color:#a6e22e">Type</span>())
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;kind is float64:&#34;</span>, <span style="color:#a6e22e">v</span>.<span style="color:#a6e22e">Kind</span>() <span style="color:#f92672">==</span> <span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">Float64</span>)
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;value:&#34;</span>, <span style="color:#a6e22e">v</span>.<span style="color:#a6e22e">Float</span>())
+</span></span></code></pre></div><p>最后，反射的话，那么反射的字段必须是可修改的，我们前面学习过传值和传引用，这个里面也是一样的道理。反射的字段必须是可读写的意思是，如果下面这样写，那么会发生错误</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">x</span> <span style="color:#66d9ef">float64</span> = <span style="color:#ae81ff">3.4</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">v</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">ValueOf</span>(<span style="color:#a6e22e">x</span>)
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">v</span>.<span style="color:#a6e22e">SetFloat</span>(<span style="color:#ae81ff">7.1</span>)
+</span></span></code></pre></div><p>如果要修改相应的值，必须这样写</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-Go" data-lang="Go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">x</span> <span style="color:#66d9ef">float64</span> = <span style="color:#ae81ff">3.4</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">p</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">reflect</span>.<span style="color:#a6e22e">ValueOf</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">x</span>)
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">v</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">p</span>.<span style="color:#a6e22e">Elem</span>()
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">v</span>.<span style="color:#a6e22e">SetFloat</span>(<span style="color:#ae81ff">7.1</span>)
+</span></span></code></pre></div><p>上面只是对反射的简单介绍，更深入的理解还需要自己在编程中不断的实践。</p>
+]]></content:encoded></item><item><title>beego 的日志级别</title><link>https://haokiu.com/blog/RAhBfF/</link><pubDate>Wed, 09 Sep 2020 11:10:43 +0000</pubDate><guid>https://haokiu.com/blog/RAhBfF/</guid><description>看 beego 的源码，beego 的日志分为7个级别： 转换为</description><content:encoded><![CDATA[<p>看 beego 的源码，beego 的日志分为7个级别：</p>
+<pre tabindex="0"><code>const (
 	LevelEmergency = iota
 	LevelAlert
 	LevelCritical
@@ -668,8 +1469,8 @@ func main() {
 	LevelInformational
 	LevelDebug
 )
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;转换为&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;	LevelEmergency = 0
+</code></pre><p>转换为</p>
+<pre tabindex="0"><code>	LevelEmergency = 0
 	LevelAlert = 1
 	LevelCritical = 2
 	LevelError = 3
@@ -677,8 +1478,4 @@ func main() {
 	LevelNotice = 5
 	LevelInformational = 6
 	LevelDebug = 7
-&lt;/code&gt;&lt;/pre&gt;</description>
-    </item>
-    
-  </channel>
-</rss>
+</code></pre>]]></content:encoded></item></channel></rss>

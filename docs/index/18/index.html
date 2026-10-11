@@ -1,200 +1,109 @@
 <!doctype html><html lang=zh-cn dir=auto><head><meta name=generator content="Hugo 0.167.0"><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>haokiu</title><meta name=description content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><meta name=author content><link rel=canonical href=https://haokiu.com/><link crossorigin=anonymous href=/assets/css/stylesheet.27115e9d9513d5c41ff78d63d8c3238939dabec71459d67163cfae4b996bfdbe.css integrity="sha256-JxFenZUT1cQf941j2MMjiTnavscUWdZxY8+uS5lr/b4=" rel="preload stylesheet" as=style><link rel=icon href=https://haokiu.com/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://haokiu.com/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://haokiu.com/favicon-32x32.png><link rel=apple-touch-icon href=https://haokiu.com/apple-touch-icon.png><link rel=mask-icon href=https://haokiu.com/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate type=application/rss+xml href=https://haokiu.com/index.xml><link rel=alternate type=application/json href=https://haokiu.com/index.json><link rel=alternate type=text/plain href=https://haokiu.com/llms.txt><link rel=alternate hreflang=zh-cn href=https://haokiu.com/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><link rel=describedby href=https://haokiu.com/llms.txt type=text/markdown><script type=application/ld+json>{"@context":"https://schema.org","@type":"WebSite","name":"haokiu","url":"https://haokiu.com/","inLanguage":"zh-cn","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https:\/\/haokiu.com\/search\/?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script><meta property="og:title" content="haokiu"><meta property="og:description" content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><meta property="og:type" content="website"><meta property="og:url" content="https://haokiu.com/"><meta name=twitter:card content="summary"><meta name=twitter:title content="haokiu"><meta name=twitter:description content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><script type=application/ld+json>{"@context":"https://schema.org","@type":"Organization","name":"haokiu","url":"https://haokiu.com/","description":"haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他","thumbnailUrl":"https://haokiu.com/favicon.ico","sameAs":[]}</script></head><body class=list id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://haokiu.com/ accesskey=h title="haokiu (Alt + H)">haokiu</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)">
 <svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button><ul class=lang-switch><li>|</li></ul></div></div><ul id=menu><li><a href=https://haokiu.com/ title=haokiu><span class=active>Home</span></a></li><li><a href=https://haokiu.com/1/ title=1><span>后端</span></a></li><li><a href=https://haokiu.com/2/ title=2><span>前端</span></a></li><li><a href=https://haokiu.com/3/ title=3><span>区块链</span></a></li><li><a href=https://haokiu.com/4/ title=4><span>大数据</span></a></li><li><a href=https://haokiu.com/5/ title=5><span>linux</span></a></li><li><a href=https://haokiu.com/6/ title=6><span>其他</span></a></li><li><a href=https://haokiu.com/tags/ title=Tags><span>tags</span></a></li><li><a href=https://haokiu.com/categories/ title=Categories><span>categories</span></a></li></ul></nav></header><main class=main><article class=post-entry><header class=entry-header><h2>网络编程</h2></header><div class=entry-content><p>网络编程 bind 函数重难点解析
-connect 函数在阻塞和非阻塞模式下的行为
-select 函数重难点解析
-Linux epoll 模型（含LT 模式和 ET 模式详解）
-socket 的阻塞模式和非阻塞模式
-非阻塞模式下 send 和 recv 函数的返回值
-服务器开发通信协议设计介绍
-TCP 协议如何解决粘包、半包问题
-网络通信中收发数据的正确姿势
-服务器端发数据时，如果对端一直不收，怎么办？</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 网络编程" href=https://haokiu.com/blog/6e60982d515240e4b34e2f0e22647f58/></a></article><article class=post-entry><header class=entry-header><h2>网络通信面试题集锦</h2></header><div class=entry-content><p>网络通信面试题集锦 TCP/IP协议栈层次结构
-TCP三次握手需要知道的细节点
-TCP四次挥手需要知道的细节点(CLOSE_WAIT、TIME_WAIT、MSL)
-TCP与UDP的区别与适用场景
-linux常见网络模型详解(select、poll与epoll)
-epoll_event结构中的epoll_data_t的fd与ptr的使用场景
-Windows常见的网络模型详解(select、WSAEventSelect、WSAAsyncSelect)
-Windows上的完成端口模型(IOCP)
-异步的connect函数如何编写
-select函数可以检测网络异常吗？
-epoll的水平模式和边缘模式
-如何将socket设置成非阻塞的(创建时设置与创建完成后设置)，非阻塞socket与阻塞的socket在收发数据上的区别
-send/recv(read/write)返回值大于0、等于0、小于0的区别
-如何编写正确的收数据代码与发数据代码
-发送数据缓冲区与接收数据缓冲区如何设计
-socket选项SO_SNDTIMEO和SO_RCVTIMEO
-socket选项TCP_NODELAY
-socket选项SO_REUSEADDR和SO_REUSEPORT（Windows平台与linux平台的区别）
-socket选项SO_LINGER
-shutdown与优雅关闭
-socket选项SO_KEEPALIVE
-关于错误码EINTR
-如何解决tcp粘包问题
-信号SIGPIPE与EPIPE错误码
-gethostbyname阻塞与错误码获取问题
-心跳包的设计技巧（保活心跳包与业务心跳包）
-断线重连机制如何设计
-如何检测对端已经关闭
-如何清除无效的死链（端与端之间的线路故障）
-定时器的不同实现及优缺点
-http协议的具体格式
-http head、get与post方法的细节
-http代理、socks4代理与socks5代理如何编码实现
-ping
-telnet
-关于以上问题的答案，有兴趣可以参考我的知乎live：https://www.zhihu.com/lives/922110858308485120
-或者如果你有任何不明白的地方，可以加我微信 easy_coder 交流。</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 网络通信面试题集锦" href=https://haokiu.com/blog/eb4b0ccb7b2942b989b3655d832bb0e0/></a></article><article class=post-entry><header class=entry-header><h2>网络通信中收发数据的正确姿势</h2></header><div class=entry-content><p>网络通信中收发数据的正确姿势 在网络通信中，我们可能既要通过 socket 去发送数据也要通过 socket 来收取数据。那么一般的网络通信框架是如何收发数据的呢？注意，这里讨论的范围是基于各种 IO 复用函数（select、poll、epoll 等）来判断 socket 读写来收发数据，其他情形比较简单，这里就不提了。
-我们这里以服务器端为例。服务器端接受客户端连接后，产生一个与客户端连接对应的 socket（Linux 下也叫 fd，为了叙述方便，以后称之为 clientfd），我们可以通过这个 clientfd 收取从客户端发来的数据，也可以通过这个 clientfd 将数据发往客户端。但是收与发在操作流程上是有明显的区别的。
-收数据的正确姿势 对于收数据，当接受连接成功得到 clientfd 后，我们会将该 clientfd 绑定到相应的 IO 复用函数上并监听其可读事件。不同的 IO 复用函数可读事件标志不一样，例如对于 poll 模型，可读标志是 POLLIN，对于 epoll 模型，可读事件标志是 EPOLLIN。当可读事件触发后，我们调用 recv 函数从 clientfd 上收取数据（这里不考虑出错的情况），根据不同的网络模式我们可能会收取部分，或一次性收完。收取到的数据我们会放入接收缓冲区内，然后做解包操作。这就是收数据的全部“姿势”。对于使用 epoll 的 LT 模式（水平触发模式），我们每次可以只收取部分数据；但是对于 ET 模式（边缘触发模式），我们必须将本次收到的数据全部收完。
-ET 模式收完的标志是 recv 或者 read 函数的返回值是 -1，错误码是 EWOULDBLOCK，针对 Windows 和 Linux 下区别，前面章节已经详细地说过了。
-这就是读数据的全部姿势。流程图如下：
-发数据的正确姿势 对于发数据，除了 epoll 模型的 ET 模式外，epoll 的 LT 模式或者其他 IO 复用函数，我们通常都不会去注册监听该 clientfd 的可写事件。这是因为，只要对端正常收数据，一般不会出现 TCP 窗口太小导致 send 或 write 函数无法写的问题。因此大多数情况下，clientfd 都是可写的，如果注册了可写事件，会导致一直触发可写事件，而此时不一定有数据需要发送。故而，如果有数据要发送一般都是调用 send 或者 write 函数直接发送，如果发送过程中， send 函数返回 -1，并且错误码是 EWOULDBLOCK 表明由于 TCP 窗口太小数据已经无法写入时，而仍然还剩下部分数据未发送，此时我们才注册监听可写事件，并将剩余的服务存入自定义的发送缓冲区中，等可写事件触发后再接着将发送缓冲区中剩余的数据发送出去，如果仍然有部分数据不能发出去，继续注册可写事件，当已经无数据需要发送时应该立即移除对可写事件的监听。这是目前主流网络库的做法。
-流程图如下：
-上述逻辑示例如下：
-直接尝试发送消息处理逻辑：
-/** *@param data 待发送的数据 *@param len 待发送数据长度 */ void TcpConnection::sendMessage(const void* data, size_t len) { int32_t nwrote = 0; size_t remaining = len; bool faultError = false; if (state_ == kDisconnected) { LOGW("disconnected, give up writing"); return; } // 当前未监听可写事件，且发送缓冲区中没有遗留数据 if (!channel_->isWriting() && outputBuffer_.readableBytes() == 0) { //直接发送数据 nwrote = sockets::write(channel_->fd(), data, len); if (nwrote >= 0) { remaining = len - nwrote; } else // nwrote &lt; 0 { nwrote = 0; //错误码不等于EWOULDBLOCK说明发送出错了 if (errno != EWOULDBLOCK) { LOGSYSE("TcpConnection::sendInLoop"); if (errno == EPIPE || errno == ECONNRESET) { faultError = true; } } } } //发送未出错且还有剩余字节未发出去 if (!faultError && remaining > 0) { //将剩余部分加入发送缓冲区 outputBuffer_.append(static_cast&lt;const char*>(data) + nwrote, remaining); if (!channel_->isWriting()) { //注册可写事件 channel_->enableWriting(); } } } 不能全部发出去监听可写事件后，可写事件触发后处理逻辑：
-...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 网络通信中收发数据的正确姿势" href=https://haokiu.com/blog/ec34cfea56f74c0d9a622ef5cbc4f812/></a></article><article class=post-entry><header class=entry-header><h2>为什么你的简历没人看</h2></header><div class=entry-content><p>为什么你的简历没人看 程序员如何写简历</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 为什么你的简历没人看" href=https://haokiu.com/blog/15d5370937664a8d84891f5e983b87f4/></a></article><article class=post-entry><header class=entry-header><h2>我的 2019</h2></header><div class=entry-content><p>我的 2019 2019 年就这么悄无声息的过去了，我并不是一个喜欢缅怀过去的人，很多人喜欢回忆过去经历的困难，但就我倒是认为如果过去的苦难不能对将来生活质量或者人生经验有帮助，那这些苦难其实相当于白挨了。
-从学生时代开始，每年在年末时都会总结一下过去的一年，给自己复盘，总结一下过去一年的得失。成年人的生活没有谁是容易的，而成年人的工作和交往大多数都是逐利的，只是有些是直接的，有些是间接的。当然，这也无可厚非，大家的目的虽然功利却也高尚，都希望给自己和家人或者爱的人提供更好的生活质量。
-工作 先来说说我的工作吧。我是一名地地道道的程序员。我于 2018 年 12 月底从携程旅行网离职，应朋友邀请一起合伙创业，投资人是一知名大佬，创业的项目是基于区块链的期货交易系统，项目从 2018 年年底开始启动，从零开始开发，于 2019 年 8 月份正式全球上线，8 月后开始优化和重构部分框架。
-整个交易系统分为场上系统和场下系统，场上系统是交易系统的核心系统，一共有多个服务，从功能上有下单服务、清算服务、撮合服务、条件单服务、K 线服务和行情推送服务，场下系统为交易非核心系统，包括指数服务、管理系统等。使用的开发语言是 Java 和 C++，行情服务使用的是 C++，其他所有服务使用的是 Java，另外我们的客户端有 Web 端和手机端（安卓和 ios）。服务与服务之间使用 Kafka 作为消息中间件，数据存储和查询使用 mysql 和 ElasticSearch。交易核心系统开发要求比较高，无论是对性能还是代码的质量的要求比较高，交易系统非核心部分，例如管理系统，由于只是给内部运营团队使用，要求不高做的相对来说粗糙一些，其技术原理也比较简单（各种对数据库进行增删改查的 RESTFUL 接口），但由于功能比较多，工作量也比较大。除了这些技术栈外，还用到了 zookeeper、consul、Prometheus 等。
-互联网时代市场动态和风口转瞬即逝，因此我们需要尽快把产品做出来。从立项之初，我们自己公司技术人员加上我一共有 3 位，另外一位是邀请我的朋友，还有一位是我从携程"忽悠”过来的一位玩的比较好的同事。为了加快开发进度，加上起初我们对部分业务不是很熟悉或者经验不足，我们花了大约四百万在上海找了一个专门做交易系统的外包团队，外包团队负责主要开发，我们负责 review 代码和把控整体开发进度。原来外包团队承诺我们的是，项目可以在五月份完成，但是由于外包团队本身的质量问题导致后来我们不得不强力干预，甚至完全自己接手。由于外包团队中开发人员的素养问题以及外包团队的 leader 的管理和待遇问题，导致我们直到五月初还看不到一个可以走通基本流程的产品。于是后来我们的策略做了调整，与外包团队所在的公司进行了沟通，吸纳了外包团队中部分还不错的开发人员，对于无法达到我们要求的开发人员停止合作，最终我接手了条件单、撮合服务、K 线服务、行情推送服务等 4 个核心服务的开发，其中行情推送服务使用的是 C++，目前的人员配置中了，只有我同时拥有 C++ 和 Java 技术栈，因此只能我来接手行情推送服务。
-其实从我们与外包团队的合作的刚开始的两个月后，我们就觉得行情服务外包团队在预定的工期内无法完成，因此在那个时候我就被安排开始接手这个服务的开发，起初他们给我的一套程序是他们根据之前做过的一个股票服务的行情代码精简来的一个空架子，加上他们的代码有大量我们不需要的无用功能，加上其通信协议与我们的业务并不完全契合，在我花了一周时间熟悉后，我一边在原来的老的上面开发，另外有自己重新设计了一套，经过大家的试用后完全采用了我新的设计。由于 C++ 是我的技术专长，在行情服务基本开发完毕后，八月份上线后到目前没有出现任何问题，所以基本未做过任何的修改。这样为我腾出大量的时间去集中精力去开发和优化条件单、撮合和 K 线服务。
-先来说撮合服务吧。在大多数交易系统中，撮合服务是非常核心的一轮。所谓撮合，即根据一定的交易规则（常见的规则是时间优先、价格优先），将用户的报单进行成交，产生成交等相关信息，如果不能成交，则成为市场上的挂单。最初负责这个服务的外包同事，哎，但是由于其工作态度和代码素养问题，写出来的代码真的是"惨不忍睹"。我们与外包团队约定的要求是，撮合服务必须至少达到每秒可以处理 3000 ～ 5000 笔报单的性能。但是其交付后我们测试发现，每秒三百到五百的速度都达不到。但是这个事情的结果在我们整个公司，包括 CEO 都引起来非常大的恐慌。项目上线在即，如果按这个速度，我们的系统注定是个失败的产品。于是后来，CEO 给外包团队的领导施压，强行把这么同事给"撵走"了，并由我来接手，当然压力也落在我的身上，我记得我最初接手的那几周内，CEO 每天跑我工位上来问我撮合现在最新的进展怎样，有时候一天可能会跑两次。我在阅读其撮合代码的过程中，发现这个代码的质量非常差。当然造成撮合效率如此之低有两个主要原因：一是他使用的一个链表去存储所有用户的报单，这样的话，改单或者撤单，寻找某个订单时需要遍历这个链表，当订单数量多的时候，这个过程会很慢。哎，数据结构和算法不用心学的开发人员，真是贻害无穷啊。二是他往 Kafka 中写数据时使用了 Future 接口的 get 方法，熟悉 Java 的同学可能知道，这个是需要等待的，也就是说每往 Kafka 发一次数据都要等待结果返回。这种同步的做法，让整个撮合系统对报单的吞吐量变得很低。于是，在全公司上下尤其是 CEO 的"密切"注视下，我花了大概三个月时间基本重写了撮合服务的所有业务逻辑，而这个外包同事已经做这个做了半年了。
-剩下的是条件单服务，所谓条件单就是用户发起的、根据一定规则（例如某个价格指数达到一定值时）才会产生的报单。这个服务也是上文中开发撮合服务的外包同事做的，条件单和撮合服务存在同样的问题，我也重写了全部的业务逻辑，但是由于时间来不及，18 年 8 月份我们上线时由于还没重构完成，我们第一次没有上线这个功能，第一次上线后的一周后我们上线了这个功能。
-剩下的就是不太重要的 K 线服务了，K 线服务本身业务并不复杂，但是数据量非常大，原来是外包团队的另外一位同事开发的。原来我们的注意力并没有在这个上面有特别多的关注，主要是其比较简单。但是某天公司的产品同事，在群里发了几张关于我们生产环境的 K 线服务的图，结果某些大周期的 K 线数据竟然和小周期的 K 线数据竟然对不上，我当时真的是无语了。于是我又被安排维护 K 线服务，K 线服务的代码质量其实还是不错的，只不过一些核心的算法竟然不对，例如计算从某天到某天之间有多少小时，这都能算错，而且如果自己稍微验证一下就很容易发现问题。
-上面说的四个服务，除了行情推送服务由于早期就使用我开发的版本因此对我来说，很轻松，大家也很放心，但是撮合、条件单和 K 线这三个服务让我承受了很大的压力。我没预料到的是，一个外包团队的某些开发人员开发水平能不靠谱到如此程度，而且还是工作多年的程序员。好在一切都过来了，项目也成功上线了。后来，我们陆续招聘了前端开发人员、测试团队、补齐了自己的产品团队和运营团队，后来我们又招了客服团队。
-由于项目任务比较多，我们采用的是 996 模式，但是在 2018 年上半年，我基本上在晚上 12 点之前是没回去过的。当然，我并不认为工作时间与实际的产出会成正比，在团队扩大的过程中也暴露了很多的问题，有我自己的，也有 CEO 和团队其他一些负责人的。有的时候，我其实挺想和 CEO 说让大家每周多休息一天，但是看到当前的现状，我最终还是没开口。
-...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 我的 2019" href=https://haokiu.com/blog/fce122b624fd44a88df285c221d765b8/></a></article><article class=post-entry><header class=entry-header><h2>我面试后端开发经理的经历</h2></header><div class=entry-content><p>我面试后端开发经理的经历 我去年12月份从上一家公司离职，一直到今年3月份，基本上都在面试中度过来的。
-先交代下背景：坐标上海，做技术开发，我本人面试的职位是linux服务器开发，最倾向的职位是服务器开发主程或技术经理。我本人也是上几家公司的面试官，因为接下来几年面临着成家，技术上也到了瓶颈期，虽然拿了不少offer，但是想综合比对一下，于是就参加了很多的面试。我先后去了如下一些公司：腾讯、百度、饿了么、爱奇艺、360、携程网、京东、华为、bilibili、上海黄金交易所、东方财富网、zilliz、掌门集团(做无线万能钥匙的那一家)、喜马拉雅听书、峰果网络、华尔街新闻、万得财经、汇正财经、逗屋网络、朝阳永续，还有数家小规模的公司或创业公司吧。
-为了避免引起不必要的纠纷，下面我就不说具体的公司名称了。技术面试的细节我尽量写的详细一点，希望对大家有参考价值，技术面试大致有三种情形：
-经验分享 一、以百度、爱奇艺等为代表的，以数据结构和算法为主。
-首先是简单地了解下你之前的工作经历和项目经验，然后就是算法和数据结构题目，具体涉及到以下内容：
-01
-快速排序
-快速排序（包括算法步骤、平均算法复杂度、最好和最坏的情形），有人说校招要把算法写出来，我是社招，所以描述一下算法步骤即可。
-02
-二分查找算法
-写二分查找算法，这个尽管是社招，但是一般也不难，所以要求面试者写出来。但是很多公司，比如不会直接让你写算法，而是结合一个具体场景来提问，然后让你自己联想到二分查找，比如求一个数的平方根。
-03
-链表
-链表，常见的面试题有写一个链表中删除一个节点的算法、单链表倒转、两个链表找相交的部分，这个一般必须得完全无误的情况下写出来。
-04
-自己实现一些基础的函数
-自己实现一些基础的函数，例如strcpy / memcpy / memmov / atoi，同样的道理，这些必须完全无误且高效地写出来，比如你的实现中会动态分配堆内存，那么这道题目就算答错。
-第3点和第4点的门道一般在于考察你的代码风格、对边界条件的处理，比如判断指针是否为空，千万不要故意不考虑这种情形，即使你知道也不行，只要你不写，一般面试官就认为你的思路不周详，容错率低；再比如，单链表的倒转，最后的返回值肯定是倒转后的链表头结点，这样才能引用一个链表，这些都是面试官想考虑的重点。
-05
-哈希表
-哈希表，对哈希表的细节要求很高，比如哈希表的冲突检测、哈希函数常用实现、算法复杂度；比如百度二面就让我写一个哈希表插入元素算法，元素类型是任意类型。
-06
-AVL树和B树的概念、细节
-AVL树和B树的概念、细节，比如会问mysql数据库的索引的实现原理，基本上就等于问你B树了。
-07
-红黑树
-红黑树，这个基本上必问的一个数据结构，包括红黑树的概念、平均算法复杂度、最好最坏情况下的算法复杂度、、左右旋转、颜色变换。面试官常见的算法套路有：你熟悉C++的stl吗？你说熟悉，ok，stl的map用过吧？用过，ok，那map是如何实现的？红黑树，ok，那什么是红黑树？这样提问红黑树就开始了。Java的也类似。
-二、以饿了么、bilibli、喜马拉雅、360、携程等为代表的，兼顾算法数据结构和其他开发技术。
-算法和数据结构部分上文提过了，下面提一下其他技术，大致包括以下东西：
-01
-基础的C++问题
-以C++语言为例（不是C++开发的朋友可以跳过这一点），第一类是基础的C++问题，常见的有C++的继承体系中virtual关键字的作用（如继承关系中析构函数为什么要申明成virtual函数，如果不申明为virtual会有什么影响)、在涉及到父子类时构造与析构函数的执行顺序、多重继承时类的成员列表在地址空间的排列；static关键字的作用，static_cast / reinterpret_cast / dynamic_cast等几个转换符的使用场景;问的最多的就是虚表的布局，尤其是菱形继承(B和C继承A，D继承B和C)时每个对象的空间结构分布，比如问D有几份虚表，D中B和C的成员空间排布。
-另外，如果你应聘的职位使用C++开发，很多公司会问你一些C++11的东西（或者问boost库，基本上都一样），这个你用过就用过，没有用过就说没用过不要装X，常见的C++11需要掌握的一些技术库我也列举一下吧（JAVA及其他语言的读者可以忽略）：
-auto关键字、for-each循环、右值及移动构造函数 + std::forward + std::move + stl容器新增的emplace_back()方法、std::thread库、std::chrono库、智能指针系列（std::shared_ptr/std::unique_ptr/std::weak_ptr）(智能指针的实现原理一定要知道，最好是自己实现过)、线程库std::thread+线程同步技术库std::mutex/std::condition_variable/std::lock_guard等、lamda表达式（JAVA中现在也常常考察lamda表达式的作用）、std::bind/std::function库、其他的就是一些关键字的用法(override、final、delete)，还有就是一些细节如可以像JAVA一样在类成员变量定义处给出初始化值。
-02
-网络通信问题
-网络通信问题，比如协议栈的层级关系，三次握手和四次挥手的【细节】，注意我说的是细节，比如CLOSE_WAIT和TIME_WAIT状态（bilibili问了这样一个问题，你可以感受一下：A与B建立了正常连接后，从未相互发过数据，这个时候B突然机器重启，问A此时的tcp状态处于什么状态？如何消除服务器程序中的这个状态？
-万得问过流量拥塞和控制机制、腾讯问过tcp和ip包头常见有哪些字段），阻塞和非阻塞socket在send、recv函数上的行为表现，异步connect函数的写法，select函数的用法，epoll与select的区别，基本上只要问到epoll，必问epoll的水平模式和边缘模式的区别；一些socket选项的用法，nagle / keepalive / linger等选项的区别；tcp / udp的区别和适用场景；通信协议如何设计避免粘包；http协议的get和post方法的区别（问的比较深的会让你画出http协议的格式，参照这篇文章中关于http协议格式的讲解：http://blog.csdn.net/analogous_love/article/details/72540130）；windows用户可能会问到完成端口模型(IOCP)，网络通信方面的问题，我专门开了一个知乎live系统地总结了一下，有兴趣的朋友可以看这里：https://www.zhihu.com/lives/922110858308485120 和 这里：https://www.zhihu.com/lives/902113324999778304。
-总之，网络通信问题能搞的多清楚就可以搞的多清楚，最起码把tcp应用层的各种socket API的用法细节搞清楚。
-03
-操作系统原理性的东西
-比如linux下elf文件的节结构，映射到进程地址空间后，分别对应哪些段，相关的问题还有，全局变量、静态存储在进程地址空间的哪里；堆和栈的区别，栈的结构，栈的细节一点要搞的特别清楚，因为一些对技术要求比较高的公司会问的比较深入，例如京东的一面是让我先写一个从1加到100的求和函数，然后让我写出这个函数的汇编代码（JAVA开发的同学可能会让你试着去写一点JVM的指令），如果你对栈的结构（如函数参数入栈顺序、函数局部变量在栈中的布局、栈帧指针和栈顶指针的位置）不熟悉的话，这题目就无法答对了；栈的问题，可能会以常见的函数调用方式来提问，常见的函数调用有如下__cdecl/__stdcall/__thiscall/__fastcall的区别，比如像printf这样具有不定参数的函数为什么不能使用__stdcall；还有就是进程和线程的联系与区别，问的最多的就是线程之间的一些同步技术，如互斥体、信号量、条件变量等(Windows上还有事件、临界区等)，这些东西你必须熟悉到具体的API函数使用的层面上来，从另外一个角度来说，这是咱们实际工作中编码最常用的东西，如果你连这个都不能熟练使用，那么你肯定不是一个合格的开发者；这类问题还可以引申为什么是死锁、如何避免死锁；进程之间通信的常用技术也需要掌握，常用的通信方式（linux下）有共享内存、匿名和具名管道、socket、消息队列等等，管道和socket是两个必须深入掌握的考察点（与上面网络通信有点重复）；linux系统下可能还会问什么是daemon进程，如何产生daemo进程，什么是僵尸进程，僵尸进程如何产生和消除（bilibili问过）。
-CAS机制（饿了么二面问过）。
-04
-使用过的开源技术
-第四类就是一个使用过的开源技术，比如代表nosql技术的redis；网络库libevent等等；数据库如mysql的一些东西。这个一般不做硬性要求，但是这里必须强调的就是redis，熟练使用redis甚至研究过redis源码，现在一般是做后台开发的技术标配或者说不可缺少的部分，基于redis的面试题既可以聊算法与数据结构，也可以聊网络框架等等一类东西。我面试的公司中基本上百分之九十以上都问到了redis，只是深浅不一而已，比如喜马拉雅问了redis的数据存储结构、rehash；bilibili问了redis的事务与集群。
-三、只问一些做过的业务或者项目经验。
-这类公司他们招人其实对技术要求不高（资深及主管级开发除外），只要你过往的项目与当前应聘职位匹配，可以过来直接上手干活就可以了，当然薪资也就不会给很多。比如游戏公司会关心你是否有某某类型的游戏开发经验、股票类公司会关心你是否有过证券或者交易系统的开发经验等。我的经验就是这类公司，能去的话可以去，不能去的话就当积累面试经验。业务开发哪里都能找到，真正的重视技术的公司，应该是广大做技术尤其是初中级开发的朋友应该值得关心的事情。
-不靠谱型公司。 我遇到的大致有四类：
-01
-装X忽悠型
-第一类：装X忽悠型
-面试过程冗长繁琐，比如号称每一百份简历中才发一个面试邀请，号称每一百个面试者发一个offer，号称硅谷风格，我面试的有一家公司就是这个样子，先是一轮长长的电话面试，然后是五轮技术面试，前三轮是刷leetcode上原题，然后后几轮面试，面试官从基本的操作系统的中断、GDT、LDT、分表分页机制问到上层高并发海量数据的架构，说的不好听，真是从外太空聊到内子宫，最后问具体职位做什么时，要么遮遮掩掩要么原型毕露；或者讨论薪资时，要么面露难色要么各种画饼，但是实际就给不了多少薪水的。
-02
-佛性公司
-第二类：佛性公司
-面试下来，全程面试官面带微笑，问你的问题你回答的面试官也很赞同，但最后你就没通过，我猜测要么公司不是很缺人，想观望一下是否有合适的人才；要么招聘信息上开的薪资给不到。
-03
-老奶奶裹脚布型公司
-第三类：老奶奶裹脚布型公司
-其特点是面试周期长，往往第一轮面试通知你过了，让你回去等上十天半个月后，给你打电话通知你来第二轮面试，面试要求穿正装，带好各种证件，面试前必须先查验你的身份证、学历证学位证，甚至是四六级考试证等等，麻烦至极，即使你一路过关斩将过了终面，薪资也给不了多少。大家都是要养家糊口的，都是忙着找工作，谁有时间和你耗上十天半个月呢？
-04
-不尊重人类型公司
-第四类：不尊重人类型公司
-我这里说的不尊重人，不是指的是面试过程中对你人身攻击，而是不根据你的工作年限和经验随意安排面试官，举个例子，比如你工作十年，你去面试一个技术总监的职位，对方公司安排一个工作不满两年的部门职员作为面试官，这个面试官如果是走过场可以理解，但是非要和你纠结一个如二进制位移、现代编译器要不要在子类析构函数前加virtual关键字这些技术细节就没必要了。还有一类就是故意问一些刁钻的问题，或者全场都心不在焉、玩手机、漫不经心的面试官，比如问你tcp协议头有多少个字段，每个字段是干啥的。遇到这一类面试官我的经验就是要么婉拒，要么直接怼回去。
-注意细节 下面再说下面试中需要注意的一些细节：
-01
-把目光放长远一点
-第一，如果你的工作年限不长，尤其是渴望在技术方面有一定的造诣，那么你首先考虑的应该是新的单位是否能有利于你技术上的成长，而不是两份同样的工作，薪资上的上下相差的三五千、五六千。如果想转行的同学（比如从客户端转服务器，从C++转JAVA），不要因为薪资突然变低而拒绝这种阵痛，要把目光放长远一点。
-02
-可能最终会因为薪资达不到不被录取
-...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 我面试后端开发经理的经历" href=https://haokiu.com/blog/b9e6c063ac4a43aca14c01cc45b2f8fa/></a></article><article class=post-entry><header class=entry-header><h2>我是如何年薪五十万的</h2></header><div class=entry-content><p>我是如何年薪五十万的 以下经历希望对广大程序员同行有点启发。
-1
-我姓方，码农一枚，14 年硕士毕业于某 211 学校，哎，这里就不提母校了。人到中年，还没混出什么名堂，就不给学校丢脸了。经常很多人问我现在的收入多少，这个嘛，男人的收入就和女人的身高一样是个秘密。不过，今天姑且聊一聊这个话题。
-2
-我的第一家公司做 Windows C/C++ 开发，第二家公司做 Linux C++ 开发，第三家公司是某大型互联网公司，以 C++ 技术专家的加入，同时从事 C++ 和 Java 开发。我大学学的非计算机专业，非科班出身的劣势就是参加大厂的校招时，筛选简历那一关直接给你 pass 掉了，这也是我毕业时未通过校招去大厂的原因之一。之所以走到今天靠的是自己的兴趣加上一些运气，当然也离不开很多人的帮助。大学时早年自学 Web ，熟悉 html 5 标准前的各类前端开发技术和 PS 等软件，后痴迷 Flash 编程，做过很多 Flash 动画自娱自乐，2011 年大学毕业时先后在上海一家开发 Flash 整站和一家做网页游戏公司任 Flash 程序员，第一家公司实习工资 1500，第二家公司正式员工月薪 3000。许多年后，我和第二家公司的 Flash 主程再聚首时，他告诉我其实我当时作为一名应届生 3000 的工资并不低，当时他作为项目负责人工资也才 8000。当然，据他说，经过这么多年后，在经历了几次创业失败后他也回归于平淡，在张江一家做游戏的公司安安心心地上班。
-3
-我的大学后半段时间，真的非常痴迷于 Flash，那个时候觉得 Flash 就是整个人生的意义，并为此写过很多轻狂的话，像什么“你 flash一下子，我爱你一辈子，真像个傻子”、“让我们高举 Flash 伟大旗帜，紧密地团结在以 Adobe 为核心的富媒体公司周围，紧随乔纳森．盖伊的脚步，不舍昼夜的编程，把我国的 RIA 事业全面推向现代化！” 那个时候，坐五个小时的火车来上海，就为去上海书城买一本全英文版的《Flash 编程精髓》，甚至为了一份 flash 开发的工作差点儿放弃读研究生。时过境迁，八年后的今天，浏览器原生支持很多以前仅能通过 flash 实现的技术和效果，Adobe 公司宣布不再更新 flash，各个浏览器逐步禁用乃至不再支持 flash。真是让人唏嘘不已啊。
-大四正式离校的前一天晚上在逛蓝色理想站点时，发现有人在一篇帖子上推荐《Windows 程序设计》（第五版）这本书，看了下目录，果断购买，听说过这本书的读者应该知道，这本书一百多块钱，老厚了。这本书可谓是改变我整个人生轨迹的一本书吧，这本书介绍了 Windows 操作系统上程序运行的原理，直接利用操作系统提供的 API 进行编程。愈看这本书，我愈喜欢，它介绍了很多操作系统层面的原理，从前很多在 flash 平台不明白的东西一下子变得清晰起来，从前很多 flash 平台提供的类库不知道该如何使用一下子明白了为什么要那么设计了，后面又陆陆续续地看了《Windows 核心编程》等书。整个人更意识到对底层原理和计算机基础科学的掌握的重要性。于是等到硕士毕业时，我可以去一些公家单位从事地质相关的工作，去互联网业务做前端开发（也包括 flash 开发），但是我还是很倔强啊，薪资高低和工作地点并不是我考虑的因为，我就要做 Windows C++ 开发。当年非 flash 不嫁，如今却非要嫁给另外一个人。哎，人这辈子啊，真的可能会爱上很多人，工作、兴趣亦如是。
-4
-让我们来复盘一下这段经历，整个学生生涯，大学期间学的是 web 开发和 flash 编程，硕士期间学的是 Windows C++，并针对性地补充很多计算机科学的基础知识，也看了不少“闲杂知识”，如汇编、逆向、安全工程等等，当然都是自学。人的经历是有限的，自学的太多其他东西，很可能让你的专业课就变得一塌糊涂。我也是这样，所以，我特别理解 CSDN 上那位叫 moreWindows 的前辈在读研期间的痛苦，好几次想辍学去做开发。但是，作为过来人，我也想劝来者：如果你有机会读研一定去读个研究生，哪怕是自费或者非全日制的，你现在不明白，会有明白的一天，我们大多数人都不是命运的幸运儿，所以有时候学历还是有点用的。
-前期学习 Web 开发技术，让我对 html、javascript、CSS 等非常熟悉，而且我读了非常多的 web 方面的经典书籍，也熟悉 web 标准，那个时候讲究的是三层分离（即表现层、样式层和行为层要分离），加上后来又学习了 web 后端开发技术（主要是 php），我的水平具备开发一个商业的 web 整站的水平。这段经历，让我熟悉了很多计算机和软件开发的一些基础理论和设计原则，如 URL、相对路径等概念。
-...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 我是如何年薪五十万的" href=https://haokiu.com/blog/7a566da932f2481388ca678c2dc2c1ac/></a></article><article class=post-entry><header class=entry-header><h2>我是一名程序员，结婚时女友要求我用两年的工资作为彩礼，我该不该答应？</h2></header><div class=entry-content><p>我是一名程序员，结婚时女友要求我用两年的工资作为彩礼，我该不该答应？ 以下内容来自于一名群友的求助，经当事人同意首发于『高性能服务器开发』公众号，文字略有改动，未经许可，不得转载。
-（以下文中的“我”乃当事人本人，非文章作者。）
-群主，您好。我是一名上海一名 C++ 客户端开发，最近遇到了点私人问题，请群主帮我参考一下。以下是我的问题：
-我是一名程序员，很爱我的女友，谈婚论嫁时，女友要求我用两年的工资作为彩礼，我该不该答应？
-（一）
-我老家是湖北黄石的，大学就读于武汉某学校，2018 年 7 月毕业，辗转来到上海。由于学历不太好，加上大学荒废了四年，在上海找了近一个月工作之后，终于 2018 年 7 月底上海找了一份 做 PC 客户端开发的工作，使用 C++ 语言。公司是做金融系统平台定制的，主要业务是股票交易系统，为此招了很多数据分析师，女孩子比较多。我就在这家公司认识了我现在的女朋友，她也是一名数据分析师，她是江苏人，也是在武汉上的学，大学毕业时在券商实习做过柜台，所以业务比较熟悉。平常她需要和我们这些开发进行对接，一来二去我们就熟悉了。有一次无意中一起下班，发现我们顺路，后来我们就经常一起加班下班，我向她请教业务问题，她和我了解系统实现逻辑。
-后来一段时间，我发现她每天早上来的很晚，而且总是眼睛红红的或者像是没休息好的样子。于是，我趁着下班的机会，问她怎么了，可是她总是说没事。终于有一天晚上我们一起下班回家的日子，她告诉我原因了：她前男友那段时间总是打电话找她，请求复合，她已经和前男友分手快一年了，她前男友回了老家，她来到了上海。现在她男朋友生了病，据她描述应该病的不轻，她拒绝了他的复合要求，但是她心里觉得很过意不去，对于一个病人这样做是不是太残忍了。但是，她又不想复合，虽然她的前男友平常对她很好，但前男友是个喜怒无常且无任何人生规划的人，还有一点点家庭暴力倾向。（画外音：小方群主看到这里惊呆了，好狗血的剧情。。。）
-后来，某天晚上在公司附近的公园的草坪上我不断的安慰她，让她想开一点，既然分手了，又有顾忌，就不要再想前一段感情了，建议她向前看。
-又过了几天，她说她想通了，这次决定放下。那天晚上，我去了她租的房子。之前，她每次只允许我走到她小区门口，从不允许我进去，调侃我说我“图谋不轨”。那天晚上，我真是感到受宠若惊，聊的比较晚。后来不知道因为什么事情，她又说起了她的前男友如何可怜，我当时很生气，抓起我的书包就准备走。她突然一把抱住我，并且强吻了我。我当时就木头了，单身二十三年，女孩子手都没摸过，更不用说和女孩子接吻了。那感觉，当时脑子就不清醒了。然后，她反问我：XXX，你是不是想追我？我当时小心翼翼地回答是。她说让她考虑一下，然后就让我先回去了。
-我一宿未眠，不知道她如何想的。第二天一大早就去了公司，可是一上午都没看到她来公司，我给她发微信打电话也没人回。终于，下午她终于来公司了，而且看起来精神状态不错。她神秘兮兮的和我说晚上一起吃饭。
-晚上我们一起在公司的楼下食堂吃饭，她说她和她前男友好好的聊了一下，把事情说清楚了。她不会再想她的前男友，并且接受我的追求。那天，当她告诉我她愿意接受我的时候，我非常的开心。
-（二）
-接下来的日子，应该是我人生中最开心的一段日子了。我发现，我们对文学都很感兴趣，我们一起聊《红楼梦》《雷雨》《巴黎圣母院》《飘》《百年孤独》《海上钢琴师》等一些国内外的经典著作和电影，她和我聊她之前在深圳和小伙伴们的趣事，还有一些我从未听过的文学作品，她的学识令我佩服。
-那段时候，下班以后，我俩骑着共享单车在华师和同济大学的校园里漫游，有时候手拉手在河边散步，无话不谈，真的佩服她的文学素养和对世界的认识。而且让我惊喜的是，她有一手好厨艺，我琢磨着和她自小的家庭环境有关系吧。周末她烧饭时，从来不让我洗碗，而且一个人全包了从买菜到炒菜煮饭、饭后洗碗、打扫的全过程。我们一起玩王者荣耀和英雄联盟，她对这两个游戏也很感兴趣。
-周末有的时候我们会一起去南京路步行街逛街、看看电影，我觉得她是个非常独立的人，她每次买东西都不会让我付钱，而且我之前断断续续借给她五六千块钱，在一次闹矛盾后也一分不少的还给我了。当然后来，我们又和好了。
-在交往中，我知道了她的家庭状况。家在苏北农村，父母务农。家里有一个哥哥，高中没读完就辍学了。父母比较对哥哥比较宠爱，从小对她管不多，她经常和家里吵架。她从小的愿望就是将来离开家。所以她一个人去武汉上学，毕业后一个人去深圳，干了一年来到上海。但是，她的哥哥从小对他很好，她很感激。唉，这个"好"字，埋下了我后来的悲剧。
-在一个周五的晚上，我们去了一家很有特色的古风饭店吃了顿饭，我们一起喝了点店里的招牌酒水——女儿红。她貌似喝醉了，脸红扑扑的，回来的路上，她一边挽着我的手一边给我唱王菲的情歌。那天星光下，她穿着一套白色的裙子，像个仙子一样美丽。那天，我也很开心，心里想：她的独立自强以及读了那么多书，具有一种一般女孩不具有的知性美，还有她的勤劳质朴，在现在的女大学生中实在太少了，这应该是我理想中的对象吧。
-顺理成章，那天晚上，我们在她的租的房子里面发生了关系，我很意外的是，她竟然还是个chu。我问她后不后悔，她意味深长的问我，你知道女儿红这酒名的来历吗？我说不知道。她说，古时候，穷人家的父亲会在女儿出生的那一天，把一坛白酒用红色的布包好藏在地窖里，等女儿长大出嫁那一天会拿出来，送给出嫁的女儿和女婿。所以，她不后悔，并安慰我她爱我，这是迟早的事情。那天我暗暗下定决心，一定一辈子对她好。
-（三）
-后来，有了第一次以后，我就经常在她那里过夜了，只不过我们隐藏的很好，公司没人知道我们的关系，我因为工作表现好，工资从六千涨到一万。后来，闲聊时，她和我说她哥哥对她的好，她虽然恨她的父母，但是她觉得她的哥哥挺可怜的，她想嫁给我，但希望我给她家 20 万的彩礼，她哥哥也可以拿着这笔钱娶老婆，她哥哥比她大五岁，她父母很着急，由于她哥哥学历不高没什么文化，又没啥手艺，生活过的很一般，年纪比较大了，家庭状况也不好，所以还没找到老婆，所以她父母压着她希望她在她哥哥的经济上照顾，她想着从小哥哥就照顾她，所以希望能帮哥哥一把。我当时听了这个话，不知道如何回答。20 万的彩礼对我来说，有点多，差不多相当于我现在快两年多的工资收入。我也是农村家庭，父母辛辛苦苦供我上大学。现在毕业了，父母年纪也大了，还有三万多的助学贷款没还完。
-我带她回了趟老家，父母很满意，非常开心。在家里催婚的状况下，我尝试着和她沟通过很多次，能不能彩礼钱少一点，结婚本身也要花钱的，她似乎并不想让步。我不敢告诉我的父母，不想让他们本来很开心的心情泼一盆冷水。我很爱她，但是她的这个条件我确实有点为难。甚至有时候，我在想，本来好好的一场可以开花结果的恋爱，怎么感觉有种卖女儿的感觉？
-另外还有件事，让我一直耿耿于怀，群主你不要笑（画外音：群主尽量忍住）。有次和她 XXOO 的时候，正在做的时候，她说她哥真的需要一个老婆，我有这方面的生理需求，她哥哥也有的。所以，她希望我能答应她的请求，她想和我过一辈子，但是希望我能理解下她，同意她的要求。我当时听了这话，像吃了苍蝇，立马没兴趣 XO 了。
-这个月，她提出来双方父母见个面，希望我们可以定下来，可是我现在很纠结：我不想和她分手，我爱她，而且她的第一次给了我，但是我又不能满足她的彩礼要求。我不敢想这些事，现在上班也没心思。群主作为过来人和各位读者，能给我点建议吗？</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 我是一名程序员，结婚时女友要求我用两年的工资作为彩礼，我该不该答应？" href=https://haokiu.com/blog/5b6afa35b0644098b8b4d0c853f20358/></a></article><article class=post-entry><header class=entry-header><h2>详解 C++ 11 中的智能指针</h2></header><div class=entry-content><p>详解 C++ 11 中的智能指针 C/C++ 语言最为人所诟病的特性之一就是存在内存泄露问题，因此后来的大多数语言都提供了内置内存分配与释放功能，有的甚至干脆对语言的使用者屏蔽了内存指针这一概念。这里不置贬褒，手动分配内存与手动释放内存有利也有弊，自动分配内存和自动释放内存亦如此，这是两种不同的设计哲学。有人认为，内存如此重要的东西怎么能放心交给用户去管理呢？而另外一些人则认为，内存如此重要的东西怎么能放心交给系统去管理呢？在 C/C++ 语言中，内存泄露的问题一直困扰着广大的开发者，因此各类库和工具的一直在努力尝试各种方法去检测和避免内存泄露，如 boost，智能指针技术应运而生。
-C++ 98/03 的尝试——std::auto_ptr 在 2019 年讨论 std::auto_ptr 不免有点让人怀疑是不是有点过时了，确实如此，随着 C++11 标准的出现（最新标准是 C++20），std::auto_ptr 已经被彻底废弃了，取而代之是 std::unique_ptr。然而，我之所以还向你介绍一下 std::auto_ptr 的用法以及它的设计不足之处是想让你了解 C++ 语言中智能指针的发展过程，一项技术如果我们了解它过去的样子和发展的轨迹，我们就能更好地掌握它，不是吗？
-std::auto_ptr 的基本用法如下代码所示：
-#include &lt;memory> int main() { //初始化方式1 std::auto_ptr&lt;int> sp1(new int(8)); //初始化方式2 std::auto_ptr&lt;int> sp2; sp2.reset(new int(8)); return 0; } 智能指针对象 sp1 和 sp2 均持有一个在堆上分配 int 对象，其值均是 8，这两块堆内存均可以在 sp1 和 sp2 释放时得到释放。这是 std::auto_ptr 的基本用法。
-sp 是 smart pointer（智能指针）的简写。
-std::auto_ptr 真正让人容易误用的地方是其不常用的复制语义，即当复制一个 std::auto_ptr 对象时（拷贝复制或 operator = 复制），原对象所持有的堆内存对象也会转移给复制出来的对象。示例代码如下：
-#include &lt;iostream> #include &lt;memory> int main() { //测试拷贝构造 std::auto_ptr&lt;int> sp1(new int(8)); std::auto_ptr&lt;int> sp2(sp1); if (sp1.get() != NULL) { std::cout &lt;&lt; "sp1 is not empty." &lt;&lt; std::endl; } else { std::cout &lt;&lt; "sp1 is empty." &lt;&lt; std::endl; } if (sp2.get() != NULL) { std::cout &lt;&lt; "sp2 is not empty." &lt;&lt; std::endl; } else { std::cout &lt;&lt; "sp2 is empty." &lt;&lt; std::endl; } //测试赋值构造 std::auto_ptr&lt;int> sp3(new int(8)); std::auto_ptr&lt;int> sp4; sp4 = sp3; if (sp3.get() != NULL) { std::cout &lt;&lt; "sp3 is not empty." &lt;&lt; std::endl; } else { std::cout &lt;&lt; "sp3 is empty." &lt;&lt; std::endl; } if (sp4.get() != NULL) { std::cout &lt;&lt; "sp4 is not empty." &lt;&lt; std::endl; } else { std::cout &lt;&lt; "sp4 is empty." &lt;&lt; std::endl; } return 0; } 上述代码中分别利用拷贝构造（sp1 => sp2）和 赋值构造（sp3 => sp4）来创建新的 std::auto_ptr 对象，因此 sp1 持有的堆对象被转移给 sp2，sp3 持有的堆对象被转移给 sp4。我们得到程序执行结果如下：
-...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 详解 C++ 11 中的智能指针" href=https://haokiu.com/blog/913fb3f31d024baf871726b2f22cdfde/></a></article><article class=post-entry><header class=entry-header><h2>用Visual Studio调试Linux程序</h2></header><div class=entry-content><p>用Visual Studio调试Linux程序 用Visual Studio调试Linux程序？你真的没看错，这个是真的，不是标题党。当然如果你说VS2015及以上版本自带的Linux调试插件，那就算了。这些自带的插件调试一个有简单的main函数程序还凑合，稍微复杂点的程序，根本无法编译调试。
-而本文介绍的主角是VS的另外一款插件Visual GDB，让我们欢迎主角登场，下面是正文。
-使用Visual Studio+VisualGDB调试远程Linux程序 需要工具：
-Visual Studio 2013或以上版本（以下简称VS） VisualGDB（一款VS插件，官网为：http://visualgdb.com/） 含有调试符号的Linux程序文件（该程序文件为调试目标） Visual Assistant（番茄助手，另外一款VS插件） 在VS上安装完VisualGDB插件以后，有如下几种方式来对远程Linux机器上的程序进行调试：
-**方法一、**如果该程序已经启动，则可以使用VS菜单【Debug】->【Attach to Process…】。 这种方法有个缺点是，不能从开始启动的main函数处添加断点，自始至终地调试程序，查看完整程序运行脉络，所以下面推荐方法二。
-方法二、利用VS启动远程Linux机器上一个Linux程序文件进行调试。选择VS菜单【Debug】 ->【Quick Debugwith GDB】。 需要注意的地方，已经在上图中标红框。这里简单地解释一下：
-如果你安装了交叉编译环境Target可以选择MinGW/Cygwin，否则就选择远程Linux系统。这里如果不存在一个ssh连接，则需要创建一个。
-Debugged program是需要设置的被调试程序的路径，位于远程Linux机器上。
-Arguments是该调试程序需要设置的命令行参数，如果被调试程序不需要命令行参数可以不设置。
-Working directory是被调试程序运行的工作目录。
-另外建议勾选上Initial breakpoint in main，这样启动调试时，程序就会停在程序入口处。
-这样，我们就可以利用VS强大的功能去查看程序的各种状态了，常用的面板，如【内存】【线程】【观察】【堆栈】【GDB Session】【断点】等窗口位于VS 菜单【Debug】->【Windows】菜单下，注意，有些窗口只有在调试状态下才可见。这里有两个值得强调一下的功能是：
-GDB Session****窗口，在这个窗口里面可以像原来直接使用gdb调试一样输入gdb指令来进行调试。 SSH console****窗口，这个窗口类似一个远程操作Linux系统的应用程序如xshell、SecureCRT。 现在还剩下一个问题，就是我们虽然在调试时可视化地远程查看一个Linux进程的状态信息，但很多类型的定义和什么却无法看到。解决这个问题的方法就是你可以先在VS里面建立一个工程，导入你要调试的程序的源代码目录。然后利用方法一或者方法二去启动调试程序。这个时候你想查看某个类型的定义或什么只要利用Visual Assit的查看源码功能即可，快捷键是Alt + G。
-需要注意的时：同时安装了Visual Assist和VisualGDB后，后者也会提供一个go按钮去查找源码定义，但这个功能远不如Visual Assist按钮好用，我们可以禁用掉它来使用Visual Assist的Go功能。禁用方法，打开菜单：【Tools】->【Option…】:
-然后重启VS即可。
-到这里，既可以查看源码，也可以调试程序了。
-VisualGDB 下载地址：
-链接：https://share.weiyun.com/57aGHLM 密码：kj9ahs</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 用Visual Studio调试Linux程序" href=https://haokiu.com/blog/f64c601f237d4cac97445aa4b0e07369/></a></article><footer class=page-footer><nav class=pagination><a class=prev href=https://haokiu.com/index/17/>«&nbsp;&nbsp;
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button><ul class=lang-switch><li>|</li></ul></div></div><ul id=menu><li><a href=https://haokiu.com/ title=haokiu><span class=active>Home</span></a></li><li><a href=https://haokiu.com/7/ title=7><span>AI</span></a></li><li><a href=https://haokiu.com/1/ title=1><span>后端</span></a></li><li><a href=https://haokiu.com/2/ title=2><span>前端</span></a></li><li><a href=https://haokiu.com/3/ title=3><span>区块链</span></a></li><li><a href=https://haokiu.com/4/ title=4><span>大数据</span></a></li><li><a href=https://haokiu.com/5/ title=5><span>linux</span></a></li><li><a href=https://haokiu.com/6/ title=6><span>其他</span></a></li><li><a href=https://haokiu.com/tags/ title=Tags><span>tags</span></a></li><li><a href=https://haokiu.com/categories/ title=Categories><span>categories</span></a></li></ul></nav></header><main class=main><article class=post-entry><header class=entry-header><h2>libevent源码深度剖析</h2></header><div class=entry-content><p>libevent源码深度剖析 libevent源码深度剖析01
+libevent源码深度剖析02
+libevent源码深度剖析03
+libevent源码深度剖析04
+libevent源码深度剖析05
+libevent源码深度剖析06
+libevent源码深度剖析07
+libevent源码深度剖析08
+libevent源码深度剖析09
+libevent源码深度剖析10
+libevent源码深度剖析11
+libevent源码深度剖析12
+libevent源码深度剖析13</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to libevent源码深度剖析" href=https://haokiu.com/blog/5d2f8fa20fdc4018a34afe19f8c23987/></a></article><article class=post-entry><header class=entry-header><h2>libevent源码深度剖析02</h2></header><div class=entry-content><p>libevent源码深度剖析02 Reactor模式
+前面讲到，整个libevent本身就是一个Reactor，因此本节将专门对Reactor模式进行必要的介绍，并列出libevnet中的几个重要组件和Reactor的对应关系，在后面的章节中可能还会提到本节介绍的基本概念。
+1. Reactor的事件处理机制 首先来回想一下普通函数调用的机制：程序调用某函数?函数执行，程序等待?函数将结果和控制权返回给程序?程序继续处理。
+Reactor释义**“反应堆”，是一种事件驱动机制。和普通函数调用的不同之处在于：应用程序不是主动的调用某个API完成处理，而是恰恰相反，Reactor逆置了事件处理流程，应用程序需要提供相应的接口并注册到Reactor上，如果相应的时间发生，Reactor将主动调用应用程序注册的接口，这些接口又称为“回调函数”**。使用libevent也是想libevent框架注册相应的事件和回调函数；当这些事件发生时，libevent会调用这些回调函数处理相应的事件（I/O读写、定时和信号）。
+用“好莱坞原则”来形容Reactor再合适不过了：不要打电话给我们，我们会打电话通知你。
+举个例子：你去应聘某xx公司，面试结束后。
+“普通函数调用机制”公司HR比较懒，不会记你的联系方式，那怎么办呢，你只能面试完后自己打电话去问结果；有没有被录取啊，还是被据了；
+“Reactor”公司HR就记下了你的联系方式，结果出来后会主动打电话通知你：有没有被录取啊，还是被据了；你不用自己打电话去问结果，事实上也不能，你没有HR的留联系方式。
+2. Reactor模式的优点 Reactor模式是编写高性能网络服务器的必备技术之一，它具有如下的优点
+1）响应快，不必为单个同步时间所阻塞，虽然Reactor本身依然是同步的；
+2）编程相对简单，可以最大程度的避免复杂的多线程及同步问题，并且避免了多线程/进程的切换开销； 3）可扩展性，可以方便的通过增加Reactor实例个数来充分利用CPU资源； 4）可复用性，reactor框架本身与具体事件处理逻辑无关，具有很高的复用性；
+3. Reactor模式框架 使用Reactor模型，必备的几个组件：事件源、Reactor框架、多路复用机制和事件处理程序，先来看看Reactor模型的整体框架，接下来再对每个组件做逐一说明。
+1） 事件源 Linux上是文件描述符，Windows上就是Socket或者Handle了，这里统一称为“句柄集”；程序在指定的句柄上注册关心的事件，比如I/O事件。
+2） event demultiplexer——事件多路分发机制 由操作系统提供的I/O多路复用机制，比如select和epoll。 程序首先将其关心的句柄（事件源）及其事件注册到event demultiplexer上； 当有事件到达时，event demultiplexer会发出通知“在已经注册的句柄集中，一个或多个句柄的事件已经就绪”； 程序收到通知后，就可以在非阻塞的情况下对事件进行处理了。 对应到libevent中，依然是select、poll、epoll等，但是libevent使用结构体eventop进行了封装，以统一的接口来支持这些I/O多路复用机制，达到了对外隐藏底层系统机制的目的。
+3） Reactor——反应器 Reactor，是事件管理的接口，内部使用event demultiplexer注册、注销事件；并运行事件循环，当有事件进入“就绪”状态时，调用注册事件的回调函数处理事件。 对应到libevent中，就是event_base结构体。 一个典型的Reactor声明方式：
+class Reactor{ public: int register_handler(Event_Handler *pHandler, int event); int remove_handler(Event_Handler *pHandler, int event); void handle_events(timeval *ptv); // ... }; 4） Event Handler——事件处理程序
+事件处理程序提供了一组接口，每个接口对应了一种类型的事件，供Reactor在相应的事件发生时调用，执行相应的事件处理。通常它会绑定一个有效的句柄。 对应到libevent中，就是event结构体。 下面是两种典型的Event Handler类声明方式，二者互有优缺点。
+class Event_Handler{ public: virtual void handle_read() = 0; virtual void handle_write() = 0; virtual void handle_timeout() = 0; virtual void handle_close() = 0; virtual HANDLE get_handle() = 0; // ... }; class Event_Handler{ public: // events maybe read/write/timeout/close .etc virtual void handle_events(int events) = 0; virtual HANDLE get_handle() = 0; // ... }; 4. Reactor事件处理流程 前面说过Reactor将事件流“逆置”了，那么使用Reactor模式后，事件控制流是什么样子呢？ 可以参见下面的序列图。
+...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to libevent源码深度剖析02" href=https://haokiu.com/blog/d62a9a215b334817945e5814d92a423a/></a></article><article class=post-entry><header class=entry-header><h2>libevent源码深度剖析03</h2></header><div class=entry-content><p>libevent源码深度剖析03 libevent基本使用场景和事件流程 1. 前言 学习源代码该从哪里入手？我觉得从程序的基本使用场景和代码的整体处理流程入手是个不错的方法，至少从个人的经验上讲，用此方法分析libevent是比较有效的。
+2. 基本应用场景 基本应用场景也是使用libevnet的基本流程，下面来考虑一个最简单的场景，使用livevent设置定时器，应用程序只需要执行下面几个简单的步骤即可。 1）首先初始化libevent库，并保存返回的指针
+struct event_base* base = event_init(); 实际上这一步相当于初始化一个Reactor实例；在初始化libevent后，就可以注册事件了。
+2）初始化事件event，设置回调函数和关注的事件
+evtimer_set(&amp;ev, timer_cb, NULL); 事实上这等价于调用 event_set(&amp;ev, -1, 0, timer_cb, NULL); event_set的函数原型是：
+void event_set(struct event *ev, int fd, short event, void (*cb)(int, short, void *), void *arg) ev：执行要初始化的event对象； fd：该event绑定的“句柄”，对于信号事件，它就是关注的信号； event：在该fd上关注的事件类型，它可以是EV_READ, EV_WRITE, EV_SIGNAL； cb：这是一个函数指针，当fd上的事件event发生时，调用该函数执行处理，它有三个参数，调用时由event_base负责传入，按顺序，实际上就是event_set时的fd, event和arg； arg：传递给cb函数指针的参数； 由于定时事件不需要fd，并且定时事件是根据添加时**（event_add）的超时值设定的，因此这里event也不需要设置。 这一步相当于初始化一个event handler**，在libevent中事件类型保存在event结构体中。 注意：libevent并不会管理event事件集合，这需要应用程序自行管理；
+3）设置event从属的event_base
+event_base_set(base, &amp;ev); 这一步相当于指明event要注册到哪个event_base实例上；
+4）是正式的添加事件的时候了
+event_add(&amp;ev, timeout); 基本信息都已设置完成，只要简单的调用**event_add()函数即可完成，其中timeout是定时值； 这一步相当于调用Reactor::register_handler()**函数注册事件。
+5）程序进入无限循环，等待就绪事件并执行事件处理
+event_base_dispatch(base); 3. 实例代码 上面例子的程序代码如下所示
+struct event ev; struct timeval tv; void time_cb(int fd, short event, void *argc){ printf("timer wakeup/n"); event_add(&amp;ev, &amp;tv); // reschedule timer } int main(){ struct event_base *base = event_init(); tv.tv_sec = 10; // 10s period tv.tv_usec = 0; evtimer_set(&amp;ev, time_cb, NULL); event_add(&amp;ev, &amp;tv); event_base_dispatch(base); } 4. 事件处理流程 当应用程序向libevent注册一个事件后，libevent内部是怎么样进行处理的呢？下面的图就给出了这一基本流程。 1）首先应用程序准备并初始化event，设置好事件类型和回调函数；这对应于前面第步骤2和3； 2）向libevent添加该事件event。对于定时事件，libevent使用一个小根堆管理，key为超时时间；对于Signal和I/O事件，libevent将其放入到等待链表（wait list）中，这是一个双向链表结构； 3）程序调用**event_base_dispatch()**系列函数进入无限循环，等待事件，以select()函数为例；每次循环前libevent会检查定时事件的最小超时时间tv，根据tv设置select()的最大等待时间，以便于后面及时处理超时事件； 当select()返回后，首先检查超时事件，然后检查I/O事件； Libevent将所有的就绪事件，放入到激活链表中； 然后对激活链表中的事件，调用事件的回调函数执行事件处理； ...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to libevent源码深度剖析03" href=https://haokiu.com/blog/88dcf812d9464727bdfa54410657cfaa/></a></article><article class=post-entry><header class=entry-header><h2>libevent源码深度剖析04</h2></header><div class=entry-content><p>libevent源码深度剖析04 1. 前言 详细分析源代码之前，如果能对其代码文件的基本结构有个大概的认识和分类，对于代码的分析将是大有裨益的。本节内容不多，我想并不是说它不重要！
+2. 源代码组织结构 Libevent的源代码虽然都在一层文件夹下面，但是其代码分类还是相当清晰的，主要可分为头文件、内部使用的头文件、辅助功能函数、日志、libevent框架、对系统I/O多路复用机制的封装、信号管理、定时事件管理、缓冲区管理、基本数据结构和基于libevent的两个实用库等几个部分，有些部分可能就是一个源文件。 源代码中的test部分就不在我们关注的范畴了。 1）头文件 主要就是event.h：事件宏定义、接口函数声明，主要结构体event的声明； 2）内部头文件 xxx-internal.h：内部数据结构和函数，对外不可见，以达到信息隐藏的目的； 3）libevent框架 event.c：event整体框架的代码实现； 4）对系统I/O多路复用机制的封装 epoll.c：对epoll的封装； select.c：对select的封装； devpoll.c：对dev/poll的封装; kqueue.c：对kqueue的封装； 5）定时事件管理 min-heap.h：其实就是一个以时间作为key的小根堆结构； 6）信号管理 signal.c：对信号事件的处理； 7）辅助功能函数 evutil.h 和evutil.c：一些辅助功能函数，包括创建socket pair和一些时间操作函数：加、减和比较等。 8）日志 log.h和log.c：log日志函数 9）缓冲区管理 evbuffer.c和buffer.c：libevent对缓冲区的封装； 10）基本数据结构 compat/sys下的两个源文件：queue.h是libevent基本数据结构的实现，包括链表，双向链表，队列等；_libevent_time.h：一些用于时间操作的结构体定义、函数和宏定义； 11）实用网络库 http和evdns：是基于libevent实现的http服务器和异步dns查询库；
+3. 小结 本节介绍了libevent的组织和分类，下面将会详细介绍libevent的核心部分event结构。</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to libevent源码深度剖析04" href=https://haokiu.com/blog/7fd5744edc6741c18b5cb6187e662e40/></a></article><article class=post-entry><header class=entry-header><h2>libevent源码深度剖析05</h2></header><div class=entry-content><p>libevent源码深度剖析05 libevent的核心：事件event
+对事件处理流程有了高层的认识后，本节将详细介绍libevent的核心结构event，以及libevent对event的管理**。**
+1. libevent的核心-event libevent是基于**事件驱动（event-driven）**的，从名字也可以看到event是整个库的核心。event就是Reactor框架中的事件处理程序组件；它提供了函数接口，供Reactor在事件发生时调用，以执行相应的事件处理，通常它会绑定一个有效的句柄。
+首先给出event结构体的声明，它位于event.h文件中：
+struct event { TAILQ_ENTRY (event) ev_next; TAILQ_ENTRY (event) ev_active_next; TAILQ_ENTRY (event) ev_signal_next; unsigned int min_heap_idx; /* for managing timeouts */ struct event_base *ev_base; int ev_fd; short ev_events; short ev_ncalls; short *ev_pncalls; /* Allows deletes in callback */ struct timeval ev_timeout; int ev_pri; /* smaller numbers are higher priority */ void (*ev_callback)(int, short, void *arg); void *ev_arg; int ev_res; /* result passed to event callback */ int ev_flags; }; ev_events：event关注的事件类型，它可以是以下3种类型：
+I/O事件： EV_WRITE和EV_READ 定时事件：EV_TIMEOUT 信号： EV_SIGNAL 辅助选项：EV_PERSIST，表明是一个永久事件 Libevent中的定义为：
+#define EV_TIMEOUT 0x01 #define EV_READ 0x02 #define EV_WRITE 0x04 #define EV_SIGNAL 0x08 #define EV_PERSIST 0x10 /* Persistant event */ 可以看出事件类型可以使用“|”运算符进行组合，需要说明的是，信号和I/O事件不能同时设置；
+还可以看出libevent使用event结构体将这3种事件的处理统一起来；
+ev_next，ev_active_next和ev_signal_next都是双向链表节点指针；它们是libevent对不同事件类型和在不同的时期，对事件的管理时使用到的字段。 libevent使用双向链表保存所有注册的I/O和Signal事件
+ev_next就是该I/O事件在链表中的位置；称此链表为“已注册事件链表”；
+同样ev_signal_next就是signal事件在signal事件链表中的位置；
+ev_active_next：libevent将所有的激活事件放入到链表active list中，然后遍历active list执行调度，ev_active_next就指明了event在active list中的位置；
+min_heap_idx和ev_timeout，如果是timeout事件，它们是event在小根堆中的索引和超时值，libevent使用小根堆来管理定时事件，这将在后面定时事件处理时专门讲解；
+ev_base该事件所属的反应堆实例，这是一个event_base结构体，下一节将会详细讲解；
+ev_fd，对于I/O事件，是绑定的文件描述符；对于signal事件，是绑定的信号；
+ev_callback，event的回调函数，被ev_base调用，执行事件处理程序，这是一个函数指针，原型为：
+1void (*ev_callback)(int fd, short events, void *arg) 其中参数fd对应于ev_fd；events对应于ev_events；arg对应于ev_arg；
+ev_arg：void*，表明可以是任意类型的数据，在设置event时指定；
+eb_flags：libevent用于标记event信息的字段，表明其当前的状态，可能的值有：
+1#define EVLIST_TIMEOUT 0x01 // event在time堆中 2 3#define EVLIST_INSERTED 0x02 // event在已注册事件链表中 4 5#define EVLIST_SIGNAL 0x04 // 未见使用 6 7#define EVLIST_ACTIVE 0x08 // event在激活链表中 8 9#define EVLIST_INTERNAL 0x10 // 内部使用标记 10 11#define EVLIST_INIT 0x80 // event已被初始化 ev_ncalls：事件就绪执行时，调用ev_callback的次数，通常为1；
+ev_pncalls：指针，通常指向ev_ncalls或者为NULL；
+ev_res：记录了当前激活事件的类型；
+...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to libevent源码深度剖析05" href=https://haokiu.com/blog/1f6a82cdb17742a49514907b604e44c1/></a></article><article class=post-entry><header class=entry-header><h2>libevent源码深度剖析06</h2></header><div class=entry-content><p>libevent源码深度剖析06 初见事件处理框架
+前面已经对libevent的事件处理框架和event结构体做了描述，现在是时候剖析libevent对事件的详细处理流程了，本节将分析libevent的事件处理框架event_base和libevent注册、删除事件的具体流程，可结合前一节libevent对event的管理。
+1. 事件处理框架-event_base 回想Reactor模式的几个基本组件，本节讲解的部分对应于Reactor框架组件。在libevent中，这就表现为event_base结构体，结构体声明如下，它位于event-internal.h文件中：
+struct event_base { const struct eventop *evsel; void *evbase;　int event_count; /* counts number of total events */ int event_count_active; /* counts number of active events */ int event_gotterm; /* Set to terminate loop */ int event_break; /* Set to terminate loop immediately */ /* active event management */ struct event_list **activequeues; int nactivequeues; /* signal handling info */ struct evsignal_info sig; struct event_list eventqueue; struct timeval event_tv; struct min_heap timeheap; struct timeval tv_cache; }; 下面详细解释一下结构体中各字段的含义。
+evsel和evbase这两个字段的设置可能会让人有些迷惑，这里你可以把evsel和evbase看作是类和静态函数的关系，比如添加事件时的调用行为：evsel->add(evbase, ev)，实际执行操作的是evbase；这相当于class::add(instance, ev)，instance就是class的一个对象实例。 evsel指向了全局变量static const struct eventop *eventops[]中的一个； 前面也说过，libevent将系统提供的I/O demultiplex机制统一封装成了eventop结构；因此eventops[]包含了select、poll、kequeue和epoll等等其中的若干个全局实例对象。 evbase实际上是一个eventop实例对象； 先来看看eventop结构体，它的成员是一系列的函数指针, 在event-internal.h文件中：
+struct eventop { const char *name; void *(*init)(struct event_base *); // 初始化 int (*add)(void *, struct event *); // 注册事件 int (*del)(void *, struct event *); // 删除事件 int (*dispatch)(struct event_base *, void *, struct timeval *); // 事件分发 void (*dealloc)(struct event_base *, void *); // 注销，释放资源 /* set if we need to reinitialize the event base */ int need_reinit; }; 也就是说，在libevent中，每种I/O demultiplex机制的实现都必须提供这五个函数接口，来完成自身的初始化、销毁释放；对事件的注册、注销和分发。 比如对于epoll，libevent实现了5个对应的接口函数，并在初始化时并将eventop的5个函数指针指向这5个函数，那么程序就可以使用epoll作为I/O demultiplex机制了，这个在后面会再次提到。
+activequeues是一个二级指针，前面讲过libevent支持事件优先级，因此你可以把它看作是数组，其中的元素activequeues[priority]是一个链表，链表的每个节点指向一个优先级为priority的就绪事件event。
+eventqueue，链表，保存了所有的注册事件event的指针。
+sig是由来管理信号的结构体，将在后面信号处理时专门讲解；
+timeheap是管理定时事件的小根堆，将在后面定时事件处理时专门讲解；
+event_tv和tv_cache是libevent用于时间管理的变量，将在后面讲到； 其它各个变量都能因名知意，就不再啰嗦了。
+...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to libevent源码深度剖析06" href=https://haokiu.com/blog/fc115cade0c049a8ab14e737a22b37fe/></a></article><article class=post-entry><header class=entry-header><h2>libevent源码深度剖析07</h2></header><div class=entry-content><p>libevent源码深度剖析07 事件主循环
+现在我们已经初步了解了libevent的Reactor组件——event_base和事件管理框架，接下来就是libevent事件处理的中心部分——事件主循环，根据系统提供的事件多路分发机制执行事件循环，对已注册的就绪事件，调用注册事件的回调函数来处理事件。
+1. 阶段性的胜利 libevent将I/O事件、定时器和信号事件处理很好的结合到了一起，本节也会介绍libevent是如何做到这一点的。 在看完本节的内容后，读者应该会对Libevent的基本框架：事件管理和主循环有比较清晰的认识了，并能够把libevent的事件控制流程清晰的串通起来，剩下的就是一些细节的内容了。
+2. 事件处理主循环 libevent的事件主循环主要是通过**event_base_loop ()**函数完成的，其主要操作如下面的流程图所示，event_base_loop所作的就是持续执行下面的循环。 清楚了event_base_loop所作的主要操作，就可以对比源代码看个究竟了，代码结构还是相当清晰的。
+int event_base_loop(struct event_base *base, int flags){ const struct eventop *evsel = base->evsel; void *evbase = base->evbase; struct timeval tv; struct timeval *tv_p; int res, done; // 清空时间缓存 base->tv_cache.tv_sec = 0; // evsignal_base是全局变量，在处理signal时，用于指名signal所属的event_base实例 if (base->sig.ev_signal_added) evsignal_base = base; done = 0; while (!done) { // 事件主循环 // 查看是否需要跳出循环，程序可以调用event_loopexit_cb()设置event_gotterm标记 // 调用event_base_loopbreak()设置event_break标记 if (base->event_gotterm) { base->event_gotterm = 0; break; } if (base->event_break) { base->event_break = 0; break; } // 校正系统时间，如果系统使用的是非MONOTONIC时间，用户可能会向后调整了系统时间 // 在timeout_correct函数里，比较last wait time和当前时间，如果当前时间&lt; last wait time // 表明时间有问题，这是需要更新timer_heap中所有定时事件的超时时间。 timeout_correct(base, &amp;tv); // 根据timer heap中事件的最小超时时间，计算系统I/O demultiplexer的最大等待时间 tv_p = &amp;tv; if (!base->event_count_active && !(flags & EVLOOP_NONBLOCK)) { timeout_next(base, &amp;tv_p); } else { // 依然有未处理的就绪时间，就让I/O demultiplexer立即返回，不必等待 // 下面会提到，在libevent中，低优先级的就绪事件可能不能立即被处理 evutil_timerclear(&amp;tv); } // 如果当前没有注册事件，就退出 if (!event_haveevents(base)) { event_debug(("%s: no events registered.", __func__)); return (1); } // 更新last wait time，并清空time cache gettime(base, &amp;base->event_tv); base->tv_cache.tv_sec = 0; // 调用系统I/O demultiplexer等待就绪I/O events，可能是epoll_wait，或者select等； // 在evsel->dispatch()中，会把就绪signal event、I/O event插入到激活链表中 res = evsel->dispatch(base, evbase, tv_p); if (res == -1) return (-1); // 将time cache赋值为当前系统时间 gettime(base, &amp;base->tv_cache); // 检查heap中的timer events，将就绪的timer event从heap上删除，并插入到激活链表中 timeout_process(base); // 调用event_process_active()处理激活链表中的就绪event，调用其回调函数执行事件处理 // 该函数会寻找最高优先级（priority值越小优先级越高）的激活事件链表， // 然后处理链表中的所有就绪事件； // 因此低优先级的就绪事件可能得不到及时处理； if (base->event_count_active) { event_process_active(base); if (!base->event_count_active && (flags & EVLOOP_ONCE)) done = 1; } else if (flags & EVLOOP_NONBLOCK) done = 1; } // 循环结束，清空时间缓存 base->tv_cache.tv_sec = 0; event_debug(("%s: asked to terminate loop.", __func__)); return (0); } 3. I/O和Timer事件的统一 libevent将Timer和Signal事件都统一到了系统的I/O 的demultiplex机制中了，相信读者从上面的流程和代码中也能窥出一斑了，下面就再啰嗦一次了。 首先将Timer事件融合到系统I/O多路复用机制中，还是相当清晰的，因为系统的I/O机制像select()和epoll_wait()都允许程序制定一个最大等待时间（也称为最大超时时间）timeout，即使没有I/O事件发生，它们也保证能在timeout时间内返回。 那么根据所有Timer事件的最小超时时间来设置系统I/O的timeout时间；当系统I/O返回时，再激活所有就绪的Timer事件就可以了，这样就能将Timer事件完美的融合到系统的I/O机制中了。 这是在Reactor和Proactor模式（主动器模式，比如Windows上的IOCP）中处理Timer事件的经典方法了，ACE采用的也是这种方法，大家可以参考POSA vol2书中的Reactor模式一节。 堆是一种经典的数据结构，向堆中插入、删除元素时间复杂度都是O(lgN)，N为堆中元素的个数，而获取最小key值（小根堆）的复杂度为O(1)；因此变成了管理Timer事件的绝佳人选（当然是非唯一的），libevent就是采用的堆结构。
+...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to libevent源码深度剖析07" href=https://haokiu.com/blog/1fa932a07dd84e9fbdde728e110c098f/></a></article><article class=post-entry><header class=entry-header><h2>libevent源码深度剖析08</h2></header><div class=entry-content><p>libevent源码深度剖析08 集成信号处理
+现在我们已经了解了libevent的基本框架：事件管理框架和事件主循环。上节提到了libevent中I/O事件和Signal以及Timer事件的集成，这一节将分析如何将Signal集成到事件主循环的框架中。
+1. 集成策略——使用socket pair 前一节已经做了足够多的介绍了，基本方法就是采用“消息机制”。在libevent中这是通过socket pair完成的，下面就来详细分析一下。 Socket pair就是一个socket对，包含两个socket，一个读socket，一个写socket。工作方式如下图所示：
+创建一个socket pair并不是复杂的操作，可以参见下面的流程图，清晰起见，其中忽略了一些错误处理和检查。
+Libevent提供了辅助函数evutil_socketpair()来创建一个socket pair，可以结合上面的创建流程来分析该函数。
+2. 集成到事件主循环——通知event_base Socket pair创建好了，可是libevent的事件主循环还是不知道Signal是否发生了啊，看来我们还差了最后一步，那就是：为socket pair的读socket在libevent的event_base实例上注册一个persist的读事件。 这样当向写socket写入数据时，读socket就会得到通知，触发读事件，从而event_base就能相应的得到通知了。 前面提到过，Libevent会在事件主循环中检查标记，来确定是否有触发的signal，如果标记被设置就处理这些signal，这段代码在各个具体的I/O机制中，以Epoll为例，在**epoll_dispatch()**函数中，代码片段如下：
+res = epoll_wait(epollop->epfd, events, epollop->nevents, timeout); if (res == -1) { if (errno != EINTR) { event_warn("epoll_wait"); return (-1); } evsignal_process(base);// 处理signal事件 return (0); } else if (base->sig.evsignal_caught) { evsignal_process(base);// 处理signal事件 } 完整的处理框架如下所示：
+注1：libevent中，初始化阶段并不注册读socket的读事件，而是在注册信号阶段才会测试并注册； 注2：libevent中，检查I/O事件是在各系统I/O机制的**dispatch()函数中完成的，该dispatch()函数在event_base_loop()**函数中被调用；
+3. evsignal_info结构体 libevent中Signal事件的管理是通过结构体evsignal_info完成的，结构体位于evsignal.h文件中，定义如下：
+struct evsignal_info { struct event ev_signal; int ev_signal_pair[2]; int ev_signal_added; volatile sig_atomic_t evsignal_caught; struct event_list evsigevents[NSIG]; sig_atomic_t evsigcaught[NSIG]; #ifdef HAVE_SIGACTION struct sigaction **sh_old; #else ev_sighandler_t **sh_old; #endif int sh_old_max; }; 下面详细介绍一下个字段的含义和作用： 1）ev_signal， 为socket pair的读socket向event_base注册读事件时使用的event结构体； 2）ev_signal_pair，socket pair对，作用见第一节的介绍； 3）ev_signal_added，记录ev_signal事件是否已经注册了； 4）evsignal_caught，是否有信号发生的标记；是volatile类型，因为它会在另外的线程中被修改； 5）evsigvents[NSIG]，数组，evsigevents[signo]表示注册到信号signo的事件链表； 6）evsigcaught[NSIG]，具体记录每个信号触发的次数，evsigcaught[signo]是记录信号signo被触发的次数； 7）sh_old记录了原来的signal处理函数指针，当信号signo注册的event被清空时，需要重新设置其处理函数； evsignal_info的初始化包括，创建socket pair，设置ev_signal事件（但并没有注册，而是等到有信号注册时才检查并注册），并将所有标记置零，初始化信号的注册事件链表指针等。
+...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to libevent源码深度剖析08" href=https://haokiu.com/blog/4a5e0c5a568b4187b207ec0ada2dbdfb/></a></article><article class=post-entry><header class=entry-header><h2>libevent源码深度剖析09</h2></header><div class=entry-content><p>libevent源码深度剖析09 集成定时器事件
+现在再来详细分析libevent中I/O事件和Timer事件的集成，与Signal相比，Timer事件的集成会直观和简单很多。Libevent对堆的调整操作做了一些优化，本节还会描述这些优化方法。
+1. 集成到事件主循环 因为系统的I/O机制像select()和epoll_wait()都允许程序制定一个最大等待时间（也称为最大超时时间）timeout，即使没有I/O事件发生，它们也保证能在timeout时间内返回。 那么根据所有Timer事件的最小超时时间来设置系统I/O的timeout时间；当系统I/O返回时，再激活所有就绪的Timer事件就可以了，这样就能将Timer事件完美的融合到系统的I/O机制中了。 具体的代码在源文件event.c的**event_base_loop()**中，现在就对比代码来看看这一处理方法：
+if (!base->event_count_active && !(flags & EVLOOP_NONBLOCK)) { // 根据Timer事件计算evsel->dispatch的最大等待时间 timeout_next(base, &amp;tv_p); } else { // 如果还有活动事件，就不要等待，让evsel->dispatch立即返回 evutil_timerclear(&amp;tv); } // ... // 调用select() or epoll_wait() 等待就绪I/O事件 res = evsel->dispatch(base, evbase, tv_p); // ... // 处理超时事件，将超时事件插入到激活链表中 timeout_process(base); **timeout_next()**函数根据堆中具有最小超时值的事件和当前时间来计算等待时间，下面看看代码：
+1static int timeout_next(struct event_base *base, struct timeval **tv_p){ 2 struct timeval now; 3 struct event *ev; 4 struct timeval *tv = *tv_p; 5 // 堆的首元素具有最小的超时值 6 if ((ev = min_heap_top(&amp;base->timeheap)) == NULL) { 7 // 如果没有定时事件，将等待时间设置为NULL,表示一直阻塞直到有I/O事件发生 8 *tv_p = NULL; 9 return (0); 10 } 11 // 取得当前时间 12 gettime(base, &amp;now); 13 // 如果超时时间&lt;=当前值，不能等待，需要立即返回 14 if (evutil_timercmp(&amp;ev->ev_timeout, &amp;now, &lt;=)) { 15 evutil_timerclear(tv); 16 return (0); 17 } 18 // 计算等待的时间=当前时间-最小的超时时间 19 evutil_timersub(&amp;ev->ev_timeout, &amp;now, tv); 20 return (0); 21} 2. Timer小根堆 libevent使用堆来管理Timer事件，其key值就是事件的超时时间，源代码位于文件min_heap.h中。 所有的数据结构书中都有关于堆的详细介绍，向堆中插入、删除元素时间复杂度都是O(lgN)，N为堆中元素的个数，而获取最小key值（小根堆）的复杂度为O(1)。堆是一个完全二叉树，基本存储方式是一个数组。 libevent实现的堆还是比较轻巧的，虽然我不喜欢这种编码方式（搞一些复杂的表达式）。轻巧到什么地方呢，就以插入元素为例，来对比说明，下面伪代码中的size表示当前堆的元素个数：
+...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to libevent源码深度剖析09" href=https://haokiu.com/blog/e65e0c91ca7e45ad9ad3081edbd423f8/></a></article><article class=post-entry><header class=entry-header><h2>libevent源码深度剖析10</h2></header><div class=entry-content><p>libevent源码深度剖析10 支持I/O多路复用技术
+libevent的核心是事件驱动、同步非阻塞，为了达到这一目标，必须采用系统提供的I/O多路复用技术，而这些在Windows、Linux、Unix等不同平台上却各有不同，如何能提供优雅而统一的支持方式，是首要关键的问题，这其实不难，本节就来分析一下。
+1. 统一的关键 libevent支持多种I/O多路复用技术的关键就在于结构体eventop，这个结构体前面也曾提到过，它的成员是一系列的函数指针, 定义在event-internal.h文件中：
+struct eventop { const char *name; void *(*init)(struct event_base *); // 初始化 int (*add)(void *, struct event *); // 注册事件 int (*del)(void *, struct event *); // 删除事件 int (*dispatch)(struct event_base *, void *, struct timeval *); // 事件分发 void (*dealloc)(struct event_base *, void *); // 注销，释放资源 /* set if we need to reinitialize the event base */ int need_reinit; }; 在libevent中，每种I/O demultiplex机制的实现都必须提供这五个函数接口，来完成自身的初始化、销毁释放；对事件的注册、注销和分发。 比如对于epoll，libevent实现了5个对应的接口函数，并在初始化时并将eventop的5个函数指针指向这5个函数，那么程序就可以使用epoll作为I/O demultiplex机制了。
+2. 设置I/O demultiplex机制 libevent把所有支持的I/O demultiplex机制存储在一个全局静态数组eventops中，并在初始化时选择使用何种机制，数组内容根据优先级顺序声明如下：
+/* In order of preference */ static const struct eventop *eventops[] = { #ifdef HAVE_EVENT_PORTS &amp;evportops, #endif #ifdef HAVE_WORKING_KQUEUE &amp;kqops, #endif #ifdef HAVE_EPOLL &amp;epollops, #endif #ifdef HAVE_DEVPOLL &amp;devpollops, #endif #ifdef HAVE_POLL &amp;pollops, #endif #ifdef HAVE_SELECT &amp;selectops, #endif #ifdef WIN32 &amp;win32ops, #endif NULL }; 然后libevent根据系统配置和编译选项决定使用哪一种I/O demultiplex机制，这段代码在函数**event_base_new()**中：
+...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to libevent源码深度剖析10" href=https://haokiu.com/blog/f567712a9375435692b3217e444f19e5/></a></article><footer class=page-footer><nav class=pagination><a class=prev href=https://haokiu.com/index/17/>«&nbsp;&nbsp;
 </a><a class=next href=https://haokiu.com/index/19/>&nbsp;&nbsp;»</a></nav></footer></main><footer class=footer><span>haokiu.com</span>
 <span>Powered by
 <a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &

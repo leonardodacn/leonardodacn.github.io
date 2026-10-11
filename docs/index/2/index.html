@@ -1,16 +1,179 @@
 <!doctype html><html lang=zh-cn dir=auto><head><meta name=generator content="Hugo 0.167.0"><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>haokiu</title><meta name=description content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><meta name=author content><link rel=canonical href=https://haokiu.com/><link crossorigin=anonymous href=/assets/css/stylesheet.27115e9d9513d5c41ff78d63d8c3238939dabec71459d67163cfae4b996bfdbe.css integrity="sha256-JxFenZUT1cQf941j2MMjiTnavscUWdZxY8+uS5lr/b4=" rel="preload stylesheet" as=style><link rel=icon href=https://haokiu.com/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://haokiu.com/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://haokiu.com/favicon-32x32.png><link rel=apple-touch-icon href=https://haokiu.com/apple-touch-icon.png><link rel=mask-icon href=https://haokiu.com/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate type=application/rss+xml href=https://haokiu.com/index.xml><link rel=alternate type=application/json href=https://haokiu.com/index.json><link rel=alternate type=text/plain href=https://haokiu.com/llms.txt><link rel=alternate hreflang=zh-cn href=https://haokiu.com/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><link rel=describedby href=https://haokiu.com/llms.txt type=text/markdown><script type=application/ld+json>{"@context":"https://schema.org","@type":"WebSite","name":"haokiu","url":"https://haokiu.com/","inLanguage":"zh-cn","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https:\/\/haokiu.com\/search\/?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script><meta property="og:title" content="haokiu"><meta property="og:description" content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><meta property="og:type" content="website"><meta property="og:url" content="https://haokiu.com/"><meta name=twitter:card content="summary"><meta name=twitter:title content="haokiu"><meta name=twitter:description content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><script type=application/ld+json>{"@context":"https://schema.org","@type":"Organization","name":"haokiu","url":"https://haokiu.com/","description":"haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他","thumbnailUrl":"https://haokiu.com/favicon.ico","sameAs":[]}</script></head><body class=list id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://haokiu.com/ accesskey=h title="haokiu (Alt + H)">haokiu</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)">
 <svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button><ul class=lang-switch><li>|</li></ul></div></div><ul id=menu><li><a href=https://haokiu.com/ title=haokiu><span class=active>Home</span></a></li><li><a href=https://haokiu.com/1/ title=1><span>后端</span></a></li><li><a href=https://haokiu.com/2/ title=2><span>前端</span></a></li><li><a href=https://haokiu.com/3/ title=3><span>区块链</span></a></li><li><a href=https://haokiu.com/4/ title=4><span>大数据</span></a></li><li><a href=https://haokiu.com/5/ title=5><span>linux</span></a></li><li><a href=https://haokiu.com/6/ title=6><span>其他</span></a></li><li><a href=https://haokiu.com/tags/ title=Tags><span>tags</span></a></li><li><a href=https://haokiu.com/categories/ title=Categories><span>categories</span></a></li></ul></nav></header><main class=main><article class=post-entry><header class=entry-header><h2>2.4 模块快速⼊⻔</h2></header><div class=entry-content><p>2.4 模块快速⼊⻔ 2.4.1 快速入门 2.4.2 go get重新⼊⻔ 2.4.3 go.mod⽂件 2.4.4 go.sum⽂件 2.4.5 版本切换 2.4.3 go mod命令 TODO</p></div><footer class=entry-footer><span title=2021-01-22>2021-01-22</span></footer><a class=entry-link aria-label="post link to 2.4 模块快速⼊⻔" href=https://haokiu.com/blog/99154ed6163e4a40bcfdc5e7d5956c7d/></a></article><article class=post-entry><header class=entry-header><h2>2.5 子模块和多版本共存</h2></header><div class=entry-content><p>2.5 子模块和多版本共存 2.5.1 子模块 2.5.2 多版本共存 TODO</p></div><footer class=entry-footer><span title=2021-01-22>2021-01-22</span></footer><a class=entry-link aria-label="post link to 2.5 子模块和多版本共存" href=https://haokiu.com/blog/c868302e70ab472280a428d5583e15d2/></a></article><article class=post-entry><header class=entry-header><h2>2.6 镜像和私有仓库</h2></header><div class=entry-content><p>2.6 镜像和私有仓库 2.6.1 Fork的仓库 2.6.2 私有仓库 TODO</p></div><footer class=entry-footer><span title=2021-01-22>2021-01-22</span></footer><a class=entry-link aria-label="post link to 2.6 镜像和私有仓库" href=https://haokiu.com/blog/3681abb2d5e34af2be2ea2f170c6226f/></a></article><article class=post-entry><header class=entry-header><h2>2.7 模块化实践中的一些问题</h2></header><div class=entry-content><p>2.7 模块化实践中的一些问题 2.7.1 和GOPATH不兼容 2.7.2 pkg目录复杂化 TODO</p></div><footer class=entry-footer><span title=2021-01-22>2021-01-22</span></footer><a class=entry-link aria-label="post link to 2.7 模块化实践中的一些问题" href=https://haokiu.com/blog/1fbab86b16734c59b0bff743e512dfb2/></a></article><article class=post-entry><header class=entry-header><h2>Go2编程指南</h2></header><div class=entry-content><p>Go2编程指南 本书重点讲解Go2新特性，以及Go1教程中较少涉及的特性。本书适合对Go语言有一定基础的用户学习。对于刚学习Go语言的读者，建议先从《Go语言圣经》开始系统学习Go语言的基础知识。如果希望了解Go语言CGO或汇编语言的细节，可以参考《Go语言高级编程》。
-作者：柴树杉，Github @chai2010，Twitter @chaishushan 网址：https://github.com/chai2010/go2-book 在线阅读 https://chai2010.cn/go2-book/ 版权声明 Go2编程指南 由 柴树杉 采用 知识共享 署名-非商业性使用-禁止演绎 4.0 国际 许可协议进行许可。
-严禁任何商业行为使用或引用该文档的全部或部分内容！
-捐助支持 支付宝 微信 前言 TODO</p></div><footer class=entry-footer><span title=2021-01-22>2021-01-22</span></footer><a class=entry-link aria-label="post link to Go2编程指南" href=https://haokiu.com/blog/5c22f69800184d7a8705059ee3773333/></a></article><article class=post-entry><header class=entry-header><h2>Go2编程指南</h2></header><div class=entry-content><p>目录1.1 Go1的诺言1.2 Go1到Go1.101.3 Go1.10过渡到Go21.4 Go2诞生第1章 语法变迁2.1 Go1的包机制2.2 基于vendor的版本管理2.3 模块的设计⽬标2.4 模块快速⼊⻔2.5 子模块和多版本共存2.6 镜像和私有仓库2.7 模块化实践中的一些问题第2章 模块化第3章 错误处理Go2编程指南</p></div><footer class=entry-footer><span title=2021-01-22>2021-01-22</span></footer><a class=entry-link aria-label="post link to Go2编程指南" href=https://haokiu.com/blog/bk-3/></a></article><article class=post-entry><header class=entry-header><h2>Go2编程指南</h2></header><div class=entry-content><p>Go2编程指南 Go语言QQ群: 102319854, 1055927514 光谷码农课堂: https://study.163.com/provider/480000001914454/index.htm 凹语言(凹读音“Wa”)(The Wa Programming Language): https://github.com/wa-lang/wa 蚂蚁金服招聘云原生方向和编程语言方向岗位(杭州/P7)：云原生方向要求熟悉k8s配套工具，如kubectl、kustomize、kubebuilder，operator；编程语言方向要求对语言对语言解释器（如py/js/lua/wasm等）、工具链、配套SDK有一定兴趣和实践经验。欢迎各位同学咨询或推荐（推荐成功独享全额推荐红包）。联系方式 chaishushan@gmail.com, shushan.css@alibaba-inc.com
-本书重点讲解Go2新特性，以及Go1教程中较少涉及的特性。本书适合对Go语言有一定基础的用户学习。对于刚学习Go语言的读者，建议先从《Go语言圣经》开始系统学习Go语言的基础知识。如果希望了解Go语言CGO或汇编语言的细节，可以参考《Go语言高级编程》。如果希望深入学习Go语言语法树结构，可以参考《Go语法树入门——开启自制编程语言和编译器之旅》。
-作者：柴树杉，Github @chai2010，Twitter @chaishushan 网址：https://github.com/chai2010/go2-book Star历史：https://starcharts.herokuapp.com/chai2010/go2-book.svg 在线阅读 SUMMARY.md https://chai2010.cn/go2-book/ 网易云课堂·光谷码农课堂 https://study.163.com/provider/480000001914454/index.htm
-加入QQ群：102319854 中国最早的Go语言QQ群
-关注微信公众号(光谷码农/guanggu-coder) 加入微信群：从公众号底部菜单扫码进群。
-相关报告 GIAC: 2018 - Go 语言将要走向何方？(PDF) - 上海·GIAC全球互联网架构大会 2018/11/23 版权声明 Go2编程指南 由 柴树杉 采用 知识共享 署名-非商业性使用-禁止演绎 4.0 国际 许可协议进行许可。
-严禁任何商业行为使用或引用该文档的全部或部分内容！
-欢迎大家提供建议！</p></div><footer class=entry-footer><span title=2021-01-22>2021-01-22</span></footer><a class=entry-link aria-label="post link to Go2编程指南" href=https://haokiu.com/blog/e2e79e399c5b464295e2703c5db5739b/></a></article><article class=post-entry><header class=entry-header><h2>第1章 语法变迁</h2></header><div class=entry-content><p>第1章 语法变迁 Go语言语法变化非常少，主要发生在Go1.10之前。Go1.10主要的开发工作在2017年下半年完成，在2018年初正式发布。Go1.10版可以说是Go1和Go2的分水岭，虽然语言本身没有大的变化，但是Go语言官方正式开始准备Go2的前期设计工作。在Go1.10以前，很多关于语言细节修改的建议绝大部分都被冻结了。但是在Go1.10以后，语言改进的工作又重新纳入日程。本章重点回顾Go1.0发布以来，语言发生了哪些细微的变化。</p></div><footer class=entry-footer><span title=2021-01-22>2021-01-22</span></footer><a class=entry-link aria-label="post link to 第1章 语法变迁" href=https://haokiu.com/blog/c3984397f8e5480f81aaaeaf1b82ac23/></a></article><article class=post-entry><header class=entry-header><h2>第2章 模块化</h2></header><div class=entry-content><p>第2章 模块化 模块化也称为包依赖管理，是管理任何大型工程必备的工具。Go语言发布十年来一直缺乏官方的模块化工具。同样在2018年，作为Go语言团队的技术领导人Russ Cox终于出手，重新发明了称为最小版本选择的包依赖管理的规则并提交了提案。模块特性已经被实验性地集成到Go1.11中，并将在后续版本中逐渐转化为正式特性。模块化的特性将彻底解决大型Go语言工程的管理问题，至此Go1除了缺少泛型等特性已经近乎完美。本章讨论模块相关的使用。</p></div><footer class=entry-footer><span title=2021-01-22>2021-01-22</span></footer><a class=entry-link aria-label="post link to 第2章 模块化" href=https://haokiu.com/blog/8ef2da522892434187a81439c5d1dc2d/></a></article><article class=post-entry><header class=entry-header><h2>第3章 错误处理</h2></header><div class=entry-content><p>第3章 错误处理</p></div><footer class=entry-footer><span title=2021-01-22>2021-01-22</span></footer><a class=entry-link aria-label="post link to 第3章 错误处理" href=https://haokiu.com/blog/615b0dd45d2e4323805039e0ffb41808/></a></article><footer class=page-footer><nav class=pagination><a class=prev href=https://haokiu.com/>«&nbsp;&nbsp;
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button><ul class=lang-switch><li>|</li></ul></div></div><ul id=menu><li><a href=https://haokiu.com/ title=haokiu><span class=active>Home</span></a></li><li><a href=https://haokiu.com/7/ title=7><span>AI</span></a></li><li><a href=https://haokiu.com/1/ title=1><span>后端</span></a></li><li><a href=https://haokiu.com/2/ title=2><span>前端</span></a></li><li><a href=https://haokiu.com/3/ title=3><span>区块链</span></a></li><li><a href=https://haokiu.com/4/ title=4><span>大数据</span></a></li><li><a href=https://haokiu.com/5/ title=5><span>linux</span></a></li><li><a href=https://haokiu.com/6/ title=6><span>其他</span></a></li><li><a href=https://haokiu.com/tags/ title=Tags><span>tags</span></a></li><li><a href=https://haokiu.com/categories/ title=Categories><span>categories</span></a></li></ul></nav></header><main class=main><article class=post-entry><header class=entry-header><h2>第6章 深入分析ClassLoader工作机制</h2></header><div class=entry-content><p>第6章 深入分析ClassLoader工作机制 三个作用：
+将Class加载到JVM中； 审查每个类应该由谁加载（双亲委派）； 将CLass字节码重新解析成JVM统一要求的格式。 6.1 ClassLoader类结构解析 defineClass方法：将byte字节流解析成JVM能够识别的Class对象。意味着不仅仅可以通过class文件实例化对象。调用此方法生成的Class对象还没有resolve，resolve会在对象真正实例化时才进行。
+findClass方法：通过直接覆盖ClassLoader父类的findClass方法来实现类的加载规则，从而取得要加载的字节码。然后调用defineClass方法生成类的Class对象。如果想在类被加载到JVM的时候就被链接（Link），那么可以接着调用另外一个resolveClass方法。
+如果想实现自己的ClassLader，一般都会继承URLClassLoader。
+6.2 ClassLoader的等级加载机制 双亲委派。
+（1）Bootstrap ClassLoader，主要加载JVM自身工作需要的类，完全由JVM自己控制。（既没有更高一级的父加载器，也没有子加载器）。
+（2）ExtClassLoader，并不是JVM亲自实现，加载System.getProperty(“java.ext.dirs”)目录下的类。
+（3）AppClassLoader，父类是ExtClassLoader。加载System.getProperty(“java.class.path”)目录下的类都可以被其加载。
+实现自己的类加载器，都必须最终调用getSystemClassLoader()作为父加载器。而此方法获取到的就是AppClassLoader。
+注意Bootstrap ClassLoader并不是如其他文章所说，而是其并无子类也无父类。ExtClassLoader并没有父类加载器。
+ExtClassLoader和AppClassLoader都继承了URLClassloader类，而URLClassLoader又实现了抽象类ClassLoader，在创建Launcher对象时会首先创建ExtClassLoader，然后讲ExtClassLoader对象作为父加载器创建AppClassLoader对象。所以如果在Java应用中没有定义其他的ClassLoader，那么除了System.getProperty(“java.ext.dirs”)目录下的类是由ExtClassloader加载，其他类都是由AppClassLoader加载。
+加载class文件到内存的两种方式：隐式，显式。
+6.3 如何加载class文件 加载、验证、准备、解析、初始化。
+第13章 Spring框架的设计理念与设计模式分析 13.1 Spring的骨骼架构 三个核心组件：Core、Context和Bean。
+13.1.1 Spring的设计理念 最核心：Bean。（面向Bean编程）
+解决了一个关键问题：把对象之间的依赖关系转而用配置文件来管理（依赖注入）。
+Spring通过把对象包装在Bean中，从而达到管理这些对象及做一系列额外操作的目的。
+这种设计策略完全类似于OOP的设计理念。构建一个数据结构，然后根据这个数据结构设计它的生存环境，并让它在这个环境中按照一定的规律不停地运动，在它们地不停运动中设计一个系列于环境或者与其他各地完成信息交换。（同时也是大多数框架地设计理念）
+13.1.12 核心组件如何协同工作 Context负责发现每个Bean之间的关系，建立关系并且维护关系。所以Context就是一个Bean关系的集合，也叫Ioc容器。
+Core就是发现、建立和维护每个Bean之间的关系所需要的一系列工具。（也就是一些Util）
+13.2 核心组件详解 13.2.1 Bean组件 包：org.springframework.beans。这个包下的类主要解决三件事：Bean的定义、Bean的创建及对Bean的解析。（使用者只需关心创建）
+Spring是典型的工厂模式，工厂的继承层次关系图如下：
+顶级接口BeanFactory有3个子接口：ListableBeanFactory、HierarchicalBeanFantory和AutowireCapableBeanFactory。
+DefaultListableBeanFactory实现了所有的结构。
+定义多接口的原因：每个接口有不同的使用场景，主要是为了区分Spring内部对象的传递和转化过程中，对对象的数据访问所作的限制。例如，ListableBeanFactory接口标识这些Bean是可列表的，HierarchicalBeanFactory表示这些Bean是有继承关系的，AutowireCapableBeanFactory接口定义Bean的自动装配规则。4个接口共同定义了Bean的集合、Bean之间的关系和Bean的行为。
+Bean的定义主要有Beandefinition描述：
+Bean是配置文件信息中&lt;bean/>节点信息的转化。Spring解析完成后，内部就是一个BeanDefinition对象。
+Bean的解析过程过于繁琐，不赘述。
+13.2.2 Context组件 ApplicationContext继承了BeanFactory。
+ApplicationContext的子类主要包含两个方面：
+ConfigurableApplicationContext表示该Context是可修改的，也就是构建Context中，用户可以动态添加或修改已有的配置信息。 WebApplication，用于Web，可以直接访问Servletcontext。 ApplicationContext必须完成的事情：
+标识一个应用环境 利用BeanFactory创建Bean对象 保存对象关系表 能够捕获各种事件 13.2.3 Core组件 其中有很多关键类，一个重要的组成部分就是定义了资源的访问方式。
+Resource类相关：封装了各种可能的资源类型，也就是说对使用者来说屏蔽了文件类型的不同。通过继承InputStreamSource接口，在这个接口中有个getInputStream方法，返回InputStream类，所有资源都可以通过InputStream来获取，及屏蔽了资源的提供者。
+Context把资源的加载、解析和描述工作委托给了ResourcePatternResolver类来完成。
+13.2.4 Ioc容器如何工作 如何创建BeanFactory工厂 refresh方法。源码已阅就不贴了。步骤如下：
+（1）构建BeanFactory
+（2）注册可能感兴趣的事件
+（3）创建Bean实例对象
+（4）出发被监听的事件
+如何创建Bean实例并构建Bean的关系网 详见源码。
+Ioc容器的扩展点 BeanFactoryPostProcessor和BeanPostProcessor，分别在构建BeanFactory和构建Be’an对象时调用。还有就是InitPostProcessor和DisposableBean，它们分别在Bean实例创建和销毁时被调用。用户可以实现在这些接口中定义的方法，Spring会在适当的时候调用他们。还有一个是FactoryBean。（会扩展是精通Spring的第一步）
+Ioc容器如何为我所用 扩展点。通过扩展点来改变Spring的通用行为。（AOP是一个例子，可以作为参考）
+13.3 Spring中AOP的特性详解 13.3.1 动态代理的实现原理 java.lang.reflect.Proxy。
+重点看公有方法。
+阅读源码部分略。
+13.2.2 Spring AOP如何实现 13.4 设计模式解析之代理模式 给某一个对象创建一个代理对象，有代理对象控制对原对象的引用，而创建代理对象之后可以再调用时增加一些额外的操作。
+...</p></div><footer class=entry-footer><span title=2021-06-08>2021-06-08</span></footer><a class=entry-link aria-label="post link to 第6章 深入分析ClassLoader工作机制" href=https://haokiu.com/blog/eec901917e884002a43f917c02f47dd9/></a></article><article class=post-entry><header class=entry-header><h2>第8章 虚拟机字节码执行系统</h2></header><div class=entry-content><p>6.4字节码指令简介 Java虚拟机的指令由一个字节长度的、代表着某种特定操作含义的数字（称为操作码，Opcode）以及跟随其后的零至多个代表此操作所需参数（称为操作数，Operands）而构成。由于Java虚拟机采用面向操作数栈而不是寄存器的架构，所以大多数的指令都不包含操作数，而只有一个操作码。
+6.4.1 字节码与数据类型 Java虚拟机的指令集中，大多数的指令都包含了其操作数所对应的数据类型信息。
+如果每一种与数据类型相关的指令都支持Java虚拟机所有运行时数据类型的话，那指令的数量恐怕就会超出一个字节所能表示的数量范围了
+前面的被系统吞了 之后再补上
+第8章 虚拟机字节码执行系统 8.1概述 8.2 运行时栈帧结构 8.2.1 局部变量表 是一组变量存储空间，用于存放方法参数和方法内部定义的局部变量。
+用于存放方法参数和方法内部定义的局部变量。
+容量以变量槽（Variable Slot）为最小单位，虚拟机规范中并没有明确指明一个Slot应占用的内存空间大小，知识很有导向性地说道每个Slot都应该能存放一个boolean、byte、char、short、int、float、reference或returnAddress类型的数据。
+只要保证计时在64位虚拟机中使用了64位的物理内存空间去实现一个Slot，虚拟机仍要使用对齐和不败的手段让Slot在外观上看起来与32位虚拟机中的一致。
+Java中占用32位以内的数据类型有boolean、byte、char、short、int、float、reference和returnAddress8种类型。（Java语言与Java虚拟机种的剧本数据类型是存在本质差别的）。reference类型表示对一个对象实例的引用。虚拟机规范没有指明长度和结构。但需要做到如下两点：
+从引用中直接或间接地查找到对象在Java堆中的数据存放的起始地址索引； 引用中直接或简介地查找到对象所属数据类型在方法区中地存储的类型信息，否则无法实现Java语言规范中定义的语法约束。 returnAddress类型目前已经很少见了，为字节码指令jsr、jsr_w和ret服务的，指向一条字节码指令的地址，很古老的Java虚拟机曾经使用这几条指令来实现异常处理，现在已经由异常表替代。
+Java中明确的64位的数据类型只有long和double两种。分割存储的做法与“long和double的非原子性协定”类似。
+但在局部变量表中不会引起数据安全问题（线程私有）。
+索引定位。访问32位数据类型的变量，索引n就代表了使用第n个Slot。64位则会同时使用n和n+1两个Slot。对于两个相邻的共同存放一个64位数据的两个Slot，不允许采用任何方式单独访问其中的某一个。
+在方法执行时，如果执行的实例（非static），局部变量表中第0位索引的Slot默认时用于传递方法所属对象实例的引用，在方法中可以通过关键字“this”来访问到这个隐含的参数。
+为了尽可能节省栈帧空间，局部变量表中的Slot是可以重用的，方法中定义的变量，其作用域并不一定会覆盖整个方法体。副作用：某些情况下会直接影响到GC。
+实例，placeholder能否被回收的根本原因是：局部变量表中的Slot是否还存有关于placeholder数组对象的引用。
+局部变量表是GC Roots的一部分。把不用的占用了大量内存的变量手动设置为null值。
+但冲编码角度讲，以恰当的变量作用域来控制变量回收时间才是最优雅的解决方法。
+———————————待补充———————————
+局部变量不负初值会编译不通过。</p></div><footer class=entry-footer><span title=2021-06-08>2021-06-08</span></footer><a class=entry-link aria-label="post link to 第8章 虚拟机字节码执行系统" href=https://haokiu.com/blog/499b1754f0844c299d9bf24652161845/></a></article><article class=post-entry><header class=entry-header><h2>第一章 并发编程的挑战</h2></header><div class=entry-content><p>本书特色 结合JDK源码介绍了Java并发框架、线程池的实现原理。
+不仅仅局限于Java层面，更深入JVM，CPU。
+结合线上应用，给出了一些并发编程实战技巧。
+第一章 并发编程的挑战 如果希望通过多线程执行任务让程序运行得更快，会面临非常多得挑战，如上下文切换的问题、死锁的问题，以及受限于硬件和软件的资源限制问题。
+1.1 上下文切换 单核处理器支持多线程执行代码，CPU通过给每个线程分配COU时间片来实现。
+时间片非常短，所以CPU通过不停的切换线程执行，让我们感觉多个线程是同时执行的，几十毫秒ms。
+CPU通过时间片分配算法来循环执行任务。任务从保存到加载的过程就是一次上下文切换。
+上下文切换回影响多线程的执行速度。
+1.1.1 多线程一定快吗 累加，并发执行的速度比串行慢是因为线程有创建和上下文切换的开销。
+1.1.2 测试上下文切换次数和时长 Lmbech3可以测量上下文切换的时长。
+cmstat可以测量上下文切换的次数。
+CS(Content Switch)表示上下文切换的次数。
+1.1.3 如何减少上下文切换 较少上下文切换的方法有无锁并发编程、CAS算法、使用最少线程和使用协程。
+无所并发编程：多线程竞争锁时，回引起上下文切换，所以多线程处理数据时，可以用一些办法来避免使用锁，如将数据的ID按照Hash算法取模分段，不同的线程处理不同段的数据。 CAS算法。Java的Atomic包使用CAS算法来更新数据，而不需要加锁。 使用最少线程。避免创建不需要的线程，比如任务很少，但是创建了很多线程来处理，这样回造成大量线程都处于等待状态。 协程：在单线程里实现多任务的调度，并在单线程里维持多个任务间的切换。 1.1.4 减少上下文切换实战 通过见扫线上大量WAITING的线程，来减少上下文切换次数。
+1.2 死锁 避免死锁的几个常见方法：
+避免一个线程同时获取多个锁。 避免一个线程在锁内同时占用多个资源，尽量保证每个锁只占用一个资源。 尝试使用定时锁，使用lock.tryLock(timeout)来替代使用内部锁机制。 对于数据库锁，加锁和解锁必须在一个数据库连接里，否则会出现解锁失败的的情况。 1.3 资源限制的挑战 （1）什么是资源限制
+资源是指在进行并发编程时，程序的执行速度受限于计算机硬件资源或软件资源。
+硬件资源限制：带宽的上传/下载速读、硬盘读写速度和CPU的处理速度。
+软件资源限制：数据库的连接数和scoket连接数。
+（2）资源限制引发的问题
+在并发编程中，将代码执行速度加快的原则是将代码中串行执行的部分变成并发执行，但是如果将某段串行的代码并发执行，因为受限于资源，仍然在串行执行，这时候程序不仅不会加快执行，反而会更慢，因为增加了上下文切换和资源调度的问题。
+（3）如何解决资源限制的问题
+对于硬件资源限制，可以考虑使用集群并行执行程序。既然单机的资源有限制，那么就让程序在多级上运行。比如使用ODPS、Hadoop或者自己搭建服务器集群，不同的机器吹不同的数据。可以通过“数据ID%机器数”，计算得到一个机器编号，然后由对应编号的机器处理这笔数据。
+对于软件资源限制，可以考虑使用资源池将资源复用。比如使用连接池将数据库和Socket连接复用，或者调用对方webservice接口获取数据时，只建立一个连接。
+（4）在资源限制情况下进行并发编程
+如何在资源限制的情况下，让程序执行得更快呢？方法就是，根据不同得资源限制调整程序得并发度。
+1.4 本章小结 本章介绍了在进行并发编程时会遇到的几个挑战，并给出了一些建议。
+第二章 Java并发机制的底层实现原理 JVM执行字节码，最终需要转化为汇编指令在CPU上执行，Java中所使用得并发机制依赖于JVM得实现和CPU的指令。
+2.1 volatile的应用 1.volatile的定义与实现原理 volatile是轻量级的synchronized，在多处理器开发中保证了共享变量的“可见性”。使用得当的话，比synchronized的使用和执行成本更低，因为它不会引起线程上下文的切换和调度。本文分析Intel处理器是如何实现volatile的。
+CPU的术语定义：
+术语 英文单词 术语描述 内存屏障 memory barriers 是一组处理器指令，用于事项对内存操作的顺序限制 缓冲行 cache line 缓存中可以分配的最小存储单位。处理器填写缓存线时会加载整个缓存线，需要使用多个主内存读周期 原子操作 atomic line 不可终端的一个或一系列操作 缓存行填充 cache line fill 当处理器试别到内存中读取操作数时可缓存的，处理器读取整个缓存行到适当的缓存（L1,L2,L3的或所有） 缓存命中 cache hit 如果进行高速缓存行填充操作的内存位置仍然是下次处理器访问的地址时，处理器从缓存中读取操作数，而不是从内存读取 写命中 write hit 当处理器将操作数写回到一个内存缓存的区域时，它首先回检查这个缓存的内存地址是否在缓存行中，如果存在一个有效的缓存行，则处理器将这个操作数写回到缓存，而不是写回到内存，这个操作被称为写命中 写缺失 write misses the cache 一个有效的缓存行被写入到不存在的内存区域 为了提高处理速度，处理器不直接个内存进行通信，二十先将系统内存的数据督导内部缓存（L1,L2或其他）后再进行操作，但操作完不知道何时会写到内存。如果对声明了volatile的变量进行写操作，JVM就会像处理器发送一条Lock前缀的指令，将这个变量所在缓存的数据写回到系统内存。但是就算写回到内存，如过其他处理器缓存的值还是旧的，再执行计算操作就会有问题。所以，再多处理器下，未了保证各个处理器缓存的值还是旧的，再执行计算操作就会有问题。所以，在多处理器下，为了保证各个处理器的换粗你一直，就会实现缓存一致性协议，每个处理器通过嗅探在总线上传播的数据来检查自己缓存的值是不是过期了，当处理器发现自己缓存行对应的内存地址被修改，就会将当前处理器的缓存行设置成无效状态，当处理器对这个数据进行修改操作的时候，回重新从系统内存中把数据读到处理器缓存里。
+Lock前缀的指令在多核处理器下会引发两件事情：
+将当前处理器缓存行的数据写回到系统内存 这个写回内存的操作会使在其他CPU里缓存了该内存地址的数据无效 volatile的两条实现原则：
+...</p></div><footer class=entry-footer><span title=2021-06-08>2021-06-08</span></footer><a class=entry-link aria-label="post link to 第一章 并发编程的挑战" href=https://haokiu.com/blog/f6ad1487667e4880973e3b21505810be/></a></article><article class=post-entry><header class=entry-header><h2>三、Paxos的工程实践</h2></header><div class=entry-content><p>2.2.3 Paxos算法详解 假设有一组可以提出提案的进程集合，那么对于一个一致性算法来说需要保证以下几点：
+在这些被提出的提案中，只有一个会被选定。
+如果没有填被提出，那么就不会有被选定的提案。
+当一个填被选定后，进程应该可以获取被选定的提案信息。
+对于一致性来说，安全性（Safety）需求如下：
+只有被提出的提案才能被选定。 只有一个值被选定。 如果某么进程认为某个提案被选定了，那么这个提案必须是真的被选定的那个。 提案的选定
+大多数。
+推导过程
+P1：一个Accptor必须批准它收到的第一个提案
+P1a：一个Acceptor只要尚未响应过任何编号大于Mn的Prepare请求，那么它就可以接收这个编号为Mn的提案。（优化：可以忽略已批准过的提案的Prepare请求）
+P2：如果编号为M0，Value值为V0的提案（即[M0,V0]）被选定了，那么所有比编号M0更高的，且被选定的提案，其Value值必须为V0。
+P2a：如果编号为M0，Value值为V0的提案（即[M0,V0]）被选定了，那么所有比编号M0更高的，且被Acceptor批准的提案，其Value值必须为V0。
+P2b：如果一个提案[M0,V0]被选定后，那么之后任何Proposer产生的编号更高的提案，其Value值都为V0。
+P2c：对于任意的Mn和Vn，如果提案[Mn,Vn]被提出，那么肯定存在一个由半数以上的Acceptor组成的集合S，满足以下两个条件中的任意一个：
+S中不存在任何批准过编号小于Mn的提案的Acceptor。 选取S中所有Acceptor批准的编号小于Mn的提案，其中编号最大的那个提案其Value值是Vn。 推导过程为第二数学归纳法。略
+Proposer生成提案
+对于Proposer，获取被通过的提案比预测可能会被通过的提案简单。
+Proposer选择一个新的提案编号Mn，然后向某个Acceptor集合的成员发送请求，要求该集合中的Acceptor做出如下回应。 像Proposer承诺，保证不再批准任何编号小于Mn的提案。 如果Acceptor已经批准过任何提案，那么其就向Proposer反馈当前该Acceptor已经批准的编号小于Mn但为最大编号的那个提案的值。 如果Proposer收到了来自半数以上的Acceptor的响应结果，那么它就可以产生编号为Mn、Value值为Vn的提案，这里的Vn是所有响应中编号最大的提案Value值。当然还存在一种情况，就是半数以上的Acceptor都没有批准过任何提案，即响应中不包含任何的提案，那么此时Vn值就可以由Proposer任意选择。 Acceptor批准提案
+一个Acceptor可能会收到来自Proposer的两种请求，分别是Prepare请求和Accept请求，分别相应如下：
+Prepare请求：Acceptor可以在任何时候响应一个Prepare请求。 Accept请求：在不违背Accept现有承诺的前提下，可以任意响应Accept请求。 算法陈述
+阶段一：
+Proposer发送提案编号Mn； Acceptor根据约束接收提案，如果接收过返回接收最大值Vn； 阶段二：
+如果Proposer收到大多数A的响应，发送[Mn,Vn]； Acceptor根据约束接收提案； 提案的获取
+通知全部Learner
+选取主Learner
+将主Learner改为Learner集合
+通过选取主Proposer保证算法的活性
+三、Paxos的工程实践 3.1 Chubby 一个分布式锁服务。解决分布式协作，元数据存储，Master选举等一系列与分布式锁服务相关的问题。
+底层为Paxos算法。
+3.1.1 概述</p></div><footer class=entry-footer><span title=2021-06-08>2021-06-08</span></footer><a class=entry-link aria-label="post link to 三、Paxos的工程实践" href=https://haokiu.com/blog/3426588a7834499f8a9a1b7e46817c0c/></a></article><article class=post-entry><header class=entry-header><h2>序</h2></header><div class=entry-content><p>序 大、快、多样性只是表象，大数据的真正价值在于生命性和生态性。（活数据）
+第1 章 总述 如果不能对数据进行有序、有结构地分类组织和存储，如果不能有效利用并发掘它，继而产生价值，那么它同时也成为一场“灾难”。无需、无结构的数据犹如堆积如山的垃圾，给企业带来的是有令人咋舌的高额成本。
+要求：
+如何建设高效的数据模型和体系，是数据易用，避免重复建设和数据不一致性； 如何提供高效易用的数据开发工具； 如何做好数据质量保障； 如何有效管理和控制日益增长的存储和计算消耗； 如何保证数据服务的稳定，保证其性能； 如何设计有效的数据产品高效赋能于外部客户和内部员工 数据采集层 日志采集体系方案包括两大体系：Aplus.JS是Web端日志采集技术方案；UserTrack是App端日记采集技术方案。
+在采集技术基础上面向各个场景的埋点规范。
+在传输方面采用TimeTunel（TT）,它既包括数据库的增量数据传输，也包括日志数据的传输；既支持实时流式计算，也知乎此各种时间窗口的批量计算。
+也通过数据同步工具（DataX和同步中心，其中同步中心是给予DataX易用性封装的）直连异构数据库（备库）来抽取各种时间窗口的数据。
+数据计算层 数据只有被整合和计算,才能被用于洞察商业规律,挖掘潜在信息，从而实现大数据价值,达到赋能于商业和创造价值的目的。
+阿里巴巴的数据计算层包括两大体系:数据存储及计算云平台（离线计算平台MaxCompute和实时计算平台StreamCompute）和数据整合及管理体系（内部称之为“ OneData ”） 。
+MaxCompute是阿里巴巴自主研发的离线大数据平台。
+StreamCompute是阿里巴巴自主研发的流式大数据平台。
+OneData是数据整合及管理的方法体系和工具。
+借助此体系，构建了数据公共层。
+从数据计算频率角度来看，阿里数据仓库可以分为离线数据仓库（传统的数据仓库概念）和实时数据仓库（典型应用：双11实时数据）。
+阿里数据仓库的数据加工链路也是遵循业界的分层理念，包括：
+操作数据层（Operational Data Store，ODS）; 明细数据层（Data WareHouse Detail，DWD）； 应用数据层（Application Data Store，ADS）。 通过数据仓库不同层次之间的加工过程实现从数据资产向信息资产的转化，并且对整个过程进行有效的元数据管理及数据质量处理。
+元数据模型整合及应用是一个重要的组成部分，主要包含：
+数据源元数据 数据仓库元数据 数据链路元数据 工具类元数据 数据质量类元数据 元数据应用主要面向数据发现、数据管理等，如用于存储、计算和成本管理。
+数据服务层 当数据已被整合和计算好之后，需要提供给产品和应用进行数据消费。
+针对不同的需求，数据服务层的数据源架构在多种数据库之上，如Mysql和HBase。
+数据服务层主要考虑性能、稳定性、扩展性。
+OneService（数据服务平台）一数据仓库整合计算好的数据作为数据源，对外通过接口的方式提供数据服务，主要提供简单数据查询服务、复杂数据查询服务（用户识别、用户画像等）和实时数据推送服务。
+数据应用层 第1篇 数据技术篇 第2章 日志采集 第2篇 数据模型篇 第8章 大数据领域建模综述 8.1 为什么需要数据建模 如何将数据进行有序、有结构地分类组织和存储？
+数据模型就是数据组织和存储方法，它强调从业务、数据存取和使用角度合理存储数据。有了适合业务和基础数据存储环境的模型，那么大数据就能获得以下好处：
+性能：良好的数据模型能帮助我们快速查询所需要的数据，减少数据的I/O吞吐。 成本：良好的数据模型能极大地减少不必要的数据冗余，也能实现计算结果复用，极大地降低大数据系统中的存储和计算成本。 效率：良好的数据模型能极大地改善用户使用数据的体验，提高使用数据的效率。 质量：良好的数据模型能改善数据统计口径的不一致性，减少数据计算错误的可能性。 8.2 关系行数据库系统和数据仓库 大数据领域仍然使用关系型数据库，使用关系理论描述数据之间的关系，只是基于其数据存储的特点关系数据模型的范式上有了不同的选择。
+8.3 从OLTP和OLAP系统特别看模型方法论的选择 OLTP系统通常面向的主要数据操作是随即读写，主要采用满足3NF的实体关系模型存储数据，从而在事务处理中解决数据的冗余和一致性问题；而OLAP系统面向的主要数据操作时批量读写，事物处理中的一致性不是OLAP所关注的，其主要关注数据的集合，以及在一次性的复杂大数据查询和处理中的性能，因此它需要采用一些不同的数据建模方法。
+8.4 典型的数据仓库建模方法论 8.4.1 ER模型 数据仓库中的3NF和OLPT系统中的3NF的却别在于，它是站在企业角度面向主题的抽象，而不是针对某个具体业务流程的实体对象关系的抽象。其具有以下几个特点：
+需要全面了解企业业务和数据； 事实周期非常长； 对建模人员的能力要求非常高。 采用ER模型建设数据仓库魔性的出发点是整合数据将个系统中的数据以整个企业角度按主题进项相似性组合和合并，并进行一致性处理，为数据分析决策服务，但是并不能直接用于分析决策。
+其建模步骤分为三个阶段：
+高层模型：一个高度抽象的模型，描述主要的主题以及主题间的关系，用语描述企业的业务总体概况。 中层模型：在高层模型的基础上，细化主题的数据项。 物理模型（也叫底层模型）：在中层模型的基础上，考虑物理存储，同时基于性能和平台特点进行物理属性的设计，也可能作一些表的合并、分区的设计等。 实践典型：金融业务FS-LDM。
+8.4.2 维度模型 是数据仓库工程领域最流行的数据仓库建模的经典。
+维度建模从分析决策的需求出发构建模型，为分析需求服务，因此它重点关注用户如何更快速地完成需求分析，同时具有较好的大规模复杂查询的响应性能。其典型的代表是星形模型，以及在一些特殊场景下使用的雪花模型。其设计分为一下几个步骤：
+选择需要进行分析决策的业务过程。业务过程可以是单个业务事件，比如交易的支付、退款等；也可以时某个时间的状态，比如当前的账户余额等；还可以是一系列相关业务时间组成的业务流程，具体需要看我们分析的是某些事件发生情况，还是当前状态，或是事件流转效率； 选择粒度。在事件分析中，我们要预判所有分析需要细分的程度，从而决定选择的粒度。粒度是维度的一个组合； 识别维表。选择好粒度之后，就需要细雨此粒度设计维表，包括维度属性，用于分析时进行分组和筛选； 选择事实。确定分析需要衡量的指标。 8.4.3 Data Vault模型 ER模型的衍生。其设计的出发点也是为了实现数据的整合，但不能直接用于数据分析决策。
+...</p></div><footer class=entry-footer><span title=2021-06-08>2021-06-08</span></footer><a class=entry-link aria-label="post link to 序" href=https://haokiu.com/blog/cffcc67d768246fd8624b3e5b98854f5/></a></article><article class=post-entry><header class=entry-header><h2>lantern 邀请码</h2></header><div class=entry-content><p>lantern 是一款专业的代理软件，方便更好的使用互联网，输入我的邀请码 46KBX2 来获得三个月的蓝灯专业版！立即下载 https://github.com/getlantern/forum</p></div><footer class=entry-footer><span title=2021-06-08>2021-06-08</span></footer><a class=entry-link aria-label="post link to lantern 邀请码" href=https://haokiu.com/blog/g6ADCM/></a></article><article class=post-entry><header class=entry-header><h2>java 到底要不要收费</h2></header><div class=entry-content><p>随着JDK 11发布, Oracle同时调整了JDK的授权许可证,里面包含了好几个动作。
+首先, Oracle从JDK 11起把以前的商业特性全部开源给OpenJDK,这样OpenJDK 11和OracleJDK 11的代码和功能,在本质上就是完全相同的(官方原文是Essentially Identical)。
+然后, Oracle宣布以后将会同时发行两个JDK:一个是以GPLV2+CE协议下由Oracle发行的OpenJDK (本书后面章节称其为Oracle OpenJDK) ,另一个是在新的OTN协议下发行的传统的OracleJDK。
+这两个JDK共享绝大部分源码,在功能上是几乎一样的,核心差异是前者可以免费在开发、测试或生产环境中使用，但是只有半年时间的更新支持;后者个人依然可以免费使用，但若在生产环境中商用就必须付费，可以有三年时间的更新支持。
+如果说由此能得出"Java要收费"的结论,那是纯属标题党,最多只能说Oracle在迫使商业用户要么不断升级JDK的版本,要么就去购买商业支持。
+JDK选择建议 JDK8 分情况 8u211和之后的版本商用需付费，JDK 9/10 免费 JDK 11及以上所有版本商用需付费
+免费建议：JDK8 使用 8u202 版本，JDK8 以上版本使用 OpenJDK 或大型机构替代版本Zulu JDK 、Amazon Corretto JDK等
+说明 Java 的版本发布周期变更为每六个月一次 ， 每半年发布一个大版本，每个季度发布一个中间特性版本，Java 9 和 Java 10 这两个被称为“功能性的版本”，两者均只提供半年的技术支持，Java 11 不仅提供了长期支持服务，还将作为 Java 平台的参考实现。Oracle 直到2023年9月都会为 Java 11 提供技术支持，而补丁和安全警告等扩展支持将持续到2026年。所以，Java11 必将是下一代长期使用的版本。</p></div><footer class=entry-footer><span title=2021-02-24>2021-02-24</span></footer><a class=entry-link aria-label="post link to java 到底要不要收费" href=https://haokiu.com/blog/AWAwA5/></a></article><article class=post-entry><header class=entry-header><h2>Neovide</h2></header><div class=entry-content><p>neovide 是一个简单的 neovim 用户图像工具，相对于 Neovim 会有一些界面的提升的，但它的功能类似于终端用户界面。
+neovide 的官网：https://github.com/Kethku/neovide。
+gitbhub上有更多关于它的安装及使用教程。</p></div><footer class=entry-footer><span title=2021-02-16>2021-02-16</span></footer><a class=entry-link aria-label="post link to Neovide" href=https://haokiu.com/blog/neovide/></a></article><article class=post-entry><header class=entry-header><h2>eth2 的优势</h2></header><div class=entry-content><p>eth2 相对于 eth1的优势：
+1、提高可扩展性 ETH1.0每秒仅支持15个左右的事务。而ETH2.0升级后最终将被划分为64（将来可能会更多）个分片，理论上可以使网络每秒完成达上千甚至上万笔交易。ETH2.0解决了主网运算能力过于集中的问题，并进一步提高了可扩展性。
+2、环境可持续性 ETH现阶段仍是使用较为主流的PoW工作量证明共识机制来运行及维护网络安全，PoW模式虽然在确保安全性和去中心化程度上具有一定的优势，但对于维护网络安全的节点付出的代价却是昂贵的。最终只有一个节点会找到正确的哈希值，获得记账权和奖励，但全球所有参与其中的节点却都付出了大量的算力和电力，这样的模式不仅效率低且对于环境资源而言是一种浪费。而升级为PoS权益证明共识机制后，ETH将不再依靠大量的算力和电力来维护、运行网络，而是依靠持币权益验证的方式来创建链上的区块和交易。</p></div><footer class=entry-footer><span title=2021-02-16>2021-02-16</span></footer><a class=entry-link aria-label="post link to eth2 的优势" href=https://haokiu.com/blog/eth2/></a></article><article class=post-entry><header class=entry-header><h2>linux 复制文件，并创建不存在的目录</h2></header><div class=entry-content><p>linux复制文件和目录用cp命令，--parents 参数可以确保不存在目录的创建，比如文件 cp --parents java/doc/readme.md ../doc ，如果目录 doc不存在目录：java/doc则会创建。
+高级操作：
+#查找当前目录下所有.md文件，并将它们复制到DataxDoc目录，如果目录不存在则双肩 find . -name "*.md" | xargs -I {} cp --parents {} ../DataxDoc</p></div><footer class=entry-footer><span title=2021-02-02>2021-02-02</span></footer><a class=entry-link aria-label="post link to linux 复制文件，并创建不存在的目录" href=https://haokiu.com/blog/a0lZoj/></a></article><footer class=page-footer><nav class=pagination><a class=prev href=https://haokiu.com/>«&nbsp;&nbsp;
 </a><a class=next href=https://haokiu.com/index/3/>&nbsp;&nbsp;»</a></nav></footer></main><footer class=footer><span>haokiu.com</span>
 <span>Powered by
 <a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &

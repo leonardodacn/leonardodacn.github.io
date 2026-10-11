@@ -1,36 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>1 on haokiu</title><link>https://haokiu.com/categories/1/</link><description>Recent content in 1 on haokiu</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>haokiu.com</copyright><lastBuildDate>Sun, 11 Oct 2026 15:15:14 +0800</lastBuildDate><atom:link href="https://haokiu.com/categories/1/index.xml" rel="self" type="application/rss+xml"/><item><title>jev-trader 简介</title><link>https://haokiu.com/blog/jev-trader/</link><pubDate>Sun, 11 Oct 2026 15:15:14 +0800</pubDate><guid>https://haokiu.com/blog/jev-trader/</guid><description>**jev-trader** 是由 Monad 基金会首席 AI 工程师 Jarrod Watts 开源的 AI 做市 / 高频交易机器人，基于 TypeSafe AI 推出的**Jev（TypeSafe System One）快速决策模型**开发，是 Jev 模型出圈的首个标杆 Demo 项目</description><content:encoded><![CDATA[<p><strong>jev-trader</strong> 是由 Monad 基金会首席AI工程师 Jarrod Watts 开源的AI做市/高频交易机器人，基于 TypeSafe AI 推出的<strong>Jev（TypeSafe System One）快速决策模型</strong>开发，是Jev模型出圈的首个标杆Demo项目。</p>
-<h2 id="基础信息">基础信息</h2>
-<ul>
-<li>GitHub：<code>jarrodwatts/jev-trader</code>，Bun + TypeScript 开发</li>
-<li>交易标的：Monad 链上 Kuru 交易所 <strong>MON/USDC</strong></li>
-<li>演示页面：jev-trader.vercel.app，提供可视化实时仪表盘，展示盘口、模型置信度、成交记录</li>
-</ul>
-<h2 id="核心机制">核心机制</h2>
-<ol>
-<li><strong>决策层：Jev模型</strong>
-Jev 不是大语言模型，主打<strong>低延迟实时决策</strong>，目标适配Monad约300ms的出块间隔；读取订单簿数据后输出：买/卖/持有 + 置信概率，只给出交易判断，不生成文本。</li>
-<li><strong>执行层：做市限价单</strong>
-程序拿到Jev的判断后，在盘口价差内侧挂<strong>仅成交限价单（post-only）</strong>，赚取买卖价差，属于简单链上做市策略。</li>
-<li><strong>两种运行模式</strong>
-<ul>
-<li>Dry-run（默认空跑）：只看盘、做模拟决策，不真实下单，适合调试观察</li>
-<li>实盘模式：导入私钥后才会发链上交易</li>
-</ul>
-</li>
-</ol>
-<h2 id="项目定位重点">项目定位（重点）</h2>
-<p>作者明确强调：<strong>这只是技术演示Demo，不是稳赚交易策略</strong>，目的是证明Jev模型可以跟上Monad的高速出块节奏，适合AI决策+链上交易的学习、二次开发，不适合直接拿来盈利。</p>
-<h2 id="社区情况与风险">社区情况与风险</h2>
-<ul>
-<li>开源后衍生出很多分支版本：比如移植到Hyperliquid的jev-trade，支持BTC/ETH/SOL等合约多空</li>
-<li>社区有实盘测试案例，出现过短时间大额亏损；AI高置信度≠盈利，缺少成熟回测、风控，市场波动下容易反复频繁换向、持续亏损</li>
-</ul>
-<h2 id="简单区分">简单区分</h2>
-<ul>
-<li><strong>Jev</strong>：TypeSafe AI的快速决策模型（System One）</li>
-<li><strong>jev-trader</strong>：用Jev模型写的Monad链上做市机器人Demo</li>
-</ul>
-]]></content:encoded></item><item><title>java 到底要不要收费</title><link>https://haokiu.com/blog/AWAwA5/</link><pubDate>Wed, 24 Feb 2021 10:24:56 +0800</pubDate><guid>https://haokiu.com/blog/AWAwA5/</guid><description>随着JDK 11发布, Oracle同时调整了JDK的授权许可证,里面包含了好几个动作。 首先, Oracle从JDK 11起把以前的商业特性全部开源给OpenJDK,这样OpenJDK 11和Ora…</description><content:encoded><![CDATA[<p>随着JDK 11发布, Oracle同时调整了JDK的授权许可证,里面包含了好几个动作。</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>1 on haokiu</title><link>https://haokiu.com/categories/1/</link><description>Recent content in 1 on haokiu</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>haokiu.com</copyright><lastBuildDate>Wed, 24 Feb 2021 10:24:56 +0800</lastBuildDate><atom:link href="https://haokiu.com/categories/1/index.xml" rel="self" type="application/rss+xml"/><item><title>java 到底要不要收费</title><link>https://haokiu.com/blog/AWAwA5/</link><pubDate>Wed, 24 Feb 2021 10:24:56 +0800</pubDate><guid>https://haokiu.com/blog/AWAwA5/</guid><description>随着JDK 11发布, Oracle同时调整了JDK的授权许可证,里面包含了好几个动作。 首先, Oracle从JDK 11起把以前的商业特性全部开源给OpenJDK,这样OpenJDK 11和Ora…</description><content:encoded><![CDATA[<p>随着JDK 11发布, Oracle同时调整了JDK的授权许可证,里面包含了好几个动作。</p>
 <p>首先, Oracle从JDK 11起把以前的商业特性全部开源给OpenJDK,这样OpenJDK 11和OracleJDK 11的代码和功能,在本质上就是完全相同的(官方原文是Essentially Identical)。</p>
 <p>然后, Oracle宣布以后将会同时发行两个JDK:一个是以GPLV2+CE协议下由Oracle发行的OpenJDK (本书后面章节称其为Oracle OpenJDK) ,另一个是在新的OTN协议下发行的传统的OracleJDK。</p>
 <p>这两个JDK共享绝大部分源码,在功能上是几乎一样的,核心差异是前者可以免费在开发、测试或生产环境中使用，但是只有半年时间的更新支持;后者个人依然可以免费使用，但若在生产环境中商用就必须付费，可以有三年时间的更新支持。</p>

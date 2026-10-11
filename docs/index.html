@@ -1,59 +1,146 @@
 <!doctype html><html lang=zh-cn dir=auto><head><meta name=generator content="Hugo 0.167.0"><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>haokiu</title><meta name=description content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><meta name=author content><link rel=canonical href=https://haokiu.com/><link crossorigin=anonymous href=/assets/css/stylesheet.27115e9d9513d5c41ff78d63d8c3238939dabec71459d67163cfae4b996bfdbe.css integrity="sha256-JxFenZUT1cQf941j2MMjiTnavscUWdZxY8+uS5lr/b4=" rel="preload stylesheet" as=style><link rel=icon href=https://haokiu.com/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://haokiu.com/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://haokiu.com/favicon-32x32.png><link rel=apple-touch-icon href=https://haokiu.com/apple-touch-icon.png><link rel=mask-icon href=https://haokiu.com/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate type=application/rss+xml href=https://haokiu.com/index.xml><link rel=alternate type=application/json href=https://haokiu.com/index.json><link rel=alternate type=text/plain href=https://haokiu.com/llms.txt><link rel=alternate hreflang=zh-cn href=https://haokiu.com/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><link rel=describedby href=https://haokiu.com/llms.txt type=text/markdown><script type=application/ld+json>{"@context":"https://schema.org","@type":"WebSite","name":"haokiu","url":"https://haokiu.com/","inLanguage":"zh-cn","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https:\/\/haokiu.com\/search\/?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script><meta property="og:title" content="haokiu"><meta property="og:description" content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><meta property="og:type" content="website"><meta property="og:url" content="https://haokiu.com/"><meta name=twitter:card content="summary"><meta name=twitter:title content="haokiu"><meta name=twitter:description content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><script type=application/ld+json>{"@context":"https://schema.org","@type":"Organization","name":"haokiu","url":"https://haokiu.com/","description":"haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他","thumbnailUrl":"https://haokiu.com/favicon.ico","sameAs":[]}</script></head><body class=list id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://haokiu.com/ accesskey=h title="haokiu (Alt + H)">haokiu</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)">
 <svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button><ul class=lang-switch><li>|</li></ul></div></div><ul id=menu><li><a href=https://haokiu.com/ title=haokiu><span class=active>Home</span></a></li><li><a href=https://haokiu.com/1/ title=1><span>后端</span></a></li><li><a href=https://haokiu.com/2/ title=2><span>前端</span></a></li><li><a href=https://haokiu.com/3/ title=3><span>区块链</span></a></li><li><a href=https://haokiu.com/4/ title=4><span>大数据</span></a></li><li><a href=https://haokiu.com/5/ title=5><span>linux</span></a></li><li><a href=https://haokiu.com/6/ title=6><span>其他</span></a></li><li><a href=https://haokiu.com/tags/ title=Tags><span>tags</span></a></li><li><a href=https://haokiu.com/categories/ title=Categories><span>categories</span></a></li></ul></nav></header><main class=main><article class=post-entry><header class=entry-header><h2>jev-trader 简介</h2></header><div class=entry-content><p>jev-trader 是由 Monad 基金会首席AI工程师 Jarrod Watts 开源的AI做市/高频交易机器人，基于 TypeSafe AI 推出的Jev（TypeSafe System One）快速决策模型开发，是Jev模型出圈的首个标杆Demo项目。
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button><ul class=lang-switch><li>|</li></ul></div></div><ul id=menu><li><a href=https://haokiu.com/ title=haokiu><span class=active>Home</span></a></li><li><a href=https://haokiu.com/7/ title=7><span>AI</span></a></li><li><a href=https://haokiu.com/1/ title=1><span>后端</span></a></li><li><a href=https://haokiu.com/2/ title=2><span>前端</span></a></li><li><a href=https://haokiu.com/3/ title=3><span>区块链</span></a></li><li><a href=https://haokiu.com/4/ title=4><span>大数据</span></a></li><li><a href=https://haokiu.com/5/ title=5><span>linux</span></a></li><li><a href=https://haokiu.com/6/ title=6><span>其他</span></a></li><li><a href=https://haokiu.com/tags/ title=Tags><span>tags</span></a></li><li><a href=https://haokiu.com/categories/ title=Categories><span>categories</span></a></li></ul></nav></header><main class=main><article class=post-entry><header class=entry-header><h2>jev-trader 简介</h2></header><div class=entry-content><p>jev-trader 是由 Monad 基金会首席AI工程师 Jarrod Watts 开源的AI做市/高频交易机器人，基于 TypeSafe AI 推出的Jev（TypeSafe System One）快速决策模型开发，是Jev模型出圈的首个标杆Demo项目。
 基础信息 GitHub：jarrodwatts/jev-trader，Bun + TypeScript 开发 交易标的：Monad 链上 Kuru 交易所 MON/USDC 演示页面：jev-trader.vercel.app，提供可视化实时仪表盘，展示盘口、模型置信度、成交记录 核心机制 决策层：Jev模型 Jev 不是大语言模型，主打低延迟实时决策，目标适配Monad约300ms的出块间隔；读取订单簿数据后输出：买/卖/持有 + 置信概率，只给出交易判断，不生成文本。 执行层：做市限价单 程序拿到Jev的判断后，在盘口价差内侧挂仅成交限价单（post-only），赚取买卖价差，属于简单链上做市策略。 两种运行模式 Dry-run（默认空跑）：只看盘、做模拟决策，不真实下单，适合调试观察 实盘模式：导入私钥后才会发链上交易 项目定位（重点） 作者明确强调：这只是技术演示Demo，不是稳赚交易策略，目的是证明Jev模型可以跟上Monad的高速出块节奏，适合AI决策+链上交易的学习、二次开发，不适合直接拿来盈利。
-社区情况与风险 开源后衍生出很多分支版本：比如移植到Hyperliquid的jev-trade，支持BTC/ETH/SOL等合约多空 社区有实盘测试案例，出现过短时间大额亏损；AI高置信度≠盈利，缺少成熟回测、风控，市场波动下容易反复频繁换向、持续亏损 简单区分 Jev：TypeSafe AI的快速决策模型（System One） jev-trader：用Jev模型写的Monad链上做市机器人Demo</p></div><footer class=entry-footer><span title=2026-10-11>2026-10-11</span></footer><a class=entry-link aria-label="post link to jev-trader 简介" href=https://haokiu.com/blog/jev-trader/></a></article><article class=post-entry><header class=entry-header><h2>java 到底要不要收费</h2></header><div class=entry-content><p>随着JDK 11发布, Oracle同时调整了JDK的授权许可证,里面包含了好几个动作。
-首先, Oracle从JDK 11起把以前的商业特性全部开源给OpenJDK,这样OpenJDK 11和OracleJDK 11的代码和功能,在本质上就是完全相同的(官方原文是Essentially Identical)。
-然后, Oracle宣布以后将会同时发行两个JDK:一个是以GPLV2+CE协议下由Oracle发行的OpenJDK (本书后面章节称其为Oracle OpenJDK) ,另一个是在新的OTN协议下发行的传统的OracleJDK。
-这两个JDK共享绝大部分源码,在功能上是几乎一样的,核心差异是前者可以免费在开发、测试或生产环境中使用，但是只有半年时间的更新支持;后者个人依然可以免费使用，但若在生产环境中商用就必须付费，可以有三年时间的更新支持。
-如果说由此能得出"Java要收费"的结论,那是纯属标题党,最多只能说Oracle在迫使商业用户要么不断升级JDK的版本,要么就去购买商业支持。
-JDK选择建议 JDK8 分情况 8u211和之后的版本商用需付费，JDK 9/10 免费 JDK 11及以上所有版本商用需付费
-免费建议：JDK8 使用 8u202 版本，JDK8 以上版本使用 OpenJDK 或大型机构替代版本Zulu JDK 、Amazon Corretto JDK等
-说明 Java 的版本发布周期变更为每六个月一次 ， 每半年发布一个大版本，每个季度发布一个中间特性版本，Java 9 和 Java 10 这两个被称为“功能性的版本”，两者均只提供半年的技术支持，Java 11 不仅提供了长期支持服务，还将作为 Java 平台的参考实现。Oracle 直到2023年9月都会为 Java 11 提供技术支持，而补丁和安全警告等扩展支持将持续到2026年。所以，Java11 必将是下一代长期使用的版本。</p></div><footer class=entry-footer><span title=2021-02-24>2021-02-24</span></footer><a class=entry-link aria-label="post link to java 到底要不要收费" href=https://haokiu.com/blog/AWAwA5/></a></article><article class=post-entry><header class=entry-header><h2>Neovide</h2></header><div class=entry-content><p>neovide 是一个简单的 neovim 用户图像工具，相对于 Neovim 会有一些界面的提升的，但它的功能类似于终端用户界面。
-neovide 的官网：https://github.com/Kethku/neovide。
-gitbhub上有更多关于它的安装及使用教程。</p></div><footer class=entry-footer><span title=2021-02-16>2021-02-16</span></footer><a class=entry-link aria-label="post link to Neovide" href=https://haokiu.com/blog/neovide/></a></article><article class=post-entry><header class=entry-header><h2>1.1 Go1的诺言</h2></header><div class=entry-content><p>1.1 Go1的诺言 Go语言从2007年开始设计，2009年底正式开源，而第一个正式的版本Go1则是在2012年上半年发布。Go1的语法变迁主要从Go第一个正式版本开始，Go1是Go语言官方对整个社区的承诺：Go1之后的版本将保证源代码层面兼容。
-从Go1的发布日志可以发现，Go1对语言和标准库做了严谨的梳理和完善，Go1的重大变化主要集中在语言和标准库部分。其中语言部分最大的变化是将原先的os.Error接口用内置的error接口类型替代、内置函数引入了close函数用于管道的关闭操作。此外，还对加强了init、append内置函数；增强了复合类型字面值的支持；针对Unicode字符增加了rune别名；改善了对map的遍历和删除元素操作；改进了影子返回值的报警提示；复制结构体时涵盖未导出的成员；明确了哪些类型可以进行相等性测试。同时对每个标准库的路径和功能进行详细的设计和完善。
-经过多年的发展和普及，大家已经对Go1语言和标准库耳熟能详，对变更的细节就不详细展开了。但正是这次梳理工作才奠定了Go1之后高速发展的十年。</p></div><footer class=entry-footer><span title=2021-01-22>2021-01-22</span></footer><a class=entry-link aria-label="post link to 1.1 Go1的诺言" href=https://haokiu.com/blog/3edad2cabde0428f9098185e6d62c870/></a></article><article class=post-entry><header class=entry-header><h2>1.2 Go1到Go1.10</h2></header><div class=entry-content><p>1.2 Go1到Go1.10 因为Go1承诺，Go1后序的版本都保持了向前兼容的目标。不过在从Go1发展到Go1.10的过程中，语言依然是增加了一些新的特性。本节我们简单回顾Go1到Go1.10的变化。
-1.2.1 Go1.2（2013年12月） Go1.2最大的语言变化是切片操作时，可以设置新切片的容量。这个需求在Go1之前就被提出了，但是因为Go1修改工作较大而延期到了Go1.2才被实现。
-比如下面的代码：
-var a = make([]int, 10) var b = a[i:j:k] 其中b切片是从a切片的第i个元素开始到第j个元素前结束，b切片的容量为k（k指定的容量不能超出a切片的容量）。
-为了配合切片语法的变更，reflect包也增加了相应的方法：
-func (v Value) SetCap(cap int) func (v Value) Slice3(low, high, max int) Value 其中Value.SetCap只调整切片的容量，和a[::cap]写法效果等价。而Value.Slice3在进行切片操作的同时也指定新切片的容量，和a[low:high:max]写法效果等价。
-通过限制子切片的容量，可以将不同子切片进行安全的分割，避免子切片无意越界操作其它切片空间。
-1.2.2 Go1.4（2014年12月） Go1.4语言部分对for语法进行了加强。在Go1.3之前for只有下面两种写法：
-for i, v := range x { // ... } for i := range x { // ... } for range针对要循环变量类型的不同，产生的循环变量也有差异。在第一种写法中，如果要循环的是数组或切片类型则i和v分别表示索引的下标和元素的值，如果循环的类型是map类型时则i和v分别表示键和值，这种写法不能用于管道类型变量的迭代。而第二种循环也可以用管道变量的迭代，直到管道被关闭时结束。如果用第二种方式循环遍历数组或map，则和for i, _ := range x {}的写法相关相同，相当于忽略的要迭代的值。
-但是有时候我们仅仅是要循环几次而并不关心循环变量的值，在Go1.3之前可以这样写：
-var times [5][0]int for i := 0; i &lt; len(times); i++ { // ... } for _ = range times { // ... } 前一种方式采用传统的for循环方式遍历，而后一种方式采用for range遍历，但是获取了每次遍历到的值。
-在Go1.4中，后一种方式可以省略掉前面的垃圾桶变量，像这样写：
-var times [5][0]int for range times { // ... } 其中times对应一个[5][0]int类型的数组，虽然第一维数组有长度，但是数组的元素[0]int大小是0，因此整个数组占用的内存大小依然是0。没有付出额外的内存代价，我们就通过for range方式实现了times次快速迭代。
-1.2.4 Go1.7（2016年8月） 在Go1.3的时代（2014年），Go语言官方博客专门属文引入了context概念包，并稍后在golang.org/x/net/context提供了官方的实现。context包是Go语言官方对Go进行并发编程的实践成果，用来简化对于处理单个请求的多个Goroutine之间与请求域的数据、超时和退出等操作。context包推出后就被社区快速吸收使用，例如gRPC以及很多Web框架都通过context来控制Goroutine的生命周期。
-在Go1.7发布时，作为扩展包的golang.org/x/net/context终于移到标准库中。Go语言官方博客已经有专文讲述了context包的使用，这里就不详细展开了。感兴趣的读者可以查看并发相关的文档和书籍。
-1.2.5 Go1.8（2017年2月） Go1.8语言有一个小的变化，如果两个结构体成员名字和底层的类型相同（忽略成员的标签字符串差异），那么结构体底层对应相同的结构可以相互强制转型。
-比如下面的代码：
-func main() { type T1 struct { X int `json:"foo"` } type T2 struct { X int `json:"bar"` } var v1 = T1{X: 9527} var v2 = T2(v1) // now legal fmt.Println(v2) } T1和T2仅仅是成员标签字符串不同，但是底层结构是相同的，它们可以相互强制转型。
-...</p></div><footer class=entry-footer><span title=2021-01-22>2021-01-22</span></footer><a class=entry-link aria-label="post link to 1.2 Go1到Go1.10" href=https://haokiu.com/blog/7ec2e79995ed4c9f8b883cc07c8d78f9/></a></article><article class=post-entry><header class=entry-header><h2>1.3 Go1.10过渡到Go2</h2></header><div class=entry-content><p>1.3 Go1.10过渡到Go2 回顾前一节中Go1到Go1.10的语法变化可发现，在Go1之后除了Go1.2的切片语法完善和Go1.9的类型别名很少有重量级的语法特性加入。这是因为Go1.2之后Go语言的语言设计基本是被冻结了，涉及到语言变化的Issue原则上必须通过Russ Cox等核心成员的同意才会被考虑。但是从Go1.10开始，官方终于开始启动Go2.0的语言前期设计工作。首先是官方开始提交模块化的草案，其次是很多呼声较高的语法糖特性开始被考虑逐步加入。可以说Go1.10之后进入了后Go1.0时代，它要在Go2.0到来之前解逐步完善细节问题，从而最终能给轻装上阵开始进入Go2.0开发流程。
-1.3.1 Go1.11（2018年8月） 在Go语言的发展史中，2018年注定是一个重要的时间点，因为在2018年8月正式发布了Go1.11。Go1.11语言部分虽然没有变化，但是带来了3个重量级的更新：一是amd64平台完全支持AVX512高性能的指令集；二是Go1.11开始支持模块化的特性；三是Go语言开始WebAssembly平台。这几个个改进将成为后Go1时代最大的亮点。
-首先AVX512高性能的指令集可以让Go语言榨干CPU的全部性能，为Go2进军运算密集型应用做好准备（如果对Go汇编语言感兴趣，可以参考作者的《Go语言高级编程》中汇编语言相关的章节）。而模块是管理任何大型工程必备的工具，但是Go语言发布十年来一直缺乏官方的模块化工具。模块化的特性将彻底解决大型Go语言工程的管理问题，至此Go1除了缺少泛型等特性已经近乎完美。最后，WebAssembly作为一个Web汇编语言和虚拟机标准，Go语言可能为Web开发打开一个崭新的领域。
-关于模块和WebAssembly都是较大的主题，它们目前都还是作为实验特性，希望在后序版本中逐步完成。在本书将有专门的章节讨论模块和WebAssembly相关的技术。
-1.3.2 Go1.12（2019年2月） Go1.12并没有增加新的语言特性，但是官方正式决定在下个Go1.13版本中删除对二进制包的支持。二进制包的是在Go1.7版本作为实验性的特性引入的，一个包可以以类似C语言静态库的方式采用二进制包发布，从而避免公布源代码。在Go语言不支持二进制包特性的时候，社区对这个需求呼声甚高，但是当官方真正支持了之后却根本没有人使用。Go语言官方删除二进制包的决定也是Go的“少即是多”的哲学决定的，而正是这种极度的克制的基因才造就了目前的Go语言成功。
-1.3.3 Go1.13（2019年8月） 从Go1.13开始，从Go1.11开始酝酿的诸多决定终于开始逐个生效：首先是模块化将成为默认的特性，彻底告别GOPATH时代；其次是不是太重要的二进制特性将被废除；最后是语言的进化将再次启动，一些细微的语言特性将在Go2到来之前被提前实现。
-最有可能被优先实现的特性有：数字支持下划线分割的特性，以便于书写更容易阅读的数字，比如100000000可以写为1_0000_0000；其次Go语言将引入二进制的数字字面值，比如0b00001111是以二进制格式书写的整数。这虽然是很小的语法糖改进，但是标志了Go2语言的开发工作正逐步进入开发计划。</p></div><footer class=entry-footer><span title=2021-01-22>2021-01-22</span></footer><a class=entry-link aria-label="post link to 1.3 Go1.10过渡到Go2" href=https://haokiu.com/blog/2756df043ed74a91bd57f134270e6cbc/></a></article><article class=post-entry><header class=entry-header><h2>1.4 Go2诞生</h2></header><div class=entry-content><p>1.4 Go2诞生 在2018年官方已经发布了Go2的设计草案，其中包含了令人惊喜的泛型和错误等诸多改进，在后Go1时代过去之后将是新兴的Go2时代。需要说明的是，Go2的诞生并不表示Go1被抛弃！如何避免Py3k的笑话正是Go2第一要考虑的问题，因此才会有Go1.11到Go2逐步过段的阶段。而Go语言官方也已经通过博文承诺Go2将保持对Go1软件资产的最大兼容，鉴于Go1诺言被忠实地执行的参考，我们有理由相信Go2会处理好Go1资产的兼容性问题。
-大约在2012年前后，作者曾乐观估计Go2将在2020年前后到来，并可能带来大家期盼已久的泛型特性。作者在此预测Go2将在2020年正式进入开发流程，并在2022年前后进入工业生产环境使用，而Go1将在2030年前后逐渐退出历史。为了在Go2正式到来时轻装上阵，我们需要提前把握Go语言的发展动向，而本书正是为此目标准备。</p></div><footer class=entry-footer><span title=2021-01-22>2021-01-22</span></footer><a class=entry-link aria-label="post link to 1.4 Go2诞生" href=https://haokiu.com/blog/4f9267cc85a647979aa3803c5c435407/></a></article><article class=post-entry><header class=entry-header><h2>2.1 Go1的包机制</h2></header><div class=entry-content><p>2.1 Go1的包机制 同⽬录Go源⽂件的集合构成包，而同⽬录下⼦⽬录对应的包的集合构成模块（暂不考虑子模块）。因此，要了解模块之前需要先了解包。
-2.1.1 包是最小链接单位 Go语言是一种编译型的语言，链接的最小单位是包，对应go/ast.Package类型，多个包链接为一个可执行程序。在当前的官方实现中，一个包一般对应一个路径目录下的全部的Go语言源文件，而目录的路径包含了表示包的唯一路径名。Go语言的规范中包只是一个抽象的概念，并不要求包一定是以目录的方式展现，在未来包或者是模块也可能以压缩文件的方式展现。
-包是Go语言应用编译和链接的基本单位，因此模块最终的目的是为了管理这些包的版本。
-2.1.2 包目录布局的演变 在Go语言刚刚开源、还没有GOPATH环境变量之前，Go语言标准库的包全部是放在$(GOROOT)/src目录之下的，比如标准库中的image/png包对应$(GOROOT)/src/image/png目录。而第三方的包也可以放在$(GOROOT)/src目录，这时候Go语言的构建工具是不区分标准库的包和第三方包的。此外第三方或自己的应用对应的包，可以放在$(GOROOT)目录之外的任意目录。
-比如可以在任意目录创建一个hello.go文件：
-package hello import "fmt" func PrintHello() { fmt.Printf("Hello, 世界\n") } 然后在同级的目录创建一个Makefile文件用于管理构建工作：
-include $(GOROOT)/src/Make.inc TARG=github.com/chai2010/go2-book/ch2/hello GOFILES=./hello.go include $(GOROOT)/src/Make.pkg 第一个语句包含构建环境，最后的语句表示这是一个包。最重要的TARG变量定义了包的路径，而GOFILES则表示了包由哪些Go文件组成。然后执行make nuke就可以编译生成$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件。当另一个包要导入hello包时，实际上是从$(GOROOT)/pkg/github.com/chai2010/go2-book/ch2/hello.a文件读取包的信息。
-在Go1之前的史前时代，一切包都是手工构建安装的，因此包的版本管理也是手工的方式进行。如果需要使用社区开源的第三方包，需要手工下载代码放到合适的目录正确编译并安装之后才可以使用。
-为了将标准库的包和第三方的包分开管理，避免第三方包代码污染$(GOROOT)/src和$(GOROOT)/pkg目录，Go语言引入了GOPATH环境变量。GOPATH环境变量对应的目录用于管理非标准库的包，其中src用户存放Go代码，pkg用于存放编译后的.a文件，bin用于存放编译后的可执行程序。此后直到Go1.10，Go语言所有和包版本管理相关的工作都是基于GOPATH特性展开。
-2.1.3 GOPATH特性的扩展 扩展GOPATH的目标都是为了更方便管理包。Go语言的包有三种类型：首先是叶子包，此类包最多依赖标准库，不依赖第三方包；其次是main包表示一个应用，它不能被其它包导入（单元测试除外）；最后是普通的依赖第三方包的非main包。比较特殊的main包同时也是一个叶子包。
-叶子包自身很少会遇到版本管理问题，因为不会遇到因为依赖第三方包产生的各种问题，因此叶子包的开发者很少关注版本管理的问题。稍微复杂一点的是main包，main包是包依赖中的根包。main包不担心被其它包依赖，因此它其实是可以通过一个独占的GOPATH来维护所有依赖的第三方包的。最复杂的是既不是main包，也不是普通的叶子包，因为普通包需要管理其依赖的第三方包，同时一般又不能单独管理GOAPTH。在vendor出现之前的版本管理实践中，普通包的版本比较简陋，很多普通包甚至都没有版本管理，只有master一个最新版本。
-GOPATH的扩展主要分为横向和纵向两个方向。横向就是同时并列维护多个GOPATH目录，通过手工方式调整其中某些目录来实现目录中包版本切换的目的。纵向扩展一般在管理main包对应的应用程序中使用，通过在包内部创建临时的GOPATH子目录，在GOPATH子目录中包含全部第三方依赖的拷贝来实现外部依赖包版本的管理。
-社区中早期出现的Godeps工具就是通过在当前目录下创建Godeps/_workspace子目录来管理维护依赖的第三方包的版本。Godeps的实践成果最终被吸收到来Go语言中，通过vendor机制实现来main包的依赖管理（不是版本管理）。但是最终vendor机制也带来了各种问题（稍后的章节会讨论），最终官方完全重新设计了模块化的特性。
-2.1.4 模块化之后的包目录路径 通过vendor机制来实现版本管理的尝试虽然失败了，但是通过横向扩展GOPATH的来维护同一个包的不同版本的思路却在模块中复活了。模块化通过重新组织目录结构，实现了同时管理同一个包的不同版本需求。
-比如之前$(GOPATH)/src/github.com/chai2010/pbgo包的1.0.0版本，在模块化之后将对应$(HOME)/go/pkg/mod/github.com/chai2010/pbgo@1.0.0。模块化通过$(HOME)/go/pkg/mod目录管理第三方的依赖包，同时通过pkg@x.y.z的版本后缀来区分同一个包的不同版本。这其实和多个GOPATH并列存放的思路是类似，不过模块化对多版本支持的更加完美。</p></div><footer class=entry-footer><span title=2021-01-22>2021-01-22</span></footer><a class=entry-link aria-label="post link to 2.1 Go1的包机制" href=https://haokiu.com/blog/e07062bd3a82483893b16c9a014f22dc/></a></article><article class=post-entry><header class=entry-header><h2>2.2 基于vendor的版本管理</h2></header><div class=entry-content><p>2.2 基于vendor的版本管理 2.2.1 vendor的工作机制 2.2.1 vendor的优势 TODO
-2.2.1 vendor的问题</p></div><footer class=entry-footer><span title=2021-01-22>2021-01-22</span></footer><a class=entry-link aria-label="post link to 2.2 基于vendor的版本管理" href=https://haokiu.com/blog/ba3f4751a98a484f995283b9377b90d1/></a></article><article class=post-entry><header class=entry-header><h2>2.3 模块的设计⽬标</h2></header><div class=entry-content><p>2.3 模块的设计⽬标 2.3.1 模块的概念 2.3.2 不同时间可重现构建 2.3.3 不同环境可重现构建 2.3.4 语义化版本号 2.3.5 最⼩化版本选择 TODO</p></div><footer class=entry-footer><span title=2021-01-22>2021-01-22</span></footer><a class=entry-link aria-label="post link to 2.3 模块的设计⽬标" href=https://haokiu.com/blog/0ade9d480b954dbc96381d011208c5f1/></a></article><footer class=page-footer><nav class=pagination><a class=next href=https://haokiu.com/index/2/>&nbsp;&nbsp;»</a></nav></footer></main><footer class=footer><span>haokiu.com</span>
+社区情况与风险 开源后衍生出很多分支版本：比如移植到Hyperliquid的jev-trade，支持BTC/ETH/SOL等合约多空 社区有实盘测试案例，出现过短时间大额亏损；AI高置信度≠盈利，缺少成熟回测、风控，市场波动下容易反复频繁换向、持续亏损 简单区分 Jev：TypeSafe AI的快速决策模型（System One） jev-trader：用Jev模型写的Monad链上做市机器人Demo</p></div><footer class=entry-footer><span title=2026-10-11>2026-10-11</span></footer><a class=entry-link aria-label="post link to jev-trader 简介" href=https://haokiu.com/blog/jev-trader/></a></article><article class=post-entry><header class=entry-header><h2>数字货币交易所-gateio</h2></header><div class=entry-content><p>Gate.io芝麻开门创立于2013年，是全球真实交易量TOP10的数字资产交易平台。
+作为全球首家提供100%保证金审计证明的交易所，Gate.io在全球多个国家进行合法注册，向全球数千万用户提供安全可靠、真实透明的数字资产交易服务。
+使用下面的链接注册，可以获得平台的奖励
+https://www.gatewebsite.app/share/HAOKIUXX</p></div><footer class=entry-footer><span title=2023-06-24>2023-06-24</span></footer><a class=entry-link aria-label="post link to 数字货币交易所-gateio" href=https://haokiu.com/blog/gateio/></a></article><article class=post-entry><header class=entry-header><h2>enkrypt invite code FC433A</h2></header><div class=entry-content><p>The enkrypt invite code is FC433A
+Mint tickets with Enkrypt every day, invite friends to earn more tickets.
+More tickets — more chances to win!
+Share your code with friends and get +1 ticket for every friend’s mint.
+Code FC433A
+address：https://raffle.enkrypt.com</p></div><footer class=entry-footer><span title=2023-05-21>2023-05-21</span></footer><a class=entry-link aria-label="post link to enkrypt invite code FC433A" href=https://haokiu.com/blog/wgJnpu/></a></article><article class=post-entry><header class=entry-header><h2>googo 邀请码 lbVOQjeS</h2></header><div class=entry-content><p>googo 可以让你更好的浏览外文网站，比如meta、youtube，google等。 它之前的网址是googo.in，现在已经不用访问。是一款非常好用的科学上网工具，使用简单。
+使用这个链接可以获取优惠：https://cn.googo.us/#/register?code=lbVOQjeS
+或者使用这个邀请码：lbVOQjeS</p></div><footer class=entry-footer><span title=2023-03-18>2023-03-18</span></footer><a class=entry-link aria-label="post link to googo 邀请码 lbVOQjeS" href=https://haokiu.com/blog/googo/></a></article><article class=post-entry><header class=entry-header><h2>Hobert读书笔记</h2></header><div class=entry-content><p>第一章 并发编程的挑战第2章 InnoDB存储引擎第1章 Java的I/O演进之路第1章 Spring框架的由来第2章 Tomcat总体架构三、Paxos的工程实践序第1章 概述第6章 深入分析ClassLoader工作机制第8章 虚拟机字节码执行系统</p></div><footer class=entry-footer><span title=2021-06-08>2021-06-08</span></footer><a class=entry-link aria-label="post link to Hobert读书笔记" href=https://haokiu.com/blog/bk-5/></a></article><article class=post-entry><header class=entry-header><h2>第1章 Java的I/O演进之路</h2></header><div class=entry-content><p>第1章 Java的I/O演进之路 1.1 I/O基础入门 1.1.1 Linux网络I/O模型简介 UNIX提供了5种I/O模型：
+（1）阻塞I/O模型
+（2）非阻塞I/O模型
+（3）I/O复用模型
+（4）信号驱动I/O模型
+（5）异步I/O
+1.1.2 I/O多路复用技术 把多个I/O阻塞复用到同一个select的阻塞上，从而是的系统在单线程的情况下可以同时处理多个客户端请求。比多线程有性能优势，节约资源。
+支持I/O多路复用的系统调用select/pselect/poll/epoll。
+epoll的优点：
+支持一个进程打开的socket描述符（FD）不受限制（仅受限于操作系统的最大文件句柄数（内存））。 I/O效率不会随着FD数目的增加而线性下降。 使用mmap加速内核与用户空间的消息传递。 epoll的API更加简单。 1.2 Java的I/O演进 历史题，略。
+第2章 NIO入门 2.1 传统的BIO编程 C/S模型，客户端发起连接请求，三次握手，通过Socket进行通信。
+2.1.1 BIO通信模型图 一请求一应答模型：每次接收到连接请求都创建一个新的线程进行链路处理。处理完成后通过输出流返回应答给客户端，线程销毁。
+该模型最大的问题就是：缺乏弹性伸缩能力，当客户端并发访问量增加后，服务端的线程个数和客户端并发访问数呈1：1的正比关系。
+2.1.2 同步阻塞式I/O创建的TimeServer源码分析 import java.io.IOException; import java.net.ServerSocket; import java.net.Socket; /** * &lt;p>Description: 同步阻塞式I/O创建的TimeServer&lt;/p> * * @author 李宏博 * @version xxx * @create 2019/8/14 17:58 */ public class TimeServer { /** * * @param args */ public static void main(String[] args) throws IOException { int port = 8080; if (args != null && args.length > 0) { try { port = Integer.valueOf(args[0]); } catch (NumberFormatException e) { e.printStackTrace(); } } ServerSocket server = null; try { server = new ServerSocket(port); System.out.println("服务端端口开启：" + port); Socket socket = null; while (true) { socket = server.accept(); new Thread(new TimeServerHandle(socket)).start(); } } finally { if (server != null) { System.out.println("服务端关闭"); server.close(); server = null; } } } } import java.io.BufferedReader; import java.io.IOException; import java.io.InputStreamReader; import java.io.PrintWriter; import java.net.Socket; /** * &lt;p>Description: xx&lt;/p> * * @author 李宏博 * @version xxx * @create 2019/8/14 18:05 */ public class TimeServerHandle implements Runnable { private Socket socket; public TimeServerHandle(Socket socket) { this.socket = socket; } @Override public void run() { BufferedReader in = null; PrintWriter out = null; try { in = new BufferedReader(new InputStreamReader(this.socket.getInputStream())); out = new PrintWriter(this.socket.getOutputStream(),true); String currentTime = null; String body = null; while (true) { body = in.readLine(); if (body == null) { break; } System.out.println("接收到命令：" + body); currentTime = "time".equalsIgnoreCase(body) ? new java.util.Date(System.currentTimeMillis()).toString() : "命令错误"; out.println(currentTime); } } catch (Exception e) { if (in != null) { try { in.close(); } catch (IOException ex) { ex.printStackTrace(); } } if (out != null) { out.close(); out = null; } if (this.socket != null) { try { this.socket.close(); } catch (IOException ex) { ex.printStackTrace(); } finally { this.socket = null; } } } } } 2.1.3 同步阻塞式I/O创建的TimeClient源码分析 import java.io.BufferedReader; import java.io.IOException; import java.io.InputStreamReader; import java.io.PrintWriter; import java.net.Socket; import java.net.UnknownHostException; /** * &lt;p>Description: 同步阻塞式I/O创建的TimeClient&lt;/p> * * @author 李宏博 * @version xxx * @create 2019/8/14 18:21 */ public class TimeClient { /** * * @param args */ public static void main(String[] args) { int port = 8080; if (args != null && args.length > 0) { try { port = Integer.valueOf(args[0]); } catch (NumberFormatException e) { e.printStackTrace(); } } Socket socket = null; BufferedReader in = null; PrintWriter out = null; try { socket = new Socket("127.0.0.1",port); in = new BufferedReader(new InputStreamReader(socket.getInputStream())); out = new PrintWriter(socket.getOutputStream(),true); out.println("time"); System.out.println("命令发送成功"); String resp = in.readLine(); System.out.println("现在时间：" + resp); } catch (UnknownHostException e) { e.printStackTrace(); } catch (IOException e) { e.printStackTrace(); } finally { if (out != null) { out.close(); out = null; } if (in != null) { try { in.close(); } catch (IOException e) { e.printStackTrace(); } finally { in = null; } } if (socket != null) { try { socket.close(); } catch (IOException e) { e.printStackTrace(); } finally { socket = null; } } } } } 2.2 伪异步I/O编程 引入线程池。
+...</p></div><footer class=entry-footer><span title=2021-06-08>2021-06-08</span></footer><a class=entry-link aria-label="post link to 第1章 Java的I/O演进之路" href=https://haokiu.com/blog/e15796699f1a419ba85731d159eba322/></a></article><article class=post-entry><header class=entry-header><h2>第1章 Spring框架的由来</h2></header><div class=entry-content><p>第1章 Spring框架的由来 1.1 Spring之崛起 1.2 Spring框架概述 基于POJO（Plain Old Java Object，简单Java对象）的轻量级开发理念。
+Spring总体架构：
+1.3 Spring大观园 1.4 小结 第2章 Spring的IOC容器 2.1 我们的理念是：让别人为你服务 2.2 手语，呼喊，还是心有灵犀 2.2.1 构造方法注入 IoC Service Provider会检查被注入对象的构造方法，取得它所需要的依赖对象列表，进而为其注 入相应的对象。同一个对象是不可能被构造两次的，因此，被注入对象的构造乃至其整个生命周期， 应该是由IoC Service Provider来管理的。
+2.2.2 setter方法注入 setter方法注入虽不像构造方法注入那样，让对象构造完成后即可使用，但相对来说更宽松一些， 可以在对象构造完成后再注入。
+2.2.3 接口注入 对于前两种注入方式来说，接口注入没有那么简单明了。被注入对象如果想要IoC Service Provider为其注入依赖对象，就必须实现某个接口。这个接口提供一个方法，用来为其注入依赖对象。 IoC Service Provider最终通过这些接口来了解应该为被注入对象注入什么依赖对象。
+示例：
+2.2.4 三种注入方式的比较 接口注入。不提倡，带有侵入性 构造方法注入。这种注入方式的优点就是，对象在构造完成之后，即已进入就绪状态，可以马上使用。缺点就是，当依赖对象比较多的时候，构造方法的参数列表会比较长。而通过反射构造对象的时候，对相同类型的参数的处理会比较困难，维护和使用上也比较麻烦。而且在Java中，构造方法无法被继承，无法设置默认值。对于非必须的依赖处理，可能需要引入多个构造方法，而参数数量的变动可能造成维护上的不便。 setter方法注入。因为方法可以命名， 所以setter方法注入在描述性上要比构造方法注入好一些。另外， setter方法可以被继承，允许设置默认值，而且有良好的IDE支持。缺点当然就是对象无法在构造完成后马上进入就绪状态。 2.3 IOC的附加值</p></div><footer class=entry-footer><span title=2021-06-08>2021-06-08</span></footer><a class=entry-link aria-label="post link to 第1章 Spring框架的由来" href=https://haokiu.com/blog/567c6d054f1d4d53a29e9d24f213165a/></a></article><article class=post-entry><header class=entry-header><h2>第1章 概述</h2></header><div class=entry-content><p>第1章 概述 互联网公司的分布式两个特点：规模大、成本低。
+1.1 分布式存储概念 定义：分布式存储系统是大量普通PC服务器通过Internet互联，对外作为一个整体提供存储服务。
+特性：
+可扩展。集群，性能随规模线性增长。 低成本。有自动容错，自动负载均衡机制。所以可以构建在普通PC机器。 高性能。 易用。提供易用的对外接口。 主要挑战：数据、状态信息的持久化，要求在自动迁移、自动容错、并发读写的过程中保证数据的一致性。
+主要技术来自于分布式系统和数据库：
+数据分布：如何保证均匀？如何实现跨服务器读写？ 一致性：如何复制？如何保证出现异常也一致？ 容错：如何检测？出错如何迁移？ 负载均衡：如何实现？如何做到迁移时不影响其他业务？ 事务与并发控制：如何实现分布式事务？如何实现MVCC？ 易用性：如何易用？如何方便运维？ 压缩/解压缩：如何根据数据特点设计压缩/解压缩算法？如何平衡节省的存储空间和消耗的CPU资源浪费？ 1.2 分布式存储分类 数据大致分为三类：
+非结构化数据：包括所有格式的办公文档、文本、图片、图像、音频和视频信息等。 结构化数据：一般存储在关系数据库中，可用二位关系表结构来表示。 半结构化数据：与结构化的区别在于，半结构化数据的模式结构和内容混在一起，没有明显的区分，也不需要预先定义数据的模式结构。 存储系统分为四类：
+分布式文件系统 图片、照片、视频等非结构化数据对象，以对象组织，对象之间没有关联，称为Blob（Binary Large Object，二进制大对象）数据。
+总体上看：分布式文件系统存储三种类型的数据：Blob对象、定长块以及大文件。在系统层面，分布式文件系统内部按照数据块来组织数据，每个数据块的大小大致相同，每个数据块可以包含多个Blob对象或者定长块，一个大文件也可以拆分成多个数据块。
+分布式键值系统 用于存储关系简单的半结构化数据，它只提供基于主键的CRUD功能，即根据主键创建、读取、更新或者删除一条键值记录。
+与传统哈希表相似，但是支持将数据分布到多个存储节点。
+分布式键值系统是分布式表格系统的一种简化实现，一般用作缓存。
+分布式表格系统 用于存储较为复杂的半结构化数据。不仅仅支持简单的CRUD操作，而且支持扫面某个主键范围。
+借鉴了许多关系型数据库的技术，例如支持某种程度上的事务，比如单行事务，某个实体组下的多行事务。
+与分布式数据库先比，仅支持针对单张表格的操作，不支持复杂操作。
+分布式数据库 一般从单机数据库扩展而来，用于存储结构化数据。
+第2章 单机存储系统 单机存储引擎就是哈希表、B树等数据结构在机械磁盘、SSD等持久化介质上的实现。
+2.1 硬件基础 2.1.1 CPU架构 经典的多CPU架构为对称多处理结构（Symmetric Multi-Processing，SMP），即在一个计算机上汇集了一组处理器，它们之间对称工作，无主次或从属关系，共享相同的物理内存及总线。
+2.1.2 IO总线 存储系统的性能瓶颈一般在与IO。
+2.1.3 网络拓扑 传统的数据中心网络拓扑，分三层。最下面是接入层，中间是汇聚层，上面是汇聚层。存在的问题：大量下层接入，导致同一个接入层下的服务器之间的带宽减小。
+2.1.4 性能参数 2.1.5 存储层次架构 存储系统的性能主要包括两个维度：吞吐量以及访问延时。
+2.2 单机存储引擎 2.2.1 哈希存储引擎 Bitcask是一个基于哈希表结构的键值寸尺系统，它仅支持追加操作（Append-only），即所有的写操作只追加而不修改老的数据。
+在Bitcask系统中，每个文件有一定的大小限制，当文件增加到相应的大小时，就会产生一个新的文件，老的文件只读不写。在任意时刻，只有一个文件市可写的，用于数据追加，称为活跃数据文件。而其他已经达到大小限制的文件，称为老数据文件。
+数据结构 一条一条写入，每条记录的数据项分别为：主键（key），value内容（value），主键长度（key_sz），value长度（value_sz），时间戳（timetamp）以及crc校验值。（删除不会删除旧的条目，而是将value设定为一个特殊的之作标识）。内存中的结构是hash表。
+定期合并 为解决垃圾文件问题。将所有老数据文件中的数据扫描一遍生成一个新的数据文件。对用一个key的多个操作以保留最新的一个原则进行删除。
+快速恢复 每次合并时，将内存中的哈希索引表转储到磁盘中，生成一个索引文件。这个索引文件只存储value的位置。
+2.2.2 B树存储引擎 不仅支持随机读取，还支持范围扫描。
+数据结构 InnoDB按照页面（Page）来组织数据，每个页面对用B+树的一个节点。
+B+树的根节点是常驻内存的。修改操作首先需要记录提交日志，接着修改内存中的B+树。
+缓冲区管理 LRU、LIRS
+2.2.3 LSM树存储引擎 将对数据的修改增量保持在内存中，达到指定的大小先之后将这些修改操作批量写入磁盘，读取时需要合并磁盘中的历史数据和内存中最近的修改操作。</p></div><footer class=entry-footer><span title=2021-06-08>2021-06-08</span></footer><a class=entry-link aria-label="post link to 第1章 概述" href=https://haokiu.com/blog/b221a7f05b774f7ab4305cff0f244d52/></a></article><article class=post-entry><header class=entry-header><h2>第2章 InnoDB存储引擎</h2></header><div class=entry-content><p>第2章 InnoDB存储引擎 事务安全。
+2.1 InnoDB存储引擎概述 Mysql5.5开始是默认的表存储引擎（之前尽在Window下是）。第一个完整支持ACID事务的MySQL存储引擎。其特点是行锁设计、支持MVCC、支持外键、提供一致性非锁定读，同时被设计用来最有效地利用以及使用内存和CUP。
+高性能、高可用、高扩展。
+2.2 InnoDB存储引擎的版本 略
+2.3 InnoDB体系结构 后台线程的主要作用是负责刷新内存池中的数据，保证缓冲池中的内存缓存的是最近的数据。
+此外将已修改的数据文件刷新到磁盘文件，同时保证在数据库发生异常的情况下InnoDB能恢复到正常运行状态。
+2.3.1 后台线程 多线程模型。不同的后台线程处理不同的任务。
+Master Thread 将缓冲池的数据异步刷新到磁盘，保证数据一致性，包括脏页的刷新、合并插入缓冲（INSERT BUFFER）、UNDO页的回收。
+IO Thread 大量使用AIO（Async IO），极大提高性能。IO Thread主要负责这些IO请求的回调处理。
+第3章 文件 参数文件：告诉MySQL启动时查找文件的地址，指定初始化参数； 日志文件：错误日志文件、二进制文件日志文件、慢查询日志文件、查询日志文件； socket：当用UNIX域套接字方式进行连接时需要的文件 pid文件：MySQL实例的进程ID文件 MySQL表结构文件：用来存放MySQL表结构定义文件 存储引擎文件：每个存储引擎都会有自己的文件来保存各种数据，这些存储引擎真正存储了记录和索引等数据。 3.1 参数文件 MySQL实例也可以不需要参数文件，这是编译MySQL时指定的默认值。但是如果在默认的数据库目录下找不到mysql架构，则会启动失败。
+3.1.1 什么是参数 数据库中的参数是键值对。MySQL中无类似Oracle中的隐藏参数。
+3.1.2 参数类型 动态参数：运行时可修改 静态参数：在整个实例的生命周期都不能修改。 3.2 日志文件 日志文件记录了MySQL数据库的各种类型活动。
+3.2.1 错误日志 对MySQL的启动、运行、关闭过程进行了记录。当出现MySQL数据库不能正常启动时，第一个必须查找的文件应该就是错误日志文件。
+3.2.2 慢查询日志 帮助DBA定位可能存在问题的SOL语句，从而进行SQL语句层面的优化。设置一个阈值（最小精度是微秒），超过（必须是大于，等于不行）时将该SQL语句记录到慢查询日志中。
+默认情况下并不启动慢查询日志。
+如果没有使用索引也会被记录。
+3.2.3 查询日志 记录了所有对MySQL数据库请求的信息，无论这些请求是否得到了正确的执行。
+3.2.4 二进制文件 记录了对MySQL数据库执行更改的所有操作，但是不包括SELEC和SHOW这类操作。
+作用：
+恢复：某些数据的恢复需要二进制日志。 复制：主从复制 审计：通过审计二进制文件，判断是否有数据库进行注入的攻击。 二进制日志文件在默认情况下并没有启动，需要手动指定参数来启动。会影响性能，但仅仅1%。
+缓冲写宕机问题，无缓冲写宕机问题
+3.3 套接字文件 3.4 pid文件 3.5 表结构定义文件 记录该存储引擎对应的表结构
+3.6 InnoDB存储引擎文件 InnoDB独有的文件
+3.6.1 表空间文件 InnoDB采用将存储的数据按表空间进行存放的设计。
+还可设置独立表空间，用户不用将所有数据都存放于默认的表空间中。
+单独的表空间仅存储表的数据、索引和插入缓冲BITMAP等信息，其余的信息存放到默认表空间。
+3.6.2 重做日志文件 宕机问题。
+重做日志文件与二进制文件的区别：
+记录范围，二进制日志会记录所有与MySQL数据库有关的日志记录，而InnoDB仅记录该存储引擎的事务日志。 记录内容，二进制日志记录具体操作（逻辑日志），而InnoDB的重做日志文件是关于每个Page的更改的物理情况 写入时间，二进制日志文件只在事务提交前进行一次写入，而重做日志文件在事务的进行过程中，一直会被写入。 3.7 小结 重做日志文件使得InnoDB存储引擎可以提供可靠的事务。
+第4章 表 4.1 索引组织表 在InnoDB存储引擎中，表都是根据主键顺序组织存放。
+在InnoDB存储引擎中，每张表都有个主键，如果没有显示定义，则按如下方式创建：
+首先判断表中是否含有唯一非空索引（Unique NOT NULL），如果有，则该列即为主键。（按定义索引的顺序选择） 如果不符合上述条件，InnoDB存储引擎自动创建一个6字节大小的指针。 _rowid仅适用于单个列为主键的情况。
+...</p></div><footer class=entry-footer><span title=2021-06-08>2021-06-08</span></footer><a class=entry-link aria-label="post link to 第2章 InnoDB存储引擎" href=https://haokiu.com/blog/232f08ac38d0478dab889420f809c20e/></a></article><article class=post-entry><header class=entry-header><h2>第2章 Tomcat总体架构</h2></header><div class=entry-content><p>第2章 Tomcat总体架构 系统设计及中间件设计时的参考：生命周期管理、可扩展的容器组件设计、类加载方式。
+2.1 总体设计 如何设计一个应用服务器？
+2.1.1 Server 最基本的功能：接收请求，业务处理，返回响应。
+两个方法：
+start()：启动服务器，打开Socket链接，监听端口，负责接收请求，处理及返回。 stop()：停止服务器并释放网络资源。 作为嵌入在应用系统中的远程请求处理方案，且访问量低时可行。但作为应用服务器不可行。
+2.1.2 Connector和Container 请求监听与请求处理放到一起扩展性差。
+Connector负责监听，返回。
+Container负责处理请求。
+均分别拥有自己的start()和stop()方法来加载和释放自己维护的资源。
+明显的缺陷：如何让Connector与Container对应？可以维护一个复杂关系映射，但是并不必需。Container设计足够灵活。
+引入Service，负责维护多个Connector和一个Container。
+在Tomcat中，Container是一个更加通用的概念。为了与Tomcat中的组件命名一致，所以重新命名为Engine，用以表示整个Servlet引擎。
+Engine表示整个Servlet引擎。Server表示整个Servlet容器。
+2.1.3 Container设计 应用服务器是用来部署并运行Web应用的，是一个运行环境，而不是独立的业务处理系统。因此需要在Engine容器中支持管理Web应用，当接收到Connector的处理请求时，Engine容器能够找到一个合适的Web应用来处理。
+使用一个Context来表示一个Web应用，并且一个Engine可以包含多个Context。
+虚拟主机，加入Host。一个Host可以包含多个Context。
+Tomcat的设计中Engine可以包含Host也可以包含Context，这是由具体的Engine实现确定的。Tomcat提供的默认实现StandardEngine只能包含Host。
+一个Web应用可以包含多个Servlet实例。在Tomcat中，Servlet定义被称为Wrapper。
+“容器”的作用都是处理请求并返回响应数据。所以引入一个Container接口：addchild()添加子容器，backgroundProcess()实现文件变更的扫描。
+2.1.4 Lifecycle 所有组件均存在启动、停止这两个生命周期方法，可在此基础上扩展生命周期管理的方法，即对于生命周期管理进行一次接口抽象。
+将Server接口替换为Lifecycle接口：
+Init()：初始化组件 start()：启动组件 stop()：停止组件 destory()：销毁组件 addLifecycleListener：添加事件监听器（用于监听组件的状态变化） removeLifecycleListener：删除 Tomcat核心组件的默认实现均继承自LifecycleBeanBase抽象类，该类不但负责组件各个状态的转换和事件处理，还将组件自身注册为MBean，以便通过Tomcat的管理工具进行动态维护。
+2.1.5 Pipeline和Valve 以上设计以保证核心架构的了可伸缩性和可扩展性。但是还要考虑各个组件的灵活性，使其同样可扩展。
+责任链模式是一种比较好的选择。Tomcat即采用该模式来实现客户端请求的处理。在Tomcat中每个Container组件通过执行一个责任链来完成具体的请求处理。
+Pipeline（管道）用于构造责任链，Valve（阀）代表责任链上的每个处理器。Pipeline中维护了一个基础的Valve（位于末端，最后执行）。
+Tomcat的每个层级的容器（Engine、Host、Context、Wrapper）均有对应的基础Valve实现，同时维护一个Pipeline实例。即任何层级的容器都可以对请求处理进行可扩展。
+2.1.6 Connector设计 基本功能：
+监听服务器端口，读取来自客户端的请求。 将请求数据按照指定协议进行解析。 根据请求地址匹配正确的容器进行处理。 将响应返回客户端。 Tomcat支持多协议，默认支持HTTP和AJP。同时支持多种I/O方式，包括BIO（8.5之后移除）、NIO、APR。而且在Tomcat8之后新增了对NIO2和HTTP/2协议的支持。因此对协议和I/O进行抽象和建模时需要关注的重点。
+在Tomcat中，ProtocolHandler表示一个协议处理器，其包含一个Endpoint（无此接口，仅有AbstractEndpoint抽象类）用于启动Socket监听，还包含一个Processor用于按照指定协议读取数据，并将请求交由容器处理。
+在Connector启动时，Endpoint会启动线程来监听，并在接收到请求后调用Processor进行数据读取。
+当Processor读取客户端请求后，需要按照请求地址映射到具体的容器进行处理，这个过程即为请求映射。由于Tomcat各个组件采用通用的生命周期管理，而且可以通过管理工具进行状态变更，因此请求映射除考虑映射规则的实现外，还要考虑容器组件的注册与销毁。
+Tomcat通过Mapper和MapperListener两个类实现上述功能。前者用于维护容器映射信息，同时按照映射规则（Servlet规范）查找容器。后者实现了ContainerListener和LifecycleListener，用于在容器组件状态发生变更时，注册或者取消对应的容器映射信息。为了实现上述功能，MapperListener实现了Lifecycle接口，当其启动时（在Service启动时启动），会自动作为监听器注册到各个容器组件上，同时将已创建的容器注册到Mapper。
+Tomcat通过适配器模式（Adapter）实现了Connector与Mapper、Container的解耦。实现自己的Adapter可以脱离Servlet容器又使用Tomcat链接器。
+2.1.7 Excutor 并发问题的解决方案。采用线程池（默认采用JDK5的线程池，继承自Lifecycle，当作通用组件进行管理）对线程进行统一管理。
+在Tomcat中Excutor由Service维护，因此同一个Service中的组件可以共享一个线程池。
+如果没有定义任何线程池，相关组件（Endpoint）会自动创建线程池，此时线程池不再共享。
+在Tomcat中，Endpoint会启动一组线程来监听Socket端口，当接收到客户端请求后，会创建请求处理对象，并交由线程池处理，由此支持并发处理客户端请求。
+2.1.8 Bootstrap和Catalina 除开前面的核心组件外，还需要提供一套配置环境来支持系统的可配置性，便于通过修改配置来优化应用。
+集群、安全等组件同样重要，但不属于通用概念。
+Tomcat通过类Catalina提供了一个Shell程序，用于解析server.xml创建各种组件，同时，负责启动、停止应用服务器（只需要启动Tomcat顶层组件Server）。
+Tomcat使用Digester解析XML文件，包括server.xml以及web.xml等。
+最后，Tomcat提供了Bootstrap作为应用服务器启动入口。Bootstrap负责创建Catalina实例，根据执行参数调用Catalina相关方法完成针对应用服务器的操作（启动、停止）。
+Bootstrap与Tomcat应用服务器完全松耦合（通过反射调用Catalina实例），它可以直接依赖JRE运行并为Tomcat应用服务器创建共享类加载器，用于构造Catalina实例以及整个Tomcat服务器。
+上述是Tomcat标准的启动方式。但是Server及其子组件代表了应用服务器本身，那么我们可以不通过Bootstrap和Catalina来启动服务器。
+Tomcat组件说明：
+组件名称 说明 Server 表示整个Servlet容器，因此Tomcat运行环境中只有唯一一个Server实例 Service Service表示一个或者多个Connector的集合，这些Connector共享同一个Container来处理其请求。在同一个Tomcat实例内可以包含任意多个Service实例，它们彼此独立 Connector 即Tomcat链接器，用于监听并转化Socket请求，同时将读取的Socket请求交由Container处理，支持不同协议以及不同的I/O方式 Container Container表示能够执行客户端请求并返回响应的一类对象。在Tomcat中存在不同级别的容器：Engine、Host、Context、Warpper Engine Engine表示整个Servlet引擎。在Tomcat中，Engine为最高层级的容器对象。尽管Engine不是直接处理请求的容器，确实获取目标容器的入口 Host Hostz作为一类容器，表示Servlet容器中的虚拟机，与一个服务器的网络名有关，如域名等。客户端可以使用这个网络名连接服务器，这个名称必须在DNS服务器上注册。 Context Context作为一类容器，用于表示ServletContext，在Servlet规范中，一个ServletContext即表示一个独立的Web应用 Wrapper Wrapper作为一类容器，用于表示Web应用中动议的Servlet Executor 表示Tomcat组件可以共享的线程池 2.2 Tomcat启动 Tomcat默认实现在相关概念的基础上结合生命周期管理监听器完成了大量的启动工作。
+...</p></div><footer class=entry-footer><span title=2021-06-08>2021-06-08</span></footer><a class=entry-link aria-label="post link to 第2章 Tomcat总体架构" href=https://haokiu.com/blog/a9dcb2a7a21d49dea965eedc7e169c79/></a></article><footer class=page-footer><nav class=pagination><a class=next href=https://haokiu.com/index/2/>&nbsp;&nbsp;»</a></nav></footer></main><footer class=footer><span>haokiu.com</span>
 <span>Powered by
 <a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
 <a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>

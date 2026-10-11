@@ -1,77 +1,225 @@
 <!doctype html><html lang=zh-cn dir=auto><head><meta name=generator content="Hugo 0.167.0"><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>haokiu</title><meta name=description content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><meta name=author content><link rel=canonical href=https://haokiu.com/><link crossorigin=anonymous href=/assets/css/stylesheet.27115e9d9513d5c41ff78d63d8c3238939dabec71459d67163cfae4b996bfdbe.css integrity="sha256-JxFenZUT1cQf941j2MMjiTnavscUWdZxY8+uS5lr/b4=" rel="preload stylesheet" as=style><link rel=icon href=https://haokiu.com/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://haokiu.com/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://haokiu.com/favicon-32x32.png><link rel=apple-touch-icon href=https://haokiu.com/apple-touch-icon.png><link rel=mask-icon href=https://haokiu.com/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate type=application/rss+xml href=https://haokiu.com/index.xml><link rel=alternate type=application/json href=https://haokiu.com/index.json><link rel=alternate type=text/plain href=https://haokiu.com/llms.txt><link rel=alternate hreflang=zh-cn href=https://haokiu.com/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style></noscript><link rel=describedby href=https://haokiu.com/llms.txt type=text/markdown><script type=application/ld+json>{"@context":"https://schema.org","@type":"WebSite","name":"haokiu","url":"https://haokiu.com/","inLanguage":"zh-cn","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https:\/\/haokiu.com\/search\/?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script><meta property="og:title" content="haokiu"><meta property="og:description" content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><meta property="og:type" content="website"><meta property="og:url" content="https://haokiu.com/"><meta name=twitter:card content="summary"><meta name=twitter:title content="haokiu"><meta name=twitter:description content="haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他"><script type=application/ld+json>{"@context":"https://schema.org","@type":"Organization","name":"haokiu","url":"https://haokiu.com/","description":"haokiu 的技术博客：后端 / 前端 / 区块链 / 大数据 / linux / 其他","thumbnailUrl":"https://haokiu.com/favicon.ico","sameAs":[]}</script></head><body class=list id=top><script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add("dark"):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove("dark"):window.matchMedia("(prefers-color-scheme: dark)").matches&&document.body.classList.add("dark")</script><header class=header><nav class=nav><div class=logo><a href=https://haokiu.com/ accesskey=h title="haokiu (Alt + H)">haokiu</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)">
 <svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button><ul class=lang-switch><li>|</li></ul></div></div><ul id=menu><li><a href=https://haokiu.com/ title=haokiu><span class=active>Home</span></a></li><li><a href=https://haokiu.com/1/ title=1><span>后端</span></a></li><li><a href=https://haokiu.com/2/ title=2><span>前端</span></a></li><li><a href=https://haokiu.com/3/ title=3><span>区块链</span></a></li><li><a href=https://haokiu.com/4/ title=4><span>大数据</span></a></li><li><a href=https://haokiu.com/5/ title=5><span>linux</span></a></li><li><a href=https://haokiu.com/6/ title=6><span>其他</span></a></li><li><a href=https://haokiu.com/tags/ title=Tags><span>tags</span></a></li><li><a href=https://haokiu.com/categories/ title=Categories><span>categories</span></a></li></ul></nav></header><main class=main><article class=post-entry><header class=entry-header><h2>pimpl 惯用法</h2></header><div class=entry-content><p>pimpl 惯用法 现在这里有一个名为 CSocketClient 的网络通信类，定义如下：
-/** * 网络通信的基础类, SocketClient.h * zhangyl 2017.07.11 */ class CSocketClient { public: CSocketClient(); ~CSocketClient(); public: void SetProxyWnd(HWND hProxyWnd); bool Init(CNetProxy* pNetProxy); bool Uninit(); int Register(const char* pszUser, const char* pszPassword); void GuestLogin(); BOOL IsClosed(); BOOL Connect(int timeout = 3); void AddData(int cmd, const std::string& strBuffer); void AddData(int cmd, const char* pszBuff, int nBuffLen); void Close(); BOOL ConnectServer(int timeout = 3); BOOL SendLoginMsg(); BOOL RecvLoginMsg(int& nRet); BOOL Login(int& nRet); private: void LoadConfig(); static UINT CALLBACK SendDataThreadProc(LPVOID lpParam); static UINT CALLBACK RecvDataThreadProc(LPVOID lpParam); bool Send(); bool Recv(); bool CheckReceivedData(); void SendHeartbeatPackage(); private: SOCKET m_hSocket; short m_nPort; char m_szServer[64]; long m_nLastDataTime; //最近一次收发数据的时间 long m_nHeartbeatInterval; //心跳包时间间隔，单位秒 CRITICAL_SECTION m_csLastDataTime; //保护m_nLastDataTime的互斥体 HANDLE m_hSendDataThread; //发送数据线程 HANDLE m_hRecvDataThread; //接收数据线程 std::string m_strSendBuf; std::string m_strRecvBuf; HANDLE m_hExitEvent; bool m_bConnected; CRITICAL_SECTION m_csSendBuf; HANDLE m_hSemaphoreSendBuf; HWND m_hProxyWnd; CNetProxy* m_pNetProxy; int m_nReconnectTimeInterval; //重连时间间隔 time_t m_nLastReconnectTime; //上次重连时刻 CFlowStatistics* m_pFlowStatistics; }; 这段代码来源于笔者实际项目中开发的一个股票客户端的软件。
-...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to pimpl 惯用法" href=https://haokiu.com/blog/4a2f5d00bb404b68a468bd72dfe357f8/></a></article><article class=post-entry><header class=entry-header><h2>select 函数重难点解析</h2></header><div class=entry-content><p>select 函数重难点解析 select 函数是网络通信编程中非常常用的一个函数，因此应该熟练掌握它。虽然它是 BSD 标准之一的 Socket 函数之一，但在 Linux 和 Windows 平台，其行为表现还是有点区别的。我们先来看一下 Linux 平台上的 select 函数。
-Linux 平台下的 select 函数 select 函数的作用是检测一组 socket 中某个或某几个是否有“事件”，这里的“**事件”**一般分为如下三类：
-可读事件，一般意味着可以调用 recv 或 read 函数从该 socket 上读取数据；如果该 socket 是侦听 socket（即调用了 bind 函数绑定过 ip 地址和端口号，并调用了 listen 启动侦听的 socket），可读意味着此时可以有新的客户端连接到来，此时可调用 accept 函数接受新连接。 可写事件，一般意味着此时调用 send 或 write 函数可以将数据“发出去”。 异常事件，某个 socket 出现异常。 函数签名如下：
-int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout); 参数说明：
-参数 nfds， Linux 下 socket 也称 fd，这个参数的值设置成所有需要使用 select 函数监听的 fd 中最大 fd 值加 1。
-参数 readfds，需要监听可读事件的 fd 集合。
-参数 writefds，需要监听可写事件的 fd 集合。
-参数 exceptfds，需要监听异常事件 fd 集合。
-readfds、writefds 和 exceptfds 类型都是 fd_set，这是一个结构体信息，其定义位于 /usr/include/sys/select.h 中：
-/* The fd_set member is required to be an array of longs. */ typedef long int __fd_mask; /* Some versions of &lt;linux/posix_types.h> define this macros. */ #undef __NFDBITS /* It's easier to assume 8-bit bytes than to get CHAR_BIT. */ #define __NFDBITS (8 * (int) sizeof (__fd_mask)) #define __FD_ELT(d) ((d) / __NFDBITS) #define __FD_MASK(d) ((__fd_mask) 1 &lt;&lt; ((d) % __NFDBITS)) /* fd_set for select and pselect. */ typedef struct { /* XPG4.2 requires this member name. Otherwise avoid the name from the global namespace. */ #ifdef __USE_XOPEN __fd_mask fds_bits[__FD_SETSIZE / __NFDBITS]; # define __FDS_BITS(set) ((set)->fds_bits) #else // 在我的centOS 7.0 系统中的值： // __FD_SETSIZE = 1024 //__NFDBITS = 64 __fd_mask __fds_bits[__FD_SETSIZE / __NFDBITS]; # define __FDS_BITS(set) ((set)->__fds_bits) #endif } fd_set; /* Maximum number of file descriptors in 'fd_set'. */ #define FD_SETSIZE __FD_SETSIZE 我们假设未定义宏 __USE_XOPEN，将上面的代码整理一下：
-typedef struct { long int __fds_bits[16]; } fd_set; 将一个 fd 添加到 fd_set 这个集合中需要使用 FD_SET 宏，其定义如下：
-void FD_SET(int fd, fd_set *set); 其实现如下：
-#define FD_SET(fd,fdsetp) __FD_SET(fd,fdsetp) FD_SET 在内部又是通过宏 __FD_SET 来实现的，__FD_SET 的定义如下（位于 /usr/include/bits/select.h 中）：
-#if defined __GNUC__ && __GNUC__ >= 2 # if __WORDSIZE == 64 # define __FD_ZERO_STOS "stosq" # else # define __FD_ZERO_STOS "stosl" # endif # define __FD_ZERO(fdsp) \ do { \ int __d0, __d1; \ __asm__ __volatile__ ("cld; rep; " __FD_ZERO_STOS \ : "=c" (__d0), "=D" (__d1) \ : "a" (0), "0" (sizeof (fd_set) \ / sizeof (__fd_mask)), \ "1" (&__FDS_BITS (fdsp)[0]) \ : "memory"); \ } while (0) #else /* ! GNU CC */ /* We don't use `memset' because this would require a prototype and the array isn't too big. */ # define __FD_ZERO(set) \ do { \ unsigned int __i; \ fd_set *__arr = (set); \ for (__i = 0; __i &lt; sizeof (fd_set) / sizeof (__fd_mask); ++__i) \ __FDS_BITS (__arr)[__i] = 0; \ } while (0) #endif /* GNU CC */ #define __FD_SET(d, set) \ ((void) (__FDS_BITS (set)[__FD_ELT (d)] |= __FD_MASK (d))) #define __FD_CLR(d, set) \ ((void) (__FDS_BITS (set)[__FD_ELT (d)] &= ~__FD_MASK (d))) #define __FD_ISSET(d, set) \ ((__FDS_BITS (set)[__FD_ELT (d)] & __FD_MASK (d)) != 0) 重点看这一行：
-((void) (__FDS_BITS (set)[__FD_ELT (d)] |= __FD_MASK (d))) __FD_MASK 和 __FD_ELT 宏在上面的代码中已经给出定义：
-#define __FD_ELT(d) ((d) / __NFDBITS) #define __FD_MASK(d) ((__fd_mask) 1 &lt;&lt; ((d) % __NFDBITS)) __NFDBITS 的值是 64 （8 * 8），也就是说 __FD_MASK (d) 先计算 fd 与 64 的余数 n，然后执行 1 « n，这一操作实际上是将 fd 的值放在 0～63 这 64 的位置上去，这个位置索引就是 fd 与 64 取模的结果；同理 __FD_ELT(d) 就是计算位置索引值了。举个例子，假设现在 fd 的 值是 57，那么在这 64 个位置的 57 位，其值在 64 个长度的二进制中置位是：
-0000 0010 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 这个值就是 1 « (57 % 64) 得到的数字。
-但是前面 fd 数组的定义是：
-typedef struct { long int __fds_bits[16]; //可以看成是128 bit的数组 } fd_set; long int 占 8 个字节，一个 16 个 long int，如果换成二进制的位(bit)就是 8 * 16 = 128， 也就是这个数组只用了低 64 位， 高 64 位并没有使用。这说明在我的机器上，select 函数支持操作的最大 fd 数量是 64。
-同理，如果我们需要从 fd_set 上删除一个 fd，我们可以调用 FD_CLR，其定义如下：
-void FD_CLR(int fd, fd_set *set); 原理和 FD_SET 相同，即将对应的标志位由1变0即可。
-如果，我们需要将 fd_set 中所有的 fd 都清掉，则使用宏 FD_ZERO：
-void FD_ZERO(fd_set *set); 当 select 函数返回时， 我们使用 FD_ISSET 宏来判断某个 fd 是否有我们关心的事件，FD_ISSET 宏的定义如下：
-...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to select 函数重难点解析" href=https://haokiu.com/blog/2369cd70c2354e9c844815c14f31134c/></a></article><article class=post-entry><header class=entry-header><h2>socket 的阻塞模式和非阻塞模式</h2></header><div class=entry-content><p>socket 的阻塞模式和非阻塞模式 对 socket 在阻塞和非阻塞模式下的各个函数的行为差别深入的理解是掌握网络编程的基本要求之一，是重点也是难点。
-阻塞和非阻塞模式下，我们常讨论的具有不同行为表现的 socket 函数一般有如下几个，见下表：
-connect accept send (Linux 平台上对 socket 进行操作时也包括 write 函数，下文中对 send 函数的讨论也适用于 write 函数) recv (Linux 平台上对 socket 进行操作时也包括 read 函数，下文中对 recv 函数的讨论也适用于 read 函数) 限于文章篇幅，本文只讨论 send 和recv函数，connect 和 accept 函数我们将在该系列的后面文章中讨论。在正式讨论之前，我们先解释一下阻塞模式和非阻塞模式的概念。所谓阻塞模式，就当某个函数“执行成功的条件”当前不能满足时，该函数会阻塞当前执行线程，程序执行流在超时时间到达或“执行成功的条件”满足后恢复继续执行。而非阻塞模式恰恰相反，即使某个函数的“执行成功的条件”不当前不能满足，该函数也不会阻塞当前执行线程，而是立即返回，继续运行执行程序流。如果读者不太明白这两个定义也没关系，后面我们会以具体的示例来讲解这两种模式的区别。
-如何将 socket 设置成非阻塞模式 无论是 Windows 还是 Linux 平台，默认创建的 socket 都是阻塞模式的。
-在 Linux 平台上，我们可以使用 fcntl() 函数或 ioctl() 函数给创建的 socket 增加 O_NONBLOCK 标志来将 socket 设置成非阻塞模式。示例代码如下：
-int oldSocketFlag = fcntl(sockfd, F_GETFL, 0); int newSocketFlag = oldSocketFlag | O_NONBLOCK; fcntl(sockfd, F_SETFL, newSocketFlag); ioctl() 函数 与 fcntl() 函数使用方式基本一致，这里就不再给出示例代码了。
-当然，Linux 下的 socket() 创建函数也可以直接在创建时将 socket 设置为非阻塞模式，socket() 函数的签名如下：
-int socket(int domain, int type, int protocol); 给 type 参数增加一个 SOCK_NONBLOCK 标志即可，例如：
-int s = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP); 不仅如此，Linux 系统下利用 accept() 函数返回的代表与客户端通信的 socket 也提供了一个扩展函数 accept4()，直接将 accept 函数返回的 socket 设置成非阻塞的。
-...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to socket 的阻塞模式和非阻塞模式" href=https://haokiu.com/blog/7a9421787c4a4e7482e4f3ea6234c7ac/></a></article><article class=post-entry><header class=entry-header><h2>TCP 协议如何解决粘包、半包问题</h2></header><div class=entry-content><p>TCP 协议如何解决粘包、半包问题 一 TCP 协议是流式协议 很多读者从接触网络知识以来，应该听说过这句话：TCP 协议是流式协议。那么这句话到底是什么意思呢？所谓流式协议，即协议的内容是像流水一样的字节流，内容与内容之间没有明确的分界标志，需要我们人为地去给这些协议划分边界。
-举个例子，A 与 B 进行 TCP 通信，A 先后给 B 发送了一个 100 字节和 200 字节的数据包，那么 B 是如何收到呢？B 可能先收到 100 字节，再收到 200 字节；也可能先收到 50 字节，再收到 250 字节；或者先收到 100 字节，再收到 100 字节，再收到 200 字节；或者先收到 20 字节，再收到 20 字节，再收到 60 字节，再收到 100 字节，再收到 50 字节，再收到 50 字节……
-不知道读者看出规律没有？规律就是 A 一共给 B 发送了 300 字节，B 可能以一次或者多次任意形式的总数为 300 字节收到。假设 A 给 B 发送的 100 字节和 200 字节分别都是一个数据包，对于发送端 A 来说，这个是可以区分的，但是对于 B 来说，如果不人为规定多长为一个数据包，B 每次是不知道应该把收到的数据中多少字节作为一个有效的数据包的。而规定每次把多少数据当成一个包就是协议格式规范的内容之一。
-经常会有新手写出类似下面这样的代码：
-发送端：
-//...省略创建socket，建立连接等部分不相关的逻辑... char buf[] = "the quick brown fox jumps over a lazy dog."; int n = send(socket, buf, strlen(buf), 0); //...省略出错处理逻辑... 接收端：
-//省略创建socket，建立连接等部分不相关的逻辑... char recvBuf[50] = { 0 }; int n = recv(socket, recvBuf, 50, 0); //省略出错处理逻辑... printf("recvBuf: %s", recvBuf); 为了专注问题本身的讨论，我这里省略掉了建立连接和部分错误处理的逻辑。上述代码中发送端给接收端发送了一串字符”the quick brown fox jumps over a lazy dog.“，接收端收到后将其打印出来。
-...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to TCP 协议如何解决粘包、半包问题" href=https://haokiu.com/blog/7b86f55ffdcd4434a17beb9dbf7b9527/></a></article><article class=post-entry><header class=entry-header><h2>TeamTalk源码解析</h2></header><div class=entry-content><p>TeamTalk源码解析 01 TeamTalk介绍
-02 服务器端的程序的编译与部署
-03 服务器端的程序架构介绍
-04 服务器端db_proxy_server源码分析
-05 服务器端msg_server源码分析
-06 服务器端login_server源码分析
-07 服务器端msfs源码分析
-08 服务器端file_server源码分析
-09 服务器端route_server源码分析
-10 开放一个TeamTalk测试服务器地址和几个测试账号
-11 pc客户端源码分析</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to TeamTalk源码解析" href=https://haokiu.com/blog/0da28a69a69242919c3333dc8e970a8f/></a></article><article class=post-entry><header class=entry-header><h2>不定参数函数实现var_arg系列的宏</h2></header><div class=entry-content><p>不定参数函数实现var_arg系列的宏 电驴的源码日志模块有一个叫 DebugLogError 函数，其签名如下：
-//代码位于easyMule-master/src/WorkLayer/Log.h 55行 void DebugLogError(LPCTSTR pszLine, ...); 电驴的源码可以在公众号【 高性能服务器开发 】后台回复“获取电驴源码”即可获取。
-这个函数的申明在 Log.h 头文件中，是一个全局函数，其实现代码在 Log.cpp 文件中：
-//代码位于easyMule-master/src/WorkLayer/Log.cpp 111行 void DebugLogError(LPCTSTR pszFmt, ...) { va_list argp; va_start(argp, pszFmt); LogV(LOG_DEBUG | LOG_ERROR, pszFmt, argp); va_end(argp); } 这个函数是一个具有不定参数的函数（也就是参数个数不确定），比如调用这个函数我们可以传入一个参数，也可以传入二个或者三个参数等等：
-DebugLogError(L"我喜欢你!"); DebugLogError(L"我喜欢你!", L"你喜欢谁？"); DebugLogError(L"我喜欢你!", L"你喜欢谁？", L"萧雨萌!"); 与此类似， C 语言中最熟悉的函数 printf() 和 scanf() 就是能传入不定参数的函数的例子，可是你知道如何编写这样具有不定参数的函数么？
-你可以通过这段代码学习到编写方法，奥秘就在DebugLogError()中使用的几个你从来没见过的宏，让我们欢迎它们：
-va_list va_start va_end 这几个宏是C函数库提供的，位于头文件stdarg.h中。下面我们利用这几个宏自定义一个ShowLove()函数：
-#include &lt;stdio.h> #include &lt;tchar.h> #include &lt;stdarg.h> #include &lt;locale.h> int ShowLove(wchar_t* szFirstSentence, ...) { //用来统计可变参数数量 int num = 0; //第一步： //申明一个va_list类型对象ap，用于对参数进行遍历 va_list ap; //第二步： //使用va_start对变量进行初始化 //这里需要注意的是: //在传统C语言中，va_start把ap中内部指针设置为传递给函数参数的【第一个实参】； //而在标准的C中，va_start接受一个额外参数，也就是最后一个【固定参数】的名称， //并把ap中的内部指针设置为传递给函数的第一个【可变参数】. //所以你在VC++ 6.0和VS2008等高版本的编译器中使用va_start需要注意区别 //这里使用标准C va_start(ap, szFirstSentence); //第三步： //使用va_arg宏返回实参列表中的下一个参数值，并把ap的内部指针推向下一个参数（如果有的话） //必须指定下一个参数的类型。 //在调用va_start之后第一次调用va_arg将返回第一个可变参数的值 wprintf(szFirstSentence); wchar_t* p = 0; while(p = va_arg(ap, wchar_t*)) { wprintf(L"%s", p); num ++; } //第四步： //待所有可变参数都读取完毕以后，调用va_end宏对ap和va_list做必要的清理工作 va_end(ap); return num; } int main(int argc, char* argv[]) { setlocale(LC_ALL, ""); int z = ShowLoveL"我喜欢你！\n"); int y = ShowLove(L"我喜欢你！", L"你喜欢谁？\n"); int l = ShowLove(L"我喜欢你！", L"你喜欢谁？", L"萧雨萌！\n"); printf("可变参数个数依次是：%d\t%d\t%d\n", z, y, l); return 0; } 上述代码的运行结果是：
-...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 不定参数函数实现var_arg系列的宏" href=https://haokiu.com/blog/e3f33300987a43d08044b27dbbc5e9ec/></a></article><article class=post-entry><header class=entry-header><h2>程序员必知必会的网络命令</h2></header><div class=entry-content><p>程序员必知必会的网络命令 利用telnet命令发电子邮件
-做Java或者C++开发都应该知道的lsof命令
-Linux网络故障排查的瑞士军刀nc命令
-Linux tcpdump使用详解
-从抓包的角度分析connect函数的连接过程
-服务器开发中网络数据分析与故障排查经验漫谈</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 程序员必知必会的网络命令" href=https://haokiu.com/blog/2137687badbe411cac56094071bcc338/></a></article><article class=post-entry><header class=entry-header><h2>程序员的烦心事</h2></header><div class=entry-content><p>程序员的烦心事 拒绝了一家公司的offer后，他们的副总和hr总监同时打电话来询问拒绝原因并极力要求加入，我该不该去？
-我是一名程序员，结婚时女友要求我用两年的工资作为彩礼，我该不该答应？</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 程序员的烦心事" href=https://haokiu.com/blog/e11a027d307841d9b515ac4b1670037c/></a></article><article class=post-entry><header class=entry-header><h2>程序员的薪资与年终奖那些事儿</h2></header><div class=entry-content><p>程序员的薪资与年终奖那些事儿 技术面试与HR谈薪资技巧
-聊一聊程序员如何增加收入
-谈一谈年终奖</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 程序员的薪资与年终奖那些事儿" href=https://haokiu.com/blog/18d3e73501ef4be092520d6f5991517f/></a></article><article class=post-entry><header class=entry-header><h2>程序员面试题精讲</h2></header><div class=entry-content><p>程序员面试题精讲 腾讯后台开发实习生技能要求
-聊聊如何拿大厂的 offer
-网络通信题目集锦
-我面试后端开发经理的经历
-Linux C/C++后端开发面试问哪些问题</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 程序员面试题精讲" href=https://haokiu.com/blog/c092595334ac4b29914e418b3aae0648/></a></article><footer class=page-footer><nav class=pagination><a class=prev href=https://haokiu.com/index/13/>«&nbsp;&nbsp;
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button><ul class=lang-switch><li>|</li></ul></div></div><ul id=menu><li><a href=https://haokiu.com/ title=haokiu><span class=active>Home</span></a></li><li><a href=https://haokiu.com/7/ title=7><span>AI</span></a></li><li><a href=https://haokiu.com/1/ title=1><span>后端</span></a></li><li><a href=https://haokiu.com/2/ title=2><span>前端</span></a></li><li><a href=https://haokiu.com/3/ title=3><span>区块链</span></a></li><li><a href=https://haokiu.com/4/ title=4><span>大数据</span></a></li><li><a href=https://haokiu.com/5/ title=5><span>linux</span></a></li><li><a href=https://haokiu.com/6/ title=6><span>其他</span></a></li><li><a href=https://haokiu.com/tags/ title=Tags><span>tags</span></a></li><li><a href=https://haokiu.com/categories/ title=Categories><span>categories</span></a></li></ul></nav></header><main class=main><article class=post-entry><header class=entry-header><h2>10 十万在线的WebGame的数据库设计思路</h2></header><div class=entry-content><p>10 十万在线的WebGame的数据库设计思路 服务器数量预估 在线人数预估： 在项目设计之前，需要先对运营后的服务器人数做一下预估，预计激活人数300w，活跃人数40w，同时在线10w。而服务器的设计极限则在激活人数500w，活跃人数60w，最高同时在线15w。 数据参考：
+这里之所以预计这么低的激活人数，是从整个服务器考虑的。《热血三国》是将不同的用户放在不同的服务器里，所以单一服务器的激活人数不会对服务器压力产生太 大影响。而如果将所有玩家统一到一组服务器里，则会导致用户表访问压力过大。偏低的激活人数靠定期清理不活跃账户来实现。
+数据库服务器数量估计： 服务器在搭配上，一般分为db服务器和web服务器。在这之前的运营中，通常按照1:1的方式来配置数据库和web服务器，而实际情况可以使1:2的配置比 例。不过在单一世界的设计里，单台db服务器肯定无法满足需求。之前设计过一款策略类webgame，在运营时，每秒sql数为在线人数的1~1.5倍。 不过这个测试数据，是在没有钱全面应用缓存的情况的数据，在新系统里，如果全面应用缓存，并采用类似于Memcache的软件提供数据缓存，这样数据库的访问压力将可以得到极大的缓解，因此我们暂定吧每秒sql数暂定为在线人数的1倍。正常情况下数据库的访问压力应该为 10w sql/秒 极限数据应该为15w sql/秒。 数据库使用ms sqlserver 2008，在这之前的一个策略类webgame项目，对一台CPU为 E5520核的服务器上做压力测试，得到的数据如下：
+Sql数 5k CPU 50% 硬盘IO 0.5M(突发3M） 网卡流量 30Mbit/s(100M网卡） 按照上面的分析，在正常情况下，我们需要为整个系统提供20台db。Web服务端按照1:1和db做搭配，也将安排20台，预计3个机柜的服务器。
+数据库表结构划分 数据库表设计： 因为要把这么多访问量分担到不同的服务器里，原先的数据库表设计肯定不会合适。初步的想法是根据游戏的逻辑模块，将不同模块的数据库表拆分到各个服务器 里，如果按照上面的服务器预估得到的结论是4~6组服务器，实际上这个方案还是可行的。但如果是20组服务器的话，除非是一台服务器一张数据库表，但这的 设计会造成数据表太分散，在处理事务的时候，会跨多个数据库 策略类webgame一般的主要模块为：建筑物和资源、军事、英雄、物品、帮会、交易、地图。根据这些模块的应用场景，可以将数据库表分为2种类型，一种是属于玩家的数据，另外一种是公共数据。
+属于玩家的数据是指玩家个人说拥有的基地、资源、军事单位、物品等数据，它们都是围绕着玩家而产生的。 公共数据则是指由多位玩家共同组合而产生的数据，例如：账户信息、帮会、地图等。 这里划分两种数据的目的是在于他们的数据库表的划分。对于公共数据，则采用单一服务器，单一数据库表处理的方式来处理。例如帮会模块和地图模块就准备分别 用3台服务器来存储各自对应的数据库表。而对于玩家的数据，则根据用户ID采用一定的划分方式，将玩家数据打散到各个服务器里（http://blog.zhaojie.me/2010/03/sharding-by-id-characteristic.html）。
+（数据表的结构划分）
+用户表和其单表的设计思路： 这里所说的单表是指在逻辑上部队数据库表做拆分，程序在访问时只访问一个数据库。当然这只是逻辑上的单一，根据实际上的访问压力，可以将数据库文件作水平切割分布在不同的文件分区和服务器里。这部分的数据库表设计继续沿用之前的设计方案就可以了。 对于用户信息，帮会信息等数据，实际上插入和更新的频率不会太高，更多的是在查询上，因此这部分的设计重点应该是在缓存上。从以前的资料里得知Memcache服务器每秒可以响应4w次的读请求，用一台Memcache就能处理好用户和帮会信息的缓存处理。
+地图模块设计思路 地图模块： 地图在传统策略类webgame里都是以平面的方式展示和存储的。地图的移动都是在这个平面上实现。但一般来说，平面地图的设计容量都会有一个上限，一般来 地图多为400*400，他的人数上限就是16w，实际上服务器容纳3~5w人后，整张地图就会显得很拥挤了。如果要想容纳几百万人在线，平面地图的尺寸 就需要扩容得相当大了，这样玩家从地图中间移动到边缘的时间会相当恐怖，因此平面地图在这里不是很合适。因此，地图不能用平面来构造，必须是立体的方法构 造。在这里我设计了两组方案：
+立体平面空间：
+如上图所描述的，立体平面空间，就是把多块地图一层层叠加在一起，形成一个立体的空间。这样如果用户不够，再增加一个新的平面就行。游戏的背景可以根据需要 做调整（例如整个世界是被大海隔开的5片大陆组成，在这5片大陆之外，还有其它的超位面空间，这些空间自身是互不相连的，但是可以通过传送阵进行位面传 送）。这样做的好处是，用户容易理解，以往用户的操作习惯不用改变，毕竟都是在平面地图上战斗。只不过要做跨位面的战斗的移动计算上会存在问题（逻辑上的 问题：是否允许跨大陆的远征军） 用户坐标的表示方法：地图层次、x坐标、y坐标
+数据库设计方案： 采用了层次结构，只需要增加一个地图层次的字段，这个地图表就能沿用。（参考字段：ID、地图层次、X坐标、y坐标、地图类型、玩家ID、城池ID） 虽然说，加入了一个地图层次的字段能解决地图的表示问题，不过，因为整个游戏世界是单一世界的服务器，当所用地图信息存储到一张表的时候，这数据量就不容小 视。在这之前做webgame项目的时候，整张地图是预先生成好数据库记录的，当有玩家加入游戏的时候，就去修改表里的玩家ID和城池ID。同时因为地图 大小只有400400，整张表也就16w条记录。但如果是要做一个承载500w人的服务器，那地图的尺寸最好是要800800，并且地图的层次为 15~20层，就算最小的15层，按照原先的设计思路，至少需要预先插入960w条记录。 数据量看上去比较夸张，不过对于SqlServer来说也不是处理不了，并且我们还将计划把地图表单独用一台服务器来处理，其压力远小很多。不过也不能不考虑当发生性能瓶颈时的优化处理。优化的方法有两个：
+拆分：按照地图层次，把这张表拆分成1520张表，或者拆分到1520个数据库里 用疏矩阵存储：地图不预先生成用户的地图信息，而是有玩家加入时才插入数据。这个方案在服务器早期人数比较少时会得到良好的性能效果，但当用户人数达到一定量时，还是避免不了因为记录函数过多而导致而外的开销。 全立体空间：
+全立体空间就是取消了平面的坐标显示，用户都是在一个三维的立体地图里战斗。好处是地图不用那么分散，在移动计算让很好处理，存在的问题就是游戏在显示的时候，如何表现地图的三维效果会比较困难。 用户坐标的表示方式：x坐标 y坐标 z坐标
+数据库存储方案： 三维空间的数据库表设计结构可以和上面的表一样，而且也只能采用疏矩阵的方式存储，因为做成三维空间后，可表示的位置的记录数更多了。
+可移动基地在全立体空间的设想： 早在两年前，看过《超时空要塞F》的时候，就产生了一个想法，就是玩家的基地是可以移动的。玩家的母舰在游戏的过程中，已一定的速度在整个世界里移动。 可以移动体系的设计要点：
+用户的基地可移动 用户基地只能拥有一个（武林三国、travian都能建立多个） 空间坐标由x坐标 y坐标 z坐标 组成，并且坐标的值应为小数 同一个坐标里运行多个玩家存在，玩家的航线交叉并不会造成影响（只是为了方便计算减少判断过程） 移动的数据通过后台定时刷新 a)每个短周期(160s)在内存里更新坐标 b)每个长周期（10100个短周期时间）将坐标的数据更新的数据库 攻击舰队移动的时间是按照2个阶段来进行的 a)第一个阶段是从母舰移动到目标坐标的时间 b)第二个阶段，在快到达时（前60分钟），做一个判断，判断攻击舰队的雷达能否搜索到目标的母舰坐标，能则做攻击坐标的新修正，如果不能则继续按照原先的坐标点移动。以上判断将每隔1分钟做一次，直到到达目标坐标点。如果到达目标坐标点仍然无法视为攻击失败，舰队返回 舰队的移动距离和舰队所携带的能量有关，超过移动范围的坐标，舰队是无法出发的。 部队和母舰应该是可以进行空间跳跃实现长距离的移动，不过空间跳跃需要在制定地点消耗大量的能量才能实现。 默认情况下，母舰移动速度为1格（x、y、z坐标）/天。 默认舰队的雷达查询范围为1格 默认母舰的雷达查询范围为3格 玩家数据的数据库设计 数据库的划分: 在游戏里数据交互最频繁的还是玩家的数据，他的访问量是一台服务器所不能解决的，因此我们考虑将这部分数据分担到多台服务器里。分担的方法还是做水平切 割，但这次不使用数据库自身的切割功能，而是在应用逻辑层上对数据库进行切割。根据用户的ID取模后写入对应的服务器里。 服务器1 用户ID % 服务器数量 = 0 服务器2 用户ID % 服务器数量 = 1 …… 预计每台服务器能提供6k8k的在线用户访问，预计一共需要16台服务器。考虑到服务器的进一步扩容问题，在初期规划时，建议规划为32个数据库，每台服务器可以先放35个数据库，等服务器用户人数上来后，再将数据库拆分到不同的服务器里。
+...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 10 十万在线的WebGame的数据库设计思路" href=https://haokiu.com/blog/ace809ec27124ecc987bcd4c7eec569f/></a></article><article class=post-entry><header class=entry-header><h2>11 pc客户端源码分析</h2></header><div class=entry-content><p>11 pc客户端源码分析 ——写在前面的话
+在要不要写这篇文章的纠结中挣扎了好久，就我个人而已，我接触windows编程，已经六七个年头了，尤其是在我读研的三年内，基本心思都是花在学习和研究windows程序上了。我很庆幸我当初学习windows程序走了一条正确的路线：先是学习常用的windows程序原理和基本API，再学习的mfc、wtl等一些常用的框架和类库，同时看了大量windows项目的源码，如金山卫士的开源代码、filezilla、电驴源码等等。个人觉得，基础真的很重要，拿windows开发来说，当你掌握了windows的程序的基本原理，我列一下大致范围：
+windows消息机制（消息如何产生、如何发送、如何处理，常见的消息有哪些、消息的优先级、如何自定义消息、窗体消息、常用控件消息）
+gdi原理（要熟悉gdi的各种对象，如画笔、画刷、字体、区域、裁剪、位图等，熟悉它们的API，熟悉各种gdi绘图API、当然最好也要熟悉一整套的gdi+的类，gdi与gdi+的区别）
+windows进程与线程的概念（进程的概念、如何创建、如何结束、跨进程如何通信；线程的创建与销毁、线程间的同步与资源保护，熟悉windows常用的线程同步对象：临界区、事件、互斥体、信号量等）
+windows内存管理（清晰地掌握一个进程地址空间的内存分布、windows堆的创建与管理等）
+dll技术（dll的生成、变量的导出、函数的导出、类的导出、如何查看dll导出哪些函数、隐式dll的加载、显示dll的加载、远程dll注入技术等）
+PE文件（一个PE文件的结构、有哪些节、如何修改、分别映射到进程地址空间的什么位置等）
+windows SEH（结构化异常处理）
+windows socket编程
+windows读写文件技术（像CreateFile、WriteFile、GetFileSize等这些API应该熟练掌握、内存映射技术）
+当然很多必备的技术也不好归类到windows技术下面，比如socket编程，这涉及到很多网络的知识，比如tcp的三次握手，数据的收发等，还有就是各种字符编码的知识、以及之间的相互转换，又比如一系列的CRT函数及其对应的宽字符版本。当然如果你搞windows开发，一定要熟悉开发工具Visual Studio，熟悉其工程项目的大多数属性配置，而且要做到知其然也知其所以然。如果不是不能跨平台，我敢说VS是史上最好最强大的开发工具，没有之一！我已经有好几年年不做windows开发了，目前主要从事linux开发，但windows的很多设计思想真的很好，非常值得借鉴，而且从编码风格来说，虽然看起来有点怪异，但是非常规范和易懂。
+有了基础知识，你可以轻松地对工作中的一些问题给出解决方案，也能轻松阅读和使用市面上的那些库，比如，如果你深刻理解windows GDI，你不会在一个群里大喊，duilib某个属性为什么不起作用，你可以直接去阅读它的画法代码，如果是bug你可以改bug，如果只是你使用错误，你可以了解到正确的使用方法。所以基础这个东西，在短时间内，可能让你看不出与其他人的差别，但是从长远来看，它决定着你在技术上走的高度与深度。套用侯捷先生的一句话：勿在浮沙筑高台。
+—— 正题
+上面简单地介绍了下，我个人学习windows程序设计的一些心得吧。扯的有点远了，让我们回到正题上来，来分析TeamTalk的源码吧。当然这篇文章与前面介绍的不一样，我们不仅介绍程序的正题设计思路，还会介绍一些有意义的细节，比如一些windows开发中常用的一些细节。
+一、程序功能 我们来先看下TeamTalk pc客户端包括哪些功能：TeamTalk因为开发的初衷是用于企业内部的即时通讯软件，所以，不提供对外注册的功能，一个员工的加入一般是人事部门在后台管理系统来新增该员工信息。其功能包括登录、聊天、群聊和建讨论组，当然聊天过程中可以发文字、表情、图片和文件，还包括查看聊天记录和简单地查看某个员工的个人信息，业务功能其实不多的。下面是一些功能截图：
+二、编译方法与项目工程文件介绍 TeamTalk的pc客户端的下载地址是：https://github.com/baloonwj/TeamTalk 代码包括服务器端代码、pc端、mac端、安卓和IOS端，还有web端所有代码。
+pc客户端代码的编译方法很简单：用VS2013打开win-client\solution目录下的teamtalk.sln，编译即可。你的VS版本至少要是VS2013，因为代码中大量使用了C++11的东西，VS2013以下版本是不支持C++11的语法的。当然，如果你是VS2015的话，可以参考这篇文章来进行修改和编译：http://www.07net01.com/linux/2017/01/1795569.html
+打开teamtalk.sln之后，总共有10个解决方法，如下图所示：
+其中teamtalk是主工程，你应该将它设置成启动工程，编译完成之后就可以调试了。你可以自己配置服务器来连接进行调试，我也可以连接我的测试服务器，具体参见《TeamTalk源码分析（十） —— 开放一个TeamTalk测试服务器地址和几个测试账号》。下面先大致介绍一个各个工程的作用：
+Duilib是teamtalk使用的一款开源界面库，该界面库模仿web开发中的布局技术，使用xml文件来布局windows界面，并且在主窗口上绘制所有子控件，也就是所谓的directUI技术；
+GifSmiley是程序中用来解析和显示gif格式的图片的库，以支持gif图片的动画效果；
+httpclient功能是程序中使用的http请求库，登录前程序会先连接服务器的login_server以获得后续需要登录的msg_server的ip地址和端口号 等信息，这里就是使用的http协议，同时聊天过程中收发的聊天图片与图片服务器msfs也使用http协议来收发这些图片；
+libogg是一个语音库，用来解析声音文件的，因为pc客户端可能会收到移动端的语音聊天，相比较传统的*.wav、.mp3、.wma，*.ogg格式的不仅音质高，而且音频文件的体积小，腾讯的QQ游戏英雄杀中的语音也是使用这个格式的。
+libspeex是一个音频压缩库；
+Modules就是TeamTalk中使用的各种库了，展开来看下你就明白了：
+network是teamtalk使用的网络通信的代码，其实teamtalk pc端和服务器端使用的是同一套网络通信库，只不过如果服务器运行在linux下，其核心的IO复用模型是epoll，而pc客户端使用的IO复用模型是select；
+speexdec 也是和ogg格式相关的编码和解码器；
+teamtalk是主程序入口工程；
+utility包含了teamtalk中用到的一些工具类工程，比如sqlite的包装接口、md5工具类等。
+除了上面介绍的一些库以外，程序还使用了sqlite库、谷歌protobuf库、日志库yaolog等。关于yaolog可参见http://blog.csdn.net/gemo/article/details/8499692，这个日志库比较有意思的地方是可以单独打印出网络通信中的字节流的二进制形式，推荐一下，效果如下图所示（位于win-client\bin\teamtalk\Debug\log\socket.log文件中）：
+三、程序总体框架介绍 整个程序使用了mfc框架来做一个架子，而所有的窗口和对话框都使用的是duilib，关于duilib网上有很多资料，这里不介绍duilib细节的东西了。一个mfc程序框架，使用起来也很简单，就是定义一个类集成mfc的CWinApp类，并改写其InitInstance()方法，mfc内部会替我们做好消息循环的步骤。TeamTalk相关的代码如下：
+//位于teamtalk.h中 class CteamtalkApp : public CWinApp { public: CteamtalkApp(); public: virtual BOOL InitInstance(); virtual BOOL ExitInstance(); private: /** * 创建用户目录 * * @return BOOL * @exception there is no any exception to throw. */ BOOL _CreateUsersFolder(); /** * 创建主窗口 * * @return BOOL * @exception there is no any exception to throw. */ BOOL _CreateMainDialog(); /** * 销毁主窗口 * * @return BOOL * @exception there is no any exception to throw. */ BOOL _DestroyMainDialog(); /** * 判断是否是单实例 * * @return BOOL * @exception there is no any exception to throw. */ BOOL _IsHaveInstance(); void _InitLog(); private: MainDialog* m_pMainDialog; }; 在teamtalk.cpp中定义了唯一的全局对象CteamtalkApp对象：
+...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 11 pc客户端源码分析" href=https://haokiu.com/blog/ee4c77c4daf64f5f821d76808ec0b8b3/></a></article><article class=post-entry><header class=entry-header><h2>11 一种高性能网络游戏服务器架构设计</h2></header><div class=entry-content><p>11 一种高性能网络游戏服务器架构设计 ​ 网络游戏的结构分为客户端与服务器端，客户端采用2D绘制引擎或者3D绘制引擎绘制游戏世界的实时画面，服务器端则负责响应所有客户端的连接请求和游戏逻辑处理，并控制所有客户端的游戏画面绘制。客户端与服务器通过网络数据包交互完成每一步游戏逻辑，由于游戏逻辑是由服务器负责处理的，要保证面对海量用户登录时，游戏具有良好的流畅性和用户体验，优秀的服务器架构起到了关键的作用。
+1 服务器架构设计 1.1 服务器架构分类 服务器组的架构一般分为两种：第一种是带网关服务器的服务器架构；第二种是不带网关服务器的服务器架构，这两种方案各有利弊。在给出服务器架构设计之前，先对这两种设计方案进行详细的探讨。 所谓网关服务器，其实是Gate服务器，比如LoginGate、GameGate等。网关服务器的主要职责是将客户端和游戏服务器隔离，客户端程序直接与这些网关服务器通信，并不需要知道具体的游戏服务器内部架构，包括它们的IP、端口、网络通信模型(完成端口或Epoll)等。客户端只与网关服务器相连，通过网关服务器转发数据包间接地与游戏服务器交互。同样地，游戏服务器也不直接和客户端通信，发给客户端的协议都通过网关服务器进行转发。
+1.2 服务器架构设计 根据网络游戏的规模和设计的不同，每组服务器中服务器种类和数量是不尽相同的。本文设计出的带网关服务器的服务器组架构如图1所示。
+本文将服务器设计成带网关服务器的架构，虽然加大了服务器的设计复杂度，但却带来了以下几点好处： （1）作为网络通信的中转站，负责维护将内网和外网隔离开，使外部无法直接访问内部服务器，保障内网服务器的安全，一定程度上较少外挂的攻击。 （2）网关服务器负责解析数据包、加解密、超时处理和一定逻辑处理，这样可以提前过滤掉错误包和非法数据包。 （3）客户端程序只需建立与网关服务器的连接即可进入游戏，无需与其它游戏服务器同时建立多条连接，节省了客户端和服务器程序的网络资源开销。 （4）在玩家跳服务器时，不需要断开与网关服务器的连接，玩家数据在不同游戏服务器间的切换是内网切换，切换工作瞬间完成，玩家几乎察觉不到，这保证了游戏的流畅性和良好的用户体验。
+在享受网关服务器带来上述好处的同时，还需注意以下可能导致负面效果的两个情况：如何避免网关服务器成为高负载情况下的通讯瓶颈问题以及由于网关的单节点故障导致整组服务器无法对外提供服务的问题。上述两个问题可以采用“多网关” 技术加以解决。顾名思义，“多网关” 就是同时存在多个网关服务器，比如一组服务器可以配置三台GameGate。当负载较大时，可以通过增加网关服务器来增加网关的总体通讯流量，当一台网关服务器宕机时，它只会影响连接到本服务器的客户端，其它客户端不会受到任何影响。
+从图1的服务器架构图可以看出，一组服务器包括LoginGate、LoginServer、GameGate、GameServer、DBServer和MServer等多种服务器。LoginGate和GameGate就是网关服务器，一般一组服务器会配置3台GameGate，因为稳定性对于网络游戏运营来说是至关重要的，而服务器宕机等突发事件是游戏运营中所面临的潜在风险，配置多台服务器可以有效地降低单个服务器宕机带来的风险。另外，配置多台网关服务器也是进行负载均衡的有效手段之一。下面将对各种服务器的主要功能和彼此之间的数据交互做详细解释。
+（1）LoginGate LoginGate主要负责在玩家登录时维护客户端与LoginServer之间的网络连接与通讯，对LoginServer和客户端的通信数据进行加解密、校验。
+（2）LoginServer
+LoginServer主要功能是验证玩家的账号是否合法，只有通过验证的账号才能登录游戏。从架构图可以看出， DBServer和GameServer会连接LoginServer。玩家登录基本流程是，客户端发送账号和密码到LoginServer验证，如果验证通过，LoginServer会给玩家分配一个SessionKey，LoginServer会把这个SessionKey发送给客户端、DBServer和GameServer，在后续的选择角色以后进入游戏过程中，DBServer和GameServer将验证SessionKey合法性，如果和客户端携带的SessionKey不一致，将无法成功获取到角色或者进入游戏。
+（3）GameGate
+GameGate(GG)主要负责在用户游戏过程中负责维持GS与客户端之间的网络连接和通讯，对GS和客户端的通信数据进行加解密和校验，对客户端发往GS的用户数据进行解析，过滤错误包，对客户端发来的一些协议作简单的逻辑处理，其中包括游戏逻辑中的一些超时判断。在用户选择角色过程中负责维持DBServer与客户端之间的网络连接和通讯，对DBServer和客户端的通信数据进行加解密和校验，对客户端发往DBServer的用户数据做简单的分析。维持客户端与MServer之间的网络连接与通讯、加解密、数据转发和简单的逻辑处理等。
+（4）GameServer
+GameServer(GS)主要负责游戏逻辑处理。网络游戏有庞大世界观背景，绚丽激烈的阵营对抗以及完备的装备和技能体系。目前，网络游戏主要包括任务系统、声望系统、玩家PK、宠物系统、摆摊系统、行会系统、排名系统、副本系统、生产系统和宝石系统等。从软件架构角度来看，这些系统可以看着GS的子系统或模块，它们共同处理整个游戏世界逻辑的运算。游戏逻辑包括角色进入与退出游戏、跳GS以及各种逻辑动作(比如行走、跑动、说话和攻击等)。
+由于整个游戏世界有许多游戏场景，在该架构中一组服务器有3台GS共同负责游戏逻辑处理，每台游戏服务器负责一部分地图的处理，这样不仅降低了单台服务器的负载，而且降低了GS宕机带来的风险。玩家角色信息里会保持玩家上次退出游戏时的地图编号和所在GS编号，这样玩家再次登录时，会进入到上次退出时的GS。
+上面提到过，在验证账号之后，LoginServer会把这个SessionKey 发给GS，当玩家选择角色登录GS时，会把SessionKey一起发给GS，这时GS会验证SessionKey是否与其保存的相一致，不一致的话GS会拒绝玩家进入游戏。MServer的主要负责GS之间的数据转发以及数据广播，另外，一些系统也可以放到MServer上，这样也可以减轻GS的运算压力。
+（5）DBServer
+DBServer主要的功能是缓存玩家角色数据，保证角色数据能快速的读取和保存。由于角色数据量是比较大的，包括玩家的等级、经验、生命值、魔法值、装备、技能、好友、公会等。如果每次GS获取角色数据都去读数据库，效率必然非常低下，用DBServer缓存角色数据之后，极大地提高了数据请求的响应速度。
+LoginServer会在玩家选组时把SessionKey发给DBServer，当玩家发送获取角色信息协议时会带上这个SessionKey，如果跟DBServer保存的SessionKey不一致，则DBServer会认为玩家不是合法用户，获取角色协议将会失败。另外，玩家选取角色正式进入游戏时，GS会给DBServer发送携带SessionKey的获取角色信息协议，这时DBServer同样会验证SessionKey的合法性。总之，只有客户端、DBServer和GS所保存的SessionKey一致，才能保证协议收到成功反馈。
+与DBServer通讯的服务器主要有GG，GS和LoginServer，DBServer与GG交互的协议主要包括列角色、创建角色、删除角色、恢复角色等，DBServer与GS交互的协议包括读取角色数据、保存角色数据和跳服务器等，DBServer与LoginServer交互的协议主要是用户登录协议，这时候会给DBServer发送SessionKey。
+（6）MServer 每一个组有一台MServer，主要负责维持3台GS之间数据的转发和数据广播。另外一些游戏系统也可能会放到MServer上处理，比如行会系统。
+1.3 服务器交互的主要流程 下面给出服务器之间数据通讯的主要流程从这些流程能看出各种服务器之间是如何数据交互和协同工作的。
+图2的流程说明了，在选角色过程中，客户端会把携带游戏账号和SessionKey的选角色协议发给GG，GG做一些简单处理之后转发给DBServer，DBServer要验证SessionKey的合法性，验证通过之后，DBServer会从角色信息缓冲区里取出该账户的所有角色信息发给客户端。这个过程在客户端的表现是，当选择好服务器组之后，客户端会直接显示该账号下的所有角色，之后就可以选择角色进入游戏了。
+图3的流程说明了，在玩家选角色正式进入游戏时，客户端会把携带游戏账号、角色ID和SessionKey的登录协议发给GG，GG做一些简单处理之后转发给GS。GS会验证SessionKey的合法性，验证通过之后，GS会把验证通过的结果发给客户端，同时GS给DBServer发获取角色数据的协议，这些角色数据是一个玩家所有的游戏数据，包括装备、技能等等。
+图4的流程说明了，在玩家游戏过程，客户端把逻辑协议(包括走、说话、跑、使用技能等)发给GG，GG完成加解密和简单逻辑处理之后转发给GS，GS负责这些协议的主要 逻辑处理。
+2 总结 网络游戏服务器的架构设计已经成为当前网络游戏研究领域的热点，因为高性能服务器架构设计是一款网络游戏成功的关键。本文从实际应用出发，提出了一种高性能的服务器架构设计解决方案，并且详细探讨了各种服务器的功能，本文的最后给出了几个服务器之间数据通讯的关键流程，以图文并茂的方式解释各个服务器是如何协同工作的。</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 11 一种高性能网络游戏服务器架构设计" href=https://haokiu.com/blog/8d180ec3ae3e409bac6e8a67811f54bc/></a></article><article class=post-entry><header class=entry-header><h2>12 经典游戏服务器端架构概述</h2></header><div class=entry-content><p>12 经典游戏服务器端架构概述 架构的分析模型 一. 讨论的背景 ​ 现代电子游戏，基本上都会使用一定的网络功能。从验证正版，到多人交互等等，都需要架设一些专用的服务器，以及编写在服务器上的程序。因此，游戏服务器端软件的架构，本质上也是游戏服务器这个特定领域的软件架构。 ​ 软件架构的分析，可以通过不同的层面入手。比较经典的软件架构描述，包含了以下几种架构： ​ 1.运行时架构——这种架构关心如何解决运行效率问题，通常以程序进程图、数据流图为表达方式。在大多数开发团队的架构设计文档中，都会包含运行时架构，说明这是一种非常重要的设计方面。这种架构也会显著的影响软件代码的开发效率和部署效率。本文主要讨论的是这种架构。 ​ 2.逻辑架构——这种架构关心软件代码之间的关系，主要目的是为了提高软件应对需求变更的便利性。人们往往会以类图、模块图来表达这种架构。这种架构设计在需要长期运营和重用性高的项目中，有至关重要的作用。因为软件的可扩展性和可重用度基本是由这个方面的设计决定的。特别是在游戏领域，需求变更的频繁程度，在多个互联网产业领域里可以说是最高的。本文会涉及一部分这种架构的内容，但不是本文的讨论重点。 ​ 3.物理架构——关心软件如何部署，以机房、服务器、网络设备为主要描述对象。 ​ 4.数据架构——关心软件涉及的数据结构的设计，对于数据分析挖掘，多系统协作有较大的意义。 ​ 5.开发架构——关心软件开发库之间的关系，以及版本管理、开发工具、编译构建的设计，主要为了提高多人协作开发，以及复杂软件库引用的开发效率。现在流行的集成构建系统就是一种开发架构的理论。
+二. 游戏服务器架构的要素 ​ 服务器端软件的本质，是一个会长期运行的程序，并且它还要服务于多个不定时，不定地点的网络请求。所以这类软件的特点是要非常关注稳定性和性能。这类程序如果需要多个协作来提高承载能力，则还要关注部署和扩容的便利性；同时，还需要考虑如何实现某种程度容灾需求。由于多进程协同工作，也带来了开发的复杂度，这也是需要关注的问题。 ​ 功能约束，是架构设计决定性因素。一个万能的架构，必定是无能的架构。一个优秀的架构，则是正好把握了对应业务领域的核心功能产生的。游戏领域的功能特征，于服务器端系统来说，非常明显的表现为几个功能的需求： ​ 1.对于游戏数据和玩家数据的存储 ​ 2.对玩家客户端进行数据广播 ​ 把一部分游戏逻辑在服务器上运算，便于游戏更新内容，以及防止外挂。 ​ 针对以上的需求特征，在服务器端软件开发上，我们往往会关注软件对电脑内存和CPU的使用，以求在特定业务代码下，能尽量满足承载量和响应延迟的需求。最基本的做法就是“时空转换”，用各种缓存的方式来开发程序，以求在CPU时间和内存空间上取得合适的平衡。在CPU和内存之上，是另外一个约束因素：网卡。网络带宽直接限制了服务器的处理能力，所以游戏服务器架构也必定要考虑这个因素。 ​ 对于游戏服务器架构设计来说，最重要的是利用游戏产品的需求约束，从而优化出对此特定功能最合适的“时-空”架构。并且最小化对网络带宽的占用。
+[图：游戏服务器的分析模型]
+三. 核心的三个架构 ​ 基于上述的分析模型，对于游戏服务端架构，最重要的三个部分就是，如何使用CPU、内存、网卡的设计： ​ 1.内存架构：主要决定服务器如何使用内存，以保证尽量少的内存泄漏的可能，以及最大化利用服务器端内存来提高承载量，降低服务延迟。 ​ 2.调度架构：设计如何使用进程、线程、协程这些对于CPU调度的方案。选择同步、异步等不同的编程模型，以提高服务器的稳定性和承载量。同时也要考虑对于开发带来的复杂度问题。现在出现的虚拟化技术，如虚拟机、docker、云服务器等，都为调度架构提供了更多的选择。 ​ 3.通信模式：决定使用何种方式通讯。网络通讯包含有传输层的选择，如TCP/UDP；据表达层的选择，如定义协议；以及应用层的接口设计，如消息队列、事件分发、远程调用等。 ​ 本文的讨论，也主要是集中于对以上三个架构的分析。
+四. 游戏服务器模型的进化历程 ​ 最早的游戏服务器是比较简单的，如UO《网络创世纪》的服务端一张3.5寸软盘就能存下。基本上只是一个广播和存储文件的服务器程序。后来由于国内的外挂、盗版流行，各游戏厂商开始以MUD为模型，建立主要运行逻辑在服务器端的架构。这种架构在MMORPG类产品的不断更新中发扬光大，从而出现了以地图、视野等分布要素设计的分布式游戏服务器。而在另外一个领域，休闲游戏，天然的需要集中超高的在线用户，所以全区型架构开始出现。现代的游戏服务器架构，基本上都希望能结合承载量和扩展性的有点来设计，从而形成了更加丰富多样的形态。 ​ 本文的讨论主要是选取这些比较典型的游戏服务器模型，分析其底层各种选择的优点和缺点，希望能探讨出更具广泛性，更高开发效率的服务器模型。
+分服模型 一. 模型描述 ​ 分服模型是游戏服务器中最典型，也是历久最悠久的模型。其特征是游戏服务器是一个个单独的世界。每个服务器的帐号是独立的，而且只用同一服务器的帐号才能产生线上交互。在早期服务器的承载量达到上限的时候，游戏开发者就通过架设更多的服务器来解决。这样提供了很多个游戏的“平行世界”，让游戏中的人人之间的比较，产生了更多的空间。所以后来以服务器的开放、合并形成了一套成熟的运营手段。一个技术上的选择最后导致了游戏运营方式的模式，是一个非常有趣的现象。
+[图：分服模型]
+二. 调度架构 1.单进程游戏服务器 最简单的游戏服务器只有一个进程，是一个单点。这个进程如果退出，则整个游戏世界消失。在此进程中，由于需要处理并发的客户端的数据包，因此产生了多种选择方法：
+[图：单进程调度模型]
+​ a.同步-动态多线程：每接收一个用户会话，就建立一个线程。这个用户会话往往就是由客户端的TCP连接来代表，这样每次从socket中调用读取或写出数据包的时候，都可以使用阻塞模式，编码直观而简单。有多少个游戏客户端的连接，就有多少个线程。但是这个方案也有很明显的缺点，就是服务器容易产生大量的线程，这对于内存占用不好控制，同时线程切换也会造成CPU的性能损失。更重要的多线程下对同一块数据的读写，需要处理锁的问题，这可能让代码变的非常复杂，造成各种死锁的BUG，影响服务器的稳定性。 ​ b.同步-多线程池：为了节约线程的建立和释放，建立了一个线程池。每个用户会话建立的时候，向线程池申请处理线程的使用。在用户会话结束的时候，线程不退出，而是向线程池“释放”对此线程的使用。线程池能很好的控制线程数量，可以防止用户暴涨下对服务器造成的连接冲击，形成一种排队进入的机制。但是线程池本身的实现比较复杂，而“申请”、“施放”线程的调用规则需要严格遵守，否则会出现线程泄露，耗尽线程池。 ​ c.异步-单线程/协程：在游戏行业中，采用Linux的epoll作为网络API，以期得到高性能，是一个常见的选择。游戏服务器进程中最常见的阻塞调用就是网路IO，因此在采用epoll之后，整个服务器进程就可能变得完全没有阻塞调用，这样只需要一个线程即可。这彻底解决了多线程的锁问题，而且也简化了对于并发编程的难度。但是，“所有调用都不得阻塞”的约束，并不是那么容易遵守的，比如有些数据库的API就是阻塞的；另外单进程单线程只能使用一个CPU，在现在多核多CPU的服务器情况下，不能充分利用CPU资源。异步编程由于是基于“回调”的方式，会导致要定义很多回调函数，并且把一个流程里面的逻辑，分别写在多个不同的回调函数里面，对于代码阅读非常不理。——针对这种编码问题，协程(Coroutine)能较好的帮忙，所以现在比较流行使用异步+协程的组合。不管怎样，异步-单线程模型由于性能好，无需并发思维，依然是现在很多团队的首选。 ​ d.异步-固定多线程：这是基于异步-单线程模型进化出来的一种模型。这种模型一般有三类线程：主线程、IO线程、逻辑线程。这些线程都在内部以全异步的方式运行，而他们之间通过无锁消息队列通信。 2.多进程游戏服务器 ​ 多进程的游戏服务器系统，最早起源于对于性能问题需求。由于单进程架构下，总会存在承载量的极限，越是复杂的游戏，其单进程承载量就越低，因此开发者们一定要突破进程的限制，才能支撑更复杂的游戏。 ​ 一旦走上多进程之路，开发者们还发现了多进程系统的其他一些好处：能够利用上多核CPU能力；利用操作系统的工具能更仔细的监控到运行状态、更容易进行容灾处理。多进程系统比较经典的模型是“三层架构”。 ​ 在多进程架构下，开发者一般倾向于把每个模块的功能，都单独开发成一个进程，然后以使用进程间通信来协调处理完整的逻辑。这种思想是典型的“管道与过滤器”架构模式思想——把每个进程看成是一个过滤器，用户发来的数据包，流经多个过滤器衔接而成的管道，最后被完整的处理完。由于使用了多进程，所以首选使用单进程单线程来构造其中的每个进程。这样对于程序开发来说，结构清晰简单很多，也能获得更高的性能。
+[图:经典的三层模型]
+​ 尽管有很多好处，但是多进程系统还有一个需要特别注意的问题——数据存储。由于要保证数据的一致性，所以存储进程一般都难以切分成多个进程。就算对关系型数据做分库分表处理，也是非常复杂的，对业务类型有依赖的。而且如果单个逻辑处理进程承载不了，由于其内存中的数据难以分割和同步，开发者很难去平行的扩展某个特定业务逻辑。他们可能会选择把业务逻辑进程做成无状态的，但是这更加加重了存储进程的性能压力，因为每次业务处理都要去存储进程处拉取或写入数据。 ​ 除了数据的问题，多进程也架构也带来了一系列运维和开发上的问题：首先就是整个系统的部署更为复杂了，因为需要对多个不同类型进程进行连接配置，造成大量的配置文件需要管理；其次是由于进程间通讯很多，所以需要定义的协议也数量庞大，在单进程下一个函数调用解决的问题，在多进程下就要定义一套请求、应答的协议，这造成整个源代码规模的数量级的增大；最后是整个系统被肢解为很多个功能短小的代码片段，如果不了解整体结构，是很难理解一个完整的业务流程是如何被处理的，这让代码的阅读和交接成本巨高无比，特别是在游戏领域，由于业务流程变化非常快，几经修改后的系统，几乎没有人能完全掌握其内容。
+三. 内存架构 ​ 由于服务器进程需要长期自动化运行，所以内存使用的稳定是首要大事。在服务器进程中，就算一个触发几率很小的内存泄露，都会积累起来变成严重的运营事故。需要注意的是，不管你的线程和进程结构如何，内存架构都是需要的，除非是Erlang这种不使用堆的函数式语言。 1.动态内存 ​ 在需要的时候申请内存来处理问题，是每个程序员入门的时候必然要学会的技能。但是，如何控制内存释放却是一个大问题。在C/C++语言中，对于堆的控制至关重要。有一些开发者会以树状来规划内存使用，就是一般只new/delete一个主要的类型的对象，其他对象都是此对象的成员（或者指针成员），只要这棵树上所有的对象都管理好自己的成员，就不会出现内存漏洞，整个结构也比较清晰简单。
+...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 12 经典游戏服务器端架构概述" href=https://haokiu.com/blog/d7795d37211b43728424c7c4f7469b67/></a></article><article class=post-entry><header class=entry-header><h2>13 游戏跨服架构进化之路</h2></header><div class=entry-content><p>13 游戏跨服架构进化之路 江贵龙，游戏行业从业8年，历任多款游戏项目服务器主程，服务器负责人。 关注游戏服务器架构及优化，监控预警，智能运维，数据统计分析等。
+1.背景 ​ 虽然游戏市场竞争激烈，产品格局变动较大,但游戏产业一直处于稳步增长阶段，无论是在端游，页游，手游还是已经初露端倪的H5游戏。可以预见，游戏类型中，MMOARPG游戏仍然会是引领市场的主流趋势，贡献着大部分流水，市场上也仍然在不断涌现精品。研发团队对MMO游戏的探索从来未间断过,从付费模式的改变，到题材多元化，次时代的视觉效果，更成熟的玩法及数值体系，本文主要针对跨服玩法上的探索和实现做一些思考和分析。 ​ 根据2016年《中国游戏产业报告》数据显示，随着游戏人口红利逐渐消失，获取用户的成本居高不下，几年来至少翻了十倍以上，目前平均导量成本页游为1015元/人，手游在1520元/人，其中IOS上成本30~50元/人,“洗”用户模式的效果正在变得微弱，用户流失严重。让我们先来看看滚服玩法的局限性，滚服洗量模式下存在着如下的弊端：
+2.设计目标 ​ 在上述背景下，一款长留存，低流失的精品游戏就成了平台方，渠道商，研发方追捧的目标，设想一下，如果让所有服务器玩家通过“跨域体系”实现自由畅通交互，在此基础上，玩家可以体验到前所未有的“国战系统”——7×24小时昼夜不停服的国家战争，随时开战；突破单地图承载容量极限的国战对决，带来真正万人国战的刺激体验，形成全区玩家能够互动的游戏社交环境。依托平台运营来打造一款真正意义上摆脱传统游戏运营模式的全新产品，为平台吸纳足够的市场份额，大幅降低流失率。 ​ 我们的蓝图是开创“1=1000”模式，让所有玩家，身处一个服务器却如同同时存在于所有服务器，这种打破服务器屏障的设定，杜绝了游戏出现“被迫滚服”现象出现，玩家不用再担心鬼服人烟稀少，不用担心交易所一无所有，所有的数据共享，让玩家轻松Hold住全世界。 3.进化过程 ​ 项目组那时面临的现状是游戏各种档期计划、宣传推广安排都已经就绪，两个月后该独代项目要在腾讯平台按时上线，开发不能因引入跨服机制而导致所有完成度100%的功能都要去分别去增加跨服的支持，而技术人员在跨服功能开发这块经验的积累上也不充分。 技术小组分析了时下项目的现状，跨服业务需求及现有的框架结构，明确了几点原则： ​ 1.为了实现跨服，游戏代码从底层架构到上层业务逻辑的代码改动成本尽量降低 ​ 2.业务逻辑里尽量少关心或者不用关心是否在本服或者跨服，降低开发人员的跨服功能开发复杂度，提高开发的效率，缩短开发周期。 那么，我们需要解决哪些技术疑点呢？
+3.1 客户端直连还是服务器转发 a)如果直连，那么，跨服玩法时客户端要维持两个连接，在跨服里，要模拟玩家登陆，绑定session的过程，游戏服和跨服两边要同时维护两份玩家数据，如何做到数据的同步？跨服要暴露给玩家，需要有公网访问IP和端口。对客户端连接管理来说较复杂。 b)如果通过大区服务器消息转发，那么，服务器之间做RPC通信，连接管理，消息需额外做一步跳转，性能能否满足？跨不跨服，对于客户端来说透明，跨服隐藏在大区之后，更加安全，不需再浪费公网IP和端口。 综合考虑了下，采用了B方案。
+3.1.1 RPC框架设计需求 那么，我们需要先准备一套高性能轻量级的RPC框架。 业界有很多典型的RPC框架，比如Motan、Thrift、gRPC、Hessian、Hprose，Wildfly,Dubbo,DubboX，为什么我们还要重复造轮子呢？综合考虑了下，框架要满足以下几点业务需求: 1.该框架要简单、易用、支持高并发的跨服请求； 2.根据现有的游戏服务器框架，会有很多定制化的场景； 3.通过NIO TCP长连接获取服务，但无需跨语言的需求； 4.支持同步请求，异步请求，异步回调CallBack； 5.要有服务发现的功能，要有Failfast能力； 6.具备负载均衡，分组等路由策略； 基于有以上的诉求，结合团队以前的开发经验，于是就决定自主研发。 我们选用的技术栈有 Netty、Apache Commons Pool、Redis等。 框架分为服务提供方(RPC Server)、服务调用方(RPC Client)、注册中心(Registry)三个角色，基于Redis为服务注册中心，通过其Pub/Sub实现服务动态的注册和发现。Server 端会在服务初始化时向Registry 注册声明所提供的服务；Client 向 Registry 订阅到具体提供服务的 Server 列表，根据需要与相关的 Server 建立连接，进行 RPC 服务调用。同时，Client 通过 Registry 感知 Server 的状态变更。三者的交互关系如右图：
+图1、RPC框架三者关系
+3.1.2 RPC请求的有序性 连接池在设计过程中，比较重要的是要考虑请求的顺序性，也就是先请求的先完成。 如果玩家的跨服请求通过不同的RPC连接并发执行，就有可能单个玩家请求因错序而导致逻辑矛盾，比如玩家移动，见图2：
+图2、玩家移动
+​ 玩家移动是很频繁的，如果A请求让玩家从位置1移动到位置2，B请求从位置2移动到位置3，有可能B请求先被跨服接收处理，这就会产生逻辑问题。 ​ 那么，如何做到请求的有序性呢？其本质是让同一份数据的访问能串行化，方法就是让同一个玩家的跨服请求通过同一条RPC连接执行，加上逻辑上的有效性验证，如图3所示：
+3.1.3 同步RPC实现细节 限于篇幅，这里只讲同步请求的RPC连接池实现。 同步请求的时序图如图4：
+上图为进入跨服战场的一次同步请求,场景切换控制器StageControllAction发起进入跨服战场的请求applyChangeByBattlefield(),场景管理器StageControllManager首先要调用登录跨服的RPC请求GameRpcClient.loginCrossServer(LoginCrossServerReq)， ​ 跨服RPC请求的工作流是这样的:
+public LoginCrossServerAck loginCrossServer(LoginCrossServerReqreq)throws ServiceException { //从连接池中获取一个连接 RpcClient rpcClient = rpcClientPool.getResource(req.getRoleId()); try { //发起一次同步RPC请求 RpcMsg msg = rpcClient.sendWithReturn(MsgType.RPC_LoginCrossServerReq, req); return JSON.parseObject(msg.getContent(), LoginCrossServerAck.class); } finally { //将连接放回连接池中 rpcClientPool.returnResource(rpcClient); } } ​ 该请求第一步先从连接池里获取一个连接RpcClient rpcClient = rpcClientPool.getResource(roleId),然后发起一个同步请求RpcClient.sendWithReturn(),等待直到结果返回，然后把资源归还连接池。 ​ 我们重点来看看sendWithReturn代码实现:
+...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 13 游戏跨服架构进化之路" href=https://haokiu.com/blog/3a513d0ec4fc47e2b3830ec79beb1572/></a></article><article class=post-entry><header class=entry-header><h2>2 网络游戏服务器开发框架设计介绍</h2></header><div class=entry-content><p>2 网络游戏服务器开发框架设计介绍 在开发过程中，会先有一份开发大纲或是一份策划案，但是这些在我的开发中可能不会有，或者即使有，也很有可能是我随性写下来的，但是我会尽可能写好它。
+网络通信层，我会放到单独的SOCKET编程中去讲解，这里的主题是游戏的架构设计以及系统模块间的协同工作。
+所以，在这里假设所有的网络层都已经开发完毕，具体的网络层开发代码不会再这里出现，因为这需要很多年的开发经验，或者对SOCKET有一定的了解才能够讲述清楚或理解，所以我不想再我还没有足够的把握之前去说这样的问题，主要问题是不想让人说我不专业；另一方面是不希望给没有接触过SOCKET编程或了解不多的人带来误导或困扰。
+在开发游戏具体功能前，第一个要做的就是理清系统功能，这里的系统功能并不是具体的游戏功能，而是从软件角度出发的，行业内部称其为分布式服务器开发，讲的是如何构建一个可移植、可分布到不同网络机器独立或依赖运行的应用程序。
+本系列开发教程是我个人游戏经历和工作历程的一个沉淀，也是我个人主观的一个未实现版本，在这里，我希望它可以以教程的方式存在，并去按部就班的一步一步实现出来。所有的源码代码都是开源的，我不会有丝毫保留，这样做的目的是方便很多像我一样的游戏狂热者入门无门，另一方面也是希望前辈们可以对我的错误进行指正。下面将具体描述服务器的划分以及功能实现。
+此系列开发教程，总共将分为10个模块：它们分别为
+LoginGate服务器、 LoginServer服务器、 GameGate服务器、 GameServer服务器、 IMServer服务器、 AIServer服务器、 CenterServer服务器、 BillingServer服务器、 WebServices服务器、 DBServer服务器。 1
+LoginGate：登陆网关服务器，将所有的LoginServer服务器地址暴露给最终用户，每个LoginGate服务可以挂接n个LoginServer，将最终用户的所有请求转发给目标LoginServer。当最终用户通过此服务完成登陆后，会与该服务断开连接，断开连接前，服务器会将数据上报给GameGate服务。
+2
+LoginServer：登陆服务器，仅作于内部服务与LoginGate进行连接，所有的最终用户请求由LoginGate过滤后，转发过来进行处理。与LoginGate的所有通信都是明文，即未加密数据。
+3
+**GameGate：**游戏网关服务器，与LoginGate协作完成最终用户的登陆过程，每一个服务会连接到唯一一个LoginGate服务上进行注册，LoginGate会将以完成验证登陆的用户信息同步到所有已注册成功的GameGate上，根据注册不同的GameGate类型信息，LoginGate会发生不同的通过认证的最终用户信息。
+GameGate挂接n个GameServer服务到自身，此服务将所有注册到自身的GameServer信息发送给最终用户，提供用户选择具体的区或线路进行游戏（区和线路在不同的游戏设定中有不同的定义），在这里区的定义对应的是GameGate，每一个GameGate可以表示物理或逻辑上的多个游戏分区，每个分区由至少一个GameServer组成；
+线路定义为GameServer，每一个GameServer代表一条线路，线路之间互相不可见，但是可以通过IMServer进行一些扩展通信，例如公会、好友、聊天等服务可以设置透明通信或隐藏通信。透明通信由IMServer向目标GameServer转发请求，并进行处理；隐藏通信仅在当前GameServer进行处理，不会做跨越性操作。
+4
+GameServer：游戏服务器，作为内部服务与GameGate协作处理最终用户的请求，这个服务主要处理游戏逻辑，例如战斗。此服务启动后，会根据配置文件的配置信息进行相应的服务注册，该服务启动成功后，会注册到GameGate和IMServer、AIServer服务器，它们分别提供最终用户游戏、交友、公会、聊天和智能体的移动、创建、销毁等服务。作为整个游戏的核心处理服务器，会处理掉大部分的用户交互服务请求，只有在不能处理的情况下，才会请求其它服务协同处理。
+5
+IMServer：IM通信服务器，全称InstantMessaging（译为即时通讯），ICQ、MSN、QQ等聊天工具都属于此范畴。此服务的作用是提供物理或逻辑不同位置的GameServer上的最终用户通讯的一个媒介，用户成功登陆GameServer时，会将自己的好友、公会信息注册到此服务上，当需要跨GameServer服务时，共IMServer使用。此服务主要提供聊天、交友、交易、公会等社交类行为服务，该服务可以直接或间接的与最终用户进行通信，但最终用户无法直接与该服务进行通信，比如请求操作，所有的用户操作都由GameServer转发，IMServer可以选择性的直接反馈最终用户或通过GameServer反馈。
+6
+**AIServer：**人工智能服务器，全称Artificial Intelligence（译为人工智能），例如现代服务性机器人（自动吸尘器、智能探测仪、智能防爆装置等）都属于人工智能范畴。这里的人工智能主要体现在游戏中的NPC、MONSTER等有行为表现物体。GameServer启动后会连接到此服务进行注册，并获取所需智能体的信息，以反馈给最终用户，并最终显示在用户应用程序中。该服务主要控制智能体的移动、攻击、创建、销毁等行为，另外包括在战斗中或非战斗状态下的行为，比如游走在街道上的商品小贩；在搜索到攻击目标时，主动或召集附近的战斗单位一起攻击用户，都属于该服务的工作内容。
+7
+**CenterServer：**中心服务器，用于监控、更新已注册到此服务的状态，比如电信1区（傲视天地）服务器的运行状态等。此服务主要是管理除自身以外的所有服务程序的运行状态，以及时反馈给技术活运维人员。
+8
+**BillingServer：**计费服务器，用于计算用户在游戏中的消耗、增值；比如XX在游戏中购买了一个双倍经验卡，消耗10金币，或者用户通过网站形式进行充值，都会通过该服务反馈给用户最终结果。
+9
+**WebServices：**网站服务，主要用于网站与游戏之间的交互。比如XX用户通过网站进行充值服务，充值成功后，通知计费服务以响应用户操作；或通过网站进行游戏激活、礼品领取等，都需要此服务与游戏应用程序进行交互，以体现实时的变化。
+10
+DBServer：用于全局数据维护，例如更新、查询、插入、删除操作；这些数据包含用户账号、充值、代金卷、点卡、月卡以及游戏中需要用到的角色数据。
+服务器整体架构图分布示意图：
+LoginGate内部运行示意图：
+LoginServer内部运行示意图：
+由于其它服务器模块程序的内部图与这两个类似，所以就不在这个上面耽搁太多时间，下一篇将讲述具体的游戏开发，网络库使用的是开源库ACE，下载地址http://download.dre.vanderbilt.edu/previous_versions/ACE-5.8.0.zip。</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 2 网络游戏服务器开发框架设计介绍" href=https://haokiu.com/blog/288a2c3a9e374a3ebf898cfa184e2921/></a></article><article class=post-entry><header class=entry-header><h2>3 游戏后端开发需要掌握的知识</h2></header><div class=entry-content><p>3 游戏后端开发需要掌握的知识 这篇是从网上找到牛人的博客总结下来的：
+实战方面：
+（1）两种在知名IT公司使用的游戏服务器架构设计
+点击图片可以放大
+1
+各个服务器的功能以及作用：
+**CenterServer服务器管理器：**管理所有的服务器，分配服务器的端口，负责全局的逻辑（管理），对各功能服务器和场景服务器提供服务，保证服务器的合法性 DBserver角色档案缓冲服务器 GameServer逻辑服务器：玩家的实时同步在里面实现 GateServer网关服务器：负责消息转发 **LoginServer登录服务器：**连接账号数据 2
+不带负载均衡的和带负载均衡：
+相同点：
+​ 与带负载均衡大概的架构相同
+不同点：
+不带负载均衡
+Gate Server 和Game Server之间是一对一的关系，每个Game Server能容纳的玩家数量是一定的，正常情况下一个Gate Server的对应一个Game Server实时在线人数能达到3000人，一旦达到峰值，就会找下一个对应的Game Server。
+各个Gate Server服务器之间是不通信的
+带负载均衡
+一个Gate Server的对应多个Game Server
+各个GateServer之间可以互相通信，而且还可以随意扩展，通过配置文件可以实现配置
+3
+服务器的工作过程：
+用户从客户端选择游戏服务器列表 登录到Login Server,在登陆的过程中 先去平台服务器进行账号的验证 验证通过后会通知Login Server，然后Login Server会把验证的消息发送 到center Server，请求其中的Gate Server的地址和端口 Center Server会找一个可用的Gate Server信息,发送回LoginServer Login Server会把消息发送给客户端 客户端断开与Login Server的连接，然后与Game Server 连接进入游戏场景中</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 3 游戏后端开发需要掌握的知识" href=https://haokiu.com/blog/16d1fbc7aa204ddba0ef394895d2c2b6/></a></article><article class=post-entry><header class=entry-header><h2>4 关于游戏服务端架构的整理</h2></header><div class=entry-content><p>4 关于游戏服务端架构的整理 一个大型的网落游戏服务器应该包含几个模块：网络通讯，业务逻辑，数据存储，守护监控（不是必须）。其中业务逻辑可能根据具体需要，又划分为好几个子模块。
+这里说的模块可以指一个进程，或者一个线程方式存在，本质上就是一些类的封装。
+对于服务器的并发性，要么采用单进程多线程，要么采用多进程单线程的方式，说说两种方式的优缺点：
+一、单进程多线程的服务器设计模式，只有一个进程，但一个进程包好多个线程： 网络通讯层，业务逻辑，数据存储，分别在独立的线程中，无守护进程。
+优点：
+数据共享和交换方便，使用全局变量或者单例就可以，数据存储方便。 单进程，服务器框架结构相对简单，编码容易。 缺点：
+所有功能只能在单个物理服务器上，不能做成分布式。 不方便监控各个线程状态，容易死锁 一个线程出错，例如内存非法访问，栈空间被破坏，那么服务器进程就退出，所有玩家掉线，影响大。 二、多进程单线程的服务器设计模式，多个进程，每个进程只有一个线程： 网路通讯，业务逻辑，数据存储，守护进程，分别在不同的进程。
+优点：
+各个进程可以分布在不同的物理服务器上，可以做成分布式的服务器框架，例如可以将数据存储单独放到一个物理服务器上，供几个区的服务器使用。将网络通讯进程独立出来，甚至可以做成导向服务器，实现跨服战。 可以通过守护进程监控其它进程状态，例如有进程死掉，马上重启该进程，或者某个进程cpu使用率接近100%（基本可以判断是某个逻辑死循环了）, 强制kill掉该进程，然后重启。 单个服务器进程异常退出，只要不是网络通讯进程（一般这个都会比较稳定，没什么逻辑），那么就可以及时被守护进程重启，不会造成玩家掉线，只会造成在1-2秒内，某个逻辑功能无法使用，甚至玩家都感觉不到。 服务器通过共享内存进行数据交换，那么如果其中一个服务器死掉，数据还在，可以保护用户数据（当然多线程也可以使用共享内存）。 并发性相对多线程要高点。 缺点：
+不方便使用互斥锁，因为进程切换的时间片远远于线程切换，对于一个高并发服务器是无法允许这么高时间片的切换代价的。因此必须设计好服务器的框架，尽量避开使用锁机制，但要保证数据不出错。 多进程编程，在各个进程间会有很多通讯，跨服务器进程的异步消息较多，会让服务器的编码难度加大。 下面先按照一个游戏的功能，将服务器的功能分块框架画出来:
+点击图片可放大
+以上是一个游戏服务器最基础的功能框架图，接下来要做的就是设计服务器的框架了
+1. 早期的MMORPG服务器结构 Client&lt;->GameServer&lt;->DB 所有业务数据集中处理
+优点:
+简单,快速开发
+缺点:
+所有业务放在一起,系统负担大大增加.一个bug可能导致整个服务器崩溃,造成所有玩家掉线甚至丢失等严重后果。 开服一刹那,所有玩家全部堆积在同一个新手村.-»»卡，客户端卡（同屏人数过多渲染/广播风暴） 服务器卡(处理大量同场景消息/广播风暴) 2. 中期-用户分离集群式 GameServe1 Client | DB GameServer2 玩家不断增多->分线->程序自动或玩家手动选择进入 **缺点:**运营到后期,随着每条线玩家的减少, 互动大大减少。
+3. 中后期 数据分离集群式 按地图划分服务器,当前主流 新手村问题：《天龙八部》提出了较好的解决方案，建立多个平行的新手村地图，一主多副，开服时尽可能多的同时容纳新用户的涌入，高等级玩家从其它地图回新手村只能到达主新手村。
+4. 当前主流的网络游戏架构 注：在GateServer和CenterServer之间是有一条TCP连接的。而GameServer和LogServer之间的连接可以是UDP连接。这是有一个大概的图，很多地方需要细化。 **GateServer:**网关服务器,AgentServer、ProxyServer
+优点:
+作为网络通信的中转站，负责维护将内网和外网隔离开，使外部无法直接访问内部服务器，保障内网服务器的安全，一定程度上较少外挂的攻击。 网关服务器负责解析数据包、加解密、超时处理和一定逻辑处理，这样可以提前过滤掉错误包和非法数据包。 客户端程序只需建立与网关服务器的连接即可进入游戏，无需与其它游戏服务器同时建立多条连接，节省了客户端和服务器程序的网络资源开销。 在玩家跳服务器时，不需要断开与网关服务器的连接，玩家数据在不同游戏服务器间的切换是内网切换，切换工作瞬问完成，玩家几乎察觉不到，这保证了游戏的流畅性和良好的用户体验。 缺点:
+网关服务器成为高负载情况下的通讯瓶颈问题 由于网关的单节点故障导致整组服务器无法对外提供服务的问题 解决：
+**多网关技术。**顾名思义，“多网关” 就是同时存在多个网关服务器，比如一组服务器可以配置三台GameGme。当负载较大时，可以通过增加网关服务器来增加网关的总体通讯流量，当一台网关服务器宕机时，它只会影响连接到本服务器的客户端，其它客户端不会受到任何影响。 **DCServer:**数据中心服务器。主要的功能是缓存玩家角色数据，保证角色数据能快速的读取和保存 CenterServer:全局服务器/中心服务器,也叫WorldServer. 主要负责维持GameServer之间数据的转发和数据广播。另外一些游戏系统也可能会放到Center上处理，比如好友系统,公会系统。 改进:
+将网关服务器细化为LogingateServer和多个GameGateServer.
+5. 按业务分离式集群 由于网络游戏存在很多的业务，如聊天，战斗，行走，NPC等，可以将某些业务分到单独的服务器上。这样每个服务器的程序则会精简很多。而且一些大流量业务的分离,可以有效的提高游戏服务器人数上限。
+优点：
+业务的分离使得每种服务器的程序变的简单，这样可以降低出错的几率。即使出错，也不至于影响到每一个整个游戏的进行,而且通过快速启动另一台备用服务器替换出错的服务器。 业务的分离使得流量得到了分散，进而相应速度回得到提升 。 大部分业务都分离了成了单独的服务器,所以可以动态的添加，从而提高人数上限。 改进： 甚至可以将登陆服务器细化拆分建角色,选择角色服务器
+6. 一种简单实用的网络游戏服务器架构 下图中每个方框表示一个独立的进程APP组件，每个服务进程如果发生宕机会影响部分用户，整体服务但不会全部中断。在宕机进程重启后，又可以并入整体，全部服务得以继续。
+**gls：**game login server，游戏登录服务器，某种程序上，其不是核心组件，gls调用外部的接口，进行基本的用户名密码认证。此外需要实现很多附属的功能：登录排队 （对开服非常有帮助），GM超级登录通道（GM可以不排队进入游戏），封测期间激活用户控制，限制用户登录，控制客户端版本等。 **db：**实质上是后台sql的大内存缓冲，隔离了数据库操作，比较内存中的数据，只把改变的数据定时批量写入sql。系统的算法，开发稳定性都要求非常高。 **center：**所有组件都要在这里注册，在线玩家的session状态都在这里集中存放，和各组件有心跳连接。所有对外的接口也全部通过这里。 角色入口：玩家登录游戏后的选择角色 **gs：**game server，最核心组件，同一地图，所有游戏逻辑相关的功能，都在这里完成。 **gate：**建立和用户的常链接，主要作sockt转发，屏蔽恶意包，对gs进行保护。协议加密解密功能，一个gate共享多个gs，降低跳转地图连接不上的风险。 **IM，关系，寄售：**表示其它组件，负责对应的跨地图发生全局的游戏逻辑。 7.另一个架构图 ...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 4 关于游戏服务端架构的整理" href=https://haokiu.com/blog/a7ec43bdee96498694f118163763c921/></a></article><article class=post-entry><header class=entry-header><h2>5 各类游戏对应的服务端架构</h2></header><div class=entry-content><p>5 各类游戏对应的服务端架构 类型一：卡牌、跑酷等弱交互服务端 卡牌跑酷类因为交互弱，玩家和玩家之间不需要实时面对面PK，打一下对方的离线数据，计算下排行榜，买卖下道具即可，所以实现往往使用简单的 HTTP服务器：
+登录时可以使用非对称加密（RSA, DH），服务器根据客户端uid，当前时间戳还有服务端私钥，计算哈希得到的加密 key 并发送给客户端。之后双方都用 HTTP通信，并用那个key进行RC4加密。客户端收到key和时间戳后保存在内存，用于之后通信，服务端不需要保存 key，因为每次都可以根据客户端传上来的 uid 和 时间戳 以及服务端自己的私钥计算得到。**用模仿 TLS的行为，**来保证多次 HTTP请求间的客户端身份，并通过时间戳保证同一人两次登录密钥不同。 每局开始时，访问一下，请求一下关卡数据，玩完了又提交一下，验算一下是否合法，获得什么奖励，数据库用单台 MySQL或者 MongoDB即可，后端的 Redis做缓存（可选）。
+如果要实现通知，那么让客户端定时15秒轮询一下服务器，如果有消息就取下来，如果没消息可以逐步放长轮询时间，比如30秒；如果有消息，就缩短轮询时间到10秒，5秒，即便两人聊天，延迟也能自适应。 此类服务器用来实现一款三国类策略或者卡牌及酷跑的游戏已经绰绰有余，这类游戏因为逻辑简单，玩家之间交互不强，使用 HTTP来开发的话，开发速度快，调试只需要一个浏览器就可以把逻辑调试清楚了。
+类型2：第一代游戏服务器 1978 1978年，英国著名的财经学校University of Essex的学生 Roy Trubshaw编写了世界上第一个MUD程序《MUD1》，在University of Essex于1980年接入 ARPANET之后加入了不少外部的玩家，甚至包括国外的玩家。《MUD1》程序的源代码在 ARPANET共享之后出现了众多的改编版本，至此MUD才在全世界广泛流行起来。不断完善的 MUD1的基础上产生了开源的 MudOS（1991），成为众多网游的鼻祖：
+MUDOS采用 C语言开发，因为玩家和玩家之间有比较强的交互（聊天，交易，PK），MUDOS使用单线程无阻塞套接字来服务所有玩家，所有玩家的请求都发到同一个线程去处****理，主线程每隔1秒钟更新一次所有对象（网络收发，更新对象状态机，处理超时，刷新地图，刷新NPC）。 游戏世界采用房间的形式组织起来，每个房间有东南西北四个方向可以移动到下一个房间，由于欧美最早的网游都是地牢迷宫形式的，因此场景的基本单位被称为 “房间”。
+MUDOS使用一门称为LPC的脚本语言来描述整个世界（包括房间拓扑，配置，NPC，以及各种剧情）。游戏里面的高级玩家（巫师），可以不断的通过修改脚本来为游戏添加房间以及增加剧情。早年 MUD1上线时只有17个房间，Roy Trubshaw毕业以后交给他的师弟 Richard Battle，在 Richard Battle手上，不断的添加各种玩法到一百多个房间，终于将 MUD发扬光大。 用户使用 Telnet之类的客户端用 Tcp协议连接到 MUDOS上，使用纯文字进行游戏，每条指令用回车进行分割。比如 1995年国内第一款 MUD游戏《侠客行》，你敲入*：”go east”，*游戏就会提示你：“*后花园 - 这里是归云庄的后花园，种满了花草，几个庄丁正在浇花。此地乃是含羞草生长之地。这里唯一的出口是 north。这里有：花待 阿牧（A mu），还有二位庄丁（Zhuang Ding）”，然后你继续用文字操作，查看阿牧的信息：“look a mu”，*系统提示：“*花待 阿牧（A mu）他是陆乘风的弟子，受命在此看管含羞草。他看起来三十多岁，生得眉清目秀，端正大方，一表人才。他的武艺看上去【不是很高】，出手似乎【极轻】”。*然后你可以选择击败他获得含羞草，但是你吃了含羞草却又可能会中毒死亡。在早期网上资源贫乏的时候，这样的游戏有很强的代入感。 用户数据保存在文件中，每个用户登录时，从文本文件里把用户的数据全部加载进来，操作全部在内存里面进行，无需马上刷回磁盘。用户退出了，或者每隔5分钟检查到数据改动了，都会保存到磁盘。这样的系统在当时每台服务器承载个4000人同时游戏，不是特别大的问题。从1991年的 MUDOS发布后，全球各地都在为他改进，扩充，退出新版本，随着 Windows图形机能的增强。1997游戏《UO》在 MUDOS的基础上为角色增加的x,y坐标，为每个房间增加了地图，并且为每个角色增加了动画，形成了第一代的图形网络游戏。 因为游戏内容基本可以通过 LPC脚本进行定制，所以MUDOS也成为名副其实的第一款服务端引擎，引擎一次性开发出来，然后制作不同游戏内容。后续国内的《万王之王》等游戏，很多都是跟《UO》一样，直接在 MUDOS上进行二次开发，加入房间的地图还有角色的坐标等要素，该架构一直为国内的第一代 MMORPG提供了稳固的支持，直到 2003年，还有游戏基于 MUDOS开发。 虽然后面图形化增加了很多东西，但是这些MMORPG后端的本质还是 MUDOS。
+随着游戏内容的越来越复杂，架构变得越来越吃不消了，各种负载问题慢慢浮上水面，于是有了我们的第二代游戏服务器。
+类型3：第二代游戏服务器 2003 2000年后，网游已经脱离最初的文字MUD，进入全面图形化年代。最先承受不住的其实是很多小文件，用户上下线，频繁的读取写入用户数据，导致负载越来越大。随着在线人数的增加和游戏数据的增加，服务器变得不抗重负。同时早期 EXT磁盘分区比较脆弱，稍微停电，容易发生大面积数据丢失。因此第一步就是拆分文件存储到数据库去。
+此时游戏服务端已经脱离陈旧的 MUDOS体系，各个公司在参考 MUDOS结构的情况下，开始自己用 C再重新开发自己的游戏服务端。并且脚本也抛弃了 LPC，采用扩展性更好的 Python或者 Lua来代替。由于主逻辑使用单线程模型，随着游戏内容的增加，传统单服务器的结构进一步成为瓶颈。于是有人开始拆分游戏世界，变为下面的模型：
+游戏服务器压力拆分后得以缓解，但是两台游戏服务器同时访问数据库，大量重复访问，大量数据交换，使得数据库成为下一个瓶颈。于是形成了数据库前端代理（DB Proxy），游戏服务器不直接访问数据库而是访问代理，再有代理访问数据库，同时提供内存级别的cache。早年 MySQL4之前没有提供存储过程，这个前端代理一般和 MySQL跑在同一台上，它转化游戏服务器发过来的高级数据操作指令，拆分成具体的数据库操作，一定程度上代替了存储过程：
+...</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 5 各类游戏对应的服务端架构" href=https://haokiu.com/blog/47a72212e86d4b6a8fe0516f8ff1cf65/></a></article><article class=post-entry><header class=entry-header><h2>6 从腾讯QQgame高性能服务器集群架构看“分而治之”与“自治”等分布式架构设计原则</h2></header><div class=entry-content><p>6 从腾讯QQgame高性能服务器集群架构看“分而治之”与“自治”等分布式架构设计原则 腾讯QQGame游戏同时在线的玩家数量极其庞大，为了方便组织玩家组队游戏，腾讯设置了大量游戏室（房间），玩家可以选择进入属意的房间，并在此房间内找到可以加入的游戏组（牌桌、棋盘等）。玩家选择进入某个房间时，必须确保此房间当前人数未满（通常上限为400），否则进入步骤将会失败。玩家在登入QQGame后，会从服务器端获取某类游戏下所有房间的当前人数数据，玩家可以据此找到未满的房间以便进入。
+如上篇所述的原因，如果待进入房间的人数接近上限时，玩家的进入请求可能失败，这是因为服务器在收到此进入请求之前可能有若干其他玩家也请求进入这个房间，造成房间人数达到上限。
+这一问题是无法通过上篇所述调整协作分配的方法来解决的，这是因为：要进入的房间是由玩家来指定的，无法在服务器端完成此项工作，游戏软件必须将服务器端所维护的所有房间人数数据复制到玩家的客户端，并让玩家在界面上看到这些数据，以便进行选择。
+这样，上篇所述的客户端与服务器端协作分配原则（谁掌握数据，谁干活），还得加上一些限制条件，并让位于另一个所谓"用户驱动客户端行为"原则–如果某个功能的执行是由用户来推动的，则这个功能的实现应当放在客户端（或者至少由客户端来控制整个协作），并且客户端必须持有此功能所依赖相关数据的副本，这个副本应当尽量与服务器端的源保持同步。
+图一"进入房间"失败示意
+QQGame还存在一个明显的不足，就是：玩家如果在游戏一段时间后，离开了某个房间，并且想进入其它房间，这时QQGame并不会刷新所有房间的当前人数，造成玩家据此信息所选的待进入房间往往实际上人数已满，使得进入步骤失败。笔者碰到的最糟情形是重复3、4次以上，才最后成功进入另外某个房间。此缺陷其实质是完全放弃了客户端数据副本与服务器端的源保持同步的原则。
+实际上，QQGame的开发者有非常充分的理由来为此缺陷的存在进行辩护：QQGame同时在线的用户数超过百万甚至千万数量级，如果所有客户端要实时（所谓实时，就玩家的体验容忍度而言，可以定为不超过1秒的延迟）地从服务器端获取更新数据，那么最终只有一个结果–系统彻底崩溃。
+设想一下每秒千万次请求的吞吐量，以普通服务器每秒上百个请求的处理能力（这个数据是根据服务请求处理过程可能涉及到I/O操作来估值的，纯内存处理的情形可能提高若干数量级），需要成千上万台服务器组成集群方能承受（高可用性挑战）；而随着玩家不断地进入或退出游戏房间，相关数据一直在快速变化中，
+正向来看，假设有一台中心服务器持有这些数据，那么需要让成千上万台服务器与中心保持这些动态数据的实时同步（数据一致性挑战）； 相对应的，逆向来看，玩家进入房间等请求被分配给不同的服务器来处理，一旦玩家进入房间成功则对应服务器内的相关数据被改变，那么假定中的中心服务器就需要实时汇集所有工作服务器内发生的数据变动（数据完整性挑战）。 同时处理上万台服务器的数据同步，这需要什么样的中心服务器呢？即使有这样的超级服务器存在，那么Internet网较大的（而且不稳定的）网络通讯延迟又怎么解决呢？
+对于软件缺陷而言，可以在不同的层面来加以解决–从设计、到需求、甚至是直接在业务层面来解决（例如，08年北京奥运会网上购票系统，为了解决订票请求拥塞而至系统崩溃的缺陷，最后放弃了原先"先到先得"的购票业务流程，改为：用户先向系统发订票申请，系统只是记录下来而不进行处理，而到了空闲时，在后台随机抽选幸运者，为他们一一完成订票业务）。当然解决方案所处的层面越高，可能就越让人不满意。
+就上述进入房间可能遭遇失败的缺陷而言，最简便的解决方案就是：在需求层面调整系统的操作方式，即**增加一个类似上篇所述"自动快速加入游戏"的功能–“自动进入房间"功能。**系统在服务器端为玩家找到一个人数较多又未满的房间，并尝试进入（注意，软件需求是由用户的操作目标所驱动的，玩家在此的目标就是尽快加入一个满意的游戏组，因此由系统来替代玩家选择目标房间同样符合相关目标）。而为了方便玩家手工选择要进入的房间，则应当增加一个"刷新当前各房间人数"的功能。另外，**还可以调整房间的组织模式，**例如以地域为单位来划分房间，像深圳（长城宽带）区房间1、四川（电信）房间3、北美区房间1等，在深圳上网的玩家将被系统引导而优先进入深圳区的房间。
+不管怎样，解决软件缺陷的王道还是在设计层面。要解决上述缺陷，架构设计师就必须同时面对高可用、数据一致性、完整性等方面的严峻挑战。
+在思考相关解决方案时，我们将应用若干与高性能服务器集群架构设计相关的一些重要原则。首先是"分而治之"原则，即将大量客户端发出的服务请求进行适当的划分（例如，所有从深圳长城宽带上网的玩家所发出的服务请求分为一组），分别分配给不同的服务器（例如，将前述服务请求分组分配给放置于深圳数据中心的服务器）来加以处理。对于QQGame千万级的并发服务请求数而言，采用Scale Up向上扩展，即升级单个服务器处理能力的方式基本上不予考虑（没有常规的主机能处理每秒上千万的请求）。唯一可行的，只有Scale Out向外扩展，即利用大量服务器集群做负载均衡的方式，这实质上就是"分而治之"原则的具体应用。
+图二 分而治之"下的QQGame游戏服务集群部署
+然而，要应用"分而治之"原则进行Scale Out向外扩展，还依赖于其它的条件。如果各服务器在处理被分配的服务请求时，其行为与其它服务器的行为结果产生交叉（循环）依赖，换句话讲就是共享了某些数据（例如，服务器A处理客户端a发来的进入房间#n请求，而同时，服务器B也在处理客户端b发来的进入房间#n请求，此时服务器A与B的行为存在循环依赖–因为两者要同时访问房间#n的数据，这一共享数据会造成两者间的循环依赖），则各服务器之间必须确保这些共享数据的一致完整性，否则就可能发生逻辑错误（例如，假定房间#n的人数差一个就满了，服务器A与B在独自处理的情况下，将同时让客户端a与b的进入请求成功，于是房间#n的最终人数将超出上限）。
+而要做到此点，各服务器的处理进程之间就必须保持同步（实际上就是排队按先后顺序访问共享数据，例如：服务器A先处理，让客户端a进入房间成功，此时房间#n满员；此后服务器B更新到房间#n满的数据，于是客户端b的进入请求处理结果失败），这样，原来将海量请求做负载均衡的意图就彻底失败了，多台服务器的并发处理能力在此与一台实质上并没有区别。
+由此，我们导出了另外一个所谓"处理自治”（或称"行为独立"）的原则，即所有参与负载均衡的服务器，其处理对应服务请求的行为应当不循环依赖于其它服务器，换句话讲，就是各服务器的行为相对独立（**注意：**在这里，非循环依赖是允许的，下文中我们来分析为什么）。
+由此可见，简单的负载均衡策略对于QQGame而言是解决不了问题的。我们必须找到一种途径，使得在使用大量服务器进行"分而治之"的同时，同时有确保各个服务器"处理自治"。此间的关键就在于"分而治之"的"分"字上。前述将某个地域网段内上网的玩家所发出的服务请求分到一组，并分配给同一服务器的做法，其目的不外乎是尽可能地减少网络通讯延迟带来的负面影响。但它不能满足"处理自治"的要求，为了确保自治，应当让同一台服务器所处理的请求本身是"自治"（准确的说法是"自闭包"Closure）的。同一台服务器所处理的所有请求组成一个服务请求集合，这个集合如果与其它任何与其无交集的（请求）集合（包含此集合的父集合除外）不循环依赖，则此服务请求集合是"自闭包"的，而处理此请求集合的服务器，其"行为独立"。
+我们可以将针对同一房间的进入请求划分到同一服务请求分组，这些请求相互之间当然是存在循环依赖的，但与其它分组中的请求却不存在循环依赖（本房间内人数的变化不会影响到其它房间），而将它们都分配给同一服务器（不妨命名为"房间管理服务器"，简称"房间服务器"）后，那个服务器将是"处理自治"的。
+图三 满足"处理自治"条件的QQ游戏区域"房间管理"服务部署
+那么接下来要解决的问题，就是玩家所关注的某个游戏区内，所有房间当前人数数据的实时更新问题。其解决途径与上述的方法类似，我们还是**将所有获取同一区内房间数据的服务请求归为一组，并交给同一服务器处理。**与上文所述场景不同的是，这个服务器需要实时汇集本区内所有房间服务器的房间人数数据。我们可以让每个房间服务器一旦发生数据变更时，就向此服务器（不妨命名为"游戏区域管理服务器"，简称"区服务器"）推送一个变更数据记录，而推送的数据只需包含房间Id和所有进入的玩家Id（房间服务器还包含其它细节数据，例如牌桌占位数据）便可。
+另外，由于一个区内的玩家数可能是上十万数量级，一个服务器根本承担不了此种负荷，那么**怎么解决这一矛盾呢？**如果深入分析，我们会发现，更新区内房间数据的请求是一种数据只读类请求，它不会对服务器状态造成变更影响，因此这些请求相互间不存在依赖关系；这样，我们可以将它们再任意划分为更小的分组，而同时这些分组仍然保持"自闭包"特性，然后分配给不同的区服务器。多台区服务器来负责同一区的数据更新请求，负载瓶颈被解决。
+当然，此前，还需将这些区服务器分为1台主区服务器和n台从属区服务器；主区服务器负责汇集本区内所有房间服务器的房间人数数据，从属区服务器则从主区服务器实时同步区房间数据副本。
+更好的做法，则是如『图五』所示，由房间服务器来充当从属区服务器的角色，玩家进入某个房间后，在玩家进入另外一个房间之前，其客户端都将从此房间对应的房间服务器来更新区内房间数据。要注意的是，图中房间服务器的数据更新利用了所谓的"分布式对象缓存服务"。
+玩家进入某个房间后，还要加入某个游戏组才能玩游戏。上篇所述的方案，是让第一个加入某个牌桌的用户，其主机自动充当本牌桌的游戏服务器；而其它玩家要加入此牌桌，其加入请求应当发往第一个加入的用户主机；此后开始游戏，其对弈过程将由第一个加入用户的主机来主导执行。
+那么此途径是否同样也符合上述的前两个设计原则呢？游戏在执行的过程中，根据输赢结果，玩家要加分或减分，同时还要记录胜负场数。这些数据必须被持久化（比如在数据库中保存下来），因此游戏服务器（『图六』中的设计，是由4个部署于QQ客户端的"升级"游戏前台逻辑执行服务，加上1个"升级"游戏后台逻辑执行服务，共同组成一个牌桌的"升级"游戏服务）在处理相关游戏执行请求时，将依赖于玩家游戏账户数据服务（『图六』中的所谓"QQGame会话服务"）；
+不过这种依赖是非循环的，即玩家游戏账户数据服务器的行为反过来并不依赖于游戏服务器。上文中曾提到，“处理自治"原则中非循环依赖是允许的。这里游戏服务器在处理游戏收盘请求时，要调用玩家游戏账户数据服务器来更新相关数据；因为不同玩家的游戏账户数据是相互独立的，此游戏服务器在调用游戏账户数据服务器时，逻辑上不受其它游戏服务器调用游戏账户数据服务器的影响，不存在同步等待问题；所以，游戏服务器在此能够达成负载均衡的意图。 点击图片可以放大
+图****四 存在"非循环依赖"的QQ游戏客户端P2P服务与交互逻辑部署
+不过，在上述场景中，虽然不存在同步依赖，但是性****能依赖还是存在的，游戏账户数据服务器的处理性能不够时，会造成游戏服务器长时间等待。为此，我们**可以应用分布式数据库表水平分割的技术，**将QQ玩家用户以其登记的行政区来加以分组，并部署于对应区域的数据库中（例如，深圳的玩家数据都在深圳的游戏账户数据库中）。
+点击图片可以放大
+图五 满足"自闭包"条件的QQ分布式数据库（集群）部署
+实际上，我们由此还可以推论出一个数据库表水平分割的原则–任何数据库表水平分割的方式，必须确保同一数据库实例中的数据记录是"自闭包"的，即不同数据库实例中的数据记录相互间不存在循环依赖。
+总之，初步满足QQGame之苛刻性能要求的分布式架构现在已经是初具雏形了，但仍然有很多涉及性能方面的细节问题有待解决。例如，Internet网络通讯延迟的问题、服务器之间协作产生的性能瓶颈问题等等。笔者将在下篇中继续深入探讨这些话题。</p></div><footer class=entry-footer><span title=2021-01-11>2021-01-11</span></footer><a class=entry-link aria-label="post link to 6 从腾讯QQgame高性能服务器集群架构看“分而治之”与“自治”等分布式架构设计原则" href=https://haokiu.com/blog/84414d52b22b4cdaa7a7cf4beb0e1585/></a></article><footer class=page-footer><nav class=pagination><a class=prev href=https://haokiu.com/index/13/>«&nbsp;&nbsp;
 </a><a class=next href=https://haokiu.com/index/15/>&nbsp;&nbsp;»</a></nav></footer></main><footer class=footer><span>haokiu.com</span>
 <span>Powered by
 <a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &

@@ -1,4 +1,30 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>3 on haokiu</title><link>https://haokiu.com/3/</link><description>Recent content in 3 on haokiu</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>haokiu.com</copyright><lastBuildDate>Sat, 24 Jun 2023 15:03:53 +0800</lastBuildDate><atom:link href="https://haokiu.com/3/index.xml" rel="self" type="application/rss+xml"/><item><title>数字货币交易所-gateio</title><link>https://haokiu.com/blog/gateio/</link><pubDate>Sat, 24 Jun 2023 15:03:53 +0800</pubDate><guid>https://haokiu.com/blog/gateio/</guid><description>Gate.io芝麻开门创立于2013年，是全球真实交易量TOP10的数字资产交易平台。 作为全球首家提供100%保证金审计证明的交易所，Gate.io在全球多个国家进行合法注册，向全球数千万用户提供安…</description><content:encoded><![CDATA[<p>Gate.io芝麻开门创立于2013年，是全球真实交易量TOP10的数字资产交易平台。</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>3 on haokiu</title><link>https://haokiu.com/3/</link><description>Recent content in 3 on haokiu</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>haokiu.com</copyright><lastBuildDate>Mon, 12 Oct 2026 09:42:06 +0800</lastBuildDate><atom:link href="https://haokiu.com/3/index.xml" rel="self" type="application/rss+xml"/><item><title>以太坊的护城河没有消失，只是不再用交易量计价</title><link>https://haokiu.com/blog/neKtVy/</link><pubDate>Mon, 12 Oct 2026 09:42:06 +0800</pubDate><guid>https://haokiu.com/blog/neKtVy/</guid><description>当越来越多人开始质疑以太坊的价值捕获能力时，这篇文章提供了一个逆向视角。作者直接回应了&amp;#34;以太坊正在失去流动性护城河&amp;#34;的论点，并从货币溢价、二层生态和稳定币份额等角度给出了反驳</description><content:encoded><![CDATA[<blockquote>
+<p>作者：Jake Koch-Gallup（深潮 TechFlow 编译）
+日期：2026-10-10 12:59 (UTC+8)</p>
+</blockquote>
+<hr>
+<p>当越来越多人开始质疑以太坊的价值捕获能力时，这篇文章提供了一个逆向视角。作者直接回应了&quot;以太坊正在失去流动性护城河&quot;的论点，并从货币溢价、二层生态和稳定币份额等角度给出了反驳。</p>
+<p>如果你还没读 Carlos 本周二的通讯，先去读一下。他的核心论点是：以太坊正在失去它最后的护城河，流动性。我们在 0xResearch 播客上争论了这个问题，我强烈不同意他的观点。</p>
+<p>他的第一个例子是，以太坊上的代币化股票几乎没有交易量，过去 30 天只有 2500 万美元的交易额，约占供应量的 3%。但以太坊在代币化股票供应量中占据第二大份额。Carlos 预料到了这一点，但我仍然认为，代币化股票的目的是扩大全球投资者进入美国市场的渠道，而不是用于借贷和 DeFi。在播客中，他的回应是：躺在你区块链上的代币化股票什么也做不了，因为它们不产生收入，而交易量才会产生收入。</p>
+<p>亲爱的读者，这里可能是你和我开始真正产生分歧的地方。我不认为以太坊一定需要产生收入。它已经拥有了货币溢价，就像许多其他 L1 一样。单靠实际经济价值（REV）远远无法解释大多数 L1 的市值，ETH 的交易价格是其过去一年 REV 的 1100 倍以上。既然市场显然将以太坊部分定价为储备资产和抵押品资产（ETF、国债、DeFi 抵押品），忽视这一点就等于说 ETH 和大多数 L1 永远被高估了 99%，这种说法没什么用。</p>
+<p>他的第二个论点是，旗舰应用正在优先选择在其他地方增长。他举例说，Robinhood Chain 占 Uniswap 过去 30 天交易量的 43%，而以太坊仅占 32%。他还提到了 Ethena 在 Base 上的增长。这两点都有道理，但 Robinhood Chain 和 Base 都是以太坊的二层网络。如果我们认同 REV 对 L1 来说没那么重要，那么以太坊二层的增长就是对以太坊的胜利。公平地说，Ethena 也确实扩展到了 Solana、TRON 和 Avalanche，这些不是二层网络。以太坊在 USDe 中的份额从 88% 下降到 56%，但它仍然是多数。Ethena 是在增加分销渠道，而不是离开。</p>
+<p>不过，如果你确实认为 REV 极其重要，可以想想这个：9 月份，Base 向以太坊支付了大约 15000 美元的租金来发布数据。同一个月，它向 Optimism Collective 支付了 711000 美元。现在想象一个世界，3 到 5 年后，以太坊说&quot;你知道吗，我们也想要 Optimism 拿到的那种收入&quot;，然后提高发布数据的最低费用。Base 可能不会喜欢，但如果到那时二层网络的规模已经翻了 10 倍，那可是一大笔钱。所以市场份额很重要，即使它现在没有产生太多 REV。</p>
+<p>他的最后一个论点是，以太坊的稳定币主导地位正在缓慢下降，这是事实。但稳定币市场不是赢家通吃的。即使未来 10 年以太坊的主导地位从 51% 下降到 30%，稳定币市场本身还会继续增长。如果 10 年后稳定币总市值达到 3 万亿美元，以太坊将拥有近 1 万亿美元的稳定币，几乎是今天持有量 1550 亿美元的 6 倍。现在把这些放一边，让我们来看看为什么以太坊仍然有价值，并且会继续有价值。</p>
+<h2 id="以太坊仍然有价值的理由">以太坊仍然有价值的理由</h2>
+<ul>
+<li>以太坊拥有迄今为止最大的 DeFi 总锁仓量，占总量的 65%。自 2022 年以来，它没有任何一周低于 62%。</li>
+<li>以太坊仍然拥有最深的流动性、最安全的网络，以及除比特币之外所有区块链中最多的机构参与。</li>
+<li>以太坊拥有最大的链上真实世界资产（RWA）管理规模（尽管其份额已从 2022 年的 99% 下降到今天的 45%）。</li>
+<li>机构持有 ETH 是作为资产，而不是为了它的收入。现货 ETF 和持币公司持有约 13% 的 ETH 总供应量。</li>
+<li>Robinhood 和 Coinbase 本可以推出自己的 L1，但它们选择在以太坊上结算。</li>
+<li>最大的代币化基金，如贝莱德的 BUIDL，首先在以太坊主网上线。</li>
+<li>以太坊已经运行超过 10 年，没有发生过全网停机。</li>
+<li>以太坊及其二层网络拥有加密领域最大的开发者基础，EVM 是默认的工具包，连竞争对手的 L1 都在复制它。</li>
+<li>36% 的 ETH 供应量处于质押状态，刚刚创下历史新高，为持有者提供了原生收益率，机构可以通过质押 ETF 获得这一收益。</li>
+<li>以太坊是加密世界的计算机。</li>
+</ul>
+<p>说到底，我是一个基本面投资者。加密项目（通常）应该有收入，而且这些价值应该归属于代币持有者。所以认为 ETH 可以依靠其货币溢价和少量 REV 生存下去，可能只是持有者的自我安慰。但也许，只是也许，以太坊应该被估值为一台世界计算机。</p>
+]]></content:encoded></item><item><title>数字货币交易所-gateio</title><link>https://haokiu.com/blog/gateio/</link><pubDate>Sat, 24 Jun 2023 15:03:53 +0800</pubDate><guid>https://haokiu.com/blog/gateio/</guid><description>Gate.io芝麻开门创立于2013年，是全球真实交易量TOP10的数字资产交易平台。 作为全球首家提供100%保证金审计证明的交易所，Gate.io在全球多个国家进行合法注册，向全球数千万用户提供安…</description><content:encoded><![CDATA[<p>Gate.io芝麻开门创立于2013年，是全球真实交易量TOP10的数字资产交易平台。</p>
 <p>作为全球首家提供100%保证金审计证明的交易所，Gate.io在全球多个国家进行合法注册，向全球数千万用户提供安全可靠、真实透明的数字资产交易服务。</p>
 <p>使用下面的链接注册，可以获得平台的奖励</p>
 <p><a href="https://www.gatewebsite.app/share/HAOKIUXX/">https://www.gatewebsite.app/share/HAOKIUXX/</a></p>

@@ -417,6 +417,8 @@
 
 ## 区块链
 
+- [以太坊的护城河没有消失，只是不再用交易量计价](https://haokiu.com/blog/neKtVy/index.md): 当越来越多人开始质疑以太坊的价值捕获能力时，这篇文章提供了一个逆向视角。作者直接回应了"以太坊正在失去流动性护城河"的论点，并从货币溢价、二层生态和稳定币份额等角度给出了反驳
+
 - [数字货币交易所-gateio](https://haokiu.com/blog/gateio/index.md): Gate.io芝麻开门创立于2013年，是全球真实交易量TOP10的数字资产交易平台。 作为全球首家提供100%保证金审计证明的交易所，Gate.io在全球多个国家进行合法注册，向全球数千万用户提供安…
 
 - [enkrypt invite code FC433A](https://haokiu.com/blog/wgJnpu/index.md): The enkrypt invite code is FC433A Mint tickets with Enkrypt every day, invite friends to earn more t…
